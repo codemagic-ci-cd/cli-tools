@@ -109,7 +109,6 @@ class Keychain(cli.CliApp):
         process = self.execute(('security', 'show-keychain-info', self.path))
         if process.returncode != 0:
             raise KeychainError(process, f'Failed to show information for keychain {self.path}')
-        self.logger.debug('kaagutamine lõpetada palun')
 
     @cli.action('set-timeout', KeychainArgument.PATH, KeychainArgument.TIMEOUT)
     def set_timeout(self, timeout: Optional[Seconds] = None):
