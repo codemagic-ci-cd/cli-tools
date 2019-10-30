@@ -6,30 +6,25 @@ import abc
 import argparse
 import logging
 import os
-import pathlib
 import shlex
-import subprocess
 import sys
-import time
 from functools import wraps
 from itertools import chain
-from typing import Optional, Sequence, Iterable, Type, Tuple, List, Union, AnyStr, NewType
+from typing import Optional, Sequence, Iterable, Type, List
 
 from .argument import Argument, ActionCallable
-
-CommandArg = Union[AnyStr, pathlib.Path]
-ObfuscatedCommand = NewType('ObfuscatedCommand', str)
+from .cli_process import CliProcess
+from .cli_types import CommandArg, ObfuscatedCommand
 
 
 class CliAppException(Exception):
 
-    def __init__(self, command: ObfuscatedCommand, message: str, returncode: int):
-        self.command = command
+    def __init__(self, cli_process: CliProcess, message: str):
+        self.cli_process = cli_process
         self.message = message
-        self.returncode = returncode
 
     def __str__(self):
-        return f'Running {self.command} failed with exit code {self.returncode}: {self.message}'
+        return f'Running {self.cli_process.safe_form} failed with exit code {self.cli_process.returncode}: {self.message}'
 
 
 class CliApp(metaclass=abc.ABCMeta):
@@ -48,7 +43,7 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException):
         sys.stderr.write(f'{cli_exception.message}\n')
-        sys.exit(cli_exception.returncode)
+        sys.exit(cli_exception.cli_process.returncode)
 
     @classmethod
     def invoke_cli(cls):
@@ -56,7 +51,7 @@ class CliApp(metaclass=abc.ABCMeta):
         instance = cls.from_cli_args(args)
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         try:
-            cli_action(**Argument.get_action_kwargs(cli_action, args))
+            return cli_action(**Argument.get_action_kwargs(cli_action, args))
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             cls._handle_cli_exception(cli_exception)
 
@@ -74,19 +69,33 @@ class CliApp(metaclass=abc.ABCMeta):
                 yield attr
 
     @classmethod
-    def _enable_logging(cls):
-        # TODO: enable logging only for some CLI arg?
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.DEBUG)
+    def _setup_logging(cls, cli_args: argparse.Namespace):
+        if not cli_args.log_commands:
+            return
+
+        stream = {'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream]
+        log_level = logging.DEBUG if cli_args.verbose else logging.INFO
         formatter = logging.Formatter('[%(asctime)s] %(levelname)s > %(message)s', '%m-%d %H:%M:%S')
+
+        handler = logging.StreamHandler(stream)
+        handler.setLevel(log_level)
         handler.setFormatter(formatter)
+
         logger = logging.getLogger()
         logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(log_level)
+
+    @classmethod
+    def _setup_default_cli_options(cls, action_parser):
+        action_parser.add_argument('--disable-logging', dest='log_commands', action='store_false',
+                                   help='Disable log output for actions')
+        action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose logging')
+        action_parser.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+                                   help='Choose which stream to use for log output. (Default: stderr)')
+        action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
     def setup_cli(cls, command_executor_type: Type[CliApp]) -> argparse.Namespace:
-        cls._enable_logging()
         parser = argparse.ArgumentParser(description=command_executor_type.__doc__)
 
         action_parsers = parser.add_subparsers(dest='action')
@@ -95,10 +104,15 @@ class CliApp(metaclass=abc.ABCMeta):
                 sub_action.action_name,
                 help=sub_action.__doc__,
                 description=sub_action.__doc__)
-            for argument_type in sub_action.required_arguments:
-                argument_type.add_to_parser(action_parser)
 
+            cls._setup_default_cli_options(action_parser)
+            required_arguments = action_parser.add_argument_group(f'required arguments for "{sub_action.action_name}"')
+            optional_arguments = action_parser.add_argument_group(f'optional arguments for "{sub_action.action_name}"')
+            for argument in sub_action.required_arguments:
+                argument_group = required_arguments if argument.is_required() else optional_arguments
+                argument.register(argument_group)
         args = parser.parse_args()
+        cls._setup_logging(args)
 
         if not args.action:
             parser.print_help()
@@ -106,8 +120,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
         return args
 
-    def _obfuscate_command(self,
-                           command_args: Sequence[CommandArg],
+    def _obfuscate_command(self, command_args: Sequence[CommandArg],
                            obfuscate_args: Optional[Iterable[CommandArg]] = None) -> ObfuscatedCommand:
         # TODO: support regex expressions for matching
         obfuscate_args = set(chain((obfuscate_args or []), self.default_obfuscation))
@@ -126,25 +139,15 @@ class CliApp(metaclass=abc.ABCMeta):
 
         return [expand(command_arg) for command_arg in command_args]
 
-    def execute(self,
-                command_args: Sequence[CommandArg],
-                obfuscate_args: Optional[Sequence[CommandArg]] = None
-                ) -> Tuple[subprocess.Popen, ObfuscatedCommand]:
-        obfuscated_command = self._obfuscate_command(command_args, obfuscate_args)
-        start = time.time()
-
-        if self.dry_run:
-            self.logger.info(f'Skip executing {obfuscated_command} due to dry run')
-            process = subprocess.Popen(['echo', 'skip'])
-            process.communicate()
-        else:
-            self.logger.info(f'Execute "{obfuscated_command}"')
-            process = subprocess.Popen(self._expand_variables(command_args))
-            process.communicate()
-            self.logger.info(
-                f'Completed "{obfuscated_command}" with returncode {process.returncode} in {time.time() - start:.2f}')
-
-        return process, obfuscated_command
+    def execute(self, command_args: Sequence[CommandArg],
+                obfuscate_args: Optional[Sequence[CommandArg]] = None,
+                show_output: bool = True) -> CliProcess:
+        return CliProcess(
+            command_args,
+            self._obfuscate_command(command_args, obfuscate_args),
+            dry=self.dry_run,
+            print_streams=show_output
+        ).execute()
 
 
 def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
@@ -156,6 +159,8 @@ def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
     """
 
     def decorator(func):
+        if func.__doc__ is None:
+            raise RuntimeError(f'Action "{action_name}" defined by {func} is not documented')
         func.is_cli_action = True
         func.action_name = action_name
         func.required_arguments = arguments
