@@ -49,7 +49,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke_cli(cls):
-        args = cls.setup_cli()
+        args = cls._setup_cli_options()
         instance = cls.from_cli_args(args)
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         try:
@@ -98,7 +98,7 @@ class CliApp(metaclass=abc.ABCMeta):
         action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
-    def setup_cli(cls) -> argparse.Namespace:
+    def _setup_cli_options(cls) -> argparse.Namespace:
         if cls.__doc__ is None:
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
