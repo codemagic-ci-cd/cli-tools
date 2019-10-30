@@ -49,7 +49,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke_cli(cls):
-        args = CliApp.setup_cli(cls)
+        args = cls.setup_cli()
         instance = cls.from_cli_args(args)
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         try:
@@ -98,11 +98,13 @@ class CliApp(metaclass=abc.ABCMeta):
         action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
-    def setup_cli(cls, command_executor_type: Type[CliApp]) -> argparse.Namespace:
-        parser = argparse.ArgumentParser(description=command_executor_type.__doc__)
+    def setup_cli(cls) -> argparse.Namespace:
+        if cls.__doc__ is None:
+            raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
+        parser = argparse.ArgumentParser(description=cls.__doc__)
         action_parsers = parser.add_subparsers(dest='action')
-        for sub_action in command_executor_type.get_class_cli_actions():
+        for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
                 help=sub_action.__doc__,
@@ -115,12 +117,12 @@ class CliApp(metaclass=abc.ABCMeta):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
         args = parser.parse_args()
-        cls._setup_logging(args)
 
         if not args.action:
             parser.print_help()
-            sys.exit(0)
+            sys.exit(2)
 
+        cls._setup_logging(args)
         return args
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
