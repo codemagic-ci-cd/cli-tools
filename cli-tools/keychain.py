@@ -5,8 +5,7 @@ import json
 import os
 import pathlib
 import sys
-from typing import Optional
-
+from typing import Optional, List
 
 import cli
 import models
@@ -185,11 +184,11 @@ class Keychain(cli.CliApp):
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
         # which fails in non-interactive CI environment.
-        if certificate_password is None:
-            obfuscate_patterns = []
-            certificate_password = ''
-        else:
+        if certificate_password is not None:
             obfuscate_patterns = [certificate_password]
+        else:
+            certificate_password = ''
+            obfuscate_patterns = []
 
         process = self.execute([
             'security', "import", certificate_path,

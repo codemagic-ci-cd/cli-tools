@@ -125,10 +125,11 @@ class CliApp(metaclass=abc.ABCMeta):
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
                            obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None) -> ObfuscatedCommand:
-        obfuscate_patterns = set(chain((obfuscate_patterns or []), self.default_obfuscation))
+
+        all_obfuscate_patterns = set(chain((obfuscate_patterns or []), self.default_obfuscation))
 
         def should_obfuscate(arg: CommandArg):
-            for pattern in obfuscate_patterns:
+            for pattern in all_obfuscate_patterns:
                 if isinstance(pattern, re.Pattern):
                     match = pattern.match(str(arg)) is not None
                 elif callable(pattern):
