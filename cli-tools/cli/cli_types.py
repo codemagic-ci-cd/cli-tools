@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Union, AnyStr, NewType
+import re
+from typing import Union, AnyStr, NewType, Callable
 
 CommandArg = Union[AnyStr, pathlib.Path]
+ObfuscationPattern = Union[re.Pattern, Callable[[CommandArg], bool], CommandArg]
 ObfuscatedCommand = NewType('ObfuscatedCommand', str)

@@ -6,6 +6,8 @@ import abc
 import argparse
 import logging
 import os
+import pathlib
+import re
 import shlex
 import sys
 from functools import wraps
@@ -14,7 +16,7 @@ from typing import Optional, Sequence, Iterable, Type, List
 
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
-from .cli_types import CommandArg, ObfuscatedCommand
+from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
 
 
 class CliAppException(Exception):
@@ -89,7 +91,8 @@ class CliApp(metaclass=abc.ABCMeta):
     def _setup_default_cli_options(cls, action_parser):
         action_parser.add_argument('--disable-logging', dest='log_commands', action='store_false',
                                    help='Disable log output for actions')
-        action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Enable verbose logging')
+        action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                                   help='Enable verbose logging')
         action_parser.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
                                    help='Choose which stream to use for log output. (Default: stderr)')
         action_parser.set_defaults(verbose=False, log_commands=True)
@@ -121,13 +124,27 @@ class CliApp(metaclass=abc.ABCMeta):
         return args
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
-                           obfuscate_args: Optional[Iterable[CommandArg]] = None) -> ObfuscatedCommand:
-        # TODO: support regex expressions for matching
-        obfuscate_args = set(chain((obfuscate_args or []), self.default_obfuscation))
-        obfuscated = ' '.join(
-            self.obfuscation if arg in obfuscate_args else shlex.quote(str(arg))
-            for arg in command_args)
-        return ObfuscatedCommand(obfuscated)
+                           obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None) -> ObfuscatedCommand:
+        obfuscate_patterns = set(chain((obfuscate_patterns or []), self.default_obfuscation))
+
+        def should_obfuscate(arg: CommandArg):
+            for pattern in obfuscate_patterns:
+                if isinstance(pattern, re.Pattern):
+                    match = pattern.match(str(arg)) is not None
+                elif callable(pattern):
+                    match = pattern(arg)
+                elif isinstance(pattern, (str, bytes, pathlib.Path)):
+                    match = pattern == arg
+                else:
+                    raise ValueError(f'Invalid obfuscation pattern {pattern}')
+                if match:
+                    return True
+            return False
+
+        def obfuscate_arg(arg: CommandArg):
+            return self.obfuscation if should_obfuscate(arg) else shlex.quote(str(arg))
+
+        return ObfuscatedCommand(' '.join(map(obfuscate_arg, command_args)))
 
     @classmethod
     def _expand_variables(cls, command_args: Sequence[CommandArg]) -> List[str]:
@@ -140,11 +157,11 @@ class CliApp(metaclass=abc.ABCMeta):
         return [expand(command_arg) for command_arg in command_args]
 
     def execute(self, command_args: Sequence[CommandArg],
-                obfuscate_args: Optional[Sequence[CommandArg]] = None,
+                obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
                 show_output: bool = True) -> CliProcess:
         return CliProcess(
             command_args,
-            self._obfuscate_command(command_args, obfuscate_args),
+            self._obfuscate_command(command_args, obfuscate_patterns),
             dry=self.dry_run,
             print_streams=show_output
         ).execute()

@@ -65,7 +65,8 @@ class Keychain(cli.CliApp):
         super().__init__()
         self.path = path
         self.password = password
-        self.default_obfuscation = [password]
+        if password is not None:
+            self.default_obfuscation = [password]
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
@@ -174,21 +175,30 @@ class Keychain(cli.CliApp):
         ]
         json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
 
-    @cli.action('add-certificate', KeychainArgument.PATH, KeychainArgument.CERTIFICATE_PATH, KeychainArgument.CERTIFICATE_PASSWORD)
+    @cli.action('add-certificate',
+                KeychainArgument.PATH,
+                KeychainArgument.CERTIFICATE_PATH,
+                KeychainArgument.CERTIFICATE_PASSWORD)
     def add_certificate(self, certificate_path: pathlib.Path, certificate_password: Optional[str] = None):
         """
         Add p12 certificate to specified keychain.
         """
-        # If no password, we need to explicitly set -P '' flag. Otherwise, security tries to
-        # open an interactive dialog to prompt the user for a password, which fails in
-        # non-interactive CI environment.
+        # If case of no password, we need to explicitly set -P '' flag. Otherwise,
+        # security tries to open an interactive dialog to prompt the user for a password,
+        # which fails in non-interactive CI environment.
+        if certificate_password is None:
+            obfuscate_patterns = []
+            certificate_password = ''
+        else:
+            obfuscate_patterns = [certificate_password]
+
         process = self.execute([
             'security', "import", certificate_path,
             "-f", "pkcs12",
             "-k", self.path,
             "-T", 'codesign',
-            "-P", '' if certificate_password is None else certificate_password
-        ], obfuscate_args=[certificate_password] if certificate_password else [])
+            "-P", certificate_password,
+        ], obfuscate_patterns=obfuscate_patterns)
         if process.returncode != 0:
             raise KeychainError(process, f'Unable to add certificate {certificate_path} to keychain {self.path}')
 
