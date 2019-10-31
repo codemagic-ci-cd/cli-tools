@@ -5,7 +5,7 @@ import json
 import os
 import pathlib
 import sys
-from typing import Optional, List
+from typing import Optional
 
 import cli
 import models
