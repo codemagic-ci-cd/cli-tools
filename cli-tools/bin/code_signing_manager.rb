@@ -26,6 +26,28 @@ Example: #{File.basename(__FILE__)} -x Project.xcodeproj -u used-profiles.json -
 Arguments:
 "
 
+
+class Log
+
+  @verbose = false
+
+  def self.set_verbose(verbose)
+    @verbose = verbose || false
+  end
+
+  def self.info(message)
+    if @verbose
+      puts message
+    end
+  end
+
+  def self.error(message)
+    puts message
+  end
+
+end
+
+
 class VariableResolver
 
   def initialize(build_target, build_configuration)
@@ -44,12 +66,12 @@ class VariableResolver
       target_str = target_str.sub(variable, value)
     end
 
-    puts " >> Resolved target_str for '#{source_str}' is '#{target_str}'"
+    Log.info "> Resolved variable '#{source_str}' to '#{target_str}'"
     # In case target str is still a variable look it up from xcconfig if possible
     Variable.new(target_str).keys_and_modifiers.each do |_variable, key, modifiers|
       value = resolve_variable_from_xcconfig_attributes(key)
       unless value.nil?
-        puts "Got '#{value}' for '#{target_str}' from xcconfig #{base_configuration_reference.real_path}"
+        Log.info "Got '#{value}' for '#{target_str}' from xcconfig #{base_configuration_reference.real_path}"
         target_str = Variable.new(value).apply modifiers
       end
     end
@@ -82,10 +104,10 @@ class VariableResolver
 
   def resolve_variable_from_target_configs(variable_name)
     value = nil
-    puts "Trying to find a target with the same name as PBXProj build configuration"
+    Log.info "Trying to find a target with the same name as PBXProj build configuration"
     @build_target.project.build_configurations.each do |project_build_configuration|
       if project_build_configuration.name == @build_configuration.name
-        puts "Found build config on PBXProj for target #{@build_target.name}: #{project_build_configuration.name}"
+        Log.info "Found build config on PBXProj for target #{@build_target.name}: #{project_build_configuration.name}"
         value = project_build_configuration.build_settings[variable_name] \
                 || resolve_variable_from_xcconfig(key, project_build_configuration)
         if value
@@ -102,7 +124,7 @@ class VariableResolver
       return nil
     end
 
-    puts "Checking #{key} from #{base_configuration_reference.real_path}"
+    Log.info "Checking value for '#{key}' from #{base_configuration_reference.real_path}"
     xcconfig = Xcodeproj::Config.new(base_configuration_reference.real_path)
     xcconfig.attributes[variable_name]
   end
@@ -119,9 +141,8 @@ class VariableResolver
   def expand_environment_variables(variable_name, target_str)
     value = variable_name
     Variable.new(value).keys_and_modifiers.each do |var, _key, _modifiers|
-      if target_str.include? var
-        puts "Avoid recursion for variable '#{var}' as it is already present in target string '#{target_str}'"
-      else
+      # "Avoid recursion for variable '#{var}' if it is already present in target string '#{target_str}'"
+      unless target_str.include? var
         resolved = resolve(var, var)
         value = value.gsub(var, resolved)
       end
@@ -191,12 +212,7 @@ class CodeSigningManager
   def initialize(project_path:, used_profiles_path:, profiles:)
     @project_path = project_path
     @used_profiles_json_path = used_profiles_path
-    begin
-      @project = Xcodeproj::Project.open(File.realpath(project_path))
-    rescue
-      puts "Skip invalid project #{project_path}"
-      exit
-    end
+    @project = Xcodeproj::Project.open(File.realpath(project_path))
     @profiles = profiles
     @used_provisioning_profiles = Hash.new
   end
@@ -220,46 +236,48 @@ class CodeSigningManager
   end
 
   def handle_target_dependencies(target)
-    puts "Handling dependencies for target: #{target}"
+    Log.info "Handling dependencies for target '#{target}'"
     if target.dependencies.length == 0
-      puts "\tTarget #{target} has no dependencies"
+      Log.info "\tTarget #{target} has no dependencies"
+      return
     end
+
     target.dependencies.each do |dependency|
       dependency_target = get_real_target(dependency)
       next unless dependency_target.instance_of? Xcodeproj::Project::Object::PBXNativeTarget
       product_type = dependency_target.product_type
       if SKIP_SIGNING_PRODUCT_TYPES.include? product_type
-        puts("\t\tSetting empty code signing settings for #{product_type} dependency target #{dependency_target}")
+        Log.info("\t\tSetting empty code signing settings for #{product_type} dependency target #{dependency_target}")
         skip_code_signing(dependency_target)
         if dependency_target.project.path != @project.path
-          puts "\t\tSaving remote project #{dependency_target.project.path}"
+          Log.info "\t\tSaving remote project #{dependency_target.project.path}"
           dependency_target.project.save
         end
       else
-        puts "\t\tWill skip handling target dependency with product type: target #{product_type}"
+        Log.info "\t\tSkip handling target dependency with product type: target #{product_type}"
       end
     end
   end
 
   def get_real_target(dependency)
-    puts "\tDependency: #{dependency}"
+    Log.info "\tDependency: #{dependency}"
     real_target = nil
     if !dependency.target.nil?
-      puts "\t\tDependency has a target: #{dependency.target}"
+      Log.info "\t\tDependency has a target: #{dependency.target}"
       real_target = dependency.target
     elsif !dependency.target_proxy.nil?
       begin
-        puts "\t\tDependency has a target_proxy: #{dependency.target_proxy}"
+        Log.info "\t\tDependency has a target_proxy: #{dependency.target_proxy}"
         proxied_target = dependency.target_proxy.proxied_object
         real_target = proxied_target
         if proxied_target.nil?
-          puts "\t\tCannot modify dependency: proxied object was nil"
+          Log.info "\t\tCannot modify dependency: proxied object was nil"
         end
       rescue
-        puts "\t\tNo proxied objects found"
+        Log.info "\t\tNo proxied objects found"
       end
     else
-      puts "No dependency target nor target_proxy found for #{dependency}"
+      Log.info "No dependency target nor target_proxy found for #{dependency}"
     end
     real_target
   end
@@ -267,14 +285,14 @@ class CodeSigningManager
   def get_bundle_id(target, build_configuration)
     bundle_id = build_configuration.build_settings["PRODUCT_BUNDLE_IDENTIFIER"]
     if not (bundle_id.nil? || bundle_id.empty?)
-      puts "Got bundle id #{bundle_id} from build settings for build configuration #{build_configuration.name}"
+      Log.info "Got bundle id '#{bundle_id}' from build settings for build configuration '#{build_configuration.name}'"
     else
       bundle_id = get_cf_bundle_identifier(build_configuration, target)
       unless bundle_id
-        puts "Failed to obtain bundle id for build_configuration #{build_configuration.name}"
+        Log.info "Failed to obtain bundle id for build_configuration '#{build_configuration.name}'"
         return ''
       end
-      puts "Got bundle id #{bundle_id} from info plist for build configuration #{build_configuration.name}"
+      Log.info "Got bundle id '#{bundle_id}' from info plist for build configuration '#{build_configuration.name}'"
     end
 
     resolver = VariableResolver.new(target, build_configuration)
@@ -284,7 +302,6 @@ class CodeSigningManager
   def get_bundle_id_from_base_conf(build_configuration)
     base_configuration_reference = build_configuration.base_configuration_reference
     if base_configuration_reference.nil?
-      puts "No base conf ref"
       return
     end
     unless File.exist?(base_configuration_reference.real_path)
@@ -293,16 +310,16 @@ class CodeSigningManager
     xcconfig = Xcodeproj::Config.new(base_configuration_reference.real_path)
     value = xcconfig.attributes["PRODUCT_BUNDLE_IDENTIFIER"]
     if value.nil?
-      puts "Could not obtain value bundle id baseconf"
+      Log.info "Could not obtain bundle id value from base configuration reference"
     end
     value
   end
 
   def get_identifier_from_info_plist(build_configuration, infoplist_path)
-    puts "Build configuration #{build_configuration.name} info plist path is #{infoplist_path}"
+    Log.info "Build configuration '#{build_configuration.name}' info plist path is '#{infoplist_path}'"
     infoplist_exists = File.file? infoplist_path
     unless infoplist_exists
-      puts "Plist #{infoplist_path} does not exist"
+      Log.info "Plist #{infoplist_path} does not exist"
       return nil
     end
     info_plist = Xcodeproj::Plist.read_from_path(infoplist_path)
@@ -315,7 +332,7 @@ class CodeSigningManager
     resolver = VariableResolver.new(target, build_configuration)
     infoplist_file = resolver.resolve('INFOPLIST_FILE', infoplist_file)
 
-    puts "Build configuration #{build_configuration.name} INFOPLIST_FILE is '#{infoplist_file}"
+    Log.info "Build configuration #{build_configuration.name} INFOPLIST_FILE is '#{infoplist_file}"
     if !infoplist_file
       _value = get_bundle_id_from_base_conf(build_configuration)
     else
@@ -325,7 +342,7 @@ class CodeSigningManager
   end
 
   def skip_code_signing(target)
-    puts "Setting empty code signing settings for target: #{target}"
+    Log.info "Setting empty code signing settings for target: #{target}"
     target.build_configurations.each do |build_configuration|
       build_configuration.build_settings["EXPANDED_CODE_SIGN_IDENTITY"] = ""
       build_configuration.build_settings["CODE_SIGNING_REQUIRED"] = "NO"
@@ -383,10 +400,10 @@ class CodeSigningManager
   end
 
   def set_configuration_build_settings(build_target, build_configuration)
-    puts "\n#{'-' * 50}\n"
+    Log.info "\n#{'-' * 50}\n"
     bundle_id = get_bundle_id(build_target, build_configuration)
     if bundle_id.nil? || bundle_id == ''
-      puts "No bundle id found for target #{build_target.name}"
+      Log.info "No bundle id found for target '#{build_target.name}'"
       return
     end
 
@@ -399,7 +416,7 @@ class CodeSigningManager
     end
 
     unless profile
-      puts "Did not find suitable profile for target with bundle identifier #{bundle_id}"
+      Log.info "Did not find suitable provisioning profile for target with bundle identifier '#{bundle_id}'"
       return
     end
 
@@ -408,11 +425,11 @@ class CodeSigningManager
   end
 
   def mark_profile_as_used(profile, target, build_configuration, bundle_id)
-    puts "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
-    puts "\ttarget '#{target.name}'"
-    puts "\tbuild configuration '#{build_configuration.name}'"
-    puts "\tbundle id '#{bundle_id}'"
-    puts "\tspecifier '#{profile['specifier']}'"
+    Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
+    Log.info "\ttarget '#{target.name}'"
+    Log.info "\tbuild configuration '#{build_configuration.name}'"
+    Log.info "\tbundle id '#{bundle_id}'"
+    Log.info "\tspecifier '#{profile['specifier']}'"
 
     if @used_provisioning_profiles[profile['specifier']].nil?
       @used_provisioning_profiles[profile['specifier']] = []
@@ -428,11 +445,11 @@ class CodeSigningManager
 
   def set_target_build_settings(target)
     return unless target.instance_of? Xcodeproj::Project::Object::PBXNativeTarget
-    puts "\n#{'=' * 50}\n"
+    Log.info "\n#{'=' * 50}\n"
 
     handle_target_dependencies(target)
     if SKIP_SIGNING_PRODUCT_TYPES.include? target.product_type
-      puts("Will use empty code signing build settings for target #{target}")
+      Log.info("Will use empty code signing build settings for target '#{target}'")
       skip_code_signing(target)
       return
     end
@@ -455,7 +472,7 @@ def parse_args
   OptionParser.new do |parser|
     parser.banner = USAGE
 
-    parser.on("-v", "--verbose", "Enable verbose logging") do |v|
+    parser.on("-v", "--[no-]verbose", "Enable verbose logging") do |v|
       options[:verbose] = v
     end
 
@@ -500,6 +517,7 @@ end
 
 
 def main(args)
+  Log.set_verbose args[:verbose]
   code_signing_manager = CodeSigningManager.new(
       project_path: args[:project_path],
       used_profiles_path: args[:used_profiles_path],
