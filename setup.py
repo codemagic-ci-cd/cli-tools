@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='Codemagic CI CLI tools',
+    name='Codemagic CLI tools',
     version='0.0.1',
     packages=['cmcli'],
     license='GNU General Public License v3.0',
