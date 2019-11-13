@@ -132,7 +132,7 @@ class VariableResolver
   def resolve_from_target_or_config(variable_name)
     default_options = {:TARGET_NAME => @build_target.name, :CONFIGURATION => @build_configuration.name}
     value = default_options[variable_name.to_sym] \
-        || build_configuration.build_settings[variable_name] \
+        || @build_configuration.build_settings[variable_name] \
         || resolve_variable_from_xcconfig(variable_name) \
         || resolve_variable_from_target_configs(variable_name)
     value
