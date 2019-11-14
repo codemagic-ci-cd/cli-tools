@@ -109,7 +109,7 @@ class VariableResolver
       if project_build_configuration.name == @build_configuration.name
         Log.info "Found build config on PBXProj for target #{@build_target.name}: #{project_build_configuration.name}"
         value = project_build_configuration.build_settings[variable_name] \
-                || resolve_variable_from_xcconfig(key, project_build_configuration)
+                || resolve_variable_from_xcconfig(variable_name, project_build_configuration)
         if value
           break
         end
@@ -124,7 +124,7 @@ class VariableResolver
       return nil
     end
 
-    Log.info "Checking value for '#{key}' from #{base_configuration_reference.real_path}"
+    Log.info "Checking value for '#{variable_name}' from #{base_configuration_reference.real_path}"
     xcconfig = Xcodeproj::Config.new(base_configuration_reference.real_path)
     xcconfig.attributes[variable_name]
   end
