@@ -4,9 +4,8 @@ from __future__ import annotations
 import argparse
 import enum
 import os
-from typing import Type, Tuple, NamedTuple, Dict, Optional, Sequence
-
-from .cli_types import CommandArg, ObfuscationPattern
+import types
+import typing
 
 
 class ActionCallable:
@@ -15,7 +14,7 @@ class ActionCallable:
 
     is_cli_action: bool
     action_name: str
-    required_arguments: Sequence[Argument]
+    required_arguments: typing.Sequence[Argument]
 
 
 class EnumArgumentValue(enum.Enum):
@@ -56,6 +55,14 @@ class EnvironmentArgumentValue:
             raise argparse.ArgumentTypeError('Provided value is not valid')
         return value
 
+    @classmethod
+    def get_description(cls, properties: ArgumentProperties) -> str:
+        description = f'{properties.description.rstrip(".")}.'
+        usage = f'Alternatively to entering "<{properties.key}>" in plaintext, ' \
+            f'it may also be specified using a "@env:" prefix followed by a environment variable name.'
+        example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>".'
+        return '\n'.join([description, usage, example])
+
     def __str__(self):
         return self._raw_value
 
@@ -63,23 +70,26 @@ class EnvironmentArgumentValue:
         return self._raw_value
 
 
-class ArgumentProperties(NamedTuple):
+class ArgumentProperties(typing.NamedTuple):
     key: str
     description: str
-    type: Type = str
-    flags: Tuple[str, ...] = tuple()
-    argparse_kwargs: Optional[Dict[str, object]] = None
+    type: typing.Union[typing.Type, typing.Callable[[str], typing.Any]] = str
+    flags: typing.Tuple[str, ...] = tuple()
+    argparse_kwargs: typing.Optional[typing.Dict[str, object]] = None
     is_action_kwarg: bool = False
 
     def get_description(self):
-        if not issubclass(self.type, EnvironmentArgumentValue):
-            return self.description
+        description = self.description
+        default = (self.argparse_kwargs or {}).get('default', None)
+        if default is not None:
+            description = f'{description} [Default: {default}]'
 
-        description = self.description if self.description.endswith('.') else f'{self.description}.'
-        usage = f'Alternatively to entering "<{self.key}>" in plaintext, ' \
-            f'it may also be specified using a "@env:" prefix followed by a environment variable name.'
-        example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>".'
-        return '\n'.join([description, usage, example])
+        if isinstance(self.type, (types.FunctionType, types.MethodType)):
+            return description
+        elif issubclass(self.type, EnvironmentArgumentValue):
+            return self.type.get_description(self)
+        else:
+            return description
 
 
 class Argument(ArgumentProperties, enum.Enum):
@@ -99,7 +109,7 @@ class Argument(ArgumentProperties, enum.Enum):
         return (self.value.argparse_kwargs or {}).get('default', None)
 
     @classmethod
-    def get_action_kwargs(cls, cli_action: ActionCallable, cli_args: argparse.Namespace) -> Dict[str, object]:
+    def get_action_kwargs(cls, cli_action: ActionCallable, cli_args: argparse.Namespace) -> typing.Dict[str, object]:
         return {
             arg_type.value.key: getattr(cli_args, arg_type.value.key, arg_type.get_default())
             for arg_type in cli_action.required_arguments

@@ -12,7 +12,7 @@ import shlex
 import sys
 from functools import wraps
 from itertools import chain
-from typing import Optional, Sequence, Iterable, Type, List
+from typing import NoReturn, Optional, Sequence, Iterable, Type, List
 
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
@@ -44,7 +44,7 @@ class CliApp(metaclass=abc.ABCMeta):
         return cls()
 
     @classmethod
-    def _handle_cli_exception(cls, cli_exception: CliAppException):
+    def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
         sys.stderr.write(f'{cli_exception.message}\n')
         sys.exit(cli_exception.cli_process.returncode)
 

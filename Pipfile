@@ -8,6 +8,7 @@ mypy = "*"
 
 [packages]
 pyopenssl = "~=19.0"
+google-cloud-storage = "~=1.23"
 
 [requires]
 python_version = "3.7"
