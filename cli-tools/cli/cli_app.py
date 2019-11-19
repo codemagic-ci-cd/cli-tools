@@ -48,7 +48,10 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
         sys.stderr.write(f'{cli_exception.message}\n')
-        sys.exit(cli_exception.cli_process.returncode)
+        if cli_exception.cli_process:
+            sys.exit(cli_exception.cli_process.returncode)
+        else:
+            sys.exit(1)
 
     @classmethod
     def invoke_cli(cls):

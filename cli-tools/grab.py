@@ -102,7 +102,7 @@ class Grab(cli.CliApp):
         self._fetch_profiles_from_codemagic(signing_files_info['provisioning_profiles'], profiles_directory)
         self._fetch_certificates_from_codemagic(signing_files_info['code_signing_certificates'], certificates_directory)
 
-    def _get_manual_signing_files_info(self):
+    def _get_manual_signing_files_info(self) -> Dict[str, List[Dict]]:
         raw_info = os.environ.get('_MANUAL_SIGNING_FILES')
         if not raw_info:
             raise GrabError('Cannot fetch signing files from Codemagic: signing files information is not available')
@@ -120,10 +120,11 @@ class Grab(cli.CliApp):
                 f'Cannot fetch signing files from Codemagic: signing files information do not contain {missing_entry}')
         return signing_files_info
 
-    def _fetch_profiles_from_codemagic(self, profiles_info: List[Dict], destination: Path):
+    def _fetch_profiles_from_codemagic(self, profiles_info: List[Dict], destination: Path) -> List[Path]:
         from explicate import Explicate
         explicate = Explicate()
         destination.mkdir(exist_ok=True)
+        save_paths = []
         for profile_info in profiles_info:
             filename = Path(profile_info['file_name'])
             self.logger.info(f'Fetch provisioning profile {filename} from Codemagic')
@@ -131,11 +132,14 @@ class Grab(cli.CliApp):
             tf.close()
             explicate.save_to_file(profile_info['object_name'], tf.name, silent=True)
             self.logger.info(f'Saved provisioning profile {filename} to {tf.name}')
+            save_paths.append(Path(tf.name))
+        return save_paths
 
-    def _fetch_certificates_from_codemagic(self, certificates_info: List[Dict], destination: Path):
+    def _fetch_certificates_from_codemagic(self, certificates_info: List[Dict], destination: Path) -> List[Path]:
         from explicate import Explicate
         explicate = Explicate()
         destination.mkdir(exist_ok=True)
+        save_paths = []
         for certificate_info in certificates_info:
             filename = Path(certificate_info['file_name'])
             self.logger.info(f'Fetch certificate {filename} from Codemagic')
@@ -146,6 +150,8 @@ class Grab(cli.CliApp):
             if password:
                 explicate.save_to_file(password['object_name'], Path(f'{tf.name}.password'), silent=True)
             self.logger.info(f'Saved certificate {filename} to {tf.name}')
+            save_paths.append(Path(tf.name))
+        return save_paths
 
 
 if __name__ == '__main__':

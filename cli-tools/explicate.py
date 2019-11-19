@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 import argparse
 import pathlib
 from tempfile import NamedTemporaryFile
 
 import cli
-
 
 DEFAULT_BUCKET = 'secure.codemagic.io'
 
@@ -59,7 +60,7 @@ class Explicate(cli.CliApp):
         self.bucket_name = bucket_name
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace) -> 'Explicate':
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> Explicate:
         default_bucket = ExplicateArgument.BUCKET_NAME.get_default()
         bucket_name = getattr(cli_args, ExplicateArgument.BUCKET_NAME.value.key, default_bucket)
         return Explicate(bucket_name)
@@ -69,7 +70,7 @@ class Explicate(cli.CliApp):
                 ExplicateArgument.OBJECT_NAME,
                 ExplicateArgument.SAVE_TO_LOCATION,
                 ExplicateArgument.SILENT)
-    def save_to_file(self, object_name: str, save_to_location: pathlib.Path, silent: bool = False):
+    def save_to_file(self, object_name: str, save_to_location: pathlib.Path, silent: bool = False) -> pathlib.Path:
         """
         Save specified object from Cloud Storage bucket to local disk
         """
@@ -78,12 +79,13 @@ class Explicate(cli.CliApp):
         if process.returncode != 0:
             error = f'Unable to save file: "{object_name}" does not exist in bucket "{self.bucket_name}"'
             raise ExplicateError(error, process)
+        return save_to_location
 
     @cli.action('show-contents',
                 ExplicateArgument.BUCKET_NAME,
                 ExplicateArgument.OBJECT_NAME,
                 ExplicateArgument.SILENT)
-    def show_contents(self, object_name, silent: bool = False):
+    def show_contents(self, object_name, silent: bool = False) -> str:
         """
         Print contents of specified object from Cloud Storage bucket to STDOUT
         """
@@ -93,7 +95,9 @@ class Explicate(cli.CliApp):
             if process.returncode != 0:
                 error = f'Unable to show contents: "{object_name}" does not exist in bucket "{self.bucket_name}"'
                 raise ExplicateError(error, process)
-            print(open(tf.name).read())
+            contents = open(tf.name).read()
+            print(contents)
+        return contents
 
 
 if __name__ == '__main__':
