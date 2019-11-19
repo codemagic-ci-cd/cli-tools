@@ -28,7 +28,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "keychain-manager = codemagic.keychain:Keychain.invoke_cli"
+            "keychain-manager = codemagic.keychain:Keychain.invoke_cli",
+            "git-changelog = codemagic.git_changelog:GitChangelog.invoke_cli",
         ]
     },
 )
