@@ -12,7 +12,7 @@ import shlex
 import sys
 from functools import wraps
 from itertools import chain
-from typing import Optional, Sequence, Iterable, Type, List
+from typing import NoReturn, Optional, Sequence, Iterable, Type, List
 
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
@@ -21,11 +21,13 @@ from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
 
 class CliAppException(Exception):
 
-    def __init__(self, cli_process: CliProcess, message: str):
+    def __init__(self, message: str, cli_process: Optional[CliProcess] = None):
         self.cli_process = cli_process
         self.message = message
 
     def __str__(self):
+        if not self.cli_process:
+            return self.message
         return f'Running {self.cli_process.safe_form} failed with exit code {self.cli_process.returncode}: {self.message}'
 
 
@@ -39,13 +41,17 @@ class CliApp(metaclass=abc.ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
+    @abc.abstractmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         return cls()
 
     @classmethod
-    def _handle_cli_exception(cls, cli_exception: CliAppException):
+    def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
         sys.stderr.write(f'{cli_exception.message}\n')
-        sys.exit(cli_exception.cli_process.returncode)
+        if cli_exception.cli_process:
+            sys.exit(cli_exception.cli_process.returncode)
+        else:
+            sys.exit(1)
 
     @classmethod
     def invoke_cli(cls):

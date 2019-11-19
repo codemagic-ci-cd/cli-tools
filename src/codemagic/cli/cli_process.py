@@ -34,12 +34,12 @@ class CliProcess:
 
     def _log_exec_started(self):
         if self._dry_run:
-            self.logger.info(f'Skip executing "{self.safe_form}" due to dry run')
+            self.logger.debug(f'Skip executing "{self.safe_form}" due to dry run')
         else:
-            self.logger.info(f'Execute "{self.safe_form}"')
+            self.logger.debug(f'Execute "{self.safe_form}"')
 
     def _log_exec_completed(self):
-        self.logger.info(f'Completed "{self.safe_form}" with returncode {self.returncode} in {self.duration:.2f}')
+        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {self.duration:.2f}')
 
     def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None):
         chunk = (input_stream.read(buffer_size) if buffer_size else input_stream.read()).decode()
