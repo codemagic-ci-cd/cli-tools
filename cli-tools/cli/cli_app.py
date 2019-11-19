@@ -21,11 +21,13 @@ from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
 
 class CliAppException(Exception):
 
-    def __init__(self, cli_process: CliProcess, message: str):
+    def __init__(self, message: str, cli_process: Optional[CliProcess] = None):
         self.cli_process = cli_process
         self.message = message
 
     def __str__(self):
+        if not self.cli_process:
+            return self.message
         return f'Running {self.cli_process.safe_form} failed with exit code {self.cli_process.returncode}: {self.message}'
 
 

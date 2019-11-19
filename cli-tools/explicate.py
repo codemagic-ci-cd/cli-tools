@@ -7,6 +7,9 @@ from tempfile import NamedTemporaryFile
 import cli
 
 
+DEFAULT_BUCKET = 'secure.codemagic.io'
+
+
 class ExplicateError(cli.CliAppException):
     pass
 
@@ -22,7 +25,7 @@ class ExplicateArgument(cli.Argument):
     BUCKET_NAME = cli.ArgumentProperties(
         key='bucket',
         flags=('--bucket',),
-        argparse_kwargs={'default': 'secure.codemagic.io', 'required': False},
+        argparse_kwargs={'default': DEFAULT_BUCKET, 'required': False},
         description='Name of the Cloud Storage bucket containing the object. For example, "my-bucket".',
     )
     OBJECT_NAME = cli.ArgumentProperties(
@@ -36,6 +39,14 @@ class ExplicateArgument(cli.Argument):
         description='Local path where you are saving your object. For example, "Desktop/Images".',
         is_action_kwarg=True
     )
+    SILENT = cli.ArgumentProperties(
+        key='silent',
+        flags=('--silent',),
+        type=bool,
+        description='Turn off log output from gsutil',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+        is_action_kwarg=True
+    )
 
 
 class Explicate(cli.CliApp):
@@ -43,9 +54,7 @@ class Explicate(cli.CliApp):
     Utility to download files from Google Cloud Storage
     """
 
-    CLI_EXCEPTION_TYPE = ExplicateError
-
-    def __init__(self, bucket_name: str):
+    def __init__(self, bucket_name: str = DEFAULT_BUCKET):
         super().__init__()
         self.bucket_name = bucket_name
 
@@ -58,31 +67,32 @@ class Explicate(cli.CliApp):
     @cli.action('save-to-file',
                 ExplicateArgument.BUCKET_NAME,
                 ExplicateArgument.OBJECT_NAME,
-                ExplicateArgument.SAVE_TO_LOCATION)
-    def save_to_file(self, object_name: str, save_to_location: pathlib.Path):
+                ExplicateArgument.SAVE_TO_LOCATION,
+                ExplicateArgument.SILENT)
+    def save_to_file(self, object_name: str, save_to_location: pathlib.Path, silent: bool = False):
         """
         Save specified object from Cloud Storage bucket to local disk
         """
-        process = self.execute(['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', save_to_location])
+        process = self.execute(
+            ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', save_to_location], show_output=not silent)
         if process.returncode != 0:
             error = f'Unable to save file: "{object_name}" does not exist in bucket "{self.bucket_name}"'
-            raise ExplicateError(process, error)
-        self.logger.info(f'Saved {object_name} to file {save_to_location}')
+            raise ExplicateError(error, process)
 
     @cli.action('show-contents',
                 ExplicateArgument.BUCKET_NAME,
-                ExplicateArgument.OBJECT_NAME)
-    def show_contents(self, object_name):
+                ExplicateArgument.OBJECT_NAME,
+                ExplicateArgument.SILENT)
+    def show_contents(self, object_name, silent: bool = False):
         """
         Print contents of specified object from Cloud Storage bucket to STDOUT
         """
         with NamedTemporaryFile() as tf:
             process = self.execute(
-                ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', tf.name],
-                show_output=False)
+                ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', tf.name], show_output=not silent)
             if process.returncode != 0:
                 error = f'Unable to show contents: "{object_name}" does not exist in bucket "{self.bucket_name}"'
-                raise ExplicateError(process, error)
+                raise ExplicateError(error, process)
             print(open(tf.name).read())
 
 

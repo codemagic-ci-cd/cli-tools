@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 from typing import Dict, List, Union
 
 from OpenSSL import crypto
@@ -7,6 +8,8 @@ from .json_serializable import JsonSerializable
 
 
 class Certificate(JsonSerializable):
+
+    DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, pem: str):
         self._pem = pem

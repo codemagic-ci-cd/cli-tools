@@ -87,11 +87,11 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'create-keychain', '-p', self.password.value, self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to create keychain {self.path}')
+            raise KeychainError(f'Unable to create keychain {self.path}', process)
 
         process = self.execute(('security', 'list-keychains', '-d', 'user', '-s', 'login.keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to add keychain {self.path} to keychain search list')
+            raise KeychainError(f'Unable to add keychain {self.path} to keychain search list', process)
 
         os.chmod(str(self.path), 0o600)
 
@@ -102,7 +102,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'delete-keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Failed to delete keychain {self.path}')
+            raise KeychainError(f'Failed to delete keychain {self.path}', process)
 
     @cli.action('show-info', KeychainArgument.PATH)
     def show_info(self):
@@ -111,7 +111,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'show-keychain-info', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Failed to show information for keychain {self.path}')
+            raise KeychainError(f'Failed to show information for keychain {self.path}', process)
 
     @cli.action('set-timeout', KeychainArgument.PATH, KeychainArgument.TIMEOUT)
     def set_timeout(self, timeout: Optional[Seconds] = None):
@@ -124,7 +124,7 @@ class Keychain(cli.CliApp):
             cmd_args[-1:-1] = ['-t', str(timeout)]
         process = self.execute(cmd_args)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to set timeout to the keychain {self.path}')
+            raise KeychainError(f'Unable to set timeout to the keychain {self.path}', process)
 
     @cli.action('lock', KeychainArgument.PATH)
     def lock(self):
@@ -133,7 +133,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'lock-keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to unlock keychain {self.path}')
+            raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('unlock', KeychainArgument.PATH, KeychainArgument.PASSWORD)
     def unlock(self):
@@ -142,7 +142,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'unlock-keychain', '-p', self.password.value, self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to unlock keychain {self.path}')
+            raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('make-default', KeychainArgument.PATH)
     def make_default(self):
@@ -151,7 +151,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'default-keychain', '-s', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to set {self.path} as default keychain')
+            raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
     @cli.action('initialize', KeychainArgument.PATH, KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
     def initialize(self, timeout: Optional[Seconds] = None):
@@ -202,12 +202,12 @@ class Keychain(cli.CliApp):
             "-P", certificate_password.value,
         ], obfuscate_patterns=obfuscate_patterns)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to add certificate {certificate_path} to keychain {self.path}')
+            raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)
 
     def find_certificates(self):
         process = self.execute(('security', 'find-certificate', '-a', '-p', self.path), show_output=False)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to list certificates from keychain {self.path}')
+            raise KeychainError(f'Unable to list certificates from keychain {self.path}', process)
 
         pem = ''
         for line in process.stdout.splitlines():
