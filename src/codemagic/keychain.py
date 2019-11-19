@@ -217,9 +217,5 @@ class Keychain(cli.CliApp):
                 pem = ''
 
 
-def main():
-    Keychain.invoke_cli()
-
-
 if __name__ == '__main__':
     Keychain.invoke_cli()
