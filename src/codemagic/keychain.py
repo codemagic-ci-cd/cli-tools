@@ -7,8 +7,8 @@ import pathlib
 import sys
 from typing import Optional
 
-import cli
-import models
+from . import cli
+from . import models
 
 
 class Seconds(int):
@@ -215,6 +215,10 @@ class Keychain(cli.CliApp):
             if line == '-----END CERTIFICATE-----':
                 yield models.Certificate(pem)
                 pem = ''
+
+
+def main():
+    Keychain.invoke_cli()
 
 
 if __name__ == '__main__':

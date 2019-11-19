@@ -7,8 +7,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List, Dict
 
-import cli
-import models
+from . import cli
+from . import models
 
 
 class GrabError(cli.CliAppException):
@@ -121,7 +121,7 @@ class Grab(cli.CliApp):
         return signing_files_info
 
     def _fetch_profiles_from_codemagic(self, profiles_info: List[Dict], destination: Path) -> List[Path]:
-        from explicate import Explicate
+        from .explicate import Explicate
         explicate = Explicate()
         destination.mkdir(exist_ok=True)
         save_paths = []
@@ -136,7 +136,7 @@ class Grab(cli.CliApp):
         return save_paths
 
     def _fetch_certificates_from_codemagic(self, certificates_info: List[Dict], destination: Path) -> List[Path]:
-        from explicate import Explicate
+        from .explicate import Explicate
         explicate = Explicate()
         destination.mkdir(exist_ok=True)
         save_paths = []
