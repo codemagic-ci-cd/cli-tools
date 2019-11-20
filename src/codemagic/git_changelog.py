@@ -3,7 +3,7 @@
 import collections
 from typing import Optional, NoReturn
 
-import cli
+from . import cli
 
 
 class GitChangelogError(cli.CliAppException):
