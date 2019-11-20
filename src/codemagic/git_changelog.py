@@ -11,7 +11,7 @@ class GitChangelogError(cli.CliAppException):
 
 
 class GitChangelogArgument(cli.Argument):
-    PREVIOUS_COMMIT = cli.ArgumentValue(
+    PREVIOUS_COMMIT = cli.ArgumentProperties(
         flags=('--previous-commit',),
         key='previous_commit',
         description='Commit ID starting from which to generate the log',

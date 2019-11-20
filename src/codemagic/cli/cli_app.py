@@ -41,7 +41,6 @@ class CliApp(metaclass=abc.ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    @abc.abstractmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         return cls()
 
