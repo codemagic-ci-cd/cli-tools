@@ -11,17 +11,13 @@ from typing import NoReturn, Optional
 from . import cli, models
 
 
-class Keystore(cli.EnvironmentArgumentValue):
-    pass
-
-
 class UniversalApkGeneratorError(cli.CliAppException):
     pass
 
 
 class UniversalApkGeneratorArgument(cli.Argument):
     PATTERN = cli.ArgumentProperties(
-        flags=('--pattern',),
+        flags=('--patterns',),
         key='pattern',
         type=pathlib.Path,
         description='glob pattern to parse files, relative to current folder',
@@ -36,11 +32,11 @@ class UniversalApkGeneratorArgument(cli.Argument):
         argparse_kwargs={'required': False, 'default': models.Bundletool.DEFAULT_PATH},
     )
 
-    KEYSTORE = cli.ArgumentProperties(
+    KEYSTORE_PATH = cli.ArgumentProperties(
         flags=('--ks',),
-        key='keystore',
-        type=Keystore,
-        description='keystore to sign the apk files with',
+        key='keystore_path',
+        type=pathlib.Path,
+        description='path to the keystore to sign the apk files with',
         argparse_kwargs={'required': False, 'default': None},
     )
 
@@ -83,13 +79,12 @@ class UniversalApkGenerator(cli.CliApp):
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         keystore_arguments = (
-            UniversalApkGeneratorArgument.KEYSTORE,
+            UniversalApkGeneratorArgument.KEYSTORE_PATH,
             UniversalApkGeneratorArgument.KEYSTORE_PASSWORD,
             UniversalApkGeneratorArgument.KEY_ALIAS,
             UniversalApkGeneratorArgument.KEY_PASSWORD,
         )
-        signing_info_args = (getattr(cli_args, a.value.key) for a in keystore_arguments)
-
+        signing_info_args = [getattr(cli_args, a.value.key) for a in keystore_arguments]
         if any(signing_info_args) and not all(signing_info_args):
             raise UniversalApkGeneratorError(
                 'either all signing info arguments should be specified, or none of them should')
@@ -99,12 +94,12 @@ class UniversalApkGenerator(cli.CliApp):
             pattern = pattern.relative_to(pattern.anchor)
 
         return UniversalApkGenerator(
-            bundletool_path=cli_args.bundletool,
+            bundletool_path=cli_args.bundletool_path,
             pattern=pattern,
-            signing_info=SigningInfo(*signing_info_args) if signing_info_args else None,
+            signing_info=SigningInfo(*signing_info_args) if all(signing_info_args) else None,
         )
 
-    @cli.action('generate', UniversalApkGeneratorArgument.KEYSTORE, UniversalApkGeneratorArgument.KEYSTORE_PASSWORD, UniversalApkGeneratorArgument.KEY_ALIAS, UniversalApkGeneratorArgument.KEY_PASSWORD)
+    @cli.action('generate', UniversalApkGeneratorArgument.PATTERN, UniversalApkGeneratorArgument.BUNDLETOOL_PATH, UniversalApkGeneratorArgument.KEYSTORE_PATH, UniversalApkGeneratorArgument.KEYSTORE_PASSWORD, UniversalApkGeneratorArgument.KEY_ALIAS, UniversalApkGeneratorArgument.KEY_PASSWORD)
     def generate(self) -> NoReturn:
         """
         Generate universal APK files from Android App Bundles
