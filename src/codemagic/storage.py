@@ -11,7 +11,7 @@ from . import cli
 DEFAULT_BUCKET = 'secure.codemagic.io'
 
 
-class ExplicateError(cli.CliAppException):
+class StorageError(cli.CliAppException):
     pass
 
 
@@ -22,7 +22,7 @@ def _existing_path(path_str: str) -> pathlib.Path:
     raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
 
 
-class ExplicateArgument(cli.Argument):
+class StorageArgument(cli.Argument):
     BUCKET_NAME = cli.ArgumentProperties(
         key='bucket',
         flags=('--bucket',),
@@ -50,7 +50,7 @@ class ExplicateArgument(cli.Argument):
     )
 
 
-class Explicate(cli.CliApp):
+class Storage(cli.CliApp):
     """
     Utility to download files from Google Cloud Storage
     """
@@ -60,16 +60,16 @@ class Explicate(cli.CliApp):
         self.bucket_name = bucket_name
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace) -> Explicate:
-        default_bucket = ExplicateArgument.BUCKET_NAME.get_default()
-        bucket_name = getattr(cli_args, ExplicateArgument.BUCKET_NAME.value.key, default_bucket)
-        return Explicate(bucket_name)
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> Storage:
+        default_bucket = StorageArgument.BUCKET_NAME.get_default()
+        bucket_name = getattr(cli_args, StorageArgument.BUCKET_NAME.value.key, default_bucket)
+        return Storage(bucket_name)
 
     @cli.action('save-to-file',
-                ExplicateArgument.BUCKET_NAME,
-                ExplicateArgument.OBJECT_NAME,
-                ExplicateArgument.SAVE_TO_LOCATION,
-                ExplicateArgument.SILENT)
+                StorageArgument.BUCKET_NAME,
+                StorageArgument.OBJECT_NAME,
+                StorageArgument.SAVE_TO_LOCATION,
+                StorageArgument.SILENT)
     def save_to_file(self, object_name: str, save_to_location: pathlib.Path, silent: bool = False) -> pathlib.Path:
         """
         Save specified object from Cloud Storage bucket to local disk
@@ -78,13 +78,13 @@ class Explicate(cli.CliApp):
             ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', save_to_location], show_output=not silent)
         if process.returncode != 0:
             error = f'Unable to save file: "{object_name}" does not exist in bucket "{self.bucket_name}"'
-            raise ExplicateError(error, process)
+            raise StorageError(error, process)
         return save_to_location
 
     @cli.action('show-contents',
-                ExplicateArgument.BUCKET_NAME,
-                ExplicateArgument.OBJECT_NAME,
-                ExplicateArgument.SILENT)
+                StorageArgument.BUCKET_NAME,
+                StorageArgument.OBJECT_NAME,
+                StorageArgument.SILENT)
     def show_contents(self, object_name, silent: bool = False) -> str:
         """
         Print contents of specified object from Cloud Storage bucket to STDOUT
@@ -94,11 +94,11 @@ class Explicate(cli.CliApp):
                 ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', tf.name], show_output=not silent)
             if process.returncode != 0:
                 error = f'Unable to show contents: "{object_name}" does not exist in bucket "{self.bucket_name}"'
-                raise ExplicateError(error, process)
+                raise StorageError(error, process)
             contents = open(tf.name).read()
             print(contents)
         return contents
 
 
 if __name__ == '__main__':
-    Explicate.invoke_cli()
+    Storage.invoke_cli()

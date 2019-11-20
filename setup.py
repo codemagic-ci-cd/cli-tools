@@ -22,14 +22,18 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
+    scripts=['bin/code_signing_manager.rb'],
     python_requires=">=3.7",
     install_requires=[
         "pyopenssl>=19.0",
     ],
     entry_points={
         "console_scripts": [
-            "keychain-manager = codemagic.keychain:Keychain.invoke_cli",
-            "git-changelog = codemagic.git_changelog:GitChangelog.invoke_cli",
+            "storage = codemagic.storage:Storage.invoke_cli",
+            "grab = codemagic.grab:Grab.invoke_cli",
+            "keychain = codemagic.keychain:Keychain.invoke_cli",
+            "changelog = codemagic.git_changelog:GitChangelog.invoke_cli",
         ]
     },
 )
+

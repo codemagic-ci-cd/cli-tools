@@ -68,6 +68,7 @@ class GrabArgument(cli.Argument):
 class Grab(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
+    to perform iOS code signing.
     """
 
     def __init__(self):
@@ -91,6 +92,7 @@ class Grab(cli.CliApp):
         Fetch code signing files from Apple Developer portal for
         specified bundle identifier
         """
+        # TODO Apple Developer Portal communication
         raise NotImplemented
 
     @cli.action('codemagic', GrabArgument.CERTIFICATES_DIRECTORY, GrabArgument.PROFILES_DIRECTORY)
@@ -121,8 +123,8 @@ class Grab(cli.CliApp):
         return signing_files_info
 
     def _fetch_profiles_from_codemagic(self, profiles_info: List[Dict], destination: Path) -> List[Path]:
-        from .explicate import Explicate
-        explicate = Explicate()
+        from .storage import Storage
+        storage = Storage()
         destination.mkdir(exist_ok=True)
         save_paths = []
         for profile_info in profiles_info:
@@ -130,14 +132,14 @@ class Grab(cli.CliApp):
             self.logger.info(f'Fetch provisioning profile {filename} from Codemagic')
             tf = NamedTemporaryFile(prefix=f'{filename.stem}_', suffix=filename.suffix, dir=destination, delete=False)
             tf.close()
-            explicate.save_to_file(profile_info['object_name'], tf.name, silent=True)
+            storage.save_to_file(profile_info['object_name'], tf.name, silent=True)
             self.logger.info(f'Saved provisioning profile {filename} to {tf.name}')
             save_paths.append(Path(tf.name))
         return save_paths
 
     def _fetch_certificates_from_codemagic(self, certificates_info: List[Dict], destination: Path) -> List[Path]:
-        from .explicate import Explicate
-        explicate = Explicate()
+        from .storage import Storage
+        storage = Storage()
         destination.mkdir(exist_ok=True)
         save_paths = []
         for certificate_info in certificates_info:
@@ -145,10 +147,10 @@ class Grab(cli.CliApp):
             self.logger.info(f'Fetch certificate {filename} from Codemagic')
             tf = NamedTemporaryFile(prefix=f'{filename.stem}_', suffix=filename.suffix, dir=destination, delete=False)
             tf.close()
-            explicate.save_to_file(certificate_info['object_name'], tf.name, silent=True)
+            storage.save_to_file(certificate_info['object_name'], tf.name, silent=True)
             password = certificate_info.get('password', None)
             if password:
-                explicate.save_to_file(password['object_name'], Path(f'{tf.name}.password'), silent=True)
+                storage.save_to_file(password['object_name'], Path(f'{tf.name}.password'), silent=True)
             self.logger.info(f'Saved certificate {filename} to {tf.name}')
             save_paths.append(Path(tf.name))
         return save_paths
