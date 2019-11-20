@@ -16,7 +16,9 @@ class Seconds(int):
 
 
 class Password(cli.EnvironmentArgumentValue):
-    pass
+    @classmethod
+    def _is_valid(cls, value: str) -> bool:
+        return True
 
 
 class KeychainError(cli.CliAppException):
@@ -34,7 +36,7 @@ class KeychainArgument(cli.Argument):
         key='password',
         type=Password,
         description='Keychain password',
-        argparse_kwargs={'required': True}
+        argparse_kwargs={'required': False, 'default': ''},
     )
     TIMEOUT = cli.ArgumentProperties(
         flags=('-t', '--timeout'),
@@ -42,7 +44,6 @@ class KeychainArgument(cli.Argument):
         type=Seconds,
         description='Keychain timeout in seconds, defaults to no timeout',
         argparse_kwargs={'required': False, 'default': None},
-        is_action_kwarg=True,
     )
     CERTIFICATE_PATH = cli.ArgumentProperties(
         flags=('-c', '--certificate'),
@@ -50,42 +51,39 @@ class KeychainArgument(cli.Argument):
         type=pathlib.Path,
         description='Path to p12 certificate',
         argparse_kwargs={'required': True},
-        is_action_kwarg=True,
     )
     CERTIFICATE_PASSWORD = cli.ArgumentProperties(
         flags=('--certificate-password',),
         key='certificate_password',
         type=Password,
         description='Encrypted p12 certificate password',
-        argparse_kwargs={'required': False, 'default': None},
-        is_action_kwarg=True,
+        argparse_kwargs={'required': False, 'default': ''},
     )
 
 
+@cli.common_arguments(KeychainArgument.PATH)
 class Keychain(cli.CliApp):
     """
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: pathlib.Path, password: Optional[Password] = None):
+    def __init__(self, path: pathlib.Path):
         super().__init__()
         self.path = path
-        self.password = password
-        if password is not None:
-            self.default_obfuscation = [password.value]
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        path = getattr(cli_args, KeychainArgument.PATH.value.key)
-        password = getattr(cli_args, KeychainArgument.PASSWORD.value.key, KeychainArgument.PASSWORD.get_default())
-        return Keychain(path, password=password)
+        path = KeychainArgument.PATH.from_args(cli_args)
+        return Keychain(path)
 
-    @cli.action('create', KeychainArgument.PATH, KeychainArgument.PASSWORD)
-    def create(self):
+    @cli.action('create', KeychainArgument.PASSWORD)
+    def create(self, password: Password = Password('')):
         """
         Create a macOS keychain, add it to the search list.
         """
-        process = self.execute(('security', 'create-keychain', '-p', self.password.value, self.path))
+        process = self.execute(
+            ('security', 'create-keychain', '-p', password.value, self.path),
+            obfuscate_patterns=[password.value])
         if process.returncode != 0:
             raise KeychainError(f'Unable to create keychain {self.path}', process)
 
@@ -95,7 +93,7 @@ class Keychain(cli.CliApp):
 
         os.chmod(str(self.path), 0o600)
 
-    @cli.action('delete', KeychainArgument.PATH)
+    @cli.action('delete')
     def delete(self):
         """
         Delete keychains and remove them from the search list.
@@ -104,7 +102,7 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Failed to delete keychain {self.path}', process)
 
-    @cli.action('show-info', KeychainArgument.PATH)
+    @cli.action('show-info')
     def show_info(self):
         """
         Show all settings for the keychain.
@@ -113,7 +111,7 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Failed to show information for keychain {self.path}', process)
 
-    @cli.action('set-timeout', KeychainArgument.PATH, KeychainArgument.TIMEOUT)
+    @cli.action('set-timeout', KeychainArgument.TIMEOUT)
     def set_timeout(self, timeout: Optional[Seconds] = None):
         """
         Set timeout settings for the keychain.
@@ -126,7 +124,7 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Unable to set timeout to the keychain {self.path}', process)
 
-    @cli.action('lock', KeychainArgument.PATH)
+    @cli.action('lock')
     def lock(self):
         """
         Lock the specified keychain.
@@ -135,16 +133,18 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
-    @cli.action('unlock', KeychainArgument.PATH, KeychainArgument.PASSWORD)
-    def unlock(self):
+    @cli.action('unlock', KeychainArgument.PASSWORD)
+    def unlock(self, password: Password = Password('')):
         """
         Unlock the specified keychain.
         """
-        process = self.execute(('security', 'unlock-keychain', '-p', self.password.value, self.path))
+        process = self.execute(
+            ('security', 'unlock-keychain', '-p', password.value, self.path),
+            obfuscate_patterns=[password.value])
         if process.returncode != 0:
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
-    @cli.action('make-default', KeychainArgument.PATH)
+    @cli.action('make-default')
     def make_default(self):
         """
         Set the keychain as the system default keychain.
@@ -153,20 +153,20 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
-    @cli.action('initialize', KeychainArgument.PATH, KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
-    def initialize(self, timeout: Optional[Seconds] = None):
+    @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
+    def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None):
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
         Make it default and unlock it for upcoming use.
         """
-        self.create()
+        self.create(password)
         self.set_timeout(timeout=timeout)
         self.make_default()
-        self.unlock()
+        self.unlock(password)
         self.show_info()
 
-    @cli.action('list-certificates', KeychainArgument.PATH)
+    @cli.action('list-certificates')
     def list_code_signing_certificates(self):
         """
         List available code signing certificates in specified keychain.
@@ -178,7 +178,6 @@ class Keychain(cli.CliApp):
         json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
 
     @cli.action('add-certificate',
-                KeychainArgument.PATH,
                 KeychainArgument.CERTIFICATE_PATH,
                 KeychainArgument.CERTIFICATE_PASSWORD)
     def add_certificate(self, certificate_path: pathlib.Path, certificate_password: Optional[Password] = None):
