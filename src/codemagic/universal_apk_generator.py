@@ -65,6 +65,14 @@ class UniversalApkGeneratorArgument(cli.Argument):
 SigningInfo = collections.namedtuple('SigningInfo', 'store_path store_pass key_alias key_pass')
 
 
+@cli.common_arguments(
+    UniversalApkGeneratorArgument.PATTERN,
+    UniversalApkGeneratorArgument.BUNDLETOOL_PATH,
+    UniversalApkGeneratorArgument.KEYSTORE_PATH,
+    UniversalApkGeneratorArgument.KEYSTORE_PASSWORD,
+    UniversalApkGeneratorArgument.KEY_ALIAS,
+    UniversalApkGeneratorArgument.KEY_PASSWORD
+)
 class UniversalApkGenerator(cli.CliApp):
     """
     Generate universal APK files from Android App Bundles
@@ -99,7 +107,7 @@ class UniversalApkGenerator(cli.CliApp):
             signing_info=SigningInfo(*signing_info_args) if all(signing_info_args) else None,
         )
 
-    @cli.action('generate', UniversalApkGeneratorArgument.PATTERN, UniversalApkGeneratorArgument.BUNDLETOOL_PATH, UniversalApkGeneratorArgument.KEYSTORE_PATH, UniversalApkGeneratorArgument.KEYSTORE_PASSWORD, UniversalApkGeneratorArgument.KEY_ALIAS, UniversalApkGeneratorArgument.KEY_PASSWORD)
+    @cli.action('generate')
     def generate(self) -> NoReturn:
         """
         Generate universal APK files from Android App Bundles

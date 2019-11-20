@@ -32,6 +32,7 @@ ChangelogEntry = collections.namedtuple(
     'ChangelogEntry', ('hash', 'date', 'author', 'description'), defaults=(None,) * 4)
 
 
+@cli.common_arguments(GitChangelogArgument.PREVIOUS_COMMIT, GitChangelogArgument.SKIP_PATTERN)
 class GitChangelog(cli.CliApp):
     """
     Generate a changelog text from git history
@@ -53,7 +54,7 @@ class GitChangelog(cli.CliApp):
         pattern = getattr(cli_args, GitChangelogArgument.SKIP_PATTERN.value.key)
         return cls(previous_commit, re.compile(pattern))
 
-    @cli.action('generate', GitChangelogArgument.PREVIOUS_COMMIT, GitChangelogArgument.SKIP_PATTERN)
+    @cli.action('generate')
     def generate(self) -> NoReturn:
         """
         Generate a changelog text from git history
