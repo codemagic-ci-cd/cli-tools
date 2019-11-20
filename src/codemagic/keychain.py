@@ -7,11 +7,15 @@ import pathlib
 import sys
 from typing import Optional
 
-import cli
-import models
+from . import cli
+from . import models
 
 
 class Seconds(int):
+    pass
+
+
+class Password(cli.EnvironmentArgumentValue):
     pass
 
 
@@ -20,17 +24,19 @@ class KeychainError(cli.CliAppException):
 
 
 class KeychainArgument(cli.Argument):
-    PATH = cli.ArgumentValue(
+    PATH = cli.ArgumentProperties(
         key='keychain_path',
+        type=pathlib.Path,
         description='Keychain path',
     )
-    PASSWORD = cli.ArgumentValue(
+    PASSWORD = cli.ArgumentProperties(
         flags=('-pw', '--password'),
         key='password',
+        type=Password,
         description='Keychain password',
         argparse_kwargs={'required': True}
     )
-    TIMEOUT = cli.ArgumentValue(
+    TIMEOUT = cli.ArgumentProperties(
         flags=('-t', '--timeout'),
         key='timeout',
         type=Seconds,
@@ -38,7 +44,7 @@ class KeychainArgument(cli.Argument):
         argparse_kwargs={'required': False, 'default': None},
         is_action_kwarg=True,
     )
-    CERTIFICATE_PATH = cli.ArgumentValue(
+    CERTIFICATE_PATH = cli.ArgumentProperties(
         flags=('-c', '--certificate'),
         key='certificate_path',
         type=pathlib.Path,
@@ -46,9 +52,10 @@ class KeychainArgument(cli.Argument):
         argparse_kwargs={'required': True},
         is_action_kwarg=True,
     )
-    CERTIFICATE_PASSWORD = cli.ArgumentValue(
+    CERTIFICATE_PASSWORD = cli.ArgumentProperties(
         flags=('--certificate-password',),
         key='certificate_password',
+        type=Password,
         description='Encrypted p12 certificate password',
         argparse_kwargs={'required': False, 'default': None},
         is_action_kwarg=True,
@@ -60,34 +67,31 @@ class Keychain(cli.CliApp):
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: pathlib.Path, password: Optional[str] = None):
+    def __init__(self, path: pathlib.Path, password: Optional[Password] = None):
         super().__init__()
         self.path = path
         self.password = password
         if password is not None:
-            self.default_obfuscation = [password]
+            self.default_obfuscation = [password.value]
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         path = getattr(cli_args, KeychainArgument.PATH.value.key)
         password = getattr(cli_args, KeychainArgument.PASSWORD.value.key, KeychainArgument.PASSWORD.get_default())
-        return Keychain(pathlib.Path(path), password=password)
-
-    def __str__(self):
-        return f'{self.__class__.__name__}(path="{self.path}", password="{"********" if self.password else ""}")'
+        return Keychain(path, password=password)
 
     @cli.action('create', KeychainArgument.PATH, KeychainArgument.PASSWORD)
     def create(self):
         """
         Create a macOS keychain, add it to the search list.
         """
-        process = self.execute(('security', 'create-keychain', '-p', self.password, self.path))
+        process = self.execute(('security', 'create-keychain', '-p', self.password.value, self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to create keychain {self.path}')
+            raise KeychainError(f'Unable to create keychain {self.path}', process)
 
         process = self.execute(('security', 'list-keychains', '-d', 'user', '-s', 'login.keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to add keychain {self.path} to keychain search list')
+            raise KeychainError(f'Unable to add keychain {self.path} to keychain search list', process)
 
         os.chmod(str(self.path), 0o600)
 
@@ -98,7 +102,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'delete-keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Failed to delete keychain {self.path}')
+            raise KeychainError(f'Failed to delete keychain {self.path}', process)
 
     @cli.action('show-info', KeychainArgument.PATH)
     def show_info(self):
@@ -107,7 +111,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'show-keychain-info', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Failed to show information for keychain {self.path}')
+            raise KeychainError(f'Failed to show information for keychain {self.path}', process)
 
     @cli.action('set-timeout', KeychainArgument.PATH, KeychainArgument.TIMEOUT)
     def set_timeout(self, timeout: Optional[Seconds] = None):
@@ -120,7 +124,7 @@ class Keychain(cli.CliApp):
             cmd_args[-1:-1] = ['-t', str(timeout)]
         process = self.execute(cmd_args)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to set timeout to the keychain {self.path}')
+            raise KeychainError(f'Unable to set timeout to the keychain {self.path}', process)
 
     @cli.action('lock', KeychainArgument.PATH)
     def lock(self):
@@ -129,16 +133,16 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'lock-keychain', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to unlock keychain {self.path}')
+            raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('unlock', KeychainArgument.PATH, KeychainArgument.PASSWORD)
     def unlock(self):
         """
         Unlock the specified keychain.
         """
-        process = self.execute(('security', 'unlock-keychain', '-p', self.password, self.path))
+        process = self.execute(('security', 'unlock-keychain', '-p', self.password.value, self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to unlock keychain {self.path}')
+            raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('make-default', KeychainArgument.PATH)
     def make_default(self):
@@ -147,7 +151,7 @@ class Keychain(cli.CliApp):
         """
         process = self.execute(('security', 'default-keychain', '-s', self.path))
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to set {self.path} as default keychain')
+            raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
     @cli.action('initialize', KeychainArgument.PATH, KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
     def initialize(self, timeout: Optional[Seconds] = None):
@@ -177,7 +181,7 @@ class Keychain(cli.CliApp):
                 KeychainArgument.PATH,
                 KeychainArgument.CERTIFICATE_PATH,
                 KeychainArgument.CERTIFICATE_PASSWORD)
-    def add_certificate(self, certificate_path: pathlib.Path, certificate_password: Optional[str] = None):
+    def add_certificate(self, certificate_path: pathlib.Path, certificate_password: Optional[Password] = None):
         """
         Add p12 certificate to specified keychain.
         """
@@ -185,9 +189,9 @@ class Keychain(cli.CliApp):
         # security tries to open an interactive dialog to prompt the user for a password,
         # which fails in non-interactive CI environment.
         if certificate_password is not None:
-            obfuscate_patterns = [certificate_password]
+            obfuscate_patterns = [certificate_password.value]
         else:
-            certificate_password = ''
+            certificate_password = Password('')
             obfuscate_patterns = []
 
         process = self.execute([
@@ -195,15 +199,15 @@ class Keychain(cli.CliApp):
             "-f", "pkcs12",
             "-k", self.path,
             "-T", 'codesign',
-            "-P", certificate_password,
+            "-P", certificate_password.value,
         ], obfuscate_patterns=obfuscate_patterns)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to add certificate {certificate_path} to keychain {self.path}')
+            raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)
 
     def find_certificates(self):
         process = self.execute(('security', 'find-certificate', '-a', '-p', self.path), show_output=False)
         if process.returncode != 0:
-            raise KeychainError(process, f'Unable to list certificates from keychain {self.path}')
+            raise KeychainError(f'Unable to list certificates from keychain {self.path}', process)
 
         pem = ''
         for line in process.stdout.splitlines():
