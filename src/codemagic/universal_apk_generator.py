@@ -20,7 +20,7 @@ class UniversalApkGeneratorError(cli.CliAppException):
 
 
 class UniversalApkGeneratorArgument(cli.Argument):
-    PATTERN = cli.EnumArgumentValue(
+    PATTERN = cli.ArgumentProperties(
         flags=('--pattern',),
         key='pattern',
         type=pathlib.Path,
@@ -28,7 +28,7 @@ class UniversalApkGeneratorArgument(cli.Argument):
         argparse_kwargs={'required': False, 'default': '**/*.aab'},
     )
 
-    BUNDLETOOL_PATH = cli.EnumArgumentValue(
+    BUNDLETOOL_PATH = cli.ArgumentProperties(
         flags=('--pattern',),
         key='bundletool_path',
         type=pathlib.Path,
@@ -36,7 +36,7 @@ class UniversalApkGeneratorArgument(cli.Argument):
         argparse_kwargs={'required': False, 'default': models.Bundletool.DEFAULT_PATH},
     )
 
-    KEYSTORE = cli.EnumArgumentValue(
+    KEYSTORE = cli.ArgumentProperties(
         flags=('--ks',),
         key='keystore',
         type=Keystore,
@@ -44,21 +44,21 @@ class UniversalApkGeneratorArgument(cli.Argument):
         argparse_kwargs={'required': False, 'default': None},
     )
 
-    KEYSTORE_PASSWORD = cli.EnumArgumentValue(
+    KEYSTORE_PASSWORD = cli.ArgumentProperties(
         flags=('--ks-pass',),
         key='keystore_password',
         description='keystore password',
         argparse_kwargs={'required': False, 'default': None},
     )
 
-    KEY_ALIAS = cli.EnumArgumentValue(
+    KEY_ALIAS = cli.ArgumentProperties(
         flags=('--ks-key-alias',),
         key='key_lias',
         description='keystore key alias',
         argparse_kwargs={'required': False, 'default': None},
     )
 
-    KEY_PASSWORD = cli.EnumArgumentValue(
+    KEY_PASSWORD = cli.ArgumentProperties(
         flags=('--key-pass',),
         key='key_password',
         description='keystore key password',
@@ -82,7 +82,13 @@ class UniversalApkGenerator(cli.CliApp):
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        signing_info_args = (cli_args.ks, cli_args.ks_pass, cli_args.ks_key_alias, cli_args.key_pass)
+        keystore_arguments = (
+            UniversalApkGeneratorArgument.KEYSTORE,
+            UniversalApkGeneratorArgument.KEYSTORE_PASSWORD,
+            UniversalApkGeneratorArgument.KEY_ALIAS,
+            UniversalApkGeneratorArgument.KEY_PASSWORD,
+        )
+        signing_info_args = (getattr(cli_args, a.value.key) for a in keystore_arguments)
 
         if any(signing_info_args) and not all(signing_info_args):
             raise UniversalApkGeneratorError(
@@ -98,8 +104,11 @@ class UniversalApkGenerator(cli.CliApp):
             signing_info=SigningInfo(*signing_info_args) if signing_info_args else None,
         )
 
-    @cli.action('generate')
+    @cli.action('generate', UniversalApkGeneratorArgument.KEYSTORE, UniversalApkGeneratorArgument.KEYSTORE_PASSWORD, UniversalApkGeneratorArgument.KEY_ALIAS, UniversalApkGeneratorArgument.KEY_PASSWORD)
     def generate(self) -> NoReturn:
+        """
+        Generate universal APK files from Android App Bundles
+        """
         self.logger.info(f'Searching for files in {self.pattern.resolve()}')
         with tempfile.TemporaryDirectory() as d:
             if not self.bundletool_path.exists():
