@@ -33,6 +33,7 @@ setup(
             "grab = codemagic.grab:Grab.invoke_cli",
             "keychain = codemagic.keychain:Keychain.invoke_cli",
             "changelog = codemagic.git_changelog:GitChangelog.invoke_cli",
+            "universal-apk = codemagic.universal_apk_generator:UniversalApkGenerator.invoke_cli",
         ]
     },
 )
