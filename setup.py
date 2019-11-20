@@ -28,7 +28,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "explicate = codemagic.explicate:Explicate.invoke_cli",
+            "storage = codemagic.storage:Storage.invoke_cli",
             "grab = codemagic.grab:Grab.invoke_cli",
             "keychain = codemagic.keychain:Keychain.invoke_cli",
         ]
