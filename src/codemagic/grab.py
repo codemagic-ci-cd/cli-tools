@@ -68,6 +68,7 @@ class GrabArgument(cli.Argument):
 class Grab(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
+    to perform iOS code signing.
     """
 
     def __init__(self):
@@ -91,6 +92,7 @@ class Grab(cli.CliApp):
         Fetch code signing files from Apple Developer portal for
         specified bundle identifier
         """
+        # TODO Apple Developer Portal communication
         raise NotImplemented
 
     @cli.action('codemagic', GrabArgument.CERTIFICATES_DIRECTORY, GrabArgument.PROFILES_DIRECTORY)
