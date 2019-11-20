@@ -32,13 +32,11 @@ class StorageArgument(cli.Argument):
     OBJECT_NAME = cli.ArgumentProperties(
         key='object_name',
         description='Name of object you are interacting with. For example, "pets/dog.png".',
-        is_action_kwarg=True,
     )
     SAVE_TO_LOCATION = cli.ArgumentProperties(
         key='save_to_location',
         type=pathlib.Path,
         description='Local path where you are saving your object. For example, "Desktop/Images".',
-        is_action_kwarg=True
     )
     SILENT = cli.ArgumentProperties(
         key='silent',
@@ -46,10 +44,10 @@ class StorageArgument(cli.Argument):
         type=bool,
         description='Turn off log output from gsutil',
         argparse_kwargs={'required': False, 'action': 'store_true'},
-        is_action_kwarg=True
     )
 
 
+@cli.requires_arguments(StorageArgument.BUCKET_NAME)
 class Storage(cli.CliApp):
     """
     Utility to download files from Google Cloud Storage
@@ -66,7 +64,6 @@ class Storage(cli.CliApp):
         return Storage(bucket_name)
 
     @cli.action('save-to-file',
-                StorageArgument.BUCKET_NAME,
                 StorageArgument.OBJECT_NAME,
                 StorageArgument.SAVE_TO_LOCATION,
                 StorageArgument.SILENT)
@@ -82,7 +79,6 @@ class Storage(cli.CliApp):
         return save_to_location
 
     @cli.action('show-contents',
-                StorageArgument.BUCKET_NAME,
                 StorageArgument.OBJECT_NAME,
                 StorageArgument.SILENT)
     def show_contents(self, object_name, silent: bool = False) -> str:

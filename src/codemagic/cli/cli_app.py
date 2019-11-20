@@ -12,7 +12,7 @@ import shlex
 import sys
 from functools import wraps
 from itertools import chain
-from typing import NoReturn, Optional, Sequence, Iterable, Type, List
+from typing import NoReturn, Optional, Sequence, Iterable, Type, List, Tuple
 
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
@@ -32,6 +32,8 @@ class CliAppException(Exception):
 
 
 class CliApp(metaclass=abc.ABCMeta):
+
+    _CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
     def __init__(self, dry=False):
@@ -58,8 +60,12 @@ class CliApp(metaclass=abc.ABCMeta):
         args = cls._setup_cli_options()
         instance = cls.from_cli_args(args)
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
+        action_args = {
+            arg_type.value.key: getattr(args, arg_type.value.key, arg_type.get_default())
+            for arg_type in cli_action.arguments
+        }
         try:
-            return cli_action(**Argument.get_action_kwargs(cli_action, args))
+            return cli_action(**action_args)
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             cls._handle_cli_exception(cli_exception)
 
@@ -119,7 +125,7 @@ class CliApp(metaclass=abc.ABCMeta):
             cls._setup_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(f'required arguments for "{sub_action.action_name}"')
             optional_arguments = action_parser.add_argument_group(f'optional arguments for "{sub_action.action_name}"')
-            for argument in sub_action.required_arguments:
+            for argument in chain(cls._CLASS_ARGUMENTS, sub_action.arguments):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
         args = parser.parse_args()
@@ -176,12 +182,11 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute()
 
 
-def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
+def action(action_name: str, *arguments: Argument):
     """
     Decorator to mark that the method is usable form CLI
     :param action_name: Name of the CLI parameter
     :param arguments: CLI arguments that are required for this method to work
-    :param optional_arguments: CLI arguments that can be omitted
     """
 
     def decorator(func):
@@ -189,13 +194,28 @@ def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
             raise RuntimeError(f'Action "{action_name}" defined by {func} is not documented')
         func.is_cli_action = True
         func.action_name = action_name
-        func.required_arguments = arguments
-        func.optionals = optional_arguments
+        func.arguments = arguments
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
         return wrapper
+
+    return decorator
+
+
+def requires_arguments(*class_arguments: Argument):
+    """
+    Decorator to mark that the method is usable form CLI
+    :param class_arguments: CLI arguments that are required to initialize the class
+    """
+
+    def decorator(cli_app_type):
+        if not issubclass(cli_app_type, CliApp):
+            raise RuntimeError(f'Cannot decorate {cli_app_type} with {requires_arguments}')
+        if class_arguments:
+            cli_app_type._CLASS_ARGUMENTS = tuple(class_arguments)
+        return cli_app_type
 
     return decorator

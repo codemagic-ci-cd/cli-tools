@@ -25,7 +25,7 @@ class ActionCallable:
 
     is_cli_action: bool
     action_name: str
-    required_arguments: Sequence[Argument]
+    arguments: Sequence[Argument]
 
 
 class EnumArgumentValue(enum.Enum):
@@ -87,7 +87,11 @@ class EnvironmentArgumentValue:
             f'or "@file:" prefix followed by a path to the file containing the value.'
         example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>", ' \
                   'and "@env:<file_path>" uses the value from file at "<file_path>".'
-        return '\n'.join([description, usage, example])
+        try:
+            default = (properties.argparse_kwargs or {})['default']
+            return '\n'.join([description, usage, example, f'[Default: {repr(default)}]'])
+        except KeyError:
+            return '\n'.join([description, usage, example])
 
     def __str__(self):
         return self._raw_value
@@ -102,13 +106,14 @@ class ArgumentProperties(NamedTuple):
     type: Union[Type, Callable[[str], Any]] = str
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, object]] = None
-    is_action_kwarg: bool = False
 
     def get_description(self):
         description = self.description
-        default = (self.argparse_kwargs or {}).get('default', None)
-        if default is not None:
+        try:
+            default = (self.argparse_kwargs or {})['default']
             description = f'{description} [Default: {default}]'
+        except KeyError:
+            pass
 
         if isinstance(self.type, (types.FunctionType, types.MethodType)):
             return description
@@ -135,11 +140,3 @@ class Argument(ArgumentProperties, enum.Enum):
 
     def get_default(self):
         return (self.value.argparse_kwargs or {}).get('default', None)
-
-    @classmethod
-    def get_action_kwargs(cls, cli_action: ActionCallable, cli_args: argparse.Namespace) -> Dict[str, object]:
-        return {
-            arg_type.value.key: getattr(cli_args, arg_type.value.key, arg_type.get_default())
-            for arg_type in cli_action.required_arguments
-            if arg_type.value.is_action_kwarg
-        }

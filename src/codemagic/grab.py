@@ -30,7 +30,6 @@ class GrabArgument(cli.Argument):
         type=Source,
         description='Where to download the signing files from',
         argparse_kwargs={'choices': [source for source in Source]},
-        is_action_kwarg=True,
     )
     APPLE_DEVELOPER_TOKEN = cli.ArgumentProperties(
         key='apple_developer_token',
@@ -38,14 +37,12 @@ class GrabArgument(cli.Argument):
         type=AppleDeveloperToken,
         description='Apple Developer Portal API Token',
         argparse_kwargs={'required': True},
-        is_action_kwarg=True,
     )
     BUNDLE_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_identifier',
         flags=('--bundle-identifier',),
         description='Bundle identifier for which the signing files will be downloaded',
         argparse_kwargs={'required': True},
-        is_action_kwarg=True,
     )
     CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
         key='certificates_directory',
@@ -53,7 +50,6 @@ class GrabArgument(cli.Argument):
         type=Path,
         description='Directory where the code signing certificates will be saved',
         argparse_kwargs={'required': False, 'default': models.Certificate.DEFAULT_LOCATION},
-        is_action_kwarg=True,
     )
     PROFILES_DIRECTORY = cli.ArgumentProperties(
         key='profiles_directory',
@@ -61,7 +57,6 @@ class GrabArgument(cli.Argument):
         type=Path,
         description='Directory where the provisioning profiles will be saved',
         argparse_kwargs={'required': False, 'default': models.ProvisioningProfile.DEFAULT_LOCATION},
-        is_action_kwarg=True,
     )
 
 
