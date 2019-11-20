@@ -57,7 +57,7 @@ class KeychainArgument(cli.Argument):
         key='certificate_password',
         type=Password,
         description='Encrypted p12 certificate password',
-        argparse_kwargs={'required': False, 'default': None},
+        argparse_kwargs={'required': False, 'default': ''},
     )
 
 
@@ -77,7 +77,7 @@ class Keychain(cli.CliApp):
         return Keychain(path)
 
     @cli.action('create', KeychainArgument.PASSWORD)
-    def create(self, password: Password):
+    def create(self, password: Password = ''):
         """
         Create a macOS keychain, add it to the search list.
         """
@@ -134,7 +134,7 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('unlock', KeychainArgument.PASSWORD)
-    def unlock(self, password: Password):
+    def unlock(self, password: Password = ''):
         """
         Unlock the specified keychain.
         """
@@ -154,7 +154,7 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
-    def initialize(self, password: Password, timeout: Optional[Seconds] = None):
+    def initialize(self, password: Password = '', timeout: Optional[Seconds] = None):
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.

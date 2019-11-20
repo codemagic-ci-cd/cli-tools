@@ -106,7 +106,7 @@ class CliApp(metaclass=abc.ABCMeta):
         action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging')
         action_parser.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help='Choose which stream to use for log output. (Default: stderr)')
+                                   help='Choose which stream to use for log output. [Default: stderr]')
         action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
