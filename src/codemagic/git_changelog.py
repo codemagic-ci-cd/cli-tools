@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import argparse
 import collections
-from typing import Optional, NoReturn
+import re
+from typing import NoReturn, Optional, Pattern
 
 from . import cli
 
@@ -15,8 +17,14 @@ class GitChangelogArgument(cli.Argument):
         flags=('--previous-commit',),
         key='previous_commit',
         description='Commit ID starting from which to generate the log',
-        is_action_kwarg=True,
         argparse_kwargs={'required': False, 'default': None},
+    )
+
+    SKIP_PATTERN = cli.ArgumentProperties(
+        flags=('--skip-pattern',),
+        key='skip_pattern',
+        description='Regex pattern to skip unneeded commit message lines',
+        argparse_kwargs={'required': False, 'default': '^[Mm]erged? (remote-tracking )?(branch|pull request|in) .*'},
     )
 
 
@@ -34,13 +42,24 @@ class GitChangelog(cli.CliApp):
     GIT_LOG_FORMAT = PARAM_SEPARATOR.join(('%H', '%cd', '%an', '%B')) + ENTRY_SEPARATOR
     CHANGELOG_LIMIT = 50
 
-    @cli.action('generate', GitChangelogArgument.PREVIOUS_COMMIT)
-    def generate(self, previous_commit: Optional[str] = None) -> NoReturn:
+    def __init__(self, previous_commit: Optional[str] = None, skip_pattern: Optional[Pattern] = None):
+        super().__init__()
+        self.previous_commit = previous_commit
+        self.skip_pattern = skip_pattern
+
+    @classmethod
+    def from_cli_args(cls, cli_args: argparse.Namespace):
+        previous_commit = getattr(cli_args, GitChangelogArgument.PREVIOUS_COMMIT.value.key)
+        pattern = getattr(cli_args, GitChangelogArgument.SKIP_PATTERN.value.key)
+        return cls(previous_commit, re.compile(pattern))
+
+    @cli.action('generate', GitChangelogArgument.PREVIOUS_COMMIT, GitChangelogArgument.SKIP_PATTERN)
+    def generate(self) -> NoReturn:
         """
         Generate a changelog text from git history
         """
         raw_log = self._get_raw_git_log()
-        log_entries = self._get_changelog_list(raw_log, previous_commit)
+        log_entries = self._get_changelog_list(raw_log)
         formatted_changelog = self._format_log(log_entries)
         print(formatted_changelog)
 
@@ -49,23 +68,35 @@ class GitChangelog(cli.CliApp):
             ['git', 'log', f'--pretty=format:{self.GIT_LOG_FORMAT}', f'-n {self.CHANGELOG_LIMIT}'],
             show_output=False)
         if process.returncode != 0:
-            raise GitChangelogError(process, 'Unable to execute git log')
+            raise GitChangelogError('Unable to execute git log', process)
         return process.stdout
 
-    def _get_changelog_list(self, changelog, previous_commit):
+    def _get_changelog_list(self, changelog):
         changelog_list = []
         changelog_entries = changelog.strip(f'\n{self.ENTRY_SEPARATOR}').split(f'{self.ENTRY_SEPARATOR}\n')
         for changelog_entry in changelog_entries:
             entry = ChangelogEntry(*changelog_entry.strip().split(self.PARAM_SEPARATOR))
-            if previous_commit and entry.hash == previous_commit:
+            if self.previous_commit and entry.hash == self.previous_commit:
                 break
+            if not entry.description.strip():
+                continue
+            if changelog_list and entry.description == changelog_list[-1].description:
+                continue
             changelog_list.append(entry)
         return changelog_list
 
-    @staticmethod
-    def _format_log(entries):
-        descriptions = [e.description for e in entries if e.description is not None]
-        return '- ' + '\n- '.join(descriptions)
+    def _format_log(self, entries):
+        descriptions = []
+        for entry in entries:
+            description_lines = [line for line in entry.description.split('\n') if self._should_include_log_line(line)]
+            if description_lines:
+                descriptions.append(f'* {description_lines[0]}')
+                for line in description_lines[1:]:
+                    descriptions.append(f'  {line}')
+        return '\n'.join(descriptions)
+
+    def _should_include_log_line(self, line):
+        return line.strip() and not self.skip_pattern.match(line.strip())
 
 
 if __name__ == '__main__':
