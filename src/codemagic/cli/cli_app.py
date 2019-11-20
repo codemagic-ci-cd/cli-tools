@@ -12,7 +12,7 @@ import shlex
 import sys
 from functools import wraps
 from itertools import chain
-from typing import NoReturn, Optional, Sequence, Iterable, Type, List
+from typing import NoReturn, Optional, Sequence, Iterable, Type, List, Tuple
 
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
@@ -32,6 +32,7 @@ class CliAppException(Exception):
 
 
 class CliApp(metaclass=abc.ABCMeta):
+    _CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
     def __init__(self, dry=False):
@@ -54,11 +55,22 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke_cli(cls):
-        args = cls._setup_cli_options()
-        instance = cls.from_cli_args(args)
-        cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
+        parser = cls._setup_cli_options()
+        args = parser.parse_args()
+        cls._setup_logging(args)
+
         try:
-            return cli_action(**Argument.get_action_kwargs(cli_action, args))
+            instance = cls.from_cli_args(args)
+        except argparse.ArgumentError as argument_error:
+            parser.error(argument_error)
+
+        cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
+        action_args = {
+            arg_type.value.key: arg_type.value.from_args(args, arg_type.get_default())
+            for arg_type in cli_action.arguments
+        }
+        try:
+            return cli_action(**action_args)
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             cls._handle_cli_exception(cli_exception)
 
@@ -99,16 +111,16 @@ class CliApp(metaclass=abc.ABCMeta):
         action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging')
         action_parser.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help='Choose which stream to use for log output. (Default: stderr)')
+                                   help='Choose which stream to use for log output. [Default: stderr]')
         action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
-    def _setup_cli_options(cls) -> argparse.Namespace:
+    def _setup_cli_options(cls) -> argparse.ArgumentParser:
         if cls.__doc__ is None:
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
         parser = argparse.ArgumentParser(description=cls.__doc__)
-        action_parsers = parser.add_subparsers(dest='action')
+        action_parsers = parser.add_subparsers(dest='action', required=True)
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
@@ -118,17 +130,10 @@ class CliApp(metaclass=abc.ABCMeta):
             cls._setup_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(f'required arguments for "{sub_action.action_name}"')
             optional_arguments = action_parser.add_argument_group(f'optional arguments for "{sub_action.action_name}"')
-            for argument in sub_action.required_arguments:
+            for argument in chain(cls._CLASS_ARGUMENTS, sub_action.arguments):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
-        args = parser.parse_args()
-
-        if not args.action:
-            parser.print_help()
-            sys.exit(2)
-
-        cls._setup_logging(args)
-        return args
+        return parser
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
                            obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None) -> ObfuscatedCommand:
@@ -175,12 +180,11 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute()
 
 
-def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
+def action(action_name: str, *arguments: Argument):
     """
-    Decorator to mark that the method is usable form CLI
+    Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
     :param arguments: CLI arguments that are required for this method to work
-    :param optional_arguments: CLI arguments that can be omitted
     """
 
     def decorator(func):
@@ -188,13 +192,28 @@ def action(action_name: str, *arguments: Argument, optional_arguments=tuple()):
             raise RuntimeError(f'Action "{action_name}" defined by {func} is not documented')
         func.is_cli_action = True
         func.action_name = action_name
-        func.required_arguments = arguments
-        func.optionals = optional_arguments
+        func.arguments = arguments
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
         return wrapper
+
+    return decorator
+
+
+def common_arguments(*class_arguments: Argument):
+    """
+    Decorator to mark that the method is usable from CLI
+    :param class_arguments: CLI arguments that are required to initialize the class
+    """
+
+    def decorator(cli_app_type):
+        if not issubclass(cli_app_type, CliApp):
+            raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
+        if class_arguments:
+            cli_app_type._CLASS_ARGUMENTS = tuple(class_arguments)
+        return cli_app_type
 
     return decorator
