@@ -28,7 +28,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "keychain-manager = codemagic.keychain:Keychain.invoke_cli"
+            "explicate = codemagic.explicate:Explicate.invoke_cli",
+            "grab = codemagic.grab:Grab.invoke_cli",
+            "keychain = codemagic.keychain:Keychain.invoke_cli",
         ]
     },
 )
