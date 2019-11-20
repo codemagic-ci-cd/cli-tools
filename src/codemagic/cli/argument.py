@@ -107,6 +107,24 @@ class ArgumentProperties(NamedTuple):
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, object]] = None
 
+    @property
+    def _parser_argument(self):
+        return getattr(self, '__parser_argument')
+
+    @_parser_argument.setter
+    def _parser_argument(self, parser_argument):
+        setattr(self, '__parser_argument', parser_argument)
+
+    def raise_argument_error(self, message):
+        """
+        :param message: ArgumentError message
+        :raises: argparse.ArgumentError
+        """
+        raise argparse.ArgumentError(self._parser_argument, message)
+
+    def from_args(self, cli_args: argparse.Namespace, default=None):
+        return vars(cli_args)[self.key] or default
+
     def get_description(self):
         description = self.description
         try:
@@ -129,7 +147,7 @@ class Argument(ArgumentProperties, enum.Enum):
         kwargs = self.value.argparse_kwargs or {}
         if 'action' not in kwargs:
             kwargs['type'] = self.value.type
-        argument_group.add_argument(
+        self._parser_argument = argument_group.add_argument(
             *self.value.flags,
             help=self.value.get_description(),
             dest=self.value.key,

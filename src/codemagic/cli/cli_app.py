@@ -32,7 +32,6 @@ class CliAppException(Exception):
 
 
 class CliApp(metaclass=abc.ABCMeta):
-
     _CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
@@ -57,11 +56,18 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def invoke_cli(cls):
-        args = cls._setup_cli_options()
-        instance = cls.from_cli_args(args)
+        parser = cls._setup_cli_options()
+        args = parser.parse_args()
+        cls._setup_logging(args)
+
+        try:
+            instance = cls.from_cli_args(args)
+        except argparse.ArgumentError as argument_error:
+            parser.error(argument_error)
+
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         action_args = {
-            arg_type.value.key: getattr(args, arg_type.value.key, arg_type.get_default())
+            arg_type.value.key: arg_type.value.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
         }
         try:
@@ -110,12 +116,12 @@ class CliApp(metaclass=abc.ABCMeta):
         action_parser.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
-    def _setup_cli_options(cls) -> argparse.Namespace:
+    def _setup_cli_options(cls) -> argparse.ArgumentParser:
         if cls.__doc__ is None:
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
         parser = argparse.ArgumentParser(description=cls.__doc__)
-        action_parsers = parser.add_subparsers(dest='action')
+        action_parsers = parser.add_subparsers(dest='action', required=True)
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
@@ -128,14 +134,7 @@ class CliApp(metaclass=abc.ABCMeta):
             for argument in chain(cls._CLASS_ARGUMENTS, sub_action.arguments):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
-        args = parser.parse_args()
-
-        if not args.action:
-            parser.print_help()
-            sys.exit(2)
-
-        cls._setup_logging(args)
-        return args
+        return parser
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
                            obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None) -> ObfuscatedCommand:
@@ -184,7 +183,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
 def action(action_name: str, *arguments: Argument):
     """
-    Decorator to mark that the method is usable form CLI
+    Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
     :param arguments: CLI arguments that are required for this method to work
     """
@@ -205,15 +204,15 @@ def action(action_name: str, *arguments: Argument):
     return decorator
 
 
-def requires_arguments(*class_arguments: Argument):
+def common_arguments(*class_arguments: Argument):
     """
-    Decorator to mark that the method is usable form CLI
+    Decorator to mark that the method is usable from CLI
     :param class_arguments: CLI arguments that are required to initialize the class
     """
 
     def decorator(cli_app_type):
         if not issubclass(cli_app_type, CliApp):
-            raise RuntimeError(f'Cannot decorate {cli_app_type} with {requires_arguments}')
+            raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
         if class_arguments:
             cli_app_type._CLASS_ARGUMENTS = tuple(class_arguments)
         return cli_app_type

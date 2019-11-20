@@ -47,7 +47,7 @@ class StorageArgument(cli.Argument):
     )
 
 
-@cli.requires_arguments(StorageArgument.BUCKET_NAME)
+@cli.common_arguments(StorageArgument.BUCKET_NAME)
 class Storage(cli.CliApp):
     """
     Utility to download files from Google Cloud Storage
@@ -60,7 +60,7 @@ class Storage(cli.CliApp):
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> Storage:
         default_bucket = StorageArgument.BUCKET_NAME.get_default()
-        bucket_name = getattr(cli_args, StorageArgument.BUCKET_NAME.value.key, default_bucket)
+        bucket_name = StorageArgument.BUCKET_NAME.from_args(cli_args, default_bucket)
         return Storage(bucket_name)
 
     @cli.action('save-to-file',

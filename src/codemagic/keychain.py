@@ -61,7 +61,7 @@ class KeychainArgument(cli.Argument):
     )
 
 
-@cli.requires_arguments(KeychainArgument.PATH)
+@cli.common_arguments(KeychainArgument.PATH)
 class Keychain(cli.CliApp):
     """
     Utility to manage macOS keychains and certificates
@@ -73,11 +73,11 @@ class Keychain(cli.CliApp):
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        path = getattr(cli_args, KeychainArgument.PATH.value.key)
+        path = KeychainArgument.PATH.from_args(cli_args)
         return Keychain(path)
 
     @cli.action('create', KeychainArgument.PASSWORD)
-    def create(self, password: Password = ''):
+    def create(self, password: Password = Password('')):
         """
         Create a macOS keychain, add it to the search list.
         """
@@ -134,7 +134,7 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('unlock', KeychainArgument.PASSWORD)
-    def unlock(self, password: Password = ''):
+    def unlock(self, password: Password = Password('')):
         """
         Unlock the specified keychain.
         """
@@ -154,7 +154,7 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
-    def initialize(self, password: Password = '', timeout: Optional[Seconds] = None):
+    def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None):
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
