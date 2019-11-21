@@ -13,6 +13,7 @@ workflows:
       # - git push "https://$GH_USER:$GH_PAT@github.com/$REPOSITORY" -tags
       - echo "Initial release\n" > release_notes.txt
       - |
+        set -ex
         # draft a release
         TAG_NAME=v$(python3 setup.py --version)
         RELEASE_NOTES=$(cat release_notes.txt)
