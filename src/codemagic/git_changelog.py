@@ -61,8 +61,9 @@ class GitChangelog(cli.CliApp):
         """
         raw_log = self._get_raw_git_log()
         log_entries = self._get_changelog_list(raw_log)
-        formatted_changelog = self._format_log(log_entries)
+        formatted_changelog, changelog_line_count = self._format_log(log_entries)
         print(formatted_changelog)
+        self.logger.info(f'Generated {changelog_line_count} change log lines')
 
     def _get_raw_git_log(self):
         process = self.execute(
@@ -94,7 +95,7 @@ class GitChangelog(cli.CliApp):
                 descriptions.append(f'* {description_lines[0]}')
                 for line in description_lines[1:]:
                     descriptions.append(f'  {line}')
-        return '\n'.join(descriptions)
+        return '\n'.join(descriptions), len(descriptions) + '\n'
 
     def _should_include_log_line(self, line):
         return line.strip() and not self.skip_pattern.match(line.strip())
