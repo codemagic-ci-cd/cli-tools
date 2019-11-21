@@ -8,7 +8,7 @@ workflows:
         REPOSITORY: codemagic-ci-cd/cli-tools
     name: Generate binary distribution wheel
     scripts:
-      - git tag -a v$(python3 setup.py --version)
+      - git tag -a v$(python3 setup.py --version) -m "Release v$(python3 setup.py --version)"
       - python3 setup.py bdist_wheel
       # - git push "https://$GH_USER:$GH_PAT@github.com/$REPOSITORY" -tags
       - echo "Initial release\n" > release_notes.txt
