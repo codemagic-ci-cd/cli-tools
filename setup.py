@@ -4,7 +4,7 @@ from setuptools import setup
 
 def get_version():
     # TODO: implement versioning
-    return '0.0.1.dev1'
+    return '0.0.1'
 
 
 setup(
