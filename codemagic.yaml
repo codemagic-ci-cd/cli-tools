@@ -18,12 +18,11 @@ workflows:
         TAG_NAME=v$(python3 setup.py --version)
         RELEASE_NOTES=$(cat release_notes.txt)
         PAYLOAD="{\"tag_name\":\"$TAG_NAME\",\"name\":\"$TAG_NAME\",\"body\":\"$RELEASE_NOTES\",\"draft\":true,\"prerelease\":true}"
-        RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "$PAYLOAD" "https://api.github.com/repos/${REPOSITORY}/releases")
-        echo "RELEASE IS $RELEASE"
+        RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --fail -H 'Content-Type: application/json' -X POST --data "$PAYLOAD" "https://api.github.com/repos/${REPOSITORY}/releases")
         EDIT_URL=$(echo $RELEASE | python -c 'import sys, json; print json.load(sys.stdin).get("html_url").replace("/tag/", "/edit/")')
         FILE_NAME=$(cd dist && ls *.whl | tail -n1)
         UPLOAD_URL=$(echo $RELEASE | python -c "import sys, json; print json.load(sys.stdin).get('upload_url').replace('{?name,label}', '?name=$FILE_NAME')")
-        curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/x-wheel+zip' -X POST "$UPLOAD_URL" --data-binary "@bin/$FILE_NAME"
+        curl -u "$GH_USER":"$GH_PAT" --fail -H 'Content-Type: application/x-wheel+zip' -X POST "$UPLOAD_URL" --data-binary "@bin/$FILE_NAME"
         echo "Draft release created. Finalize it at $EDIT_URL"
     artifacts:
       - dist/codemagic-*.whl
