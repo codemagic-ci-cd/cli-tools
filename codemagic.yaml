@@ -13,7 +13,7 @@ workflows:
       # - git push "https://$GH_USER:$GH_PAT@github.com/$REPOSITORY" -tags
       - echo "Initial release\n" > release_notes.txt
       - |
-        set -ex
+        set -e
         # draft a release
         TAG_NAME=v$(python3 setup.py --version)
         RELEASE_NOTES=$(cat release_notes.txt)
@@ -23,6 +23,7 @@ workflows:
         EDIT_URL=$(echo $RELEASE | python -c 'import sys, json; print json.load(sys.stdin).get("html_url").replace("/tag/", "/edit/")')
         FILE_NAME=$(cd dist && ls *.whl | tail -n1)
         UPLOAD_URL=$(echo $RELEASE | python -c "import sys, json; print json.load(sys.stdin).get('upload_url').replace('{?name,label}', '?name=$FILE_NAME')")
+        curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/x-wheel+zip' -X POST "$UPLOAD_URL" --data-binary "@bin/$FILE_NAME"
         echo "Draft release created. Finalize it at $EDIT_URL"
     artifacts:
       - dist/codemagic-*.whl
