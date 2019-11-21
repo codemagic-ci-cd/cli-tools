@@ -17,7 +17,7 @@ class UniversalApkGeneratorError(cli.CliAppException):
 
 class UniversalApkGeneratorArgument(cli.Argument):
     PATTERN = cli.ArgumentProperties(
-        flags=('--patterns',),
+        flags=('--pattern',),
         key='pattern',
         type=pathlib.Path,
         description='glob pattern to parse files, relative to current folder',
@@ -25,7 +25,7 @@ class UniversalApkGeneratorArgument(cli.Argument):
     )
 
     BUNDLETOOL_PATH = cli.ArgumentProperties(
-        flags=('--pattern',),
+        flags=('--bundletool',),
         key='bundletool_path',
         type=pathlib.Path,
         description='glob pattern to parse files, relative to current folder',
