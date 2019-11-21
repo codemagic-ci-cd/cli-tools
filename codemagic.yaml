@@ -17,8 +17,8 @@ workflows:
         # draft a release
         TAG_NAME=v$(python3 setup.py --version)
         RELEASE_NOTES=$(cat release_notes.txt)
-        PAYLOAD="{\"tag_name\":$TAG_NAME,\"name\":$TAG_NAME,\"body\":$RELEASE_NOTES,\"draft\":true,\"prerelease\":true}"
-        RELEASE=$(curl -u $GH_USER:$GH_PAT --silent -H 'Content-Type: application/json' -X POST --data $PAYLOAD "https://api.github.com/repos/${REPOSITORY}/releases?access_token=${GH_PAT}")
+        PAYLOAD="{\"tag_name\":\"$TAG_NAME\",\"name\":\"$TAG_NAME\",\"body\":\"$RELEASE_NOTES\",\"draft\":true,\"prerelease\":true}"
+        RELEASE=$(curl -u $GH_USER:$GH_PAT --silent --fail -H 'Content-Type: application/json' -X POST --data $PAYLOAD "https://api.github.com/repos/${REPOSITORY}/releases?access_token=${GH_PAT}")
         echo "RELEASE IS $RELEASE"
         EDIT_URL=1
         echo "Draft release created. Finalize it at $EDIT_URL"
