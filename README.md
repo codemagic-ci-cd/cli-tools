@@ -1,27 +1,25 @@
-# cli-tools
+Various utilities to simplify your builds at [codemagic.io](https://codemagic.io)
 
-## Installing
+# Installing
 
 ```
 pip3 install codemagic-cli-tools
 ```
 
-## Packaging for distribution
+# Usage
 
-Don't forget the version number
+Package installs the following executables to your path:
 
-```
-python3 setup.py sdist bdist_wheel
-```
+* `storage`
+* `grab`
+* `keychain`
+* `git-changelog`
+* `universal-apk`
 
-## Publishing package (test)
+See their documentation by running `<command> --help` or `<command> <subcommand> --help`.
 
-```
-python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-```
-
-## Publishing package (real)
+For example:
 
 ```
-python3 -m twine upload dist/*
+universal-apk generate --help
 ```
