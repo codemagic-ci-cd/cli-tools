@@ -10,6 +10,7 @@ autopep8 = "*"
 
 [packages]
 pyopenssl = "~=19.0"
+twine = "*"
 
 [requires]
 python_version = "3.7"
