@@ -2,7 +2,7 @@
 
 import re
 import typing
-from typing import List, Optional, Pattern
+from typing import Iterator, List, Optional, Pattern
 
 from . import cli
 
@@ -79,22 +79,20 @@ class GitChangelog(cli.CliApp):
             raise GitChangelogError('Unable to execute git log', process)
         raw_log = process.stdout.strip()
         if not raw_log:
-            raise GitChangelogError('Empty output from git log. Cannot generate log', process)
+            raise GitChangelogError('Aborting due to empty output from git log. Nothing to generate', process)
         return raw_log
 
-    def _get_changelog_list(self, changelog):
-        changelog_list = []
+    def _get_changelog_list(self, changelog) -> Iterator[ChangelogEntry]:
         changelog_entries = changelog.strip(f'\n{self.ENTRY_SEPARATOR}').split(f'{self.ENTRY_SEPARATOR}\n')
+        previous_description = None
         for changelog_entry in changelog_entries:
             entry = ChangelogEntry(*changelog_entry.strip().split(self.PARAM_SEPARATOR))
             if self.previous_commit and entry.hash == self.previous_commit:
                 break
-            if not entry.description.strip():
-                continue
-            if changelog_list and entry.description == changelog_list[-1].description:
-                continue
-            changelog_list.append(entry)
-        return changelog_list
+            description = entry.description.strip()
+            if description and description != previous_description:
+                yield entry
+            previous_description = description
 
     def _format_log(self, entries):
         descriptions = []
@@ -104,7 +102,10 @@ class GitChangelog(cli.CliApp):
                 descriptions.append(f'* {description_lines[0]}')
                 for line in description_lines[1:]:
                     descriptions.append(f'  {line}')
-        return '\n'.join(descriptions) + '\n', len(descriptions)
+        formatted_log = '\n'.join(descriptions)
+        if descriptions:
+            formatted_log = formatted_log + '\n'
+        return formatted_log, len(descriptions)
 
     def _should_include_log_line(self, line):
         return line.strip() and not self.skip_pattern.match(line.strip())

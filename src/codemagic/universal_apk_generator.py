@@ -48,7 +48,7 @@ class UniversalApkGeneratorArgument(cli.Argument):
 
     KEY_ALIAS = cli.ArgumentProperties(
         flags=('--ks-key-alias',),
-        key='key_lias',
+        key='key_alias',
         description='keystore key alias',
         argparse_kwargs={'required': False, 'default': None},
     )
@@ -88,7 +88,7 @@ class UniversalApkGenerator(cli.CliApp):
             UniversalApkGeneratorArgument.KEY_ALIAS,
             UniversalApkGeneratorArgument.KEY_PASSWORD,
         )
-        signing_info_args = [getattr(cli_args, a.value.key) for a in keystore_arguments]
+        signing_info_args = [argument.from_args(cli_args) for argument in keystore_arguments]
         if any(signing_info_args) and not all(signing_info_args):
             UniversalApkGeneratorArgument.KEYSTORE_PATH.raise_argument_error(
                 'either all signing info arguments should be specified, or none of them should')
