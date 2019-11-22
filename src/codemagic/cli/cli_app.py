@@ -9,6 +9,7 @@ import os
 import pathlib
 import re
 import shlex
+import shutil
 import sys
 from functools import wraps
 from itertools import chain
@@ -17,6 +18,7 @@ from typing import NoReturn, Optional, Sequence, Iterable, Type, List, Tuple
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
 from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
+from .color import Color
 
 
 class CliAppException(Exception):
@@ -47,7 +49,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
-        sys.stderr.write(f'{cli_exception.message}\n')
+        sys.stderr.write(f'{Color.RED(cli_exception.message)}\n')
         if cli_exception.cli_process:
             sys.exit(cli_exception.cli_process.returncode)
         else:
@@ -119,17 +121,22 @@ class CliApp(metaclass=abc.ABCMeta):
         if cls.__doc__ is None:
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
-        parser = argparse.ArgumentParser(description=cls.__doc__)
+        # Patch help message width
+        os.environ['COLUMNS'] = str(shutil.get_terminal_size(fallback=(100, 24)).columns)
+        parser = argparse.ArgumentParser(description=Color.BOLD(cls.__doc__))
+
         action_parsers = parser.add_subparsers(dest='action', required=True)
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
                 help=sub_action.__doc__,
-                description=sub_action.__doc__)
+                description=Color.BOLD(sub_action.__doc__))
 
             cls._setup_default_cli_options(action_parser)
-            required_arguments = action_parser.add_argument_group(f'required arguments for "{sub_action.action_name}"')
-            optional_arguments = action_parser.add_argument_group(f'optional arguments for "{sub_action.action_name}"')
+            required_arguments = action_parser.add_argument_group(
+                f'required arguments for {Color.BOLD(sub_action.action_name)}')
+            optional_arguments = action_parser.add_argument_group(
+                f'optional arguments for {Color.BOLD(sub_action.action_name)}')
             for argument in chain(cls._CLASS_ARGUMENTS, sub_action.arguments):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
