@@ -129,7 +129,10 @@ class ArgumentProperties(NamedTuple):
         description = self.description
         try:
             default = (self.argparse_kwargs or {})['default']
-            description = f'{description} [Default: {default}]'
+            if isinstance(default, (Path, str)):
+                description = f'{description} [Default: "{default}"]'
+            elif default is not None:
+                description = f'{description} [Default: {default}]'
         except KeyError:
             pass
 
