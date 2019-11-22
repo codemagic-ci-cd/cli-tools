@@ -53,7 +53,7 @@ class GitChangelog(cli.CliApp):
     # %H - full commit hash, %cd - commit date, %an - author name, %B - subject/description
     GIT_LOG_FORMAT = PARAM_SEPARATOR.join(('%H', '%cd', '%an', '%B')) + ENTRY_SEPARATOR
 
-    def __init__(self, previous_commit: Optional[str], skip_pattern: Pattern, commit_limit: int):
+    def __init__(self, *, previous_commit: Optional[str], skip_pattern: Pattern, commit_limit: int):
         super().__init__()
         self.previous_commit = previous_commit
         self.skip_pattern = skip_pattern
