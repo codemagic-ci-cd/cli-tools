@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import argparse
-import collections
 import re
-from typing import NoReturn, Optional, Pattern
+import typing
+from typing import List, Optional, Pattern
 
 from . import cli
 
@@ -23,16 +22,28 @@ class GitChangelogArgument(cli.Argument):
     SKIP_PATTERN = cli.ArgumentProperties(
         flags=('--skip-pattern',),
         key='skip_pattern',
+        type=re.compile,
         description='Regex pattern to skip unneeded commit message lines',
         argparse_kwargs={'required': False, 'default': '^[Mm]erged? (remote-tracking )?(branch|pull request|in) .*'},
     )
 
+    COMMIT_LIMIT = cli.ArgumentProperties(
+        flags=('--commit-limit',),
+        key='commit_limit',
+        type=int,
+        description='Maxmimum number of commits to retrieve from git before filtering',
+        argparse_kwargs={'required': False, 'default': 50},
+    )
 
-ChangelogEntry = collections.namedtuple(
-    'ChangelogEntry', ('hash', 'date', 'author', 'description'), defaults=(None,) * 4)
+
+class ChangelogEntry(typing.NamedTuple):
+    hash: str = None
+    date: str = None
+    author: str = None
+    description: str = None
 
 
-@cli.common_arguments(GitChangelogArgument.PREVIOUS_COMMIT, GitChangelogArgument.SKIP_PATTERN)
+@cli.common_arguments(*GitChangelogArgument)
 class GitChangelog(cli.CliApp):
     """
     Generate a changelog text from git history
@@ -41,21 +52,15 @@ class GitChangelog(cli.CliApp):
     PARAM_SEPARATOR = '\x1f'
     # %H - full commit hash, %cd - commit date, %an - author name, %B - subject/description
     GIT_LOG_FORMAT = PARAM_SEPARATOR.join(('%H', '%cd', '%an', '%B')) + ENTRY_SEPARATOR
-    CHANGELOG_LIMIT = 50
 
-    def __init__(self, previous_commit: Optional[str] = None, skip_pattern: Optional[Pattern] = None):
+    def __init__(self, previous_commit: Optional[str], skip_pattern: Pattern, commit_limit: int):
         super().__init__()
         self.previous_commit = previous_commit
         self.skip_pattern = skip_pattern
-
-    @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
-        previous_commit = getattr(cli_args, GitChangelogArgument.PREVIOUS_COMMIT.value.key)
-        pattern = getattr(cli_args, GitChangelogArgument.SKIP_PATTERN.value.key)
-        return cls(previous_commit, re.compile(pattern))
+        self.commit_limit = commit_limit
 
     @cli.action('generate')
-    def generate(self) -> NoReturn:
+    def generate(self) -> List[str]:
         """
         Generate a changelog text from git history
         """
@@ -64,14 +69,18 @@ class GitChangelog(cli.CliApp):
         formatted_changelog, changelog_line_count = self._format_log(log_entries)
         print(formatted_changelog)
         self.logger.info(f'Generated {changelog_line_count} change log lines')
+        return log_entries
 
     def _get_raw_git_log(self):
         process = self.execute(
-            ['git', 'log', f'--pretty=format:{self.GIT_LOG_FORMAT}', f'-n {self.CHANGELOG_LIMIT}'],
+            ['git', 'log', f'--pretty=format:{self.GIT_LOG_FORMAT}', f'-n {self.commit_limit}'],
             show_output=False)
         if process.returncode != 0:
             raise GitChangelogError('Unable to execute git log', process)
-        return process.stdout
+        raw_log = process.stdout.strip()
+        if not raw_log:
+            raise GitChangelogError('Empty output from git log. Cannot generate log', process)
+        return raw_log
 
     def _get_changelog_list(self, changelog):
         changelog_list = []
@@ -95,7 +104,7 @@ class GitChangelog(cli.CliApp):
                 descriptions.append(f'* {description_lines[0]}')
                 for line in description_lines[1:]:
                     descriptions.append(f'  {line}')
-        return '\n'.join(descriptions), len(descriptions) + '\n'
+        return '\n'.join(descriptions) + '\n', len(descriptions)
 
     def _should_include_log_line(self, line):
         return line.strip() and not self.skip_pattern.match(line.strip())

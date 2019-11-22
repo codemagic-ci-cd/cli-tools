@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import collections
 import pathlib
 import tempfile
 import urllib.request
 import zipfile
-from typing import NoReturn, Optional
+from typing import List, Optional, NamedTuple
 
 from . import cli, models
 
@@ -62,23 +61,20 @@ class UniversalApkGeneratorArgument(cli.Argument):
     )
 
 
-SigningInfo = collections.namedtuple('SigningInfo', 'store_path store_pass key_alias key_pass')
+class SigningInfo(NamedTuple):
+    store_path: pathlib.Path
+    store_pass: str
+    key_alias: str
+    key_pass: str
 
 
-@cli.common_arguments(
-    UniversalApkGeneratorArgument.PATTERN,
-    UniversalApkGeneratorArgument.BUNDLETOOL_PATH,
-    UniversalApkGeneratorArgument.KEYSTORE_PATH,
-    UniversalApkGeneratorArgument.KEYSTORE_PASSWORD,
-    UniversalApkGeneratorArgument.KEY_ALIAS,
-    UniversalApkGeneratorArgument.KEY_PASSWORD
-)
+@cli.common_arguments(*UniversalApkGeneratorArgument)
 class UniversalApkGenerator(cli.CliApp):
     """
     Generate universal APK files from Android App Bundles
     """
 
-    def __init__(self, bundletool_path: pathlib.Path, pattern: pathlib.Path, signing_info: Optional[SigningInfo] = None):
+    def __init__(self, bundletool_path: pathlib.Path, pattern: pathlib.Path, signing_info: Optional[SigningInfo]):
         super().__init__()
         self.bundletool_path = bundletool_path
         self.pattern = pattern
@@ -94,12 +90,10 @@ class UniversalApkGenerator(cli.CliApp):
         )
         signing_info_args = [getattr(cli_args, a.value.key) for a in keystore_arguments]
         if any(signing_info_args) and not all(signing_info_args):
-            raise UniversalApkGeneratorError(
+            UniversalApkGeneratorArgument.KEYSTORE_PATH.raise_argument_error(
                 'either all signing info arguments should be specified, or none of them should')
 
         pattern = cli_args.pattern.expanduser()
-        if pattern.is_absolute():
-            pattern = pattern.relative_to(pattern.anchor)
 
         return UniversalApkGenerator(
             bundletool_path=cli_args.bundletool_path,
@@ -108,26 +102,41 @@ class UniversalApkGenerator(cli.CliApp):
         )
 
     @cli.action('generate')
-    def generate(self) -> NoReturn:
+    def generate(self) -> List[pathlib.Path]:
         """
         Generate universal APK files from Android App Bundles
         """
-        self.logger.info(f'Searching for files in {self.pattern.resolve()}')
+
+        aab_paths = list(self._find_paths())
+        if aab_paths:
+            self.logger.info(f'Found {len(aab_paths)} matching files')
+        else:
+            raise UniversalApkGeneratorError('Did not find any matching files from which to generate apk')
+
         with tempfile.TemporaryDirectory() as d:
             if not self.bundletool_path.exists():
                 self.bundletool_path = pathlib.Path(d) / 'bundletool.jar'
-                self.logger.info(f'Downloading bundletool to {self.bundletool_path}')
+                self.logger.info(
+                    f'Downloading bundletool from {models.Bundletool.DOWNLOAD_URL} to {self.bundletool_path}')
                 urllib.request.urlretrieve(models.Bundletool.DOWNLOAD_URL, self.bundletool_path)
 
-            did_find_paths = False
-            for path in pathlib.Path().glob(str(self.pattern)):
-                did_find_paths = True
+            apk_paths = []
+            for path in aab_paths:
                 self.logger.info(f'Generating universal apk for {path}')
-                apk_path = self._generate_apk(path)
-                self.logger.info(f'Generated {apk_path.resolve()}')
+                apk_path = self._generate_apk(path).resolve()
+                self.logger.info(f'Generated {apk_path}')
+                apk_paths.append(apk_path)
 
-        if not did_find_paths:
-            raise UniversalApkGeneratorError('Did not find any matching files to generate apk from')
+        return apk_paths
+
+    def _find_paths(self):
+        if self.pattern.is_absolute():
+            self.logger.info(f'Searching for files matching {self.pattern}')
+            # absolute globs are not supported, match them as relative to root
+            relative_pattern = self.pattern.relative_to(self.pattern.anchor)
+            return pathlib.Path(self.pattern.anchor).glob(str(relative_pattern))
+        self.logger.info(f'Searching for files matching {self.pattern.resolve()}')
+        return pathlib.Path().glob(str(self.pattern))
 
     def _generate_apk(self, path):
         apk_path = self._get_apk_path(path)

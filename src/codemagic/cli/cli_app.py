@@ -43,7 +43,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        return cls()
+        return cls(*[arg.from_args(cli_args) for arg in cls._CLASS_ARGUMENTS])
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
