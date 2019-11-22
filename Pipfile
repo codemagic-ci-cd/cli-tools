@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 mypy = "*"
+pylint = "*"
+autopep8 = "*"
 
 [packages]
 pyopenssl = "~=19.0"

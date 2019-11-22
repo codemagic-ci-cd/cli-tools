@@ -42,9 +42,8 @@ class CliApp(metaclass=abc.ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    @abc.abstractmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        return cls()
+        return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls._CLASS_ARGUMENTS})
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
