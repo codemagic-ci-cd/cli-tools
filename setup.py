@@ -8,7 +8,7 @@ def get_version():
 
 
 setup(
-    name='codemagic',
+    name='codemagic-cli-tools',
     version=get_version(),
     url='https://github.com/codemagic-ci-cd/cli-tools',
     project_urls={
@@ -19,6 +19,7 @@ setup(
     license='GNU General Public License v3.0',
     description="CLI tools used in Codemagic builds",
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
@@ -29,11 +30,11 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "storage = codemagic.storage:Storage.invoke_cli",
-            "grab = codemagic.grab:Grab.invoke_cli",
-            "keychain = codemagic.keychain:Keychain.invoke_cli",
-            "git-changelog = codemagic.git_changelog:GitChangelog.invoke_cli",
-            "universal-apk = codemagic.universal_apk_generator:UniversalApkGenerator.invoke_cli",
+            "storage = codemagic_cli_tools.storage:Storage.invoke_cli",
+            "grab = codemagic_cli_tools.grab:Grab.invoke_cli",
+            "keychain = codemagic_cli_tools.keychain:Keychain.invoke_cli",
+            "git-changelog = codemagic_cli_tools.git_changelog:GitChangelog.invoke_cli",
+            "universal-apk = codemagic_cli_tools.universal_apk_generator:UniversalApkGenerator.invoke_cli",
         ]
     },
 )
