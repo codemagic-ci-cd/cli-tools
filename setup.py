@@ -19,6 +19,7 @@ setup(
     license='GNU General Public License v3.0',
     description="CLI tools used in Codemagic builds",
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,

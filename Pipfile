@@ -7,10 +7,10 @@ verify_ssl = true
 mypy = "*"
 pylint = "*"
 autopep8 = "*"
+twine = "*"
 
 [packages]
 pyopenssl = "~=19.0"
-twine = "*"
 
 [requires]
 python_version = "3.7"
