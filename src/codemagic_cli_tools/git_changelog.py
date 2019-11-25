@@ -103,8 +103,6 @@ class GitChangelog(cli.CliApp):
                 for line in description_lines[1:]:
                     descriptions.append(f'  {line}')
         formatted_log = '\n'.join(descriptions)
-        if descriptions:
-            formatted_log = formatted_log + '\n'
         return formatted_log, len(descriptions)
 
     def _should_include_log_line(self, line):
