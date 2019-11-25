@@ -7,9 +7,12 @@ verify_ssl = true
 mypy = "*"
 pylint = "*"
 autopep8 = "*"
+typing-extensions = "*"
 
 [packages]
 pyopenssl = "~=19.0"
+pyjwt = "~=1.7.1"
+requests = "~=2.22.0"
 
 [requires]
 python_version = "3.7"
