@@ -78,7 +78,7 @@ class GitChangelog(cli.CliApp):
         if process.returncode != 0:
             raise GitChangelogError('Unable to execute git log', process)
         raw_log = process.stdout.strip()
-        if raw_log:
+        if not raw_log:
             raise GitChangelogError('Aborting due to empty output from git log. Nothing to generate')
         return raw_log
 
