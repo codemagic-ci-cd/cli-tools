@@ -1,18 +1,51 @@
 import datetime
+import enum
 import logging
 from typing import Dict, Optional, List, NewType
 
 import jwt
 import requests
 
-try:
-    from typing_extensions import Literal
-except ImportError:
-    Literal = tuple
+from .resources import App, BundleId, BundleIdPlatform, ErrorResponse, ResourceId, ResourceType
+
 
 KeyIdentifier = NewType('KeyIdentifier', str)
 IssuerId = NewType('IssuerId', str)
-AppsSortOptions = Literal['bundleId', '-bundleId', 'name', '-name', 'sku', '-sku']
+
+
+class Ordering(enum.Enum):
+    def as_param(self, reverse=False):
+        return f'{"-" if reverse else ""}{self.value}'
+
+
+class AppOrdering(Ordering):
+    BUNDLE_ID = 'bundleId'
+    NAME = 'name'
+    SKU = 'sku'
+
+
+class BundleIdOrdering(Ordering):
+    ID = 'id'
+    NAME = 'name'
+    PLATFORM = 'platform'
+    SEED_ID = 'seedId'
+
+
+class AppStoreConnectApiError(Exception):
+
+    def __init__(self, response: requests.Response):
+        self._response = response
+        try:
+            self.error_response = ErrorResponse(response.json())
+        except ValueError:
+            self.error_response = ErrorResponse.from_raw_response(response)
+
+    @property
+    def status_code(self):
+        return self._response.status_code
+
+    def __str__(self):
+        return str(self.error_response)
 
 
 class AppStoreConnectApi:
@@ -38,13 +71,12 @@ class AppStoreConnectApi:
     def jwt(self):
         if self._jwt and not self._is_token_expired():
             return self._jwt
-        payload = {
-            'iss': self._issuer_id,
-            'exp': self._get_timestamp(),
-            'aud': AppStoreConnectApi.JWT_AUDIENCE
-        }
-        headers = {'kid': self._key_identifier}
-        token = jwt.encode(payload, self._private_key, algorithm=AppStoreConnectApi.JWT_ALGORITHM, headers=headers)
+        self._logger.debug('Generate new JWT for App Store Connect')
+        token = jwt.encode(
+            self._get_jwt_payload(),
+            self._private_key,
+            algorithm=AppStoreConnectApi.JWT_ALGORITHM,
+            headers={'kid': self._key_identifier})
         self._jwt = token.decode()
         return self._jwt
 
@@ -59,27 +91,101 @@ class AppStoreConnectApi:
         self._jwt_expires = dt
         return int(dt.timestamp())
 
+    def _get_jwt_payload(self):
+        return {
+            'iss': self._issuer_id,
+            'exp': self._get_timestamp(),
+            'aud': AppStoreConnectApi.JWT_AUDIENCE
+        }
+
     @property
     def auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
     def _paginate(self, url, params=None, page_size=100) -> List[Dict]:
         params = {k: v for k, v in (params or {}).items() if v is not None}
-        payload = self._session.get(url, params={'limit': page_size, **params}).json()
+        response = self._session.get(url, params={'limit': page_size, **params}).json()
         try:
-            results = payload['data']
+            results = response['data']
         except KeyError:
             results = []
-        while 'next' in payload['links']:
-            payload = self._session.get(payload['links']['next'], params=params).json()
-            results.extend(payload['data'])
+        while 'next' in response['links']:
+            response = self._session.get(response['links']['next'], params=params).json()
+            results.extend(response['data'])
         return results
 
-    def list_apps(self, sort: Optional[AppsSortOptions] = None) -> List:
-        return self._paginate(
+    @classmethod
+    def _get_update_payload(cls, resource_id: ResourceId, resource_type: ResourceType, attributes: Dict):
+        return {
+            'data': {
+                'id': resource_id,
+                'type': resource_type.value,
+                'attributes': attributes
+            }
+        }
+
+    @classmethod
+    def _get_create_payload(cls, resource_type: ResourceType, attributes: Dict):
+        return {
+            'data': {
+                'type': resource_type.value,
+                'attributes': attributes
+            }
+        }
+
+    #####################################################
+    # App operations
+    #####################################################
+
+    def list_apps(self, ordering=AppOrdering.NAME, reverse=False) -> List[App]:
+        apps = self._paginate(
             f'{self.API_URL}/apps',
-            params={'sort': sort}
+            params={'sort': ordering.as_param(reverse)}
         )
+        return [App(app) for app in apps]
+
+    #####################################################
+    # Bundle ID operations
+    #####################################################
+
+    def register_bundle_id(self,
+                           identifier: str,
+                           name: str,
+                           platform: BundleIdPlatform,
+                           seed_id: Optional[str] = None) -> BundleId:
+        attributes = {
+            'name': name,
+            'identifier': identifier,
+            'platform': platform.value,
+        }
+        if seed_id:
+            attributes['seedId'] = seed_id
+        response = self._session.post(
+            f'{self.API_URL}/bundleIds',
+            json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes)
+        ).json()
+        return BundleId(response['data'])
+
+    def modify_bundle_id(self, resource_id: ResourceId, name: str) -> BundleId:
+        response = self._session.patch(
+            f'{self.API_URL}/bundleIds/{resource_id}',
+            json=self._get_update_payload(resource_id, ResourceType.BUNDLE_ID, {'name': name})
+        ).json()
+        return BundleId(response['data'])
+
+    def delete_bundle_id(self, resource_id: ResourceId):
+        self._session.delete(f'{self.API_URL}/bundleIds/{resource_id}')
+
+    def list_bundle_ids(self, ordering=BundleIdOrdering.NAME, reverse=False) -> List[BundleId]:
+        bundle_ids = self._paginate(
+            f'{self.API_URL}/bundleIds',
+            params={'sort': ordering.as_param(reverse)}
+        )
+        return [BundleId(bundle_id) for bundle_id in bundle_ids]
+
+    def read_bundle_id(self, resource_id: ResourceId) -> BundleId:
+        response = self._session.get(f'{self.API_URL}/bundleIds/{resource_id}').json()
+        return BundleId(response['data'])
 
 
 class AppStoreConnectApiSession(requests.Session):
@@ -109,4 +215,6 @@ class AppStoreConnectApiSession(requests.Session):
         headers.update(self.api.auth_headers)
         response = super().request(*args, **kwargs, headers=headers)
         self._log_response(response)
+        if not response.ok:
+            raise AppStoreConnectApiError(response)
         return response
