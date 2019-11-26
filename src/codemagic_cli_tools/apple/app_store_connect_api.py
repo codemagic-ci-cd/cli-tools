@@ -8,6 +8,7 @@ import requests
 
 from .resources import App
 from .resources import BundleId
+from .resources import BundleIdCapability
 from .resources import BundleIdPlatform
 from .resources import ErrorResponse
 from .resources import LinkedResourceData
@@ -40,18 +41,22 @@ class BundleIdOrdering(Ordering):
 class AppStoreConnectApiError(Exception):
 
     def __init__(self, response: requests.Response):
-        self._response = response
+        self.response = response
         try:
             self.error_response = ErrorResponse(response.json())
         except ValueError:
             self.error_response = ErrorResponse.from_raw_response(response)
 
     @property
-    def status_code(self):
-        return self._response.status_code
+    def request(self) -> requests.PreparedRequest:
+        return self.response.request
+
+    @property
+    def status_code(self) -> int:
+        return self.response.status_code
 
     def __str__(self):
-        return str(self.error_response)
+        return f'{self.request.method} {self.request.url} returned {self.response.status_code}: {self.error_response}'
 
 
 class AppStoreConnectApi:
@@ -108,9 +113,12 @@ class AppStoreConnectApi:
     def auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
-    def _paginate(self, url, params=None, page_size=100) -> List[Dict]:
+    def _paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
         params = {k: v for k, v in (params or {}).items() if v is not None}
-        response = self._session.get(url, params={'limit': page_size, **params}).json()
+        if page_size is None:
+            response = self._session.get(url, params=params).json()
+        else:
+            response = self._session.get(url, params={'limit': page_size, **params}).json()
         try:
             results = response['data']
         except KeyError:
@@ -215,6 +223,26 @@ class AppStoreConnectApi:
         else:
             raise ValueError(f'Invalid resource for listing profiles: {resource}')
         return [Profile(profile) for profile in self._paginate(url)]
+
+    def list_bundle_id_capabilility_ids(
+            self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
+        if isinstance(resource, BundleId):
+            url = resource.relationships.bundleIdCapabilities.links.itself
+        elif isinstance(resource, ResourceId):
+            url = f'{self.API_URL}/bundleIds/{resource}/relationships/bundleIdCapabilities'
+        else:
+            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+        return [LinkedResourceData(capabilility) for capabilility in self._paginate(url, page_size=None)]
+
+    def list_bundle_id_capabilities(
+            self, resource: Union[BundleId, ResourceId]) -> List[BundleIdCapability]:
+        if isinstance(resource, BundleId):
+            url = resource.relationships.bundleIdCapabilities.links.related
+        elif isinstance(resource, ResourceId):
+            url = f'{self.API_URL}/bundleIds/{resource}/bundleIdCapabilities'
+        else:
+            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+        return [BundleIdCapability(capabilility) for capabilility in self._paginate(url, page_size=None)]
 
 
 class AppStoreConnectApiSession(requests.Session):

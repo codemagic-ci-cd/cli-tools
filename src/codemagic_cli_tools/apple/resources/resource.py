@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import enum
-import json
 from dataclasses import dataclass, Field
 from datetime import datetime
 from typing import Dict, Optional, overload
@@ -97,7 +96,6 @@ class Data:
 
 @dataclass
 class Relationship:
-
     meta: Optional[PagingInformation]
     links: Links
     data: Optional[Data]
@@ -155,7 +153,7 @@ class LinkedResourceData(JsonSerializable):
         }
 
     def __str__(self):
-        return json.dumps(self.dict(), indent=4)
+        return self.json()
 
 
 class Resource(LinkedResourceData):

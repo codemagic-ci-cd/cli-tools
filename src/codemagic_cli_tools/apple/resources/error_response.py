@@ -13,6 +13,7 @@ class Error:
     title: str
     detail: str
     id: Optional[str] = None
+    source: Optional[Dict[str, str]] = None
 
     def dict(self) -> Dict:
         return self.__dict__
@@ -39,4 +40,4 @@ class ErrorResponse:
         }
 
     def __str__(self):
-        return '\n'.join(f'{error.title}: {error.detail}' for error in self.errors)
+        return '\n'.join(f'{error.title} - {error.detail}' for error in self.errors)
