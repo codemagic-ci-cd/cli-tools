@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import enum
-from collections import OrderedDict
 from typing import NamedTuple, Dict
 
-from .resource import Resource
+from .resource import Relationship, Resource
 
 
 class BundleIdPlatform(enum.Enum):
@@ -10,25 +11,47 @@ class BundleIdPlatform(enum.Enum):
     MAC_OS = 'MAC_OS'
 
 
-class BundleIdAttributes(NamedTuple):
-    name: str
-    identifier: str
-    platform: BundleIdPlatform
-    seedId: str
-
-    def dict(self) -> OrderedDict:
-        d = OrderedDict((k, v) for k, v in self._asdict().items() if v is not None)
-        d['platform'] = self.platform.value
-        return d
-
-
 class BundleId(Resource):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/bundleid
+    """
+
+    class Attributes(NamedTuple):
+        identifier: str
+        name: str
+        platform: BundleIdPlatform
+        seedId: str
+
+        @classmethod
+        def from_api_response(cls, api_response: Dict) -> BundleId.Attributes:
+            attributes = api_response['attributes']
+            return BundleId.Attributes(
+                identifier=attributes['identifier'],
+                name=attributes['name'],
+                platform=BundleIdPlatform(attributes['platform']),
+                seedId=attributes['seedId'],
+            )
+
+        def dict(self) -> Dict:
+            d = self._asdict()
+            d['platform'] = self.platform.value
+            return d
+
+    class Relationships(NamedTuple):
+        profiles: Relationship
+        bundleIdCapabilities: Relationship
+
+        @classmethod
+        def from_api_response(cls, api_response: Dict) -> BundleId.Relationships:
+            return Relationship.create_relationships(BundleId.Relationships, api_response)
+
+        def dict(self) -> Dict:
+            return {
+                'profiles': self.profiles.dict(),
+                'bundleIdCapabilities': self.bundleIdCapabilities.dict()
+            }
 
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
-        self.attributes = BundleIdAttributes(
-            name=api_response['attributes']['name'],
-            identifier=api_response['attributes']['identifier'],
-            platform=BundleIdPlatform(api_response['attributes']['platform']),
-            seedId=api_response['attributes']['seedId'],
-        )
+        self.attributes = BundleId.Attributes.from_api_response(api_response)
+        self.relationships = BundleId.Relationships.from_api_response(api_response)

@@ -1,7 +1,7 @@
 import datetime
 import enum
 import logging
-from typing import Dict, Optional, List, NewType
+from typing import Dict, Optional, List, NewType, overload, Union
 
 import jwt
 import requests
@@ -186,6 +186,24 @@ class AppStoreConnectApi:
     def read_bundle_id(self, resource_id: ResourceId) -> BundleId:
         response = self._session.get(f'{self.API_URL}/bundleIds/{resource_id}').json()
         return BundleId(response['data'])
+
+    @overload
+    def list_bundle_id_profiles(self, resource: BundleId) -> List:
+        pass
+
+    @overload
+    def list_bundle_id_profiles(self, resource: ResourceId) -> List:
+        pass
+
+    def list_bundle_id_profiles(self, resource: Union[BundleId, ResourceId]) -> List:
+        if isinstance(resource, BundleId):
+            url = BundleId.links
+        elif isinstance(resource, ResourceId):
+            url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
+        else:
+            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+
+        return []
 
 
 class AppStoreConnectApiSession(requests.Session):
