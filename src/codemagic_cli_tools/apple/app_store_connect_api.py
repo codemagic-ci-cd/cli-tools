@@ -81,7 +81,7 @@ class AppStoreConnectApi:
         self._logger = logging.getLogger(self.__class__.__name__)
 
     @property
-    def jwt(self):
+    def jwt(self) -> str:
         if self._jwt and not self._is_token_expired():
             return self._jwt
         self._logger.debug('Generate new JWT for App Store Connect')
@@ -218,32 +218,28 @@ class AppStoreConnectApi:
         response = self._session.get(f'{self.API_URL}/bundleIds/{resource_id}').json()
         return BundleId(response['data'])
 
-    def list_bundle_id_profile_ids(
-            self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
+    def list_bundle_id_profile_ids(self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         if isinstance(resource, BundleId):
             url = resource.relationships.profiles.links.itself
         else:
             url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
         return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self._paginate(url)]
 
-    def list_bundle_id_profiles(
-            self, resource: Union[BundleId, ResourceId]) -> List[Profile]:
+    def list_bundle_id_profiles(self, resource: Union[BundleId, ResourceId]) -> List[Profile]:
         if isinstance(resource, BundleId):
             url = resource.relationships.profiles.links.related
         else:
             url = f'{self.API_URL}/bundleIds/{resource}/profiles'
         return [Profile(profile) for profile in self._paginate(url)]
 
-    def list_bundle_id_capabilility_ids(
-            self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
+    def list_bundle_id_capabilility_ids(self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         if isinstance(resource, BundleId):
             url = resource.relationships.bundleIdCapabilities.links.itself
         else:
             url = f'{self.API_URL}/bundleIds/{resource}/relationships/bundleIdCapabilities'
         return [LinkedResourceData(capabilility) for capabilility in self._paginate(url, page_size=None)]
 
-    def list_bundle_id_capabilities(
-            self, resource: Union[BundleId, ResourceId]) -> List[BundleIdCapability]:
+    def list_bundle_id_capabilities(self, resource: Union[BundleId, ResourceId]) -> List[BundleIdCapability]:
         if isinstance(resource, BundleId):
             url = resource.relationships.bundleIdCapabilities.links.related
         else:
