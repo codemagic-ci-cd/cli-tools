@@ -48,12 +48,12 @@ class CliApp(metaclass=abc.ABCMeta):
         return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls._CLASS_ARGUMENTS})
 
     @classmethod
-    def _handle_cli_exception(cls, cli_exception: CliAppException) -> NoReturn:
+    def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
         sys.stderr.write(f'{Color.RED(cli_exception.message)}\n')
         if cli_exception.cli_process:
-            sys.exit(cli_exception.cli_process.returncode)
+            return cli_exception.cli_process.returncode
         else:
-            sys.exit(1)
+            return 1
 
     @classmethod
     def invoke_cli(cls):
@@ -72,9 +72,10 @@ class CliApp(metaclass=abc.ABCMeta):
             for arg_type in cli_action.arguments
         }
         try:
-            return cli_action(**action_args)
+            cli_action(**action_args)
+            return 0
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
-            cls._handle_cli_exception(cli_exception)
+            return cls._handle_cli_exception(cli_exception)
 
     @classmethod
     def get_class_cli_actions(cls) -> Iterable[ActionCallable]:

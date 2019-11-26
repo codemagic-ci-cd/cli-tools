@@ -10,7 +10,7 @@ workflows:
       - git tag -a v$(python3 setup.py --version) -m "Release v$(python3 setup.py --version)"
       - python3 setup.py bdist_wheel
       - git push "https://$GH_USER:$GH_PAT@github.com/$REPOSITORY" --tags
-      - echo "Initial release\n" > release_notes.txt
+      - echo "git-changelog and universal-apk now exit with code 0 on success\n" > release_notes.txt
       - |
         # draft a release
         set -e
