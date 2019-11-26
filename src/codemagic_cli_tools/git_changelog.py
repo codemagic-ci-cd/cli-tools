@@ -37,10 +37,10 @@ class GitChangelogArgument(cli.Argument):
 
 
 class ChangelogEntry(typing.NamedTuple):
-    hash: str = None
-    date: str = None
-    author: str = None
-    description: str = None
+    hash: str = ''
+    date: str = ''
+    author: str = ''
+    description: str = ''
 
 
 @cli.common_arguments(*GitChangelogArgument)
@@ -60,7 +60,7 @@ class GitChangelog(cli.CliApp):
         self.commit_limit = commit_limit
 
     @cli.action('generate')
-    def generate(self) -> List[str]:
+    def generate(self) -> Iterator[ChangelogEntry]:
         """
         Generate a changelog text from git history
         """
