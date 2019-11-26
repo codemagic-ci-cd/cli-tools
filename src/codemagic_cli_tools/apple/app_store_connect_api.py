@@ -104,7 +104,7 @@ class AppStoreConnectApi:
         self._jwt_expires = dt
         return int(dt.timestamp())
 
-    def _get_jwt_payload(self):
+    def _get_jwt_payload(self) -> Dict:
         return {
             'iss': self._issuer_id,
             'exp': self._get_timestamp(),
@@ -134,7 +134,7 @@ class AppStoreConnectApi:
     def _get_update_payload(cls,
                             resource_id: ResourceId,
                             resource_type: ResourceType,
-                            attributes: Dict):
+                            attributes: Dict) -> Dict:
         return {
             'data': {
                 'id': resource_id,
@@ -147,7 +147,7 @@ class AppStoreConnectApi:
     def _get_create_payload(cls,
                             resource_type: ResourceType, *,
                             attributes: Optional[Dict] = None,
-                            relationships: Optional[Dict] = None):
+                            relationships: Optional[Dict] = None) -> Dict:
         data = {'type': resource_type.value}
         if attributes is not None:
             data['attributes'] = attributes
@@ -199,7 +199,7 @@ class AppStoreConnectApi:
         response = self._session.patch(f'{self.API_URL}/bundleIds/{resource_id}', json=payload).json()
         return BundleId(response['data'])
 
-    def delete_bundle_id(self, resource: Union[LinkedResourceData, ResourceId]):
+    def delete_bundle_id(self, resource: Union[LinkedResourceData, ResourceId]) -> None:
         if isinstance(resource, LinkedResourceData):
             resource_id = resource.id
         else:
@@ -277,7 +277,7 @@ class AppStoreConnectApi:
         response = self._session.post(f'{self.API_URL}/bundleIdCapabilities', json=payload).json()
         return BundleIdCapability(response['data'])
 
-    def disable_capability(self, resource: Union[LinkedResourceData, ResourceId]):
+    def disable_capability(self, resource: Union[LinkedResourceData, ResourceId]) -> None:
         if isinstance(resource, LinkedResourceData):
             resource_id = resource.id
         else:
