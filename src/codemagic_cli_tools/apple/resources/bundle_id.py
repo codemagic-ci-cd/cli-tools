@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import enum
-from typing import NamedTuple, Dict
+from dataclasses import dataclass
+from typing import Dict
 
-from .resource import Relationship, Resource
+from .resource import AbstractRelationships
+from .resource import Relationship
+from .resource import Resource
 
 
 class BundleIdPlatform(enum.Enum):
@@ -16,7 +19,8 @@ class BundleId(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/bundleid
     """
 
-    class Attributes(NamedTuple):
+    @dataclass
+    class Attributes(Resource.Attributes):
         identifier: str
         name: str
         platform: BundleIdPlatform
@@ -33,25 +37,16 @@ class BundleId(Resource):
             )
 
         def dict(self) -> Dict:
-            d = self._asdict()
+            d = self.__dict__
             d['platform'] = self.platform.value
             return d
 
-    class Relationships(NamedTuple):
+    @dataclass
+    class Relationships(AbstractRelationships):
         profiles: Relationship
         bundleIdCapabilities: Relationship
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict) -> BundleId.Relationships:
-            return Relationship.create_relationships(BundleId.Relationships, api_response)
-
-        def dict(self) -> Dict:
-            return {
-                'profiles': self.profiles.dict(),
-                'bundleIdCapabilities': self.bundleIdCapabilities.dict()
-            }
-
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
-        self.attributes = BundleId.Attributes.from_api_response(api_response)
-        self.relationships = BundleId.Relationships.from_api_response(api_response)
+        self.attributes: BundleId.Attributes = BundleId.Attributes.from_api_response(api_response)
+        self.relationships: BundleId.Relationships = BundleId.Relationships.from_api_response(api_response)

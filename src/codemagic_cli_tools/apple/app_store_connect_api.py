@@ -1,13 +1,19 @@
 import datetime
 import enum
 import logging
-from typing import Dict, Optional, List, NewType, overload, Union
+from typing import Dict, Optional, List, NewType, Union
 
 import jwt
 import requests
 
-from .resources import App, BundleId, BundleIdPlatform, ErrorResponse, ResourceId, ResourceType
-
+from .resources import App
+from .resources import BundleId
+from .resources import BundleIdPlatform
+from .resources import ErrorResponse
+from .resources import LinkedResourceData
+from .resources import Profile
+from .resources import ResourceId
+from .resources import ResourceType
 
 KeyIdentifier = NewType('KeyIdentifier', str)
 IssuerId = NewType('IssuerId', str)
@@ -115,7 +121,10 @@ class AppStoreConnectApi:
         return results
 
     @classmethod
-    def _get_update_payload(cls, resource_id: ResourceId, resource_type: ResourceType, attributes: Dict):
+    def _get_update_payload(cls,
+                            resource_id: ResourceId,
+                            resource_type: ResourceType,
+                            attributes: Dict):
         return {
             'data': {
                 'id': resource_id,
@@ -187,23 +196,25 @@ class AppStoreConnectApi:
         response = self._session.get(f'{self.API_URL}/bundleIds/{resource_id}').json()
         return BundleId(response['data'])
 
-    @overload
-    def list_bundle_id_profiles(self, resource: BundleId) -> List:
-        pass
-
-    @overload
-    def list_bundle_id_profiles(self, resource: ResourceId) -> List:
-        pass
-
-    def list_bundle_id_profiles(self, resource: Union[BundleId, ResourceId]) -> List:
+    def list_bundle_id_profile_ids(
+            self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         if isinstance(resource, BundleId):
-            url = BundleId.links
+            url = resource.relationships.profiles.links.itself
         elif isinstance(resource, ResourceId):
             url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
         else:
             raise ValueError(f'Invalid resource for listing profiles: {resource}')
+        return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self._paginate(url)]
 
-        return []
+    def list_bundle_id_profiles(
+            self, resource: Union[BundleId, ResourceId]) -> List[Profile]:
+        if isinstance(resource, BundleId):
+            url = resource.relationships.profiles.links.related
+        elif isinstance(resource, ResourceId):
+            url = f'{self.API_URL}/bundleIds/{resource}/profiles'
+        else:
+            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+        return [Profile(profile) for profile in self._paginate(url)]
 
 
 class AppStoreConnectApiSession(requests.Session):

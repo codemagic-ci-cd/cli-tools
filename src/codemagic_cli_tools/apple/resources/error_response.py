@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-from collections import OrderedDict
-from typing import NamedTuple, Dict, Optional
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 from requests import Response
 
 
-class Error(NamedTuple):
+@dataclass
+class Error:
     code: str
     status: str
     title: str
     detail: str
     id: Optional[str] = None
 
-    def dict(self) -> OrderedDict:
-        return self._asdict()
+    def dict(self) -> Dict:
+        return self.__dict__
 
 
 class ErrorResponse:
@@ -32,8 +33,10 @@ class ErrorResponse:
             detail=f'Request failed with status code {response.status_code}'))
         return error_response
 
-    def dict(self) -> OrderedDict:
-        return OrderedDict(error=[e.dict() for e in self.errors])
+    def dict(self) -> Dict:
+        return {
+            'errors': [e.dict() for e in self.errors]
+        }
 
     def __str__(self):
         return '\n'.join(f'{error.title}: {error.detail}' for error in self.errors)

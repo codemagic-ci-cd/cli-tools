@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from typing import NamedTuple, Dict
+from dataclasses import dataclass
+from typing import Dict
 
-from .resource import Resource, Relationship
+from .resource import AbstractRelationships
+from .resource import Relationship
+from .resource import Resource
 
 
 class App(Resource):
@@ -10,7 +13,8 @@ class App(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/app
     """
 
-    class Attributes(NamedTuple):
+    @dataclass
+    class Attributes(Resource.Attributes):
         name: str
         bundleId: str
         sku: str
@@ -21,10 +25,11 @@ class App(Resource):
             attributes = api_response['attributes']
             return App.Attributes(**attributes)
 
-        def dict(self) -> Dict:
-            return self._asdict()
+        def dict(self) -> Dict[str, str]:
+            return self.__dict__
 
-    class Relationships(NamedTuple):
+    @dataclass
+    class Relationships(AbstractRelationships):
         betaLicenseAgreement: Relationship
         preReleaseVersions: Relationship
         betaAppLocalizations: Relationship
@@ -33,14 +38,7 @@ class App(Resource):
         builds: Relationship
         betaAppReviewDetail: Relationship
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict) -> App.Relationships:
-            return Relationship.create_relationships(App.Relationships, api_response)
-
-        def dict(self) -> Dict:
-            return {field_name: getattr(self, field_name).dict() for field_name in self._fields}
-
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
-        self.attributes = App.Attributes.from_api_response(api_response)
-        self.relationships = App.Relationships.from_api_response(api_response)
+        self.attributes: App.Attributes = App.Attributes.from_api_response(api_response)
+        self.relationships: App.Relationships = App.Relationships.from_api_response(api_response)
