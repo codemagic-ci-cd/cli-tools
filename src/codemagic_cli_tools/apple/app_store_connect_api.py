@@ -10,6 +10,8 @@ from .resources import App
 from .resources import BundleId
 from .resources import BundleIdCapability
 from .resources import BundleIdPlatform
+from .resources import CapabilitySetting
+from .resources import CapabilityType
 from .resources import ErrorResponse
 from .resources import LinkedResourceData
 from .resources import Profile
@@ -142,17 +144,21 @@ class AppStoreConnectApi:
         }
 
     @classmethod
-    def _get_create_payload(cls, resource_type: ResourceType, attributes: Dict):
-        return {
-            'data': {
-                'type': resource_type.value,
-                'attributes': attributes
-            }
-        }
+    def _get_create_payload(cls,
+                            resource_type: ResourceType, *,
+                            attributes: Optional[Dict] = None,
+                            relationships: Optional[Dict] = None):
+        data = {'type': resource_type.value}
+        if attributes is not None:
+            data['attributes'] = attributes
+        if relationships is not None:
+            data['relationships'] = relationships
+        return {'data': data}
 
-    #####################################################
-    # App operations
-    #####################################################
+    # ---------------------------------------------------------------------------- #
+    # App operations                                                               #
+    # https://developer.apple.com/documentation/appstoreconnectapi/testflight/apps #
+    # ---------------------------------------------------------------------------- #
 
     def list_apps(self, ordering=AppOrdering.NAME, reverse=False) -> List[App]:
         apps = self._paginate(
@@ -161,9 +167,10 @@ class AppStoreConnectApi:
         )
         return [App(app) for app in apps]
 
-    #####################################################
-    # Bundle ID operations
-    #####################################################
+    # ----------------------------------------------------------------------- #
+    # Bundle ID operations                                                    #
+    # https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids #
+    # ----------------------------------------------------------------------- #
 
     def register_bundle_id(self,
                            identifier: str,
@@ -179,28 +186,35 @@ class AppStoreConnectApi:
             attributes['seedId'] = seed_id
         response = self._session.post(
             f'{self.API_URL}/bundleIds',
-            json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes)
+            json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes=attributes)
         ).json()
         return BundleId(response['data'])
 
-    def modify_bundle_id(self, resource_id: ResourceId, name: str) -> BundleId:
-        response = self._session.patch(
-            f'{self.API_URL}/bundleIds/{resource_id}',
-            json=self._get_update_payload(resource_id, ResourceType.BUNDLE_ID, {'name': name})
-        ).json()
+    def modify_bundle_id(self, resource: Union[LinkedResourceData, ResourceId], name: str) -> BundleId:
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
+        payload = self._get_update_payload(resource_id, ResourceType.BUNDLE_ID, {'name': name})
+        response = self._session.patch(f'{self.API_URL}/bundleIds/{resource_id}', json=payload).json()
         return BundleId(response['data'])
 
-    def delete_bundle_id(self, resource_id: ResourceId):
+    def delete_bundle_id(self, resource: Union[LinkedResourceData, ResourceId]):
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
         self._session.delete(f'{self.API_URL}/bundleIds/{resource_id}')
 
     def list_bundle_ids(self, ordering=BundleIdOrdering.NAME, reverse=False) -> List[BundleId]:
-        bundle_ids = self._paginate(
-            f'{self.API_URL}/bundleIds',
-            params={'sort': ordering.as_param(reverse)}
-        )
+        bundle_ids = self._paginate(f'{self.API_URL}/bundleIds', params={'sort': ordering.as_param(reverse)})
         return [BundleId(bundle_id) for bundle_id in bundle_ids]
 
-    def read_bundle_id(self, resource_id: ResourceId) -> BundleId:
+    def read_bundle_id(self, resource: Union[LinkedResourceData, ResourceId]) -> BundleId:
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
         response = self._session.get(f'{self.API_URL}/bundleIds/{resource_id}').json()
         return BundleId(response['data'])
 
@@ -208,41 +222,71 @@ class AppStoreConnectApi:
             self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         if isinstance(resource, BundleId):
             url = resource.relationships.profiles.links.itself
-        elif isinstance(resource, ResourceId):
-            url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
         else:
-            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+            url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
         return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self._paginate(url)]
 
     def list_bundle_id_profiles(
             self, resource: Union[BundleId, ResourceId]) -> List[Profile]:
         if isinstance(resource, BundleId):
             url = resource.relationships.profiles.links.related
-        elif isinstance(resource, ResourceId):
-            url = f'{self.API_URL}/bundleIds/{resource}/profiles'
         else:
-            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+            url = f'{self.API_URL}/bundleIds/{resource}/profiles'
         return [Profile(profile) for profile in self._paginate(url)]
 
     def list_bundle_id_capabilility_ids(
             self, resource: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         if isinstance(resource, BundleId):
             url = resource.relationships.bundleIdCapabilities.links.itself
-        elif isinstance(resource, ResourceId):
-            url = f'{self.API_URL}/bundleIds/{resource}/relationships/bundleIdCapabilities'
         else:
-            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+            url = f'{self.API_URL}/bundleIds/{resource}/relationships/bundleIdCapabilities'
         return [LinkedResourceData(capabilility) for capabilility in self._paginate(url, page_size=None)]
 
     def list_bundle_id_capabilities(
             self, resource: Union[BundleId, ResourceId]) -> List[BundleIdCapability]:
         if isinstance(resource, BundleId):
             url = resource.relationships.bundleIdCapabilities.links.related
-        elif isinstance(resource, ResourceId):
-            url = f'{self.API_URL}/bundleIds/{resource}/bundleIdCapabilities'
         else:
-            raise ValueError(f'Invalid resource for listing profiles: {resource}')
+            url = f'{self.API_URL}/bundleIds/{resource}/bundleIdCapabilities'
         return [BundleIdCapability(capabilility) for capabilility in self._paginate(url, page_size=None)]
+
+    # ----------------------------------------------------------------------------------- #
+    # Bundle ID Capabilities operations                                                   #
+    # https://developer.apple.com/documentation/appstoreconnectapi/bundle_id_capabilities #
+    # ----------------------------------------------------------------------------------- #
+
+    def enable_capability(self,
+                          capability_type: CapabilityType,
+                          bundle_id_resource: Union[ResourceId, BundleId],
+                          capability_settings: Optional[CapabilitySetting] = None) -> BundleIdCapability:
+        if isinstance(bundle_id_resource, BundleId):
+            bundle_id = bundle_id_resource.id
+        else:
+            bundle_id = bundle_id_resource
+
+        attributes = {'capabilityType': capability_type.value}
+        if capability_settings is not None:
+            attributes['settings'] = capability_settings.dict()
+        relationships = {
+            'bundleId': {
+                'data': {'id': bundle_id, 'type': ResourceType.BUNDLE_ID.value}
+            }
+        }
+        payload = self._get_create_payload(
+            ResourceType.BUNDLE_ID_CAPABILITIES, attributes=attributes, relationships=relationships)
+        response = self._session.post(f'{self.API_URL}/bundleIdCapabilities', json=payload).json()
+        return BundleIdCapability(response['data'])
+
+    def disable_capability(self, resource: Union[LinkedResourceData, ResourceId]):
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
+        self._session.delete(f'{self.API_URL}/bundleIdCapabilities/{resource_id}')
+
+    def modify_capability_configuration(self):
+        # TODO
+        raise NotImplemented
 
 
 class AppStoreConnectApiSession(requests.Session):

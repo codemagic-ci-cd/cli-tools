@@ -149,5 +149,5 @@ class BundleIdCapability(Resource):
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
         self.attributes: BundleIdCapability.Attributes = BundleIdCapability.Attributes.from_api_response(api_response)
-        self.relationships: BundleIdCapability.Relationships = BundleIdCapability.Relationships.from_api_response(
-            api_response)
+        self.relationships: BundleIdCapability.Relationships = \
+            BundleIdCapability.Relationships.from_api_response(api_response)
