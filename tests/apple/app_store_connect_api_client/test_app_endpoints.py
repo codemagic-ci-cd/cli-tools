@@ -1,14 +1,12 @@
-import unittest
-
 import pytest
 
 from apple.resources import App
 from apple.resources import ResourceType
+from tests.apple.app_store_connect_api_client.endpoint_tests_base import EndpointTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-@pytest.mark.usefixtures('class_api_client', 'class_logger')
-class AppEndpointsTest(unittest.TestCase):
+class AppEndpointsTest(EndpointTestsBase):
 
     def test_list_apps(self):
         apps = self.api_client.list_apps()

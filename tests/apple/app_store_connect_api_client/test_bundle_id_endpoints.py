@@ -1,4 +1,3 @@
-import unittest
 import uuid
 
 import pytest
@@ -10,13 +9,13 @@ from apple.resources import LinkedResourceData
 from apple.resources import Profile
 from apple.resources import ResourceId
 from apple.resources import ResourceType
+from tests.apple.app_store_connect_api_client.endpoint_tests_base import EndpointTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-@pytest.mark.usefixtures('class_api_client', 'class_logger')
-class BundleIdEndpointsTest(unittest.TestCase):
+class BundleIdEndpointsTest(EndpointTestsBase):
 
     def test_register_bundle_id(self):
         bundle_id = self.api_client.register_bundle_id(

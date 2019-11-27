@@ -4,6 +4,8 @@ from .bundle_id import BundleIdPlatform
 from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
 from .bundle_id_capability import CapabilityType
+from .certificate import Certificate
+from .certificate import CertificateType
 from .error_response import ErrorResponse
 from .profile import Profile
 from .resource import LinkedResourceData

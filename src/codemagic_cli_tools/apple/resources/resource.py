@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import abc
 import enum
-from dataclasses import dataclass, Field
+from dataclasses import dataclass
+from dataclasses import Field
+from dataclasses import is_dataclass
 from datetime import datetime
 from typing import Dict, Optional, overload
 
@@ -17,6 +19,7 @@ class ResourceType(enum.Enum):
     APP = 'apps'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
+    CERTIFICATES = 'certificates'
     PROFILES = 'profiles'
 
 
@@ -160,8 +163,20 @@ class Resource(LinkedResourceData):
     class Attributes(metaclass=abc.ABCMeta):
         __dataclass_fields__: Dict[str, Field] = {}
 
+        @classmethod
+        def from_api_response(cls, api_response: Dict):
+            return cls(**api_response['attributes'])
+
         def dict(self):
-            return {}
+            d = self.__dict__
+            for k, v in d.items():
+                if isinstance(v, enum.Enum):
+                    d[k] = v.value
+                elif isinstance(v, datetime):
+                    d[k] = Resource.to_iso_8601(v)
+                elif is_dataclass(v):
+                    d[k] = v.dict()
+            return d
 
     def __init__(self, api_response: Dict):
         super().__init__(api_response)

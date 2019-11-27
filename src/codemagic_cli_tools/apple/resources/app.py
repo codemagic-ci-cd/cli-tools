@@ -20,14 +20,6 @@ class App(Resource):
         sku: str
         primaryLocale: str
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict) -> App.Attributes:
-            attributes = api_response['attributes']
-            return App.Attributes(**attributes)
-
-        def dict(self) -> Dict[str, str]:
-            return self.__dict__
-
     @dataclass
     class Relationships(AbstractRelationships):
         betaLicenseAgreement: Relationship

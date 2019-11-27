@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import logging
 from datetime import datetime
@@ -17,6 +19,8 @@ from .resources import BundleIdCapability
 from .resources import BundleIdPlatform
 from .resources import CapabilitySetting
 from .resources import CapabilityType
+from .resources import Certificate
+from .resources import CertificateType
 from .resources import ErrorResponse
 from .resources import LinkedResourceData
 from .resources import Profile
@@ -43,6 +47,13 @@ class BundleIdOrdering(Ordering):
     NAME = 'name'
     PLATFORM = 'platform'
     SEED_ID = 'seedId'
+
+
+class CertificateOrdering(Ordering):
+    CERTIFICATE_TYPE = 'certificateType'
+    DISPLAY_NAME = 'displayName'
+    ID = 'id'
+    SERIAL_NUMBER = 'serialNumber'
 
 
 class AppStoreConnectApiError(Exception):
@@ -349,10 +360,22 @@ class AppStoreConnectApiClient:
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
 
-    def list_certificates(self):
+    def list_certificates(self,
+                          filter_certificate_type: Optional[CertificateType] = None,
+                          filter_display_name: Optional[str] = None,
+                          ordering=CertificateOrdering.DISPLAY_NAME,
+                          reverse=False) -> List[Certificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
         """
+        params = {'sort': ordering.as_param(reverse)}
+        if filter_certificate_type is not None:
+            params['filter[certificateType]'] = filter_certificate_type.value
+        if filter_display_name is not None:
+            params['filter[displayName]'] = filter_display_name
+
+        certificates = self._paginate(f'{self.API_URL}/certificates', params=params)
+        return [Certificate(certificate) for certificate in certificates]
 
     def read_certificate(self):
         """

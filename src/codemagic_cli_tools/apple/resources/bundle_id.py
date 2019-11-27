@@ -26,20 +26,9 @@ class BundleId(Resource):
         platform: BundleIdPlatform
         seedId: str
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict) -> BundleId.Attributes:
-            attributes = api_response['attributes']
-            return BundleId.Attributes(
-                identifier=attributes['identifier'],
-                name=attributes['name'],
-                platform=BundleIdPlatform(attributes['platform']),
-                seedId=attributes['seedId'],
-            )
-
-        def dict(self) -> Dict:
-            d = self.__dict__
-            d['platform'] = self.platform.value
-            return d
+        def __post_init__(self):
+            if isinstance(self.platform, str):
+                self.platform = BundleIdPlatform(self.platform)
 
     @dataclass
     class Relationships(AbstractRelationships):

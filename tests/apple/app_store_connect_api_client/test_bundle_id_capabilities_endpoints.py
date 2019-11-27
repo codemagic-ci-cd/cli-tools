@@ -1,5 +1,3 @@
-import unittest
-
 import pytest
 
 from apple.app_store_connect_api import AppStoreConnectApiError
@@ -7,13 +5,13 @@ from apple.resources import BundleIdCapability
 from apple.resources import CapabilityType
 from apple.resources import ResourceId
 from apple.resources import ResourceType
+from tests.apple.app_store_connect_api_client.endpoint_tests_base import EndpointTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-@pytest.mark.usefixtures('class_api_client', 'class_logger')
-class BundleIdCapabilitiesEndpointsTest(unittest.TestCase):
+class BundleIdCapabilitiesEndpointsTest(EndpointTestsBase):
 
     def test_enable_capability(self):
         capability_type = CapabilityType.ACCESS_WIFI_INFORMATION
@@ -27,8 +25,9 @@ class BundleIdCapabilitiesEndpointsTest(unittest.TestCase):
         self.api_client.disable_capability(capability_id)
 
     def test_disable_capability_does_not_exist(self):
+        capability_id = ResourceId('F88J43FA9J_ACCESS_WIFI_INFORMATION')
         with pytest.raises(AppStoreConnectApiError) as api_error:
-            self.api_client.disable_capability(CapabilityType.DATA_PROTECTION)
+            self.api_client.disable_capability(capability_id)
         error = api_error.value.error_response.errors[0]
         assert error.code == 'NOT_FOUND'
         assert error.status == '404'

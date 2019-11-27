@@ -46,35 +46,17 @@ class Profile(Resource):
         profileType: ProfileType
         expirationDate: datetime
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict[str, Dict[str, str]]) -> Profile.Attributes:
-            attributes = api_response['attributes']
-            return Profile.Attributes(
-                name=attributes['name'],
-                platform=BundleIdPlatform(attributes['platform']),
-                profileContent=attributes['profileContent'],
-                uuid=attributes['uuid'],
-                createdDate=Resource.from_iso_8601(attributes['createdDate']),
-                profileState=ProfileState(attributes['profileState']),
-                profileType=ProfileType(attributes['profileType']),
-                expirationDate=Resource.from_iso_8601(attributes['expirationDate']),
-            )
-
-        def _get_str_value(self, field_name: str) -> Optional[str]:
-            field_value = getattr(self, field_name)
-            if field_value is None:
-                return field_value
-            elif isinstance(field_value, str):
-                return field_value
-            elif isinstance(field_value, enum.Enum):
-                return field_value.value
-            elif isinstance(field_value, datetime):
-                return Resource.to_iso_8601(field_value)
-            else:
-                raise ValueError(f'Invalid value {field_value} on field {field_name}')
-
-        def dict(self) -> Dict[str, Optional[str]]:
-            return {field: self._get_str_value(field) for field in self.__dataclass_fields__}
+        def __post_init__(self):
+            if isinstance(self.platform, str):
+                self.platform = BundleIdPlatform(self.platform)
+            if isinstance(self.createdDate, str):
+                self.createdDate = Resource.from_iso_8601(self.createdDate)
+            if isinstance(self.profileState, str):
+                self.profileState = ProfileState(self.profileState)
+            if isinstance(self.profileType, str):
+                self.profileType = ProfileType(self.profileType)
+            if isinstance(self.expirationDate, str):
+                self.expirationDate = Resource.from_iso_8601(self.expirationDate)
 
     @dataclass
     class Relationships(AbstractRelationships):

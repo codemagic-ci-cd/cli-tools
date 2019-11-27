@@ -125,22 +125,11 @@ class BundleIdCapability(Resource):
         capabilityType: CapabilityType
         settings: Optional[CapabilitySetting]
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict) -> BundleIdCapability.Attributes:
-            attributes = api_response['attributes']
-            return BundleIdCapability.Attributes(
-                capabilityType=CapabilityType(attributes['capabilityType']),
-                settings=CapabilitySetting.from_api_response(attributes['settings']),
-            )
-
-        def dict(self) -> Dict:
-            settings = None
-            if self.settings is not None:
-                settings = self.settings.dict()
-            return {
-                'capabilityType': self.capabilityType.value,
-                'settings': settings
-            }
+        def __post_init__(self):
+            if isinstance(self.capabilityType, str):
+                self.capabilityType = CapabilityType(self.capabilityType)
+            if isinstance(self.settings, dict):
+                self.settings = CapabilitySetting.from_api_response(self.settings)
 
     @dataclass
     class Relationships(AbstractRelationships):

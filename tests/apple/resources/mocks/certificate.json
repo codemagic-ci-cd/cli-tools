@@ -1,0 +1,17 @@
+{
+    "type": "certificates",
+    "id": "32R6CKZDXN",
+    "attributes": {
+        "serialNumber": "E1F6136D44155670",
+        "certificateContent": "...",
+        "displayName": "Code Magic",
+        "name": "iOS Development: Code Magic",
+        "csrContent": null,
+        "platform": "IOS",
+        "expirationDate": "2020-02-12T13:17:50.000+0000",
+        "certificateType": "IOS_DEVELOPMENT"
+    },
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/certificates/32R6CKZDXN"
+    }
+}
