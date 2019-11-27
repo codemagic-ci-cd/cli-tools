@@ -377,10 +377,16 @@ class AppStoreConnectApiClient:
         certificates = self._paginate(f'{self.API_URL}/certificates', params=params)
         return [Certificate(certificate) for certificate in certificates]
 
-    def read_certificate(self):
+    def read_certificate(self, resource: Union[LinkedResourceData, ResourceId]) -> Certificate:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_certificate_information
         """
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
+        response = self._session.get(f'{self.API_URL}/certificates/{resource_id}').json()
+        return Certificate(response['data'])
 
     def revoke_certificate(self):
         """
