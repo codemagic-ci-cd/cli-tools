@@ -22,6 +22,7 @@ class Error:
 class ErrorResponse:
 
     def __init__(self, api_response: Dict):
+        self._raw = api_response
         self.errors = [Error(**error) for error in api_response['errors']]
 
     @classmethod

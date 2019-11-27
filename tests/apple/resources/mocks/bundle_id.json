@@ -1,0 +1,39 @@
+{
+    "attributes": {
+        "identifier": "io.codemagic.banaan",
+        "name": "banaan",
+        "platform": "IOS",
+        "seedId": "X8NNQ9CYL2"
+    },
+    "id": "NLRN94JD59",
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/bundleIds/NLRN94JD59"
+    },
+    "relationships": {
+        "bundleIdCapabilities": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/bundleIds/NLRN94JD59/bundleIdCapabilities",
+                "self": "https://api.appstoreconnect.apple.com/v1/bundleIds/NLRN94JD59/relationships/bundleIdCapabilities"
+            },
+            "meta": {
+                "paging": {
+                    "limit": 2147483647,
+                    "total": 0
+                }
+            }
+        },
+        "profiles": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/bundleIds/NLRN94JD59/profiles",
+                "self": "https://api.appstoreconnect.apple.com/v1/bundleIds/NLRN94JD59/relationships/profiles"
+            },
+            "meta": {
+                "paging": {
+                    "limit": 2147483647,
+                    "total": 0
+                }
+            }
+        }
+    },
+    "type": "bundleIds"
+}

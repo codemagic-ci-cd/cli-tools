@@ -1,0 +1,57 @@
+{
+    "attributes": {
+        "bundleId": "io.codemagic.banaan",
+        "name": "Banaan Codemagic",
+        "primaryLocale": "en-GB",
+        "sku": "banaanike"
+    },
+    "id": "1481211155",
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155"
+    },
+    "relationships": {
+        "betaAppLocalizations": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppLocalizations",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppLocalizations"
+            }
+        },
+        "betaAppReviewDetail": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppReviewDetail",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppReviewDetail"
+            }
+        },
+        "betaGroups": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaGroups",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaGroups"
+            }
+        },
+        "betaLicenseAgreement": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaLicenseAgreement",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaLicenseAgreement"
+            }
+        },
+        "betaTesters": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaTesters",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaTesters"
+            }
+        },
+        "builds": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/builds",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/builds"
+            }
+        },
+        "preReleaseVersions": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preReleaseVersions",
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preReleaseVersions"
+            }
+        }
+    },
+    "type": "apps"
+}

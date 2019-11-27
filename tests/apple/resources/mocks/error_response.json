@@ -1,0 +1,14 @@
+{
+    "errors": [
+        {
+            "code": "NOT_FOUND",
+            "detail": "There is no resource of type 'bundleIds' with id 'NLRN94JD591'",
+            "id": "d5580cb9-8291-4fbf-b40f-79847cc36e61",
+            "source": {
+                "pointer": "data/id"
+            },
+            "status": "404",
+            "title": "The specified resource does not exist"
+        }
+    ]
+}

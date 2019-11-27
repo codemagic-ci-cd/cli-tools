@@ -10,6 +10,7 @@ autopep8 = "*"
 typing-extensions = "*"
 twine = "*"
 ipdb = "*"
+pytest = "*"
 
 [packages]
 pyopenssl = "~=19.0"

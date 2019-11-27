@@ -26,8 +26,11 @@ setup(
     scripts=['bin/code_signing_manager.rb'],
     python_requires=">=3.7",
     install_requires=[
-        "pyopenssl>=19.0", 'PyJWT>=1.7.1', 'requests'
+        "pyopenssl>=19.0", 'PyJWT>=1.7.1', 'requests>=2.22.0'
     ],
+    extras_require={
+        'dev': ['pytest']
+    },
     entry_points={
         "console_scripts": [
             "storage = codemagic_cli_tools.storage:Storage.invoke_cli",

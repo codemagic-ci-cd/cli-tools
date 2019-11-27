@@ -1,7 +1,12 @@
-import datetime
 import enum
 import logging
-from typing import Dict, Optional, List, NewType, Union
+from datetime import datetime
+from datetime import timedelta
+from typing import Dict
+from typing import List
+from typing import NewType
+from typing import Optional
+from typing import Union
 
 import jwt
 import requests
@@ -61,7 +66,7 @@ class AppStoreConnectApiError(Exception):
         return f'{self.request.method} {self.request.url} returned {self.response.status_code}: {self.error_response}'
 
 
-class AppStoreConnectApi:
+class AppStoreConnectApiClient:
     JWT_AUDIENCE = 'appstoreconnect-v1'
     JWT_ALGORITHM = 'ES256'
     API_URL = 'https://api.appstoreconnect.apple.com/v1'
@@ -76,7 +81,7 @@ class AppStoreConnectApi:
         self._issuer_id = issuer_id
         self._private_key = private_key
         self._jwt: Optional[str] = None
-        self._jwt_expires: datetime.datetime = datetime.datetime.now()
+        self._jwt_expires: datetime = datetime.now()
         self._session = AppStoreConnectApiSession(self)
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -88,18 +93,18 @@ class AppStoreConnectApi:
         token = jwt.encode(
             self._get_jwt_payload(),
             self._private_key,
-            algorithm=AppStoreConnectApi.JWT_ALGORITHM,
+            algorithm=AppStoreConnectApiClient.JWT_ALGORITHM,
             headers={'kid': self._key_identifier})
         self._jwt = token.decode()
         return self._jwt
 
     def _is_token_expired(self) -> bool:
-        delta = datetime.timedelta(seconds=30)
-        return datetime.datetime.now() - delta > self._jwt_expires
+        delta = timedelta(seconds=30)
+        return datetime.now() - delta > self._jwt_expires
 
     def _get_timestamp(self) -> int:
-        now = datetime.datetime.now()
-        delta = datetime.timedelta(minutes=19)
+        now = datetime.now()
+        delta = timedelta(minutes=19)
         dt = now + delta
         self._jwt_expires = dt
         return int(dt.timestamp())
@@ -108,7 +113,7 @@ class AppStoreConnectApi:
         return {
             'iss': self._issuer_id,
             'exp': self._get_timestamp(),
-            'aud': AppStoreConnectApi.JWT_AUDIENCE
+            'aud': AppStoreConnectApiClient.JWT_AUDIENCE
         }
 
     @property
@@ -287,7 +292,7 @@ class AppStoreConnectApi:
 
 class AppStoreConnectApiSession(requests.Session):
 
-    def __init__(self, app_store_connect_api: AppStoreConnectApi):
+    def __init__(self, app_store_connect_api: AppStoreConnectApiClient):
         super().__init__()
         self.api = app_store_connect_api
         self._logger = logging.getLogger(self.__class__.__name__)
