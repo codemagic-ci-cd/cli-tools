@@ -9,7 +9,7 @@ NOW = datetime(year=2019, month=8, day=20)
 UTC_NOW = datetime(year=2019, month=8, day=20, tzinfo=timezone.utc)
 
 
-@pytest.fixture(autouse=False)
+@pytest.fixture
 def freeze_now():
     with mock.patch('apple.app_store_connect_api.datetime') as mock_now:
         mock_now.now.return_value = NOW

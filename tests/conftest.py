@@ -10,32 +10,15 @@ from apple.app_store_connect_api import IssuerId
 from apple.app_store_connect_api import KeyIdentifier
 
 
-@pytest.fixture(autouse=False)
-def _apple_api_key_identifier() -> KeyIdentifier:
-    return KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER'])
-
-
-@pytest.fixture(autouse=False)
-def _apple_api_issuer_id() -> IssuerId:
-    return IssuerId(os.environ['TEST_APPLE_ISSUER_ID'])
-
-
-@pytest.fixture(autouse=False)
-def _apple_api_private_key() -> str:
+def _api_client() -> AppStoreConnectApiClient:
     key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
-    return key_path.expanduser().read_text()
-
-
-@pytest.fixture(autouse=False)
-def api_client(_apple_api_key_identifier, _apple_api_issuer_id, _apple_api_private_key) -> AppStoreConnectApiClient:
     return AppStoreConnectApiClient(
-        _apple_api_key_identifier,
-        _apple_api_issuer_id,
-        _apple_api_private_key)
+        KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
+        IssuerId(os.environ['TEST_APPLE_ISSUER_ID']),
+        key_path.expanduser().read_text())
 
 
-@pytest.fixture(autouse=False)
-def _logger() -> logging.Logger:
+def _logger():
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)s - %(message)s', '%m-%d %H:%M:%S')
@@ -49,3 +32,23 @@ def _logger() -> logging.Logger:
     requests_logger.addHandler(handler)
     requests_logger.setLevel(logging.ERROR)
     return logger
+
+
+@pytest.fixture
+def api_client() -> AppStoreConnectApiClient:
+    return _api_client()
+
+
+@pytest.fixture(scope='class')
+def class_api_client(request):
+    request.cls.api_client = _api_client()
+
+
+@pytest.fixture
+def logger() -> logging.Logger:
+    return _logger()
+
+
+@pytest.fixture(scope='class')
+def class_logger(request):
+    request.cls.logger = _logger()
