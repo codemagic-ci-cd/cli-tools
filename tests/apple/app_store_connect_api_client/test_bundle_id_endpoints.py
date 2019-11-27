@@ -16,7 +16,7 @@ CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
 @pytest.mark.usefixtures('class_api_client', 'class_logger')
-class AppEndpointsTest(unittest.TestCase):
+class BundleIdEndpointsTest(unittest.TestCase):
 
     def test_register_bundle_id(self):
         bundle_id = self.api_client.register_bundle_id(
