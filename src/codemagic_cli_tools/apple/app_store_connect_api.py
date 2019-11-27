@@ -339,6 +339,31 @@ class AppStoreConnectApiClient:
         response = self._session.patch(f'{self.API_URL}/bundleIdCapabilities/{resource_id}', json=payload).json()
         return BundleIdCapability(response['data'])
 
+    # ------------------------------------------------------------------------- #
+    # Certificates operations                                                   #
+    # https://developer.apple.com/documentation/appstoreconnectapi/certificates #
+    # ------------------------------------------------------------------------- #
+
+    def create_certificate(self):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
+        """
+
+    def list_certificates(self):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
+        """
+
+    def read_certificate(self):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_certificate_information
+        """
+
+    def revoke_certificate(self):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/revoke_a_certificate
+        """
+
 
 class AppStoreConnectApiSession(requests.Session):
 
