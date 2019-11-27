@@ -26,7 +26,7 @@ def _logger():
 
     logger = logging.getLogger()
     logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     requests_logger = logging.getLogger('requests')
     requests_logger.addHandler(handler)
@@ -51,4 +51,6 @@ def logger() -> logging.Logger:
 
 @pytest.fixture(scope='class')
 def class_logger(request):
-    request.cls.logger = _logger()
+    logger = _logger()
+    logger.debug(f'Attach logger to {request.cls.__name__}')
+    request.cls.logger = logger

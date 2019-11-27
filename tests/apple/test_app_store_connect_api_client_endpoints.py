@@ -110,3 +110,13 @@ class AppStoreConnectApiClientEndpointsTest(unittest.TestCase):
     def test_disable_capability(self):
         capability_id = ResourceId('F88J43FA9J_ACCESS_WIFI_INFORMATION')
         self.api_client.disable_capability(capability_id)
+
+    @pytest.mark.skip(reason='Live App Store Connect API access')
+    def test_modify_capability_configuration(self):
+        capability = self.api_client.modify_capability_configuration(
+            ResourceId('F88J43FA9J_GAME_CENTER_IOS'),
+            CapabilityType.GAME_CENTER,
+            None
+        )
+        assert isinstance(capability, BundleIdCapability)
+        assert capability.type is ResourceType.BUNDLE_ID_CAPABILITIES
