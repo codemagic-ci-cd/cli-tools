@@ -359,6 +359,7 @@ class AppStoreConnectApiClient:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
+        raise NotImplemented  # TODO
 
     def list_certificates(self,
                           filter_certificate_type: Optional[CertificateType] = None,
@@ -392,6 +393,7 @@ class AppStoreConnectApiClient:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/revoke_a_certificate
         """
+        raise NotImplemented  # TODO
 
 
 class AppStoreConnectApiSession(requests.Session):
