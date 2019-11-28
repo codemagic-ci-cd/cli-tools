@@ -8,6 +8,8 @@ from .certificate import Certificate
 from .certificate import CertificateType
 from .error_response import ErrorResponse
 from .profile import Profile
+from .profile import ProfileState
+from .profile import ProfileType
 from .resource import LinkedResourceData
 from .resource import Resource
 from .resource import ResourceId

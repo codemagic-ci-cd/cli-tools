@@ -15,6 +15,8 @@ from apple.app_store_connect.operations import AppOperations
 from apple.app_store_connect.operations import BundleIdCapabilitiesOperations
 from apple.app_store_connect.operations import BundleIdOperations
 from apple.app_store_connect.operations import CertificateOperations
+from apple.app_store_connect.operations import DeviceOperations
+from apple.app_store_connect.operations import ProfileOperations
 from apple.resources import ResourceId
 from apple.resources import ResourceType
 
@@ -132,3 +134,11 @@ class AppStoreConnectApiClient:
     @property
     def certificates(self) -> CertificateOperations:
         return CertificateOperations(self)
+
+    @property
+    def devices(self) -> DeviceOperations:
+        return DeviceOperations(self)
+
+    @property
+    def profiles(self) -> ProfileOperations:
+        return ProfileOperations(self)
