@@ -10,6 +10,10 @@ from tests.apple.app_store_connect_api_client.endpoint_tests_base import Endpoin
 @pytest.mark.skip(reason='Live App Store Connect API access')
 class CertificateEndpointsTest(EndpointTestsBase):
 
+    def test_create_certificate(self):
+        # TODO
+        raise NotImplemented
+
     def test_list_certificates(self):
         expected_type = CertificateType.IOS_DEVELOPMENT
         certificates = self.api_client.certificates.list(filter_certificate_type=expected_type)

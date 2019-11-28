@@ -140,19 +140,19 @@ class AppStoreConnectApiClient:
         return {'data': data}
 
     @property
-    def apps(self):
+    def apps(self) -> AppOperations:
         return AppOperations(self)
 
     @property
-    def bundle_ids(self):
+    def bundle_ids(self) -> BundleIdOperations:
         return BundleIdOperations(self)
 
     @property
-    def bundle_id_capabilities(self):
+    def bundle_id_capabilities(self) -> BundleIdCapabilitiesOperations:
         return BundleIdCapabilitiesOperations(self)
 
     @property
-    def certificates(self):
+    def certificates(self) -> CertificateOperations:
         return CertificateOperations(self)
 
 

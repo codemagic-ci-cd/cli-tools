@@ -6,6 +6,7 @@ from apple.resources import Certificate
 from apple.resources import CertificateType
 from apple.resources import LinkedResourceData
 from apple.resources import ResourceId
+from apple.resources import ResourceType
 from .base_operations import BaseOperations
 from .base_operations import BaseOrdering
 
@@ -23,11 +24,19 @@ class CertificateOperations(BaseOperations):
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
     """
 
-    def create(self):
+    def create(self, certificate_type: CertificateType, csr_content: str):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
-        raise NotImplemented  # TODO
+        attributes = {
+            'certificateType': certificate_type,
+            'csrContent': csr_content,
+        }
+        response = self.client.session.post(
+            f'{self.client.API_URL}/certificates',
+            json=self.client.get_create_payload(ResourceType.CERTIFICATES, attributes=attributes)
+        ).json()
+        return Certificate(response['data'])
 
     def list(self,
              filter_certificate_type: Optional[CertificateType] = None,
