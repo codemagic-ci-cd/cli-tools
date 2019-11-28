@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
-from .resource import AbstractRelationships
+from .resource import DictSerializable
 from .resource import Relationship
 from .resource import Resource
 
@@ -36,7 +36,7 @@ class CapabilityType(enum.Enum):
 
 
 @dataclass
-class CapabilityOption:
+class CapabilityOption(DictSerializable):
     class Key(enum.Enum):
         XCODE_5 = 'XCODE_5'
         XCODE_6 = 'XCODE_6'
@@ -51,28 +51,13 @@ class CapabilityOption:
     name: str
     supportsWildcard: bool
 
-    @classmethod
-    def from_api_response(cls, api_options: Optional[Dict]) -> Optional[CapabilityOption]:
-        if api_options is None:
-            return None
-        options = api_options
-        return CapabilityOption(
-            description=options['description'],
-            enabled=options['enabled'],
-            enabledByDefault=options['enabledByDefault'],
-            key=CapabilityOption.Key(options['key']),
-            name=options['name'],
-            supportsWildcard=options['supportsWildcard'],
-        )
-
-    def dict(self):
-        d = self.__dict__
-        d['key'] = self.key.value
-        return d
+    def __post_init__(self):
+        if isinstance(self.key, str):
+            self.key = CapabilityOption.Key(self.key)
 
 
 @dataclass
-class CapabilitySetting:
+class CapabilitySetting(DictSerializable):
     class AllowedInstance(enum.Enum):
         ENTRY = 'ENTRY'
         SINGLE = 'SINGLE'
@@ -91,28 +76,11 @@ class CapabilitySetting:
     visible: bool
     minInstances: int
 
-    @classmethod
-    def from_api_response(cls, api_settings: Optional[Dict]) -> Optional[CapabilitySetting]:
-        if api_settings is None:
-            return None
-        settings = api_settings
-        return CapabilitySetting(
-            allowedInstances=CapabilitySetting.AllowedInstance(settings['allowedInstances']),
-            description=settings['description'],
-            enabledByDefault=settings['enabledByDefault'],
-            key=CapabilitySetting.Key(settings['key']),
-            name=settings['name'],
-            options=CapabilityOption.from_api_response(settings['options']),
-            visible=settings['visible'],
-            minInstances=settings['minInstances'],
-        )
-
-    def dict(self):
-        d = self.__dict__
-        d['allowedInstances'] = self.allowedInstances.value
-        d['key'] = self.key.value
-        d['options'] = self.options.dict()
-        return d
+    def __post_init__(self):
+        if isinstance(self.allowedInstances, str):
+            self.allowedInstances = CapabilitySetting.AllowedInstance(self.allowedInstances)
+        if isinstance(self.options, dict):
+            self.options = CapabilityOption(**self.options)
 
 
 class BundleIdCapability(Resource):
@@ -129,14 +97,8 @@ class BundleIdCapability(Resource):
             if isinstance(self.capabilityType, str):
                 self.capabilityType = CapabilityType(self.capabilityType)
             if isinstance(self.settings, dict):
-                self.settings = CapabilitySetting.from_api_response(self.settings)
+                self.settings = CapabilitySetting(**self.settings)
 
     @dataclass
-    class Relationships(AbstractRelationships):
+    class Relationships(Resource.Relationships):
         bundleId: Relationship
-
-    def __init__(self, api_response: Dict):
-        super().__init__(api_response)
-        self.attributes: BundleIdCapability.Attributes = BundleIdCapability.Attributes.from_api_response(api_response)
-        self.relationships: BundleIdCapability.Relationships = \
-            BundleIdCapability.Relationships.from_api_response(api_response)

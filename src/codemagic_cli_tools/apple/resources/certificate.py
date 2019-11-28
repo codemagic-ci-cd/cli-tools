@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 from .bundle_id import BundleIdPlatform
 from .resource import Resource
@@ -42,13 +42,3 @@ class Certificate(Resource):
                 self.platform = BundleIdPlatform(self.platform)
             if isinstance(self.certificateType, str):
                 self.certificateType = CertificateType(self.certificateType)
-
-    def __init__(self, api_response: Dict):
-        super().__init__(api_response)
-        self.attributes: Certificate.Attributes = Certificate.Attributes.from_api_response(api_response)
-        self.relationships = None
-
-    def dict(self) -> Dict:
-        d = super().dict()
-        del d['relationships']
-        return d

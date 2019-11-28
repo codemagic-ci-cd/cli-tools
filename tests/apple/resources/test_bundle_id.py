@@ -15,6 +15,6 @@ def api_bundle_id() -> Dict:
     return json.loads(mock_path.read_text())
 
 
-def test_app_initialization(api_bundle_id):
+def test_bundle_id_initialization(api_bundle_id):
     bundle_id = BundleId(api_bundle_id)
     assert bundle_id.dict() == api_bundle_id

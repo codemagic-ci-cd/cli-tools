@@ -15,6 +15,6 @@ def api_profile() -> Dict:
     return json.loads(mock_path.read_text())
 
 
-def test_app_initialization(api_profile):
+def test_profile_initialization(api_profile):
     profile = Profile(api_profile)
     assert profile.dict() == api_profile

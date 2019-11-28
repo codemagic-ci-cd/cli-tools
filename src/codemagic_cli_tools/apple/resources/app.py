@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
-from .resource import AbstractRelationships
 from .resource import Relationship
 from .resource import Resource
 
@@ -21,7 +19,7 @@ class App(Resource):
         primaryLocale: str
 
     @dataclass
-    class Relationships(AbstractRelationships):
+    class Relationships(Resource.Relationships):
         betaLicenseAgreement: Relationship
         preReleaseVersions: Relationship
         betaAppLocalizations: Relationship
@@ -29,8 +27,3 @@ class App(Resource):
         betaTesters: Relationship
         builds: Relationship
         betaAppReviewDetail: Relationship
-
-    def __init__(self, api_response: Dict):
-        super().__init__(api_response)
-        self.attributes: App.Attributes = App.Attributes.from_api_response(api_response)
-        self.relationships: App.Relationships = App.Relationships.from_api_response(api_response)

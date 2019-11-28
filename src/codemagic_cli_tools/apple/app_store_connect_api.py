@@ -257,7 +257,7 @@ class AppStoreConnectApiClient:
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_profile_ids_for_a_bundle_id
         """
         if isinstance(resource, BundleId):
-            url = resource.relationships.profiles.links.itself
+            url = resource.relationships.profiles.links.self
         else:
             url = f'{self.API_URL}/bundleIds/{resource}/relationships/profiles'
         return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self._paginate(url)]
@@ -277,7 +277,7 @@ class AppStoreConnectApiClient:
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_capabilility_ids_for_a_bundle_id
         """
         if isinstance(resource, BundleId):
-            url = resource.relationships.bundleIdCapabilities.links.itself
+            url = resource.relationships.bundleIdCapabilities.links.self
         else:
             url = f'{self.API_URL}/bundleIds/{resource}/relationships/bundleIdCapabilities'
         return [LinkedResourceData(capabilility) for capabilility in self._paginate(url, page_size=None)]

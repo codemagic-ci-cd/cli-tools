@@ -5,9 +5,11 @@ from typing import Dict, Optional
 
 from requests import Response
 
+from .resource import DictSerializable
+
 
 @dataclass
-class Error:
+class Error(DictSerializable):
     code: str
     status: str
     title: str
@@ -15,11 +17,8 @@ class Error:
     id: Optional[str] = None
     source: Optional[Dict[str, str]] = None
 
-    def dict(self) -> Dict:
-        return self.__dict__
 
-
-class ErrorResponse:
+class ErrorResponse(DictSerializable):
 
     def __init__(self, api_response: Dict):
         self._raw = api_response
@@ -34,11 +33,6 @@ class ErrorResponse:
             title='Request failed',
             detail=f'Request failed with status code {response.status_code}'))
         return error_response
-
-    def dict(self) -> Dict:
-        return {
-            'errors': [e.dict() for e in self.errors]
-        }
 
     def __str__(self):
         return '\n'.join(f'{error.title} - {error.detail}' for error in self.errors)

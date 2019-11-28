@@ -15,6 +15,6 @@ def api_error_response() -> Dict:
     return json.loads(mock_path.read_text())
 
 
-def test_app_initialization(api_error_response):
+def test_error_response_initialization(api_error_response):
     error_response = ErrorResponse(api_error_response)
     assert error_response.dict() == api_error_response

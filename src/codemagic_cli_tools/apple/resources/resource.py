@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import abc
 import enum
 from dataclasses import dataclass
-from dataclasses import Field
-from dataclasses import is_dataclass
 from datetime import datetime
 from typing import Dict, Optional, overload
 
@@ -13,6 +10,34 @@ from models import JsonSerializable
 
 class ResourceId(str):
     pass
+
+
+class DictSerializable:
+    _OMIT_KEYS = ('_raw',)
+    _OMIT_IF_NONE_KEYS = tuple()
+
+    @classmethod
+    def _serialize(cls, obj):
+        if isinstance(obj, enum.Enum):
+            return obj.value
+        elif isinstance(obj, datetime):
+            return Resource.to_iso_8601(obj)
+        elif isinstance(obj, DictSerializable):
+            return obj.dict()
+        elif isinstance(obj, (list, tuple)):
+            return [cls._serialize(item) for item in obj]
+        return obj
+
+    @classmethod
+    def _should_omit(cls, key, value):
+        if key in cls._OMIT_KEYS:
+            return True
+        if key in cls._OMIT_IF_NONE_KEYS and value is None:
+            return True
+        return False
+
+    def dict(self):
+        return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
 class ResourceType(enum.Enum):
@@ -24,173 +49,89 @@ class ResourceType(enum.Enum):
 
 
 @dataclass
-class PagingInformation:
+class PagingInformation(DictSerializable):
     @dataclass
-    class Paging:
+    class Paging(DictSerializable):
         total: int
         limit: int
 
-        def dict(self) -> Dict[str, int]:
-            return self.__dict__
-
     paging: Paging
 
-    @classmethod
-    def from_api_response(cls, api_response: Dict) -> Optional[PagingInformation]:
-        try:
-            paging_info = api_response['meta']
-        except KeyError:
-            return None
-        return PagingInformation(
-            paging=PagingInformation.Paging(**paging_info['paging'])
-        )
-
-    def dict(self) -> Dict[str, Dict[str, int]]:
-        return {'paging': self.paging.dict()}
+    def __post_init__(self):
+        if isinstance(self.paging, dict):
+            self.paging = PagingInformation.Paging(**self.paging)
 
 
-@dataclass
-class Links:
-    itself: str
-    related: Optional[str] = None
+class Links(DictSerializable):
+    _OMIT_IF_NONE_KEYS = ('related',)
 
-    @classmethod
-    def from_api_response(cls, links: Dict[str, str]) -> Links:
-        return Links(itself=links['self'], related=links.get('related'))
+    def __init__(_self, self: str, related: Optional[str] = None):
+        _self.self = self
+        _self.related = related
 
-    def dict(self) -> Dict:
-        d = {'self': self.itself}
-        if self.related is not None:
-            d['related'] = self.related
-        return d
+
+class ResourceLinks(DictSerializable):
+    def __init__(_self, self):
+        _self.self = self
 
 
 @dataclass
-class ResourceLinks:
-    itself: str
-
-    @classmethod
-    def from_api_response(cls, resource_links: Dict) -> ResourceLinks:
-        return ResourceLinks(itself=resource_links['self'])
-
-    def dict(self) -> Dict[str, str]:
-        return {'self': self.itself}
-
-
-@dataclass
-class Data:
+class Data(DictSerializable):
     id: str
     type: ResourceType
 
-    @classmethod
-    def from_api_response(cls, api_response: Dict) -> Optional[Data]:
-        try:
-            data = api_response['data']
-        except KeyError:
-            return None
-        return Data(id=data['id'], type=ResourceType(data['type']))
-
-    def dict(self) -> Dict:
-        return {
-            'id': self.id,
-            'type': self.type.value
-        }
+    def __post_init__(self):
+        if isinstance(self.type, str):
+            self.type = ResourceType(self.type)
 
 
 @dataclass
-class Relationship:
-    meta: Optional[PagingInformation]
+class Relationship(DictSerializable):
+    _OMIT_IF_NONE_KEYS = ('data', 'meta')
+
     links: Links
-    data: Optional[Data]
+    data: Optional[Data] = None
+    meta: Optional[PagingInformation] = None
 
-    @classmethod
-    def from_api_response(cls, api_relationship: Dict) -> Relationship:
-        return Relationship(
-            meta=PagingInformation.from_api_response(api_relationship),
-            links=Links.from_api_response(api_relationship['links']),
-            data=Data.from_api_response(api_relationship)
-        )
-
-    def dict(self) -> Dict:
-        d = {'links': self.links.dict()}
-        if self.meta is not None:
-            d['meta'] = self.meta.dict()
-        if self.data is not None:
-            d['data'] = self.data.dict()
-        return d
+    def __post_init__(self):
+        if isinstance(self.links, dict):
+            self.links = Links(**self.links)
+        if isinstance(self.data, dict):
+            self.data = Data(**self.data)
+        if isinstance(self.meta, dict):
+            self.meta = PagingInformation(**self.meta)
 
 
-class AbstractRelationships(metaclass=abc.ABCMeta):
-    __dataclass_fields__: Dict[str, Field] = {}
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-    @classmethod
-    def from_api_response(cls, api_response: Dict):
-        relationships = api_response['relationships']
-        kwargs = {
-            field_name: Relationship.from_api_response(relationships[field_name])
-            for field_name in cls.__dataclass_fields__
-        }
-        return cls(**kwargs)
-
-    def dict(self) -> Dict:
-        return {
-            field_name: getattr(self, field_name).dict()
-            for field_name in self.__dataclass_fields__
-        }
-
-
-class LinkedResourceData(JsonSerializable):
+class LinkedResourceData(DictSerializable, JsonSerializable):
 
     def __init__(self, api_response: Dict):
         self._raw = api_response
         self.type = ResourceType(api_response['type'])
         self.id: ResourceId = ResourceId(api_response['id'])
 
-    def dict(self) -> Dict:
-        return {
-            'type': self.type.value,
-            'id': str(self.id),
-        }
-
     def __str__(self):
         return self.json()
 
 
 class Resource(LinkedResourceData):
-    class Attributes(metaclass=abc.ABCMeta):
-        __dataclass_fields__: Dict[str, Field] = {}
+    @dataclass
+    class Attributes(DictSerializable):
+        pass
 
-        @classmethod
-        def from_api_response(cls, api_response: Dict):
-            return cls(**api_response['attributes'])
-
-        def dict(self):
-            d = self.__dict__
-            for k, v in d.items():
-                if isinstance(v, enum.Enum):
-                    d[k] = v.value
-                elif isinstance(v, datetime):
-                    d[k] = Resource.to_iso_8601(v)
-                elif is_dataclass(v):
-                    d[k] = v.dict()
-            return d
+    @dataclass
+    class Relationships(DictSerializable):
+        def __post_init__(self):
+            for field in self.__dict__:
+                value = getattr(self, field)
+                if not isinstance(value, Relationship):
+                    setattr(self, field, Relationship(**value))
 
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
-        self.links: ResourceLinks = ResourceLinks.from_api_response(api_response['links'])
-        self.attributes: Resource.Attributes = Resource.Attributes()
-        self.relationships: AbstractRelationships = AbstractRelationships()
-
-    def dict(self) -> Dict:
-        return {
-            **super().dict(),
-            'links': self.links.dict(),
-            'attributes': self.attributes.dict() if self.attributes else {},
-            'relationships': self.relationships.dict() if self.relationships else {},
-        }
+        self.links: ResourceLinks = ResourceLinks(**api_response['links'])
+        self.attributes = self.Attributes(**api_response['attributes'])
+        if 'relationships' in api_response:
+            self.relationships = self.Relationships(**api_response['relationships'])
 
     @classmethod
     @overload

@@ -3,10 +3,9 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 from .bundle_id import BundleIdPlatform
-from .resource import AbstractRelationships
 from .resource import Relationship
 from .resource import Resource
 
@@ -59,12 +58,7 @@ class Profile(Resource):
                 self.expirationDate = Resource.from_iso_8601(self.expirationDate)
 
     @dataclass
-    class Relationships(AbstractRelationships):
+    class Relationships(Resource.Relationships):
         certificates: Relationship
         devices: Relationship
         bundleId: Relationship
-
-    def __init__(self, api_response: Dict):
-        super().__init__(api_response)
-        self.attributes: Profile.Attributes = Profile.Attributes.from_api_response(api_response)
-        self.relationships: Profile.Relationships = Profile.Relationships.from_api_response(api_response)
