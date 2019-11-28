@@ -1,11 +1,11 @@
 from typing import Optional, List, Union
 
+from apple.resources import Profile
+from apple.resources import ProfileState
+from apple.resources import ProfileType
+from apple.resources import ResourceId
 from .base_operations import BaseOperations
 from .base_operations import BaseOrdering
-from apple.resources import Profile
-from apple.resources import ProfileType
-from apple.resources import ProfileState
-from apple.resources import ResourceId
 
 
 class ProfileOrdering(BaseOrdering):

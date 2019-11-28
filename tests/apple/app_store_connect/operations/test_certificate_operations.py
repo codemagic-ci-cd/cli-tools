@@ -12,7 +12,7 @@ from tests.apple.app_store_connect.operations import EndpointTestsBase
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
 @pytest.mark.usefixtures('class_unencrypted_pem')
-class CertificateEndpointsTest(EndpointTestsBase):
+class CertificateOperationsTest(EndpointTestsBase):
 
     def test_create_certificate(self):
         rsa = PrivateKey.pem_to_rsa(self.unencrypted_pem.content)

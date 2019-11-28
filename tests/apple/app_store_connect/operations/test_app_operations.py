@@ -6,7 +6,7 @@ from tests.apple.app_store_connect.operations import EndpointTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-class AppEndpointsTest(EndpointTestsBase):
+class AppOperationsTest(EndpointTestsBase):
 
     def test_list_apps(self):
         apps = self.api_client.apps.list()

@@ -11,7 +11,7 @@ CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-class BundleIdCapabilitiesEndpointsTest(EndpointTestsBase):
+class BundleIdCapabilitiesOperationsTest(EndpointTestsBase):
 
     def test_enable_capability(self):
         capability_type = CapabilityType.ACCESS_WIFI_INFORMATION
