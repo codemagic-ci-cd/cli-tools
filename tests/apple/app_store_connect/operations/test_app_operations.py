@@ -2,7 +2,7 @@ import pytest
 
 from apple.resources import App
 from apple.resources import ResourceType
-from tests.apple.app_store_connect_api_client.endpoint_tests_base import EndpointTestsBase
+from tests.apple.app_store_connect.operations import EndpointTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')

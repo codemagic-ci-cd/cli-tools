@@ -9,7 +9,7 @@ from apple.resources import LinkedResourceData
 from apple.resources import Profile
 from apple.resources import ResourceId
 from apple.resources import ResourceType
-from tests.apple.app_store_connect_api_client.endpoint_tests_base import EndpointTestsBase
+from tests.apple.app_store_connect.operations import EndpointTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
