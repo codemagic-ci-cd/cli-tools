@@ -26,9 +26,9 @@ class BundleIdCapabilitiesEndpointsTest(EndpointTestsBase):
 
     def test_disable_capability_does_not_exist(self):
         capability_id = ResourceId('F88J43FA9J_ACCESS_WIFI_INFORMATION')
-        with pytest.raises(AppStoreConnectApiError) as api_error:
+        with pytest.raises(AppStoreConnectApiError) as exception_info:
             self.api_client.bundle_id_capabilities.disable(capability_id)
-        error = api_error.value.error_response.errors[0]
+        error = exception_info.value.error_response.errors[0]
         assert error.code == 'NOT_FOUND'
         assert error.status == '404'
 
