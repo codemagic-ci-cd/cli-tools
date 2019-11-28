@@ -1,6 +1,6 @@
 import pytest
 
-from apple.app_store_connect_api import AppStoreConnectApiError
+from apple.app_store_connect import AppStoreConnectApiError
 from apple.resources import BundleIdCapability
 from apple.resources import CapabilityType
 from apple.resources import ResourceId

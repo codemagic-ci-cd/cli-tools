@@ -9,39 +9,17 @@ from typing import NewType
 from typing import Optional
 
 import jwt
-import requests
 
-from apple.app_store_connect_operations import AppOperations
-from apple.app_store_connect_operations import BundleIdCapabilitiesOperations
-from apple.app_store_connect_operations import BundleIdOperations
-from apple.app_store_connect_operations import CertificateOperations
-from apple.resources import ErrorResponse
+from apple.app_store_connect.app_store_connect_api_session import AppStoreConnectApiSession
+from apple.app_store_connect.operations import AppOperations
+from apple.app_store_connect.operations import BundleIdCapabilitiesOperations
+from apple.app_store_connect.operations import BundleIdOperations
+from apple.app_store_connect.operations import CertificateOperations
 from apple.resources import ResourceId
 from apple.resources import ResourceType
 
 KeyIdentifier = NewType('KeyIdentifier', str)
 IssuerId = NewType('IssuerId', str)
-
-
-class AppStoreConnectApiError(Exception):
-
-    def __init__(self, response: requests.Response):
-        self.response = response
-        try:
-            self.error_response = ErrorResponse(response.json())
-        except ValueError:
-            self.error_response = ErrorResponse.from_raw_response(response)
-
-    @property
-    def request(self) -> requests.PreparedRequest:
-        return self.response.request
-
-    @property
-    def status_code(self) -> int:
-        return self.response.status_code
-
-    def __str__(self):
-        return f'{self.request.method} {self.request.url} returned {self.response.status_code}: {self.error_response}'
 
 
 class AppStoreConnectApiClient:
@@ -154,35 +132,3 @@ class AppStoreConnectApiClient:
     @property
     def certificates(self) -> CertificateOperations:
         return CertificateOperations(self)
-
-
-class AppStoreConnectApiSession(requests.Session):
-
-    def __init__(self, app_store_connect_api: AppStoreConnectApiClient):
-        super().__init__()
-        self.api = app_store_connect_api
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-    def _log_response(self, response):
-        try:
-            self._logger.info(f'<<< {response.status_code} {response.json()}')
-        except ValueError:
-            self._logger.info(f'<<< {response.status_code} {response.content}')
-
-    def _log_request(self, *args, **kwargs):
-        method = args[0].upper()
-        url = args[1]
-        body = kwargs.get('params') or kwargs.get('data')
-        if isinstance(body, dict):
-            body = {k: (v if 'password' not in k.lower() else '*******') for k, v in body.items()}
-        self._logger.info(f'>>> {method} {url} {body}')
-
-    def request(self, *args, **kwargs):
-        self._log_request(*args, **kwargs)
-        headers = kwargs.pop('headers', {})
-        headers.update(self.api.auth_headers)
-        response = super().request(*args, **kwargs, headers=headers)
-        self._log_response(response)
-        if not response.ok:
-            raise AppStoreConnectApiError(response)
-        return response

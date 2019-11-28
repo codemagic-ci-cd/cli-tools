@@ -3,7 +3,7 @@ import unittest
 
 import pytest
 
-from apple.app_store_connect_api import AppStoreConnectApiClient
+from apple.app_store_connect import AppStoreConnectApiClient
 
 
 @pytest.mark.usefixtures('class_api_client', 'class_logger')

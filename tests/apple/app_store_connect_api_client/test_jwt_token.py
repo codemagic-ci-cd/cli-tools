@@ -11,7 +11,7 @@ UTC_NOW = datetime(year=2019, month=8, day=20, tzinfo=timezone.utc)
 
 @pytest.fixture
 def freeze_now():
-    with mock.patch('apple.app_store_connect_api.datetime') as mock_now:
+    with mock.patch('apple.app_store_connect.app_store_connect_api_client.datetime') as mock_now:
         mock_now.now.return_value = NOW
         mock_now.utcnow.return_value = UTC_NOW
         mock_now.side_effect = lambda *args, **kw: datetime(*args, **kw)

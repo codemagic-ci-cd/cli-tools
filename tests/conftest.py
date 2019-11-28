@@ -7,9 +7,9 @@ from typing import Optional, NamedTuple
 
 import pytest
 
-from apple.app_store_connect_api import AppStoreConnectApiClient
-from apple.app_store_connect_api import IssuerId
-from apple.app_store_connect_api import KeyIdentifier
+from apple.app_store_connect import AppStoreConnectApiClient
+from apple.app_store_connect import IssuerId
+from apple.app_store_connect import KeyIdentifier
 
 
 class PEM(NamedTuple):
