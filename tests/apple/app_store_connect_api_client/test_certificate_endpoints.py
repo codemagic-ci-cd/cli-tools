@@ -12,7 +12,7 @@ class CertificateEndpointsTest(EndpointTestsBase):
 
     def test_list_certificates(self):
         expected_type = CertificateType.IOS_DEVELOPMENT
-        certificates = self.api_client.list_certificates(filter_certificate_type=expected_type)
+        certificates = self.api_client.certificates.list(filter_certificate_type=expected_type)
         assert len(certificates) > 0
         for certificate in certificates:
             assert isinstance(certificate, Certificate)
@@ -21,7 +21,7 @@ class CertificateEndpointsTest(EndpointTestsBase):
 
     def test_read_certificate(self):
         certificate_id = ResourceId('X6NCZS3K2D')
-        certificate = self.api_client.read_certificate(certificate_id)
+        certificate = self.api_client.certificates.read(certificate_id)
         assert isinstance(certificate, Certificate)
         assert certificate.id == certificate_id
         assert certificate.type is ResourceType.CERTIFICATES

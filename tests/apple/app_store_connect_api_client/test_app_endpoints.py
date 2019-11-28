@@ -9,7 +9,7 @@ from tests.apple.app_store_connect_api_client.endpoint_tests_base import Endpoin
 class AppEndpointsTest(EndpointTestsBase):
 
     def test_list_apps(self):
-        apps = self.api_client.list_apps()
+        apps = self.api_client.apps.list()
         assert len(apps) > 0
         for app in apps:
             assert isinstance(app, App)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, overload
+from typing import Dict, Optional, overload, Tuple
 
 from models import JsonSerializable
 
@@ -13,8 +13,8 @@ class ResourceId(str):
 
 
 class DictSerializable:
-    _OMIT_KEYS = ('_raw',)
-    _OMIT_IF_NONE_KEYS = tuple()
+    _OMIT_KEYS: Tuple[str, ...] = ('_raw',)
+    _OMIT_IF_NONE_KEYS: Tuple[str, ...] = tuple()
 
     @classmethod
     def _serialize(cls, obj):
@@ -116,22 +116,34 @@ class LinkedResourceData(DictSerializable, JsonSerializable):
 class Resource(LinkedResourceData):
     @dataclass
     class Attributes(DictSerializable):
-        pass
+        def __init__(self, *args, **kwargs):
+            pass
 
     @dataclass
     class Relationships(DictSerializable):
+        def __init__(self, *args, **kwargs):
+            pass
+
         def __post_init__(self):
             for field in self.__dict__:
                 value = getattr(self, field)
                 if not isinstance(value, Relationship):
                     setattr(self, field, Relationship(**value))
 
+    @classmethod
+    def _create_attributes(cls, api_response):
+        return cls.Attributes(**api_response['attributes'])
+
+    @classmethod
+    def _create_relationships(cls, api_response):
+        return cls.Relationships(**api_response['relationships'])
+
     def __init__(self, api_response: Dict):
         super().__init__(api_response)
         self.links: ResourceLinks = ResourceLinks(**api_response['links'])
-        self.attributes = self.Attributes(**api_response['attributes'])
+        self.attributes = self._create_attributes(api_response)
         if 'relationships' in api_response:
-            self.relationships = self.Relationships(**api_response['relationships'])
+            self.relationships = self._create_relationships(api_response)
 
     @classmethod
     @overload
