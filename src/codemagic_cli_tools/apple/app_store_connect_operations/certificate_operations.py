@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, AnyStr
 from typing import Optional
 from typing import Union
 
@@ -24,12 +24,14 @@ class CertificateOperations(BaseOperations):
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
     """
 
-    def create(self, certificate_type: CertificateType, csr_content: str):
+    def create(self, certificate_type: CertificateType, csr_content: AnyStr):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
+        if isinstance(csr_content, bytes):
+            csr_content = csr_content.decode()
         attributes = {
-            'certificateType': certificate_type,
+            'certificateType': certificate_type.value,
             'csrContent': csr_content,
         }
         response = self.client.session.post(
@@ -66,8 +68,12 @@ class CertificateOperations(BaseOperations):
         response = self.client.session.get(f'{self.client.API_URL}/certificates/{resource_id}').json()
         return Certificate(response['data'])
 
-    def revoke(self):
+    def revoke(self, resource: Union[LinkedResourceData, ResourceId]) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/revoke_a_certificate
         """
-        raise NotImplemented  # TODO
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
+        self.client.session.delete(f'{self.client.API_URL}/certificates/{resource_id}')

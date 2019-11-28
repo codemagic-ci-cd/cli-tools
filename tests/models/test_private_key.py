@@ -1,51 +1,9 @@
 from __future__ import annotations
 
-import pathlib
-from functools import lru_cache
-from typing import NamedTuple, Optional
-
 import OpenSSL
 import pytest
 
 from models import PrivateKey
-
-
-class PEM(NamedTuple):
-    content: bytes
-    public_key: bytes
-    key_size: int
-    password: Optional[bytes] = None
-
-
-@lru_cache()
-def _get_pem(filename: str, password: str = '') -> PEM:
-    mocks_dir = pathlib.Path(__file__).parent / 'mocks'
-    pem_path = mocks_dir / filename
-    pub_key_path = mocks_dir / f'{filename}.pub'
-    return PEM(pem_path.read_bytes(), pub_key_path.read_bytes(), 4096, password.encode())
-
-
-def _encrypted_pem() -> PEM:
-    return _get_pem('encrypted.pem', 'strong password')
-
-
-def _unencrypted_pem() -> PEM:
-    return _get_pem('unencrypted.pem')
-
-
-@pytest.fixture
-def encrypted_pem() -> PEM:
-    return _encrypted_pem()
-
-
-@pytest.fixture
-def unencrypted_pem() -> PEM:
-    return _unencrypted_pem()
-
-
-@pytest.fixture(params=[_encrypted_pem(), _unencrypted_pem()])
-def pem(request):
-    return request.param
 
 
 def test_get_public_key(pem):

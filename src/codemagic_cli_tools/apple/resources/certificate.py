@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Optional
 
 from .bundle_id import BundleIdPlatform
 from .resource import Resource
@@ -33,7 +33,7 @@ class Certificate(Resource):
         platform: BundleIdPlatform
         serialNumber: str
         certificateType: CertificateType
-        csrContent: Any  # Undocumented attribute
+        csrContent: Optional[str]
 
         def __post_init__(self):
             if isinstance(self.expirationDate, str):
