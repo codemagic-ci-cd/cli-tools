@@ -11,10 +11,10 @@ from typing import Optional
 import jwt
 import requests
 
-from apple.operations import AppOperations
-from apple.operations import BundleIdCapabilitiesOperations
-from apple.operations import BundleIdOperations
-from apple.operations import CertificateOperations
+from apple.app_store_connect_operations import AppOperations
+from apple.app_store_connect_operations import BundleIdCapabilitiesOperations
+from apple.app_store_connect_operations import BundleIdOperations
+from apple.app_store_connect_operations import CertificateOperations
 from apple.resources import ErrorResponse
 from apple.resources import ResourceId
 from apple.resources import ResourceType
