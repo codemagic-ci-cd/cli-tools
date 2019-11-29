@@ -8,7 +8,7 @@ from tests.apple.app_store_connect.operations.operations_test_base import Operat
 @pytest.mark.skip(reason='Live App Store Connect API access')
 class AppOperationsTest(OperationsTestsBase):
 
-    def test_list_apps(self):
+    def test_list(self):
         apps = self.api_client.apps.list()
         assert len(apps) > 0
         for app in apps:
