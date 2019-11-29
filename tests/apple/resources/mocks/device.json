@@ -1,0 +1,16 @@
+{
+    "type": "devices",
+    "id": "D9PQ3SW2K6",
+    "attributes": {
+        "addedDate": "2019-03-07T13:11:26.000+0000",
+        "name": "Test iPhone X",
+        "deviceClass": "IPHONE",
+        "model": "iPhone X",
+        "udid": "5d0d1e9e3e4c8323756ec0038564006dafe15c21",
+        "platform": "IOS",
+        "status": "DISABLED"
+    },
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/devices/D9PQ3SW2K6"
+    }
+}

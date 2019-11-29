@@ -1,6 +1,7 @@
 import pytest
 
-from codemagic_cli_tools.apple.resources import BundleId, Certificate
+from codemagic_cli_tools.apple.resources import BundleId
+from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ResourceId

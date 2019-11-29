@@ -41,10 +41,11 @@ class DictSerializable:
 
 
 class ResourceType(enum.Enum):
-    APP = 'apps'
+    APPS = 'apps'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
     CERTIFICATES = 'certificates'
+    DEVICES = 'devices'
     PROFILES = 'profiles'
 
 

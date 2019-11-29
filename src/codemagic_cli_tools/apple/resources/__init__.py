@@ -7,6 +7,7 @@ from .bundle_id_capability import CapabilityType
 from .certificate import Certificate
 from .certificate import CertificateType
 from .device import Device
+from .device import DeviceStatus
 from .error_response import ErrorResponse
 from .profile import Profile
 from .profile import ProfileState

@@ -13,4 +13,4 @@ class AppOperationsTest(OperationsTestsBase):
         assert len(apps) > 0
         for app in apps:
             assert isinstance(app, App)
-            assert app.type is ResourceType.APP
+            assert app.type is ResourceType.APPS
