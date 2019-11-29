@@ -2,25 +2,24 @@ from typing import List, AnyStr
 from typing import Optional
 from typing import Union
 
+from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import CertificateType
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from .base_operations import BaseOperations
-from .base_operations import BaseOrdering
 
 
-class CertificateOrdering(BaseOrdering):
+class CertificateOrdering(ResourceManager.Ordering):
     CERTIFICATE_TYPE = 'certificateType'
     DISPLAY_NAME = 'displayName'
     ID = 'id'
     SERIAL_NUMBER = 'serialNumber'
 
 
-class CertificateOperations(BaseOperations):
+class Certificates(ResourceManager):
     """
-    Certificate operations
+    Certificates
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
     """
 

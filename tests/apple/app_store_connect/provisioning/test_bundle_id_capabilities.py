@@ -5,7 +5,7 @@ from codemagic_cli_tools.apple.resources import BundleIdCapability
 from codemagic_cli_tools.apple.resources import CapabilityType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 

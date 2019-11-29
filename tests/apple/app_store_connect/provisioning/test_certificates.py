@@ -7,7 +7,7 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
-from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')

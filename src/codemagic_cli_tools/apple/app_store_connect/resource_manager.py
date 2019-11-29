@@ -8,12 +8,10 @@ if TYPE_CHECKING:
     from codemagic_cli_tools.apple import AppStoreConnectApiClient
 
 
-class BaseOrdering(enum.Enum):
-    def as_param(self, reverse=False):
-        return f'{"-" if reverse else ""}{self.value}'
-
-
-class BaseOperations(metaclass=abc.ABCMeta):
+class ResourceManager(metaclass=abc.ABCMeta):
+    class Ordering(enum.Enum):
+        def as_param(self, reverse=False):
+            return f'{"-" if reverse else ""}{self.value}'
 
     def __init__(self, client: AppStoreConnectApiClient):
         self.client = client

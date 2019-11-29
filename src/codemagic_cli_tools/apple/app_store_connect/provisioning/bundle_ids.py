@@ -1,5 +1,6 @@
 from typing import List, Optional, Union
 
+from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleId
 from codemagic_cli_tools.apple.resources import BundleIdCapability
 from codemagic_cli_tools.apple.resources import BundleIdPlatform
@@ -7,20 +8,18 @@ from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from .base_operations import BaseOperations
-from .base_operations import BaseOrdering
 
 
-class BundleIdOrdering(BaseOrdering):
+class BundleIdOrdering(ResourceManager.Ordering):
     ID = 'id'
     NAME = 'name'
     PLATFORM = 'platform'
     SEED_ID = 'seedId'
 
 
-class BundleIdOperations(BaseOperations):
+class BundleIds(ResourceManager):
     """
-    Bundle ID operations
+    Bundle IDs
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids
     """
 

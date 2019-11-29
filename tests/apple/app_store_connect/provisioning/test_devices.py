@@ -7,7 +7,7 @@ from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import DeviceStatus
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
 
 DEVICE_ID = ResourceId('D9PW3SW6K2')
 DEVICE_UDID = '5d0d1e9e3e4c8323756ec0038564006dafe15c21'

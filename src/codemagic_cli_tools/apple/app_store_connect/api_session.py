@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import requests
 
-from .app_store_connect_api_error import AppStoreConnectApiError
+from .api_error import AppStoreConnectApiError
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.apple import AppStoreConnectApiClient

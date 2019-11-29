@@ -7,7 +7,6 @@ import sys
 from functools import lru_cache
 from typing import Optional
 from typing import NamedTuple
-from typing import TYPE_CHECKING
 
 import pytest
 

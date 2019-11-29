@@ -1,6 +1,7 @@
 from typing import Optional
 from typing import Union
 
+from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleId
 from codemagic_cli_tools.apple.resources import BundleIdCapability
 from codemagic_cli_tools.apple.resources import CapabilitySetting
@@ -8,12 +9,11 @@ from codemagic_cli_tools.apple.resources import CapabilityType
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from .base_operations import BaseOperations
 
 
-class BundleIdCapabilitiesOperations(BaseOperations):
+class BundleIdCapabilities(ResourceManager):
     """
-    Bundle ID Capabilities operations
+    Bundle ID Capabilities
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_id_capabilities
     """
 

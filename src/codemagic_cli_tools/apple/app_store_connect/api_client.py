@@ -10,14 +10,14 @@ from typing import Optional
 
 import jwt
 
-from .app_store_connect_api_session import AppStoreConnectApiSession
-from .operations import BundleIdCapabilitiesOperations
-from .operations import BundleIdOperations
-from .operations import CertificateOperations
-from .operations import DeviceOperations
-from .operations import ProfileOperations
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
+from .api_session import AppStoreConnectApiSession
+from .provisioning import BundleIdCapabilities
+from .provisioning import BundleIds
+from .provisioning import Certificates
+from .provisioning import Devices
+from .provisioning import Profiles
 
 KeyIdentifier = NewType('KeyIdentifier', str)
 IssuerId = NewType('IssuerId', str)
@@ -119,21 +119,21 @@ class AppStoreConnectApiClient:
         return {'data': data}
 
     @property
-    def bundle_ids(self) -> BundleIdOperations:
-        return BundleIdOperations(self)
+    def bundle_ids(self) -> BundleIds:
+        return BundleIds(self)
 
     @property
-    def bundle_id_capabilities(self) -> BundleIdCapabilitiesOperations:
-        return BundleIdCapabilitiesOperations(self)
+    def bundle_id_capabilities(self) -> BundleIdCapabilities:
+        return BundleIdCapabilities(self)
 
     @property
-    def certificates(self) -> CertificateOperations:
-        return CertificateOperations(self)
+    def certificates(self) -> Certificates:
+        return Certificates(self)
 
     @property
-    def devices(self) -> DeviceOperations:
-        return DeviceOperations(self)
+    def devices(self) -> Devices:
+        return Devices(self)
 
     @property
-    def profiles(self) -> ProfileOperations:
-        return ProfileOperations(self)
+    def profiles(self) -> Profiles:
+        return Profiles(self)

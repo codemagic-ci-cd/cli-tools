@@ -1,16 +1,15 @@
 from typing import List, Optional, Union
 
+from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleIdPlatform
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import DeviceStatus
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from .base_operations import BaseOperations
-from .base_operations import BaseOrdering
 
 
-class DeviceOrdering(BaseOrdering):
+class DeviceOrdering(ResourceManager.Ordering):
     ID = 'id'
     NAME = 'name'
     PLATFORM = 'platform'
@@ -18,9 +17,9 @@ class DeviceOrdering(BaseOrdering):
     UDID = 'udid'
 
 
-class DeviceOperations(BaseOperations):
+class Devices(ResourceManager):
     """
-    Device operations
+    Devices
     https://developer.apple.com/documentation/appstoreconnectapi/devices
     """
 

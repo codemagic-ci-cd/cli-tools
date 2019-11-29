@@ -1,27 +1,26 @@
 from typing import Optional, List, Union
 
+from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleId
 from codemagic_cli_tools.apple.resources import Certificate
-from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ProfileState
 from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
-from .base_operations import BaseOperations
-from .base_operations import BaseOrdering
 
 
-class ProfileOrdering(BaseOrdering):
+class ProfileOrdering(ResourceManager.Ordering):
     ID = 'id'
     NAME = 'name'
     PROFILE_STATE = 'profileState'
     PROFILE_TYPE = 'profileType'
 
 
-class ProfileOperations(BaseOperations):
+class Profiles(ResourceManager):
     """
-    Profiles operations
+    Profiles
     https://developer.apple.com/documentation/appstoreconnectapi/profiles
     """
 
