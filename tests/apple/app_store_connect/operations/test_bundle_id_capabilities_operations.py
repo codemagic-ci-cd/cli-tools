@@ -5,13 +5,13 @@ from apple.resources import BundleIdCapability
 from apple.resources import CapabilityType
 from apple.resources import ResourceId
 from apple.resources import ResourceType
-from tests.apple.app_store_connect.operations import EndpointTestsBase
+from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-class BundleIdCapabilitiesOperationsTest(EndpointTestsBase):
+class BundleIdCapabilitiesOperationsTest(OperationsTestsBase):
 
     def test_enable_capability(self):
         capability_type = CapabilityType.ACCESS_WIFI_INFORMATION

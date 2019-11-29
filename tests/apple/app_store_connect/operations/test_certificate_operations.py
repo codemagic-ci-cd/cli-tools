@@ -7,12 +7,12 @@ from apple.resources import ResourceId
 from apple.resources import ResourceType
 from models import Certificate
 from models import PrivateKey
-from tests.apple.app_store_connect.operations import EndpointTestsBase
+from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
 @pytest.mark.usefixtures('class_unencrypted_pem')
-class CertificateOperationsTest(EndpointTestsBase):
+class CertificateOperationsTest(OperationsTestsBase):
 
     def test_create_certificate(self):
         rsa = PrivateKey.pem_to_rsa(self.unencrypted_pem.content)

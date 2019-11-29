@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 import logging
 import os
 import pathlib
 import sys
 from functools import lru_cache
-from typing import Optional, NamedTuple
+from typing import Optional
+from typing import NamedTuple
+from typing import TYPE_CHECKING
 
 import pytest
 
-from apple.app_store_connect import AppStoreConnectApiClient
-from apple.app_store_connect import IssuerId
-from apple.app_store_connect import KeyIdentifier
+if TYPE_CHECKING:
+    from apple.app_store_connect import AppStoreConnectApiClient
+
+sys.path.append('src/codemagic_cli_tools')
 
 
 class PEM(NamedTuple):
@@ -40,7 +45,11 @@ def _unencrypted_pem() -> PEM:
 
 
 @lru_cache()
-def _api_client() -> AppStoreConnectApiClient:
+def _api_client():
+    from apple.app_store_connect import AppStoreConnectApiClient
+    from apple.app_store_connect import IssuerId
+    from apple.app_store_connect import KeyIdentifier
+
     key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
     return AppStoreConnectApiClient(
         KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
