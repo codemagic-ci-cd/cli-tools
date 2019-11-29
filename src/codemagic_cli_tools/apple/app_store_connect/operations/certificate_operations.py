@@ -29,10 +29,12 @@ class CertificateOperations(BaseOperations):
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
         if isinstance(csr_content, bytes):
-            csr_content = csr_content.decode()
+            content = csr_content.decode()
+        else:
+            content = csr_content
         attributes = {
             'certificateType': certificate_type.value,
-            'csrContent': csr_content,
+            'csrContent': content,
         }
         response = self.client.session.post(
             f'{self.client.API_URL}/certificates',

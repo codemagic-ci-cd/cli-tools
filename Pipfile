@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 mypy = "*"
-pylint = "*"
+pylint = "<2.0.0"
 autopep8 = "*"
 typing-extensions = "*"
 twine = "*"
