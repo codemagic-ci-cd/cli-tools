@@ -1,4 +1,3 @@
-from .app import App
 from .bundle_id import BundleId
 from .bundle_id import BundleIdPlatform
 from .bundle_id_capability import BundleIdCapability

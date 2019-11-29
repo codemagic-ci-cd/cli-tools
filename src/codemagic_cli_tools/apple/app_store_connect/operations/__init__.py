@@ -1,5 +1,3 @@
-from .app_operations import AppOperations
-from .app_operations import AppOrdering
 from .bundle_id_capabilities_operations import BundleIdCapabilitiesOperations
 from .bundle_id_operations import BundleIdOperations
 from .bundle_id_operations import BundleIdOrdering

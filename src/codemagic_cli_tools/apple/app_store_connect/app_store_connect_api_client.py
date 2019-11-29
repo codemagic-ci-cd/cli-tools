@@ -11,7 +11,6 @@ from typing import Optional
 import jwt
 
 from .app_store_connect_api_session import AppStoreConnectApiSession
-from .operations import AppOperations
 from .operations import BundleIdCapabilitiesOperations
 from .operations import BundleIdOperations
 from .operations import CertificateOperations
@@ -118,10 +117,6 @@ class AppStoreConnectApiClient:
         if relationships is not None:
             data['relationships'] = relationships
         return {'data': data}
-
-    @property
-    def apps(self) -> AppOperations:
-        return AppOperations(self)
 
     @property
     def bundle_ids(self) -> BundleIdOperations:
