@@ -7,13 +7,11 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.x509 import NameOID
 
 from .json_serializable import JsonSerializable
 
 
 class Certificate(JsonSerializable):
-
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, pem: str):
@@ -72,10 +70,9 @@ class Certificate(JsonSerializable):
         }
 
     @classmethod
-    def create_certificate_signing_request(cls, rsa_key: RSAPrivateKey):
-        # TODO add return type
-        subject_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'PEM')])
-        csr_builder = x509.CertificateSigningRequestBuilder()\
+    def create_certificate_signing_request(cls, rsa_key: RSAPrivateKey) -> x509.CertificateSigningRequest:
+        subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, 'PEM')])
+        csr_builder = x509.CertificateSigningRequestBuilder() \
             .subject_name(subject_name)
         csr = csr_builder.sign(rsa_key, hashes.SHA256(), default_backend())
         return csr
