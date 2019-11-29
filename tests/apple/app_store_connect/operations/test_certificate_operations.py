@@ -1,12 +1,12 @@
 import pytest
 from cryptography.hazmat.primitives import serialization
 
-from apple.resources import Certificate as CertificateResource
-from apple.resources import CertificateType
-from apple.resources import ResourceId
-from apple.resources import ResourceType
-from models import Certificate
-from models import PrivateKey
+from codemagic_cli_tools.apple.resources import Certificate as CertificateResource
+from codemagic_cli_tools.apple.resources import CertificateType
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
+from codemagic_cli_tools.models import Certificate
+from codemagic_cli_tools.models import PrivateKey
 from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 

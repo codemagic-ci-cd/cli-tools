@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Optional, overload, Tuple
 
-from models import JsonSerializable
+from codemagic_cli_tools.models import JsonSerializable
 
 
 class ResourceId(str):

@@ -5,7 +5,7 @@ from datetime import timezone
 
 import pytest
 
-from apple.resources import Resource
+from codemagic_cli_tools.apple.resources import Resource
 
 
 @pytest.mark.parametrize('iso_8601_timestamp, expected_datetime', [

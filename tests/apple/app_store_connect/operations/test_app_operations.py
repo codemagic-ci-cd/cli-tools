@@ -1,7 +1,7 @@
 import pytest
 
-from apple.resources import App
-from apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import App
+from codemagic_cli_tools.apple.resources import ResourceType
 from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 

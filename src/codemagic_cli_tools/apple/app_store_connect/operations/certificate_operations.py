@@ -2,11 +2,11 @@ from typing import List, AnyStr
 from typing import Optional
 from typing import Union
 
-from apple.resources import Certificate
-from apple.resources import CertificateType
-from apple.resources import LinkedResourceData
-from apple.resources import ResourceId
-from apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import Certificate
+from codemagic_cli_tools.apple.resources import CertificateType
+from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
 from .base_operations import BaseOperations
 from .base_operations import BaseOrdering
 

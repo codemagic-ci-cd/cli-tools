@@ -6,7 +6,7 @@ from typing import Dict
 
 import pytest
 
-from apple.resources import Certificate
+from codemagic_cli_tools.apple.resources import Certificate
 
 
 @pytest.fixture

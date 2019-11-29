@@ -10,15 +10,15 @@ from typing import Optional
 
 import jwt
 
-from apple.app_store_connect.app_store_connect_api_session import AppStoreConnectApiSession
-from apple.app_store_connect.operations import AppOperations
-from apple.app_store_connect.operations import BundleIdCapabilitiesOperations
-from apple.app_store_connect.operations import BundleIdOperations
-from apple.app_store_connect.operations import CertificateOperations
-from apple.app_store_connect.operations import DeviceOperations
-from apple.app_store_connect.operations import ProfileOperations
-from apple.resources import ResourceId
-from apple.resources import ResourceType
+from .app_store_connect_api_session import AppStoreConnectApiSession
+from .operations import AppOperations
+from .operations import BundleIdCapabilitiesOperations
+from .operations import BundleIdOperations
+from .operations import CertificateOperations
+from .operations import DeviceOperations
+from .operations import ProfileOperations
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
 
 KeyIdentifier = NewType('KeyIdentifier', str)
 IssuerId = NewType('IssuerId', str)

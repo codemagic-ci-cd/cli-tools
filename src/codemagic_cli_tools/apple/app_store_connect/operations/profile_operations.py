@@ -1,13 +1,13 @@
 from typing import Optional, List, Union
 
-from apple.resources import BundleId
-from apple.resources import Certificate
-from apple.resources import Profile
-from apple.resources import Device
-from apple.resources import LinkedResourceData
-from apple.resources import ProfileState
-from apple.resources import ProfileType
-from apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import BundleId
+from codemagic_cli_tools.apple.resources import Certificate
+from codemagic_cli_tools.apple.resources import Profile
+from codemagic_cli_tools.apple.resources import Device
+from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import ProfileState
+from codemagic_cli_tools.apple.resources import ProfileType
+from codemagic_cli_tools.apple.resources import ResourceId
 from .base_operations import BaseOperations
 from .base_operations import BaseOrdering
 

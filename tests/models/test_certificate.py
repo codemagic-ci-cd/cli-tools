@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from models import Certificate
+from codemagic_cli_tools.models import Certificate
 
 
 @pytest.mark.skip(reason='Test not ready')

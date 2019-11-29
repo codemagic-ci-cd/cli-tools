@@ -3,7 +3,7 @@ from __future__ import annotations
 import OpenSSL
 import pytest
 
-from models import PrivateKey
+from codemagic_cli_tools.models import PrivateKey
 
 
 def test_get_public_key(pem):

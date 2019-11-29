@@ -1,6 +1,6 @@
 import requests
 
-from apple.resources import ErrorResponse
+from codemagic_cli_tools.apple.resources import ErrorResponse
 
 
 class AppStoreConnectApiError(Exception):

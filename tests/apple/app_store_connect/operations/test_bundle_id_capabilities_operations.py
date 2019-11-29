@@ -1,10 +1,10 @@
 import pytest
 
-from apple.app_store_connect import AppStoreConnectApiError
-from apple.resources import BundleIdCapability
-from apple.resources import CapabilityType
-from apple.resources import ResourceId
-from apple.resources import ResourceType
+from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiError
+from codemagic_cli_tools.apple.resources import BundleIdCapability
+from codemagic_cli_tools.apple.resources import CapabilityType
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
 from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')

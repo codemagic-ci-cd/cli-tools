@@ -1,13 +1,13 @@
 from typing import Optional
 from typing import Union
 
-from apple.resources import BundleId
-from apple.resources import BundleIdCapability
-from apple.resources import CapabilitySetting
-from apple.resources import CapabilityType
-from apple.resources import LinkedResourceData
-from apple.resources import ResourceId
-from apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import BundleId
+from codemagic_cli_tools.apple.resources import BundleIdCapability
+from codemagic_cli_tools.apple.resources import CapabilitySetting
+from codemagic_cli_tools.apple.resources import CapabilityType
+from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
 from .base_operations import BaseOperations
 
 

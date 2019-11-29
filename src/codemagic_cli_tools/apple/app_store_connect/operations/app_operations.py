@@ -1,6 +1,6 @@
 from typing import List
 
-from apple.resources import App
+from codemagic_cli_tools.apple.resources import App
 from .base_operations import BaseOperations
 from .base_operations import BaseOrdering
 

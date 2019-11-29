@@ -11,10 +11,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-if TYPE_CHECKING:
-    from apple.app_store_connect import AppStoreConnectApiClient
+sys.path.append('src')
 
-sys.path.append('src/codemagic_cli_tools')
+from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
+from codemagic_cli_tools.apple.app_store_connect import IssuerId
+from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
 
 
 class PEM(NamedTuple):
@@ -45,11 +46,7 @@ def _unencrypted_pem() -> PEM:
 
 
 @lru_cache()
-def _api_client():
-    from apple.app_store_connect import AppStoreConnectApiClient
-    from apple.app_store_connect import IssuerId
-    from apple.app_store_connect import KeyIdentifier
-
+def _api_client() -> AppStoreConnectApiClient:
     key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
     return AppStoreConnectApiClient(
         KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),

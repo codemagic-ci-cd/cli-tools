@@ -5,7 +5,7 @@ import enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from apple import AppStoreConnectApiClient
+    from codemagic_cli_tools.apple import AppStoreConnectApiClient
 
 
 class BaseOrdering(enum.Enum):

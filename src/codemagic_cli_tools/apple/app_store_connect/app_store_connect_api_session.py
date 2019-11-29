@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 import requests
 
-from apple.app_store_connect.app_store_connect_api_error import AppStoreConnectApiError
+from .app_store_connect_api_error import AppStoreConnectApiError
 
 if TYPE_CHECKING:
-    from apple import AppStoreConnectApiClient
+    from codemagic_cli_tools.apple import AppStoreConnectApiClient
 
 
 class AppStoreConnectApiSession(requests.Session):

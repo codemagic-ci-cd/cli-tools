@@ -2,13 +2,13 @@ import uuid
 
 import pytest
 
-from apple.resources import BundleId
-from apple.resources import BundleIdCapability
-from apple.resources import BundleIdPlatform
-from apple.resources import LinkedResourceData
-from apple.resources import Profile
-from apple.resources import ResourceId
-from apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import BundleId
+from codemagic_cli_tools.apple.resources import BundleIdCapability
+from codemagic_cli_tools.apple.resources import BundleIdPlatform
+from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import Profile
+from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import ResourceType
 from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
