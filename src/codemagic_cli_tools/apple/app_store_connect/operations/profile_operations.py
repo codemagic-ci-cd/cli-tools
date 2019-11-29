@@ -1,6 +1,10 @@
 from typing import Optional, List, Union
 
+from apple.resources import BundleId
+from apple.resources import Certificate
 from apple.resources import Profile
+from apple.resources import Device
+from apple.resources import LinkedResourceData
 from apple.resources import ProfileState
 from apple.resources import ProfileType
 from apple.resources import ResourceId
@@ -21,12 +25,12 @@ class ProfileOperations(BaseOperations):
     https://developer.apple.com/documentation/appstoreconnectapi/profiles
     """
 
-    def create(self):
+    def create(self) -> Profile:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
         """
 
-    def delete(self):
+    def delete(self) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_a_profile
         """
@@ -54,37 +58,65 @@ class ProfileOperations(BaseOperations):
         profiles = self.client.paginate(f'{self.client.API_URL}/profiles', params=params)
         return [Profile(profile) for profile in profiles]
 
-    def read(self):
+    def read(self, resource: Union[LinkedResourceData, ResourceId]) -> Profile:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_profile_information
         """
+        if isinstance(resource, LinkedResourceData):
+            resource_id = resource.id
+        else:
+            resource_id = resource
+        response = self.client.session.get(f'{self.client.API_URL}/profiles/{resource_id}').json()
+        return Profile(response['data'])
 
-    def read_bundle_id(self):
+    def read_bundle_id(self, resource: Union[Profile, ResourceId]) -> BundleId:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_bundle_id_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.bundleId.links.related
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/bundleId'
+        response = self.client.session.get(url).json()
+        return BundleId(response['data'])
 
-    def get_bundle_id_resource_id(self):
+    def get_bundle_id_resource_id(self, resource: Union[Profile, ResourceId]) -> LinkedResourceData:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_the_bundle_resource_id_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.bundleId.links.self
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/relationships/bundleId'
+        response = self.client.session.get(url).json()
+        return LinkedResourceData(response['data'])
 
-    def list_certificates(self):
+    def list_certificates(self, resource: Union[Profile, ResourceId]) -> List[Certificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_certificates_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.profiles.links.related
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/certificates'
+        return [Certificate(certificate) for certificate in self.client.paginate(url)]
 
-    def list_certificate_ids(self):
+    def list_certificate_ids(self, resource: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_certificate_ids_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.profiles.links.self
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/relationships/certificates'
+        return [LinkedResourceData(certificate) for certificate in self.client.paginate(url)]
 
-    def list_devices(self):
+    def list_devices(self, resource: Union[Profile, ResourceId]) -> List[Device]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_devices_in_a_profile
         """
 
-    def list_device_ids(self):
+    def list_device_ids(self, resource: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_device_resource_ids_in_a_profile
         """
