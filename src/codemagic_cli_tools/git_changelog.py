@@ -37,10 +37,10 @@ class GitChangelogArgument(cli.Argument):
 
 
 class ChangelogEntry(typing.NamedTuple):
-    hash: str = None
-    date: str = None
-    author: str = None
-    description: str = None
+    hash: str = ''
+    date: str = ''
+    author: str = ''
+    description: str = ''
 
 
 @cli.common_arguments(*GitChangelogArgument)
@@ -60,7 +60,7 @@ class GitChangelog(cli.CliApp):
         self.commit_limit = commit_limit
 
     @cli.action('generate')
-    def generate(self) -> List[str]:
+    def generate(self) -> Iterator[ChangelogEntry]:
         """
         Generate a changelog text from git history
         """
@@ -79,7 +79,7 @@ class GitChangelog(cli.CliApp):
             raise GitChangelogError('Unable to execute git log', process)
         raw_log = process.stdout.strip()
         if not raw_log:
-            raise GitChangelogError('Aborting due to empty output from git log. Nothing to generate', process)
+            raise GitChangelogError('Aborting due to empty output from git log. Nothing to generate')
         return raw_log
 
     def _get_changelog_list(self, changelog) -> Iterator[ChangelogEntry]:
@@ -103,8 +103,6 @@ class GitChangelog(cli.CliApp):
                 for line in description_lines[1:]:
                     descriptions.append(f'  {line}')
         formatted_log = '\n'.join(descriptions)
-        if descriptions:
-            formatted_log = formatted_log + '\n'
         return formatted_log, len(descriptions)
 
     def _should_include_log_line(self, line):
