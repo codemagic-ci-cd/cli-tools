@@ -29,11 +29,15 @@ class ProfileOperations(BaseOperations):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
         """
+        # TODO
+        raise NotImplemented
 
     def delete(self) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_a_profile
         """
+        # TODO
+        raise NotImplemented
 
     def list(self,
              filter_id: Optional[Union[str, ResourceId]] = None,
@@ -115,8 +119,18 @@ class ProfileOperations(BaseOperations):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_devices_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.profiles.links.related
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/devices'
+        return [Device(device) for device in self.client.paginate(url)]
 
     def list_device_ids(self, resource: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_device_resource_ids_in_a_profile
         """
+        if isinstance(resource, Profile):
+            url = resource.relationships.profiles.links.self
+        else:
+            url = f'{self.client.API_URL}/profiles/{resource}/relationships/devices'
+        return [LinkedResourceData(device) for device in self.client.paginate(url)]

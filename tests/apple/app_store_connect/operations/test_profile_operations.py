@@ -2,6 +2,7 @@ import pytest
 
 from codemagic_cli_tools.apple.resources import BundleId
 from codemagic_cli_tools.apple.resources import Certificate
+from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ResourceId
@@ -61,7 +62,17 @@ class ProfileOperationsTest(OperationsTestsBase):
             assert certificate.type is ResourceType.CERTIFICATES
 
     def test_list_devices(self):
-        ...
+        profile_id = ResourceId('M7GU3HQ8CZ')
+        devices = self.api_client.profiles.list_devices(profile_id)
+        assert len(devices) > 0
+        for device in devices:
+            assert isinstance(device, Device)
+            assert device.type is ResourceType.DEVICES
 
     def test_list_device_ids(self):
-        ...
+        profile_id = ResourceId('M7GU3HQ8CZ')
+        devices = self.api_client.profiles.list_device_ids(profile_id)
+        assert len(devices) > 0
+        for device in devices:
+            assert isinstance(device, LinkedResourceData)
+            assert device.type is ResourceType.DEVICES

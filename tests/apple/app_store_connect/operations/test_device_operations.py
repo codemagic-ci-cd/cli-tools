@@ -2,8 +2,9 @@ import uuid
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import BundleIdPlatform, DeviceStatus
+from codemagic_cli_tools.apple.resources import BundleIdPlatform
 from codemagic_cli_tools.apple.resources import Device
+from codemagic_cli_tools.apple.resources import DeviceStatus
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 from tests.apple.app_store_connect.operations.operations_test_base import OperationsTestsBase
