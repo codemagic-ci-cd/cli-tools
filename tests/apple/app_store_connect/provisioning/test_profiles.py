@@ -5,6 +5,7 @@ from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
+from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
@@ -14,10 +15,25 @@ from tests.apple.app_store_connect.resource_manager_test_base import ResourceMan
 class ProfilesTest(ResourceManagerTestsBase):
 
     def test_create(self):
-        ...
+        name = 'test profile'
+        profile_type = ProfileType.IOS_APP_DEVELOPMENT
+        bundle_id_resource_id = ResourceId('F88J43FA9J')
+        certificate_id = ResourceId('29NU422CRF')
+        device_ids = [ResourceId('D9PW3SW6K2'), ResourceId('8UCFZA68RK')]
+        profile = self.api_client.profiles.create(
+            name=name,
+            profile_type=profile_type,
+            bundle_id=bundle_id_resource_id,
+            certificates=[certificate_id],
+            devices=device_ids,
+        )
+        assert isinstance(profile, Profile)
+        assert profile.attributes.name == name
+        assert profile.attributes.profileType is profile_type
 
     def test_delete(self):
-        ...
+        profile_id = ResourceId('ZK3RZ4B465')
+        self.api_client.profiles.delete(profile_id)
 
     def test_list(self):
         profiles = self.api_client.profiles.list()

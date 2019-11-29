@@ -3,7 +3,12 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Optional, overload, Tuple
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import overload
 
 from codemagic_cli_tools.models import JsonSerializable
 
@@ -90,7 +95,7 @@ class Relationship(DictSerializable):
     _OMIT_IF_NONE_KEYS = ('data', 'meta')
 
     links: Links
-    data: Optional[Data] = None
+    data: Optional[Union[Data, List[Data]]] = None
     meta: Optional[PagingInformation] = None
 
     def __post_init__(self):
@@ -98,6 +103,9 @@ class Relationship(DictSerializable):
             self.links = Links(**self.links)
         if isinstance(self.data, dict):
             self.data = Data(**self.data)
+        elif isinstance(self.data, list):
+            if self.data and isinstance(self.data[0], dict):
+                self.data = [Data(**data) for data in self.data]
         if isinstance(self.meta, dict):
             self.meta = PagingInformation(**self.meta)
 

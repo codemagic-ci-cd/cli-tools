@@ -1,4 +1,6 @@
-from typing import List, Optional, Union
+from typing import List
+from typing import Optional
+from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleIdPlatform
@@ -34,7 +36,7 @@ class Devices(ResourceManager):
         }
         response = self.client.session.post(
             f'{self.client.API_URL}/devices',
-            json=self.client.get_create_payload(ResourceType.DEVICES, attributes=attributes)
+            json=self._get_create_payload(ResourceType.DEVICES, attributes=attributes)
         ).json()
         return Device(response['data'])
 
@@ -64,33 +66,27 @@ class Devices(ResourceManager):
         devices = self.client.paginate(f'{self.client.API_URL}/devices', params=params)
         return [Device(device) for device in devices]
 
-    def read(self, resource: Union[LinkedResourceData, ResourceId]) -> Device:
+    def read(self, device: Union[LinkedResourceData, ResourceId]) -> Device:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_device_information
         """
-        if isinstance(resource, LinkedResourceData):
-            resource_id = resource.id
-        else:
-            resource_id = resource
-        response = self.client.session.get(f'{self.client.API_URL}/devices/{resource_id}').json()
+        device_id = self._get_resource_id(device)
+        response = self.client.session.get(f'{self.client.API_URL}/devices/{device_id}').json()
         return Device(response['data'])
 
     def modify(self,
-               resource: Union[LinkedResourceData, ResourceId],
+               device: Union[LinkedResourceData, ResourceId],
                name: Optional[str] = None,
                status: Optional[DeviceStatus] = None) -> Device:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_registered_device
         """
-        if isinstance(resource, LinkedResourceData):
-            resource_id = resource.id
-        else:
-            resource_id = resource
+        device_id = self._get_resource_id(device)
         attributes = {}
         if name is not None:
             attributes['name'] = name
         if status is not None:
             attributes['status'] = status.value
-        payload = self.client.get_update_payload(resource_id, ResourceType.DEVICES, attributes=attributes)
-        response = self.client.session.patch(f'{self.client.API_URL}/devices/{resource_id}', json=payload).json()
+        payload = self._get_update_payload(device_id, ResourceType.DEVICES, attributes=attributes)
+        response = self.client.session.patch(f'{self.client.API_URL}/devices/{device_id}', json=payload).json()
         return Device(response['data'])

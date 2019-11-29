@@ -10,8 +10,6 @@ from typing import Optional
 
 import jwt
 
-from codemagic_cli_tools.apple.resources import ResourceId
-from codemagic_cli_tools.apple.resources import ResourceType
 from .api_session import AppStoreConnectApiSession
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
@@ -92,31 +90,6 @@ class AppStoreConnectApiClient:
             response = self.session.get(response['links']['next'], params=params).json()
             results.extend(response['data'])
         return results
-
-    @classmethod
-    def get_update_payload(cls,
-                           resource_id: ResourceId,
-                           resource_type: ResourceType,
-                           attributes: Dict) -> Dict:
-        return {
-            'data': {
-                'id': resource_id,
-                'type': resource_type.value,
-                'attributes': attributes
-            }
-        }
-
-    @classmethod
-    def get_create_payload(cls,
-                           resource_type: ResourceType, *,
-                           attributes: Optional[Dict] = None,
-                           relationships: Optional[Dict] = None) -> Dict:
-        data = {'type': resource_type.value}
-        if attributes is not None:
-            data['attributes'] = attributes
-        if relationships is not None:
-            data['relationships'] = relationships
-        return {'data': data}
 
     @property
     def bundle_ids(self) -> BundleIds:
