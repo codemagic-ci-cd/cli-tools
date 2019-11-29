@@ -9,13 +9,13 @@ from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-class BundleIdOperationsTest(OperationsTestsBase):
+class BundleIdsTest(ResourceManagerTestsBase):
 
     def test_register(self):
         bundle_id = self.api_client.bundle_ids.register(

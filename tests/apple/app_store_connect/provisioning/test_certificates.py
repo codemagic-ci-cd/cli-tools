@@ -7,12 +7,12 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
-from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
 @pytest.mark.usefixtures('class_unencrypted_pem')
-class CertificateOperationsTest(OperationsTestsBase):
+class CertificatesTest(ResourceManagerTestsBase):
 
     def test_create(self):
         rsa = PrivateKey.pem_to_rsa(self.unencrypted_pem.content)

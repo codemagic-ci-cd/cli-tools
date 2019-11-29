@@ -5,13 +5,13 @@ from codemagic_cli_tools.apple.resources import BundleIdCapability
 from codemagic_cli_tools.apple.resources import CapabilityType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
-from tests.apple.app_store_connect.provisioning.operations_test_base import OperationsTestsBase
+from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
-class BundleIdCapabilitiesOperationsTest(OperationsTestsBase):
+class BundleIdCapabilitiesTest(ResourceManagerTestsBase):
 
     def test_enable(self):
         capability_type = CapabilityType.ACCESS_WIFI_INFORMATION
