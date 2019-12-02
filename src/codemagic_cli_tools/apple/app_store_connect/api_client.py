@@ -38,7 +38,7 @@ class AppStoreConnectApiClient:
         self._private_key = private_key
         self._jwt: Optional[str] = None
         self._jwt_expires: datetime = datetime.now()
-        self.session = AppStoreConnectApiSession(self)
+        self.session = AppStoreConnectApiSession(self.generate_auth_headers)
         self._logger = logging.getLogger(self.__class__.__name__)
 
     @property
@@ -72,8 +72,7 @@ class AppStoreConnectApiClient:
             'aud': AppStoreConnectApiClient.JWT_AUDIENCE
         }
 
-    @property
-    def auth_headers(self) -> Dict[str, str]:
+    def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
     def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:

@@ -37,4 +37,4 @@ def test_is_token_expired(jwt_expires, is_expired, api_client, freeze_now):
 
 
 def test_auth_headers(api_client):
-    assert api_client.jwt in api_client.auth_headers['Authorization']
+    assert api_client.jwt in api_client.generate_auth_headers()['Authorization']

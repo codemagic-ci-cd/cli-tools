@@ -1,21 +1,18 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Callable, Dict
 
 import requests
 
 from .api_error import AppStoreConnectApiError
 
-if TYPE_CHECKING:
-    from codemagic_cli_tools.apple import AppStoreConnectApiClient
-
 
 class AppStoreConnectApiSession(requests.Session):
 
-    def __init__(self, app_store_connect_api: AppStoreConnectApiClient):
+    def __init__(self, auth_headers_factory: Callable[[], Dict[str, str]]):
         super().__init__()
-        self.api = app_store_connect_api
+        self._auth_headers_factory = auth_headers_factory
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def _log_response(self, response):
@@ -35,7 +32,7 @@ class AppStoreConnectApiSession(requests.Session):
     def request(self, *args, **kwargs):
         self._log_request(*args, **kwargs)
         headers = kwargs.pop('headers', {})
-        headers.update(self.api.auth_headers)
+        headers.update(self._auth_headers_factory())
         response = super().request(*args, **kwargs, headers=headers)
         self._log_response(response)
         if not response.ok:
