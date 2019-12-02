@@ -7,7 +7,6 @@ verify_ssl = true
 mypy = "*"
 pylint = "*"
 autopep8 = "*"
-typing-extensions = "*"
 twine = "*"
 ipdb = "*"
 pytest = "*"
