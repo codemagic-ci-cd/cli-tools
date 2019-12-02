@@ -3,12 +3,15 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from OpenSSL import crypto
+from cryptography import x509
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 from .json_serializable import JsonSerializable
 
 
 class Certificate(JsonSerializable):
-
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, pem: str):
@@ -65,3 +68,11 @@ class Certificate(JsonSerializable):
             'has_expired': self.has_expired,
             'extensions': self.extensions,
         }
+
+    @classmethod
+    def create_certificate_signing_request(cls, rsa_key: RSAPrivateKey) -> x509.CertificateSigningRequest:
+        subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, 'PEM')])
+        csr_builder = x509.CertificateSigningRequestBuilder() \
+            .subject_name(subject_name)
+        csr = csr_builder.sign(rsa_key, hashes.SHA256(), default_backend())
+        return csr

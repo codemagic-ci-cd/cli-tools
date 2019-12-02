@@ -50,17 +50,17 @@ class Scanner:
     def scan(self, string: Any): ...
 
 # Names in __all__ with no definition:
-#   A
-#   ASCII
-#   DOTALL
-#   I
-#   IGNORECASE
-#   L
-#   LOCALE
-#   M
-#   MULTILINE
-#   S
-#   U
-#   UNICODE
-#   VERBOSE
-#   X
+A = RegexFlag.A
+ASCII = RegexFlag.ASCII
+DOTALL = RegexFlag.DOTALL
+I = RegexFlag.I
+IGNORECASE = RegexFlag.IGNORECASE
+L = RegexFlag.L
+LOCALE = RegexFlag.LOCALE
+M = RegexFlag.M
+MULTILINE = RegexFlag.MULTILINE
+S = RegexFlag.S
+U = RegexFlag.U
+UNICODE = RegexFlag.UNICODE
+VERBOSE = RegexFlag.VERBOSE
+X = RegexFlag.X

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-import argparse
-import json
-import os
+import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List, Dict
+from typing import List, Optional, NewType, Sequence, Tuple, Iterable
 
 from . import cli
-from . import models
+from .models import ProvisioningProfile
+from .models import Certificate
+
+
+ObjectName = NewType('ObjectName', str)
 
 
 class GrabError(cli.CliAppException):
@@ -49,40 +51,61 @@ class GrabArgument(cli.Argument):
         flags=('--certificates-dir',),
         type=Path,
         description='Directory where the code signing certificates will be saved',
-        argparse_kwargs={'required': False, 'default': models.Certificate.DEFAULT_LOCATION},
+        argparse_kwargs={'required': False, 'default': Certificate.DEFAULT_LOCATION},
     )
     PROFILES_DIRECTORY = cli.ArgumentProperties(
         key='profiles_directory',
         flags=('--profiles-dir',),
         type=Path,
         description='Directory where the provisioning profiles will be saved',
-        argparse_kwargs={'required': False, 'default': models.ProvisioningProfile.DEFAULT_LOCATION},
+        argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
+    )
+    PROVISIONING_PROFILE_OBJECT_NAME = cli.ArgumentProperties(
+        key='profile_names',
+        flags=('--profile-names',),
+        type=ObjectName,
+        description='Name of provisioning profile object in Cloud Storage',
+        argparse_kwargs={'required': True, 'nargs': '+', 'metavar': 'profile-object-name'},
+    )
+    CERTIFICATE_OBJECT_NAME = cli.ArgumentProperties(
+        key='certificate_name',
+        flags=('--certificate-name',),
+        type=ObjectName,
+        description='Name of certificate object in Cloud Storage',
+        argparse_kwargs={'required': True, 'metavar': 'certificate-object-name'},
+    )
+    CERTIFICATE_PASSWORD_OBJECT_NAME = cli.ArgumentProperties(
+        key='certificate_password_name',
+        flags=('--certificate-password-name',),
+        type=ObjectName,
+        description='Name of certificate password object in Cloud Storage',
+        argparse_kwargs={'required': False, 'metavar': 'certificate-password-object-name'},
     )
 
 
+@cli.common_arguments(
+    GrabArgument.PROFILES_DIRECTORY,
+    GrabArgument.CERTIFICATES_DIRECTORY
+)
 class Grab(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
     to perform iOS code signing.
     """
 
-    def __init__(self):
+    def __init__(self,
+                 profiles_directory: Path = ProvisioningProfile.DEFAULT_LOCATION,
+                 certificates_directory: Path = Certificate.DEFAULT_LOCATION):
         super().__init__()
-
-    @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
-        return Grab()
+        self.profiles_directory = profiles_directory
+        self.certificates_directory = certificates_directory
 
     @cli.action('apple-developer',
                 GrabArgument.APPLE_DEVELOPER_TOKEN,
-                GrabArgument.BUNDLE_IDENTIFIER,
-                GrabArgument.CERTIFICATES_DIRECTORY,
-                GrabArgument.PROFILES_DIRECTORY)
+                GrabArgument.BUNDLE_IDENTIFIER)
     def fetch_from_apple_developer(self,
                                    apple_developer_token: AppleDeveloperToken,
-                                   bundle_identifier: str,
-                                   profiles_directory: Path,
-                                   certificates_directory: Path):
+                                   bundle_identifier: str):
         """
         Fetch code signing files from Apple Developer portal for
         specified bundle identifier
@@ -90,65 +113,69 @@ class Grab(cli.CliApp):
         # TODO Apple Developer Portal communication
         raise NotImplemented
 
-    @cli.action('codemagic', GrabArgument.CERTIFICATES_DIRECTORY, GrabArgument.PROFILES_DIRECTORY)
-    def fetch_from_codemagic(self, profiles_directory: Path, certificates_directory: Path):
+    @cli.action('codemagic',
+                GrabArgument.PROVISIONING_PROFILE_OBJECT_NAME,
+                GrabArgument.CERTIFICATE_OBJECT_NAME,
+                GrabArgument.CERTIFICATE_PASSWORD_OBJECT_NAME)
+    def fetch_from_codemagic(self,
+                             profile_names: List[ObjectName],
+                             certificate_name: ObjectName,
+                             certificate_password_name: Optional[ObjectName] = None) -> Tuple[List[Path], Path]:
         """
         Fetch manual code signing files from Codemagic
         """
-        signing_files_info = self._get_manual_signing_files_info()
-        self._fetch_profiles_from_codemagic(signing_files_info['provisioning_profiles'], profiles_directory)
-        self._fetch_certificates_from_codemagic(signing_files_info['code_signing_certificates'], certificates_directory)
 
-    def _get_manual_signing_files_info(self) -> Dict[str, List[Dict]]:
-        raw_info = os.environ.get('_MANUAL_SIGNING_FILES')
-        if not raw_info:
-            raise GrabError('Cannot fetch signing files from Codemagic: signing files information is not available')
-        try:
-            signing_files_info = json.loads(raw_info)
-        except ValueError:
-            self.logger.warning('Could not parse signing files info from %s', raw_info)
-            raise GrabError('Cannot fetch signing files from Codemagic: signing files information is in invalid format')
-        for key in ('provisioning_profiles', 'code_signing_certificates'):
-            if key in signing_files_info:
-                continue
-            missing_entry = key.replace("_", " ")
-            self.logger.warning(f'{missing_entry.capitalize()} are missing from signing files info {raw_info}')
+        for profile_name in profile_names:
+            if not profile_name:
+                raise GrabError(
+                    f'Cannot fetch signing files from Codemagic: provisioning profile object name not given')
+        if not certificate_name:
             raise GrabError(
-                f'Cannot fetch signing files from Codemagic: signing files information do not contain {missing_entry}')
-        return signing_files_info
+                f'Cannot fetch signing files from Codemagic: certificate object name not given')
 
-    def _fetch_profiles_from_codemagic(self, profiles_info: List[Dict], destination: Path) -> List[Path]:
-        from .storage import Storage
-        storage = Storage()
-        destination.mkdir(exist_ok=True)
-        save_paths = []
-        for profile_info in profiles_info:
-            filename = Path(profile_info['file_name'])
-            self.logger.info(f'Fetch provisioning profile {filename} from Codemagic')
-            tf = NamedTemporaryFile(prefix=f'{filename.stem}_', suffix=filename.suffix, dir=destination, delete=False)
-            tf.close()
-            storage.save_to_file(profile_info['object_name'], tf.name, silent=True)
-            self.logger.info(f'Saved provisioning profile {filename} to {tf.name}')
-            save_paths.append(Path(tf.name))
-        return save_paths
+        downloader = _CodemagicDownloader(self.profiles_directory, self.certificates_directory)
+        profile_paths = downloader.download_profiles(profile_names)
+        certificate_path = downloader.download_certificate(certificate_name, certificate_password_name)
+        return profile_paths, certificate_path
 
-    def _fetch_certificates_from_codemagic(self, certificates_info: List[Dict], destination: Path) -> List[Path]:
+
+class _CodemagicDownloader:
+
+    def __init__(self, profiles_directory: Path, certificates_directory: Path):
         from .storage import Storage
-        storage = Storage()
-        destination.mkdir(exist_ok=True)
-        save_paths = []
-        for certificate_info in certificates_info:
-            filename = Path(certificate_info['file_name'])
-            self.logger.info(f'Fetch certificate {filename} from Codemagic')
-            tf = NamedTemporaryFile(prefix=f'{filename.stem}_', suffix=filename.suffix, dir=destination, delete=False)
-            tf.close()
-            storage.save_to_file(certificate_info['object_name'], tf.name, silent=True)
-            password = certificate_info.get('password', None)
-            if password:
-                storage.save_to_file(password['object_name'], Path(f'{tf.name}.password'), silent=True)
-            self.logger.info(f'Saved certificate {filename} to {tf.name}')
-            save_paths.append(Path(tf.name))
-        return save_paths
+        self.storage = Storage()
+        self.profiles_directory = profiles_directory
+        self.certificates_directory = certificates_directory
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def _download_profile(self, profile_name: str) -> Path:
+        self.logger.info(f'Download provisioning profile {profile_name} from Codemagic')
+        path = self._get_unique_path('profile.mobileprovision', self.profiles_directory)
+        self.storage.save_to_file(profile_name, path, silent=True)
+        self.logger.info(f'Saved provisioning profile {profile_name} to {path}')
+        return path
+
+    def download_profiles(self, profiles: Sequence[ObjectName]) -> List[Path]:
+        return [self._download_profile(p) for p in profiles]
+
+    def download_certificate(self, certificate_name: ObjectName, password_name: Optional[ObjectName]) -> Path:
+        self.logger.info(f'Download certificate {certificate_name} from Codemagic')
+        path = self._get_unique_path('certificate.p12', self.certificates_directory)
+        self.storage.save_to_file(certificate_name, path, silent=True)
+        if password_name:
+            self.storage.save_to_file(password_name, Path(f'{path}.password'), silent=True)
+        self.logger.info(f'Saved certificate {certificate_name} to {path}')
+        return path
+
+    @classmethod
+    def _get_unique_path(cls, file_name: str, destination: Path) -> Path:
+        if destination.exists() and not destination.is_dir():
+            raise ValueError(f'Destination {destination} is not a directory')
+        destination.mkdir(parents=True, exist_ok=True)
+        name = Path(file_name)
+        tf = NamedTemporaryFile(prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False)
+        tf.close()
+        return Path(tf.name)
 
 
 if __name__ == '__main__':

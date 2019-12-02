@@ -1,5 +1,6 @@
 import enum
 import re
+from typing import Optional
 
 
 class Color(enum.Enum):
@@ -37,5 +38,7 @@ class Color(enum.Enum):
     BRIGHT_WHITE = '\033[97m'
     BRIGHT_WHITE_BG = '\033[107m'
 
-    def __call__(self, string: str):
+    def __call__(self, string: Optional[str]):
+        if string is None:
+            return None
         return re.sub(r'^(\s*)(.*)(\s*)$', r'\1%s\2%s\3' % (self.value, Color.RESET.value), string, flags=re.MULTILINE)

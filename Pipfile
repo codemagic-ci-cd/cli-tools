@@ -8,9 +8,14 @@ mypy = "*"
 pylint = "*"
 autopep8 = "*"
 twine = "*"
+ipdb = "*"
+pytest = "*"
 
 [packages]
 pyopenssl = "~=19.0"
+pyjwt = "~=1.7.1"
+requests = "~=2.22.0"
+cryptography = "~=2.8"
 
 [requires]
 python_version = "3.7"

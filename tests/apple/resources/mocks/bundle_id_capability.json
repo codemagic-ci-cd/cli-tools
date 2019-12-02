@@ -1,0 +1,19 @@
+{
+    "attributes": {
+        "capabilityType": "GAME_CENTER",
+        "settings": null
+    },
+    "id": "NLRN94JD59_GAME_CENTER_IOS",
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/NLRN94JD59_GAME_CENTER_IOS"
+    },
+    "relationships": {
+        "bundleId": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/NLRN94JD59_GAME_CENTER_IOS/bundleId",
+                "self": "https://api.appstoreconnect.apple.com/v1/bundleIdCapabilities/NLRN94JD59_GAME_CENTER_IOS/relationships/bundleId"
+            }
+        }
+    },
+    "type": "bundleIdCapabilities"
+}

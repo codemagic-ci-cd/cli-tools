@@ -25,5 +25,5 @@ class JsonSerializable(metaclass=_JsonSerializableMeta):
     def dict(self) -> Dict:
         raise NotImplementedError(f'Method {self.__class__.__name__}.{self.dict.__name__} is not implemented')
 
-    def json(self):
-        return json.dumps(self)
+    def json(self, *args, indent=4, **kwargs):
+        return json.dumps(self, *args, indent=indent, **kwargs)
