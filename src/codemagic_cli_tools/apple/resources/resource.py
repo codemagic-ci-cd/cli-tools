@@ -55,6 +55,9 @@ class ResourceType(enum.Enum):
 
 @dataclass
 class PagingInformation(DictSerializable):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/paginginformation
+    """
     @dataclass
     class Paging(DictSerializable):
         total: int
@@ -76,6 +79,9 @@ class Links(DictSerializable):
 
 
 class ResourceLinks(DictSerializable):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
+    """
     def __init__(_self, self):
         _self.self = self
 
