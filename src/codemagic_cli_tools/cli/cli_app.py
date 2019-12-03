@@ -68,7 +68,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         action_args = {
-            arg_type.value.key: arg_type.value.from_args(args, arg_type.get_default())
+            arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
         }
         try:
