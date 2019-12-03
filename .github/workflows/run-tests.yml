@@ -1,9 +1,9 @@
-name: Python application
+name: Tests
 
 on: [push]
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -13,6 +13,10 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
+    - uses: actions/cache@v1
+      with:
+        path: /home/runner/.local/share/virtualenvs/
+        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -21,7 +25,7 @@ jobs:
     - name: Static type checks with mypy
       run: |
         export MYPYPATH=stubs
-        mypy src/codemagic_cli_tools
+        python -m mypy src/codemagic_cli_tools
     - name: Test with pytest
       run: |
-        pytest
+        python -m pytest
