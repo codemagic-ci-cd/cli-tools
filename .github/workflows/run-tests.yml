@@ -13,22 +13,36 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - uses: actions/cache@v1
       with:
         path: /home/runner/.local/share/virtualenvs/
         key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pipenv-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install pipenv
         pipenv install --dev
+
     - name: Test workflow
       run: |
         pipenv run pip freeze
+
 #     - name: Static type checks with mypy
 #       run: |
 #         export MYPYPATH=stubs
 #         pipenv run mypy src/codemagic_cli_tools
+# 
 #     - name: Test with pytest
 #       run: |
 #         pipenv run pytest
