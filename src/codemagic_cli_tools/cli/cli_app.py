@@ -42,7 +42,7 @@ class CliAppException(Exception):
 
 
 class CliApp(metaclass=abc.ABCMeta):
-    _CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
+    CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
     def __init__(self, dry=False):
@@ -53,7 +53,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
-        return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls._CLASS_ARGUMENTS})
+        return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls.CLASS_ARGUMENTS})
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
@@ -146,7 +146,7 @@ class CliApp(metaclass=abc.ABCMeta):
                 f'required arguments for {Colors.BOLD(sub_action.action_name)}')
             optional_arguments = action_parser.add_argument_group(
                 f'optional arguments for {Colors.BOLD(sub_action.action_name)}')
-            for argument in chain(cls._CLASS_ARGUMENTS, sub_action.arguments):
+            for argument in chain(cls.CLASS_ARGUMENTS, sub_action.arguments):
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
         return parser
@@ -225,11 +225,14 @@ def common_arguments(*class_arguments: Argument):
     :param class_arguments: CLI arguments that are required to initialize the class
     """
 
-    def decorator(cli_app_type):
+    def decorator(cli_app_type: Type[CliApp]):
         if not issubclass(cli_app_type, CliApp):
             raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
         if class_arguments:
-            cli_app_type._CLASS_ARGUMENTS = tuple(class_arguments)
+            for class_argument in class_arguments:
+                if not isinstance(class_argument, Argument):
+                    raise TypeError(f'Invalid argument to common_arguments: {class_argument}')
+            cli_app_type.CLASS_ARGUMENTS += tuple(class_arguments)
         return cli_app_type
 
     return decorator

@@ -5,7 +5,6 @@ from datetime import datetime
 from datetime import timedelta
 from typing import Dict
 from typing import List
-from typing import NewType
 from typing import Optional
 
 import jwt
@@ -17,14 +16,21 @@ from .provisioning import Certificates
 from .provisioning import Devices
 from .provisioning import Profiles
 
-KeyIdentifier = NewType('KeyIdentifier', str)
-IssuerId = NewType('IssuerId', str)
+
+class KeyIdentifier(str):
+    pass
+
+
+class IssuerId(str):
+    pass
 
 
 class AppStoreConnectApiClient:
     JWT_AUDIENCE = 'appstoreconnect-v1'
     JWT_ALGORITHM = 'ES256'
     API_URL = 'https://api.appstoreconnect.apple.com/v1'
+    API_KEYS_DOCS_URL = \
+        'https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api'
 
     def __init__(self, key_identifier: KeyIdentifier, issuer_id: IssuerId, private_key: str):
         """
