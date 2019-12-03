@@ -115,16 +115,6 @@ class ArgumentProperties(NamedTuple):
     def _parser_argument(self, parser_argument):
         setattr(self, '__parser_argument', parser_argument)
 
-    def raise_argument_error(self, message):
-        """
-        :param message: ArgumentError message
-        :raises: argparse.ArgumentError
-        """
-        raise argparse.ArgumentError(self._parser_argument, message)
-
-    def from_args(self, cli_args: argparse.Namespace, default=None):
-        return vars(cli_args)[self.key] or default
-
     def get_description(self):
         description = self.description
         try:
@@ -161,3 +151,13 @@ class Argument(ArgumentProperties, enum.Enum):
 
     def get_default(self):
         return (self.value.argparse_kwargs or {}).get('default', None)
+
+    def from_args(self, cli_args: argparse.Namespace, default=None):
+        return vars(cli_args)[self.value.key] or default
+
+    def raise_argument_error(self, message):
+        """
+        :param message: ArgumentError message
+        :raises: argparse.ArgumentError
+        """
+        raise argparse.ArgumentError(self._parser_argument, message)

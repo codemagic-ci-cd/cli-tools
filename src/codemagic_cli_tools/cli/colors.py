@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import enum
 import re
+from functools import reduce
 from typing import Optional
+from typing import overload
 
 
-class Color(enum.Enum):
-
+class Colors(enum.Enum):
     RESET = '\033[0m'
     BOLD = '\033[01m'
     RED = '\033[31m'
@@ -38,7 +41,19 @@ class Color(enum.Enum):
     BRIGHT_WHITE = '\033[97m'
     BRIGHT_WHITE_BG = '\033[107m'
 
+    @overload
+    def __call__(self, string: None) -> None:
+        ...
+
+    @overload
+    def __call__(self, string: str) -> str:
+        ...
+
     def __call__(self, string: Optional[str]):
         if string is None:
             return None
-        return re.sub(r'^(\s*)(.*)(\s*)$', r'\1%s\2%s\3' % (self.value, Color.RESET.value), string, flags=re.MULTILINE)
+        return re.sub(r'^(\s*)(.*)(\s*)$', r'\1%s\2%s\3' % (self.value, Colors.RESET.value), string, flags=re.MULTILINE)
+
+    @classmethod
+    def apply(cls, string: str, *colors: Colors) -> str:
+        return reduce(lambda s, color: color(s), colors, string)

@@ -7,8 +7,8 @@ import pathlib
 import sys
 from typing import Optional
 
-from . import cli
-from . import models
+from codemagic_cli_tools import cli
+from codemagic_cli_tools import models
 
 
 class Seconds(int):

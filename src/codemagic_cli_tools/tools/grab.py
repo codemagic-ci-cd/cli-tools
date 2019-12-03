@@ -3,12 +3,15 @@
 import logging
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import List, Optional, NewType, Sequence, Tuple, Iterable
+from typing import List
+from typing import NewType
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
 
-from . import cli
-from .models import ProvisioningProfile
-from .models import Certificate
-
+from codemagic_cli_tools import cli
+from codemagic_cli_tools.models import Certificate
+from codemagic_cli_tools.models import ProvisioningProfile
 
 ObjectName = NewType('ObjectName', str)
 

@@ -5,9 +5,12 @@ import pathlib
 import tempfile
 import urllib.request
 import zipfile
-from typing import List, Optional, NamedTuple
+from typing import List
+from typing import NamedTuple
+from typing import Optional
 
-from . import cli, models
+from codemagic_cli_tools import cli
+from codemagic_cli_tools import models
 
 
 class UniversalApkGeneratorError(cli.CliAppException):
