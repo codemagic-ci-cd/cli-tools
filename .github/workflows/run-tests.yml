@@ -30,19 +30,18 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        python -m pip install pipenv
+        python -m pip install --upgrade pip pipenv
         pipenv install --dev
 
-    - name: Test workflow
+    - name: Pipenv checks
       run: |
-        pipenv run pip freeze
+        pipenv checks
 
 #     - name: Static type checks with mypy
 #       run: |
 #         export MYPYPATH=stubs
 #         pipenv run mypy src/codemagic_cli_tools
 # 
-#     - name: Test with pytest
-#       run: |
-#         pipenv run pytest
+    - name: Test with pytest
+      run: |
+        pipenv run pytest
