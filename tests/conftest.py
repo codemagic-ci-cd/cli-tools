@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import os
 import pathlib
@@ -121,3 +122,11 @@ def class_unencrypted_pem(request):
 @pytest.fixture(params=[_encrypted_pem(), _unencrypted_pem()])
 def pem(request):
     return request.param
+
+
+@pytest.fixture
+def cli_argument_group():
+    parser = argparse.ArgumentParser()
+    action_parsers = parser.add_subparsers()
+    action_parser = action_parsers.add_parser('action parser')
+    return action_parser.add_argument_group()

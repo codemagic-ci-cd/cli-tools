@@ -2,9 +2,11 @@
 
 import re
 import typing
-from typing import Iterator, List, Optional, Pattern
+from typing import Iterator
+from typing import Optional
+from typing import Pattern
 
-from . import cli
+from codemagic_cli_tools import cli
 
 
 class GitChangelogError(cli.CliAppException):

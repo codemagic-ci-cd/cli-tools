@@ -4,7 +4,7 @@ from setuptools import setup
 
 def get_version():
     # TODO: implement versioning
-    return '0.0.2'
+    return '0.0.3'
 
 
 setup(
@@ -36,12 +36,11 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "storage = codemagic_cli_tools.storage:Storage.invoke_cli",
-            "grab = codemagic_cli_tools.grab:Grab.invoke_cli",
-            "keychain = codemagic_cli_tools.keychain:Keychain.invoke_cli",
-            "git-changelog = codemagic_cli_tools.git_changelog:GitChangelog.invoke_cli",
-            "universal-apk = codemagic_cli_tools.universal_apk_generator:UniversalApkGenerator.invoke_cli",
+            "storage = codemagic_cli_tools.tools:Storage.invoke_cli",
+            "grab = codemagic_cli_tools.tools:Grab.invoke_cli",
+            "keychain = codemagic_cli_tools.tools:Keychain.invoke_cli",
+            "git-changelog = codemagic_cli_tools.tools:GitChangelog.invoke_cli",
+            "universal-apk = codemagic_cli_tools.tools:UniversalApkGenerator.invoke_cli",
         ]
     },
 )
-

@@ -6,7 +6,9 @@ import logging
 import subprocess
 import sys
 import time
-from typing import Optional, Sequence, IO
+from typing import IO
+from typing import Optional
+from typing import Sequence
 
 from .cli_types import CommandArg, ObfuscatedCommand
 

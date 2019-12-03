@@ -6,7 +6,7 @@ import argparse
 import pathlib
 from tempfile import NamedTemporaryFile
 
-from . import cli
+from codemagic_cli_tools import cli
 
 DEFAULT_BUCKET = 'secure.codemagic.io'
 
