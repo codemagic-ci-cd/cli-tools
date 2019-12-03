@@ -1,4 +1,4 @@
-name: Tests
+name: Checks
 
 on: [push]
 
@@ -22,10 +22,13 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install pipenv
         pipenv install --dev
-    - name: Static type checks with mypy
+    - name: Test workflow
       run: |
-        export MYPYPATH=stubs
-        pipenv run mypy src/codemagic_cli_tools
-    - name: Test with pytest
-      run: |
-        pipenv run pytest
+        pipenv run pip freeze
+#     - name: Static type checks with mypy
+#       run: |
+#         export MYPYPATH=stubs
+#         pipenv run mypy src/codemagic_cli_tools
+#     - name: Test with pytest
+#       run: |
+#         pipenv run pytest
