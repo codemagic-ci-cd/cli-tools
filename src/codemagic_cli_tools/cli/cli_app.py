@@ -18,7 +18,7 @@ from typing import NoReturn, Optional, Sequence, Iterable, Type, List, Tuple
 from .argument import Argument, ActionCallable
 from .cli_process import CliProcess
 from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
-from .color import Color
+from .colors import Color
 
 
 class CliAppException(Exception):
