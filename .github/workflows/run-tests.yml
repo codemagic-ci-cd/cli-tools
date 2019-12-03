@@ -35,7 +35,7 @@ jobs:
 
     - name: Pipenv checks
       run: |
-        pipenv checks
+        pipenv check
 
 #     - name: Static type checks with mypy
 #       run: |
