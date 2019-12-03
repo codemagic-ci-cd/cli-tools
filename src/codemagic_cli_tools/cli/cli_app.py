@@ -13,11 +13,19 @@ import shutil
 import sys
 from functools import wraps
 from itertools import chain
-from typing import NoReturn, Optional, Sequence, Iterable, Type, List, Tuple
+from typing import Iterable
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Type
 
-from .argument import Argument, ActionCallable
+from .argument import ActionCallable
+from .argument import Argument
 from .cli_process import CliProcess
-from .cli_types import CommandArg, ObfuscatedCommand, ObfuscationPattern
+from .cli_types import CommandArg
+from .cli_types import ObfuscatedCommand
+from .cli_types import ObfuscationPattern
 from .colors import Colors
 
 

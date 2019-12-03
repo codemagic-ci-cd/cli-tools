@@ -3,11 +3,11 @@ from __future__ import annotations
 import enum
 import re
 from functools import reduce
-from typing import Optional, overload
+from typing import Optional
+from typing import overload
 
 
 class Colors(enum.Enum):
-
     RESET = '\033[0m'
     BOLD = '\033[01m'
     RED = '\033[31m'

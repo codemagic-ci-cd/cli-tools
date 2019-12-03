@@ -2,7 +2,9 @@
 
 import re
 import typing
-from typing import Iterator, Optional, Pattern
+from typing import Iterator
+from typing import Optional
+from typing import Pattern
 
 from codemagic_cli_tools import cli
 
