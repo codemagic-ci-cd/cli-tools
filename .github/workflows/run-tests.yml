@@ -20,11 +20,8 @@ jobs:
         pipenv install --dev
     - name: Static type checks with mypy
       run: |
-        pipenv shell
         export MYPYPATH=stubs
-        python -m mypy src/codemagic_cli_tools
+        pipenv run mypy src/codemagic_cli_tools
     - name: Test with pytest
       run: |
-        pipenv shell
-        pipenv install --dev
-        python -m pytest
+        pipenv run pytest
