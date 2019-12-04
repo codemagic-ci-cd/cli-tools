@@ -57,7 +57,7 @@ class CustomStr(str):
 ])
 def test_environment_argument_value_custom_type(
         given_type: Type, raw_input: str, expected_value: Any):
-    class CustomTypeEnvVar(EnvironmentArgumentValue):
+    class CustomTypeEnvVar(EnvironmentArgumentValue[given_type]):
         argument_type = given_type
 
     argument_value = CustomTypeEnvVar(raw_input)

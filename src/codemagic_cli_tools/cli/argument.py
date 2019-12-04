@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import abc
 import argparse
 import enum
 import os
@@ -37,13 +38,14 @@ class EnumArgumentValue(enum.Enum):
         return self.name.lower()
 
 
-T = TypeVar('T', type, int)
+T = TypeVar('T')
 
 
-class EnvironmentArgumentValue(Generic[T]):
-    argument_type: Type = str
+class EnvironmentArgumentValue(Generic[T], metaclass=abc.ABCMeta):
 
-    def __init__(self, raw_value: str, ):
+    argument_type: Type[T] = str  # type: ignore
+
+    def __init__(self, raw_value: str):
         self._raw_value = raw_value
         self.value: T = self._parse_value()
 
@@ -81,7 +83,7 @@ class EnvironmentArgumentValue(Generic[T]):
             value = self._raw_value
         if not self._is_valid(value):
             raise argparse.ArgumentTypeError('Provided value is not valid')
-        return self.argument_type(value)
+        return self.argument_type(value)  # type: ignore
 
     @classmethod
     def get_description(cls, properties: ArgumentProperties) -> str:
