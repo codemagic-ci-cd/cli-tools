@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import AnyStr
 from typing import List
 from typing import Optional
@@ -11,14 +12,19 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class CertificateOrdering(ResourceManager.Ordering):
-    CERTIFICATE_TYPE = 'certificateType'
-    DISPLAY_NAME = 'displayName'
-    ID = 'id'
-    SERIAL_NUMBER = 'serialNumber'
-
-
 class Certificates(ResourceManager):
+    @dataclass
+    class Filter(ResourceManager.Filter):
+        serial_number: Optional[str] = None
+        certificate_type: Optional[CertificateType] = None
+        display_name: Optional[str] = None
+
+    class Ordering(ResourceManager.Ordering):
+        CERTIFICATE_TYPE = 'certificateType'
+        DISPLAY_NAME = 'displayName'
+        ID = 'id'
+        SERIAL_NUMBER = 'serialNumber'
+
     """
     Certificates
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
@@ -43,19 +49,13 @@ class Certificates(ResourceManager):
         return Certificate(response['data'])
 
     def list(self,
-             filter_certificate_type: Optional[CertificateType] = None,
-             filter_display_name: Optional[str] = None,
-             ordering=CertificateOrdering.DISPLAY_NAME,
+             certificate_filter: Filter = Filter(),
+             ordering=Ordering.DISPLAY_NAME,
              reverse=False) -> List[Certificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
         """
-        params = {'sort': ordering.as_param(reverse)}
-        if filter_certificate_type is not None:
-            params['filter[certificateType]'] = filter_certificate_type.value
-        if filter_display_name is not None:
-            params['filter[displayName]'] = filter_display_name
-
+        params = {'sort': ordering.as_param(reverse), **certificate_filter.as_query_params()}
         certificates = self.client.paginate(f'{self.client.API_URL}/certificates', params=params)
         return [Certificate(certificate) for certificate in certificates]
 

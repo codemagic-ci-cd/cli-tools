@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List
 from typing import Optional
 from typing import Union
@@ -12,14 +13,21 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class BundleIdOrdering(ResourceManager.Ordering):
-    ID = 'id'
-    NAME = 'name'
-    PLATFORM = 'platform'
-    SEED_ID = 'seedId'
-
-
 class BundleIds(ResourceManager):
+    @dataclass
+    class Filter(ResourceManager.Filter):
+        id: Optional[str] = None
+        identifier: Optional[str] = None
+        name: Optional[str] = None
+        platform: Optional[BundleIdPlatform] = None
+        seed_id: Optional[str] = None
+
+    class Ordering(ResourceManager.Ordering):
+        ID = 'id'
+        NAME = 'name'
+        PLATFORM = 'platform'
+        SEED_ID = 'seedId'
+
     """
     Bundle IDs
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids
@@ -63,11 +71,14 @@ class BundleIds(ResourceManager):
         bundle_id_resource_id = self._get_resource_id(bundle_id)
         self.client.session.delete(f'{self.client.API_URL}/bundleIds/{bundle_id_resource_id}')
 
-    def list(self, ordering=BundleIdOrdering.NAME, reverse=False) -> List[BundleId]:
+    def list(self,
+             bundle_id_filter: Filter = Filter(),
+             ordering=Ordering.NAME,
+             reverse=False) -> List[BundleId]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_bundle_ids
         """
-        params = {'sort': ordering.as_param(reverse)}
+        params = {'sort': ordering.as_param(reverse), **bundle_id_filter.as_query_params()}
         bundle_ids = self.client.paginate(f'{self.client.API_URL}/bundleIds', params=params)
         return [BundleId(bundle_id) for bundle_id in bundle_ids]
 

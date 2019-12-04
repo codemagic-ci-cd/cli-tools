@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List
 from typing import Optional
 from typing import Union
@@ -11,15 +12,22 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class DeviceOrdering(ResourceManager.Ordering):
-    ID = 'id'
-    NAME = 'name'
-    PLATFORM = 'platform'
-    STATUS = 'status'
-    UDID = 'udid'
-
-
 class Devices(ResourceManager):
+    @dataclass
+    class Filter(ResourceManager.Filter):
+        id: Optional[Union[str, ResourceId]] = None
+        name: Optional[str] = None
+        platform: Optional[BundleIdPlatform] = None
+        status: Optional[DeviceStatus] = None
+        udid: Optional[str] = None
+
+    class Ordering(ResourceManager.Ordering):
+        ID = 'id'
+        NAME = 'name'
+        PLATFORM = 'platform'
+        STATUS = 'status'
+        UDID = 'udid'
+
     """
     Devices
     https://developer.apple.com/documentation/appstoreconnectapi/devices
@@ -41,28 +49,13 @@ class Devices(ResourceManager):
         return Device(response['data'])
 
     def list(self,
-             filter_id: Optional[Union[str, ResourceId]] = None,
-             filter_name: Optional[str] = None,
-             filter_platform: Optional[BundleIdPlatform] = None,
-             filter_status: Optional[DeviceStatus] = None,
-             filter_udid: Optional[str] = None,
-             ordering=DeviceOrdering.NAME,
+             device_filter: Filter = Filter(),
+             ordering=Ordering.NAME,
              reverse=False) -> List[Device]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_devices
         """
-        params = {'sort': ordering.as_param(reverse)}
-        if filter_id is not None:
-            params['filter[id]'] = filter_id
-        if filter_name is not None:
-            params['filter[name]'] = filter_name
-        if filter_platform is not None:
-            params['filter[platform]'] = filter_platform.value
-        if filter_status is not None:
-            params['filter[status]'] = filter_status.value
-        if filter_udid is not None:
-            params['filter[udid]'] = filter_udid
-
+        params = {'sort': ordering.as_param(reverse), **device_filter.as_query_params()}
         devices = self.client.paginate(f'{self.client.API_URL}/devices', params=params)
         return [Device(device) for device in devices]
 

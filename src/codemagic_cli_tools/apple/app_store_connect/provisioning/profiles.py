@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List
 from typing import Optional
 from typing import Union
@@ -14,14 +15,20 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class ProfileOrdering(ResourceManager.Ordering):
-    ID = 'id'
-    NAME = 'name'
-    PROFILE_STATE = 'profileState'
-    PROFILE_TYPE = 'profileType'
-
-
 class Profiles(ResourceManager):
+    @dataclass
+    class Filter(ResourceManager.Filter):
+        id: Optional[Union[str, ResourceId]] = None
+        name: Optional[str] = None
+        profile_state: Optional[ProfileState] = None
+        profile_type: Optional[ProfileType] = None
+
+    class Ordering(ResourceManager.Ordering):
+        ID = 'id'
+        NAME = 'name'
+        PROFILE_STATE = 'profileState'
+        PROFILE_TYPE = 'profileType'
+
     """
     Profiles
     https://developer.apple.com/documentation/appstoreconnectapi/profiles
@@ -66,25 +73,13 @@ class Profiles(ResourceManager):
         self.client.session.delete(f'{self.client.API_URL}/profiles/{profile_id}')
 
     def list(self,
-             filter_id: Optional[Union[str, ResourceId]] = None,
-             filter_name: Optional[str] = None,
-             filter_profile_state: Optional[ProfileState] = None,
-             filter_profile_type: Optional[ProfileType] = None,
-             ordering=ProfileOrdering.NAME,
+             profile_filter: Filter = Filter(),
+             ordering=Ordering.NAME,
              reverse=False) -> List[Profile]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_profiles
         """
-        params = {'sort': ordering.as_param(reverse)}
-        if filter_id is not None:
-            params['filter[id]'] = filter_id
-        if filter_profile_state is not None:
-            params['filter[profileState]'] = filter_profile_state.value
-        if filter_profile_type is not None:
-            params['filter[profileType]'] = filter_profile_type.value
-        if filter_name is not None:
-            params['filter[name]'] = filter_name
-
+        params = {'sort': ordering.as_param(reverse), **profile_filter.as_query_params()}
         profiles = self.client.paginate(f'{self.client.API_URL}/profiles', params=params)
         return [Profile(profile) for profile in profiles]
 
