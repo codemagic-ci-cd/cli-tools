@@ -10,6 +10,9 @@ from typing import overload
 class Colors(enum.Enum):
     RESET = '\033[0m'
     BOLD = '\033[01m'
+    ITALIC = '\033[03m'
+    UNDERLINE = '\033[04m'
+    STRIKE = '\033[09m'
     RED = '\033[31m'
     RED_BG = '\033[41m'
     GREEN = '\033[32m'
@@ -57,3 +60,14 @@ class Colors(enum.Enum):
     @classmethod
     def apply(cls, string: str, *colors: Colors) -> str:
         return reduce(lambda s, color: color(s), colors, string)
+
+
+if __name__ == '__main__':
+    styles = [
+        Colors.BLUE,
+        Colors.BOLD,
+        Colors.ITALIC,
+        Colors.STRIKE,
+        Colors.YELLOW_BG
+    ]
+    print(Colors.apply(' '.join(s.name.lower() for s in styles), *styles))

@@ -116,14 +116,28 @@ class CliApp(metaclass=abc.ABCMeta):
         logger.setLevel(log_level)
 
     @classmethod
-    def _setup_default_cli_options(cls, action_parser):
-        action_parser.add_argument('--disable-logging', dest='log_commands', action='store_false',
+    def fmt(cls, s):
+        return Colors.apply(s, Colors.UNDERLINE)
+
+    @classmethod
+    def _setup_default_cli_options(cls, cli_options_parser):
+        options_group = cli_options_parser.add_argument_group(cls.fmt('Options'))
+        executable = cli_options_parser.prog.split()[0]
+        tool_required_arguments = cli_options_parser.add_argument_group(
+            cls.fmt(f'Required arguments for {Colors.BOLD(executable)}'))
+        tool_optional_arguments = cli_options_parser.add_argument_group(
+            cls.fmt(f'Optional arguments for {Colors.BOLD(executable)}'))
+        for argument in cls.CLASS_ARGUMENTS:
+            argument_group = tool_required_arguments if argument.is_required() else tool_optional_arguments
+            argument.register(argument_group)
+
+        options_group.add_argument('--disable-logging', dest='log_commands', action='store_false',
                                    help='Disable log output for actions')
-        action_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+        options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging')
-        action_parser.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
                                    help='Choose which stream to use for log output. [Default: stderr]')
-        action_parser.set_defaults(verbose=False, log_commands=True)
+        options_group.set_defaults(verbose=False, log_commands=True)
 
     @classmethod
     def _setup_cli_options(cls) -> argparse.ArgumentParser:
@@ -133,8 +147,13 @@ class CliApp(metaclass=abc.ABCMeta):
         # Patch help message width
         os.environ['COLUMNS'] = str(shutil.get_terminal_size(fallback=(100, 24)).columns)
         parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__))
+        cls._setup_default_cli_options(parser)
 
-        action_parsers = parser.add_subparsers(dest='action', required=True)
+        action_parsers = parser.add_subparsers(
+            dest='action',
+            required=True,
+            title=Colors.BOLD(Colors.UNDERLINE('Available commands'))
+        )
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
@@ -143,10 +162,10 @@ class CliApp(metaclass=abc.ABCMeta):
 
             cls._setup_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(
-                f'required arguments for {Colors.BOLD(sub_action.action_name)}')
+                cls.fmt(f'Required arguments for action {Colors.BOLD(sub_action.action_name)}'))
             optional_arguments = action_parser.add_argument_group(
-                f'optional arguments for {Colors.BOLD(sub_action.action_name)}')
-            for argument in chain(cls.CLASS_ARGUMENTS, sub_action.arguments):
+                cls.fmt(f'Optional arguments for action {Colors.BOLD(sub_action.action_name)}'))
+            for argument in sub_action.arguments:
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
         return parser

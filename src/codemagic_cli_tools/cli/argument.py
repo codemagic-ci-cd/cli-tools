@@ -7,7 +7,7 @@ import enum
 import os
 import types
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 from typing import Callable
 from typing import Dict
 from typing import Generic
@@ -161,7 +161,7 @@ class Argument(ArgumentProperties, enum.Enum):
     def from_args(self, cli_args: argparse.Namespace, default=None):
         return vars(cli_args)[self.value.key] or default
 
-    def raise_argument_error(self, message):
+    def raise_argument_error(self, message) -> NoReturn:
         """
         :param message: ArgumentError message
         :raises: argparse.ArgumentError
