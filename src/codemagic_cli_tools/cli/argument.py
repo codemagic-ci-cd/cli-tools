@@ -6,17 +6,17 @@ import enum
 import os
 import types
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    NamedTuple,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Generic
+from typing import NamedTuple
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Type
+from typing import TypeVar
+from typing import Union
 
 
 class ActionCallable:
@@ -37,15 +37,19 @@ class EnumArgumentValue(enum.Enum):
         return self.name.lower()
 
 
-class EnvironmentArgumentValue:
+T = TypeVar('T', type, int)
 
-    def __init__(self, raw_value: str):
+
+class EnvironmentArgumentValue(Generic[T]):
+    argument_type: Type = str
+
+    def __init__(self, raw_value: str, ):
         self._raw_value = raw_value
-        self.value = self._parse_value()
+        self.value: T = self._parse_value()
 
     @classmethod
-    def _is_valid(cls, value: str) -> bool:
-        return bool(value)
+    def _is_valid(cls, raw_value: str) -> bool:
+        return bool(raw_value)
 
     def _is_from_environment(self) -> bool:
         return self._raw_value.startswith('@env:')
@@ -66,9 +70,9 @@ class EnvironmentArgumentValue:
             raise argparse.ArgumentTypeError(f'File "{path}" does not exist')
         if not path.is_file():
             raise argparse.ArgumentTypeError(f'"{path}" is not a file')
-        return path.read_text()[:-1]  # Strip the added newline character from the end
+        return path.read_text()
 
-    def _parse_value(self) -> str:
+    def _parse_value(self) -> T:
         if self._is_from_environment():
             value = self._get_from_environment()
         elif self._is_from_file():
@@ -77,14 +81,14 @@ class EnvironmentArgumentValue:
             value = self._raw_value
         if not self._is_valid(value):
             raise argparse.ArgumentTypeError('Provided value is not valid')
-        return value
+        return self.argument_type(value)
 
     @classmethod
     def get_description(cls, properties: ArgumentProperties) -> str:
         description = f'{properties.description.rstrip(".")}.'
         usage = f'Alternatively to entering "<{properties.key}>" in plaintext, ' \
-            f'it may also be specified using a "@env:" prefix followed by a environment variable name, ' \
-            f'or "@file:" prefix followed by a path to the file containing the value.'
+                f'it may also be specified using a "@env:" prefix followed by a environment variable name, ' \
+                f'or "@file:" prefix followed by a path to the file containing the value.'
         example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>", ' \
                   'and "@env:<file_path>" uses the value from file at "<file_path>".'
         try:

@@ -17,7 +17,7 @@ class Seconds(int):
 
 class Password(cli.EnvironmentArgumentValue):
     @classmethod
-    def _is_valid(cls, value: str) -> bool:
+    def _is_valid(cls, raw_value: str) -> bool:
         return True
 
 
