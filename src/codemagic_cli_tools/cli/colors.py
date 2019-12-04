@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 import re
+import sys
 from functools import reduce
 from typing import Optional
 from typing import overload
@@ -55,7 +56,11 @@ class Colors(enum.Enum):
     def __call__(self, string: Optional[str]):
         if string is None:
             return None
-        return re.sub(r'^(\s*)(.*)(\s*)$', r'\1%s\2%s\3' % (self.value, Colors.RESET.value), string, flags=re.MULTILINE)
+        elif sys.stdout.isatty():
+            patt = re.compile(r'^(\s*)(.*)(\s*)$', flags=re.MULTILINE)
+            return patt.sub(r'\1%s\2%s\3' % (self.value, Colors.RESET.value), string)
+        else:
+            return string
 
     @classmethod
     def apply(cls, string: str, *colors: Colors) -> str:
@@ -64,10 +69,12 @@ class Colors(enum.Enum):
 
 if __name__ == '__main__':
     styles = [
-        Colors.BLUE,
+        Colors.GREEN,
         Colors.BOLD,
         Colors.ITALIC,
         Colors.STRIKE,
-        Colors.YELLOW_BG
+        Colors.BRIGHT_BLACK_BG
     ]
-    print(Colors.apply(' '.join(s.name.lower() for s in styles), *styles))
+    print(Colors.apply(' '.join(s.name for s in styles), *styles))
+    for c in Colors:
+        print(c(c.name))

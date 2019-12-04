@@ -42,6 +42,23 @@ class CliAppException(Exception):
 
 
 class CliApp(metaclass=abc.ABCMeta):
+    class HelpFormatter(argparse.HelpFormatter):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            if sys.stdout.isatty():
+                self._width = shutil.get_terminal_size(fallback=(100, 24)).columns
+            else:
+                self._width = sys.maxsize
+
+        def _format_args(self, *args, **kwargs):
+            return Colors.CYAN(super()._format_args(*args, **kwargs))
+
+        def _format_action_invocation(self, action):
+            default = super()._format_action_invocation(action)
+            if action.option_strings:
+                return Colors.BRIGHT_BLUE(default)
+            return default
+
     CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
@@ -145,8 +162,7 @@ class CliApp(metaclass=abc.ABCMeta):
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
         # Patch help message width
-        os.environ['COLUMNS'] = str(shutil.get_terminal_size(fallback=(100, 24)).columns)
-        parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__))
+        parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__), formatter_class=cls.HelpFormatter)
         cls._setup_default_cli_options(parser)
 
         action_parsers = parser.add_subparsers(
@@ -157,14 +173,15 @@ class CliApp(metaclass=abc.ABCMeta):
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,
+                formatter_class=cls.HelpFormatter,
                 help=sub_action.__doc__,
                 description=Colors.BOLD(sub_action.__doc__))
 
             cls._setup_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(
-                cls.fmt(f'Required arguments for action {Colors.BOLD(sub_action.action_name)}'))
+                cls.fmt(f'Required arguments for command {Colors.BOLD(sub_action.action_name)}'))
             optional_arguments = action_parser.add_argument_group(
-                cls.fmt(f'Optional arguments for action {Colors.BOLD(sub_action.action_name)}'))
+                cls.fmt(f'Optional arguments for command {Colors.BOLD(sub_action.action_name)}'))
             for argument in sub_action.arguments:
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
