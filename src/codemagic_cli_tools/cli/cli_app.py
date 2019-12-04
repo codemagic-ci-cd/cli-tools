@@ -161,7 +161,6 @@ class CliApp(metaclass=abc.ABCMeta):
         if cls.__doc__ is None:
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
-        # Patch help message width
         parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__), formatter_class=cls.HelpFormatter)
         cls._setup_default_cli_options(parser)
 
