@@ -11,10 +11,12 @@ from .api_error import AppStoreConnectApiError
 
 class AppStoreConnectApiSession(requests.Session):
 
-    def __init__(self, auth_headers_factory: Callable[[], Dict[str, str]]):
+    def __init__(self, auth_headers_factory: Callable[[], Dict[str, str]], log_requests: bool = False):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
         self._logger = logging.getLogger(self.__class__.__name__)
+        if not log_requests:
+            self._logger.setLevel(logging.WARNING)
 
     def _log_response(self, response):
         try:

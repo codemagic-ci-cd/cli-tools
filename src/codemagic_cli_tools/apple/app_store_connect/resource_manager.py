@@ -36,6 +36,15 @@ class ResourceManager(metaclass=abc.ABCMeta):
                 if value is not None
             }
 
+        def __bool__(self):
+            return any(self.__dict__.values())
+
+        def constraints(self) -> Optional[str]:
+            query_params = self.as_query_params()
+            if not query_params:
+                return None
+            return ', '.join(f'{param}={value}' for param, value in query_params.items())
+
     class Ordering(enum.Enum):
         def as_param(self, reverse=False):
             return f'{"-" if reverse else ""}{self.value}'

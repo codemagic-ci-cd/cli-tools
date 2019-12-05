@@ -32,15 +32,6 @@ class ActionCallable:
     arguments: Sequence[Argument]
 
 
-class EnumArgumentValue(enum.Enum):
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return self.name.lower()
-
-
 T = TypeVar('T')
 
 

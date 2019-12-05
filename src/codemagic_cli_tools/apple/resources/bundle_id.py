@@ -11,6 +11,9 @@ class BundleIdPlatform(enum.Enum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
 
+    def __str__(self):
+        return self.value
+
 
 class BundleId(Resource):
     """

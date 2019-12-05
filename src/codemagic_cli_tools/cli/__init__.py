@@ -1,6 +1,5 @@
 from .argument import Argument
 from .argument import ArgumentProperties
-from .argument import EnumArgumentValue
 from .argument import EnvironmentArgumentValue
 from .argument import EnvironmentVariableDefaultArgumentValue
 from .cli_app import CliApp

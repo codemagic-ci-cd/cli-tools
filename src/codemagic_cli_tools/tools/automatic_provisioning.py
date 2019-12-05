@@ -6,9 +6,11 @@ import argparse
 import pathlib
 
 from codemagic_cli_tools import cli
+from codemagic_cli_tools.apple import AppStoreConnectApiError
 from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic_cli_tools.apple.app_store_connect import IssuerId
 from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
+from codemagic_cli_tools.apple.resources import BundleIdPlatform
 from codemagic_cli_tools.cli.colors import Colors
 from .base_provisioning import BaseProvisioning
 
@@ -50,6 +52,13 @@ API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL
 
 
 class AutomaticProvisioningArgument(cli.Argument):
+    LOG_REQUESTS = cli.ArgumentProperties(
+        key='log_requests',
+        flags=('--log-api-calls',),
+        type=bool,
+        description='Turn on logging for App Store Connect API HTTP requests',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
     ISSUER_ID = cli.ArgumentProperties(
         key='issuer_id',
         flags=('--issuer-id',),
@@ -81,13 +90,30 @@ class AutomaticProvisioningArgument(cli.Argument):
     )
     BUNDLE_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_identifier',
-        flags=('--bundle-identifier',),
         description='Bundle identifier for which the signing files will be downloaded',
-        argparse_kwargs={'required': True},
+    )
+    CREATE = cli.ArgumentProperties(
+        key='create',
+        flags=('--create',),
+        type=bool,
+        description='Whether to create the resource if id does not exist yet',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    PLATFORM = cli.ArgumentProperties(
+        key='platform',
+        flags=('--platform',),
+        type=BundleIdPlatform,
+        description='Bundle ID platform',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BundleIdPlatform),
+            'default': BundleIdPlatform.IOS,
+        },
     )
 
 
 @cli.common_arguments(
+    AutomaticProvisioningArgument.LOG_REQUESTS,
     AutomaticProvisioningArgument.ISSUER_ID,
     AutomaticProvisioningArgument.KEY_IDENTIFIER,
     AutomaticProvisioningArgument.PRIVATE_KEY,
@@ -99,12 +125,19 @@ class AutomaticProvisioning(BaseProvisioning):
     from Apple Developer Portal using App Store Connect API to perform iOS code signing.
     """
 
-    def __init__(self, key_identifier: KeyIdentifier, issuer_id: IssuerId, private_key: str, **kwargs):
+    def __init__(self,
+                 key_identifier: KeyIdentifier,
+                 issuer_id: IssuerId,
+                 private_key: str,
+                 log_requests: bool = False,
+                 **kwargs):
         super().__init__(**kwargs)
         self.api_client = AppStoreConnectApiClient(
             key_identifier=key_identifier,
             issuer_id=issuer_id,
-            private_key=private_key)
+            private_key=private_key,
+            log_requests=log_requests,
+        )
 
     @classmethod
     def _get_private_key(cls, cli_args: argparse.Namespace) -> str:
@@ -134,6 +167,9 @@ class AutomaticProvisioning(BaseProvisioning):
             issuer_id=issuer_id_argument.value,
             key_identifier=key_identifier_argument.value,
             private_key=cls._get_private_key(cli_args),
+            profiles_directory=cli_args.profiles_directory,
+            certificates_directory=cli_args.certificates_directory,
+            log_requests=cli_args.log_requests,
         )
 
     @cli.action('fetch', AutomaticProvisioningArgument.BUNDLE_IDENTIFIER)
@@ -144,13 +180,43 @@ class AutomaticProvisioning(BaseProvisioning):
         """
         # TODO Apple Developer Portal communication
 
-    @cli.action('get-identifier', AutomaticProvisioningArgument.BUNDLE_IDENTIFIER)
-    def get_or_create_bundle_id(self, bundle_identifier: str, create: bool = False):
+    @cli.action('get-identifier',
+                AutomaticProvisioningArgument.BUNDLE_IDENTIFIER,
+                AutomaticProvisioningArgument.CREATE,
+                AutomaticProvisioningArgument.PLATFORM)
+    def get_or_create_bundle_id(self,
+                                bundle_identifier: str,
+                                create: bool = False,
+                                platform: BundleIdPlatform = BundleIdPlatform.IOS):
         """
         Find specified bundle identifier from Apple Developer portal.
         """
+
         bundle_id_filter = self.api_client.bundle_ids.Filter(identifier=bundle_identifier)
-        self.api_client.bundle_ids.list(bundle_id_filter=bundle_id_filter)
+        try:
+            bundle_ids = self.api_client.bundle_ids.list(bundle_id_filter=bundle_id_filter)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+
+        self.logger.info(f'Found {len(bundle_ids)} Bundle IDs matching {bundle_id_filter.constraints()}')
+        if not bundle_ids and not create:
+            raise AutomaticProvisioningError(
+                f'Did not find any bundle ids matching specified filters: {bundle_id_filter.constraints()}')
+
+        if bundle_ids:
+            bundle_id = bundle_ids[0]
+            self.logger.info(f'Found Bundle ID {bundle_id}')
+            return bundle_id
+
+        self.logger.info(f'Bundle ID matching {bundle_id_filter.constraints()} not found.')
+        name = bundle_identifier.replace('.', ' ')
+        self.logger.info(f'Creating new Bundle ID "{bundle_identifier}" with name "{name}" for platform {platform}')
+        try:
+            bundle_id = self.api_client.bundle_ids.register(bundle_identifier, name, platform)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+        self.logger.info(f'Created Bundle ID {bundle_id}')
+        return bundle_id
 
 
 if __name__ == '__main__':
