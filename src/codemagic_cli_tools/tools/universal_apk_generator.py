@@ -93,7 +93,7 @@ class UniversalApkGenerator(cli.CliApp):
         )
         signing_info_args = [argument.from_args(cli_args) for argument in keystore_arguments]
         if any(signing_info_args) and not all(signing_info_args):
-            UniversalApkGeneratorArgument.KEYSTORE_PATH.raise_argument_error(
+            raise UniversalApkGeneratorArgument.KEYSTORE_PATH.raise_argument_error(
                 'either all signing info arguments should be specified, or none of them should')
 
         pattern = cli_args.pattern.expanduser()

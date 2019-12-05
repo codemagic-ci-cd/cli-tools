@@ -6,6 +6,7 @@ from typing import Type, Any, Union
 import pytest
 
 from codemagic_cli_tools.cli.argument import EnvironmentArgumentValue
+from codemagic_cli_tools.cli.argument import EnvironmentVariableDefaultArgumentValue
 
 mock_dir = pathlib.Path(__file__).parent / 'mocks'
 
@@ -62,4 +63,23 @@ def test_environment_argument_value_custom_type(
 
     argument_value = CustomTypeEnvVar(raw_input)
     assert isinstance(argument_value.value, given_type)
+    assert argument_value.value == expected_value
+
+
+@pytest.mark.parametrize('env_var_key, given_type, raw_input, expected_value', [
+    ('INT_KEY', int, '111', 111),
+    ('FLOAT_KEY', float, '1.5', 1.5),
+    ('LIST_KEY', list, 'abc', ['a', 'b', 'c']),
+    ('TUPLE_KEY', tuple, '12', ('1', '2')),
+    ('CUSTOM_STR_KEY', CustomStr, 'my_str', CustomStr('my_str')),
+    ('STR_KEY', str, 'my_str', 'my_str'),
+])
+def test_environment_variable_fallback(
+        env_var_key: str, given_type: Type, raw_input: str, expected_value: Any):
+    class EnvVarDefaultType(EnvironmentVariableDefaultArgumentValue[given_type]):
+        environment_variable_key = env_var_key
+        argument_type = given_type
+
+    os.environ[env_var_key] = raw_input
+    argument_value = EnvVarDefaultType.from_environment_variable_default()
     assert argument_value.value == expected_value
