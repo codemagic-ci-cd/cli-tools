@@ -8,11 +8,18 @@ from datetime import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Union
 from typing import overload
 
 from codemagic_cli_tools.models import JsonSerializable
+
+
+class ResourceEnum(enum.Enum):
+
+    def __str__(self):
+        return str(self.value)
 
 
 class ResourceId(str):
@@ -47,7 +54,7 @@ class DictSerializable:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
-class ResourceType(enum.Enum):
+class ResourceType(ResourceEnum):
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
     CERTIFICATES = 'certificates'
@@ -228,7 +235,7 @@ class Resource(LinkedResourceData):
         return s
 
     @classmethod
-    def print_resources(cls, resources: List[Resource], json_output: bool):
+    def print_resources(cls, resources: Sequence[Resource], json_output: bool):
         if json_output:
             items = [resource.dict() for resource in resources]
             print(json.dumps(items, indent=4))

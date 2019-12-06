@@ -10,7 +10,8 @@ from typing import IO
 from typing import Optional
 from typing import Sequence
 
-from .cli_types import CommandArg, ObfuscatedCommand
+from .cli_types import CommandArg
+from .cli_types import ObfuscatedCommand
 
 
 class CliProcess:

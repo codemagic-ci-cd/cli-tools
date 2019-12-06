@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 
 from .resource import Relationship
 from .resource import Resource
+from .resource import ResourceEnum
 
 
-class BundleIdPlatform(enum.Enum):
+class BundleIdPlatform(ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
-
-    def __str__(self):
-        return self.value
 
 
 class BundleId(Resource):

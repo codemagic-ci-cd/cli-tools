@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import pathlib
-from typing import Any
 from typing import List
 from typing import Optional
-from typing import Union
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.apple import AppStoreConnectApiError
@@ -16,136 +13,19 @@ from codemagic_cli_tools.apple.app_store_connect import IssuerId
 from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
 from codemagic_cli_tools.apple.resources import BundleId
 from codemagic_cli_tools.apple.resources import BundleIdPlatform
+from codemagic_cli_tools.apple.resources import Device
+from codemagic_cli_tools.apple.resources import DeviceStatus
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.cli.colors import Colors
-from .base_provisioning import BaseProvisioning
+from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
+from .provisioning.automatic_provisioning_arguments import BundleIdActionArgument
+from .provisioning.automatic_provisioning_arguments import CommonActionArgument
+from .provisioning.automatic_provisioning_arguments import DeviceActionArgument
+from .provisioning.base_provisioning import BaseProvisioning
 
 
 class AutomaticProvisioningError(cli.CliAppException):
     pass
-
-
-class BundleIdArgument(cli.TypedCliArgument[str]):
-    pass
-
-
-class IssuerIdArgument(cli.EnvironmentArgumentValue[IssuerId]):
-    argument_type = IssuerId
-    environment_variable_key = 'APP_STORE_CONNECT_ISSUER_ID'
-
-
-class KeyIdentifierArgument(cli.EnvironmentArgumentValue[KeyIdentifier]):
-    argument_type = KeyIdentifier
-    environment_variable_key = 'APP_STORE_CONNECT_KEY_IDENTIFIER'
-
-
-class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
-    environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
-    alternative_to = 'PRIVATE_KEY_PATH'
-
-    @classmethod
-    def _is_valid(cls, value: str) -> bool:
-        return value.startswith('-----BEGIN PRIVATE KEY-----')
-
-
-class PrivateKeyPathArgument(cli.TypedCliArgument[pathlib.Path]):
-    environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY_PATH'
-    alternative_to = 'PRIVATE_KEY'
-    argument_type = pathlib.Path
-
-    @classmethod
-    def _is_valid(cls, value: pathlib.Path) -> bool:
-        return value.exists() and value.is_file()
-
-
-API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
-
-
-class AutomaticProvisioningArgument(cli.Argument):
-    LOG_REQUESTS = cli.ArgumentProperties(
-        key='log_requests',
-        flags=('--log-api-calls',),
-        type=bool,
-        description='Turn on logging for App Store Connect API HTTP requests',
-        argparse_kwargs={'required': False, 'action': 'store_true'},
-    )
-    ISSUER_ID = cli.ArgumentProperties(
-        key='issuer_id',
-        flags=('--issuer-id',),
-        type=IssuerIdArgument,
-        description=f'App Store Connect API Key Issuer ID. Identifies the issuer '
-                    f'who created the authentication token. {API_DOCS_REFERENCE}',
-        argparse_kwargs={'required': False},
-    )
-    KEY_IDENTIFIER = cli.ArgumentProperties(
-        key='key_identifier',
-        flags=('--key-id',),
-        type=KeyIdentifierArgument,
-        description=f'App Store Connect API Key ID. {API_DOCS_REFERENCE}',
-        argparse_kwargs={'required': False},
-    )
-    PRIVATE_KEY = cli.ArgumentProperties(
-        key='private_key',
-        flags=('--private-key',),
-        type=PrivateKeyArgument,
-        description=f'App Store Connect API private key. {API_DOCS_REFERENCE}',
-        argparse_kwargs={'required': False},
-    )
-    PRIVATE_KEY_PATH = cli.ArgumentProperties(
-        key='private_key_path',
-        flags=('--private-key-path',),
-        type=PrivateKeyPathArgument,
-        description=f'Path to the App Store Connect API private key. {API_DOCS_REFERENCE}',
-        argparse_kwargs={'required': False},
-    )
-    BUNDLE_ID_RESOURCE_ID = cli.ArgumentProperties(
-        key='bundle_id_resource_id',
-        type=ResourceId,
-        description='Alphanumeric ID value of the Bundle ID',
-    )
-    BUNDLE_ID_IDENTIFIER = cli.ArgumentProperties(
-        key='bundle_id_identifier',
-        type=BundleIdArgument,
-        description='Identifier of the Bundle ID',
-    )
-    BUNDLE_ID_NAME = cli.ArgumentProperties(
-        key='bundle_id_name',
-        flags=('--bundle-id-name',),
-        description='Name of the Bundle ID. By default will be deduced from Bundle ID identifier.',
-        argparse_kwargs={'required': False},
-    )
-    CREATE_RESOURCE = cli.ArgumentProperties(
-        key='create_resource',
-        flags=('--create',),
-        type=bool,
-        description='Whether to create the resource if it does not exist yet',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
-    )
-    JSON_OUTPUT = cli.ArgumentProperties(
-        key='json_output',
-        flags=('--json',),
-        type=bool,
-        description='Whether to show the resource in JSON format',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
-    )
-    PLATFORM = cli.ArgumentProperties(
-        key='platform',
-        flags=('--platform',),
-        type=BundleIdPlatform,
-        description='Bundle ID platform',
-        argparse_kwargs={
-            'required': False,
-            'choices': list(BundleIdPlatform),
-            'default': BundleIdPlatform.IOS,
-        },
-    )
-    IGNORE_NOT_FOUND = cli.ArgumentProperties(
-        key='ignore_not_found',
-        flags=('--ignore-not-found',),
-        type=bool,
-        description='Do not raise exceptions if the specified resource does not exist.',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
-    )
 
 
 @cli.common_arguments(
@@ -168,12 +48,7 @@ class AutomaticProvisioning(BaseProvisioning):
                  log_requests: bool = False,
                  **kwargs):
         super().__init__(**kwargs)
-        self.api_client = AppStoreConnectApiClient(
-            key_identifier=key_identifier,
-            issuer_id=issuer_id,
-            private_key=private_key,
-            log_requests=log_requests,
-        )
+        self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
@@ -208,33 +83,57 @@ class AutomaticProvisioning(BaseProvisioning):
             log_requests=cli_args.log_requests,
         )
 
-    @classmethod
-    def _get_argument_value(cls, argument: Union[Any, cli.TypedCliArgument]) -> Any:
-        if isinstance(argument, cli.TypedCliArgument):
-            return argument.value
-        return argument
+    def _list_resources(self, resource_filter, listing_function, resource_name):
+        try:
+            resources = listing_function(resource_filter=resource_filter)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+
+        self.logger.info(f'Found {len(resources)} {resource_name} matching {resource_filter}')
+        return resources
+
+    @cli.action('list-devices',
+                BundleIdActionArgument.PLATFORM,
+                DeviceActionArgument.DEVICE_NAME,
+                DeviceActionArgument.DEVICE_STATUS,
+                CommonActionArgument.JSON_OUTPUT)
+    def list_devices(self,
+                     platform: Optional[BundleIdPlatform] = None,
+                     device_name: Optional[str] = None,
+                     device_status: Optional[DeviceStatus] = None,
+                     json_output: bool = False,
+                     print_resources: bool = True) -> List[Device]:
+        """
+        List Devices from Apple Developer portal matching given constraints.
+        """
+
+        device_filter = self.api_client.devices.Filter(
+            name=device_name, platform=platform, status=device_status)
+        devices = self._list_resources(device_filter, self.api_client.devices.list, 'Devices')
+        if print_resources:
+            BundleId.print_resources(devices, json_output)
+        return devices
 
     @cli.action('create-bundle-id',
-                AutomaticProvisioningArgument.BUNDLE_ID_IDENTIFIER,
-                AutomaticProvisioningArgument.BUNDLE_ID_NAME,
-                AutomaticProvisioningArgument.JSON_OUTPUT,
-                AutomaticProvisioningArgument.PLATFORM)
+                BundleIdActionArgument.BUNDLE_ID_IDENTIFIER,
+                BundleIdActionArgument.BUNDLE_ID_NAME,
+                BundleIdActionArgument.PLATFORM,
+                CommonActionArgument.JSON_OUTPUT)
     def create_bundle_id(self,
-                         bundle_id_identifier: Union[str, BundleIdArgument],
+                         bundle_id_identifier: str,
                          bundle_id_name: Optional[str] = None,
-                         json_output: bool = False,
-                         platform: BundleIdPlatform = BundleIdPlatform.IOS) -> BundleId:
+                         platform: BundleIdPlatform = BundleIdPlatform.IOS,
+                         json_output: bool = False) -> BundleId:
         """
         Create Bundle ID in Apple Developer portal for specifier identifier.
         """
 
-        identifier = self._get_argument_value(bundle_id_identifier)
         if bundle_id_name is None:
-            bundle_id_name = identifier.replace('.', ' ')
+            bundle_id_name = bundle_id_identifier.replace('.', ' ')
         self.logger.info(
-            f'Creating new Bundle ID "{identifier}" with name "{bundle_id_name}" for platform {platform}')
+            f'Creating new Bundle ID "{bundle_id_identifier}" with name "{bundle_id_name}" for platform {platform}')
         try:
-            bundle_id = self.api_client.bundle_ids.register(identifier, bundle_id_name, platform)
+            bundle_id = self.api_client.bundle_ids.register(bundle_id_identifier, bundle_id_name, platform)
         except AppStoreConnectApiError as api_error:
             raise AutomaticProvisioningError(str(api_error))
         self.logger.info(f'Created Bundle ID {bundle_id.id}')
@@ -242,58 +141,51 @@ class AutomaticProvisioning(BaseProvisioning):
         return bundle_id
 
     @cli.action('list-bundle-ids',
-                AutomaticProvisioningArgument.BUNDLE_ID_IDENTIFIER,
-                AutomaticProvisioningArgument.BUNDLE_ID_NAME,
-                AutomaticProvisioningArgument.JSON_OUTPUT,
-                AutomaticProvisioningArgument.PLATFORM)
+                BundleIdActionArgument.BUNDLE_ID_IDENTIFIER,
+                BundleIdActionArgument.BUNDLE_ID_NAME,
+                BundleIdActionArgument.PLATFORM,
+                CommonActionArgument.JSON_OUTPUT)
     def list_bundle_ids(self,
-                        bundle_id_identifier: Union[str, BundleIdArgument],
+                        bundle_id_identifier: str,
                         bundle_id_name: Optional[str] = None,
-                        json_output: bool = False,
                         platform: BundleIdPlatform = BundleIdPlatform.IOS,
+                        json_output: bool = False,
                         print_resources: bool = True) -> List[BundleId]:
         """
         List Bundle IDs from Apple Developer portal matching given constraints.
         """
 
-        identifier = self._get_argument_value(bundle_id_identifier)
         bundle_id_filter = self.api_client.bundle_ids.Filter(
-            identifier=identifier, name=bundle_id_name, platform=platform)
-        try:
-            bundle_ids = self.api_client.bundle_ids.list(bundle_id_filter=bundle_id_filter)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
-
-        self.logger.info(f'Found {len(bundle_ids)} Bundle IDs matching {bundle_id_filter}')
+            identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
+        bundle_ids = self._list_resources(bundle_id_filter, self.api_client.bundle_ids.list, 'Bundle IDs')
         if not bundle_ids:
             raise AutomaticProvisioningError(
-                f'Did not find any bundle ids matching specified filters: {bundle_id_filter}')
+                f'Did not find any Bundle IDs matching specified filters: {bundle_id_filter}')
         if print_resources:
             BundleId.print_resources(bundle_ids, json_output)
         return bundle_ids
 
     @cli.action('find-bundle-id',
-                AutomaticProvisioningArgument.BUNDLE_ID_IDENTIFIER,
-                AutomaticProvisioningArgument.CREATE_RESOURCE,
-                AutomaticProvisioningArgument.JSON_OUTPUT,
-                AutomaticProvisioningArgument.PLATFORM)
+                BundleIdActionArgument.BUNDLE_ID_IDENTIFIER,
+                BundleIdActionArgument.PLATFORM,
+                CommonActionArgument.CREATE_RESOURCE,
+                CommonActionArgument.JSON_OUTPUT)
     def find_bundle_id(self,
-                       bundle_id_identifier: Union[str, BundleIdArgument],
+                       bundle_id_identifier: str,
+                       platform: BundleIdPlatform = BundleIdPlatform.IOS,
                        create_resource: bool = False,
-                       json_output: bool = False,
-                       platform: BundleIdPlatform = BundleIdPlatform.IOS) -> BundleId:
+                       json_output: bool = False) -> BundleId:
         """
         Find one Bundle ID from Apple Developer portal for specifier identifier.
         """
 
-        identifier = self._get_argument_value(bundle_id_identifier)
         try:
             bundle_ids = self.list_bundle_ids(
-                bundle_id_identifier, json_output=json_output, platform=platform, print_resources=False)
+                bundle_id_identifier, platform=platform, json_output=json_output, print_resources=False)
         except AutomaticProvisioningError:
             if not create_resource:
                 raise
-            self.logger.info(f'Bundle ID for identifier {identifier} not found.')
+            self.logger.info(f'Bundle ID for identifier {bundle_id_identifier} not found.')
             return self.create_bundle_id(bundle_id_identifier, json_output=json_output, platform=platform)
 
         bundle_id = bundle_ids[0]
@@ -302,8 +194,8 @@ class AutomaticProvisioning(BaseProvisioning):
         return bundle_id
 
     @cli.action('delete-bundle-id',
-                AutomaticProvisioningArgument.BUNDLE_ID_RESOURCE_ID,
-                AutomaticProvisioningArgument.IGNORE_NOT_FOUND)
+                BundleIdActionArgument.BUNDLE_ID_RESOURCE_ID,
+                CommonActionArgument.IGNORE_NOT_FOUND)
     def delete_bundle_id(self, bundle_id_resource_id: ResourceId, ignore_not_found: bool = False) -> None:
         """
         Delete specified Bundle ID from Apple Developer portal.

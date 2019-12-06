@@ -49,13 +49,13 @@ class Certificates(ResourceManager):
         return Certificate(response['data'])
 
     def list(self,
-             certificate_filter: Filter = Filter(),
+             resource_filter: Filter = Filter(),
              ordering=Ordering.DISPLAY_NAME,
              reverse=False) -> List[Certificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
         """
-        params = {'sort': ordering.as_param(reverse), **certificate_filter.as_query_params()}
+        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         certificates = self.client.paginate(f'{self.client.API_URL}/certificates', params=params)
         return [Certificate(certificate) for certificate in certificates]
 

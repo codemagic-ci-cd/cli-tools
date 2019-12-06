@@ -8,13 +8,10 @@ from unittest import mock
 
 import pytest
 
-from codemagic_cli_tools.tools.base_provisioning import ProvisioningArgument
 from codemagic_cli_tools.tools.automatic_provisioning import AutomaticProvisioning
-from codemagic_cli_tools.tools.automatic_provisioning import AutomaticProvisioningArgument
-from codemagic_cli_tools.tools.automatic_provisioning import IssuerIdArgument
-from codemagic_cli_tools.tools.automatic_provisioning import KeyIdentifierArgument
-from codemagic_cli_tools.tools.automatic_provisioning import PrivateKeyArgument
-from codemagic_cli_tools.tools.automatic_provisioning import PrivateKeyPathArgument
+from codemagic_cli_tools.tools.provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
+from codemagic_cli_tools.tools.provisioning.automatic_provisioning_arguments import Types
+from codemagic_cli_tools.tools.provisioning.base_provisioning import ProvisioningArgument
 
 
 @pytest.fixture(autouse=True)
@@ -29,9 +26,9 @@ def namespace_kwargs():
         ProvisioningArgument.CERTIFICATES_DIRECTORY.key: ProvisioningArgument.CERTIFICATES_DIRECTORY.get_default(),
         ProvisioningArgument.PROFILES_DIRECTORY.key: ProvisioningArgument.PROFILES_DIRECTORY.get_default(),
         AutomaticProvisioningArgument.LOG_REQUESTS.key: True,
-        AutomaticProvisioningArgument.ISSUER_ID.key: IssuerIdArgument('issuer-id'),
-        AutomaticProvisioningArgument.KEY_IDENTIFIER.key: KeyIdentifierArgument('key-identifier'),
-        AutomaticProvisioningArgument.PRIVATE_KEY.key: PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),
+        AutomaticProvisioningArgument.ISSUER_ID.key: Types.IssuerIdArgument('issuer-id'),
+        AutomaticProvisioningArgument.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument('key-identifier'),
+        AutomaticProvisioningArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),
         AutomaticProvisioningArgument.PRIVATE_KEY_PATH.key: None,
     }
     for arg in AutomaticProvisioning.CLASS_ARGUMENTS:
@@ -67,22 +64,22 @@ def test_missing_private_key_arg(namespace_kwargs):
     _test_missing_argument(AutomaticProvisioningArgument.PRIVATE_KEY, namespace_kwargs)
 
 
-@pytest.mark.parametrize('argument', [
-    AutomaticProvisioningArgument.ISSUER_ID,
-    AutomaticProvisioningArgument.KEY_IDENTIFIER,
+@pytest.mark.parametrize('argument, api_client_arg_index', [
+    (AutomaticProvisioningArgument.KEY_IDENTIFIER, 0),
+    (AutomaticProvisioningArgument.ISSUER_ID, 1),
 ])
 @mock.patch('codemagic_cli_tools.tools.automatic_provisioning.AppStoreConnectApiClient')
-def test_missing_arg_from_env(MockApiClient, namespace_kwargs, argument):
+def test_missing_arg_from_env(MockApiClient, namespace_kwargs, argument, api_client_arg_index):
     namespace_kwargs[argument.key] = None
 
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
     os.environ[argument.value.type.environment_variable_key] = 'environment-value'
 
     _ = AutomaticProvisioning.from_cli_args(cli_args)
-    api_client_args = MockApiClient.call_args[1]
-    client_kwarg = api_client_args[argument.key]
-    assert isinstance(client_kwarg, argument.type.argument_type)
-    assert client_kwarg == argument.type.argument_type('environment-value')
+    api_client_args = MockApiClient.call_args[0]
+    client_arg = api_client_args[api_client_arg_index]
+    assert isinstance(client_arg, argument.type.argument_type)
+    assert client_arg == argument.type.argument_type('environment-value')
 
 
 def test_private_key_and_private_key_path_given(namespace_kwargs):
@@ -98,7 +95,7 @@ def test_private_key_and_private_key_path_given(namespace_kwargs):
 
 
 def test_private_key_invalid_path(namespace_kwargs):
-    os.environ[PrivateKeyPathArgument.environment_variable_key] = 'this-is-not-a-file'
+    os.environ[Types.PrivateKeyPathArgument.environment_variable_key] = 'this-is-not-a-file'
     namespace_kwargs[AutomaticProvisioningArgument.PRIVATE_KEY_PATH.key] = None
     namespace_kwargs[AutomaticProvisioningArgument.PRIVATE_KEY.key] = None
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
@@ -111,7 +108,7 @@ def test_private_key_invalid_path(namespace_kwargs):
     lambda argument, filename, ns_kwargs: os.environ.update(
         {argument.type.environment_variable_key: filename}),
     lambda argument, filename, ns_kwargs: ns_kwargs.update(
-        {argument.key: PrivateKeyPathArgument(pathlib.Path(filename))})
+        {argument.key: Types.PrivateKeyPathArgument(pathlib.Path(filename))})
 ])
 @mock.patch('codemagic_cli_tools.tools.automatic_provisioning.AppStoreConnectApiClient')
 def test_private_key_path_arg(MockApiClient, configure_variable, namespace_kwargs):
@@ -125,7 +122,6 @@ def test_private_key_path_arg(MockApiClient, configure_variable, namespace_kwarg
 
         cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
         _ = AutomaticProvisioning.from_cli_args(cli_args)
-        api_client_args = MockApiClient.call_args[1]
-        client_kwarg = api_client_args['private_key']
-        assert isinstance(client_kwarg, str)
-        assert client_kwarg == pk
+        _, _, private_key_arg = MockApiClient.call_args[0]
+        assert isinstance(private_key_arg, str)
+        assert private_key_arg == pk

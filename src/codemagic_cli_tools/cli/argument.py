@@ -8,11 +8,12 @@ import os
 import shlex
 import types
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Generic
 from typing import NamedTuple
+from typing import NoReturn
 from typing import Optional
 from typing import Sequence
 from typing import Tuple

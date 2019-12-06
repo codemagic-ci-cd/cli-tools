@@ -10,7 +10,7 @@ from typing import Sequence
 from typing import Tuple
 
 from codemagic_cli_tools import cli
-from .base_provisioning import BaseProvisioning
+from .provisioning.base_provisioning import BaseProvisioning
 from .storage import Storage
 
 ObjectName = NewType('ObjectName', str)

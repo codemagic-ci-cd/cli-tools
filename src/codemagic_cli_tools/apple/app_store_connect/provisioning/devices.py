@@ -49,13 +49,13 @@ class Devices(ResourceManager):
         return Device(response['data'])
 
     def list(self,
-             device_filter: Filter = Filter(),
+             resource_filter: Filter = Filter(),
              ordering=Ordering.NAME,
              reverse=False) -> List[Device]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_devices
         """
-        params = {'sort': ordering.as_param(reverse), **device_filter.as_query_params()}
+        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         devices = self.client.paginate(f'{self.client.API_URL}/devices', params=params)
         return [Device(device) for device in devices]
 

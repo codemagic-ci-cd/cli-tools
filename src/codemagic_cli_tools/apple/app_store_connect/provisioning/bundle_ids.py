@@ -72,13 +72,13 @@ class BundleIds(ResourceManager):
         self.client.session.delete(f'{self.client.API_URL}/bundleIds/{bundle_id_resource_id}')
 
     def list(self,
-             bundle_id_filter: Filter = Filter(),
+             resource_filter: Filter = Filter(),
              ordering=Ordering.NAME,
              reverse=False) -> List[BundleId]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_bundle_ids
         """
-        params = {'sort': ordering.as_param(reverse), **bundle_id_filter.as_query_params()}
+        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         bundle_ids = self.client.paginate(f'{self.client.API_URL}/bundleIds', params=params)
         return [BundleId(bundle_id) for bundle_id in bundle_ids]
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
@@ -9,14 +8,15 @@ from typing import Optional
 from .bundle_id import BundleIdPlatform
 from .resource import Relationship
 from .resource import Resource
+from .resource import ResourceEnum
 
 
-class ProfileState(enum.Enum):
+class ProfileState(ResourceEnum):
     ACTIVE = 'ACTIVE'
     INVALID = 'INVALID'
 
 
-class ProfileType(enum.Enum):
+class ProfileType(ResourceEnum):
     IOS_APP_ADHOC = 'IOS_APP_ADHOC'
     IOS_APP_DEVELOPMENT = 'IOS_APP_DEVELOPMENT'
     IOS_APP_INHOUSE = 'IOS_APP_INHOUSE'

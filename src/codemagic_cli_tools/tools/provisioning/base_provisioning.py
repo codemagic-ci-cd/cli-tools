@@ -27,8 +27,7 @@ class ProvisioningArgument(cli.Argument):
 
 @cli.common_arguments(
     ProvisioningArgument.CERTIFICATES_DIRECTORY,
-    ProvisioningArgument.PROFILES_DIRECTORY,
-)
+    ProvisioningArgument.PROFILES_DIRECTORY)
 class BaseProvisioning(cli.CliApp):
 
     def __init__(self,

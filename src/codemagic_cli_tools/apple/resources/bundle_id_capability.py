@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 from typing import Optional
 
 from .resource import DictSerializable
 from .resource import Relationship
 from .resource import Resource
+from .resource import ResourceEnum
 
 
-class CapabilityType(enum.Enum):
+class CapabilityType(ResourceEnum):
     ACCESS_WIFI_INFORMATION = 'ACCESS_WIFI_INFORMATION'
     APP_GROUPS = 'APP_GROUPS'
     APPLE_PAY = 'APPLE_PAY'
@@ -37,7 +37,7 @@ class CapabilityType(enum.Enum):
 
 @dataclass
 class CapabilityOption(DictSerializable):
-    class Key(enum.Enum):
+    class Key(ResourceEnum):
         XCODE_5 = 'XCODE_5'
         XCODE_6 = 'XCODE_6'
         COMPLETE_PROTECTION = 'COMPLETE_PROTECTION'
@@ -58,12 +58,12 @@ class CapabilityOption(DictSerializable):
 
 @dataclass
 class CapabilitySetting(DictSerializable):
-    class AllowedInstance(enum.Enum):
+    class AllowedInstance(ResourceEnum):
         ENTRY = 'ENTRY'
         SINGLE = 'SINGLE'
         MULTIPLE = 'MULTIPLE'
 
-    class Key(enum.Enum):
+    class Key(ResourceEnum):
         ICLOUD_VERSION = 'ICLOUD_VERSION'
         DATA_PROTECTION_PERMISSION_LEVEL = 'DATA_PROTECTION_PERMISSION_LEVEL'
 

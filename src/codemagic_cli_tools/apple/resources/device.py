@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 from datetime import datetime
 
 from .bundle_id import BundleIdPlatform
 from .resource import Resource
+from .resource import ResourceEnum
 
 
-class DeviceClass(enum.Enum):
+class DeviceClass(ResourceEnum):
     APPLE_TV = 'APPLE_TV'
     APPLE_WATCH = 'APPLE_WATCH'
     IPAD = 'IPAD'
@@ -17,7 +17,7 @@ class DeviceClass(enum.Enum):
     MAC = 'MAC'
 
 
-class DeviceStatus(enum.Enum):
+class DeviceStatus(ResourceEnum):
     DISABLED = 'DISABLED'
     ENABLED = 'ENABLED'
 

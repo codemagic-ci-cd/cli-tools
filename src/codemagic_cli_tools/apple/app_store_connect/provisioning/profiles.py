@@ -73,13 +73,13 @@ class Profiles(ResourceManager):
         self.client.session.delete(f'{self.client.API_URL}/profiles/{profile_id}')
 
     def list(self,
-             profile_filter: Filter = Filter(),
+             resource_filter: Filter = Filter(),
              ordering=Ordering.NAME,
              reverse=False) -> List[Profile]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_profiles
         """
-        params = {'sort': ordering.as_param(reverse), **profile_filter.as_query_params()}
+        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         profiles = self.client.paginate(f'{self.client.API_URL}/profiles', params=params)
         return [Profile(profile) for profile in profiles]
 

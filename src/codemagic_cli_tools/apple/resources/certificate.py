@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
@@ -8,9 +7,10 @@ from typing import Optional
 
 from .bundle_id import BundleIdPlatform
 from .resource import Resource
+from .resource import ResourceEnum
 
 
-class CertificateType(enum.Enum):
+class CertificateType(ResourceEnum):
     DEVELOPER_ID_APPLICATION = 'DEVELOPER_ID_APPLICATION'
     DEVELOPER_ID_KEXT = 'DEVELOPER_ID_KEXT'
     IOS_DEVELOPMENT = 'IOS_DEVELOPMENT'
