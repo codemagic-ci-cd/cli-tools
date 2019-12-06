@@ -35,7 +35,7 @@ class ActionCallable:
 T = TypeVar('T')
 
 
-class EnvironmentVariableDefaultArgumentValue(Generic[T], metaclass=abc.ABCMeta):
+class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     argument_type: Type[T] = str  # type: ignore
     environment_variable_key: Optional[str] = None
     alternative_to: Optional[str] = None
@@ -99,10 +99,10 @@ class EnvironmentVariableDefaultArgumentValue(Generic[T], metaclass=abc.ABCMeta)
         return self._raw_value
 
     def __repr__(self):
-        return str(self)
+        return repr(str(self))
 
 
-class EnvironmentArgumentValue(EnvironmentVariableDefaultArgumentValue[T], metaclass=abc.ABCMeta):
+class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
 
     def _is_from_environment(self) -> bool:
         return self._raw_value.startswith('@env:')
@@ -192,7 +192,7 @@ class Argument(ArgumentProperties, enum.Enum):
 
     def from_args(self, cli_args: argparse.Namespace, default=None):
         value = vars(cli_args)[self.value.key] or default
-        if not value and issubclass(self.value.type, EnvironmentVariableDefaultArgumentValue):
+        if not value and issubclass(self.value.type, TypedCliArgument):
             return self.value.type.from_environment_variable_default()
         return value
 
@@ -212,13 +212,13 @@ class Argument(ArgumentProperties, enum.Enum):
 
         if isinstance(self.value.type, (types.FunctionType, types.MethodType)):
             return description
-        elif issubclass(self.value.type, EnvironmentVariableDefaultArgumentValue):
+        elif issubclass(self.value.type, TypedCliArgument):
             return self.value.type.get_description(self.value)
         else:
             return description
 
     def get_missing_value_error_message(self) -> str:
-        if issubclass(self.value.type, EnvironmentVariableDefaultArgumentValue):
+        if issubclass(self.value.type, TypedCliArgument):
             message = self.value.type.get_missing_value_error_message(self)
             if message:
                 return message

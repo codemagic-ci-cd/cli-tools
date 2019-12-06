@@ -6,7 +6,7 @@ from typing import Type, Any, Union
 import pytest
 
 from codemagic_cli_tools.cli.argument import EnvironmentArgumentValue
-from codemagic_cli_tools.cli.argument import EnvironmentVariableDefaultArgumentValue
+from codemagic_cli_tools.cli.argument import TypedCliArgument
 
 mock_dir = pathlib.Path(__file__).parent / 'mocks'
 
@@ -76,7 +76,7 @@ def test_environment_argument_value_custom_type(
 ])
 def test_environment_variable_fallback(
         env_var_key: str, given_type: Type, raw_input: str, expected_value: Any):
-    class EnvVarDefaultType(EnvironmentVariableDefaultArgumentValue[given_type]):
+    class EnvVarDefaultType(TypedCliArgument[given_type]):
         environment_variable_key = env_var_key
         argument_type = given_type
 

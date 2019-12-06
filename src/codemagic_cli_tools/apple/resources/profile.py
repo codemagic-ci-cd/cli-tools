@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
+from dataclasses import field
 from datetime import datetime
 from typing import Optional
 
@@ -38,12 +39,12 @@ class Profile(Resource):
     class Attributes(Resource.Attributes):
         name: str
         platform: BundleIdPlatform
-        profileContent: str
         uuid: str
         createdDate: Optional[datetime]
         profileState: ProfileState
         profileType: ProfileType
         expirationDate: datetime
+        profileContent: str = field(metadata={'hide': True})
 
         def __post_init__(self):
             if isinstance(self.platform, str):

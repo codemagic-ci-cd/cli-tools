@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
+from dataclasses import field
 from datetime import datetime
 from typing import Optional
 
@@ -26,14 +27,14 @@ class Certificate(Resource):
 
     @dataclass
     class Attributes(Resource.Attributes):
-        certificateContent: str
         displayName: str
         expirationDate: datetime
         name: str
         platform: BundleIdPlatform
         serialNumber: str
         certificateType: CertificateType
-        csrContent: Optional[str]
+        certificateContent: str = field(metadata={'hide': True})
+        csrContent: Optional[str] = field(metadata={'hide': True})
 
         def __post_init__(self):
             if isinstance(self.expirationDate, str):

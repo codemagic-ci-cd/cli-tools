@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict
@@ -124,7 +125,10 @@ class LinkedResourceData(DictSerializable, JsonSerializable):
         self.id: ResourceId = ResourceId(api_response['id'])
 
     def __str__(self):
-        return self.json()
+        return '\n'.join([
+            f'Id: {self.id}',
+            f'Type: {self.type.value}'
+        ])
 
 
 class Resource(LinkedResourceData):
@@ -190,3 +194,32 @@ class Resource(LinkedResourceData):
         if dt is None:
             return None
         return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+
+    def _format_attribute_name(self, name):
+        type_prefix = self.type.value.rstrip('s')
+        name = re.sub(f'{type_prefix}s?', '', name)
+        name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
+        return name.lower().capitalize()
+
+    def _hide_attribute_value(self, attribute_name):
+        if not hasattr(self.attributes, '__dataclass_fields__'):
+            return False
+        field = self.attributes.__dataclass_fields__[attribute_name]
+        return field.metadata.get('hide') is True
+
+    def _format_attribute_value(self, attribute_name, value):
+        if self._hide_attribute_value(attribute_name):
+            return '"..."'
+        if isinstance(value, enum.Enum):
+            return value.value
+        return value
+
+    def __str__(self):
+        s = super().__str__()
+        for attribute_name, value in self.attributes.__dict__.items():
+            if value is None:
+                continue
+            name = self._format_attribute_name(attribute_name)
+            value = self._format_attribute_value(attribute_name, value)
+            s += f'\n{name}: {value}'
+        return s

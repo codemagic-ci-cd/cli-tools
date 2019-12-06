@@ -29,21 +29,24 @@ class ResourceManager(metaclass=abc.ABCMeta):
                 return filed_value.value
             return filed_value
 
-        def as_query_params(self) -> Dict[str, str]:
+        def _get_restrictions(self):
             return {
-                f'filter[{self._snake_to_camel(field_name)}]': self._get_param_value(value)
+                self._snake_to_camel(field_name): self._get_param_value(value)
                 for field_name, value in self.__dict__.items()
                 if value is not None
             }
 
+        def as_query_params(self) -> Dict[str, str]:
+            return {f'filter[{field}]': p for field, p in self._get_restrictions().items()}
+
         def __bool__(self):
             return any(self.__dict__.values())
 
-        def constraints(self) -> Optional[str]:
-            query_params = self.as_query_params()
-            if not query_params:
-                return None
-            return ', '.join(f'{param}={value}' for param, value in query_params.items())
+        def __str__(self):
+            restrictions = self._get_restrictions()
+            if not restrictions:
+                return '*'
+            return ', '.join(f'{param}={value}' for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
         def as_param(self, reverse=False):

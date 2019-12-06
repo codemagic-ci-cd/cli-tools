@@ -19,6 +19,10 @@ class AutomaticProvisioningError(cli.CliAppException):
     pass
 
 
+class BundleIdArgument(cli.TypedCliArgument[str]):
+    pass
+
+
 class IssuerIdArgument(cli.EnvironmentArgumentValue[IssuerId]):
     argument_type = IssuerId
     environment_variable_key = 'APP_STORE_CONNECT_ISSUER_ID'
@@ -38,7 +42,7 @@ class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
         return value.startswith('-----BEGIN PRIVATE KEY-----')
 
 
-class PrivateKeyPathArgument(cli.EnvironmentVariableDefaultArgumentValue[pathlib.Path]):
+class PrivateKeyPathArgument(cli.TypedCliArgument[pathlib.Path]):
     environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY_PATH'
     alternative_to = 'PRIVATE_KEY'
     argument_type = pathlib.Path
@@ -90,14 +94,22 @@ class AutomaticProvisioningArgument(cli.Argument):
     )
     BUNDLE_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_identifier',
+        type=BundleIdArgument,
         description='Bundle identifier for which the signing files will be downloaded',
     )
-    CREATE = cli.ArgumentProperties(
-        key='create',
+    CREATE_RESOURCE = cli.ArgumentProperties(
+        key='create_resource',
         flags=('--create',),
         type=bool,
-        description='Whether to create the resource if id does not exist yet',
-        argparse_kwargs={'required': False, 'action': 'store_true'},
+        description='Whether to create the resource if it does not exist yet',
+        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
+    )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key='json_output',
+        flags=('--json',),
+        type=bool,
+        description='Whether to show the resource in JSON format',
+        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -182,40 +194,48 @@ class AutomaticProvisioning(BaseProvisioning):
 
     @cli.action('get-identifier',
                 AutomaticProvisioningArgument.BUNDLE_IDENTIFIER,
-                AutomaticProvisioningArgument.CREATE,
+                AutomaticProvisioningArgument.CREATE_RESOURCE,
+                AutomaticProvisioningArgument.JSON_OUTPUT,
                 AutomaticProvisioningArgument.PLATFORM)
     def get_or_create_bundle_id(self,
-                                bundle_identifier: str,
-                                create: bool = False,
+                                bundle_identifier: BundleIdArgument,
+                                create_resource: bool = False,
+                                json_output: bool = False,
                                 platform: BundleIdPlatform = BundleIdPlatform.IOS):
         """
         Find specified bundle identifier from Apple Developer portal.
         """
 
-        bundle_id_filter = self.api_client.bundle_ids.Filter(identifier=bundle_identifier)
+        bundle_id_filter = self.api_client.bundle_ids.Filter(
+            identifier=bundle_identifier.value, platform=platform)
         try:
             bundle_ids = self.api_client.bundle_ids.list(bundle_id_filter=bundle_id_filter)
         except AppStoreConnectApiError as api_error:
             raise AutomaticProvisioningError(str(api_error))
 
-        self.logger.info(f'Found {len(bundle_ids)} Bundle IDs matching {bundle_id_filter.constraints()}')
-        if not bundle_ids and not create:
+        self.logger.info(f'Found {len(bundle_ids)} Bundle IDs matching {bundle_id_filter}')
+        if not bundle_ids and not create_resource:
             raise AutomaticProvisioningError(
-                f'Did not find any bundle ids matching specified filters: {bundle_id_filter.constraints()}')
+                f'Did not find any bundle ids matching specified filters: {bundle_id_filter}')
 
         if bundle_ids:
             bundle_id = bundle_ids[0]
-            self.logger.info(f'Found Bundle ID {bundle_id}')
-            return bundle_id
+            self.logger.info(f'Found Bundle ID {bundle_id.id}')
+        else:
+            self.logger.info(f'Bundle ID matching {bundle_id_filter} not found.')
+            name = bundle_identifier.value.replace('.', ' ')
+            self.logger.info(
+                f'Creating new Bundle ID "{bundle_identifier.value}" with name "{name}" for platform {platform}')
+            try:
+                bundle_id = self.api_client.bundle_ids.register(bundle_identifier.value, name, platform)
+            except AppStoreConnectApiError as api_error:
+                raise AutomaticProvisioningError(str(api_error))
+            self.logger.info(f'Created Bundle ID {bundle_id.id}')
 
-        self.logger.info(f'Bundle ID matching {bundle_id_filter.constraints()} not found.')
-        name = bundle_identifier.replace('.', ' ')
-        self.logger.info(f'Creating new Bundle ID "{bundle_identifier}" with name "{name}" for platform {platform}')
-        try:
-            bundle_id = self.api_client.bundle_ids.register(bundle_identifier, name, platform)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
-        self.logger.info(f'Created Bundle ID {bundle_id}')
+        if json_output:
+            print(bundle_id.json())
+        else:
+            print(bundle_id)
         return bundle_id
 
 
