@@ -8,6 +8,7 @@ from unittest import mock
 
 import pytest
 
+from codemagic_cli_tools.tools.base_provisioning import ProvisioningArgument
 from codemagic_cli_tools.tools.automatic_provisioning import AutomaticProvisioning
 from codemagic_cli_tools.tools.automatic_provisioning import AutomaticProvisioningArgument
 from codemagic_cli_tools.tools.automatic_provisioning import IssuerIdArgument
@@ -25,6 +26,9 @@ def register_args(cli_argument_group):
 @pytest.fixture()
 def namespace_kwargs():
     ns_kwars = {
+        ProvisioningArgument.CERTIFICATES_DIRECTORY.key: ProvisioningArgument.CERTIFICATES_DIRECTORY.get_default(),
+        ProvisioningArgument.PROFILES_DIRECTORY.key: ProvisioningArgument.PROFILES_DIRECTORY.get_default(),
+        AutomaticProvisioningArgument.LOG_REQUESTS.key: True,
         AutomaticProvisioningArgument.ISSUER_ID.key: IssuerIdArgument('issuer-id'),
         AutomaticProvisioningArgument.KEY_IDENTIFIER.key: KeyIdentifierArgument('key-identifier'),
         AutomaticProvisioningArgument.PRIVATE_KEY.key: PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),
