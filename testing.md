@@ -20,7 +20,11 @@ Note that for the tests to run successfully, you'd have to define the following 
 ```bash
 export TEST_APPLE_KEY_IDENTIFIER=...  # Key ID
 export TEST_APPLE_ISSUER_ID=...  # Issued ID
+```
+And one of either
+```bash
 export TEST_APPLE_PRIVATE_KEY_PATH=...  # Path to private key in .p8 format
+export TEST_APPLE_PRIVATE_KEY_CONTENT=...  # Content of .p8 private key
 ```
 
 Those can be obtained from
