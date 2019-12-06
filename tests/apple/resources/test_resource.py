@@ -5,6 +5,7 @@ from datetime import timezone
 
 import pytest
 
+from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import Resource
 
 
@@ -24,3 +25,11 @@ def test_to_iso_8601(iso_8601_timestamp, expected_datetime):
 ])
 def test_from_iso_8601(given_datetime, expected_iso_8601_timestamp):
     assert Resource.from_iso_8601(given_datetime) == expected_iso_8601_timestamp
+
+
+@pytest.mark.skip('Test not ready')
+def test_resource_tabular_formatting(api_profile):
+    # TODO
+    assert True
+    # profile = Profile(api_profile)
+    # print(profile.tabular())
