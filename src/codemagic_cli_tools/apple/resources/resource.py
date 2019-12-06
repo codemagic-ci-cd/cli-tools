@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -59,6 +60,7 @@ class PagingInformation(DictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/paginginformation
     """
+
     @dataclass
     class Paging(DictSerializable):
         total: int
@@ -83,6 +85,7 @@ class ResourceLinks(DictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
     """
+
     def __init__(_self, self):
         _self.self = self
 
@@ -223,3 +226,23 @@ class Resource(LinkedResourceData):
             value = self._format_attribute_value(attribute_name, value)
             s += f'\n{name}: {value}'
         return s
+
+    @classmethod
+    def print_resources(cls, resources: List[Resource], json_output: bool):
+        if json_output:
+            items = [resource.dict() for resource in resources]
+            print(json.dumps(items, indent=4))
+        else:
+            for resource in resources:
+                cls.print_resource(resource, False)
+
+    @classmethod
+    def print_resource(cls, resource: Resource, json_output: bool):
+        if json_output:
+            print(resource.json())
+        else:
+            print('---')
+            print(resource)
+
+    def print(self, json_output: bool):
+        self.print_resource(self, json_output)
