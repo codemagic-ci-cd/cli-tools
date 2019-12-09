@@ -4,22 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from .bundle_id import BundleIdPlatform
+from .enums import DeviceClass
+from .enums import DeviceStatus
 from .resource import Resource
-from .resource import ResourceEnum
-
-
-class DeviceClass(ResourceEnum):
-    APPLE_TV = 'APPLE_TV'
-    APPLE_WATCH = 'APPLE_WATCH'
-    IPAD = 'IPAD'
-    IPHONE = 'IPHONE'
-    IPOD = 'IPOD'
-    MAC = 'MAC'
-
-
-class DeviceStatus(ResourceEnum):
-    DISABLED = 'DISABLED'
-    ENABLED = 'ENABLED'
 
 
 class Device(Resource):

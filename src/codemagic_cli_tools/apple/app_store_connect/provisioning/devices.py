@@ -46,7 +46,7 @@ class Devices(ResourceManager):
             f'{self.client.API_URL}/devices',
             json=self._get_create_payload(ResourceType.DEVICES, attributes=attributes)
         ).json()
-        return Device(response['data'])
+        return Device(response['data'], created=True)
 
     def list(self,
              resource_filter: Filter = Filter(),

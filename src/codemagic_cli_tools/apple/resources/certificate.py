@@ -6,18 +6,8 @@ from datetime import datetime
 from typing import Optional
 
 from .bundle_id import BundleIdPlatform
+from .enums import CertificateType
 from .resource import Resource
-from .resource import ResourceEnum
-
-
-class CertificateType(ResourceEnum):
-    DEVELOPER_ID_APPLICATION = 'DEVELOPER_ID_APPLICATION'
-    DEVELOPER_ID_KEXT = 'DEVELOPER_ID_KEXT'
-    IOS_DEVELOPMENT = 'IOS_DEVELOPMENT'
-    IOS_DISTRIBUTION = 'IOS_DISTRIBUTION'
-    MAC_APP_DEVELOPMENT = 'MAC_APP_DEVELOPMENT'
-    MAC_APP_DISTRIBUTION = 'MAC_APP_DISTRIBUTION'
-    MAC_INSTALLER_DISTRIBUTION = 'MAC_INSTALLER_DISTRIBUTION'
 
 
 class Certificate(Resource):

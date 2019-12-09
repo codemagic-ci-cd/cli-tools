@@ -6,23 +6,7 @@ import pathlib
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import ProvisioningProfile
-
-
-class ProvisioningArgument(cli.Argument):
-    CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
-        key='certificates_directory',
-        flags=('--certificates-dir',),
-        type=pathlib.Path,
-        description='Directory where the code signing certificates will be saved',
-        argparse_kwargs={'required': False, 'default': Certificate.DEFAULT_LOCATION},
-    )
-    PROFILES_DIRECTORY = cli.ArgumentProperties(
-        key='profiles_directory',
-        flags=('--profiles-dir',),
-        type=pathlib.Path,
-        description='Directory where the provisioning profiles will be saved',
-        argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
-    )
+from .automatic_provisioning_arguments import ProvisioningArgument
 
 
 @cli.common_arguments(

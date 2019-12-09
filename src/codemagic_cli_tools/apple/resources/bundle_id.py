@@ -2,14 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .enums import BundleIdPlatform
 from .resource import Relationship
 from .resource import Resource
-from .resource import ResourceEnum
-
-
-class BundleIdPlatform(ResourceEnum):
-    IOS = 'IOS'
-    MAC_OS = 'MAC_OS'
 
 
 class BundleId(Resource):

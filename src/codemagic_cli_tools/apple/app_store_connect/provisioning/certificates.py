@@ -46,7 +46,7 @@ class Certificates(ResourceManager):
             f'{self.client.API_URL}/certificates',
             json=self._get_create_payload(ResourceType.CERTIFICATES, attributes=attributes)
         ).json()
-        return Certificate(response['data'])
+        return Certificate(response['data'], created=True)
 
     def list(self,
              resource_filter: Filter = Filter(),

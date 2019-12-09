@@ -33,7 +33,7 @@ class BundleIdCapabilities(ResourceManager):
         payload = self._get_create_payload(
             ResourceType.BUNDLE_ID_CAPABILITIES, attributes=attributes, relationships=relationships)
         response = self.client.session.post(f'{self.client.API_URL}/bundleIdCapabilities', json=payload).json()
-        return BundleIdCapability(response['data'])
+        return BundleIdCapability(response['data'], created=True)
 
     def disable(self, bundle_id_capability: Union[LinkedResourceData, ResourceId]) -> None:
         """

@@ -6,28 +6,10 @@ from datetime import datetime
 from typing import Optional
 
 from .bundle_id import BundleIdPlatform
+from .enums import ProfileState
+from .enums import ProfileType
 from .resource import Relationship
 from .resource import Resource
-from .resource import ResourceEnum
-
-
-class ProfileState(ResourceEnum):
-    ACTIVE = 'ACTIVE'
-    INVALID = 'INVALID'
-
-
-class ProfileType(ResourceEnum):
-    IOS_APP_ADHOC = 'IOS_APP_ADHOC'
-    IOS_APP_DEVELOPMENT = 'IOS_APP_DEVELOPMENT'
-    IOS_APP_INHOUSE = 'IOS_APP_INHOUSE'
-    IOS_APP_STORE = 'IOS_APP_STORE'
-    MAC_APP_DEVELOPMENT = 'MAC_APP_DEVELOPMENT'
-    MAC_APP_DIRECT = 'MAC_APP_DIRECT'
-    MAC_APP_STORE = 'MAC_APP_STORE'
-    TVOS_APP_ADHOC = 'TVOS_APP_ADHOC'
-    TVOS_APP_DEVELOPMENT = 'TVOS_APP_DEVELOPMENT'
-    TVOS_APP_INHOUSE = 'TVOS_APP_INHOUSE'
-    TVOS_APP_STORE = 'TVOS_APP_STORE'
 
 
 class Profile(Resource):

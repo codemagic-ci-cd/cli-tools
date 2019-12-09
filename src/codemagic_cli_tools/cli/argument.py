@@ -4,6 +4,7 @@ from __future__ import annotations
 import abc
 import argparse
 import enum
+import inspect
 import os
 import shlex
 import types
@@ -193,7 +194,9 @@ class Argument(ArgumentProperties, enum.Enum):
 
     def from_args(self, cli_args: argparse.Namespace, default=None):
         value = vars(cli_args)[self.value.key] or default
-        if not value and issubclass(self.value.type, TypedCliArgument):
+        if not value and \
+                inspect.isclass(self.value.type) and \
+                issubclass(self.value.type, TypedCliArgument):
             return self.value.type.from_environment_variable_default()
         return value
 

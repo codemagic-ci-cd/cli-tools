@@ -4,8 +4,15 @@ from codemagic_cli_tools import cli
 from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic_cli_tools.apple.app_store_connect import IssuerId
 from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
-from codemagic_cli_tools.apple.resources import BundleIdPlatform, DeviceStatus
+from codemagic_cli_tools.apple.resources import BundleIdPlatform
+from codemagic_cli_tools.apple.resources import CertificateType
+from codemagic_cli_tools.apple.resources import DeviceStatus
+from codemagic_cli_tools.apple.resources import ProfileState
+from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.models import Certificate
+from codemagic_cli_tools.models import ProvisioningProfile
 
 
 class Types:
@@ -35,7 +42,25 @@ class Types:
 
         @classmethod
         def _is_valid(cls, value: pathlib.Path) -> bool:
-            return value.exists() and value.is_file()
+            path = value.expanduser()
+            return path.exists() and path.is_file()
+
+
+class ProvisioningArgument(cli.Argument):
+    CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
+        key='certificates_directory',
+        flags=('--certificates-dir',),
+        type=pathlib.Path,
+        description='Directory where the code signing certificates will be saved',
+        argparse_kwargs={'required': False, 'default': Certificate.DEFAULT_LOCATION},
+    )
+    PROFILES_DIRECTORY = cli.ArgumentProperties(
+        key='profiles_directory',
+        flags=('--profiles-dir',),
+        type=pathlib.Path,
+        description='Directory where the provisioning profiles will be saved',
+        argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
+    )
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
@@ -80,7 +105,7 @@ class AutomaticProvisioningArgument(cli.Argument):
     )
 
 
-class BundleIdActionArgument(cli.Argument):
+class BundleIdArgument(cli.Argument):
     BUNDLE_ID_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_id_identifier',
         description='Identifier of the Bundle ID',
@@ -93,7 +118,7 @@ class BundleIdActionArgument(cli.Argument):
     )
     BUNDLE_ID_NAME = cli.ArgumentProperties(
         key='bundle_id_name',
-        flags=('--bundle-id-name',),
+        flags=('--name',),
         description='Name of the Bundle ID. If the resource is being created, '
                     'the default will be deduced from given Bundle ID identifier.',
         argparse_kwargs={'required': False},
@@ -102,6 +127,13 @@ class BundleIdActionArgument(cli.Argument):
         key='bundle_id_resource_id',
         type=ResourceId,
         description='Alphanumeric ID value of the Bundle ID',
+    )
+    BUNDLE_ID_RESOURCE_IDS = cli.ArgumentProperties(
+        key='bundle_id_resource_ids',
+        flags=('--bundle-ids', '-ids'),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Bundle ID',
+        argparse_kwargs={'required': True, 'nargs': '+', 'metavar': 'bundle-id-resource-ids'}
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -116,17 +148,24 @@ class BundleIdActionArgument(cli.Argument):
     )
 
 
-class DeviceActionArgument(cli.Argument):
+class DeviceArgument(cli.Argument):
+    DEVICE_RESOURCE_IDS = cli.ArgumentProperties(
+        key='device_resource_ids',
+        flags=('--device-ids',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Device',
+        argparse_kwargs={'nargs': '+', 'metavar': 'device-resource-ids'}
+    )
     DEVICE_NAME = cli.ArgumentProperties(
         key='device_name',
-        flags=('--device_name',),
+        flags=('--name',),
         description='Name of the Device',
         argparse_kwargs={'required': False}
     )
     DEVICE_PLATFORM = cli.ArgumentProperties(
         key='device_platform',
         type=BundleIdPlatform,
-        flags=('--device_platform',),
+        flags=('--platform',),
         description='Platform of the Device',
         argparse_kwargs={
             'required': False,
@@ -135,7 +174,7 @@ class DeviceActionArgument(cli.Argument):
     )
     DEVICE_STATUS = cli.ArgumentProperties(
         key='device_status',
-        flags=('--device_status',),
+        flags=('--status',),
         type=DeviceStatus,
         description='Status of the Device',
         argparse_kwargs={
@@ -143,27 +182,102 @@ class DeviceActionArgument(cli.Argument):
             'choices': list(DeviceStatus),
         }
     )
+    NO_AUTO_PROVISION = cli.ArgumentProperties(
+        key='auto_provision',
+        flags=('--no-auto-provision',),
+        type=bool,
+        description='Do not include missing active devices to matched provisioning profiles',
+        argparse_kwargs={'required': False, 'action': 'store_false'},
+    )
 
 
-class CommonActionArgument(cli.Argument):
+class CertificateArgument(cli.Argument):
+    CERTIFICATE_RESOURCE_IDS = cli.ArgumentProperties(
+        key='certificate_resource_ids',
+        flags=('--certificate-ids',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Certificate',
+        argparse_kwargs={'required': True, 'nargs': '+', 'metavar': 'certificate-resource-ids'}
+    )
+    CERTIFICATE_TYPE = cli.ArgumentProperties(
+        key='certificate_type',
+        flags=('--type',),
+        type=CertificateType,
+        description='Type of the certificate',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(CertificateType),
+            'default': CertificateType.IOS_DEVELOPMENT,
+        }
+    )
+    DISPLAY_NAME = cli.ArgumentProperties(
+        key='certificate_display_name',
+        flags=('--display-name',),
+        description='Code signing certificate display name',
+        argparse_kwargs={'required': False}
+    )
+
+
+class ProfileArgument(cli.Argument):
+    PROFILE_TYPE = cli.ArgumentProperties(
+        key='profile_type',
+        flags=('--type',),
+        type=ProfileType,
+        description='Type of the provisioning profile',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ProfileType),
+            'default': ProfileType.IOS_APP_DEVELOPMENT
+        }
+    )
+    PROFILE_STATE = cli.ArgumentProperties(
+        key='profile_state',
+        flags=('--state',),
+        type=ProfileState,
+        description='State of the provisioning profile',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ProfileState),
+            'default': ProfileState.ACTIVE,
+        }
+    )
+    PROFILE_NAME = cli.ArgumentProperties(
+        key='profile_name',
+        flags=('--name',),
+        description='Name of the provisioning profile',
+        argparse_kwargs={'required': False}
+    )
+
+
+class CommonArgument(cli.Argument):
     CREATE_RESOURCE = cli.ArgumentProperties(
         key='create_resource',
         flags=('--create',),
         type=bool,
         description='Whether to create the resource if it does not exist yet',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     IGNORE_NOT_FOUND = cli.ArgumentProperties(
         key='ignore_not_found',
         flags=('--ignore-not-found',),
         type=bool,
         description='Do not raise exceptions if the specified resource does not exist.',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
         key='json_output',
         flags=('--json',),
         type=bool,
         description='Whether to show the resource in JSON format',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False},
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    SAVE = cli.ArgumentProperties(
+        key='save',
+        flags=('--save',),
+        type=bool,
+        description=f'Whether to save the resource to disk. See '
+                    f'{Colors.CYAN(ProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
+                    f'{Colors.CYAN(ProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
+                    f'for more information.',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )

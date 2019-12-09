@@ -39,6 +39,12 @@ class ResourceManager(metaclass=abc.ABCMeta):
         def as_query_params(self) -> Dict[str, str]:
             return {f'filter[{field}]': p for field, p in self._get_restrictions().items()}
 
+        @classmethod
+        def _field_matches(cls, field_value, resource_value):
+            if field_value is None:
+                return True
+            return field_value == resource_value
+
         def __bool__(self):
             return any(self.__dict__.values())
 

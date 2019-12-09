@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import TYPE_CHECKING
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -11,6 +14,9 @@ from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
+
+if TYPE_CHECKING:
+    from .profiles import Profiles
 
 
 class BundleIds(ResourceManager):
@@ -52,7 +58,7 @@ class BundleIds(ResourceManager):
             f'{self.client.API_URL}/bundleIds',
             json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes=attributes)
         ).json()
-        return BundleId(response['data'])
+        return BundleId(response['data'], created=True)
 
     def modify(self, bundle_id: Union[LinkedResourceData, ResourceId], name: str) -> BundleId:
         """
@@ -100,7 +106,9 @@ class BundleIds(ResourceManager):
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/relationships/profiles'
         return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self.client.paginate(url)]
 
-    def list_profiles(self, bundle_id: Union[BundleId, ResourceId]) -> List[Profile]:
+    def list_profiles(self,
+                      bundle_id: Union[BundleId, ResourceId],
+                      resource_filter: Optional[Profiles.Filter] = None) -> List[Profile]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_profiles_for_a_bundle_id
         """
@@ -108,7 +116,10 @@ class BundleIds(ResourceManager):
             url = bundle_id.relationships.profiles.links.related
         else:
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/profiles'
-        return [Profile(profile) for profile in self.client.paginate(url)]
+        profiles = [Profile(profile) for profile in self.client.paginate(url)]
+        if resource_filter:
+            return [profile for profile in profiles if resource_filter.matches(profile)]
+        return profiles
 
     def list_capabilility_ids(self, bundle_id: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         """

@@ -23,6 +23,12 @@ class Profiles(ResourceManager):
         profile_state: Optional[ProfileState] = None
         profile_type: Optional[ProfileType] = None
 
+        def matches(self, profile: Profile) -> bool:
+            return self._field_matches(self.id, profile.id) and \
+                   self._field_matches(self.name, profile.attributes.name) and \
+                   self._field_matches(self.profile_state, profile.attributes.profileState) and \
+                   self._field_matches(self.profile_type, profile.attributes.profileType)
+
     class Ordering(ResourceManager.Ordering):
         ID = 'id'
         NAME = 'name'
@@ -38,8 +44,8 @@ class Profiles(ResourceManager):
                name: str,
                profile_type: ProfileType,
                bundle_id: Union[ResourceId, BundleId],
-               certificates: List[Union[ResourceId, Certificate]],
-               devices: List[Union[ResourceId, Device]]) -> Profile:
+               certificates: Union[List[ResourceId], List[Certificate]],
+               devices: Union[List[ResourceId], List[Device]]) -> Profile:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
         """
@@ -63,7 +69,7 @@ class Profiles(ResourceManager):
         payload = self._get_create_payload(
             ResourceType.PROFILES, attributes=attributes, relationships=relationships)
         response = self.client.session.post(f'{self.client.API_URL}/profiles', json=payload).json()
-        return Profile(response['data'])
+        return Profile(response['data'], created=True)
 
     def delete(self, profile: Union[LinkedResourceData, ResourceId]) -> None:
         """

@@ -14,12 +14,7 @@ from typing import Union
 from typing import overload
 
 from codemagic_cli_tools.models import JsonSerializable
-
-
-class ResourceEnum(enum.Enum):
-
-    def __str__(self):
-        return str(self.value)
+from .enums import ResourceType
 
 
 class ResourceId(str):
@@ -44,6 +39,8 @@ class DictSerializable:
 
     @classmethod
     def _should_omit(cls, key, value):
+        if key.startswith('_'):
+            return True
         if key in cls._OMIT_KEYS:
             return True
         if key in cls._OMIT_IF_NONE_KEYS and value is None:
@@ -52,14 +49,6 @@ class DictSerializable:
 
     def dict(self):
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
-
-
-class ResourceType(ResourceEnum):
-    BUNDLE_ID = 'bundleIds'
-    BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
-    CERTIFICATES = 'certificates'
-    DEVICES = 'devices'
-    PROFILES = 'profiles'
 
 
 @dataclass
@@ -166,12 +155,17 @@ class Resource(LinkedResourceData):
     def _create_relationships(cls, api_response):
         return cls.Relationships(**api_response['relationships'])
 
-    def __init__(self, api_response: Dict):
+    def __init__(self, api_response: Dict, created: bool = False):
         super().__init__(api_response)
+        self._created = created
         self.links: ResourceLinks = ResourceLinks(**api_response['links'])
         self.attributes = self._create_attributes(api_response)
         if 'relationships' in api_response:
             self.relationships = self._create_relationships(api_response)
+
+    @property
+    def created(self) -> bool:
+        return self._created
 
     @classmethod
     @overload
@@ -235,7 +229,7 @@ class Resource(LinkedResourceData):
         return s
 
     @classmethod
-    def print_resources(cls, resources: Sequence[Resource], json_output: bool):
+    def print_resources(cls, resources: Sequence[Resource], json_output: Optional[bool]):
         if json_output:
             items = [resource.dict() for resource in resources]
             print(json.dumps(items, indent=4))
@@ -244,12 +238,12 @@ class Resource(LinkedResourceData):
                 cls.print_resource(resource, False)
 
     @classmethod
-    def print_resource(cls, resource: Resource, json_output: bool):
+    def print_resource(cls, resource: Resource, json_output: Optional[bool]):
         if json_output:
             print(resource.json())
         else:
             print('---')
             print(resource)
 
-    def print(self, json_output: bool):
+    def print(self, json_output: Optional[bool]):
         self.print_resource(self, json_output)
