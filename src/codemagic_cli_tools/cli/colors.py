@@ -66,6 +66,15 @@ class Colors(enum.Enum):
     def apply(cls, string: str, *colors: Colors) -> str:
         return reduce(lambda s, color: color(s), colors, string)
 
+    @classmethod
+    def remove(cls, string: str) -> str:
+        start = "|".join(re.escape(color.value) for color in Colors)
+        end = re.escape(Colors.RESET.value)
+        patt = re.compile(f'({start})(.+)({end})')
+        if not patt.search(string):
+            return string
+        return cls.remove(patt.sub(r'\2', string))
+
 
 if __name__ == '__main__':
     styles = [
