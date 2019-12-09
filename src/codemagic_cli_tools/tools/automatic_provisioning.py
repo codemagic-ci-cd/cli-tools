@@ -141,12 +141,12 @@ class AutomaticProvisioning(BaseProvisioning):
         return bundle_id
 
     @cli.action('list-bundle-ids',
-                BundleIdActionArgument.BUNDLE_ID_IDENTIFIER,
+                BundleIdActionArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
                 BundleIdActionArgument.BUNDLE_ID_NAME,
                 BundleIdActionArgument.PLATFORM,
                 CommonActionArgument.JSON_OUTPUT)
     def list_bundle_ids(self,
-                        bundle_id_identifier: str,
+                        bundle_id_identifier: Optional[str] = None,
                         bundle_id_name: Optional[str] = None,
                         platform: BundleIdPlatform = BundleIdPlatform.IOS,
                         json_output: bool = False,

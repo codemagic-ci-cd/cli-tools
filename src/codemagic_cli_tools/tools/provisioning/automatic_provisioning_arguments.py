@@ -4,7 +4,7 @@ from codemagic_cli_tools import cli
 from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic_cli_tools.apple.app_store_connect import IssuerId
 from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
-from codemagic_cli_tools.apple.resources import BundleIdPlatform
+from codemagic_cli_tools.apple.resources import BundleIdPlatform, DeviceStatus
 from codemagic_cli_tools.apple.resources import ResourceId
 
 
@@ -85,10 +85,17 @@ class BundleIdActionArgument(cli.Argument):
         key='bundle_id_identifier',
         description='Identifier of the Bundle ID',
     )
+    BUNDLE_ID_IDENTIFIER_OPTIONAL = cli.ArgumentProperties(
+        key='bundle_id_identifier',
+        flags=('--bundle-id-identifier',),
+        description='Identifier of the Bundle ID',
+        argparse_kwargs={'required': False}
+    )
     BUNDLE_ID_NAME = cli.ArgumentProperties(
         key='bundle_id_name',
         flags=('--bundle-id-name',),
-        description='Name of the Bundle ID. By default will be deduced from Bundle ID identifier.',
+        description='Name of the Bundle ID. If the resource is being created, '
+                    'the default will be deduced from given Bundle ID identifier.',
         argparse_kwargs={'required': False},
     )
     BUNDLE_ID_RESOURCE_ID = cli.ArgumentProperties(
@@ -113,21 +120,28 @@ class DeviceActionArgument(cli.Argument):
     DEVICE_NAME = cli.ArgumentProperties(
         key='device_name',
         flags=('--device_name',),
-        description='device_name of the Device',
+        description='Name of the Device',
         argparse_kwargs={'required': False}
     )
     DEVICE_PLATFORM = cli.ArgumentProperties(
         key='device_platform',
         type=BundleIdPlatform,
         flags=('--device_platform',),
-        description='device_platform of the Device',
-        argparse_kwargs={'required': False}
+        description='Platform of the Device',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BundleIdPlatform),
+        }
     )
     DEVICE_STATUS = cli.ArgumentProperties(
         key='device_status',
         flags=('--device_status',),
-        description='device_status of the Device',
-        argparse_kwargs={'required': False}
+        type=DeviceStatus,
+        description='Status of the Device',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(DeviceStatus),
+        }
     )
 
 
