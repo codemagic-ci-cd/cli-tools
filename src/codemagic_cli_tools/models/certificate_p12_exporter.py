@@ -20,8 +20,8 @@ CommandRunner = Callable[[Tuple[str, ...], Optional[Sequence[ObfuscationPattern]
 
 class P12Exporter:
 
-    def __init__(self, x509_certificate: X509, rsa_key: RSAPrivateKeyWithSerialization, container_password: str):
-        self.x509 = x509_certificate
+    def __init__(self, x509: X509, rsa_key: RSAPrivateKeyWithSerialization, container_password: str):
+        self.x509 = x509
         self.rsa_key = rsa_key
         self.container_password = container_password
         self._temp_pem_certificate_path = self._save_to_disk('cert', Certificate.x509_to_pem(self.x509))

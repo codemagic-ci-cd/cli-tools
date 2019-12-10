@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
@@ -35,5 +36,8 @@ class Certificate(Resource):
                 self.certificateType = CertificateType(self.certificateType)
 
     def get_display_info(self) -> str:
-        attributes = self.attributes
-        return f'{attributes.certificateType} certificate {attributes.serialNumber} {attributes.displayName}'
+        return f'{self.attributes.certificateType} certificate {self.attributes.serialNumber}'
+
+    @property
+    def asn1_content(self) -> bytes:
+        return b64decode(self.attributes.certificateContent)

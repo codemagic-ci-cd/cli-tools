@@ -33,7 +33,7 @@ class Types:
 
         @classmethod
         def _is_valid(cls, value: str) -> bool:
-            return value.startswith('-----BEGIN PRIVATE KEY-----')
+            return value.startswith('-----BEGIN ')
 
     class PrivateKeyPathArgument(cli.TypedCliArgument[pathlib.Path]):
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY_PATH'
@@ -44,6 +44,17 @@ class Types:
         def _is_valid(cls, value: pathlib.Path) -> bool:
             path = value.expanduser()
             return path.exists() and path.is_file()
+
+    class CertificateKeyArgument(PrivateKeyArgument):
+        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
+        alternative_to = 'CERTIFICATE_PRIVATE_KEY_PATH'
+
+    class CertificateKeyPathArgument(PrivateKeyPathArgument):
+        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PATH'
+        alternative_to = 'CERTIFICATE_PRIVATE_KEY'
+
+    class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
+        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
 
 
 class ProvisioningArgument(cli.Argument):
@@ -192,6 +203,11 @@ class DeviceArgument(cli.Argument):
 
 
 class CertificateArgument(cli.Argument):
+    CERTIFICATE_RESOURCE_ID = cli.ArgumentProperties(
+        key='certificate_resource_id',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Certificate',
+    )
     CERTIFICATE_RESOURCE_IDS = cli.ArgumentProperties(
         key='certificate_resource_ids',
         flags=('--certificate-ids',),
@@ -211,10 +227,45 @@ class CertificateArgument(cli.Argument):
         }
     )
     DISPLAY_NAME = cli.ArgumentProperties(
-        key='certificate_display_name',
+        key='display_name',
         flags=('--display-name',),
         description='Code signing certificate display name',
         argparse_kwargs={'required': False}
+    )
+    PRIVATE_KEY = cli.ArgumentProperties(
+        key='certificate_key',
+        flags=('--certificate-key',),
+        type=Types.CertificateKeyArgument,
+        description=f'Private key used to generate the certificate. '
+                    f'Used together with {Colors.BRIGHT_BLUE("--save")} '
+                    f'or {Colors.BRIGHT_BLUE("--create")} options.',
+        argparse_kwargs={'required': False},
+    )
+    PRIVATE_KEY_PATH = cli.ArgumentProperties(
+        key='certificate_key_path',
+        flags=('--certificate-key-path',),
+        type=Types.CertificateKeyPathArgument,
+        description=f'Path to the private key used to generate the certificate. '
+                    f'Used together with {Colors.BRIGHT_BLUE("--save")} '
+                    f'or {Colors.BRIGHT_BLUE("--create")} options.',
+        argparse_kwargs={'required': False},
+    )
+    PRIVATE_KEY_PASSWORD = cli.ArgumentProperties(
+        key='certificate_key_password',
+        flags=('--certificate-key-password',),
+        type=Types.CertificateKeyPasswordArgument,
+        description=f'Password of the private key used to generate the certificate. '
+                    f'Used together with {Colors.BRIGHT_BLUE("--certificate-key")} '
+                    f'or {Colors.BRIGHT_BLUE("--certificate-key-path")} options '
+                    f'if the provided key is encrypted.',
+        argparse_kwargs={'required': False},
+    )
+    P12_CONTAINER_PASSWORD = cli.ArgumentProperties(
+        key='p12_container_password',
+        flags=('--p12-password',),
+        description='If provided, the saved p12 container will be encrypted using this password. '
+                    f'Used together with {Colors.BRIGHT_BLUE("--save")} option.',
+        argparse_kwargs={'required': False, 'default': 'password'},
     )
 
 

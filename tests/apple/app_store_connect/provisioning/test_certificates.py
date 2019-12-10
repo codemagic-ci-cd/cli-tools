@@ -17,7 +17,7 @@ class CertificatesTest(ResourceManagerTestsBase):
     def test_create(self):
         rsa = PrivateKey.pem_to_rsa(self.unencrypted_pem.content)
         csr = Certificate.create_certificate_signing_request(rsa)
-        csr_content = csr.public_bytes(serialization.Encoding.PEM)
+        csr_content = Certificate.get_certificate_signing_request_content(csr)
         certificate = self.api_client.certificates.create(CertificateType.IOS_DEVELOPMENT, csr_content)
         assert isinstance(certificate, CertificateResource)
         assert certificate.attributes.displayName == 'Created via API'

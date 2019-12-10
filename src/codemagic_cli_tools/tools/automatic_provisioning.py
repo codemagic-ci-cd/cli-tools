@@ -3,30 +3,39 @@
 from __future__ import annotations
 
 import argparse
+import pathlib
+import re
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Tuple
+
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 
 from codemagic_cli_tools import cli
+from codemagic_cli_tools import models
 from codemagic_cli_tools.apple import AppStoreConnectApiError
 from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic_cli_tools.apple.app_store_connect import IssuerId
 from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
 from codemagic_cli_tools.apple.resources import BundleId
-from codemagic_cli_tools.apple.resources import Certificate
-from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import BundleIdPlatform
+from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import CertificateType
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import DeviceStatus
+from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.cli.cli_types import ObfuscationPattern
 from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
 from .provisioning.automatic_provisioning_arguments import BundleIdArgument
 from .provisioning.automatic_provisioning_arguments import CertificateArgument
 from .provisioning.automatic_provisioning_arguments import CommonArgument
 from .provisioning.automatic_provisioning_arguments import DeviceArgument
 from .provisioning.automatic_provisioning_arguments import ProfileArgument
+from .provisioning.automatic_provisioning_arguments import Types
 from .provisioning.base_provisioning import BaseProvisioning
 
 
@@ -89,12 +98,13 @@ class AutomaticProvisioning(BaseProvisioning):
             log_requests=cli_args.log_requests,
         )
 
-    def _list_resources(self, resource_filter, listing_function, resource_name):
+    def _list_resources(self, resource_filter, resource_manager):
         try:
-            resources = listing_function(resource_filter=resource_filter)
+            resources = resource_manager.list(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
             raise AutomaticProvisioningError(str(api_error))
 
+        resource_name = resource_manager.managed_resource.resource_names()
         self.logger.info(f'Found {len(resources)} {resource_name} matching {resource_filter}')
         return resources
 
@@ -115,7 +125,7 @@ class AutomaticProvisioning(BaseProvisioning):
 
         device_filter = self.api_client.devices.Filter(
             name=device_name, platform=platform, status=device_status)
-        devices = self._list_resources(device_filter, self.api_client.devices.list, 'Devices')
+        devices = self._list_resources(device_filter, self.api_client.devices)
 
         if print_resources:
             BundleId.print_resources(devices, json_output)
@@ -167,7 +177,7 @@ class AutomaticProvisioning(BaseProvisioning):
 
         bundle_id_filter = self.api_client.bundle_ids.Filter(
             identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
-        bundle_ids = self._list_resources(bundle_id_filter, self.api_client.bundle_ids.list, 'Bundle IDs')
+        bundle_ids = self._list_resources(bundle_id_filter, self.api_client.bundle_ids)
         if not bundle_ids:
             error_message = f'Did not find any Bundle IDs matching specified filters: {bundle_id_filter}'
             raise AutomaticProvisioningError(error_message)
@@ -249,15 +259,161 @@ class AutomaticProvisioning(BaseProvisioning):
         else:
             self.logger.info(f'Successfully deleted Bundle ID {bundle_id_resource_id}')
 
+    @classmethod
+    def _get_certificate_private_key(cls,
+                                     certificate_key: Optional[Types.CertificateKeyArgument],
+                                     certificate_key_path: Optional[Types.CertificateKeyPathArgument],
+                                     certificate_password: Optional[Types.CertificateKeyPasswordArgument]
+                                     ) -> Optional[RSAPrivateKeyWithSerialization]:
+
+        if certificate_key and certificate_key_path:
+            private_key_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY.key.upper())
+            private_key_path_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY_PATH.key.upper())
+            raise AutomaticProvisioningError(f'Only one of {private_key_arg} and {private_key_path_arg} allowed')
+
+        password = certificate_password.value if certificate_password else None
+        if certificate_key:
+            pem = certificate_key.value
+            return models.PrivateKey.pem_to_rsa(pem, password)
+        elif certificate_key_path:
+            pem = certificate_key_path.value.expanduser().read_text()
+            return models.PrivateKey.pem_to_rsa(pem, password)
+        return None
+
+    def _save_certificate(self,
+                          certificate: Certificate,
+                          rsa_key: RSAPrivateKeyWithSerialization,
+                          p12_container_password: str) -> pathlib.Path:
+        def command_runner(command_args: Tuple[str, ...],
+                           obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None):
+            process = self.execute(command_args, obfuscate_patterns=obfuscate_patterns)
+            if process.returncode == 0:
+                return
+            error = f'Unable to export certificate {certificate.attributes.name}'
+            if 'unable to load private key' in process.stderr:
+                error = f'{error}: Invalid private key'
+            else:
+                error = f'{error}: Failed to create PKCS12 container'
+            raise AutomaticProvisioningError(error, process)
+
+        safe_name = re.sub(r'[^\w.]', '_', certificate.get_display_info())
+        p12_path = models.Certificate.export_p12(
+            models.Certificate.asn1_to_x509(certificate.asn1_content),
+            rsa_key,
+            p12_container_password,
+            export_path=self._get_unique_path(f'{safe_name}.p12', self.certificates_directory),
+            command_runner=command_runner)
+        self.logger.info(f'Saved {certificate.get_display_info()} to {p12_path}')
+        return p12_path
+
+    @cli.action('create-certificate',
+                CertificateArgument.CERTIFICATE_TYPE,
+                CertificateArgument.PRIVATE_KEY,
+                CertificateArgument.PRIVATE_KEY_PATH,
+                CertificateArgument.PRIVATE_KEY_PASSWORD,
+                CertificateArgument.P12_CONTAINER_PASSWORD,
+                CommonArgument.JSON_OUTPUT,
+                CommonArgument.SAVE)
+    def create_certificate(self,
+                           certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
+                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                           certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
+                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+                           p12_container_password: str = 'password',
+                           json_output: bool = False,
+                           save: bool = False,
+                           print_resources: bool = True) -> Certificate:
+        """
+        Fetch code signing certificates from Apple Developer Portal for offline use
+        """
+        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        if rsa_key is None:
+            raise AutomaticProvisioningError('Cannot create resource without private key')
+        csr = models.Certificate.create_certificate_signing_request(rsa_key)
+        csr_content = models.Certificate.get_certificate_signing_request_content(csr)
+        certificate = self.api_client.certificates.create(certificate_type, csr_content)
+        self.logger.info(f'Created {certificate.get_display_info()}')
+        if print_resources:
+            certificate.print(json_output)
+        if save:
+            self._save_certificate(certificate, rsa_key, p12_container_password)
+        return certificate
+
+    @cli.action('get-certificate',
+                CertificateArgument.CERTIFICATE_RESOURCE_ID,
+                CertificateArgument.PRIVATE_KEY,
+                CertificateArgument.PRIVATE_KEY_PATH,
+                CertificateArgument.PRIVATE_KEY_PASSWORD,
+                CertificateArgument.P12_CONTAINER_PASSWORD,
+                CommonArgument.JSON_OUTPUT,
+                CommonArgument.SAVE)
+    def get_certificate(self,
+                        certificate_resource_id: ResourceId,
+                        certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                        certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
+                        certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+                        p12_container_password: str = 'password',
+                        json_output: bool = False,
+                        save: bool = False,
+                        print_resource: bool = True) -> Certificate:
+        """
+        Get specified Certificate from Apple Developer portal.
+        """
+        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        if save and rsa_key is None:
+            raise AutomaticProvisioningError('Cannot save resource without private key')
+        else:
+            assert rsa_key is not None
+
+        self.logger.info(f'Get Certificate {certificate_resource_id}')
+        try:
+            certificate = self.api_client.certificates.read(certificate_resource_id)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+
+        if print_resource:
+            certificate.print(json_output)
+        if save:
+            self._save_certificate(certificate, rsa_key, p12_container_password)
+        return certificate
+
+    @cli.action('delete-certificate',
+                CertificateArgument.CERTIFICATE_RESOURCE_ID,
+                CommonArgument.IGNORE_NOT_FOUND)
+    def delete_certificate(self,
+                         certificate_resource_id: ResourceId,
+                         ignore_not_found: Optional[bool] = False) -> None:
+        """
+        Delete specified Certificate from Apple Developer portal.
+        """
+        self.logger.info(f'Delete Certificate {certificate_resource_id}')
+        try:
+            self.api_client.certificates.revoke(certificate_resource_id)
+        except AppStoreConnectApiError as api_error:
+            if ignore_not_found and api_error.status_code == 404:
+                self.logger.info(f'Certificate {certificate_resource_id} does not exist, did not delete.')
+                return
+            raise AutomaticProvisioningError(str(api_error))
+        else:
+            self.logger.info(f'Successfully deleted Certificate {certificate_resource_id}')
+
     @cli.action('fetch-certificates',
                 CertificateArgument.CERTIFICATE_TYPE,
                 CertificateArgument.DISPLAY_NAME,
+                CertificateArgument.PRIVATE_KEY,
+                CertificateArgument.PRIVATE_KEY_PATH,
+                CertificateArgument.PRIVATE_KEY_PASSWORD,
+                CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.CREATE_RESOURCE,
                 CommonArgument.JSON_OUTPUT,
                 CommonArgument.SAVE)
     def fetch_certificates(self,
-                           certificate_type: Optional[CertificateType] = None,
+                           certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
                            display_name: Optional[str] = None,
+                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                           certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
+                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+                           p12_container_password: str = 'password',
                            create_resource: bool = False,
                            json_output: bool = False,
                            save: bool = False,
@@ -265,18 +421,33 @@ class AutomaticProvisioning(BaseProvisioning):
         """
         Fetch code signing certificates from Apple Developer Portal for offline use
         """
+        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        if (save or create_resource) and rsa_key is None:
+            raise AutomaticProvisioningError('Cannot create or save resource without private key')
+        else:
+            assert rsa_key is not None  # Make mypy happy
+
         certificate_filter = self.api_client.certificates.Filter(
             certificate_type=certificate_type,
             display_name=display_name)
         try:
-            certificates = self._list_resources(certificate_filter, self.api_client.certificates.list, 'Certificates')
+            certificates = self._list_resources(certificate_filter, self.api_client.certificates)
         except AutomaticProvisioningError:
             if not create_resource:
                 raise
             self.logger.info(f'Certificate with type {certificate_type} not found.')
-            # TODO: create certificate
-            raise NotImplemented
+            certificate = self.create_certificate(
+                certificate_type,
+                certificate_key=certificate_key,
+                certificate_key_path=certificate_key_path,
+                certificate_key_password=certificate_key_password,
+                print_resources=False,
+                save=False)
+            certificates = [certificate]
 
+        if save:
+            for certificate in certificates:
+                self._save_certificate(certificate, rsa_key, p12_container_password)
         if print_resources:
             Certificate.print_resources(certificates, json_output)
         return certificates
@@ -309,12 +480,12 @@ class AutomaticProvisioning(BaseProvisioning):
         if not bundle_ids:
             raise AutomaticProvisioningError(f'Did not find Bundle ID with identifier {bundle_id_identifier}')
         certificate_type = CertificateType.from_profile_type(profile_type)
-        devices = self.list_devices(
-            platform=platform, device_status=DeviceStatus.ENABLED, print_resources=False)
         certificates = self.fetch_certificates(
             certificate_type=certificate_type, create_resource=True, print_resources=False)
         profiles: List[Profile] = []  # TODO: fetch profiles
         if auto_provision:
+            devices = self.list_devices(
+                platform=platform, device_status=DeviceStatus.ENABLED, print_resources=False)
             # TODO: update profiles with new devices
             ...
         raise NotImplemented

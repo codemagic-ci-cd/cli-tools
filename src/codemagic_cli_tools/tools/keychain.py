@@ -173,7 +173,7 @@ class Keychain(cli.CliApp):
         """
         certificates = [
             certificate for certificate in self.find_certificates()
-            if certificate.is_code_signign_certificate()
+            if certificate.is_code_signing_certificate()
         ]
         json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
 

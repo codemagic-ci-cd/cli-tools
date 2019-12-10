@@ -1,7 +1,9 @@
 import os
 import pathlib
 from tempfile import NamedTemporaryFile
-from typing import Type, Any, Union
+from typing import Any
+from typing import Type
+from typing import Union
 
 import pytest
 

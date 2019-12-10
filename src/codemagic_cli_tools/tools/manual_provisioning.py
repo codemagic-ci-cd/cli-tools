@@ -97,16 +97,6 @@ class ManualProvisioning(BaseProvisioning):
         self.logger.info(f'Saved certificate {certificate_name} to {path}')
         return path
 
-    @classmethod
-    def _get_unique_path(cls, file_name: str, destination: Path) -> Path:
-        if destination.exists() and not destination.is_dir():
-            raise ValueError(f'Destination {destination} is not a directory')
-        destination.mkdir(parents=True, exist_ok=True)
-        name = Path(file_name)
-        tf = NamedTemporaryFile(prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False)
-        tf.close()
-        return Path(tf.name)
-
 
 if __name__ == '__main__':
     ManualProvisioning.invoke_cli()

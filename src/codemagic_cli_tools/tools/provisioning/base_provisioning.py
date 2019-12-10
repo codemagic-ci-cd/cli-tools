@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import pathlib
+import tempfile
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.models import Certificate
@@ -20,3 +21,14 @@ class BaseProvisioning(cli.CliApp):
         super().__init__()
         self.profiles_directory = profiles_directory
         self.certificates_directory = certificates_directory
+
+    @classmethod
+    def _get_unique_path(cls, file_name: str, destination: pathlib.Path) -> pathlib.Path:
+        if destination.exists() and not destination.is_dir():
+            raise ValueError(f'Destination {destination} is not a directory')
+        destination.mkdir(parents=True, exist_ok=True)
+        name = pathlib.Path(file_name)
+        tf = tempfile.NamedTemporaryFile(
+            prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False)
+        tf.close()
+        return pathlib.Path(tf.name)
