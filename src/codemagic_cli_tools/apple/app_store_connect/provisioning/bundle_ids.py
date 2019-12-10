@@ -20,6 +20,15 @@ if TYPE_CHECKING:
 
 
 class BundleIds(ResourceManager):
+    """
+    Bundle IDs
+    https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids
+    """
+
+    @property
+    def managed_resource(self):
+        return BundleId
+
     @dataclass
     class Filter(ResourceManager.Filter):
         id: Optional[str] = None
@@ -33,11 +42,6 @@ class BundleIds(ResourceManager):
         NAME = 'name'
         PLATFORM = 'platform'
         SEED_ID = 'seedId'
-
-    """
-    Bundle IDs
-    https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids
-    """
 
     def register(self,
                  identifier: str,

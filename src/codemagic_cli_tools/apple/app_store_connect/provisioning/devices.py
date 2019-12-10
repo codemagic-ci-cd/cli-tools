@@ -13,6 +13,15 @@ from codemagic_cli_tools.apple.resources import ResourceType
 
 
 class Devices(ResourceManager):
+    """
+    Devices
+    https://developer.apple.com/documentation/appstoreconnectapi/devices
+    """
+
+    @property
+    def managed_resource(self):
+        return Device
+
     @dataclass
     class Filter(ResourceManager.Filter):
         id: Optional[Union[str, ResourceId]] = None
@@ -27,11 +36,6 @@ class Devices(ResourceManager):
         PLATFORM = 'platform'
         STATUS = 'status'
         UDID = 'udid'
-
-    """
-    Devices
-    https://developer.apple.com/documentation/appstoreconnectapi/devices
-    """
 
     def register(self, name: str, platform: BundleIdPlatform, udid: str) -> Device:
         """

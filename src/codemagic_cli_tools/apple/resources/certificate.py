@@ -33,3 +33,7 @@ class Certificate(Resource):
                 self.platform = BundleIdPlatform(self.platform)
             if isinstance(self.certificateType, str):
                 self.certificateType = CertificateType(self.certificateType)
+
+    def get_display_info(self) -> str:
+        attributes = self.attributes
+        return f'{attributes.certificateType} certificate {attributes.serialNumber} {attributes.displayName}'

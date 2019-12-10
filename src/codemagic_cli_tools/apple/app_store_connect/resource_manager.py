@@ -6,14 +6,19 @@ import re
 from typing import Dict
 from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Type
+from typing import TypeVar
 from typing import Union
 
 from codemagic_cli_tools.apple.resources import LinkedResourceData
+from codemagic_cli_tools.apple.resources import Resource
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.apple import AppStoreConnectApiClient
+
+R = TypeVar('R', bound=Resource)
 
 
 class ResourceManager(metaclass=abc.ABCMeta):
@@ -60,6 +65,11 @@ class ResourceManager(metaclass=abc.ABCMeta):
 
     def __init__(self, client: AppStoreConnectApiClient):
         self.client = client
+
+    @property
+    @abc.abstractmethod
+    def managed_resource(self) -> Type[R]:
+        raise NotImplemented
 
     @classmethod
     def _get_update_payload(

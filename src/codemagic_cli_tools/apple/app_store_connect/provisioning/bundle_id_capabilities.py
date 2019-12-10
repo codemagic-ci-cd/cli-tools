@@ -17,6 +17,10 @@ class BundleIdCapabilities(ResourceManager):
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_id_capabilities
     """
 
+    @property
+    def managed_resource(self):
+        return BundleIdCapability
+
     def enable(self,
                capability_type: CapabilityType,
                bundle_id: Union[ResourceId, BundleId],

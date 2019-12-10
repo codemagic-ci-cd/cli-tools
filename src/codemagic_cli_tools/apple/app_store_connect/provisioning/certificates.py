@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import AnyStr
 from typing import List
 from typing import Optional
 from typing import Union
@@ -13,6 +12,15 @@ from codemagic_cli_tools.apple.resources import ResourceType
 
 
 class Certificates(ResourceManager):
+    """
+    Certificates
+    https://developer.apple.com/documentation/appstoreconnectapi/certificates
+    """
+
+    @property
+    def managed_resource(self):
+        return Certificate
+
     @dataclass
     class Filter(ResourceManager.Filter):
         serial_number: Optional[str] = None
@@ -25,22 +33,13 @@ class Certificates(ResourceManager):
         ID = 'id'
         SERIAL_NUMBER = 'serialNumber'
 
-    """
-    Certificates
-    https://developer.apple.com/documentation/appstoreconnectapi/certificates
-    """
-
-    def create(self, certificate_type: CertificateType, csr_content: AnyStr) -> Certificate:
+    def create(self, certificate_type: CertificateType, csr_content: str) -> Certificate:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
-        if isinstance(csr_content, bytes):
-            content = csr_content.decode()
-        else:
-            content = csr_content
         attributes = {
             'certificateType': certificate_type.value,
-            'csrContent': content,
+            'csrContent': csr_content,
         }
         response = self.client.session.post(
             f'{self.client.API_URL}/certificates',

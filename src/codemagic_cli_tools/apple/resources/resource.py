@@ -163,6 +163,19 @@ class Resource(LinkedResourceData):
         if 'relationships' in api_response:
             self.relationships = self._create_relationships(api_response)
 
+    @classmethod
+    def resource_name(cls):
+        class_name = cls.__name__
+        name = re.sub(f'([A-Z])', r' \1', class_name).lstrip(' ')
+        return re.sub('Id', 'ID', name)
+
+    @classmethod
+    def resource_names(cls) -> str:
+        singular = cls.resource_name()
+        if singular.endswith('y'):
+            return f'{singular[:-1]}ies'
+        return f'{singular}s'
+
     @property
     def created(self) -> bool:
         return self._created
@@ -242,7 +255,7 @@ class Resource(LinkedResourceData):
         if json_output:
             print(resource.json())
         else:
-            print('---')
+            print(f'-- {resource.resource_name()}{" (Created)" if resource.created else ""} --')
             print(resource)
 
     def print(self, json_output: Optional[bool]):

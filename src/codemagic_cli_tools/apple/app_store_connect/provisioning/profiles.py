@@ -16,6 +16,15 @@ from codemagic_cli_tools.apple.resources import ResourceType
 
 
 class Profiles(ResourceManager):
+    """
+    Profiles
+    https://developer.apple.com/documentation/appstoreconnectapi/profiles
+    """
+
+    @property
+    def managed_resource(self):
+        return Profile
+
     @dataclass
     class Filter(ResourceManager.Filter):
         id: Optional[Union[str, ResourceId]] = None
@@ -34,11 +43,6 @@ class Profiles(ResourceManager):
         NAME = 'name'
         PROFILE_STATE = 'profileState'
         PROFILE_TYPE = 'profileType'
-
-    """
-    Profiles
-    https://developer.apple.com/documentation/appstoreconnectapi/profiles
-    """
 
     def create(self,
                name: str,
