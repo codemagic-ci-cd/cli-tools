@@ -41,4 +41,4 @@ class CertificatesTest(ResourceManagerTestsBase):
 
     def test_revoke(self):
         certificate_id = ResourceId('A7N37QDAWK')
-        self.api_client.certificates.revoke(certificate_id)
+        self.api_client.certificates.delete(certificate_id)

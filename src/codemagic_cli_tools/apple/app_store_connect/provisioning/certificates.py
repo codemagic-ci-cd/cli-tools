@@ -66,7 +66,7 @@ class Certificates(ResourceManager):
         response = self.client.session.get(f'{self.client.API_URL}/certificates/{certificate_id}').json()
         return Certificate(response['data'])
 
-    def revoke(self, certificate: Union[LinkedResourceData, ResourceId]) -> None:
+    def delete(self, certificate: Union[LinkedResourceData, ResourceId]) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/revoke_a_certificate
         """

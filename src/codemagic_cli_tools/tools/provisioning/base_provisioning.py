@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import pathlib
+import re
 import tempfile
 
 from codemagic_cli_tools import cli
@@ -27,7 +28,7 @@ class BaseProvisioning(cli.CliApp):
         if destination.exists() and not destination.is_dir():
             raise ValueError(f'Destination {destination} is not a directory')
         destination.mkdir(parents=True, exist_ok=True)
-        name = pathlib.Path(file_name)
+        name = pathlib.Path(re.sub(r'[^\w.]', '_', file_name))
         tf = tempfile.NamedTemporaryFile(
             prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False)
         tf.close()

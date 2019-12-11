@@ -1,19 +1,18 @@
 from __future__ import annotations
 
 import enum
-import json
 import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Sequence
 from typing import Tuple
 from typing import Union
 from typing import overload
 
 from codemagic_cli_tools.models import JsonSerializable
+from codemagic_cli_tools.models import JsonSerializableMeta
 from .enums import ResourceType
 
 
@@ -130,7 +129,28 @@ class LinkedResourceData(DictSerializable, JsonSerializable):
         ])
 
 
-class Resource(LinkedResourceData):
+class _PrettyNameMeta(JsonSerializableMeta):
+    def __str__(cls):
+        class_name = cls.__name__
+        name = re.sub(f'([A-Z])', r' \1', class_name).lstrip(' ')
+        return re.sub('Id', 'ID', name)
+
+    @property
+    def s(cls) -> str:
+        """ Plural name of the object """
+        return cls.plural()
+
+    def plural(cls, count: Optional[int] = None) -> str:
+        """ Optional plural name of the object depending on the count """
+        singular = str(cls)
+        if count == 1:
+            return singular
+        if singular.endswith('y'):
+            return f'{singular[:-1]}ies'
+        return f'{singular}s'
+
+
+class Resource(LinkedResourceData, metaclass=_PrettyNameMeta):
     @dataclass
     class Attributes(DictSerializable):
         def __init__(self, *args, **kwargs):
@@ -162,19 +182,6 @@ class Resource(LinkedResourceData):
         self.attributes = self._create_attributes(api_response)
         if 'relationships' in api_response:
             self.relationships = self._create_relationships(api_response)
-
-    @classmethod
-    def resource_name(cls):
-        class_name = cls.__name__
-        name = re.sub(f'([A-Z])', r' \1', class_name).lstrip(' ')
-        return re.sub('Id', 'ID', name)
-
-    @classmethod
-    def resource_names(cls) -> str:
-        singular = cls.resource_name()
-        if singular.endswith('y'):
-            return f'{singular[:-1]}ies'
-        return f'{singular}s'
 
     @property
     def created(self) -> bool:
@@ -240,23 +247,3 @@ class Resource(LinkedResourceData):
             value = self._format_attribute_value(attribute_name, value)
             s += f'\n{name}: {value}'
         return s
-
-    @classmethod
-    def print_resources(cls, resources: Sequence[Resource], json_output: Optional[bool]):
-        if json_output:
-            items = [resource.dict() for resource in resources]
-            print(json.dumps(items, indent=4))
-        else:
-            for resource in resources:
-                cls.print_resource(resource, False)
-
-    @classmethod
-    def print_resource(cls, resource: Resource, json_output: Optional[bool]):
-        if json_output:
-            print(resource.json())
-        else:
-            print(f'-- {resource.resource_name()}{" (Created)" if resource.created else ""} --')
-            print(resource)
-
-    def print(self, json_output: Optional[bool]):
-        self.print_resource(self, json_output)

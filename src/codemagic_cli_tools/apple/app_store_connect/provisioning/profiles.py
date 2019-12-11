@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+from typing import Sequence
 from typing import Optional
 from typing import Union
 
@@ -48,8 +49,8 @@ class Profiles(ResourceManager):
                name: str,
                profile_type: ProfileType,
                bundle_id: Union[ResourceId, BundleId],
-               certificates: Union[List[ResourceId], List[Certificate]],
-               devices: Union[List[ResourceId], List[Device]]) -> Profile:
+               certificates: Union[Sequence[ResourceId], Sequence[Certificate]],
+               devices: Union[Sequence[ResourceId], Sequence[Device]]) -> Profile:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
         """

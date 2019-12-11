@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Sequence
+from typing import TYPE_CHECKING
 
 from .enums import BundleIdPlatform
 from .resource import Relationship
 from .resource import Resource
+
+if TYPE_CHECKING:
+    from .profile import Profile
 
 
 class BundleId(Resource):
@@ -27,3 +32,9 @@ class BundleId(Resource):
     class Relationships(Resource.Relationships):
         profiles: Relationship
         bundleIdCapabilities: Relationship
+
+    def has_profile(self, profiles: Sequence[Profile]) -> bool:
+        for profile in profiles:
+            if profile.relationships.bundleId.data.id == self.id:
+                return True
+        return False

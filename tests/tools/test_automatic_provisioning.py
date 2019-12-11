@@ -26,6 +26,7 @@ def namespace_kwargs():
         ProvisioningArgument.CERTIFICATES_DIRECTORY.key: ProvisioningArgument.CERTIFICATES_DIRECTORY.get_default(),
         ProvisioningArgument.PROFILES_DIRECTORY.key: ProvisioningArgument.PROFILES_DIRECTORY.get_default(),
         AutomaticProvisioningArgument.LOG_REQUESTS.key: True,
+        AutomaticProvisioningArgument.JSON_OUTPUT.key: False,
         AutomaticProvisioningArgument.ISSUER_ID.key: Types.IssuerIdArgument('issuer-id'),
         AutomaticProvisioningArgument.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument('key-identifier'),
         AutomaticProvisioningArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),

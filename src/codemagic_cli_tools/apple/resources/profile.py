@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
 from typing import Optional
+from typing import Sequence
 
 from .bundle_id import BundleIdPlatform
+from .certificate import Certificate
 from .enums import ProfileState
 from .enums import ProfileType
 from .resource import Relationship
@@ -53,3 +55,8 @@ class Profile(Resource):
     @property
     def profile_content(self) -> bytes:
         return b64decode(self.attributes.profileContent)
+
+    def has_certificates(self, certificates: Sequence[Certificate]) -> bool:
+        profile_certificate_ids = {c.id for c in self.relationships.certificates.data}
+        certificate_ids = {c.id for c in certificates}
+        return certificate_ids.issubset(profile_certificate_ids)

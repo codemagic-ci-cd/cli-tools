@@ -5,7 +5,7 @@ from typing import Dict
 _json_encoder_default = json.JSONEncoder.default
 
 
-class _JsonSerializableMeta(type):
+class JsonSerializableMeta(type):
 
     @staticmethod
     def default(json_encoder, obj):
@@ -16,10 +16,10 @@ class _JsonSerializableMeta(type):
 
     def __init__(cls, name, bases, dict):
         super().__init__(name, bases, dict)
-        json.JSONEncoder.default = _JsonSerializableMeta.default
+        json.JSONEncoder.default = JsonSerializableMeta.default
 
 
-class JsonSerializable(metaclass=_JsonSerializableMeta):
+class JsonSerializable(metaclass=JsonSerializableMeta):
 
     @abstractmethod
     def dict(self) -> Dict:

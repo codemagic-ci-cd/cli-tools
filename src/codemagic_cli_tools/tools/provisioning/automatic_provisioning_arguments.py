@@ -85,6 +85,13 @@ class AutomaticProvisioningArgument(cli.Argument):
         description='Turn on logging for App Store Connect API HTTP requests',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key='json_output',
+        flags=('--json',),
+        type=bool,
+        description='Whether to show the resource in JSON format',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
     ISSUER_ID = cli.ArgumentProperties(
         key='issuer_id',
         flags=('--issuer-id',),
@@ -141,10 +148,14 @@ class BundleIdArgument(cli.Argument):
     )
     BUNDLE_ID_RESOURCE_IDS = cli.ArgumentProperties(
         key='bundle_id_resource_ids',
-        flags=('--bundle-ids', '-ids'),
+        flags=('--bundle-ids',),
         type=ResourceId,
         description='Alphanumeric ID value of the Bundle ID',
-        argparse_kwargs={'required': True, 'nargs': '+', 'metavar': 'bundle-id-resource-ids'}
+        argparse_kwargs={
+            'required': True,
+            'nargs': '+',
+            'metavar': 'bundle-identifier-id'
+        }
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -165,7 +176,11 @@ class DeviceArgument(cli.Argument):
         flags=('--device-ids',),
         type=ResourceId,
         description='Alphanumeric ID value of the Device',
-        argparse_kwargs={'nargs': '+', 'metavar': 'device-resource-ids'}
+        argparse_kwargs={
+            'required': True,
+            'nargs': '+',
+            'metavar': 'device-id'
+        }
     )
     DEVICE_NAME = cli.ArgumentProperties(
         key='device_name',
@@ -213,7 +228,11 @@ class CertificateArgument(cli.Argument):
         flags=('--certificate-ids',),
         type=ResourceId,
         description='Alphanumeric ID value of the Certificate',
-        argparse_kwargs={'required': True, 'nargs': '+', 'metavar': 'certificate-resource-ids'}
+        argparse_kwargs={
+            'required': True,
+            'nargs': '+',
+            'metavar': 'certificate-id'
+        }
     )
     CERTIFICATE_TYPE = cli.ArgumentProperties(
         key='certificate_type',
@@ -313,13 +332,6 @@ class CommonArgument(cli.Argument):
         flags=('--ignore-not-found',),
         type=bool,
         description='Do not raise exceptions if the specified resource does not exist.',
-        argparse_kwargs={'required': False, 'action': 'store_true'},
-    )
-    JSON_OUTPUT = cli.ArgumentProperties(
-        key='json_output',
-        flags=('--json',),
-        type=bool,
-        description='Whether to show the resource in JSON format',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     SAVE = cli.ArgumentProperties(
