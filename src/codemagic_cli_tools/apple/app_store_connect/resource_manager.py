@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import enum
 import re
+import shlex
 from typing import Dict
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -57,7 +58,7 @@ class ResourceManager(metaclass=abc.ABCMeta):
             restrictions = self._get_restrictions()
             if not restrictions:
                 return '*'
-            return ', '.join(f'{param}={value}' for param, value in restrictions.items())
+            return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
         def as_param(self, reverse=False):

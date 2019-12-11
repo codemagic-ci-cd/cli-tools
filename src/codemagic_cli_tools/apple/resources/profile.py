@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
@@ -45,3 +46,10 @@ class Profile(Resource):
         certificates: Relationship
         devices: Relationship
         bundleId: Relationship
+
+    def get_display_info(self) -> str:
+        return f'{self.attributes.profileType} profile {self.attributes.uuid}'
+
+    @property
+    def profile_content(self) -> bytes:
+        return b64decode(self.attributes.profileContent)
