@@ -10,6 +10,7 @@ autopep8 = "*"
 twine = "*"
 ipdb = "*"
 pytest = "*"
+pytest-cov = "*"
 
 [packages]
 pyopenssl = "~=19.0"
