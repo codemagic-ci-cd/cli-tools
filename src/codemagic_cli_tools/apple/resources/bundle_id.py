@@ -32,9 +32,3 @@ class BundleId(Resource):
     class Relationships(Resource.Relationships):
         profiles: Relationship
         bundleIdCapabilities: Relationship
-
-    def has_profile(self, profiles: Sequence[Profile]) -> bool:
-        for profile in profiles:
-            if profile.relationships.bundleId.data.id == self.id:
-                return True
-        return False

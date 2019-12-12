@@ -114,6 +114,13 @@ def unencrypted_pem() -> PEM:
     return _unencrypted_pem()
 
 
+@pytest.fixture
+def certificate_asn1() -> bytes:
+    mocks_dir = pathlib.Path(__file__).parent / 'mocks'
+    asn1_path = mocks_dir / 'certificate.asn1'
+    return asn1_path.read_bytes()
+
+
 @pytest.fixture(scope='class')
 def class_unencrypted_pem(request):
     request.cls.unencrypted_pem = _unencrypted_pem()

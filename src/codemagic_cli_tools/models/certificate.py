@@ -116,3 +116,11 @@ class Certificate(JsonSerializable, BytesStrConverter):
         from .certificate_p12_exporter import P12Exporter
         exporter = P12Exporter(x509_certificate, rsa_key, container_password)
         return exporter.export(export_path, command_runner)
+
+    @classmethod
+    def is_signed_with_key(cls, x509_certificate: X509, rsa_key: RSAPrivateKey) -> bool:
+        certificate_public_key = x509_certificate.to_cryptography().public_key()
+        rsa_key_public_key = rsa_key.public_key()
+        certificate_public_numbers = certificate_public_key.public_numbers()
+        rsa_key_public_numbers = rsa_key_public_key.public_numbers()
+        return certificate_public_numbers == rsa_key_public_numbers

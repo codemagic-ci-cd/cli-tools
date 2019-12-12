@@ -1,5 +1,4 @@
 import pytest
-from cryptography.hazmat.primitives import serialization
 
 from codemagic_cli_tools.apple.resources import Certificate as CertificateResource
 from codemagic_cli_tools.apple.resources import CertificateType
@@ -25,7 +24,8 @@ class CertificatesTest(ResourceManagerTestsBase):
 
     def test_list(self):
         expected_type = CertificateType.IOS_DEVELOPMENT
-        certificates = self.api_client.certificates.list(filter_certificate_type=expected_type)
+        certificates_filter = self.api_client.certificates.Filter(certificate_type=expected_type)
+        certificates = self.api_client.certificates.list(resource_filter=certificates_filter)
         assert len(certificates) > 0
         for certificate in certificates:
             assert isinstance(certificate, CertificateResource)

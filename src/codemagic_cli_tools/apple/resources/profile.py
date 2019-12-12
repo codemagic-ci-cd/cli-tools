@@ -55,8 +55,3 @@ class Profile(Resource):
     @property
     def profile_content(self) -> bytes:
         return b64decode(self.attributes.profileContent)
-
-    def has_certificates(self, certificates: Sequence[Certificate]) -> bool:
-        profile_certificate_ids = {c.id for c in self.relationships.certificates.data}
-        certificate_ids = {c.id for c in certificates}
-        return certificate_ids.issubset(profile_certificate_ids)

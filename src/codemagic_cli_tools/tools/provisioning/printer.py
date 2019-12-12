@@ -52,7 +52,7 @@ class Printer:
     def log_creating(self, resource_type: Type[R], **params):
         message = f'Creating new {resource_type}'
         if params:
-            attributes = ', '.join(f'{name}: {shlex.quote(str(value))}' for name, value in params.values())
+            attributes = ', '.join(f'{name}: {shlex.quote(str(value))}' for name, value in params.items())
             message = f'{message}: {attributes}'
         self.logger.info(message)
 
@@ -78,6 +78,14 @@ class Printer:
             self.logger.info(Colors.YELLOW(f'Did not find any {name}{related}{suffix}'))
         else:
             self.logger.info(Colors.GREEN(f'Found {count} {name}{related}{suffix}'))
+
+    def log_filtered(self, resource_type: Type[R], resources: Sequence[R], constraint: str):
+        count = len(resources)
+        name = resource_type.plural(count)
+        if count == 0:
+            self.logger.info(Colors.YELLOW(f'Did not find any {name} {constraint}'))
+        else:
+            self.logger.info(Colors.GREEN(f'Filtered out {count} {name} {constraint}'))
 
     def log_delete(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(f'Delete {resource_type} {resource_id}')

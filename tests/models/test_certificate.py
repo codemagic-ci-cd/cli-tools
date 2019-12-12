@@ -29,3 +29,15 @@ def test_create_certificate_signing_request(unencrypted_pem):
     assert csr.signature_hash_algorithm.name == 'sha256'
     assert csr.is_signature_valid is True
     assert csr.public_bytes(serialization.Encoding.PEM) == public_bytes
+
+
+def test_certificate_has_key(certificate_asn1, unencrypted_pem):
+    rsa = PrivateKey.pem_to_rsa(unencrypted_pem.content)
+    x509 = Certificate.asn1_to_x509(certificate_asn1)
+    assert Certificate.is_signed_with_key(x509, rsa) is True
+
+
+def test_certificate_does_not_have_key(certificate_asn1, encrypted_pem):
+    rsa = PrivateKey.pem_to_rsa(encrypted_pem.content, encrypted_pem.password)
+    x509 = Certificate.asn1_to_x509(certificate_asn1)
+    assert Certificate.is_signed_with_key(x509, rsa) is False

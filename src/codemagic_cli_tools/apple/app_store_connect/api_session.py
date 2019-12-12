@@ -15,6 +15,12 @@ class AppStoreConnectApiSession(requests.Session):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
         self._logger = logging.getLogger(self.__class__.__name__)
+        self._configure_logging(log_requests)
+
+    def _configure_logging(self, log_requests: bool):
+        for logger_name in ('requests', 'urllib3'):
+            requests_logger = logging.getLogger(logger_name)
+            requests_logger.setLevel(logging.ERROR)
         if not log_requests:
             self._logger.setLevel(logging.WARNING)
 

@@ -139,7 +139,7 @@ class Profiles(ResourceManager):
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_certificate_ids_in_a_profile
         """
         if isinstance(profile, Profile):
-            url = profile.relationships.profiles.links.self
+            url = profile.relationships.certificates.links.self
         else:
             url = f'{self.client.API_URL}/profiles/{profile}/relationships/certificates'
         return [LinkedResourceData(certificate) for certificate in self.client.paginate(url)]
