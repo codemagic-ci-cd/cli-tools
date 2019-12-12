@@ -136,6 +136,8 @@ class CliApp(metaclass=abc.ABCMeta):
 
         options_group.add_argument('--disable-logging', dest='log_commands', action='store_false',
                                    help='Disable log output for actions')
+        options_group.add_argument('--no-color', dest='no_color', action='store_true',
+                                   help='Do not use ANSI colors to format terminal output')
         options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging')
         options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],

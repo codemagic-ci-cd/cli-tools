@@ -56,11 +56,12 @@ class Colors(enum.Enum):
     def __call__(self, string: Optional[str]):
         if string is None:
             return None
-        elif sys.stdout.isatty():
-            patt = re.compile(r'^(\s*)(.*)(\s*)$', flags=re.MULTILINE)
-            return patt.sub(r'\1%s\2%s\3' % (self.value, Colors.RESET.value), string)
+        if '--no-color' in sys.argv:
+            colored = string
         else:
-            return string
+            patt = re.compile(r'^(\s*)(.*)(\s*)$', flags=re.MULTILINE)
+            colored = patt.sub(r'\1%s\2%s\3' % (self.value, Colors.RESET.value), string)
+        return colored
 
     @classmethod
     def apply(cls, string: str, *colors: Colors) -> str:
