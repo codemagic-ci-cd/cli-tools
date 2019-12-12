@@ -4,9 +4,11 @@ import json
 import logging
 import pathlib
 import shlex
+from typing import Any
 from typing import Optional
 from typing import Sequence
 from typing import TYPE_CHECKING
+from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -46,14 +48,18 @@ class Printer:
         if self.print_json:
             print(resource.json())
         else:
-            print(f'-- {resource.__class__}{" (Created)" if resource.created else ""} --')
+            header = f'-- {resource.__class__}{" (Created)" if resource.created else ""} --'
+            print(Colors.BLUE(header))
             print(resource)
 
     def log_creating(self, resource_type: Type[R], **params):
+        def fmt(item: Tuple[str, Any]):
+            name, value = item
+            return f'{name.replace("_", " ")}: {shlex.quote(str(value))}'
+
         message = f'Creating new {resource_type}'
         if params:
-            attributes = ', '.join(f'{name}: {shlex.quote(str(value))}' for name, value in params.items())
-            message = f'{message}: {attributes}'
+            message = f'{message}: {", ".join(map(fmt, params.items()))}'
         self.logger.info(message)
 
     def log_created(self, resource: Resource):

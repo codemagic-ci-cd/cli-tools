@@ -172,6 +172,16 @@ class BundleIdArgument(cli.Argument):
             'default': BundleIdPlatform.IOS,
         },
     )
+    PLATFORM_OPTIONAL = cli.ArgumentProperties(
+        key='platform',
+        flags=('--platform',),
+        type=BundleIdPlatform,
+        description='Bundle ID platform',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BundleIdPlatform),
+        },
+    )
 
 
 class DeviceArgument(cli.Argument):
@@ -249,6 +259,16 @@ class CertificateArgument(cli.Argument):
             'default': CertificateType.IOS_DEVELOPMENT,
         }
     )
+    CERTIFICATE_TYPE_OPTIONAL = cli.ArgumentProperties(
+        key='certificate_type',
+        flags=('--type',),
+        type=CertificateType,
+        description='Type of the certificate',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(CertificateType),
+        }
+    )
     DISPLAY_NAME = cli.ArgumentProperties(
         key='display_name',
         flags=('--display-name',),
@@ -301,6 +321,11 @@ class CertificateArgument(cli.Argument):
 
 
 class ProfileArgument(cli.Argument):
+    PROFILE_RESOURCE_ID = cli.ArgumentProperties(
+        key='profile_resource_id',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Profile',
+    )
     PROFILE_TYPE = cli.ArgumentProperties(
         key='profile_type',
         flags=('--type',),
@@ -312,6 +337,16 @@ class ProfileArgument(cli.Argument):
             'default': ProfileType.IOS_APP_DEVELOPMENT
         }
     )
+    PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
+        key='profile_type',
+        flags=('--type',),
+        type=ProfileType,
+        description='Type of the provisioning profile',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ProfileType),
+        }
+    )
     PROFILE_STATE = cli.ArgumentProperties(
         key='profile_state',
         flags=('--state',),
@@ -321,6 +356,16 @@ class ProfileArgument(cli.Argument):
             'required': False,
             'choices': list(ProfileState),
             'default': ProfileState.ACTIVE,
+        }
+    )
+    PROFILE_STATE_OPTIONAL = cli.ArgumentProperties(
+        key='profile_state',
+        flags=('--state',),
+        type=ProfileState,
+        description='State of the provisioning profile',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ProfileState),
         }
     )
     PROFILE_NAME = cli.ArgumentProperties(

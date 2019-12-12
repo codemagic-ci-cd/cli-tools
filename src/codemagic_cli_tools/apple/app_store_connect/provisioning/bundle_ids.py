@@ -43,11 +43,11 @@ class BundleIds(ResourceManager[BundleId]):
         PLATFORM = 'platform'
         SEED_ID = 'seedId'
 
-    def register(self,
-                 identifier: str,
-                 name: str,
-                 platform: BundleIdPlatform,
-                 seed_id: Optional[str] = None) -> BundleId:
+    def create(self,
+               identifier: str,
+               name: str,
+               platform: BundleIdPlatform,
+               seed_id: Optional[str] = None) -> BundleId:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/register_a_new_bundle_id
         """

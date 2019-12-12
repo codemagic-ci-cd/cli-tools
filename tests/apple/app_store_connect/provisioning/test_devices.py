@@ -17,7 +17,7 @@ DEVICE_UDID = '5d0d1e9e3e4c8323756ec0038564006dafe15c21'
 class DevicesTest(ResourceManagerTestsBase):
 
     def test_register(self):
-        device = self.api_client.devices.register(
+        device = self.api_client.devices.create(
             f'test device from {self.__class__.__name__}',
             BundleIdPlatform.IOS,
             DEVICE_UDID

@@ -37,7 +37,7 @@ class Devices(ResourceManager[Device]):
         STATUS = 'status'
         UDID = 'udid'
 
-    def register(self, name: str, platform: BundleIdPlatform, udid: str) -> Device:
+    def create(self, name: str, platform: BundleIdPlatform, udid: str) -> Device:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/register_a_new_device
         """

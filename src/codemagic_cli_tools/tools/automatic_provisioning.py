@@ -105,6 +105,30 @@ class AutomaticProvisioning(BaseProvisioning):
             json_output=cli_args.json_output,
         )
 
+    def _create_resource(self, resource_manager, should_print, **create_params):
+        omit_keys = create_params.pop('omit_keys', tuple())
+        self.printer.log_creating(
+            resource_manager.resource_type,
+            **{k: v for k, v in create_params.items() if k not in omit_keys}
+        )
+        try:
+            resource = resource_manager.create(**create_params)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+
+        self.printer.print_resource(resource, should_print)
+        self.printer.log_created(resource)
+        return resource
+
+    def _get_resource(self, resource_id, resource_manager, should_print):
+        self.printer.log_get(resource_manager.resource_type, resource_id)
+        try:
+            resource = resource_manager.read(resource_id)
+        except AppStoreConnectApiError as api_error:
+            raise AutomaticProvisioningError(str(api_error))
+        self.printer.print_resource(resource, should_print)
+        return resource
+
     def _list_resources(self, resource_filter, resource_manager, should_print):
         try:
             resources = resource_manager.list(resource_filter=resource_filter)
@@ -127,7 +151,7 @@ class AutomaticProvisioning(BaseProvisioning):
                 raise AutomaticProvisioningError(str(api_error))
 
     @cli.action('list-devices',
-                BundleIdArgument.PLATFORM,
+                BundleIdArgument.PLATFORM_OPTIONAL,
                 DeviceArgument.DEVICE_NAME,
                 DeviceArgument.DEVICE_STATUS)
     def list_devices(self,
@@ -159,24 +183,17 @@ class AutomaticProvisioning(BaseProvisioning):
         if bundle_id_name is None:
             bundle_id_name = bundle_id_identifier.replace('.', ' ')
 
-        self.printer.log_creating(BundleId, identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
-        try:
-            bundle_id = self.api_client.bundle_ids.register(bundle_id_identifier, bundle_id_name, platform)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
-
-        self.printer.print_resource(bundle_id, should_print)
-        self.printer.log_created(bundle_id)
-        return bundle_id
+        create_params = dict(identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
+        return self._create_resource(self.api_client.bundle_ids, should_print, **create_params)
 
     @cli.action('list-bundle-ids',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
                 BundleIdArgument.BUNDLE_ID_NAME,
-                BundleIdArgument.PLATFORM)
+                BundleIdArgument.PLATFORM_OPTIONAL)
     def list_bundle_ids(self,
                         bundle_id_identifier: Optional[str] = None,
                         bundle_id_name: Optional[str] = None,
-                        platform: BundleIdPlatform = BundleIdPlatform.IOS,
+                        platform: Optional[BundleIdPlatform] = None,
                         should_print: bool = True) -> List[BundleId]:
         """
         List Bundle IDs from Apple Developer portal matching given constraints.
@@ -188,25 +205,6 @@ class AutomaticProvisioning(BaseProvisioning):
 
         return bundle_ids
 
-    @cli.action('find-bundle-ids',
-                BundleIdArgument.BUNDLE_ID_IDENTIFIER,
-                BundleIdArgument.PLATFORM)
-    def find_bundle_ids(self,
-                        bundle_id_identifier: str,
-                        platform: BundleIdPlatform = BundleIdPlatform.IOS,
-                        should_print: bool = True) -> List[BundleId]:
-        """
-        Find Bundle IDs from Apple Developer portal for specified identifier.
-        """
-
-        bundle_ids = self.list_bundle_ids(
-            bundle_id_identifier=bundle_id_identifier,
-            platform=platform,
-            should_print=False)
-
-        self.printer.print_resources(bundle_ids, should_print)
-        return bundle_ids
-
     @cli.action('get-bundle-id', BundleIdArgument.BUNDLE_ID_RESOURCE_ID)
     def get_bundle_id(self,
                       bundle_id_resource_id: ResourceId,
@@ -215,14 +213,7 @@ class AutomaticProvisioning(BaseProvisioning):
         Get specified Bundle ID from Apple Developer portal.
         """
 
-        self.printer.log_get(BundleId, bundle_id_resource_id)
-        try:
-            bundle_id = self.api_client.bundle_ids.read(bundle_id_resource_id)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
-
-        self.printer.print_resource(bundle_id, should_print)
-        return bundle_id
+        return self._get_resource(bundle_id_resource_id, self.api_client.bundle_ids, should_print)
 
     @cli.action('delete-bundle-id',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
@@ -258,12 +249,13 @@ class AutomaticProvisioning(BaseProvisioning):
         rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
         if rsa_key is None:
             raise AutomaticProvisioningError('Cannot create resource without private key')
-        self.printer.log_creating(Certificate, type=certificate_type)
+
         csr = models.Certificate.create_certificate_signing_request(rsa_key)
         csr_content = models.Certificate.get_certificate_signing_request_content(csr)
-        certificate = self.api_client.certificates.create(certificate_type, csr_content)
-        self.printer.print_resource(certificate, should_print)
-        self.printer.log_created(certificate)
+
+        create_params = dict(csr_content=csr_content, certificate_type=certificate_type, omit_keys=['csr_content'])
+        certificate = self._create_resource(self.api_client.certificates, should_print, **create_params)
+
         if save:
             self._save_certificate(certificate, rsa_key, p12_container_password)
         return certificate
@@ -293,13 +285,8 @@ class AutomaticProvisioning(BaseProvisioning):
         else:
             assert rsa_key is not None
 
-        self.printer.log_get(Certificate, certificate_resource_id)
-        try:
-            certificate = self.api_client.certificates.read(certificate_resource_id)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
+        certificate = self._get_resource(certificate_resource_id, self.api_client.certificates, should_print)
 
-        self.printer.print_resource(certificate, should_print)
         if save:
             self._save_certificate(certificate, rsa_key, p12_container_password)
         return certificate
@@ -316,25 +303,25 @@ class AutomaticProvisioning(BaseProvisioning):
 
         self._delete_resource(self.api_client.certificates, certificate_resource_id, ignore_not_found)
 
-    @cli.action('fetch-certificates',
-                CertificateArgument.CERTIFICATE_TYPE,
+    @cli.action('list-certificates',
+                CertificateArgument.CERTIFICATE_TYPE_OPTIONAL,
                 CertificateArgument.DISPLAY_NAME,
                 CertificateArgument.PRIVATE_KEY,
                 CertificateArgument.PRIVATE_KEY_PATH,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
-    def fetch_certificates(self,
-                           certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
-                           display_name: Optional[str] = None,
-                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                           certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
-                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                           p12_container_password: str = 'password',
-                           save: bool = False,
-                           should_print: bool = True) -> List[Certificate]:
+    def list_certificates(self,
+                          certificate_type: Optional[CertificateType] = None,
+                          display_name: Optional[str] = None,
+                          certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                          certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
+                          certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+                          p12_container_password: str = 'password',
+                          save: bool = False,
+                          should_print: bool = True) -> List[Certificate]:
         """
-        Fetch code signing certificates from Apple Developer Portal for offline use
+        List code signing certificates from Apple Developer Portal matching given constraints.
         """
 
         def has_rsa_key(certificate):
@@ -387,32 +374,53 @@ class AutomaticProvisioning(BaseProvisioning):
         else:
             raise AutomaticProvisioningError(f'"{profile_name}" is not a valid {Profile} name')
 
-        self.printer.log_creating(Profile, **{'type': profile_type, f'{BundleId}': bundle_id.id, 'name': name})
+        create_params = dict(
+            name=name,
+            profile_type=profile_type,
+            bundle_id=bundle_id_resource_id,
+            certificates=certificate_resource_ids,
+            devices=device_resource_ids,
+            omit_keys=['devices']
+        )
+        profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
 
-        try:
-            profile = self.api_client.profiles.create(
-                name, profile_type, bundle_id, certificates=certificate_resource_ids, devices=device_resource_ids)
-        except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
-        self.printer.print_resource(profile, should_print)
-        self.printer.log_created(profile)
         if save:
             self._save_profile(profile)
         return profile
 
-    @cli.action('fetch-profiles',
-                ProfileArgument.PROFILE_TYPE,
-                ProfileArgument.PROFILE_STATE,
+    @cli.action('get-profile', ProfileArgument.PROFILE_RESOURCE_ID)
+    def get_profile(self, profile_resource_id: ResourceId, should_print: bool = True) -> Profile:
+        """
+        Get specified Profile from Apple Developer portal.
+        """
+
+        return self._get_resource(profile_resource_id, self.api_client.profiles, should_print)
+
+    @cli.action('delete-profile',
+                ProfileArgument.PROFILE_RESOURCE_ID,
+                CommonArgument.IGNORE_NOT_FOUND)
+    def delete_profile(self,
+                       profile_resource_id: ResourceId,
+                       ignore_not_found: bool = False) -> None:
+        """
+        Delete specified Profile from Apple Developer portal.
+        """
+
+        self._delete_resource(self.api_client.profiles, profile_resource_id, ignore_not_found)
+
+    @cli.action('list-profiles',
+                ProfileArgument.PROFILE_TYPE_OPTIONAL,
+                ProfileArgument.PROFILE_STATE_OPTIONAL,
                 ProfileArgument.PROFILE_NAME,
                 CommonArgument.SAVE)
-    def fetch_profiles(self,
-                       profile_type: Optional[ProfileType] = None,
-                       profile_state: Optional[ProfileState] = None,
-                       profile_name: Optional[str] = None,
-                       save: bool = False,
-                       should_print: bool = True) -> List[Profile]:
+    def list_profiles(self,
+                      profile_type: Optional[ProfileType] = None,
+                      profile_state: Optional[ProfileState] = None,
+                      profile_name: Optional[str] = None,
+                      save: bool = False,
+                      should_print: bool = True) -> List[Profile]:
         """
-        Fetch provisioning profiles from Apple Developer Portal for offline use
+        List Profiles from Apple Developer portal matching given constraints.
         """
         profile_filter = self.api_client.profiles.Filter(
             profile_type=profile_type,
@@ -435,21 +443,21 @@ class AutomaticProvisioning(BaseProvisioning):
         self.printer.log_found(Profile, profiles, profiles_filter, BundleId)
         return profiles
 
-    @cli.action('fetch-bundle-id-profiles',
+    @cli.action('list-bundle-id-profiles',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_IDS,
-                ProfileArgument.PROFILE_TYPE,
-                ProfileArgument.PROFILE_STATE,
+                ProfileArgument.PROFILE_TYPE_OPTIONAL,
+                ProfileArgument.PROFILE_STATE_OPTIONAL,
                 ProfileArgument.PROFILE_NAME,
                 CommonArgument.SAVE)
-    def fetch_bundle_id_profiles(self,
-                                 bundle_id_resource_ids: Sequence[ResourceId],
-                                 profile_type: Optional[ProfileType] = None,
-                                 profile_state: Optional[ProfileState] = None,
-                                 profile_name: Optional[str] = None,
-                                 save: bool = False,
-                                 should_print: bool = True) -> List[Profile]:
+    def list_bundle_id_profiles(self,
+                                bundle_id_resource_ids: Sequence[ResourceId],
+                                profile_type: Optional[ProfileType] = None,
+                                profile_state: Optional[ProfileState] = None,
+                                profile_name: Optional[str] = None,
+                                save: bool = False,
+                                should_print: bool = True) -> List[Profile]:
         """
-        Fetch provisioning profiles from Apple Developer Portal for specified Bundle IDs.
+        List provisioning profiles from Apple Developer Portal for specified Bundle IDs.
         """
 
         profiles_filter = self.api_client.profiles.Filter(
@@ -466,7 +474,7 @@ class AutomaticProvisioning(BaseProvisioning):
             self._save_profiles(profiles)
         return profiles
 
-    @cli.action('fetch',
+    @cli.action('fetch-signing-files',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER,
                 BundleIdArgument.PLATFORM,
                 CertificateArgument.PRIVATE_KEY,
@@ -485,8 +493,8 @@ class AutomaticProvisioning(BaseProvisioning):
                             profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
                             create_resource: bool = False):
         """
-        Fetch provisioning profiles and code signing certificates for Bundle ID with given
-        identifier.
+        Fetch provisioning profiles and code signing certificates
+        for Bundle ID with given identifier.
         """
 
         rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
@@ -504,7 +512,7 @@ class AutomaticProvisioning(BaseProvisioning):
 
     def _get_or_create_bundle_ids(
             self, bundle_id_identifier: str, platform: BundleIdPlatform, create_resource: bool) -> List[BundleId]:
-        bundle_ids = self.find_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
+        bundle_ids = self.list_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
         if not bundle_ids:
             if not create_resource:
                 raise AutomaticProvisioningError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
@@ -518,7 +526,7 @@ class AutomaticProvisioning(BaseProvisioning):
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[Certificate]:
         certificate_type = CertificateType.from_profile_type(profile_type)
-        certificates = self.fetch_certificates(
+        certificates = self.list_certificates(
             certificate_type=certificate_type,
             certificate_key=certificate_key,
             certificate_key_path=certificate_key_path,
@@ -567,10 +575,12 @@ class AutomaticProvisioning(BaseProvisioning):
             return not (profile_ids & {p.id for p in bundle_ids_profiles})
 
         certificate_ids = {c.id for c in certificates}
-        profiles = self.fetch_bundle_id_profiles(
+        profiles = self.list_bundle_id_profiles(
             [bundle_id.id for bundle_id in bundle_ids], profile_type=profile_type, should_print=False)
         profiles = list(filter(has_certificate, profiles))
-        message = f'that contain certificate(s) {", ".join(c.attributes.displayName for c in certificates)}'
+
+        certificate_names = (f'{c.attributes.displayName} [{c.attributes.serialNumber}]' for c in certificates)
+        message = f'that contain certificate(s) {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
 
         profile_ids = {p.id for p in profiles}

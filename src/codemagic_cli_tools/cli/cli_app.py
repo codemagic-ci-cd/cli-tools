@@ -107,9 +107,14 @@ class CliApp(metaclass=abc.ABCMeta):
             return
 
         stream = {'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream]
-        log_level = logging.DEBUG if cli_args.verbose else logging.INFO
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)-5s > %(message)s', '%m-%d %H:%M:%S')
+        if cli_args.verbose:
+            log_fmt = '[%(asctime)s] %(levelname)-5s > %(message)s'
+            log_level = logging.DEBUG
+        else:
+            log_fmt = '%(message)s'
+            log_level = logging.INFO
 
+        formatter = logging.Formatter(log_fmt, '%m-%d %H:%M:%S')
         handler = logging.StreamHandler(stream)
         handler.setLevel(log_level)
         handler.setFormatter(formatter)
