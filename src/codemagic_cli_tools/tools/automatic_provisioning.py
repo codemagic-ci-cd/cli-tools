@@ -11,7 +11,6 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 
 from codemagic_cli_tools import cli
@@ -338,6 +337,10 @@ class AutomaticProvisioning(BaseProvisioning):
         Fetch code signing certificates from Apple Developer Portal for offline use
         """
 
+        def has_rsa_key(certificate):
+            x509 = models.Certificate.asn1_to_x509(certificate.asn1_content)
+            return models.Certificate.is_signed_with_key(x509, rsa_key)
+
         rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
         if save and rsa_key is None:
             raise AutomaticProvisioningError('Cannot create or save resource without private key')
@@ -348,12 +351,13 @@ class AutomaticProvisioning(BaseProvisioning):
         certificates = self._list_resources(certificate_filter, self.api_client.certificates, should_print)
 
         if rsa_key:
-            certificates = self._filter_certificates(rsa_key, certificates)
+            certificates = list(filter(has_rsa_key, certificates))
             self.printer.log_filtered(Certificate, certificates, 'for given private key')
 
         if save:
             assert rsa_key is not None  # Make mypy happy
             self._save_certificates(certificates, rsa_key, p12_container_password)
+
         return certificates
 
     @cli.action('create-profile',
@@ -462,78 +466,6 @@ class AutomaticProvisioning(BaseProvisioning):
             self._save_profiles(profiles)
         return profiles
 
-    def _get_or_create_bundle_ids(
-            self, bundle_id_identifier: str, platform: BundleIdPlatform, create_resource: bool) -> List[BundleId]:
-        bundle_ids = self.find_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
-        if not bundle_ids:
-            if not create_resource:
-                raise AutomaticProvisioningError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
-            bundle_id = self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False)
-            bundle_ids = [bundle_id]
-        return bundle_ids
-
-    def _get_or_create_certificates(self,
-                                    profile_type: ProfileType,
-                                    certificate_key: Optional[Types.CertificateKeyArgument],
-                                    certificate_key_path: Optional[Types.CertificateKeyPathArgument],
-                                    certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
-                                    create_resource: bool) -> List[Certificate]:
-        certificate_type = CertificateType.from_profile_type(profile_type)
-        certificates = self.fetch_certificates(
-            certificate_type=certificate_type,
-            certificate_key=certificate_key,
-            certificate_key_path=certificate_key_path,
-            certificate_key_password=certificate_key_password,
-            should_print=False)
-
-        if not certificates:
-            if not create_resource:
-                raise AutomaticProvisioningError(f'Did not find {certificate_type} {Certificate.s}')
-            certificate = self.create_certificate(
-                certificate_type,
-                certificate_key=certificate_key,
-                certificate_key_path=certificate_key_path,
-                certificate_key_password=certificate_key_password,
-                should_print=False)
-            certificates = [certificate]
-        return certificates
-
-    def _create_missing_profiles(self,
-                                 bundle_ids_without_profiles: Sequence[BundleId],
-                                 certificates: Sequence[Certificate],
-                                 profile_type: ProfileType) -> Iterator[Profile]:
-        if not bundle_ids_without_profiles:
-            return []
-        platform = bundle_ids_without_profiles[0].attributes.platform
-        devices = self.list_devices(
-            platform=platform, device_status=DeviceStatus.ENABLED, should_print=False)
-        for bundle_id in bundle_ids_without_profiles:
-            yield self.create_profile(
-                bundle_id.id,
-                [certificate.id for certificate in certificates],
-                [device.id for device in devices],
-                profile_type=profile_type,
-                should_print=False
-            )
-
-    def _get_or_create_profiles(self,
-                                bundle_ids: Sequence[BundleId],
-                                certificates: Sequence[Certificate],
-                                profile_type: ProfileType,
-                                create_resource: bool):
-        profiles = self.fetch_bundle_id_profiles(
-            [bid.id for bid in bundle_ids], profile_type=profile_type, should_print=False)
-        profiles = self._filter_profiles(profiles, certificates)
-        message = f'that contain certificate(s) {", ".join(c.attributes.displayName for c in certificates)}'
-        self.printer.log_filtered(Profile, profiles, message)
-        bundle_ids_without_profiles = self._filter_without_profiles_bundle_ids(bundle_ids, profiles)
-        if bundle_ids_without_profiles and not create_resource:
-            missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
-            raise AutomaticProvisioningError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
-        profiles.extend(self._create_missing_profiles(
-            bundle_ids_without_profiles, certificates, profile_type))
-        return profiles
-
     @cli.action('fetch',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER,
                 BundleIdArgument.PLATFORM,
@@ -570,6 +502,87 @@ class AutomaticProvisioning(BaseProvisioning):
         self._save_profiles(profiles)
         return profiles, certificates
 
+    def _get_or_create_bundle_ids(
+            self, bundle_id_identifier: str, platform: BundleIdPlatform, create_resource: bool) -> List[BundleId]:
+        bundle_ids = self.find_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
+        if not bundle_ids:
+            if not create_resource:
+                raise AutomaticProvisioningError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
+            bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
+        return bundle_ids
+
+    def _get_or_create_certificates(self,
+                                    profile_type: ProfileType,
+                                    certificate_key: Optional[Types.CertificateKeyArgument],
+                                    certificate_key_path: Optional[Types.CertificateKeyPathArgument],
+                                    certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
+                                    create_resource: bool) -> List[Certificate]:
+        certificate_type = CertificateType.from_profile_type(profile_type)
+        certificates = self.fetch_certificates(
+            certificate_type=certificate_type,
+            certificate_key=certificate_key,
+            certificate_key_path=certificate_key_path,
+            certificate_key_password=certificate_key_password,
+            should_print=False)
+
+        if not certificates:
+            if not create_resource:
+                raise AutomaticProvisioningError(f'Did not find {certificate_type} {Certificate.s}')
+            certificates.append(self.create_certificate(
+                certificate_type,
+                certificate_key=certificate_key,
+                certificate_key_path=certificate_key_path,
+                certificate_key_password=certificate_key_password,
+                should_print=False))
+        return certificates
+
+    def _create_missing_profiles(self,
+                                 bundle_ids_without_profiles: Sequence[BundleId],
+                                 certificates: Sequence[Certificate],
+                                 profile_type: ProfileType) -> Iterator[Profile]:
+        if not bundle_ids_without_profiles:
+            return []
+        platform = bundle_ids_without_profiles[0].attributes.platform
+        devices = self.list_devices(platform=platform, device_status=DeviceStatus.ENABLED, should_print=False)
+        for bundle_id in bundle_ids_without_profiles:
+            yield self.create_profile(
+                bundle_id.id,
+                [certificate.id for certificate in certificates],
+                [device.id for device in devices],
+                profile_type=profile_type,
+                should_print=False
+            )
+
+    def _get_or_create_profiles(self,
+                                bundle_ids: Sequence[BundleId],
+                                certificates: Sequence[Certificate],
+                                profile_type: ProfileType,
+                                create_resource: bool):
+        def has_certificate(profile):
+            profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
+            return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
+
+        def missing_profile(bundle_id):
+            bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
+            return not (profile_ids & {p.id for p in bundle_ids_profiles})
+
+        certificate_ids = {c.id for c in certificates}
+        profiles = self.fetch_bundle_id_profiles(
+            [bundle_id.id for bundle_id in bundle_ids], profile_type=profile_type, should_print=False)
+        profiles = list(filter(has_certificate, profiles))
+        message = f'that contain certificate(s) {", ".join(c.attributes.displayName for c in certificates)}'
+        self.printer.log_filtered(Profile, profiles, message)
+
+        profile_ids = {p.id for p in profiles}
+        bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
+        if bundle_ids_without_profiles and not create_resource:
+            missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
+            raise AutomaticProvisioningError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
+
+        created_profiles = self._create_missing_profiles(bundle_ids_without_profiles, certificates, profile_type)
+        profiles.extend(created_profiles)
+        return profiles
+
     @classmethod
     def _get_certificate_private_key(cls,
                                      certificate_key: Optional[Types.CertificateKeyArgument],
@@ -590,39 +603,6 @@ class AutomaticProvisioning(BaseProvisioning):
             pem = certificate_key_path.value.expanduser().read_text()
             private_key = models.PrivateKey.pem_to_rsa(pem, password)
         return private_key
-
-    def _filter_profiles(self, profiles: Sequence[Profile], certificates: Sequence[Certificate]) -> List[Profile]:
-        """
-        Filter out profiles that include all given certificates
-        """
-        certificate_ids = {c.id for c in certificates}
-        get_certificate_ids = self.api_client.profiles.list_certificate_ids
-        return [
-            profile for profile in profiles
-            if certificate_ids.issubset({c.id for c in get_certificate_ids(profile)})
-        ]
-
-    def _filter_without_profiles_bundle_ids(
-            self, bundle_ids: Sequence[BundleId], profiles: Sequence[Profile]) -> List[BundleId]:
-        get_profile_ids = self.api_client.bundle_ids.list_profile_ids
-        profile_ids = {p.id for p in profiles}
-        return [
-            bundle_id for bundle_id in bundle_ids
-            if not (profile_ids & {p.id for p in get_profile_ids(bundle_id)})
-        ]
-
-    @classmethod
-    def _filter_certificates(cls, rsa_key: RSAPrivateKey, certificates: Sequence[Certificate]) -> List[Certificate]:
-        """
-        Filter out those certificates that have been signed with given RSA private key
-        """
-        return [
-            certificate for certificate in certificates
-            if models.Certificate.is_signed_with_key(
-                models.Certificate.asn1_to_x509(certificate.asn1_content),
-                rsa_key
-            )
-        ]
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(f'{profile.get_display_info()}.p12', self.profiles_directory)
