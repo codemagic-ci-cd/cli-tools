@@ -7,6 +7,7 @@ import pathlib
 import time
 from typing import Iterator
 from typing import List
+from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -44,6 +45,28 @@ from .provisioning.printer import Printer
 
 class AutomaticProvisioningError(cli.CliAppException):
     pass
+
+
+class CertificatePrivateKey(NamedTuple):
+    certificate_key: Optional[Types.CertificateKeyArgument] = None
+    certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None
+    certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None
+
+    def get_rsa(self) -> Optional[RSAPrivateKeyWithSerialization]:
+        if self.certificate_key and self.certificate_key_path:
+            private_key_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY.key.upper())
+            private_key_path_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY_PATH.key.upper())
+            raise AutomaticProvisioningError(f'Only one of {private_key_arg} and {private_key_path_arg} allowed')
+
+        password = self.certificate_key_password.value if self.certificate_key_password else None
+        private_key: Optional[RSAPrivateKeyWithSerialization] = None
+        if self.certificate_key:
+            pem = self.certificate_key.value
+            private_key = models.PrivateKey.pem_to_rsa(pem, password)
+        elif self.certificate_key_path:
+            pem = self.certificate_key_path.value.expanduser().read_text()
+            private_key = models.PrivateKey.pem_to_rsa(pem, password)
+        return private_key
 
 
 @cli.common_arguments(
@@ -246,7 +269,7 @@ class AutomaticProvisioning(BaseProvisioning):
         Create code signing certificates of given type
         """
 
-        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        rsa_key = CertificatePrivateKey(certificate_key, certificate_key_path, certificate_key_password).get_rsa()
         if rsa_key is None:
             raise AutomaticProvisioningError('Cannot create resource without private key')
 
@@ -279,7 +302,7 @@ class AutomaticProvisioning(BaseProvisioning):
         Get specified Certificate from Apple Developer portal.
         """
 
-        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        rsa_key = CertificatePrivateKey(certificate_key, certificate_key_path, certificate_key_password).get_rsa()
         if save and rsa_key is None:
             raise AutomaticProvisioningError('Cannot save resource without private key')
         else:
@@ -328,7 +351,7 @@ class AutomaticProvisioning(BaseProvisioning):
             x509 = models.Certificate.asn1_to_x509(certificate.asn1_content)
             return models.Certificate.is_signed_with_key(x509, rsa_key)
 
-        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        rsa_key = CertificatePrivateKey(certificate_key, certificate_key_path, certificate_key_password).get_rsa()
         if save and rsa_key is None:
             raise AutomaticProvisioningError('Cannot create or save resource without private key')
 
@@ -497,7 +520,7 @@ class AutomaticProvisioning(BaseProvisioning):
         for Bundle ID with given identifier.
         """
 
-        rsa_key = self._get_certificate_private_key(certificate_key, certificate_key_path, certificate_key_password)
+        rsa_key = CertificatePrivateKey(certificate_key, certificate_key_path, certificate_key_password).get_rsa()
         if rsa_key is None:
             raise AutomaticProvisioningError(f'Cannot save {Certificate.s} without private key')
 
@@ -592,27 +615,6 @@ class AutomaticProvisioning(BaseProvisioning):
         created_profiles = self._create_missing_profiles(bundle_ids_without_profiles, certificates, profile_type)
         profiles.extend(created_profiles)
         return profiles
-
-    @classmethod
-    def _get_certificate_private_key(cls,
-                                     certificate_key: Optional[Types.CertificateKeyArgument],
-                                     certificate_key_path: Optional[Types.CertificateKeyPathArgument],
-                                     certificate_password: Optional[Types.CertificateKeyPasswordArgument]
-                                     ) -> Optional[RSAPrivateKeyWithSerialization]:
-        if certificate_key and certificate_key_path:
-            private_key_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY.key.upper())
-            private_key_path_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY_PATH.key.upper())
-            raise AutomaticProvisioningError(f'Only one of {private_key_arg} and {private_key_path_arg} allowed')
-
-        password = certificate_password.value if certificate_password else None
-        private_key: Optional[RSAPrivateKeyWithSerialization] = None
-        if certificate_key:
-            pem = certificate_key.value
-            private_key = models.PrivateKey.pem_to_rsa(pem, password)
-        elif certificate_key_path:
-            pem = certificate_key_path.value.expanduser().read_text()
-            private_key = models.PrivateKey.pem_to_rsa(pem, password)
-        return private_key
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(f'{profile.get_display_info()}.p12', self.profiles_directory)
