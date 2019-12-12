@@ -96,8 +96,10 @@ class AutomaticProvisioningArgument(cli.Argument):
         key='issuer_id',
         flags=('--issuer-id',),
         type=Types.IssuerIdArgument,
-        description=f'App Store Connect API Key Issuer ID. Identifies the issuer '
-                    f'who created the authentication token. {_API_DOCS_REFERENCE}',
+        description=(
+            f'App Store Connect API Key Issuer ID. Identifies the issuer '
+            f'who created the authentication token. {_API_DOCS_REFERENCE}'
+        ),
         argparse_kwargs={'required': False},
     )
     KEY_IDENTIFIER = cli.ArgumentProperties(
@@ -137,8 +139,10 @@ class BundleIdArgument(cli.Argument):
     BUNDLE_ID_NAME = cli.ArgumentProperties(
         key='bundle_id_name',
         flags=('--name',),
-        description='Name of the Bundle ID. If the resource is being created, '
-                    'the default will be deduced from given Bundle ID identifier.',
+        description=(
+            'Name of the Bundle ID. If the resource is being created, '
+            'the default will be deduced from given Bundle ID identifier.'
+        ),
         argparse_kwargs={'required': False},
     )
     BUNDLE_ID_RESOURCE_ID = cli.ArgumentProperties(
@@ -255,35 +259,43 @@ class CertificateArgument(cli.Argument):
         key='certificate_key',
         flags=('--certificate-key',),
         type=Types.CertificateKeyArgument,
-        description=f'Private key used to generate the certificate. '
-                    f'Used together with {Colors.BRIGHT_BLUE("--save")} '
-                    f'or {Colors.BRIGHT_BLUE("--create")} options.',
+        description=(
+            f'Private key used to generate the certificate. '
+            f'Used together with {Colors.BRIGHT_BLUE("--save")} '
+            f'or {Colors.BRIGHT_BLUE("--create")} options.'
+        ),
         argparse_kwargs={'required': False},
     )
     PRIVATE_KEY_PATH = cli.ArgumentProperties(
         key='certificate_key_path',
         flags=('--certificate-key-path',),
         type=Types.CertificateKeyPathArgument,
-        description=f'Path to the private key used to generate the certificate. '
-                    f'Used together with {Colors.BRIGHT_BLUE("--save")} '
-                    f'or {Colors.BRIGHT_BLUE("--create")} options.',
+        description=(
+            f'Path to the private key used to generate the certificate. '
+            f'Used together with {Colors.BRIGHT_BLUE("--save")} '
+            f'or {Colors.BRIGHT_BLUE("--create")} options.'
+        ),
         argparse_kwargs={'required': False},
     )
     PRIVATE_KEY_PASSWORD = cli.ArgumentProperties(
         key='certificate_key_password',
         flags=('--certificate-key-password',),
         type=Types.CertificateKeyPasswordArgument,
-        description=f'Password of the private key used to generate the certificate. '
-                    f'Used together with {Colors.BRIGHT_BLUE("--certificate-key")} '
-                    f'or {Colors.BRIGHT_BLUE("--certificate-key-path")} options '
-                    f'if the provided key is encrypted.',
+        description=(
+            f'Password of the private key used to generate the certificate. '
+            f'Used together with {Colors.BRIGHT_BLUE("--certificate-key")} '
+            f'or {Colors.BRIGHT_BLUE("--certificate-key-path")} options '
+            f'if the provided key is encrypted.'
+        ),
         argparse_kwargs={'required': False},
     )
     P12_CONTAINER_PASSWORD = cli.ArgumentProperties(
         key='p12_container_password',
         flags=('--p12-password',),
-        description='If provided, the saved p12 container will be encrypted using this password. '
-                    f'Used together with {Colors.BRIGHT_BLUE("--save")} option.',
+        description=(
+            'If provided, the saved p12 container will be encrypted using this password. '
+            f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
+        ),
         argparse_kwargs={'required': False, 'default': 'password'},
     )
 
@@ -338,9 +350,11 @@ class CommonArgument(cli.Argument):
         key='save',
         flags=('--save',),
         type=bool,
-        description=f'Whether to save the resource to disk. See '
-                    f'{Colors.CYAN(ProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
-                    f'{Colors.CYAN(ProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
-                    f'for more information.',
+        description=(
+            f'Whether to save the resource to disk. See '
+            f'{Colors.CYAN(ProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
+            f'{Colors.CYAN(ProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
+            f'for more information.'
+        ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )

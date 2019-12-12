@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
-from typing import Sequence
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -16,14 +16,14 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class Profiles(ResourceManager):
+class Profiles(ResourceManager[Profile]):
     """
     Profiles
     https://developer.apple.com/documentation/appstoreconnectapi/profiles
     """
 
     @property
-    def managed_resource(self):
+    def resource_type(self):
         return Profile
 
     @dataclass

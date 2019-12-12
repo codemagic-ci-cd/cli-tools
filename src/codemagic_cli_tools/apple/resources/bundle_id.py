@@ -1,15 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Sequence
-from typing import TYPE_CHECKING
 
 from .enums import BundleIdPlatform
 from .resource import Relationship
 from .resource import Resource
-
-if TYPE_CHECKING:
-    from .profile import Profile
 
 
 class BundleId(Resource):

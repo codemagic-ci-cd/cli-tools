@@ -38,7 +38,10 @@ class CliAppException(Exception):
     def __str__(self):
         if not self.cli_process:
             return self.message
-        return f'Running {self.cli_process.safe_form} failed with exit code {self.cli_process.returncode}: {self.message}'
+        return (
+            f'Running {self.cli_process.safe_form} failed with '
+            f'exit code {self.cli_process.returncode}: {self.message}'
+        )
 
 
 class CliApp(metaclass=abc.ABCMeta):

@@ -12,14 +12,14 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class Devices(ResourceManager):
+class Devices(ResourceManager[Device]):
     """
     Devices
     https://developer.apple.com/documentation/appstoreconnectapi/devices
     """
 
     @property
-    def managed_resource(self):
+    def resource_type(self):
         return Device
 
     @dataclass

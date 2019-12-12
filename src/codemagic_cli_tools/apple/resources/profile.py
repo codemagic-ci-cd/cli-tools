@@ -5,10 +5,8 @@ from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
 from typing import Optional
-from typing import Sequence
 
 from .bundle_id import BundleIdPlatform
-from .certificate import Certificate
 from .enums import ProfileState
 from .enums import ProfileType
 from .resource import Relationship

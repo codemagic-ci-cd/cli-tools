@@ -112,19 +112,18 @@ class AutomaticProvisioning(BaseProvisioning):
         except AppStoreConnectApiError as api_error:
             raise AutomaticProvisioningError(str(api_error))
 
-        self.printer.log_found(resource_manager.managed_resource, resources, resource_filter)
+        self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
         self.printer.print_resources(resources, should_print)
         return resources
 
     def _delete_resource(self, resource_manager, resource_id: ResourceId, ignore_not_found: bool):
-        resource_type = resource_manager.managed_resource
-        self.printer.log_delete(resource_type, resource_id)
+        self.printer.log_delete(resource_manager.resource_type, resource_id)
         try:
             resource_manager.delete(resource_id)
-            self.printer.log_deleted(resource_type, resource_id)
+            self.printer.log_deleted(resource_manager.resource_type, resource_id)
         except AppStoreConnectApiError as api_error:
             if ignore_not_found is True and api_error.status_code == 404:
-                self.printer.log_ignore_not_deleted(resource_type, resource_id)
+                self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
             else:
                 raise AutomaticProvisioningError(str(api_error))
 

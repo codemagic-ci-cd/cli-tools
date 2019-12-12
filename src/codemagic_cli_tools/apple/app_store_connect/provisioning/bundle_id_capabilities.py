@@ -11,14 +11,14 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class BundleIdCapabilities(ResourceManager):
+class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
     """
     Bundle ID Capabilities
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_id_capabilities
     """
 
     @property
-    def managed_resource(self):
+    def resource_type(self):
         return BundleIdCapability
 
     def enable(self,

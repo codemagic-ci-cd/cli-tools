@@ -19,14 +19,14 @@ if TYPE_CHECKING:
     from .profiles import Profiles
 
 
-class BundleIds(ResourceManager):
+class BundleIds(ResourceManager[BundleId]):
     """
     Bundle IDs
     https://developer.apple.com/documentation/appstoreconnectapi/bundle_ids
     """
 
     @property
-    def managed_resource(self):
+    def resource_type(self):
         return BundleId
 
     @dataclass

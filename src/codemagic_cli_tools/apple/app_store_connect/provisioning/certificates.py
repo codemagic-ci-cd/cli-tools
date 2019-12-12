@@ -11,14 +11,14 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
 
 
-class Certificates(ResourceManager):
+class Certificates(ResourceManager[Certificate]):
     """
     Certificates
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
     """
 
     @property
-    def managed_resource(self):
+    def resource_type(self):
         return Certificate
 
     @dataclass

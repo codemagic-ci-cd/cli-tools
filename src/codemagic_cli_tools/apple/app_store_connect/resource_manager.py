@@ -5,6 +5,7 @@ import enum
 import re
 import shlex
 from typing import Dict
+from typing import Generic
 from typing import Optional
 from typing import TYPE_CHECKING
 from typing import Type
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
 R = TypeVar('R', bound=Resource)
 
 
-class ResourceManager(metaclass=abc.ABCMeta):
+class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     class Filter:
         @classmethod
         def _snake_to_camel(cls, field_name: str) -> str:
@@ -69,7 +70,7 @@ class ResourceManager(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def managed_resource(self) -> Type[R]:
+    def resource_type(self) -> Type[R]:
         raise NotImplemented
 
     @classmethod
