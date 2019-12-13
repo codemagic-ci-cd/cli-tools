@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import AnyStr
 from typing import Optional
 
@@ -12,32 +14,37 @@ from .byte_str_converter import BytesStrConverter
 
 class PrivateKey(BytesStrConverter):
 
+    def __init__(self, rsa_key: RSAPrivateKeyWithSerialization):
+        self.rsa_key = rsa_key
+
     @classmethod
-    def pem_to_rsa(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> RSAPrivateKeyWithSerialization:
+    def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
         if password is None:
             key_password = b''
         else:
             key_password = cls._bytes(password)
-        rsa_key = crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(pem_key), key_password)
-        return rsa_key.to_cryptography_key()
+        pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(pem_key), key_password)
+        return PrivateKey(pkey.to_cryptography_key())
 
-    @classmethod
-    def rsa_to_pem(cls, rsa_key: RSAPrivateKeyWithSerialization, password: Optional[AnyStr] = None) -> str:
+    def as_pem(self, password: Optional[AnyStr] = None) -> str:
         key_format = serialization.PrivateFormat.TraditionalOpenSSL
         algorithm: KeySerializationEncryption = serialization.NoEncryption()
         if password is not None:
             key_format = serialization.PrivateFormat.PKCS8
-            algorithm = serialization.BestAvailableEncryption(cls._bytes(password))
-        pem = rsa_key.private_bytes(
+            algorithm = serialization.BestAvailableEncryption(self._bytes(password))
+        pem = self.rsa_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=key_format,
             encryption_algorithm=algorithm
         )
-        return cls._str(pem)
+        return self._str(pem)
 
-    @classmethod
-    def get_public_key(cls, public_key: RSAPublicKey) -> bytes:
-        return public_key.public_bytes(
+    @property
+    def public_key(self) -> RSAPublicKey:
+        return self.rsa_key.public_key()
+
+    def get_public_key(self) -> bytes:
+        return self.public_key.public_bytes(
             serialization.Encoding.OpenSSH,
             serialization.PublicFormat.OpenSSH
         )

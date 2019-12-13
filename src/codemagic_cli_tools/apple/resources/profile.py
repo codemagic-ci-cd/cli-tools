@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import pathlib
 from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
+from tempfile import NamedTemporaryFile
 from typing import Optional
 
+from codemagic_cli_tools.models import ProvisioningProfile
 from .bundle_id import BundleIdPlatform
 from .enums import ProfileState
 from .enums import ProfileType
@@ -53,3 +56,10 @@ class Profile(Resource):
     @property
     def profile_content(self) -> bytes:
         return b64decode(self.attributes.profileContent)
+
+    def as_provisioning_profile(self) -> ProvisioningProfile:
+        with NamedTemporaryFile() as tf:
+            tf.write(self.profile_content)
+            tf.flush()
+            path = pathlib.Path(tf.name)
+            return ProvisioningProfile.from_path(path)

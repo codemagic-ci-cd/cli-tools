@@ -212,7 +212,7 @@ class Keychain(cli.CliApp):
         for line in process.stdout.splitlines():
             pem += line + '\n'
             if line == '-----END CERTIFICATE-----':
-                yield models.Certificate(pem)
+                yield models.Certificate.from_pem(pem)
                 pem = ''
 
 

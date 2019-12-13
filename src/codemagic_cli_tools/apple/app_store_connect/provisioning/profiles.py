@@ -6,7 +6,6 @@ from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic_cli_tools.apple.resources import BundleId
-from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
@@ -14,6 +13,7 @@ from codemagic_cli_tools.apple.resources import ProfileState
 from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import SigningCertificate
 
 
 class Profiles(ResourceManager[Profile]):
@@ -49,7 +49,7 @@ class Profiles(ResourceManager[Profile]):
                name: str,
                profile_type: ProfileType,
                bundle_id: Union[ResourceId, BundleId],
-               certificates: Union[Sequence[ResourceId], Sequence[Certificate]],
+               certificates: Union[Sequence[ResourceId], Sequence[SigningCertificate]],
                devices: Union[Sequence[ResourceId], Sequence[Device]]) -> Profile:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
@@ -124,7 +124,7 @@ class Profiles(ResourceManager[Profile]):
         response = self.client.session.get(url).json()
         return LinkedResourceData(response['data'])
 
-    def list_certificates(self, profile: Union[Profile, ResourceId]) -> List[Certificate]:
+    def list_certificates(self, profile: Union[Profile, ResourceId]) -> List[SigningCertificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_certificates_in_a_profile
         """
@@ -132,14 +132,14 @@ class Profiles(ResourceManager[Profile]):
             url = profile.relationships.profiles.links.related
         else:
             url = f'{self.client.API_URL}/profiles/{profile}/certificates'
-        return [Certificate(certificate) for certificate in self.client.paginate(url)]
+        return [SigningCertificate(certificate) for certificate in self.client.paginate(url)]
 
     def list_certificate_ids(self, profile: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_certificate_ids_in_a_profile
         """
         if isinstance(profile, Profile):
-            url = profile.relationships.certificates.links.self
+            url = profile.relationships.signing_certificates.links.self
         else:
             url = f'{self.client.API_URL}/profiles/{profile}/relationships/certificates'
         return [LinkedResourceData(certificate) for certificate in self.client.paginate(url)]

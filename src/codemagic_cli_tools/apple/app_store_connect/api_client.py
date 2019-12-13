@@ -12,9 +12,9 @@ import jwt
 from .api_session import AppStoreConnectApiSession
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
-from .provisioning import Certificates
 from .provisioning import Devices
 from .provisioning import Profiles
+from .provisioning import SigningCertificates
 
 
 class KeyIdentifier(str):
@@ -105,13 +105,13 @@ class AppStoreConnectApiClient:
         return BundleIdCapabilities(self)
 
     @property
-    def certificates(self) -> Certificates:
-        return Certificates(self)
-
-    @property
     def devices(self) -> Devices:
         return Devices(self)
 
     @property
     def profiles(self) -> Profiles:
         return Profiles(self)
+
+    @property
+    def signing_certificates(self) -> SigningCertificates:
+        return SigningCertificates(self)

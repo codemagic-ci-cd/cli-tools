@@ -1,9 +1,6 @@
-from typing import TypeVar
-
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
-from .certificate import Certificate
 from .device import Device
 from .enums import BundleIdPlatform
 from .enums import CapabilityOptionKey
@@ -21,5 +18,4 @@ from .profile import Profile
 from .resource import LinkedResourceData
 from .resource import Resource
 from .resource import ResourceId
-
-R = TypeVar('R', bound=Resource)
+from .signing_certificate import SigningCertificate

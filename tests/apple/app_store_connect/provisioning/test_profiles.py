@@ -1,7 +1,7 @@
 import pytest
 
 from codemagic_cli_tools.apple.resources import BundleId
-from codemagic_cli_tools.apple.resources import Certificate
+from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.apple.resources import Device
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import Profile
@@ -66,7 +66,7 @@ class ProfilesTest(ResourceManagerTestsBase):
         certificates = self.api_client.profiles.list_certificates(profile_id)
         assert len(certificates) > 0
         for certificate in certificates:
-            assert isinstance(certificate, Certificate)
+            assert isinstance(certificate, SigningCertificate)
             assert certificate.type is ResourceType.CERTIFICATES
 
     def test_list_certificate_ids(self):

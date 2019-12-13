@@ -13,10 +13,10 @@ from typing import Type
 from typing import TypeVar
 from typing import Union
 
-from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import Resource
 from codemagic_cli_tools.apple.resources import ResourceId
+from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.cli import Colors
 
 if TYPE_CHECKING:
@@ -102,6 +102,6 @@ class Printer:
     def log_deleted(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(Colors.GREEN(f'Successfully deleted {resource_type} {resource_id}'))
 
-    def log_saved(self, resource: Union[Certificate, Profile], path: pathlib.Path):
+    def log_saved(self, resource: Union[SigningCertificate, Profile], path: pathlib.Path):
         destination = shlex.quote(str(path))
         self.logger.info(Colors.GREEN(f'Saved {resource.__class__} {resource.get_display_info()} to {destination}'))

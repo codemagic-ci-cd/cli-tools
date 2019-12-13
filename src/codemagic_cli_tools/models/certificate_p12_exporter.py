@@ -6,26 +6,24 @@ from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import Sequence
+from typing import TYPE_CHECKING
 from typing import Tuple
 
-from OpenSSL.crypto import X509
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
-
 from codemagic_cli_tools.cli.cli_types import ObfuscationPattern
-from codemagic_cli_tools.models import Certificate
-from codemagic_cli_tools.models import PrivateKey
+
+if TYPE_CHECKING:
+    from .certificate import Certificate
+    from .private_key import PrivateKey
 
 CommandRunner = Callable[[Tuple[str, ...], Optional[Sequence[ObfuscationPattern]]], None]
 
 
 class P12Exporter:
 
-    def __init__(self, x509: X509, rsa_key: RSAPrivateKeyWithSerialization, container_password: str):
-        self.x509 = x509
-        self.rsa_key = rsa_key
+    def __init__(self, certificate: 'Certificate', private_key: 'PrivateKey', container_password: str):
         self.container_password = container_password
-        self._temp_pem_certificate_path = self._save_to_disk('cert', Certificate.x509_to_pem(self.x509))
-        self._temp_private_key_path = self._save_to_disk('key', PrivateKey.rsa_to_pem(self.rsa_key))
+        self._temp_pem_certificate_path = self._save_to_disk('cert', certificate.as_pem())
+        self._temp_private_key_path = self._save_to_disk('key', private_key.as_pem())
 
     @classmethod
     def _save_to_disk(cls, prefix: str, pem: str):
@@ -74,6 +72,6 @@ class P12Exporter:
 
         try:
             command_runner(export_args, obfuscate_patterns)
-            return p12_path
         finally:
             self._cleanup()
+        return p12_path

@@ -6,12 +6,13 @@ from dataclasses import field
 from datetime import datetime
 from typing import Optional
 
+from codemagic_cli_tools.models import Certificate
 from .bundle_id import BundleIdPlatform
 from .enums import CertificateType
 from .resource import Resource
 
 
-class Certificate(Resource):
+class SigningCertificate(Resource):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/certificate
     """
@@ -41,3 +42,6 @@ class Certificate(Resource):
     @property
     def asn1_content(self) -> bytes:
         return b64decode(self.attributes.certificateContent)
+
+    def as_certificate(self) -> Certificate:
+        return Certificate.from_ans1(self.asn1_content)

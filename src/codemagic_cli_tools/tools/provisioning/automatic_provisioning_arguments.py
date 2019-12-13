@@ -235,13 +235,13 @@ class CertificateArgument(cli.Argument):
     CERTIFICATE_RESOURCE_ID = cli.ArgumentProperties(
         key='certificate_resource_id',
         type=ResourceId,
-        description='Alphanumeric ID value of the Certificate',
+        description='Alphanumeric ID value of the Signing Certificate',
     )
     CERTIFICATE_RESOURCE_IDS = cli.ArgumentProperties(
         key='certificate_resource_ids',
         flags=('--certificate-ids',),
         type=ResourceId,
-        description='Alphanumeric ID value of the Certificate',
+        description='Alphanumeric ID value of the Signing Certificate',
         argparse_kwargs={
             'required': True,
             'nargs': '+',

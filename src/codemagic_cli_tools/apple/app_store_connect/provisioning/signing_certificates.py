@@ -4,22 +4,22 @@ from typing import Optional
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
-from codemagic_cli_tools.apple.resources import Certificate
 from codemagic_cli_tools.apple.resources import CertificateType
 from codemagic_cli_tools.apple.resources import LinkedResourceData
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import ResourceType
+from codemagic_cli_tools.apple.resources import SigningCertificate
 
 
-class Certificates(ResourceManager[Certificate]):
+class SigningCertificates(ResourceManager[SigningCertificate]):
     """
-    Certificates
+    Signing Certificates
     https://developer.apple.com/documentation/appstoreconnectapi/certificates
     """
 
     @property
     def resource_type(self):
-        return Certificate
+        return SigningCertificate
 
     @dataclass
     class Filter(ResourceManager.Filter):
@@ -33,7 +33,7 @@ class Certificates(ResourceManager[Certificate]):
         ID = 'id'
         SERIAL_NUMBER = 'serialNumber'
 
-    def create(self, certificate_type: CertificateType, csr_content: str) -> Certificate:
+    def create(self, certificate_type: CertificateType, csr_content: str) -> SigningCertificate:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_certificate
         """
@@ -45,26 +45,26 @@ class Certificates(ResourceManager[Certificate]):
             f'{self.client.API_URL}/certificates',
             json=self._get_create_payload(ResourceType.CERTIFICATES, attributes=attributes)
         ).json()
-        return Certificate(response['data'], created=True)
+        return SigningCertificate(response['data'], created=True)
 
     def list(self,
              resource_filter: Filter = Filter(),
              ordering=Ordering.DISPLAY_NAME,
-             reverse=False) -> List[Certificate]:
+             reverse=False) -> List[SigningCertificate]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
         """
         params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         certificates = self.client.paginate(f'{self.client.API_URL}/certificates', params=params)
-        return [Certificate(certificate) for certificate in certificates]
+        return [SigningCertificate(certificate) for certificate in certificates]
 
-    def read(self, certificate: Union[LinkedResourceData, ResourceId]) -> Certificate:
+    def read(self, certificate: Union[LinkedResourceData, ResourceId]) -> SigningCertificate:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_certificate_information
         """
         certificate_id = self._get_resource_id(certificate)
         response = self.client.session.get(f'{self.client.API_URL}/certificates/{certificate_id}').json()
-        return Certificate(response['data'])
+        return SigningCertificate(response['data'])
 
     def delete(self, certificate: Union[LinkedResourceData, ResourceId]) -> None:
         """

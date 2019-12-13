@@ -38,7 +38,7 @@ T = TypeVar('T')
 
 
 class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
-    argument_type: Type[T] = str  # type: ignore
+    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
     alternative_to: Optional[str] = None
 
