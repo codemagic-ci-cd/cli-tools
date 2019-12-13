@@ -130,15 +130,6 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _setup_default_cli_options(cls, cli_options_parser):
         options_group = cli_options_parser.add_argument_group(cls.fmt('Options'))
-        executable = cli_options_parser.prog.split()[0]
-        tool_required_arguments = cli_options_parser.add_argument_group(
-            cls.fmt(f'Required arguments for {Colors.BOLD(executable)}'))
-        tool_optional_arguments = cli_options_parser.add_argument_group(
-            cls.fmt(f'Optional arguments for {Colors.BOLD(executable)}'))
-        for argument in cls.CLASS_ARGUMENTS:
-            argument_group = tool_required_arguments if argument.is_required() else tool_optional_arguments
-            argument.register(argument_group)
-
         options_group.add_argument('--disable-logging', dest='log_commands', action='store_false',
                                    help='Disable log output for actions')
         options_group.add_argument('--no-color', dest='no_color', action='store_true',
@@ -148,6 +139,17 @@ class CliApp(metaclass=abc.ABCMeta):
         options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
                                    help='Choose which stream to use for log output. [Default: stderr]')
         options_group.set_defaults(verbose=False, log_commands=True)
+
+    @classmethod
+    def _setup_class_cli_options(cls, cli_options_parser):
+        executable = cli_options_parser.prog.split()[0]
+        tool_required_arguments = cli_options_parser.add_argument_group(
+            cls.fmt(f'Required arguments for {Colors.BOLD(executable)}'))
+        tool_optional_arguments = cli_options_parser.add_argument_group(
+            cls.fmt(f'Optional arguments for {Colors.BOLD(executable)}'))
+        for argument in cls.CLASS_ARGUMENTS:
+            argument_group = tool_required_arguments if argument.is_required() else tool_optional_arguments
+            argument.register(argument_group)
 
     @classmethod
     def _setup_cli_options(cls) -> argparse.ArgumentParser:
@@ -177,6 +179,7 @@ class CliApp(metaclass=abc.ABCMeta):
             for argument in sub_action.arguments:
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)
+            cls._setup_class_cli_options(action_parser)
         return parser
 
     def _obfuscate_command(self, command_args: Sequence[CommandArg],
