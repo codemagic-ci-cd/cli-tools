@@ -10,9 +10,9 @@ from typing import Dict
 from typing import List
 from typing import Union
 
-from .byte_str_converter import BytesStrConverter
-from .certificate import Certificate
-from .json_serializable import JsonSerializable
+from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.models.certificate import Certificate
+from codemagic_cli_tools.models.json_serializable import JsonSerializable
 
 
 class ProvisioningProfile(JsonSerializable, BytesStrConverter):
@@ -102,7 +102,6 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
     @property
     def certificate_common_name(self) -> str:
         common_names = Counter(certificate.common_name for certificate in self.certificates)
-        print(common_names)
         most_common = common_names.most_common(1)
         return most_common[0][0] if most_common else ''
 

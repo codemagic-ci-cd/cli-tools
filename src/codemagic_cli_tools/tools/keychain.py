@@ -5,10 +5,11 @@ import json
 import os
 import pathlib
 import sys
+from typing import List
 from typing import Optional
 
 from codemagic_cli_tools import cli
-from codemagic_cli_tools import models
+from codemagic_cli_tools.models import Certificate
 
 
 class Seconds(int):
@@ -67,9 +68,9 @@ class Keychain(cli.CliApp):
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: pathlib.Path):
+    def __init__(self, path: Optional[pathlib.Path] = None):
         super().__init__()
-        self.path = path
+        self.path = path if path else self.get_default()
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
@@ -144,6 +145,18 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
+    @cli.action('get-default')
+    def get_default(self) -> pathlib.Path:
+        """
+        Show the system default keychain.
+        """
+        process = self.execute(('security', 'default-keychain'))
+        if process.returncode != 0:
+            raise KeychainError(f'Unable to get default keychain', process)
+        cleaned = process.stdout.strip().strip('"').strip("'")
+        default_kaychain_path = pathlib.Path(cleaned)
+        return default_kaychain_path
+
     @cli.action('make-default')
     def make_default(self):
         """
@@ -167,15 +180,17 @@ class Keychain(cli.CliApp):
         self.show_info()
 
     @cli.action('list-certificates')
-    def list_code_signing_certificates(self):
+    def list_code_signing_certificates(self, should_print: bool = True) -> List[Certificate]:
         """
         List available code signing certificates in specified keychain.
         """
         certificates = [
-            certificate for certificate in self.find_certificates()
+            certificate for certificate in self._find_certificates()
             if certificate.is_code_signing_certificate()
         ]
-        json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
+        if should_print:
+            json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
+        return certificates
 
     @cli.action('add-certificate',
                 KeychainArgument.CERTIFICATE_PATH,
@@ -203,7 +218,7 @@ class Keychain(cli.CliApp):
         if process.returncode != 0:
             raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)
 
-    def find_certificates(self):
+    def _find_certificates(self):
         process = self.execute(('security', 'find-certificate', '-a', '-p', self.path), show_output=False)
         if process.returncode != 0:
             raise KeychainError(f'Unable to list certificates from keychain {self.path}', process)
@@ -212,7 +227,7 @@ class Keychain(cli.CliApp):
         for line in process.stdout.splitlines():
             pem += line + '\n'
             if line == '-----END CERTIFICATE-----':
-                yield models.Certificate.from_pem(pem)
+                yield Certificate.from_pem(pem)
                 pem = ''
 
 
