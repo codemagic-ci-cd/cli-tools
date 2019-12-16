@@ -7,7 +7,10 @@ from pathlib import Path
 from typing import Any
 from typing import AnyStr
 from typing import Dict
+from typing import Generator
 from typing import List
+from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
@@ -99,12 +102,6 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
         asn1_certificates = self._plist['DeveloperCertificates']
         return [Certificate.from_ans1(certificate) for certificate in asn1_certificates]
 
-    @property
-    def certificate_common_name(self) -> str:
-        common_names = Counter(certificate.common_name for certificate in self.certificates)
-        most_common = common_names.most_common(1)
-        return most_common[0][0] if most_common else ''
-
     def dict(self) -> Dict:
         return {
             'name': self.name,
@@ -112,6 +109,17 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
             'team_name': self.team_name,
             'bundle_id': self.bundle_id,
             'specifier': self.uuid,
-            'certificate_common_name': self.certificate_common_name,
+            'certificates': [c.serial for c in self.certificates],
             'xcode_managed': self.xcode_managed,
         }
+
+    def get_usable_certificates(self, certificates: Sequence[Certificate]) -> Generator[Certificate, None, None]:
+        available_certificates_serials = {c.serial for c in certificates}
+        return (c for c in self.certificates if c.serial in available_certificates_serials)
+
+    def serialize_for_code_signing_manager(self, available_certificates: Sequence[Certificate]):
+        usable_certificates = self.get_usable_certificates(available_certificates)
+        common_names = Counter(certificate.common_name for certificate in usable_certificates)
+        most_popular_common = common_names.most_common(1)
+        common_name = most_popular_common[0][0] if most_popular_common else ''
+        return {'certificate_common_name': common_name, **self.dict()}

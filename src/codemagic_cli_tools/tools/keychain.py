@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import argparse
 import json
 import os
 import pathlib
-import sys
 from typing import List
 from typing import Optional
 
@@ -70,7 +70,7 @@ class Keychain(cli.CliApp):
 
     def __init__(self, path: Optional[pathlib.Path] = None):
         super().__init__()
-        self.path = path if path else self.get_default()
+        self.path = path if path else self.get_default(show_output=False)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
@@ -82,6 +82,8 @@ class Keychain(cli.CliApp):
         """
         Create a macOS keychain, add it to the search list.
         """
+
+        self.logger.info(f'Create keychain {self.path}')
         process = self.execute(
             ('security', 'create-keychain', '-p', password.value, self.path),
             obfuscate_patterns=[password.value])
@@ -99,6 +101,8 @@ class Keychain(cli.CliApp):
         """
         Delete keychains and remove them from the search list.
         """
+
+        self.logger.info(f'Delete keychain {self.path}')
         process = self.execute(('security', 'delete-keychain', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Failed to delete keychain {self.path}', process)
@@ -108,6 +112,8 @@ class Keychain(cli.CliApp):
         """
         Show all settings for the keychain.
         """
+
+        self.logger.info(f'Keychain {self.path} settings:')
         process = self.execute(('security', 'show-keychain-info', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Failed to show information for keychain {self.path}', process)
@@ -121,6 +127,9 @@ class Keychain(cli.CliApp):
         cmd_args = ['security', 'set-keychain-settings', str(self.path)]
         if timeout is not None:
             cmd_args[-1:-1] = ['-t', str(timeout)]
+            self.logger.info(f'Set keychain {self.path} timeout to {timeout} seconds')
+        else:
+            self.logger.info(f'Set keychain {self.path} timeout to "no timeout"')
         process = self.execute(cmd_args)
         if process.returncode != 0:
             raise KeychainError(f'Unable to set timeout to the keychain {self.path}', process)
@@ -130,6 +139,8 @@ class Keychain(cli.CliApp):
         """
         Lock the specified keychain.
         """
+
+        self.logger.info(f'Lock keychain {self.path}')
         process = self.execute(('security', 'lock-keychain', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
@@ -139,6 +150,8 @@ class Keychain(cli.CliApp):
         """
         Unlock the specified keychain.
         """
+
+        self.logger.info(f'Unlock keychain {self.path}')
         process = self.execute(
             ('security', 'unlock-keychain', '-p', password.value, self.path),
             obfuscate_patterns=[password.value])
@@ -146,11 +159,14 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('get-default')
-    def get_default(self) -> pathlib.Path:
+    def get_default(self, show_output=True) -> pathlib.Path:
         """
         Show the system default keychain.
         """
-        process = self.execute(('security', 'default-keychain'))
+
+        if show_output:
+            self.logger.info(f'Get system default keychain')
+        process = self.execute(('security', 'default-keychain'), show_output=show_output)
         if process.returncode != 0:
             raise KeychainError(f'Unable to get default keychain', process)
         cleaned = process.stdout.strip().strip('"').strip("'")
@@ -162,12 +178,14 @@ class Keychain(cli.CliApp):
         """
         Set the keychain as the system default keychain.
         """
+
+        self.logger.info(f'Set keychain {self.path} to system default keychain')
         process = self.execute(('security', 'default-keychain', '-s', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
-    def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None):
+    def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None) -> Keychain:
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
@@ -177,19 +195,19 @@ class Keychain(cli.CliApp):
         self.set_timeout(timeout=timeout)
         self.make_default()
         self.unlock(password)
-        self.show_info()
+        return self
 
     @cli.action('list-certificates')
     def list_code_signing_certificates(self, should_print: bool = True) -> List[Certificate]:
         """
         List available code signing certificates in specified keychain.
         """
-        certificates = [
-            certificate for certificate in self._find_certificates()
-            if certificate.is_code_signing_certificate()
-        ]
+
+        self.logger.info(f'List available code signing certificates in keychain {self.path}')
+        all_certificates = self._find_certificates()
+        certificates = [cert for cert in all_certificates if cert.is_code_signing_certificate()]
         if should_print:
-            json.dump(certificates, sys.stdout, sort_keys=True, indent=4)
+            print(json.dumps(certificates, sort_keys=True, indent=4))
         return certificates
 
     @cli.action('add-certificate',
@@ -199,6 +217,8 @@ class Keychain(cli.CliApp):
         """
         Add p12 certificate to specified keychain.
         """
+
+        self.logger.info(f'Add certificate {certificate_path} for keychain {self.path}')
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
         # which fails in non-interactive CI environment.
