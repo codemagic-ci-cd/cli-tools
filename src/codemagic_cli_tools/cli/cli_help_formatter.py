@@ -22,8 +22,9 @@ class CliHelpFormatter(argparse.HelpFormatter):
     def _format_action_invocation(self, action):
         # Color optional arguments as blue and mandatory as green
         fmt = super()._format_action_invocation(action)
+        parts = fmt.split(', ')
         color = Colors.BRIGHT_BLUE if action.option_strings else Colors.GREEN
-        return color(fmt)
+        return ', '.join(map(color, parts))
 
     def _format_action(self, action):
         # Identical to superclass definition with exception in one if -branch:
