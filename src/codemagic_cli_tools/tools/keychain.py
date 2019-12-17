@@ -9,6 +9,7 @@ from typing import List
 from typing import Optional
 
 from codemagic_cli_tools import cli
+from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.models import Certificate
 
 
@@ -29,8 +30,17 @@ class KeychainError(cli.CliAppException):
 class KeychainArgument(cli.Argument):
     PATH = cli.ArgumentProperties(
         key='keychain_path',
+        flags=('--path', '-p',),
         type=pathlib.Path,
-        description='Keychain path',
+        description='Keychain path.',
+        argparse_kwargs={'required': False}
+    )
+    USE_DEFAULT_KEYCHAIN = cli.ArgumentProperties(
+        key='use_default',
+        flags=('--use-default',),
+        type=bool,
+        description='Use current default keychain.',
+        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False}
     )
     PASSWORD = cli.ArgumentProperties(
         flags=('-pw', '--password'),
@@ -62,20 +72,40 @@ class KeychainArgument(cli.Argument):
     )
 
 
-@cli.common_arguments(KeychainArgument.PATH)
+@cli.common_arguments(
+    KeychainArgument.PATH,
+    KeychainArgument.USE_DEFAULT_KEYCHAIN)
 class Keychain(cli.CliApp):
     """
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: Optional[pathlib.Path] = None):
+    def __init__(self, path: Optional[pathlib.Path] = None, use_default: bool = False):
         super().__init__()
-        self.path = path if path else self.get_default(show_output=False)
+        if use_default:
+            self.path = self.get_default(show_output=False)
+        else:
+            assert path is not None
+            self.path = path
+
+    @classmethod
+    def _validate_cli_args(cls, path: Optional[pathlib.Path], use_default: Optional[bool]):
+        arguments = (KeychainArgument.PATH, KeychainArgument.USE_DEFAULT_KEYCHAIN)
+        choices = map(lambda k: Colors.CYAN(k.key.upper()), arguments)
+        error = None
+        if path and use_default:
+            error = f'Both {" and ".join(choices)} were given. Choose one.'
+        elif not path and not use_default:
+            error = f'Either {" or ".join(choices)} has to be provided. Choose one.'
+        if error:
+            raise KeychainArgument.PATH.raise_argument_error(error)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         path = KeychainArgument.PATH.from_args(cli_args)
-        return Keychain(path)
+        use_default = KeychainArgument.USE_DEFAULT_KEYCHAIN.from_args(cli_args, False)
+        cls._validate_cli_args(path, use_default)
+        return Keychain(path=path, use_default=use_default)
 
     @cli.action('create', KeychainArgument.PASSWORD)
     def create(self, password: Password = Password('')):
