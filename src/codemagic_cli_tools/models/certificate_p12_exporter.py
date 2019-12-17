@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shutil
 import subprocess
 import tempfile
 from typing import Optional
@@ -42,6 +43,11 @@ class P12Exporter(BytesStrConverter):
         with tempfile.NamedTemporaryFile(prefix='certificate', suffix='.p12', delete=False) as tf:
             return pathlib.Path(tf.name)
 
+    @classmethod
+    def _ensure_openssl(cls):
+        if shutil.which('openssl') is None:
+            raise IOError('OpenSSL executable not present on system')
+
     def _get_export_args(self, p12_path: pathlib.Path) -> Tuple[str, ...]:
         return (
             'openssl', 'pkcs12', '-export',
@@ -68,7 +74,9 @@ class P12Exporter(BytesStrConverter):
 
     def export(self,
                export_path: Optional[pathlib.Path] = None,
+               *,
                cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+        self._ensure_openssl()
         p12_path = self._get_export_path(export_path)
         export_args = self._get_export_args(p12_path)
         try:

@@ -623,7 +623,7 @@ class AutomaticProvisioning(BaseProvisioning):
                 p12_container_password,
                 export_path=certificate_path,
                 cli_app=self)
-        except IOError as error:
+        except (ValueError, IOError) as error:
             raise AutomaticProvisioningError(*error.args)
         self.printer.log_saved(certificate, p12_path)
         return p12_path

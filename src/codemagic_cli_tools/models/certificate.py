@@ -116,7 +116,11 @@ class Certificate(JsonSerializable, BytesStrConverter):
                    private_key: PrivateKey,
                    container_password: str,
                    export_path: Optional[pathlib.Path] = None,
+                   *,
                    cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+        """
+        :raises: IOError, ValueError
+        """
         exporter = P12Exporter(self, private_key, container_password)
         return exporter.export(export_path, cli_app=cli_app)
 

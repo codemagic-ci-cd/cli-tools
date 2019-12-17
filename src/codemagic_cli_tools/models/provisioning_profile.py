@@ -35,7 +35,7 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
         return ProvisioningProfile(plist)
 
     @classmethod
-    def from_path(cls, profile_path: Path, cli_app: Optional['CliApp'] = None) -> ProvisioningProfile:
+    def from_path(cls, profile_path: Path, *, cli_app: Optional['CliApp'] = None) -> ProvisioningProfile:
         if not profile_path.exists():
             raise ValueError(f'Profile {profile_path} does not exist')
         profile_data = cls._read_profile(profile_path, cli_app)
@@ -45,10 +45,10 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
     @classmethod
     def _ensure_openssl(cls):
         if shutil.which('openssl') is None:
-            raise EnvironmentError('OpenSSL executable not present on system')
+            raise IOError('OpenSSL executable not present on system')
 
     @classmethod
-    def _read_profile(cls, profile_path: Union[str, Path], cli_app: Optional['CliApp'] = None) -> bytes:
+    def _read_profile(cls, profile_path: Union[str, Path], cli_app: Optional['CliApp']) -> bytes:
         cls._ensure_openssl()
         cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path))
         try:

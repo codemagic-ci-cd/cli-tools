@@ -1,3 +1,4 @@
+from .bundle_id_detector import BundleIdDetector
 from .bundletool import Bundletool
 from .certificate import Certificate
 from .json_serializable import JsonSerializable

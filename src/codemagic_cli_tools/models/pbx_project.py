@@ -27,12 +27,12 @@ class PbxProject(BytesStrConverter):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path, cli_app: Optional['CliApp'] = None):
+    def from_path(cls, path: pathlib.Path, *, cli_app: Optional['CliApp'] = None):
         """
         :param path: Path to project.pbxproj
         :param cli_app: CliApp to invoke underlying shell commands.
                         If not provided, subprocess module will be used instead.
-        :raises: ValueError, EnvironmentError
+        :raises: ValueError, IOError
         :return: PbxProject
         """
         if not path.exists():
@@ -51,10 +51,10 @@ class PbxProject(BytesStrConverter):
     @classmethod
     def _ensure_plutil(cls):
         if shutil.which('plutil') is None:
-            raise EnvironmentError('Missing executable "plutil"')
+            raise IOError('Missing executable "plutil"')
 
     @classmethod
-    def _convert_to_xml(cls, path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> bytes:
+    def _convert_to_xml(cls, path: pathlib.Path, cli_app: Optional['CliApp']) -> bytes:
         cls._ensure_plutil()
         with tempfile.NamedTemporaryFile(suffix='xml') as tf:
             cmd = ('plutil', '-convert', 'xml1', '-o', tf.name, str(path))
@@ -66,7 +66,7 @@ class PbxProject(BytesStrConverter):
                     subprocess.check_output(cmd, stderr=subprocess.PIPE)
             except subprocess.CalledProcessError as cpe:
                 reason = f'unable to read file: {cls._str(cpe.stderr)}'
-                raise ValueError(f'Cannot initialize PBX Project from {path}, {reason}')
+                raise IOError(f'Cannot initialize PBX Project from {path}, {reason}')
             return pathlib.Path(tf.name).read_bytes()
 
     def _get_project_section(self) -> Dict[str, Any]:
