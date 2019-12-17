@@ -5,8 +5,8 @@ import os
 import pathlib
 import shlex
 import shutil
-from collections import Counter
 from tempfile import NamedTemporaryFile
+from typing import Counter
 from typing import Generator
 from typing import List
 from typing import Optional
@@ -166,7 +166,7 @@ class CodeSigningSetup(cli.CliApp):
         for profile_path in profile_paths:
             profile = ProvisioningProfile.from_path(profile_path, cli_app=self)
             usable_certificates = profile.get_usable_certificates(available_certs)
-            common_names = Counter(certificate.common_name for certificate in usable_certificates)
+            common_names = Counter[str](certificate.common_name for certificate in usable_certificates)
             most_popular_common = common_names.most_common(1)
             common_name = most_popular_common[0][0] if most_popular_common else ''
             yield {'certificate_common_name': common_name, **profile.dict()}
@@ -200,7 +200,7 @@ class CodeSigningSetup(cli.CliApp):
 
     def _autodetect_bundle_id(self, xcode_projects: Sequence[pathlib.Path]) -> str:
         self.logger.info('Autodetect Bundle ID for found Xcode projects')
-        bundle_ids = Counter()
+        bundle_ids = Counter[str]()
         for xcode_project in xcode_projects:
             if xcode_project.stem == 'Pods':
                 self.logger.info(f'Skip Bundle ID detection from Pod project {xcode_project}')
