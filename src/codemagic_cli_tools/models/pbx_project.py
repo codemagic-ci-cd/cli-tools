@@ -41,8 +41,8 @@ class PbxProject(BytesStrConverter):
             raise ValueError(f'Cannot initialize PBX Project from {path}, not a file.')
 
         try:
-            parsed = plistlib.loads(path.read_bytes())
-        except plistlib.InvalidFileException:
+            parsed: Dict[str, Any] = plistlib.loads(path.read_bytes())
+        except ValueError:
             xml = cls._convert_to_xml(path, cli_app)
             parsed = plistlib.loads(xml)
 
@@ -119,7 +119,7 @@ class PbxProject(BytesStrConverter):
         build_configurations_list_ids = (target['buildConfigurationList'], self._project['buildConfigurationList'])
         all_build_configurations = map(self._get_build_configurations, build_configurations_list_ids)
         build_configurations = (config for config in chain(*all_build_configurations) if config['name'] == config_name)
-        build_configuration = next(build_configurations, {})
+        build_configuration: Dict[str, Any] = next(build_configurations, {})
         build_settings = build_configuration.get('buildSettings', {})
         try:
             value = build_settings[variable]
@@ -132,4 +132,7 @@ class PbxProject(BytesStrConverter):
 
     def get_bundle_id(self, target_name: str, config_name: str) -> str:
         target = self.get_target(target_name)
-        return self._resolve_variable('PRODUCT_BUNDLE_IDENTIFIER', target, config_name)
+        bundle_id = self._resolve_variable('PRODUCT_BUNDLE_IDENTIFIER', target, config_name)
+        if bundle_id is None:
+            raise ValueError(f'Unable to obtain Bundle ID for target {target_name} [{config_name}]')
+        return bundle_id

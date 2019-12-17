@@ -55,13 +55,14 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
             if cli_app:
                 process = cli_app.execute(cmd)
                 process.raise_for_returncode()
-                stdout = process.stdout
+                converted = cls._bytes(process.stdout)
             else:
                 stdout = subprocess.check_output(cmd, stderr=subprocess.PIPE)
+                converted = cls._bytes(stdout)
         except subprocess.CalledProcessError as cpe:
             raise ValueError(
                 f'Invalid provisioning profile {profile_path}:\n{cls._str(cpe.stderr)}')
-        return cls._bytes(stdout)
+        return converted
 
     @property
     def name(self) -> str:
@@ -129,9 +130,3 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
         available_certificates_serials = {c.serial for c in certificates}
         return (c for c in self.certificates if c.serial in available_certificates_serials)
 
-    def serialize_for_code_signing_manager(self, available_certificates: Sequence[Certificate]):
-        usable_certificates = self.get_usable_certificates(available_certificates)
-        common_names = Counter(certificate.common_name for certificate in usable_certificates)
-        most_popular_common = common_names.most_common(1)
-        common_name = most_popular_common[0][0] if most_popular_common else ''
-        return {'certificate_common_name': common_name, **self.dict()}
