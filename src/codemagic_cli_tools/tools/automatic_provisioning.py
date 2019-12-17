@@ -7,10 +7,8 @@ import pathlib
 import time
 from typing import Iterator
 from typing import List
-from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.apple import AppStoreConnectApiError
@@ -28,7 +26,6 @@ from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.cli import Colors
-from codemagic_cli_tools.cli.cli_types import ObfuscationPattern
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
 from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
@@ -50,7 +47,6 @@ def _get_certificate_key(
         certificate_key: Optional[Types.CertificateKeyArgument] = None,
         certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None) -> Optional[PrivateKey]:
-
     if certificate_key and certificate_key_path:
         private_key_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY.key.upper())
         private_key_path_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY_PATH.key.upper())
@@ -620,23 +616,15 @@ class AutomaticProvisioning(BaseProvisioning):
                           certificate: SigningCertificate,
                           private_key: PrivateKey,
                           p12_container_password: str) -> pathlib.Path:
-        def command_runner(command_args: Tuple[str, ...],
-                           obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None):
-            process = self.execute(command_args, obfuscate_patterns=obfuscate_patterns)
-            if process.returncode == 0:
-                return
-            if 'unable to load private key' in process.stderr:
-                error = 'Unable to export certificate: Invalid private key'
-            else:
-                error = 'Unable to export certificate: Failed to create PKCS12 container'
-            raise AutomaticProvisioningError(error, process)
-
         certificate_path = self._get_unique_path(f'{certificate.get_display_info()}.p12', self.certificates_directory)
-        p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
-            private_key,
-            p12_container_password,
-            export_path=certificate_path,
-            command_runner=command_runner)
+        try:
+            p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
+                private_key,
+                p12_container_password,
+                export_path=certificate_path,
+                cli_app=self)
+        except IOError as error:
+            raise AutomaticProvisioningError(*error.args)
         self.printer.log_saved(certificate, p12_path)
         return p12_path
 

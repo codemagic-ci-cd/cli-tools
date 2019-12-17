@@ -4,12 +4,10 @@ import pathlib
 import re
 from pathlib import Path
 from typing import AnyStr
-from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Sequence
-from typing import Tuple
+from typing import TYPE_CHECKING
 from typing import Union
 
 from OpenSSL import crypto
@@ -19,13 +17,13 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
-from codemagic_cli_tools.cli.cli_types import ObfuscationPattern
 from .byte_str_converter import BytesStrConverter
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import PrivateKey
 
-CommandRunner = Callable[[Tuple[str, ...], Optional[Sequence[ObfuscationPattern]]], None]
+if TYPE_CHECKING:
+    from codemagic_cli_tools.cli import CliApp
 
 
 class Certificate(JsonSerializable, BytesStrConverter):
@@ -118,9 +116,9 @@ class Certificate(JsonSerializable, BytesStrConverter):
                    private_key: PrivateKey,
                    container_password: str,
                    export_path: Optional[pathlib.Path] = None,
-                   command_runner: Optional[CommandRunner] = None) -> pathlib.Path:
+                   cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         exporter = P12Exporter(self, private_key, container_password)
-        return exporter.export(export_path, command_runner)
+        return exporter.export(export_path, cli_app=cli_app)
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()

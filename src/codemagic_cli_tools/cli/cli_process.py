@@ -70,3 +70,9 @@ class CliProcess:
             self.duration = time.time() - start
             self._log_exec_completed()
         return self
+
+    def raise_for_returncode(self, success_code: int = 0):
+        if self.returncode == success_code:
+            return
+        raise subprocess.CalledProcessError(
+            self.returncode, self._command_args, self.stdout, self.stderr)

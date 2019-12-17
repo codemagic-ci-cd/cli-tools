@@ -1,24 +1,23 @@
+from __future__ import annotations
+
 import os
 import pathlib
 import subprocess
 import tempfile
-from typing import Any
-from typing import Callable
 from typing import Optional
 from typing import Sequence
 from typing import TYPE_CHECKING
 from typing import Tuple
 
-from codemagic_cli_tools.cli.cli_types import ObfuscationPattern
+from .byte_str_converter import BytesStrConverter
 
 if TYPE_CHECKING:
     from .certificate import Certificate
     from .private_key import PrivateKey
+    from codemagic_cli_tools.cli import CliApp
 
-CommandRunner = Callable[[Tuple[str, ...], Optional[Sequence[ObfuscationPattern]]], None]
 
-
-class P12Exporter:
+class P12Exporter(BytesStrConverter):
 
     def __init__(self, certificate: 'Certificate', private_key: 'PrivateKey', container_password: str):
         self.container_password = container_password
@@ -36,15 +35,6 @@ class P12Exporter:
             if path and path.exists():
                 os.remove(str(path))
 
-    @staticmethod
-    def default_command_runner(command_args: Sequence[str], obfuscate_patterns: Any = None):
-        p = subprocess.Popen(command_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        if p.returncode != 0:
-            if b'unable to load private key' in stderr:
-                raise ValueError('Invalid private key')
-            raise IOError('Failed to create PKCS12 container')
-
     @classmethod
     def _get_export_path(cls, export_path: Optional[pathlib.Path]) -> pathlib.Path:
         if export_path is not None:
@@ -61,17 +51,28 @@ class P12Exporter:
             '-passout', f'pass:{self.container_password}'
         )
 
+    def _run_export_command(self, command: Sequence[str], cli_app: Optional['CliApp']):
+        process = None
+        try:
+            if cli_app:
+                process = cli_app.execute(command, [command[-1]])
+                process.raise_for_returncode()
+            else:
+                subprocess.check_output(command, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as cpe:
+            if 'unable to load private key' in self._str(cpe.stderr):
+                error = 'Unable to export certificate: Invalid private key'
+            else:
+                error = 'Unable to export certificate: Failed to create PKCS12 container'
+            raise IOError(error, process)
+
     def export(self,
                export_path: Optional[pathlib.Path] = None,
-               command_runner: Optional[CommandRunner] = None) -> pathlib.Path:
+               cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         p12_path = self._get_export_path(export_path)
         export_args = self._get_export_args(p12_path)
-        obfuscate_patterns = [export_args[-1]]
-        if command_runner is None:
-            command_runner = P12Exporter.default_command_runner
-
         try:
-            command_runner(export_args, obfuscate_patterns)
+            self._run_export_command(export_args, cli_app)
         finally:
             self._cleanup()
         return p12_path

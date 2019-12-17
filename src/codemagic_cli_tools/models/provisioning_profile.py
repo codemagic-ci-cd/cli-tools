@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import plistlib
+import shutil
 import subprocess
 from collections import Counter
 from pathlib import Path
@@ -11,11 +12,15 @@ from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import TYPE_CHECKING
 from typing import Union
 
 from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
 from codemagic_cli_tools.models.certificate import Certificate
 from codemagic_cli_tools.models.json_serializable import JsonSerializable
+
+if TYPE_CHECKING:
+    from codemagic_cli_tools.cli import CliApp
 
 
 class ProvisioningProfile(JsonSerializable, BytesStrConverter):
@@ -30,26 +35,33 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
         return ProvisioningProfile(plist)
 
     @classmethod
-    def from_path(cls, profile_path: Path) -> ProvisioningProfile:
+    def from_path(cls, profile_path: Path, cli_app: Optional['CliApp'] = None) -> ProvisioningProfile:
         if not profile_path.exists():
             raise ValueError(f'Profile {profile_path} does not exist')
-        profile_data = cls._read_profile(profile_path)
+        profile_data = cls._read_profile(profile_path, cli_app)
         plist: Dict[str, Any] = plistlib.loads(profile_data)
         return ProvisioningProfile(plist)
 
     @classmethod
-    def _read_profile(cls, profile_path: Union[str, Path]) -> bytes:
-        cmd = ['openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path)]
-        try:
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except FileNotFoundError as nfe:
-            raise EnvironmentError('OpenSSL executable not present on system') from nfe
+    def _ensure_openssl(cls):
+        if shutil.which('openssl') is None:
+            raise EnvironmentError('OpenSSL executable not present on system')
 
-        stdout, stderr = process.communicate(timeout=1)
-        if process.returncode != 0:
-            error = stderr.decode()
-            raise ValueError(f'Invalid provisioning profile {profile_path}:\n{error}')
-        return stdout
+    @classmethod
+    def _read_profile(cls, profile_path: Union[str, Path], cli_app: Optional['CliApp'] = None) -> bytes:
+        cls._ensure_openssl()
+        cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path))
+        try:
+            if cli_app:
+                process = cli_app.execute(cmd)
+                process.raise_for_returncode()
+                stdout = process.stdout
+            else:
+                stdout = subprocess.check_output(cmd, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError as cpe:
+            raise ValueError(
+                f'Invalid provisioning profile {profile_path}:\n{cls._str(cpe.stderr)}')
+        return cls._bytes(stdout)
 
     @property
     def name(self) -> str:

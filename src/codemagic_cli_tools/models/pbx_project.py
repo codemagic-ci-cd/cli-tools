@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import pathlib
 import plistlib
@@ -9,9 +11,15 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import TYPE_CHECKING
+
+from .byte_str_converter import BytesStrConverter
+
+if TYPE_CHECKING:
+    from codemagic_cli_tools.cli import CliApp
 
 
-class PbxProject:
+class PbxProject(BytesStrConverter):
 
     def __init__(self, project_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = project_data
@@ -19,9 +27,11 @@ class PbxProject:
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path):
+    def from_path(cls, path: pathlib.Path, cli_app: Optional['CliApp'] = None):
         """
         :param path: Path to project.pbxproj
+        :param cli_app: CliApp to invoke underlying shell commands.
+                        If not provided, subprocess module will be used instead.
         :raises: ValueError, EnvironmentError
         :return: PbxProject
         """
@@ -33,7 +43,7 @@ class PbxProject:
         try:
             parsed = plistlib.loads(path.read_bytes())
         except plistlib.InvalidFileException:
-            xml = cls._convert_to_xml(path)
+            xml = cls._convert_to_xml(path, cli_app)
             parsed = plistlib.loads(xml)
 
         return PbxProject(parsed)
@@ -44,10 +54,19 @@ class PbxProject:
             raise EnvironmentError('Missing executable "plutil"')
 
     @classmethod
-    def _convert_to_xml(cls, path: pathlib.Path) -> bytes:
+    def _convert_to_xml(cls, path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> bytes:
         cls._ensure_plutil()
         with tempfile.NamedTemporaryFile(suffix='xml') as tf:
-            subprocess.check_output(['plutil', '-convert', 'xml1', '-o', tf.name, str(path)])
+            cmd = ('plutil', '-convert', 'xml1', '-o', tf.name, str(path))
+            try:
+                if cli_app:
+                    process = cli_app.execute(cmd)
+                    process.raise_for_returncode()
+                else:
+                    subprocess.check_output(cmd, stderr=subprocess.PIPE)
+            except subprocess.CalledProcessError as cpe:
+                reason = f'unable to read file: {cls._str(cpe.stderr)}'
+                raise ValueError(f'Cannot initialize PBX Project from {path}, {reason}')
             return pathlib.Path(tf.name).read_bytes()
 
     def _get_project_section(self) -> Dict[str, Any]:
@@ -106,7 +125,8 @@ class PbxProject:
             value = build_settings[variable]
             self.logger.debug(f'Resolved {variable} for {target["name"]} [{config_name}]: {value}')
         except KeyError:
-            self.logger.warning(f'Unable to resolve {variable} for {target["name"]} [{config_name}]: variable not found')
+            self.logger.warning(
+                f'Unable to resolve {variable} for {target["name"]} [{config_name}]: variable not found')
             value = None
         return value
 
