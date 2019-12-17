@@ -179,7 +179,7 @@ class CodeSigningSetup(cli.CliApp):
                          xcode_project_path: pathlib.Path,
                          target_name: Optional[str] = None,
                          configuration_name: Optional[str] = None,
-                         should_print: bool = True) -> Optional[str]:
+                         should_print: bool = True) -> str:
         """ Detect Bundle ID from specified Xcode project """
 
         self.printer.log_detecting_bundle_id(xcode_project_path, target_name, configuration_name)
@@ -198,6 +198,27 @@ class CodeSigningSetup(cli.CliApp):
         self.printer.print_object('Bundle ID', bundle_id, should_print)
         return bundle_id
 
+    def _autodetect_bundle_id(self, xcode_projects: Sequence[pathlib.Path]) -> str:
+        self.logger.info('Autodetect Bundle ID for found Xcode projects')
+        bundle_ids = Counter()
+        for xcode_project in xcode_projects:
+            if xcode_project.stem == 'Pods':
+                self.logger.info(f'Skip Bundle ID detection from Pod project {xcode_project}')
+                continue
+            bundle_id = self.detect_bundle_id(xcode_project, should_print=False)
+            bundle_ids[bundle_id] += 1
+
+        bundle_id = bundle_ids.most_common(1)[0][0]
+        self.logger.info(Colors.GREEN(f'Detected Bundle ID {bundle_id}'))
+
+        if '$' in bundle_id:
+            raise CodeSigningSetupException(
+                f'Detected Bundle ID "{bundle_id}" contains environment variables. '
+                f'Please manually specify your Bundle ID with '
+                f'{Colors.CYAN(CodeSigningSetupArgument.AUTOMATIC_PROVISIONING_BUNDLE_ID.key)}.'
+            )
+        return bundle_id
+
     @cli.action('automatic',
                 CodeSigningSetupArgument.XCODE_PROJECT_PATTERN,
                 CodeSigningSetupArgument.AUTOMATIC_PROVISIONING_BUNDLE_ID)
@@ -208,12 +229,11 @@ class CodeSigningSetup(cli.CliApp):
         Set up code signing for Xcode project by fetching signing files
         automatically from Apple Developer Portal
         """
-        xcode_projects = self._find_xcode_projects(xcode_project_pattern)
-        self._setup_keychain()
-
+        xcode_projects = self._find_xcode_projects(xcode_project_pattern.expanduser())
         if bundle_id == AUTO_DETECT_BUNDLE_ID:
-            bundle_id = 'todo.todo.todo'  # TODO
+            bundle_id = self._autodetect_bundle_id(xcode_projects)
 
+        # self._setup_keychain()
         # TODO: complete
 
     @cli.action('manual',

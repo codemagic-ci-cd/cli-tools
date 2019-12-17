@@ -10,6 +10,8 @@ import pathlib
 import re
 import shlex
 import sys
+import time
+from datetime import timedelta
 from functools import wraps
 from itertools import chain
 from typing import Iterable
@@ -70,7 +72,7 @@ class CliApp(metaclass=abc.ABCMeta):
     def invoke_cli(cls):
         parser = cls._setup_cli_options()
         args = parser.parse_args()
-        cls._setup_logging(args)
+        logger = cls._setup_logging(args)
 
         try:
             instance = cls.from_cli_args(args)
@@ -82,11 +84,17 @@ class CliApp(metaclass=abc.ABCMeta):
             arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
         }
+        start = time.time()
         try:
             cli_action(**action_args)
             return 0
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             return cls._handle_cli_exception(cli_exception)
+        except KeyboardInterrupt:
+            logger.warning(Colors.YELLOW('Terminated'))
+        finally:
+            seconds = int(time.time() - start)
+            logger.debug(f'Completed in {time.strftime("%M:%S", time.gmtime(seconds))}.')
 
     @classmethod
     def get_class_cli_actions(cls) -> Iterable[ActionCallable]:
@@ -122,6 +130,7 @@ class CliApp(metaclass=abc.ABCMeta):
         logger = logging.getLogger()
         logger.addHandler(handler)
         logger.setLevel(log_level)
+        return logger
 
     @classmethod
     def fmt(cls, s):

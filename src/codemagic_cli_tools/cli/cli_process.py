@@ -42,7 +42,8 @@ class CliProcess:
             self.logger.debug(f'Execute "{self.safe_form}"')
 
     def _log_exec_completed(self):
-        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {self.duration:.2f}')
+        duration = time.strftime("%M:%S", time.gmtime(self.duration))
+        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None):
         chunk = (input_stream.read(buffer_size) if buffer_size else input_stream.read()).decode()
