@@ -15,3 +15,8 @@ class PathFinderMixin(metaclass=abc.ABCMeta):
             return pathlib.Path(pattern.anchor).glob(str(relative_pattern))
         self.logger.info(f'Searching for files matching {pattern.resolve()}')
         return pathlib.Path().glob(str(pattern))
+
+    def _find_xcode_projects(self, *patterns: pathlib.Path):
+        for pattern in patterns:
+            for xcode_project in self._find_paths(pattern.expanduser()):
+                yield xcode_project

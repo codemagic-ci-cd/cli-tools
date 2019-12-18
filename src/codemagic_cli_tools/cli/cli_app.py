@@ -112,13 +112,13 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _setup_logging(cls, cli_args: argparse.Namespace):
-        if not cli_args.log_commands:
-            return
-
         stream = {'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream]
         if cli_args.verbose:
             log_fmt = '[%(asctime)s] %(levelname)-5s > %(message)s'
             log_level = logging.DEBUG
+        elif not cli_args.enable_logging:
+            log_fmt = '%(message)s'
+            log_level = logging.ERROR
         else:
             log_fmt = '%(message)s'
             log_level = logging.INFO
@@ -140,15 +140,18 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _setup_default_cli_options(cls, cli_options_parser):
         options_group = cli_options_parser.add_argument_group(cls.fmt('Options'))
-        options_group.add_argument('--disable-logging', dest='log_commands', action='store_false',
-                                   help='Disable log output for actions')
+        options_group.add_argument('-s', '--silent', dest='enable_logging', action='store_false',
+                                   help='Disable log output for commands')
+        options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                                   help='Enable verbose logging for commands')
+        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+                                   help=(
+                                       f'Choose which stream to use for log output. '
+                                       f'{Argument.format_default("stderr")}'
+                                   ))
         options_group.add_argument('--no-color', dest='no_color', action='store_true',
                                    help='Do not use ANSI colors to format terminal output')
-        options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                                   help='Enable verbose logging')
-        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help='Choose which stream to use for log output. [Default: stderr]')
-        options_group.set_defaults(verbose=False, log_commands=True)
+        options_group.set_defaults(verbose=False, enable_logging=True)
 
     @classmethod
     def _setup_class_cli_options(cls, cli_options_parser):

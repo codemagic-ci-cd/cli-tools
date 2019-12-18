@@ -31,14 +31,19 @@ class CodeSigningException(cli.CliAppException):
 
 class CodeSigningArgument(cli.Argument):
     XCODE_PROJECT_PATTERN = cli.ArgumentProperties(
-        key='xcode_project_pattern',
-        flags=('--xcode-project-pattern',),
+        key='xcode_project_patterns',
+        flags=('--project',),
         type=pathlib.Path,
         description=(
-            'Glob pattern to detect Xcode projects for which to apply the settings to, '
-            'relative to working directory. Can be a literal path.'
+            'Path to Xcode project (*.xcodeproj). Can be either a path literal, or '
+            'a glob pattern to match projects in working directory.'
         ),
-        argparse_kwargs={'required': False, 'default': '**/*.xcodeproj'},
+        argparse_kwargs={
+            'required': False,
+            'default': (pathlib.Path('**/*.xcodeproj'),),
+            'nargs': '+',
+            'metavar': 'project-path'
+        },
     )
     PROFILE_PATHS = cli.ArgumentProperties(
         key='profile_paths',
@@ -73,7 +78,7 @@ class CodeSigning(cli.CliApp, PathFinderMixin):
                 CodeSigningArgument.XCODE_PROJECT_PATTERN,
                 CodeSigningArgument.PROFILE_PATHS)
     def use_profiles(self,
-                     xcode_project_pattern: pathlib.Path,
+                     xcode_project_patterns: Sequence[pathlib.Path],
                      profile_paths: Optional[Sequence[pathlib.Path]] = None):
         """
         Set up code signing settings on specified Xcode project
@@ -87,7 +92,8 @@ class CodeSigning(cli.CliApp, PathFinderMixin):
         except (ValueError, IOError) as error:
             raise CodeSigningException(*error.args)
 
-        for xcode_project in self._find_paths(xcode_project_pattern.expanduser()):
+        xcode_projects = self._find_xcode_projects(*xcode_project_patterns)
+        for xcode_project in xcode_projects:
             used_profiles = self._use_profiles(xcode_project, serialized_profiles)
             # TODO: proper profile usage notice
             self.logger.info(f'Use profiles result: {used_profiles}')

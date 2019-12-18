@@ -202,7 +202,13 @@ class Argument(ArgumentProperties, enum.Enum):
 
     @classmethod
     def format_default(cls, default_value: Any) -> str:
-        escaped = shlex.quote(str(default_value))
+        try:
+            iter(default_value)
+        except TypeError:
+            escaped = shlex.quote(str(default_value))
+        else:
+            # Default value is iterable, use
+            escaped = ' '.join(shlex.quote(str(v)) for v in default_value)
         return Colors.WHITE(f'[Default: {escaped}]')
 
     def get_description(self) -> str:

@@ -18,14 +18,19 @@ class XcodeProjectException(cli.CliAppException):
 
 class XcodeProjectArgument(cli.Argument):
     XCODE_PROJECT_PATTERN = cli.ArgumentProperties(
-        key='xcode_project_pattern',
-        flags=('--xcode-project-pattern',),
+        key='xcode_project_patterns',
+        flags=('--project',),
         type=pathlib.Path,
         description=(
-            'Glob pattern to detect Xcode projects for which to apply the settings to, '
-            'relative to working directory. Can be a literal path.'
+            'Path to Xcode project (*.xcodeproj). Can be either a path literal, or '
+            'a glob pattern to match projects in working directory.'
         ),
-        argparse_kwargs={'required': False, 'default': '**/*.xcodeproj'},
+        argparse_kwargs={
+            'required': False,
+            'default': (pathlib.Path('**/*.xcodeproj'),),
+            'nargs': '+',
+            'metavar': 'project-path'
+        },
     )
     TARGET_NAME = cli.ArgumentProperties(
         key='target_name',
@@ -51,14 +56,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.TARGET_NAME,
                 XcodeProjectArgument.CONFIGURATION_NAME)
     def detect_bundle_id(self,
-                         xcode_project_pattern: pathlib.Path,
+                         xcode_project_patterns: Sequence[pathlib.Path],
                          target_name: Optional[str] = None,
                          configuration_name: Optional[str] = None,
                          include_pods: bool = False,
                          should_print: bool = True) -> str:
         """ Try to deduce the Bundle ID from specified Xcode project """
 
-        xcode_projects = self._find_paths(xcode_project_pattern.expanduser())
+        xcode_projects = self._find_xcode_projects(*xcode_project_patterns)
         bundle_ids = Counter[str](
             bundle_id
             for xcode_project in xcode_projects
@@ -105,3 +110,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         for bundle_id in bundle_ids:
             groups['$' in bundle_id].append(bundle_id)
         return groups[True], groups[False]
+
+
+if __name__ == '__main__':
+    XcodeProject.invoke_cli()
