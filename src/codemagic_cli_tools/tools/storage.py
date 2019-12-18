@@ -38,13 +38,6 @@ class StorageArgument(cli.Argument):
         type=pathlib.Path,
         description='Local path where you are saving your object. For example, "Desktop/Images".',
     )
-    SILENT = cli.ArgumentProperties(
-        key='silent',
-        flags=('--silent',),
-        type=bool,
-        description='Turn off log output from gsutil',
-        argparse_kwargs={'required': False, 'action': 'store_true'},
-    )
 
 
 @cli.common_arguments(StorageArgument.BUCKET_NAME)
@@ -65,29 +58,26 @@ class Storage(cli.CliApp):
 
     @cli.action('save-to-file',
                 StorageArgument.OBJECT_NAME,
-                StorageArgument.SAVE_TO_LOCATION,
-                StorageArgument.SILENT)
-    def save_to_file(self, object_name: str, save_to_location: pathlib.Path, silent: bool = False) -> pathlib.Path:
+                StorageArgument.SAVE_TO_LOCATION)
+    def save_to_file(self, object_name: str, save_to_location: pathlib.Path) -> pathlib.Path:
         """
         Save specified object from Cloud Storage bucket to local disk
         """
         process = self.execute(
-            ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', save_to_location], show_output=not silent)
+            ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', save_to_location], show_output=False)
         if process.returncode != 0:
             error = f'Unable to save file: "{object_name}" does not exist in bucket "{self.bucket_name}"'
             raise StorageError(error, process)
         return save_to_location
 
-    @cli.action('show-contents',
-                StorageArgument.OBJECT_NAME,
-                StorageArgument.SILENT)
-    def show_contents(self, object_name, silent: bool = False) -> str:
+    @cli.action('show-contents', StorageArgument.OBJECT_NAME)
+    def show_contents(self, object_name) -> str:
         """
         Print contents of specified object from Cloud Storage bucket to STDOUT
         """
         with NamedTemporaryFile() as tf:
             process = self.execute(
-                ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', tf.name], show_output=not silent)
+                ['gsutil', 'cp', f'gs://{self.bucket_name}/{object_name}', tf.name], show_output=False)
             if process.returncode != 0:
                 error = f'Unable to show contents: "{object_name}" does not exist in bucket "{self.bucket_name}"'
                 raise StorageError(error, process)

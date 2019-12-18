@@ -53,7 +53,7 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
         cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path))
         try:
             if cli_app:
-                process = cli_app.execute(cmd)
+                process = cli_app.execute(cmd, show_output=False)
                 process.raise_for_returncode()
                 converted = cls._bytes(process.stdout)
             else:

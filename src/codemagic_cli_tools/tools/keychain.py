@@ -83,7 +83,7 @@ class Keychain(cli.CliApp):
     def __init__(self, path: Optional[pathlib.Path] = None, use_default: bool = False):
         super().__init__()
         if use_default:
-            self.path = self.get_default(show_output=False)
+            self.path = self._get_default()
         else:
             assert path is not None
             self.path = path
@@ -189,19 +189,20 @@ class Keychain(cli.CliApp):
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('get-default')
-    def get_default(self, show_output=True) -> pathlib.Path:
+    def get_default(self) -> pathlib.Path:
         """
         Show the system default keychain.
         """
 
-        if show_output:
-            self.logger.info(f'Get system default keychain')
-        process = self.execute(('security', 'default-keychain'), show_output=show_output)
+        self.logger.info(f'Get system default keychain')
+        return self.get_default()
+
+    def _get_default(self):
+        process = self.execute(('security', 'default-keychain'), show_output=False)
         if process.returncode != 0:
             raise KeychainError(f'Unable to get default keychain', process)
         cleaned = process.stdout.strip().strip('"').strip("'")
-        default_kaychain_path = pathlib.Path(cleaned)
-        return default_kaychain_path
+        return pathlib.Path(cleaned)
 
     @cli.action('make-default')
     def make_default(self):

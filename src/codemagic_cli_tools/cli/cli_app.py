@@ -49,10 +49,11 @@ class CliApp(metaclass=abc.ABCMeta):
     CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
-    def __init__(self, dry=False):
+    def __init__(self, dry=False, verbose=False):
         self.dry_run = dry
         self.default_obfuscation = []
         self.obfuscation = 8 * '*'
+        self.verbose = verbose
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
@@ -75,6 +76,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
         try:
             instance = cls.from_cli_args(args)
+            instance.verbose = args.verbose
         except argparse.ArgumentError as argument_error:
             parser.error(argument_error)
 
@@ -144,14 +146,16 @@ class CliApp(metaclass=abc.ABCMeta):
                                    help='Disable log output for commands')
         options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging for commands')
-        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help=(
-                                       f'Choose which stream to use for log output. '
-                                       f'{Argument.format_default("stderr")}'
-                                   ))
         options_group.add_argument('--no-color', dest='no_color', action='store_true',
                                    help='Do not use ANSI colors to format terminal output')
-        options_group.set_defaults(verbose=False, enable_logging=True)
+        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+                                   help=f'Log output stream. {Argument.format_default("stderr")}')
+
+        options_group.set_defaults(
+            enable_logging=True,
+            verbose=False,
+            no_color=False,
+        )
 
     @classmethod
     def _setup_class_cli_options(cls, cli_options_parser):
@@ -236,7 +240,7 @@ class CliApp(metaclass=abc.ABCMeta):
             command_args,
             self._obfuscate_command(command_args, obfuscate_patterns),
             dry=self.dry_run,
-            print_streams=show_output
+            print_streams=show_output or self.verbose
         ).execute()
 
 
