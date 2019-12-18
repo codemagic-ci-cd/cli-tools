@@ -37,7 +37,6 @@ setup(
     entry_points={
         "console_scripts": [
             "automatic-provisioning = codemagic_cli_tools.tools.automatic_provisioning",
-            "code-signing = codemagic_cli_tools.tools.code_signing"
             "git-changelog = codemagic_cli_tools.tools.git_changelog",
             "keychain = codemagic_cli_tools.tools.keychain",
             "manual-provisioning = codemagic_cli_tools.tools.manual_provisioning",

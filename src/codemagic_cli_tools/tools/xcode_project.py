@@ -1,14 +1,16 @@
 import pathlib
+from collections import defaultdict
 from typing import Counter
-from typing import DefaultDict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.cli import Colors
-from codemagic_cli_tools.models.bundle_id_detector import BundleIdDetector
+from codemagic_cli_tools.models import BundleIdDetector
+from codemagic_cli_tools.models import CodeSigningSettingsManager
+from codemagic_cli_tools.models import ProvisioningProfile
+from .keychain import Keychain
 from .mixins import PathFinderMixin
 
 
@@ -43,6 +45,21 @@ class XcodeProjectArgument(cli.Argument):
         flags=('--config',),
         description='Name of the build configuration',
         argparse_kwargs={'required': False},
+    )
+    PROFILE_PATHS = cli.ArgumentProperties(
+        key='profile_path_patterns',
+        flags=('--profile',),
+        type=pathlib.Path,
+        description=(
+            'Path to provisioning profile. Can be either a path literal, or '
+            'a glob pattern to match provisioning profiles.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+            'metavar': 'profile-path',
+            'default': (ProvisioningProfile.DEFAULT_LOCATION,),
+        }
     )
 
 
@@ -86,6 +103,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                                    config_name: Optional[str],
                                    include_pods: bool) -> List[str]:
 
+        def group(bundle_ids):
+            groups = defaultdict(list)
+            for bundle_id in bundle_ids:
+                groups['$' in bundle_id].append(bundle_id)
+            return groups[True], groups[False]
+
         if not include_pods and xcode_project.stem == 'Pods':
             self.logger.info(f'Skip Bundle ID detection from Pod project {xcode_project}')
             return []
@@ -93,23 +116,48 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         detector = BundleIdDetector(xcode_project, target_name, config_name)
         detector.notify(self.logger)
         try:
-            bundle_ids = detector.detect(cli_app=self)
+            detected_bundle_ids = detector.detect(cli_app=self)
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
-        env_var_bundle_ids, valid_bundle_ids = self._group_bundle_ids(bundle_ids)
+        env_var_bundle_ids, valid_bundle_ids = group(detected_bundle_ids)
         if env_var_bundle_ids:
             msg = f'Bundle IDs {", ".join(env_var_bundle_ids)} contain environment variables, exclude them.'
             self.logger.info(Colors.YELLOW(msg))
         self.logger.info(f'Detected Bundle IDs: {", ".join(valid_bundle_ids)}')
         return valid_bundle_ids
 
-    @classmethod
-    def _group_bundle_ids(cls, bundle_ids: Sequence[str]) -> Tuple[List[str], List[str]]:
-        groups = DefaultDict[bool, List[str]](list)
-        for bundle_id in bundle_ids:
-            groups['$' in bundle_id].append(bundle_id)
-        return groups[True], groups[False]
+    @cli.action('use-profiles',
+                XcodeProjectArgument.XCODE_PROJECT_PATTERN,
+                XcodeProjectArgument.PROFILE_PATHS)
+    def use_profiles(self,
+                     xcode_project_patterns: Sequence[pathlib.Path],
+                     profile_path_patterns: Sequence[pathlib.Path]):
+        """
+        Set up code signing settings on specified Xcode projects
+        to use given provisioning profiles
+        """
+
+        self.logger.info('Configure code signing settings')
+
+        profile_paths = self.find_paths(*profile_path_patterns)
+        xcode_projects = self.find_paths(*xcode_project_patterns)
+
+        try:
+            profiles = [ProvisioningProfile.from_path(p, cli_app=self) for p in profile_paths]
+        except (ValueError, IOError) as error:
+            raise XcodeProjectException(*error.args)
+
+        available_certs = Keychain(use_default=True).list_code_signing_certificates(should_print=False)
+        code_signing_settings_manager = CodeSigningSettingsManager(profiles, available_certs)
+
+        try:
+            for xcode_project in xcode_projects:
+                code_signing_settings_manager.use_profiles(xcode_project, cli_app=self)
+        except (ValueError, IOError) as error:
+            raise XcodeProjectException(*error.args)
+
+        code_signing_settings_manager.notify_profile_usage(self.logger)
 
 
 if __name__ == '__main__':

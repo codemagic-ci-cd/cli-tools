@@ -203,7 +203,9 @@ class Argument(ArgumentProperties, enum.Enum):
     @classmethod
     def format_default(cls, default_value: Any) -> str:
         try:
-            iter(default_value)
+            if isinstance(default_value, str):
+                raise TypeError
+            iter(default_value)  # raises TypeError if not iterable
         except TypeError:
             escaped = shlex.quote(str(default_value))
         else:

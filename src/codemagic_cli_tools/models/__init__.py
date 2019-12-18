@@ -1,6 +1,7 @@
 from .bundle_id_detector import BundleIdDetector
 from .bundletool import Bundletool
 from .certificate import Certificate
+from .code_signing_settings_manager import CodeSigningSettingsManager
 from .json_serializable import JsonSerializable
 from .json_serializable import JsonSerializableMeta
 from .pbx_project import PbxProject
