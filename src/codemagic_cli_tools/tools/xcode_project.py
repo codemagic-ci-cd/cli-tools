@@ -63,7 +63,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                          should_print: bool = True) -> str:
         """ Try to deduce the Bundle ID from specified Xcode project """
 
-        xcode_projects = self._find_xcode_projects(*xcode_project_patterns)
+        xcode_projects = self.find_paths(*xcode_project_patterns)
         bundle_ids = Counter[str](
             bundle_id
             for xcode_project in xcode_projects

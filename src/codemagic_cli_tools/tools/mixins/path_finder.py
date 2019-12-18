@@ -7,7 +7,7 @@ from typing import Generator
 class PathFinderMixin(metaclass=abc.ABCMeta):
     logger: logging.Logger
 
-    def _find_paths(self, pattern: pathlib.Path) -> Generator[pathlib.Path, None, None]:
+    def glob(self, pattern: pathlib.Path) -> Generator[pathlib.Path, None, None]:
         if pattern.is_absolute():
             self.logger.info(f'Searching for files matching {pattern}')
             # absolute globs are not supported, match them as relative to root
@@ -16,7 +16,7 @@ class PathFinderMixin(metaclass=abc.ABCMeta):
         self.logger.info(f'Searching for files matching {pattern.resolve()}')
         return pathlib.Path().glob(str(pattern))
 
-    def _find_xcode_projects(self, *patterns: pathlib.Path):
+    def find_paths(self, *patterns: pathlib.Path) -> Generator[pathlib.Path, None, None]:
         for pattern in patterns:
-            for xcode_project in self._find_paths(pattern.expanduser()):
-                yield xcode_project
+            for path in self.glob(pattern.expanduser()):
+                yield path

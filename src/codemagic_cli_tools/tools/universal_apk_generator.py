@@ -111,7 +111,7 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         Generate universal APK files from Android App Bundles
         """
 
-        aab_paths = list(self._find_paths(self.pattern))
+        aab_paths = list(self.find_paths(self.pattern))
         if aab_paths:
             self.logger.info(f'Found {len(aab_paths)} matching files')
         else:

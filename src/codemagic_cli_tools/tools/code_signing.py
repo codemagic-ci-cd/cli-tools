@@ -6,6 +6,7 @@ import shutil
 from tempfile import NamedTemporaryFile
 from typing import Counter
 from typing import Generator
+from typing import Iterator
 from typing import Optional
 from typing import Sequence
 
@@ -46,18 +47,18 @@ class CodeSigningArgument(cli.Argument):
         },
     )
     PROFILE_PATHS = cli.ArgumentProperties(
-        key='profile_paths',
-        flags=('--profiles',),
+        key='profile_path_patterns',
+        flags=('--profile',),
         type=_existing_file,
         description=(
-            'Path to provisioning profile to be used for code signing. '
-            f'If not provided, the profiles will be looked up from '
-            f'{Colors.WHITE(shlex.quote(str(ProvisioningProfile.DEFAULT_LOCATION)))}.'
+            'Path to provisioning profile. Can be either a path literal, or '
+            'a glob pattern to match provisioning profiles.'
         ),
         argparse_kwargs={
             'required': False,
             'nargs': '+',
-            'metavar': 'profile-path'
+            'metavar': 'profile-path',
+            'default': (ProvisioningProfile.DEFAULT_LOCATION,),
         }
     )
 
@@ -79,26 +80,25 @@ class CodeSigning(cli.CliApp, PathFinderMixin):
                 CodeSigningArgument.PROFILE_PATHS)
     def use_profiles(self,
                      xcode_project_patterns: Sequence[pathlib.Path],
-                     profile_paths: Optional[Sequence[pathlib.Path]] = None):
+                     profile_path_patterns: Sequence[pathlib.Path]):
         """
         Set up code signing settings on specified Xcode project
         to use given provisioning profiles.
         """
 
-        if profile_paths is None:
-            profile_paths = list(ProvisioningProfile.DEFAULT_LOCATION.glob('*.mobileprovision'))
+        profile_paths = self.find_paths(*profile_path_patterns)
         try:
             serialized_profiles = json.dumps(list(self._serialize_profiles(profile_paths)))
         except (ValueError, IOError) as error:
             raise CodeSigningException(*error.args)
 
-        xcode_projects = self._find_xcode_projects(*xcode_project_patterns)
+        xcode_projects = self.find_paths(*xcode_project_patterns)
         for xcode_project in xcode_projects:
             used_profiles = self._use_profiles(xcode_project, serialized_profiles)
             # TODO: proper profile usage notice
-            self.logger.info(f'Use profiles result: {used_profiles}')
+            self.logger.info(Colors.GREEN(f'Use profiles result: {used_profiles}'))
 
-    def _serialize_profiles(self, profile_paths: Sequence[pathlib.Path]) -> Generator:
+    def _serialize_profiles(self, profile_paths: Iterator[pathlib.Path]) -> Generator:
         available_certs = Keychain(use_default=True) \
             .list_code_signing_certificates(should_print=False)
 
@@ -112,13 +112,14 @@ class CodeSigning(cli.CliApp, PathFinderMixin):
 
     def _use_profiles(self, xcode_project: pathlib.Path, json_serialized_profiles: str):
         with NamedTemporaryFile(mode='r', prefix='used_profiles_', suffix='.json') as used_profiles:
-            cmd = (
+            cmd = [
                 self._code_signing_manager,
                 '--xcode-project', xcode_project,
                 '--used-profiles', used_profiles.name,
                 '--profiles', json_serialized_profiles,
-                '--verbose'
-            )
+            ]
+            if self.verbose:
+                cmd.append('--verbose')
             process = self.execute(cmd)
             try:
                 used_profiles_info = json.load(used_profiles)
