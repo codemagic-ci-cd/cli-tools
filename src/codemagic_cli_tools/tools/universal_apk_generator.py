@@ -11,6 +11,7 @@ from typing import Optional
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools import models
+from codemagic_cli_tools.tools.mixins import PathFinderMixin
 
 
 class UniversalApkGeneratorError(cli.CliAppException):
@@ -72,7 +73,7 @@ class SigningInfo(NamedTuple):
 
 
 @cli.common_arguments(*UniversalApkGeneratorArgument)
-class UniversalApkGenerator(cli.CliApp):
+class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     """
     Generate universal APK files from Android App Bundles
     """
@@ -110,7 +111,7 @@ class UniversalApkGenerator(cli.CliApp):
         Generate universal APK files from Android App Bundles
         """
 
-        aab_paths = list(self._find_paths())
+        aab_paths = list(self._find_paths(self.pattern))
         if aab_paths:
             self.logger.info(f'Found {len(aab_paths)} matching files')
         else:
@@ -131,15 +132,6 @@ class UniversalApkGenerator(cli.CliApp):
                 apk_paths.append(apk_path)
 
         return apk_paths
-
-    def _find_paths(self):
-        if self.pattern.is_absolute():
-            self.logger.info(f'Searching for files matching {self.pattern}')
-            # absolute globs are not supported, match them as relative to root
-            relative_pattern = self.pattern.relative_to(self.pattern.anchor)
-            return pathlib.Path(self.pattern.anchor).glob(str(relative_pattern))
-        self.logger.info(f'Searching for files matching {self.pattern.resolve()}')
-        return pathlib.Path().glob(str(self.pattern))
 
     def _generate_apk(self, path):
         apk_path = self._get_apk_path(path)
