@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import pathlib
 import shlex
 import shutil
 import subprocess
 from typing import Any
-from typing import Counter
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -21,38 +22,51 @@ if TYPE_CHECKING:
 
 class BundleIdDetector(BytesStrConverter):
 
-    def __init__(self, xcode_project: pathlib.Path):
+    def __init__(self, xcode_project: pathlib.Path, target_name: Optional[str], config_name: Optional[str]):
         self.xcode_project = xcode_project.expanduser()
+        self.target = target_name
+        self.config = config_name
 
     @classmethod
-    def _can_use_xcode(cls) -> bool:
+    def _can_use_xcodebuild(cls) -> bool:
         return shutil.which('xcodebuild') is not None
 
-    def detect(self,
-               target_name: Optional[str],
-               configuration_name: Optional[str] = None,
-               *, cli_app: Optional['CliApp'] = None) -> Counter[str]:
+    def notify(self, logger: Optional[logging.Logger]):
+        if logger is None:
+            logger = logging.getLogger(self.__class__.__name__)
+
+        prefix = f'Detect Bundle ID from {self.xcode_project}'
+        if self.target and self.config:
+            logger.info(f'{prefix} target {self.target!r} [{self.config!r}]')
+        elif self.target:
+            logger.info(f'{prefix} target {self.target!r}')
+        elif self.config:
+            logger.info(f'{prefix} build configuration {self.config!r}')
+        else:
+            logger.info(prefix)
+
+    def detect(self, *, cli_app: Optional['CliApp'] = None) -> List[str]:
         """
         :raises: IOError, ValueError
         """
         bundle_ids = None
-        if self._can_use_xcode():
-            bundle_ids = self._detect_bundle_ids_with_xcode(target_name, configuration_name, cli_app)
+        if self._can_use_xcodebuild():
+            bundle_ids = self._detect_with_xcodebuild(cli_app)
         if not bundle_ids:
-            bundle_ids = self._detect_bundle_ids_from_project(target_name, configuration_name, cli_app)
-        return bundle_ids
+            bundle_ids = self._detect_from_project(cli_app)
+        return list(bundle_ids)
 
-    def _get_xcodebuild_command(self, target_name: Optional[str], configuration_name: Optional[str]) -> List[str]:
+    def _get_xcodebuild_command(self) -> List[str]:
         cmd = ['xcodebuild', '-project', str(self.xcode_project)]
-        if target_name is not None:
-            cmd.extend(['-target', target_name])
-        if configuration_name is not None:
-            cmd.extend(['-configuration', configuration_name])
+        if self.target is not None:
+            cmd.extend(['-target', self.target])
+        if self.config is not None:
+            cmd.extend(['-configuration', self.config])
         cmd.extend(['-showBuildSettings', '-json'])
         return cmd
 
-    def _detect_bundle_ids_with_xcode(self, target_name, configuration_name, cli_app) -> Counter[str]:
-        cmd = self._get_xcodebuild_command(target_name, configuration_name)
+    def _detect_with_xcodebuild(self, cli_app) -> Iterator[str]:
+        cmd = self._get_xcodebuild_command()
         process = None
         try:
             if cli_app:
@@ -66,25 +80,25 @@ class BundleIdDetector(BytesStrConverter):
             error = f'Unable to detect Bundle ID from Xcode project {xcode_project}: {self._str(cpe.stderr)}'
             raise IOError(error, process)
 
-        return Counter[str](
+        return (
             build_setting['buildSettings']['PRODUCT_BUNDLE_IDENTIFIER']
             for build_setting in json.loads(stdout)
         )
 
-    def _detect_bundle_ids_from_project(self, target_name, configuration_name, cli_app) -> Counter[str]:
-        def get_targets(pbx_project: PbxProject):
-            if target_name:
-                return [pbx_project.get_target(target_name)]
-            return pbx_project.get_targets()
+    def _get_project_configs(self, pbx_project: PbxProject, target: Dict[str, Any]):
+        if self.config:
+            return [pbx_project.get_target_config(target['name'], self.config)]
+        return pbx_project.get_target_configs(target['name'])
 
-        def get_configs(pbx_project: PbxProject, target: Dict[str, Any]):
-            if configuration_name:
-                return [pbx_project.get_target_config(target['name'], configuration_name)]
-            return pbx_project.get_target_configs(target['name'])
+    def _get_project_targets(self, pbx_project: PbxProject):
+        if self.target:
+            return [pbx_project.get_target(self.target)]
+        return pbx_project.get_targets()
 
+    def _detect_from_project(self, cli_app) -> Iterator[str]:
         project = PbxProject.from_path(self.xcode_project / 'project.pbxproj', cli_app=cli_app)
-        return Counter[str](
+        return (
             project.get_bundle_id(target['name'], config['name'])
-            for target in get_targets(project)
-            for config in get_configs(project, target)
+            for target in self._get_project_targets(project)
+            for config in self._get_project_configs(project, target)
         )
