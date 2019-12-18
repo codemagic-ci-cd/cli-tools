@@ -221,6 +221,7 @@ class Keychain(cli.CliApp):
         at specified path with specified password with given timeout.
         Make it default and unlock it for upcoming use.
         """
+        self.logger.info(f'Initialize new keychain to store code signing certificates at {self.path}')
         self.create(password)
         self.set_timeout(timeout=timeout)
         self.make_default()
