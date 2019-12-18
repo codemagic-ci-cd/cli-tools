@@ -11,7 +11,6 @@ import re
 import shlex
 import sys
 import time
-from datetime import timedelta
 from functools import wraps
 from itertools import chain
 from typing import Iterable
@@ -88,6 +87,8 @@ class CliApp(metaclass=abc.ABCMeta):
         try:
             cli_action(**action_args)
             return 0
+        except argparse.ArgumentError as argument_error:
+            parser.error(argument_error)
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             return cls._handle_cli_exception(cli_exception)
         except KeyboardInterrupt:
