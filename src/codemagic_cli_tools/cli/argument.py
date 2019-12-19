@@ -26,12 +26,11 @@ from codemagic_cli_tools.cli.colors import Colors
 
 
 class ActionCallable:
-    def __call__(self, *args, **kwargs):
-        pass
-
     is_cli_action: bool
     action_name: str
     arguments: Sequence[Argument]
+    __name__: str
+    __call__: Callable
 
 
 T = TypeVar('T')
@@ -143,7 +142,7 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
                 f'it may also be specified using a "@env:" prefix followed by a environment variable name, ' \
                 f'or "@file:" prefix followed by a path to the file containing the value.'
         example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>", ' \
-                  'and "@env:<file_path>" uses the value from file at "<file_path>".'
+                  'and "@file:<file_path>" uses the value from file at "<file_path>".'
         try:
             default_value = (properties.argparse_kwargs or {})['default']
             default = Argument.format_default(default_value)

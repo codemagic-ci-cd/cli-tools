@@ -68,7 +68,7 @@ class CodeSigningSettingsManager(BytesStrConverter):
         if logger is None:
             logger = logging.getLogger(self.__class__.__name__)
 
-        logger.info(Colors.GREEN('Completed code signing settings configuration'))
+        logger.info(Colors.GREEN('Completed configuring code signing settings'))
 
         if not self._modified_build_configs_info:
             message = 'Did not find matching provisioning profiles for code signing!'

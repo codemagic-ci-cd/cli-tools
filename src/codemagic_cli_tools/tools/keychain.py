@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import pathlib
+import shutil
+from tempfile import NamedTemporaryFile
 from typing import List
 from typing import Optional
+from typing import Sequence
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.models import Certificate
+from .mixins import PathFinderMixin
 
 
 class Seconds(int):
@@ -29,18 +32,14 @@ class KeychainError(cli.CliAppException):
 
 class KeychainArgument(cli.Argument):
     PATH = cli.ArgumentProperties(
-        key='keychain_path',
-        flags=('--path', '-p',),
+        flags=('-p', '--path'),
+        key='path',
         type=pathlib.Path,
-        description='Keychain path.',
+        description=(
+            'Keychain path. If not provided, the system default '
+            'keychain will be used instead'
+        ),
         argparse_kwargs={'required': False}
-    )
-    USE_DEFAULT_KEYCHAIN = cli.ArgumentProperties(
-        key='use_default',
-        flags=('--use-default',),
-        type=bool,
-        description='Use current default keychain.',
-        argparse_kwargs={'required': False, 'action': 'store_true', 'default': False}
     )
     PASSWORD = cli.ArgumentProperties(
         flags=('-pw', '--password'),
@@ -56,56 +55,45 @@ class KeychainArgument(cli.Argument):
         description='Keychain timeout in seconds, defaults to no timeout',
         argparse_kwargs={'required': False, 'default': None},
     )
-    CERTIFICATE_PATH = cli.ArgumentProperties(
+    CERTIFICATE_PATHS = cli.ArgumentProperties(
         flags=('-c', '--certificate'),
-        key='certificate_path',
+        key='certificate_path_patterns',
         type=pathlib.Path,
-        description='Path to p12 certificate',
-        argparse_kwargs={'required': True},
+        description=(
+            'Path to pkcs12 certificate. Can be either a path literal, or '
+            'a glob pattern to match certificates.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+            'metavar': 'certificate-path',
+            'default': (Certificate.DEFAULT_LOCATION / '*.p12',),
+        }
     )
     CERTIFICATE_PASSWORD = cli.ArgumentProperties(
         flags=('--certificate-password',),
         key='certificate_password',
         type=Password,
         description='Encrypted p12 certificate password',
-        argparse_kwargs={'required': False, 'default': ''},
+        argparse_kwargs={'required': False, 'default': 'password'},
     )
 
 
-@cli.common_arguments(
-    KeychainArgument.PATH,
-    KeychainArgument.USE_DEFAULT_KEYCHAIN)
-class Keychain(cli.CliApp):
+@cli.common_arguments(KeychainArgument.PATH)
+class Keychain(cli.CliApp, PathFinderMixin):
     """
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: Optional[pathlib.Path] = None, use_default: bool = False):
+    def __init__(self, path: Optional[pathlib.Path] = None):
         super().__init__()
-        if use_default:
-            self.path = self._get_default()
-        else:
-            assert path is not None
-            self.path = path
+        self._path = path
 
-    @classmethod
-    def _validate_cli_args(cls, path: Optional[pathlib.Path], use_default: Optional[bool]):
-        arguments = (KeychainArgument.PATH, KeychainArgument.USE_DEFAULT_KEYCHAIN)
-        choices = map(lambda k: Colors.CYAN(k.key.upper()), arguments)
-        error = None
-        if path and use_default:
-            error = f'Both {" and ".join(choices)} were given. Choose one.'
-        elif not path and not use_default:
-            error = f'Either {" or ".join(choices)} has to be provided. Choose one.'
-        if error:
-            raise KeychainArgument.PATH.raise_argument_error(error)
-
-    @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
-        path = KeychainArgument.PATH.from_args(cli_args)
-        use_default = KeychainArgument.USE_DEFAULT_KEYCHAIN.from_args(cli_args, False)
-        cls._validate_cli_args(path, use_default)
-        return Keychain(path=path, use_default=use_default)
+    @property
+    def path(self) -> pathlib.Path:
+        if self._path is None:
+            self._path = self._get_default()
+        return self._path
 
     @cli.action('create', KeychainArgument.PASSWORD)
     def create(self, password: Password = Password('')):
@@ -195,7 +183,9 @@ class Keychain(cli.CliApp):
         """
 
         self.logger.info(f'Get system default keychain')
-        return self.get_default()
+        default = self._get_default()
+        print(default)
+        return default
 
     def _get_default(self):
         process = self.execute(('security', 'default-keychain'), show_output=False)
@@ -222,7 +212,12 @@ class Keychain(cli.CliApp):
         at specified path with specified password with given timeout.
         Make it default and unlock it for upcoming use.
         """
-        self.logger.info(f'Initialize new keychain to store code signing certificates at {self.path}')
+
+        if not self._path:
+            self._generate_path()
+
+        message = f'Initialize new keychain to store code signing certificates at {self.path}'
+        self.logger.info(Colors.GREEN(message))
         self.create(password)
         self.set_timeout(timeout=timeout)
         self.make_default()
@@ -242,15 +237,29 @@ class Keychain(cli.CliApp):
             print(json.dumps(certificates, sort_keys=True, indent=4))
         return certificates
 
-    @cli.action('add-certificate',
-                KeychainArgument.CERTIFICATE_PATH,
+    def _generate_path(self):
+        with NamedTemporaryFile(prefix='build_', suffix='.keychain') as tf:
+            self._path = pathlib.Path(tf.name)
+
+    @cli.action('add-certificates',
+                KeychainArgument.CERTIFICATE_PATHS,
                 KeychainArgument.CERTIFICATE_PASSWORD)
-    def add_certificate(self, certificate_path: pathlib.Path, certificate_password: Optional[Password] = None):
+    def add_certificates(self,
+                         certificate_path_patterns: Sequence[pathlib.Path],
+                         certificate_password: Password = Password('password')):
         """
         Add p12 certificate to specified keychain.
         """
+        certificate_paths = list(self.find_paths(*certificate_path_patterns))
+        if not certificate_paths:
+            raise KeychainError('Did not find any certificates from specified locations')
+        for certificate_path in certificate_paths:
+            self._add_certificate(certificate_path, certificate_password)
 
-        self.logger.info(f'Add certificate {certificate_path} for keychain {self.path}')
+    def _add_certificate(self,
+                         certificate_path: pathlib.Path,
+                         certificate_password: Optional[Password] = None):
+        self.logger.info(f'Add certificate {certificate_path} to keychain {self.path}')
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
         # which fails in non-interactive CI environment.
@@ -261,11 +270,11 @@ class Keychain(cli.CliApp):
             obfuscate_patterns = []
 
         process = self.execute([
-            'security', "import", certificate_path,
-            "-f", "pkcs12",
-            "-k", self.path,
-            "-T", 'codesign',
-            "-P", certificate_password.value,
+            'security', 'import', certificate_path,
+            '-f', "pkcs12",
+            '-k', self.path,
+            '-T', shutil.which('codesign'),
+            '-P', certificate_password.value,
         ], obfuscate_patterns=obfuscate_patterns)
         if process.returncode != 0:
             raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)

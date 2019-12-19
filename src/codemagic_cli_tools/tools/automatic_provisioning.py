@@ -607,7 +607,7 @@ class AutomaticProvisioning(BaseProvisioning):
         return profiles
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
-        profile_path = self._get_unique_path(f'{profile.get_display_info()}.p12', self.profiles_directory)
+        profile_path = self._get_unique_path(f'{profile.get_display_info()}.mobileprovision', self.profiles_directory)
         profile_path.write_bytes(profile.profile_content)
         self.printer.log_saved(profile, profile_path)
         return profile_path

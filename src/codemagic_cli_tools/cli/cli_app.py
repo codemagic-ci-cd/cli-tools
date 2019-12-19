@@ -15,6 +15,7 @@ from functools import wraps
 from itertools import chain
 from typing import Iterable
 from typing import List
+from typing import NoReturn
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -62,14 +63,15 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
-        sys.stderr.write(f'{Colors.RED(cli_exception.message)}\n')
+        logger = logging.getLogger(cls.__name__)
+        logger.error(f'{Colors.RED(cli_exception.message)}')
         if cli_exception.cli_process:
             return cli_exception.cli_process.returncode
         else:
             return 1
 
     @classmethod
-    def invoke_cli(cls):
+    def invoke_cli(cls) -> NoReturn:
         parser = cls._setup_cli_options()
         args = parser.parse_args()
         logger = cls._setup_logging(args)
@@ -88,16 +90,19 @@ class CliApp(metaclass=abc.ABCMeta):
         start = time.time()
         try:
             cli_action(**action_args)
-            return 0
+            status = 0
         except argparse.ArgumentError as argument_error:
             parser.error(argument_error)
+            status = 2
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
-            return cls._handle_cli_exception(cli_exception)
+            status = cls._handle_cli_exception(cli_exception)
         except KeyboardInterrupt:
             logger.warning(Colors.YELLOW('Terminated'))
+            status = 130
         finally:
             seconds = int(time.time() - start)
             logger.debug(f'Completed in {time.strftime("%M:%S", time.gmtime(seconds))}.')
+        sys.exit(status)
 
     @classmethod
     def get_class_cli_actions(cls) -> Iterable[ActionCallable]:
@@ -107,10 +112,8 @@ class CliApp(metaclass=abc.ABCMeta):
                 yield attr
 
     def get_cli_actions(self) -> Iterable[ActionCallable]:
-        for attr_name in dir(self):
-            attr = getattr(self, attr_name)
-            if callable(attr) and getattr(attr, 'is_cli_action', False):
-                yield attr
+        for class_action in self.get_class_cli_actions():
+            yield getattr(self, class_action.__name__)
 
     @classmethod
     def _setup_logging(cls, cli_args: argparse.Namespace):

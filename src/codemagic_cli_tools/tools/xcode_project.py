@@ -58,7 +58,7 @@ class XcodeProjectArgument(cli.Argument):
             'required': False,
             'nargs': '+',
             'metavar': 'profile-path',
-            'default': (ProvisioningProfile.DEFAULT_LOCATION,),
+            'default': (ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',),
         }
     )
 
@@ -148,7 +148,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
-        available_certs = Keychain(use_default=True).list_code_signing_certificates(should_print=False)
+        available_certs = Keychain().list_code_signing_certificates(should_print=False)
         code_signing_settings_manager = CodeSigningSettingsManager(profiles, available_certs)
 
         try:
