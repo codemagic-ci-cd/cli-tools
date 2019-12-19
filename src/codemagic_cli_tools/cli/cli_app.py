@@ -80,7 +80,7 @@ class CliApp(metaclass=abc.ABCMeta):
             instance = cls.from_cli_args(args)
             instance.verbose = args.verbose
         except argparse.ArgumentError as argument_error:
-            parser.error(argument_error)
+            parser.error(str(argument_error))
 
         cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
         action_args = {
@@ -92,7 +92,7 @@ class CliApp(metaclass=abc.ABCMeta):
             cli_action(**action_args)
             status = 0
         except argparse.ArgumentError as argument_error:
-            parser.error(argument_error)
+            parser.error(str(argument_error))
             status = 2
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             status = cls._handle_cli_exception(cli_exception)
