@@ -351,7 +351,10 @@ class AutomaticProvisioning(BaseProvisioning):
         certificates = self._list_resources(certificate_filter, self.api_client.signing_certificates, should_print)
 
         if private_key:
-            certificates = [c for c in certificates if c.as_certificate().is_signed_with(private_key)]
+            certificates = [
+                certificate for certificate in certificates
+                if Certificate.from_ans1(certificate.asn1_content).is_signed_with(private_key)
+            ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
 
         if save:
