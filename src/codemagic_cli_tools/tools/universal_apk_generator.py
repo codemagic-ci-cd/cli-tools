@@ -78,8 +78,12 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     Generate universal APK files from Android App Bundles
     """
 
-    def __init__(self, bundletool_path: pathlib.Path, pattern: pathlib.Path, signing_info: Optional[SigningInfo]):
-        super().__init__()
+    def __init__(self,
+                 bundletool_path: pathlib.Path,
+                 pattern: pathlib.Path,
+                 signing_info: Optional[SigningInfo],
+                 **kwargs):
+        super().__init__(**kwargs)
         self.bundletool_path = bundletool_path
         self.pattern = pattern
         self.signing_info = signing_info
@@ -103,6 +107,7 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
             bundletool_path=cli_args.bundletool_path,
             pattern=pattern,
             signing_info=SigningInfo(*signing_info_args) if all(signing_info_args) else None,
+            **cls._parent_class_kwargs(cli_args)
         )
 
     @cli.action('generate')

@@ -85,8 +85,8 @@ class Keychain(cli.CliApp, PathFinderMixin):
     Utility to manage macOS keychains and certificates
     """
 
-    def __init__(self, path: Optional[pathlib.Path] = None):
-        super().__init__()
+    def __init__(self, path: Optional[pathlib.Path] = None, **kwargs):
+        super().__init__(**kwargs)
         self._path = path
 
     @property

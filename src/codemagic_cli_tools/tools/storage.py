@@ -46,15 +46,15 @@ class Storage(cli.CliApp):
     Utility to download files from Google Cloud Storage
     """
 
-    def __init__(self, bucket_name: str = DEFAULT_BUCKET):
-        super().__init__()
+    def __init__(self, bucket_name: str = DEFAULT_BUCKET, **kwargs):
+        super().__init__(**kwargs)
         self.bucket_name = bucket_name
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> Storage:
         default_bucket = StorageArgument.BUCKET_NAME.get_default()
         bucket_name = StorageArgument.BUCKET_NAME.from_args(cli_args, default_bucket)
-        return Storage(bucket_name)
+        return Storage(bucket_name, **cls._parent_class_kwargs(cli_args))
 
     @cli.action('save-to-file',
                 StorageArgument.OBJECT_NAME,

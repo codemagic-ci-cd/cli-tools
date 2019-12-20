@@ -18,8 +18,9 @@ class BaseProvisioning(cli.CliApp):
 
     def __init__(self,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
-                 certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION):
-        super().__init__()
+                 certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
+                 **kwargs):
+        super().__init__(**kwargs)
         self.profiles_directory = profiles_directory
         self.certificates_directory = certificates_directory
 

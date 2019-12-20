@@ -13,6 +13,8 @@ import sys
 import time
 from functools import wraps
 from itertools import chain
+from typing import Any
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import NoReturn
@@ -48,9 +50,10 @@ class CliAppException(Exception):
 
 class CliApp(metaclass=abc.ABCMeta):
     CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
+    REGISTERED_CLASS_ARGUMENTS: Dict[Type[CliApp], Tuple[Argument, ...]] = {}
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
 
-    def __init__(self, dry=False, verbose=False):
+    def __init__(self, dry=False, verbose=False, **cli_options):
         self.dry_run = dry
         self.default_obfuscation = []
         self.obfuscation = 8 * '*'
@@ -60,6 +63,15 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace):
         return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls.CLASS_ARGUMENTS})
+
+    @classmethod
+    def _parent_class_kwargs(cls, cli_args: argparse.Namespace) -> Dict[str, Any]:
+        class_args = cls.REGISTERED_CLASS_ARGUMENTS[cls]
+        class_arg_keys = {arg.key for arg in class_args}
+        return {
+            key: value for key, value in cli_args.__dict__.items()
+            if key not in class_arg_keys
+        }
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
@@ -286,6 +298,8 @@ def common_arguments(*class_arguments: Argument):
                 raise ValueError(f'{class_argument} is already registered on class {cli_app_type.__name__}')
             else:
                 cli_app_type.CLASS_ARGUMENTS += (class_argument,)
+
+        cli_app_type.REGISTERED_CLASS_ARGUMENTS[cli_app_type] = tuple(class_arguments)
         return cli_app_type
 
     return decorator

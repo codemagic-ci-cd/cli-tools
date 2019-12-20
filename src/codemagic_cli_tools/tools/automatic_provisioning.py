@@ -116,10 +116,9 @@ class AutomaticProvisioning(BaseProvisioning):
             issuer_id=issuer_id_argument.value,
             key_identifier=key_identifier_argument.value,
             private_key=private_key,
-            profiles_directory=cli_args.profiles_directory,
-            certificates_directory=cli_args.certificates_directory,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,
+            **cls._parent_class_kwargs(cli_args)
         )
 
     def _create_resource(self, resource_manager, should_print, **create_params):
