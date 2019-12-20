@@ -9,10 +9,10 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSeria
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
 
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 
 
-class PrivateKey(BytesStrConverter):
+class PrivateKey(StringConverterMixin):
 
     def __init__(self, rsa_key: RSAPrivateKeyWithSerialization):
         self.rsa_key = rsa_key

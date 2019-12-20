@@ -10,7 +10,7 @@ from typing import Sequence
 from typing import TYPE_CHECKING
 from typing import Tuple
 
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
     from .certificate import Certificate
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class P12Exporter(BytesStrConverter):
+class P12Exporter(StringConverterMixin):
 
     def __init__(self, certificate: 'Certificate', private_key: 'PrivateKey', container_password: str):
         self.container_password = container_password

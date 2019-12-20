@@ -13,13 +13,13 @@ from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
 
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class PbxProject(BytesStrConverter):
+class PbxProject(StringConverterMixin):
 
     def __init__(self, project_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = project_data

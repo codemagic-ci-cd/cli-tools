@@ -7,11 +7,11 @@ from typing import Sequence
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.mixins import PathFinderMixin
 from codemagic_cli_tools.models import BundleIdDetector
+from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import CodeSigningSettingsManager
 from codemagic_cli_tools.models import ProvisioningProfile
-from .keychain import Keychain
-from .mixins import PathFinderMixin
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -148,7 +148,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
-        available_certs = Keychain().list_code_signing_certificates(should_print=False)
+        available_certs = self._get_certificates_from_keychain()
         code_signing_settings_manager = CodeSigningSettingsManager(profiles, available_certs)
 
         try:
@@ -158,6 +158,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise XcodeProjectException(*error.args)
 
         code_signing_settings_manager.notify_profile_usage(self.logger)
+
+    @classmethod
+    def _get_certificates_from_keychain(cls) -> List[Certificate]:
+        from .keychain import Keychain
+        return Keychain() \
+            .list_code_signing_certificates(should_print=False)
 
 
 if __name__ == '__main__':

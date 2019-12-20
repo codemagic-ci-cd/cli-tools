@@ -13,14 +13,14 @@ from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
 
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 from .pbx_project import PbxProject
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class BundleIdDetector(BytesStrConverter):
+class BundleIdDetector(StringConverterMixin):
 
     def __init__(self, xcode_project: pathlib.Path, target_name: Optional[str], config_name: Optional[str]):
         self.xcode_project = xcode_project.expanduser()

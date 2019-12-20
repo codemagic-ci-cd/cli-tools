@@ -13,7 +13,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 from codemagic_cli_tools.cli import Colors
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 from .certificate import Certificate
 from .provisioning_profile import ProvisioningProfile
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class CodeSigningSettingsManager(BytesStrConverter):
+class CodeSigningSettingsManager(StringConverterMixin):
 
     def __init__(self, profiles: List[ProvisioningProfile], keychain_certificates: List[Certificate]):
         self.profiles = {profile.uuid: profile for profile in profiles}

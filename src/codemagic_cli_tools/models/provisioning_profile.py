@@ -3,7 +3,6 @@ from __future__ import annotations
 import plistlib
 import shutil
 import subprocess
-from collections import Counter
 from pathlib import Path
 from typing import Any
 from typing import AnyStr
@@ -15,7 +14,7 @@ from typing import Sequence
 from typing import TYPE_CHECKING
 from typing import Union
 
-from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 from codemagic_cli_tools.models.certificate import Certificate
 from codemagic_cli_tools.models.json_serializable import JsonSerializable
 
@@ -23,7 +22,7 @@ if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class ProvisioningProfile(JsonSerializable, BytesStrConverter):
+class ProvisioningProfile(JsonSerializable, StringConverterMixin):
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Provisioning Profiles')
 
     def __init__(self, plist: Dict[str, Any]):
@@ -129,4 +128,3 @@ class ProvisioningProfile(JsonSerializable, BytesStrConverter):
     def get_usable_certificates(self, certificates: Sequence[Certificate]) -> Generator[Certificate, None, None]:
         available_certificates_serials = {c.serial for c in certificates}
         return (c for c in self.certificates if c.serial in available_certificates_serials)
-

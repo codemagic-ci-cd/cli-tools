@@ -11,7 +11,7 @@ from typing import Optional
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools import models
-from codemagic_cli_tools.tools.mixins import PathFinderMixin
+from codemagic_cli_tools.mixins import PathFinderMixin
 
 
 class UniversalApkGeneratorError(cli.CliAppException):

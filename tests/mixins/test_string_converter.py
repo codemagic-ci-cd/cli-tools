@@ -1,6 +1,6 @@
 import pytest
 
-from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 
 
 @pytest.mark.parametrize('bytes_or_str, expected_result', [
@@ -15,7 +15,7 @@ from codemagic_cli_tools.models.byte_str_converter import BytesStrConverter
     (b'test', b'test')
 ])
 def test_to_bytes(bytes_or_str, expected_result):
-    assert BytesStrConverter._bytes(bytes_or_str) == expected_result
+    assert StringConverterMixin._bytes(bytes_or_str) == expected_result
 
 
 @pytest.mark.parametrize('bytes_or_str, expected_result', [
@@ -30,4 +30,4 @@ def test_to_bytes(bytes_or_str, expected_result):
     (b'test', 'test')
 ])
 def test_to_str(bytes_or_str, expected_result):
-    assert BytesStrConverter._str(bytes_or_str) == expected_result
+    assert StringConverterMixin._str(bytes_or_str) == expected_result

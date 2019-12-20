@@ -12,8 +12,8 @@ from typing import Sequence
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.mixins import PathFinderMixin
 from codemagic_cli_tools.models import Certificate
-from .mixins import PathFinderMixin
 
 
 class Seconds(int):

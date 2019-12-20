@@ -1,7 +1,7 @@
 from typing import AnyStr
 
 
-class BytesStrConverter:
+class StringConverterMixin:
 
     @classmethod
     def _bytes(cls, str_or_bytes: AnyStr) -> bytes:

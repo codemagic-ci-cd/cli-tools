@@ -17,7 +17,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
-from .byte_str_converter import BytesStrConverter
+from codemagic_cli_tools.mixins import StringConverterMixin
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import PrivateKey
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
 
 
-class Certificate(JsonSerializable, BytesStrConverter):
+class Certificate(JsonSerializable, StringConverterMixin):
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, x509_certificate: X509):
