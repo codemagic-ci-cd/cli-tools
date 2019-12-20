@@ -16,9 +16,6 @@ from codemagic_cli_tools.models import ProvisioningProfile
 
 
 class Types:
-    class BundleIdArgument(cli.TypedCliArgument[str]):
-        pass
-
     class IssuerIdArgument(cli.EnvironmentArgumentValue[IssuerId]):
         argument_type = IssuerId
         environment_variable_key = 'APP_STORE_CONNECT_ISSUER_ID'

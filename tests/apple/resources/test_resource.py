@@ -5,8 +5,9 @@ from datetime import timezone
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import *
+from codemagic_cli_tools.apple.resources import Profile
 from codemagic_cli_tools.apple.resources import Resource
+from codemagic_cli_tools.apple.resources.resource import PrettyNameMeta
 
 
 @pytest.mark.parametrize('iso_8601_timestamp, expected_datetime', [
@@ -40,3 +41,46 @@ def test_resource_tabular_formatting(api_profile):
         'Expiration date: 2020-11-28 13:56:50.220000+00:00\n' \
         'Content: "..."'
     assert str(Profile(api_profile)) == expected_format
+
+
+@pytest.mark.parametrize('class_name, pretty_name', [
+    ('BundleId', 'Bundle ID'),
+    ('RandomNameWithIdInIt', 'Random Name With ID In It'),
+    ('Resource', 'Resource')
+])
+def test_pretty_name_meta(class_name, pretty_name):
+    class K(metaclass=PrettyNameMeta):
+        dict = lambda self: {}
+
+    K.__name__ = class_name
+    assert str(K) == pretty_name
+
+
+@pytest.mark.parametrize('class_name, pretty_name', [
+    ('BundleId', 'Bundle ID'),
+    ('RandomNameWithIdInIt', 'Random Name With ID In It'),
+    ('Resource', 'Resource'),
+    ('name', 'name'),
+])
+def test_pretty_name(class_name, pretty_name):
+    class K(metaclass=PrettyNameMeta):
+        ...
+
+    K.__name__ = class_name
+    assert str(K) == pretty_name
+    assert K.plural(1) == pretty_name
+
+
+@pytest.mark.parametrize('class_name, plural_name', [
+    ('Capability', 'Capabilities'),
+    ('Resource', 'Resources'),
+    ('name', 'names'),
+    ('BundleId', 'Bundle IDs'),
+])
+def test_pretty_name_plural(class_name, plural_name):
+    class K(metaclass=PrettyNameMeta):
+        ...
+
+    K.__name__ = class_name
+    assert K.plural() == plural_name
+    assert K.s == plural_name

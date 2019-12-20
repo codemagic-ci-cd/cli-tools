@@ -1,3 +1,4 @@
+import argparse
 import os
 import pathlib
 from tempfile import NamedTemporaryFile
@@ -7,10 +8,24 @@ from typing import Union
 
 import pytest
 
+from codemagic_cli_tools import cli
 from codemagic_cli_tools.cli.argument import EnvironmentArgumentValue
 from codemagic_cli_tools.cli.argument import TypedCliArgument
 
 mock_dir = pathlib.Path(__file__).parent / 'mocks'
+
+
+class CustomStr(str):
+    pass
+
+
+class _TypedArgument(cli.TypedCliArgument[pathlib.Path]):
+    environment_variable_key = '_TYPED_ARGUMENT_'
+    argument_type = CustomStr
+
+
+class _TestArgument(cli.Argument):
+    TYPED_ARGUMENT = cli.ArgumentProperties(key='typed_argument', type=_TypedArgument, description='')
 
 
 @pytest.mark.parametrize('file_contents', [
@@ -44,10 +59,6 @@ def test_environment_argument_value_verbatim():
     actual_value = 'my public value'
     argument_value = EnvironmentArgumentValue(actual_value)
     assert argument_value.value == actual_value
-
-
-class CustomStr(str):
-    pass
 
 
 @pytest.mark.parametrize('given_type, raw_input, expected_value', [
@@ -85,3 +96,25 @@ def test_environment_variable_fallback(
     os.environ[env_var_key] = raw_input
     argument_value = EnvVarDefaultType.from_environment_variable_default()
     assert argument_value.value == expected_value
+
+
+def test_typed_cli_argument_initialization_with_value_from_cli():
+    value = _TypedArgument('some_value')
+    parsed_value = _TestArgument.TYPED_ARGUMENT.from_args(argparse.Namespace(typed_argument=value))
+    assert parsed_value.value == value.value
+    assert isinstance(parsed_value.value, CustomStr)
+    assert str(parsed_value) == value.value
+
+
+def test_typed_cli_argument_initialization_with_no_value():
+    parsed_value = _TestArgument.TYPED_ARGUMENT.from_args(argparse.Namespace(typed_argument=None))
+    assert parsed_value is None
+
+
+def test_typed_cli_argument_initialization_with_value_from_env():
+    value = _TypedArgument('some_value')
+    os.environ[value.environment_variable_key] = value.value
+    parsed_value = _TestArgument.TYPED_ARGUMENT.from_args(argparse.Namespace(typed_argument=None))
+    assert parsed_value.value == value.value
+    assert isinstance(parsed_value.value, CustomStr)
+    assert str(parsed_value) == f'@env:{value.environment_variable_key}'

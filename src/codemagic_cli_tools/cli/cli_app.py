@@ -279,11 +279,13 @@ def common_arguments(*class_arguments: Argument):
     def decorator(cli_app_type: Type[CliApp]):
         if not issubclass(cli_app_type, CliApp):
             raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
-        if class_arguments:
-            for class_argument in class_arguments:
-                if not isinstance(class_argument, Argument):
-                    raise TypeError(f'Invalid argument to common_arguments: {class_argument}')
-            cli_app_type.CLASS_ARGUMENTS += tuple(class_arguments)
+        for class_argument in class_arguments:
+            if not isinstance(class_argument, Argument):
+                raise TypeError(f'Invalid argument to common_arguments: {class_argument}')
+            elif class_argument in cli_app_type.CLASS_ARGUMENTS:
+                raise ValueError(f'{class_argument} is already registered on class {cli_app_type.__name__}')
+            else:
+                cli_app_type.CLASS_ARGUMENTS += (class_argument,)
         return cli_app_type
 
     return decorator

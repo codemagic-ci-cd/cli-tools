@@ -129,7 +129,7 @@ class LinkedResourceData(DictSerializable, JsonSerializable):
         ])
 
 
-class _PrettyNameMeta(JsonSerializableMeta):
+class PrettyNameMeta(JsonSerializableMeta):
     def __str__(cls):
         class_name = cls.__name__
         name = re.sub(f'([A-Z])', r' \1', class_name).lstrip(' ')
@@ -150,7 +150,7 @@ class _PrettyNameMeta(JsonSerializableMeta):
         return f'{singular}s'
 
 
-class Resource(LinkedResourceData, metaclass=_PrettyNameMeta):
+class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     @dataclass
     class Attributes(DictSerializable):
         def __init__(self, *args, **kwargs):
