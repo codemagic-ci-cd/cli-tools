@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from typing import List
 from typing import NewType
 from typing import Optional
@@ -11,7 +10,6 @@ from typing import Tuple
 
 from codemagic_cli_tools import cli
 from .provisioning.base_provisioning import BaseProvisioning
-from .storage import Storage
 
 ObjectName = NewType('ObjectName', str)
 
@@ -52,7 +50,12 @@ class ManualProvisioning(BaseProvisioning):
 
     def __init__(self, **kwargs):
         super(ManualProvisioning, self).__init__(**kwargs)
-        self._storage = Storage()
+        self._storage = self._setup_storage()
+
+    @classmethod
+    def _setup_storage(cls):
+        from .storage import Storage
+        return Storage()
 
     @cli.action('fetch',
                 ManualProvisioningArgument.PROVISIONING_PROFILE_OBJECT_NAME,

@@ -36,13 +36,13 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "automatic-provisioning = codemagic_cli_tools.tools.automatic_provisioning",
-            "git-changelog = codemagic_cli_tools.tools.git_changelog",
-            "keychain = codemagic_cli_tools.tools.keychain",
-            "manual-provisioning = codemagic_cli_tools.tools.manual_provisioning",
-            "storage = codemagic_cli_tools.tools.storage",
-            "universal-apk = codemagic_cli_tools.tools.universal_apk_generator",
-            "xcode-project = codemagic_cli_tools.tools.xcode_project",
+            'automatic-provisioning = codemagic_cli_tools.tools:AutomaticProvisioning.invoke_cli',
+            'git-changelog = codemagic_cli_tools.tools:GitChangelog.invoke_cli',
+            'keychain = codemagic_cli_tools.tools:Keychain.invoke_cli',
+            'manual-provisioning = codemagic_cli_tools.tools:ManualProvisioning.invoke_cli',
+            'storage = codemagic_cli_tools.tools:Storage.invoke_cli',
+            'universal-apk = codemagic_cli_tools.tools:UniversalApkGenerator.invoke_cli',
+            'xcode-project = codemagic_cli_tools.tools:XcodeProject.invoke_cli',
         ]
     },
 )
