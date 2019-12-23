@@ -176,16 +176,6 @@ class DeviceArgument(cli.Argument):
         description='Name of the Device',
         argparse_kwargs={'required': False}
     )
-    DEVICE_PLATFORM = cli.ArgumentProperties(
-        key='device_platform',
-        type=BundleIdPlatform,
-        flags=('--platform',),
-        description='Platform of the Device',
-        argparse_kwargs={
-            'required': False,
-            'choices': list(BundleIdPlatform),
-        }
-    )
     DEVICE_STATUS = cli.ArgumentProperties(
         key='device_status',
         flags=('--status',),
@@ -195,13 +185,6 @@ class DeviceArgument(cli.Argument):
             'required': False,
             'choices': list(DeviceStatus),
         }
-    )
-    NO_AUTO_PROVISION = cli.ArgumentProperties(
-        key='auto_provision',
-        flags=('--no-auto-provision',),
-        type=bool,
-        description='Do not include missing active devices to matched provisioning profiles',
-        argparse_kwargs={'required': False, 'action': 'store_false'},
     )
 
 
@@ -310,17 +293,6 @@ class ProfileArgument(cli.Argument):
             'choices': list(ProfileType),
         }
     )
-    PROFILE_STATE = cli.ArgumentProperties(
-        key='profile_state',
-        flags=('--state',),
-        type=ProfileState,
-        description='State of the provisioning profile',
-        argparse_kwargs={
-            'required': False,
-            'choices': list(ProfileState),
-            'default': ProfileState.ACTIVE,
-        }
-    )
     PROFILE_STATE_OPTIONAL = cli.ArgumentProperties(
         key='profile_state',
         flags=('--state',),
@@ -359,7 +331,7 @@ class CommonArgument(cli.Argument):
         flags=('--save',),
         type=bool,
         description=(
-            f'Whether to save the resource to disk. See '
+            f'Whether to save the resources to disk. See '
             f'{Colors.CYAN(ProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
             f'{Colors.CYAN(ProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
             f'for more information.'
