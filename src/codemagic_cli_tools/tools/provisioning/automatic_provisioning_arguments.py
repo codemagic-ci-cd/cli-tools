@@ -26,29 +26,13 @@ class Types:
 
     class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
-        alternative_to = 'PRIVATE_KEY_PATH'
 
         @classmethod
         def _is_valid(cls, value: str) -> bool:
             return value.startswith('-----BEGIN ')
 
-    class PrivateKeyPathArgument(cli.TypedCliArgument[pathlib.Path]):
-        environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY_PATH'
-        alternative_to = 'PRIVATE_KEY'
-        argument_type = pathlib.Path
-
-        @classmethod
-        def _is_valid(cls, value: pathlib.Path) -> bool:
-            path = value.expanduser()
-            return path.exists() and path.is_file()
-
     class CertificateKeyArgument(PrivateKeyArgument):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
-        alternative_to = 'CERTIFICATE_PRIVATE_KEY_PATH'
-
-    class CertificateKeyPathArgument(PrivateKeyPathArgument):
-        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PATH'
-        alternative_to = 'CERTIFICATE_PRIVATE_KEY'
 
     class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
@@ -111,13 +95,6 @@ class AutomaticProvisioningArgument(cli.Argument):
         flags=('--private-key',),
         type=Types.PrivateKeyArgument,
         description=f'App Store Connect API private key. {_API_DOCS_REFERENCE}',
-        argparse_kwargs={'required': False},
-    )
-    PRIVATE_KEY_PATH = cli.ArgumentProperties(
-        key='private_key_path',
-        flags=('--private-key-path',),
-        type=Types.PrivateKeyPathArgument,
-        description=f'Path to the App Store Connect API private key. {_API_DOCS_REFERENCE}',
         argparse_kwargs={'required': False},
     )
 
@@ -278,17 +255,6 @@ class CertificateArgument(cli.Argument):
         type=Types.CertificateKeyArgument,
         description=(
             f'Private key used to generate the certificate. '
-            f'Used together with {Colors.BRIGHT_BLUE("--save")} '
-            f'or {Colors.BRIGHT_BLUE("--create")} options.'
-        ),
-        argparse_kwargs={'required': False},
-    )
-    PRIVATE_KEY_PATH = cli.ArgumentProperties(
-        key='certificate_key_path',
-        flags=('--certificate-key-path',),
-        type=Types.CertificateKeyPathArgument,
-        description=(
-            f'Path to the private key used to generate the certificate. '
             f'Used together with {Colors.BRIGHT_BLUE("--save")} '
             f'or {Colors.BRIGHT_BLUE("--create")} options.'
         ),

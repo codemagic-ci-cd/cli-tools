@@ -39,7 +39,6 @@ T = TypeVar('T')
 class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
-    alternative_to: Optional[str] = None
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
@@ -72,8 +71,6 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     @classmethod
     def get_description(cls, properties: ArgumentProperties) -> str:
         description = f'{properties.description.rstrip(".")}.'
-        if cls.alternative_to is not None:
-            description += f'\nCan be used in place of {Colors.CYAN(cls.alternative_to)}.'
         if cls.environment_variable_key is not None:
             description += '\nIf not given, the value will be checked from ' \
                            f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
@@ -89,9 +86,6 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         if cls.environment_variable_key:
             key = Colors.CYAN(cls.environment_variable_key)
             message = f'{message}, or set environment variable {key}'
-        if cls.alternative_to:
-            alternative = Colors.CYAN(cls.alternative_to)
-            message = f'{message}. Alternatively you can provide value for {alternative}'
         return message
 
     def __str__(self):

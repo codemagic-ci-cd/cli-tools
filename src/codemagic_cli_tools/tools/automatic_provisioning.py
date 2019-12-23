@@ -45,22 +45,11 @@ class AutomaticProvisioningError(cli.CliAppException):
 
 def _get_certificate_key(
         certificate_key: Optional[Types.CertificateKeyArgument] = None,
-        certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None) -> Optional[PrivateKey]:
-    if certificate_key and certificate_key_path:
-        private_key_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY.key.upper())
-        private_key_path_arg = Colors.CYAN(CertificateArgument.PRIVATE_KEY_PATH.key.upper())
-        raise AutomaticProvisioningError(f'Only one of {private_key_arg} and {private_key_path_arg} allowed')
-
     password = certificate_key_password.value if certificate_key_password else None
-    private_key: Optional[PrivateKey] = None
-    if certificate_key:
-        pem = certificate_key.value
-        private_key = PrivateKey.from_pem(pem, password)
-    elif certificate_key_path:
-        pem = certificate_key_path.value.expanduser().read_text()
-        private_key = PrivateKey.from_pem(pem, password)
-    return private_key
+    if certificate_key is not None:
+        return PrivateKey.from_pem(certificate_key.value, password)
+    return None
 
 
 @cli.common_arguments(
@@ -68,7 +57,6 @@ def _get_certificate_key(
     AutomaticProvisioningArgument.ISSUER_ID,
     AutomaticProvisioningArgument.KEY_IDENTIFIER,
     AutomaticProvisioningArgument.PRIVATE_KEY,
-    AutomaticProvisioningArgument.PRIVATE_KEY_PATH,
     AutomaticProvisioningArgument.JSON_OUTPUT,
 )
 class AutomaticProvisioning(BaseProvisioning):
@@ -92,30 +80,18 @@ class AutomaticProvisioning(BaseProvisioning):
     def from_cli_args(cls, cli_args: argparse.Namespace):
         key_identifier_argument = AutomaticProvisioningArgument.KEY_IDENTIFIER.from_args(cli_args)
         issuer_id_argument = AutomaticProvisioningArgument.ISSUER_ID.from_args(cli_args)
+        private_key_argument = AutomaticProvisioningArgument.PRIVATE_KEY.from_args(cli_args)
         if issuer_id_argument is None:
             raise AutomaticProvisioningArgument.ISSUER_ID.raise_argument_error()
         if key_identifier_argument is None:
             raise AutomaticProvisioningArgument.KEY_IDENTIFIER.raise_argument_error()
-
-        private_key_argument = AutomaticProvisioningArgument.PRIVATE_KEY.from_args(cli_args)
-        private_key_path_argument = AutomaticProvisioningArgument.PRIVATE_KEY_PATH.from_args(cli_args)
-        if private_key_argument is None and private_key_path_argument is None:
+        if private_key_argument is None:
             raise AutomaticProvisioningArgument.PRIVATE_KEY.raise_argument_error()
-        if private_key_argument is not None and private_key_path_argument is not None:
-            arguments = (AutomaticProvisioningArgument.PRIVATE_KEY, AutomaticProvisioningArgument.PRIVATE_KEY_PATH)
-            given_arguments = ' and '.join(map(lambda k: Colors.CYAN(k.key.upper()), arguments))
-            raise AutomaticProvisioningArgument.PRIVATE_KEY.raise_argument_error(
-                f'Both {given_arguments} were given. Choose one.')
-
-        if private_key_argument:
-            private_key = private_key_argument.value
-        else:
-            private_key = private_key_path_argument.value.expanduser().read_text()
 
         return AutomaticProvisioning(
             issuer_id=issuer_id_argument.value,
             key_identifier=key_identifier_argument.value,
-            private_key=private_key,
+            private_key=private_key_argument.value,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,
             **cls._parent_class_kwargs(cli_args)
@@ -246,14 +222,12 @@ class AutomaticProvisioning(BaseProvisioning):
     @cli.action('create-certificate',
                 CertificateArgument.CERTIFICATE_TYPE,
                 CertificateArgument.PRIVATE_KEY,
-                CertificateArgument.PRIVATE_KEY_PATH,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
     def create_certificate(self,
                            certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
                            certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                           certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
                            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                            p12_container_password: str = 'password',
                            save: bool = False,
@@ -262,7 +236,7 @@ class AutomaticProvisioning(BaseProvisioning):
         Create code signing certificates of given type
         """
 
-        private_key = _get_certificate_key(certificate_key, certificate_key_path, certificate_key_password)
+        private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
             raise AutomaticProvisioningError('Cannot create resource without private key')
 
@@ -279,14 +253,12 @@ class AutomaticProvisioning(BaseProvisioning):
     @cli.action('get-certificate',
                 CertificateArgument.CERTIFICATE_RESOURCE_ID,
                 CertificateArgument.PRIVATE_KEY,
-                CertificateArgument.PRIVATE_KEY_PATH,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
     def get_certificate(self,
                         certificate_resource_id: ResourceId,
                         certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                        certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
                         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                         p12_container_password: str = 'password',
                         save: bool = False,
@@ -295,7 +267,7 @@ class AutomaticProvisioning(BaseProvisioning):
         Get specified Signing Certificate from Apple Developer portal.
         """
 
-        private_key = _get_certificate_key(certificate_key, certificate_key_path, certificate_key_password)
+        private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
             raise AutomaticProvisioningError('Cannot save resource without private key')
         else:
@@ -323,7 +295,6 @@ class AutomaticProvisioning(BaseProvisioning):
                 CertificateArgument.CERTIFICATE_TYPE_OPTIONAL,
                 CertificateArgument.DISPLAY_NAME,
                 CertificateArgument.PRIVATE_KEY,
-                CertificateArgument.PRIVATE_KEY_PATH,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
@@ -331,7 +302,6 @@ class AutomaticProvisioning(BaseProvisioning):
                           certificate_type: Optional[CertificateType] = None,
                           display_name: Optional[str] = None,
                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                          certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                           p12_container_password: str = 'password',
                           save: bool = False,
@@ -340,7 +310,7 @@ class AutomaticProvisioning(BaseProvisioning):
         List Signing Certificates from Apple Developer Portal matching given constraints.
         """
 
-        private_key = _get_certificate_key(certificate_key, certificate_key_path, certificate_key_password)
+        private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
             raise AutomaticProvisioningError('Cannot create or save resource without private key')
 
@@ -493,7 +463,6 @@ class AutomaticProvisioning(BaseProvisioning):
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER,
                 BundleIdArgument.PLATFORM,
                 CertificateArgument.PRIVATE_KEY,
-                CertificateArgument.PRIVATE_KEY_PATH,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 ProfileArgument.PROFILE_TYPE,
@@ -501,7 +470,6 @@ class AutomaticProvisioning(BaseProvisioning):
     def fetch_signing_files(self,
                             bundle_id_identifier: str,
                             certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                            certificate_key_path: Optional[Types.CertificateKeyPathArgument] = None,
                             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                             p12_container_password: str = 'password',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
@@ -512,13 +480,13 @@ class AutomaticProvisioning(BaseProvisioning):
         for Bundle ID with given identifier.
         """
 
-        private_key = _get_certificate_key(certificate_key, certificate_key_path, certificate_key_password)
+        private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
             raise AutomaticProvisioningError(f'Cannot save {SigningCertificate.s} without private key')
 
         bundle_ids = self._get_or_create_bundle_ids(bundle_id_identifier, platform, create_resource)
         certificates = self._get_or_create_certificates(
-            profile_type, certificate_key, certificate_key_path, certificate_key_password, create_resource)
+            profile_type, certificate_key, certificate_key_password, create_resource)
         profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource)
 
         self._save_certificates(certificates, private_key, p12_container_password)
@@ -537,14 +505,12 @@ class AutomaticProvisioning(BaseProvisioning):
     def _get_or_create_certificates(self,
                                     profile_type: ProfileType,
                                     certificate_key: Optional[Types.CertificateKeyArgument],
-                                    certificate_key_path: Optional[Types.CertificateKeyPathArgument],
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
         certificate_type = CertificateType.from_profile_type(profile_type)
         certificates = self.list_certificates(
             certificate_type=certificate_type,
             certificate_key=certificate_key,
-            certificate_key_path=certificate_key_path,
             certificate_key_password=certificate_key_password,
             should_print=False)
 
@@ -554,7 +520,6 @@ class AutomaticProvisioning(BaseProvisioning):
             certificates.append(self.create_certificate(
                 certificate_type,
                 certificate_key=certificate_key,
-                certificate_key_path=certificate_key_path,
                 certificate_key_password=certificate_key_password,
                 should_print=False))
         return certificates
