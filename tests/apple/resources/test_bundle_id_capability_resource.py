@@ -1,11 +1,5 @@
 from __future__ import annotations
 
-import json
-import pathlib
-from typing import Dict
-
-import pytest
-
 from codemagic_cli_tools.apple.resources import BundleIdCapability
 
 

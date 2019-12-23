@@ -4,6 +4,7 @@ import enum
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -37,7 +38,7 @@ class DictSerializable:
         return obj
 
     @classmethod
-    def _should_omit(cls, key, value):
+    def _should_omit(cls, key, value) -> bool:
         if key.startswith('_'):
             return True
         if key in cls._OMIT_KEYS:
@@ -46,7 +47,7 @@ class DictSerializable:
             return True
         return False
 
-    def dict(self):
+    def dict(self) -> Dict:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
@@ -219,26 +220,26 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
             return None
         return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
 
-    def _format_attribute_name(self, name):
+    def _format_attribute_name(self, name: str) -> str:
         type_prefix = self.type.value.rstrip('s')
         name = re.sub(f'{type_prefix}s?', '', name)
         name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
         return name.lower().capitalize()
 
-    def _hide_attribute_value(self, attribute_name):
+    def _hide_attribute_value(self, attribute_name: str) -> bool:
         if not hasattr(self.attributes, '__dataclass_fields__'):
             return False
         field = self.attributes.__dataclass_fields__[attribute_name]
         return field.metadata.get('hide') is True
 
-    def _format_attribute_value(self, attribute_name, value):
+    def _format_attribute_value(self, attribute_name: str, value: Any) -> Any:
         if self._hide_attribute_value(attribute_name):
             return '"..."'
         if isinstance(value, enum.Enum):
             return value.value
         return value
 
-    def __str__(self):
+    def __str__(self) -> str:
         s = super().__str__()
         for attribute_name, value in self.attributes.__dict__.items():
             if value is None:

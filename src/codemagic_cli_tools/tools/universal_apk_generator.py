@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import argparse
 import pathlib
@@ -89,7 +90,7 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         self.signing_info = signing_info
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> UniversalApkGenerator:
         keystore_arguments = (
             UniversalApkGeneratorArgument.KEYSTORE_PATH,
             UniversalApkGeneratorArgument.KEYSTORE_PASSWORD,

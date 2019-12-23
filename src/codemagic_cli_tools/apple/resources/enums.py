@@ -117,7 +117,7 @@ class ProfileType(_ResourceEnum):
     TVOS_APP_INHOUSE = 'TVOS_APP_INHOUSE'
     TVOS_APP_STORE = 'TVOS_APP_STORE'
 
-    def requires_devices(self):
+    def requires_devices(self) -> bool:
         return self in (ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE)
 
 

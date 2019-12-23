@@ -62,7 +62,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
-        def as_param(self, reverse=False):
+        def as_param(self, reverse=False) -> str:
             return f'{"-" if reverse else ""}{self.value}'
 
     def __init__(self, client: AppStoreConnectApiClient):

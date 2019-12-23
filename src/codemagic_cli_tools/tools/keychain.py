@@ -96,7 +96,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         return self._path
 
     @cli.action('create', KeychainArgument.PASSWORD)
-    def create(self, password: Password = Password('')):
+    def create(self, password: Password = Password('')) -> pathlib.Path:
         """
         Create a macOS keychain, add it to the search list.
         """
@@ -113,6 +113,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
             raise KeychainError(f'Unable to add keychain {self.path} to keychain search list', process)
 
         os.chmod(str(self.path), 0o600)
+        return self.path
 
     @cli.action('delete')
     def delete(self):

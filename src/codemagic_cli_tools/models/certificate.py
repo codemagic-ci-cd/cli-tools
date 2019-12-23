@@ -79,7 +79,7 @@ class Certificate(JsonSerializable, StringConverterMixin):
         extensions_count = self.x509.get_extension_count()
         return [self._str(self.x509.get_extension(i).get_short_name()) for i in range(extensions_count)]
 
-    def is_code_signing_certificate(self):
+    def is_code_signing_certificate(self) -> bool:
         code_signing_certificate_pattern = re.compile(
             r'^((Apple (Development|Distribution))|(iPhone (Developer|Distribution))):.*$')
         return code_signing_certificate_pattern.match(self.common_name) is not None

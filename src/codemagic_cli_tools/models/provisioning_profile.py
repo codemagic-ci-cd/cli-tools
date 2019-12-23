@@ -100,7 +100,7 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
         return self.application_identifier.endswith("*")
 
     @property
-    def bundle_id(self):
+    def bundle_id(self) -> str:
         return '.'.join(self.application_identifier.split('.')[1:])
 
     @property

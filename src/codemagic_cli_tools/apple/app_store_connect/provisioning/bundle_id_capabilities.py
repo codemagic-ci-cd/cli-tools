@@ -1,4 +1,5 @@
 from typing import Optional
+from typing import Type
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -18,7 +19,7 @@ class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
     """
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> Type[BundleIdCapability]:
         return BundleIdCapability
 
     def enable(self,

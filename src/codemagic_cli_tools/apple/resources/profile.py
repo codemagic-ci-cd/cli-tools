@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-import pathlib
 from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
-from tempfile import NamedTemporaryFile
 from typing import Optional
 
 from .bundle_id import BundleIdPlatform

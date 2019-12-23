@@ -27,7 +27,7 @@ class PbxProject(StringConverterMixin):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path, *, cli_app: Optional['CliApp'] = None):
+    def from_path(cls, path: pathlib.Path, *, cli_app: Optional['CliApp'] = None) -> PbxProject:
         """
         :param path: Path to project.pbxproj
         :param cli_app: CliApp to invoke underlying shell commands.

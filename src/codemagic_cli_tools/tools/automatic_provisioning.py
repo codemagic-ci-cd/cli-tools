@@ -77,7 +77,7 @@ class AutomaticProvisioning(BaseProvisioning):
         self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> AutomaticProvisioning:
         key_identifier_argument = AutomaticProvisioningArgument.KEY_IDENTIFIER.from_args(cli_args)
         issuer_id_argument = AutomaticProvisioningArgument.ISSUER_ID.from_args(cli_args)
         private_key_argument = AutomaticProvisioningArgument.PRIVATE_KEY.from_args(cli_args)
@@ -546,11 +546,11 @@ class AutomaticProvisioning(BaseProvisioning):
                                 certificates: Sequence[SigningCertificate],
                                 profile_type: ProfileType,
                                 create_resource: bool):
-        def has_certificate(profile):
+        def has_certificate(profile) -> bool:
             profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
             return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
 
-        def missing_profile(bundle_id):
+        def missing_profile(bundle_id) -> bool:
             bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
             return not (profile_ids & {p.id for p in bundle_ids_profiles})
 

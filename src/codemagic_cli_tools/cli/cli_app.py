@@ -61,7 +61,7 @@ class CliApp(metaclass=abc.ABCMeta):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace):
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> 'CliApp':
         return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls.CLASS_ARGUMENTS})
 
     @classmethod
@@ -151,12 +151,8 @@ class CliApp(metaclass=abc.ABCMeta):
         return logger
 
     @classmethod
-    def fmt(cls, s):
-        return Colors.apply(s, Colors.UNDERLINE)
-
-    @classmethod
     def _setup_default_cli_options(cls, cli_options_parser):
-        options_group = cli_options_parser.add_argument_group(cls.fmt('Options'))
+        options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
         options_group.add_argument('-s', '--silent', dest='enable_logging', action='store_false',
                                    help='Disable log output for commands')
         options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
@@ -205,9 +201,9 @@ class CliApp(metaclass=abc.ABCMeta):
 
             cls._setup_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(
-                cls.fmt(f'Required arguments for command {Colors.BOLD(sub_action.action_name)}'))
+                Colors.UNDERLINE(f'Required arguments for command {Colors.BOLD(sub_action.action_name)}'))
             optional_arguments = action_parser.add_argument_group(
-                cls.fmt(f'Optional arguments for command {Colors.BOLD(sub_action.action_name)}'))
+                Colors.UNDERLINE(f'Optional arguments for command {Colors.BOLD(sub_action.action_name)}'))
             for argument in sub_action.arguments:
                 argument_group = required_arguments if argument.is_required() else optional_arguments
                 argument.register(argument_group)

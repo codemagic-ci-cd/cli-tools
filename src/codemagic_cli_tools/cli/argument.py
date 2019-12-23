@@ -46,7 +46,7 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         self._from_environment = from_environment
 
     @classmethod
-    def from_environment_variable_default(cls):
+    def from_environment_variable_default(cls) -> Optional['TypedCliArgument[T]']:
         if cls.environment_variable_key is None:
             return None
         elif cls.environment_variable_key not in os.environ:
@@ -179,7 +179,7 @@ class Argument(ArgumentProperties, enum.Enum):
             dest=self.value.key,
             **kwargs)
 
-    def is_required(self):
+    def is_required(self) -> bool:
         return (self.value.argparse_kwargs or {}).get('required', True)
 
     def get_default(self):

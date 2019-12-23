@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import Type
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -19,7 +20,7 @@ class Devices(ResourceManager[Device]):
     """
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> Type[Device]:
         return Device
 
     @dataclass

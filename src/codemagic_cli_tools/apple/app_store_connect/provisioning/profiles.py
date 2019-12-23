@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Type
 from typing import Union
 
 from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -23,7 +24,7 @@ class Profiles(ResourceManager[Profile]):
     """
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> Type[Profile]:
         return Profile
 
     @dataclass

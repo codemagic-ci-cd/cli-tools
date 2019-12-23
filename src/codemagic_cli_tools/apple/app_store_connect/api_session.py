@@ -38,11 +38,12 @@ class AppStoreConnectApiSession(requests.Session):
             body = {k: (v if 'password' not in k.lower() else '*******') for k, v in body.items()}
         self._logger.info(f'>>> {method} {url} {body}')
 
-    def request(self, *args, **kwargs):
+    def request(self, *args, **kwargs) -> requests.Response:
         self._log_request(*args, **kwargs)
         headers = kwargs.pop('headers', {})
         headers.update(self._auth_headers_factory())
-        response = super().request(*args, **kwargs, headers=headers)
+        kwargs['headers'] = headers
+        response = super().request(*args, **kwargs)
         self._log_response(response)
         if not response.ok:
             raise AppStoreConnectApiError(response)
