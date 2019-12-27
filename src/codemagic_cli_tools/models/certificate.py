@@ -79,6 +79,12 @@ class Certificate(JsonSerializable, StringConverterMixin):
         extensions_count = self.x509.get_extension_count()
         return [self._str(self.x509.get_extension(i).get_short_name()) for i in range(extensions_count)]
 
+    @property
+    def is_development_certificate(self) -> bool:
+        development_certificate_pattern = re.compile(
+            r'^((Apple Development)|(iPhone Developer)):.*$')
+        return development_certificate_pattern.match(self.common_name) is not None
+
     def is_code_signing_certificate(self) -> bool:
         code_signing_certificate_pattern = re.compile(
             r'^((Apple (Development|Distribution))|(iPhone (Developer|Distribution))):.*$')
@@ -86,13 +92,15 @@ class Certificate(JsonSerializable, StringConverterMixin):
 
     def dict(self) -> Dict[str, Union[str, int, Dict[str, str], List[str]]]:
         return {
-            'serial': self.serial,
-            'subject': self.subject,
+            'common_name': self.common_name,
+            'extensions': self.extensions,
+            'has_expired': self.has_expired,
             'issuer': self.issuer,
+            'is_development_certificate': self.is_development_certificate,
             'not_after': self.not_after,
             'not_before': self.not_before,
-            'has_expired': self.has_expired,
-            'extensions': self.extensions,
+            'serial': self.serial,
+            'subject': self.subject,
         }
 
     def as_pem(self) -> str:

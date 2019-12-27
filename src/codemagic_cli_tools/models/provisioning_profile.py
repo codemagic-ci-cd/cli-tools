@@ -116,12 +116,17 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
 
     def dict(self) -> Dict:
         return {
-            'name': self.name,
-            'team_id': self.team_identifier,
-            'team_name': self.team_name,
+            'application_identifier': self.application_identifier,
             'bundle_id': self.bundle_id,
-            'specifier': self.uuid,
-            'certificates': [c.serial for c in self.certificates],
+            'certificates': [c.dict() for c in self.certificates],
+            'has_beta_entitlements': self.has_beta_entitlements,
+            'is_wildcard': self.is_wildcard,
+            'name': self.name,
+            'provisioned_devices': self.provisioned_devices,
+            'provisions_all_devices': self.provisions_all_devices,
+            'team_identifier': self.team_identifier,
+            'team_name': self.team_name,
+            'uuid': self.uuid,
             'xcode_managed': self.xcode_managed,
         }
 

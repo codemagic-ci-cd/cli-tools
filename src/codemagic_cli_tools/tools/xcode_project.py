@@ -1,6 +1,15 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
+import enum
+import json
 import pathlib
+import plistlib
 from collections import defaultdict
 from typing import Counter
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -12,6 +21,17 @@ from codemagic_cli_tools.models import BundleIdDetector
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import CodeSigningSettingsManager
 from codemagic_cli_tools.models import ProvisioningProfile
+
+
+def _json_dict(json_dict: str) -> Dict:
+    try:
+        d = json.loads(json_dict)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f'"{json_dict}" is not a valid JSON')
+
+    if not isinstance(d, dict):
+        raise argparse.ArgumentTypeError(f'"{json_dict}" is not a dictionary')
+    return d
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -60,6 +80,26 @@ class XcodeProjectArgument(cli.Argument):
             'metavar': 'profile-path',
             'default': (ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',),
         }
+    )
+    EXPORT_OPTIONS_PATH = cli.ArgumentProperties(
+        key='export_options_path',
+        flags=('--export-options-path',),
+        type=pathlib.Path,
+        description='Path where the generated export options plist will be saved',
+        argparse_kwargs={
+            'required': False,
+            'default': pathlib.Path('~/export_options.plist').expanduser()
+        }
+    )
+    CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
+        key='custom_export_options',
+        flags=('--custom-export-options',),
+        type=_json_dict,
+        description=(
+            'Custom options for generated export options as JSON string. '
+            'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
+        ),
+        argparse_kwargs={'required': False}
     )
 
 
@@ -129,10 +169,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
     @cli.action('use-profiles',
                 XcodeProjectArgument.XCODE_PROJECT_PATTERN,
-                XcodeProjectArgument.PROFILE_PATHS)
+                XcodeProjectArgument.PROFILE_PATHS,
+                XcodeProjectArgument.EXPORT_OPTIONS_PATH,
+                XcodeProjectArgument.CUSTOM_EXPORT_OPTIONS)
     def use_profiles(self,
                      xcode_project_patterns: Sequence[pathlib.Path],
-                     profile_path_patterns: Sequence[pathlib.Path]):
+                     profile_path_patterns: Sequence[pathlib.Path],
+                     export_options_path: pathlib.Path,
+                     custom_export_options: Optional[Dict] = None):
         """
         Set up code signing settings on specified Xcode projects
         to use given provisioning profiles
@@ -158,6 +202,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise XcodeProjectException(*error.args)
 
         code_signing_settings_manager.notify_profile_usage(self.logger)
+        export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
+        code_signing_settings_manager.notify_export_options(export_options, logger=self.logger)
+        with export_options_path.open('wb') as fd:
+            plistlib.dump(export_options, fd)
+        self.logger.info(Colors.GREEN(f'Saved export options to {export_options_path}'))
+        return export_options
 
     @classmethod
     def _get_certificates_from_keychain(cls) -> List[Certificate]:
