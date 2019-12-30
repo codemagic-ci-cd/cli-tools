@@ -223,7 +223,9 @@ class Argument(ArgumentProperties, enum.Enum):
             return description
 
     def get_missing_value_error_message(self) -> str:
-        if issubclass(self.value.type, TypedCliArgument):
+        if isinstance(self.value.type, (types.FunctionType, types.MethodType)):
+            pass  # value.type is not a class and issubclass check would fail
+        elif issubclass(self.value.type, TypedCliArgument):
             message = self.value.type.get_missing_value_error_message(self)
             if message:
                 return message

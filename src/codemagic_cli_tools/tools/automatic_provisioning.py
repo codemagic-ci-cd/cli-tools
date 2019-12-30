@@ -25,7 +25,6 @@ from codemagic_cli_tools.apple.resources import ProfileState
 from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import SigningCertificate
-from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
 from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument

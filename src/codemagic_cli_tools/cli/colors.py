@@ -69,9 +69,10 @@ class Colors(enum.Enum):
 
     @classmethod
     def remove(cls, string: str) -> str:
-        start = "|".join(re.escape(color.value) for color in Colors)
+        start = '|'.join(re.escape(color.value) for color in Colors)
+        no_match = ''.join(re.escape(color.value) for color in Colors)
         end = re.escape(Colors.RESET.value)
-        patt = re.compile(f'({start})(.+)({end})')
+        patt = re.compile(f'({start})([^{no_match}]+)({end})')
         if not patt.search(string):
             return string
         return cls.remove(patt.sub(r'\2', string))

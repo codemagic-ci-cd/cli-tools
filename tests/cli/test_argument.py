@@ -9,6 +9,7 @@ from typing import Union
 import pytest
 
 from codemagic_cli_tools import cli
+from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.cli.argument import EnvironmentArgumentValue
 from codemagic_cli_tools.cli.argument import TypedCliArgument
 
@@ -19,13 +20,31 @@ class CustomStr(str):
     pass
 
 
+def integer_converter(s: str) -> int:
+    try:
+        return int(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f'{s} is not a valid integer')
+
+
 class _TypedArgument(cli.TypedCliArgument[pathlib.Path]):
     environment_variable_key = '_TYPED_ARGUMENT_'
     argument_type = CustomStr
 
 
 class _TestArgument(cli.Argument):
-    TYPED_ARGUMENT = cli.ArgumentProperties(key='typed_argument', type=_TypedArgument, description='')
+    TYPED_ARGUMENT = cli.ArgumentProperties(
+        key='typed_argument',
+        type=_TypedArgument,
+        description='typed argument')
+    PATH_ARGUMENT = cli.ArgumentProperties(
+        key='path_argument',
+        type=pathlib.Path,
+        description='path')
+    INT_ARGUMENT = cli.ArgumentProperties(
+        key='int_argument',
+        type=integer_converter,
+        description='integer')
 
 
 @pytest.mark.parametrize('file_contents', [
@@ -118,3 +137,28 @@ def test_typed_cli_argument_initialization_with_value_from_env():
     assert parsed_value.value == value.value
     assert isinstance(parsed_value.value, CustomStr)
     assert str(parsed_value) == f'@env:{value.environment_variable_key}'
+
+
+@pytest.mark.parametrize('argument', _TestArgument)
+def test_raise_argument_error(argument: cli.Argument, cli_argument_group):
+    argument.register(cli_argument_group)
+    with pytest.raises(argparse.ArgumentError) as error_info:
+        argument.raise_argument_error()
+
+    error_msg = Colors.remove(str(error_info.value))
+    key = argument.key
+    assert error_msg.startswith(f'argument {key}: ')
+    assert any([
+        f'Value {key.upper()} not provided' in error_msg,
+        f'Missing value {key.upper()}' in error_msg
+    ])
+
+
+@pytest.mark.parametrize('argument', _TestArgument)
+def test_raise_argument_error_custom_message(argument: cli.Argument, cli_argument_group):
+    argument.register(cli_argument_group)
+    with pytest.raises(argparse.ArgumentError) as error_info:
+        argument.raise_argument_error('Custom error')
+
+    error_msg = Colors.remove(str(error_info.value))
+    assert error_msg == f'argument {argument.key}: Custom error'
