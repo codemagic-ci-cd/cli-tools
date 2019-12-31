@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import enum
 import json
 import logging
 import pathlib
-import re
 import shlex
 import shutil
 import subprocess
@@ -14,58 +12,17 @@ from typing import Counter
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Sequence
 from typing import TYPE_CHECKING
-from typing import Union
 
 from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.mixins import StringConverterMixin
 from .certificate import Certificate
+from .export_options import ExportOptions
+from .matched_profile import MatchedProfile
 from .provisioning_profile import ProvisioningProfile
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
-
-
-ExportOptions = Dict[str, Union[str, Dict[str, str]]]
-
-
-class SigningStyle(enum.Enum):
-    AUTOMATIC = 'automatic'
-    MANUAL = 'manual'
-
-    @classmethod
-    def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> SigningStyle:
-        xcode_managed_profiles = (pp for pp in profiles if pp.xcode_managed)
-        if any(xcode_managed_profiles):
-            return SigningStyle.AUTOMATIC
-        else:
-            return SigningStyle.MANUAL
-
-
-class ArchiveMethod(enum.Enum):
-    AD_HOC = "ad-hoc"
-    DEVELOPMENT = "development"
-    APP_STORE = "app-store"
-    ENTERPRISE = "enterprise"
-
-    @classmethod
-    def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> ArchiveMethod:
-        def is_development_profile(profile):
-            return any(c.is_development_certificate for c in profile.certificates)
-
-        enterprise_profiles = (p for p in profiles if p.provisions_all_devices)
-        app_store_connect_compatible = (p for p in profiles if p.has_beta_entitlements)
-        with_development_certificate = (p for p in profiles if is_development_profile(p))
-
-        if any(enterprise_profiles):
-            return ArchiveMethod.ENTERPRISE
-        if any(app_store_connect_compatible):
-            return ArchiveMethod.APP_STORE
-        elif any(with_development_certificate):
-            return ArchiveMethod.DEVELOPMENT
-        else:
-            return ArchiveMethod.AD_HOC
 
 
 class CodeSigningSettingsManager(StringConverterMixin):
@@ -73,8 +30,7 @@ class CodeSigningSettingsManager(StringConverterMixin):
     def __init__(self, profiles: List[ProvisioningProfile], keychain_certificates: List[Certificate]):
         self.profiles: Dict[str, ProvisioningProfile] = {profile.uuid: profile for profile in profiles}
         self._certificates = keychain_certificates
-        self._modified_build_configs_info: List[Dict] = []
-        self._used_profiles: Dict[str, ProvisioningProfile] = {}
+        self._matched_profiles: List[MatchedProfile] = []
 
     @lru_cache()
     def _get_json_serialized_profiles(self) -> str:
@@ -115,41 +71,19 @@ class CodeSigningSettingsManager(StringConverterMixin):
             f'for target "{target}" [{config}] from project "{project}"'
         )
 
-    def _sort_modified_build_configs_info(self):
-        def key(info):
-            return info['project_name'], info['target_name'], info['build_configuration']
-
-        self._modified_build_configs_info.sort(key=key)
-
     def notify_profile_usage(self, logger: Optional[logging.Logger]):
         if logger is None:
             logger = logging.getLogger(self.__class__.__name__)
 
         logger.info(Colors.GREEN('Completed configuring code signing settings'))
 
-        if not self._modified_build_configs_info:
+        if not self._matched_profiles:
             message = 'Did not find matching provisioning profiles for code signing!'
             logger.warning(Colors.YELLOW(message))
             return
 
-        self._sort_modified_build_configs_info()
-        for build_config_info in self._modified_build_configs_info:
-            logger.info(self._format_build_config_meta(build_config_info))
-
-    def notify_export_options(self, options: ExportOptions, logger: Optional[logging.Logger]):
-        if logger is None:
-            logger = logging.getLogger(self.__class__.__name__)
-
-        logger.info(Colors.GREEN('Generated options for exporting IPA'))
-        for key in sorted(options):
-            value = options[key]
-            option = re.sub(f'([A-Z])', r' \1', key.replace('ID', 'Id')).lstrip(' ').title()
-            if isinstance(value, dict):
-                logger.info(Colors.BLUE(f' - {option}:'))
-                for k, v in value.items():
-                    logger.info(Colors.BLUE(f'     - {k}: {v}'))
-            else:
-                logger.info(Colors.BLUE(f' - {option}: {value}'))
+        for info in sorted(self._matched_profiles, key=lambda i: i.sort_key()):
+            logger.info(Colors.BLUE(info.format()))
 
     def _apply(self, xcode_project, result_file_name, cli_app):
         cmd = [
@@ -180,43 +114,13 @@ class CodeSigningSettingsManager(StringConverterMixin):
             except ValueError:
                 used_profiles_info = {}
 
-        self._modified_build_configs_info.extend(
-            {'profile': self.profiles[profile_uuid], **xcode_build_config}
+        self._matched_profiles.extend(
+            MatchedProfile(profile=self.profiles[profile_uuid], **xcode_build_config)
             for profile_uuid, xcode_build_configs in used_profiles_info.items()
             for xcode_build_config in xcode_build_configs
         )
-        self._used_profiles.update({
-            profile_uuid: self.profiles[profile_uuid] for profile_uuid, _ in used_profiles_info.items()
-        })
 
-    def generate_export_options(self, custom_options) -> ExportOptions:
-        used_profiles = [entry['profile'] for entry in self._modified_build_configs_info]
-        export_options = {
-            'method': ArchiveMethod.from_profiles(used_profiles).value,
-            'signingStyle': SigningStyle.from_profiles(used_profiles).value,
-            'teamID': self._get_export_team_id(),
-            'provisioningProfiles': self._get_export_profiles(),
-            'signingCertificate': self._get_export_certificate(),
-        }
-        if custom_options:
-            export_options.update(custom_options)
+    def generate_export_options(self, custom_options: Optional[Dict]) -> ExportOptions:
+        export_options = ExportOptions.from_matched_profiles(self._matched_profiles)
+        export_options.update(**(custom_options or {}))
         return export_options
-
-    def _get_export_team_id(self) -> str:
-        identifiers = Counter[str](p.team_identifier for p in self._used_profiles.values())
-        if not identifiers:
-            return ''
-        return identifiers.most_common(1)[0][0]
-
-    def _get_export_profiles(self) -> Dict[str, str]:
-        return {
-            entry['bundle_id']: entry['profile'].name
-            for entry in self._modified_build_configs_info
-        }
-
-    def _get_export_certificate(self) -> str:
-        certificates = (c for p in self._used_profiles.values() for c in p.certificates)
-        common_names = Counter[str](c.common_name.split(':')[0] for c in certificates)
-        if not common_names:
-            return ''
-        return common_names.most_common(1)[0][0]

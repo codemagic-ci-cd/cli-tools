@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import argparse
-import enum
 import json
 import pathlib
-import plistlib
 from collections import defaultdict
 from typing import Counter
 from typing import Dict
@@ -20,7 +18,9 @@ from codemagic_cli_tools.mixins import PathFinderMixin
 from codemagic_cli_tools.models import BundleIdDetector
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import CodeSigningSettingsManager
+from codemagic_cli_tools.models import ExportOptions
 from codemagic_cli_tools.models import ProvisioningProfile
+from codemagic_cli_tools.models import Xcodebuild
 
 
 def _json_dict(json_dict: str) -> Dict:
@@ -32,6 +32,13 @@ def _json_dict(json_dict: str) -> Dict:
     if not isinstance(d, dict):
         raise argparse.ArgumentTypeError(f'"{json_dict}" is not a dictionary')
     return d
+
+
+def _existing_path(path_str: str) -> pathlib.Path:
+    path = pathlib.Path(path_str)
+    if path.exists():
+        return path
+    raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -54,16 +61,36 @@ class XcodeProjectArgument(cli.Argument):
             'metavar': 'project-path'
         },
     )
+    XCODE_PROJECT_PATH = cli.ArgumentProperties(
+        key='xcode_project_path',
+        flags=('--project',),
+        type=_existing_path,
+        description='Path to Xcode project (*.xcodeproj)',
+        argparse_kwargs={'required': False}
+    )
+    XCODE_WORKSPACE_PATH = cli.ArgumentProperties(
+        key='xcode_workspace_path',
+        flags=('--workspace',),
+        type=_existing_path,
+        description='Path to Xcode workspace (*.xcworkspace)',
+        argparse_kwargs={'required': False}
+    )
+    SCHEME_NAME = cli.ArgumentProperties(
+        key='scheme_name',
+        flags=('--scheme',),
+        description='Name of the Xcode Scheme',
+        argparse_kwargs={'required': False},
+    )
     TARGET_NAME = cli.ArgumentProperties(
         key='target_name',
         flags=('--target',),
-        description='Name of the build target',
+        description='Name of the Xcode Target',
         argparse_kwargs={'required': False},
     )
     CONFIGURATION_NAME = cli.ArgumentProperties(
         key='configuration_name',
         flags=('--config',),
-        description='Name of the build configuration',
+        description='Name of the Xcode build configuration',
         argparse_kwargs={'required': False},
     )
     PROFILE_PATHS = cli.ArgumentProperties(
@@ -82,13 +109,33 @@ class XcodeProjectArgument(cli.Argument):
         }
     )
     EXPORT_OPTIONS_PATH = cli.ArgumentProperties(
-        key='export_options_path',
-        flags=('--export-options-path',),
+        key='export_options_plist',
+        flags=('--export-options-plist',),
         type=pathlib.Path,
-        description='Path where the generated export options plist will be saved',
+        description='Path to the generated export options plist',
         argparse_kwargs={
             'required': False,
             'default': pathlib.Path('~/export_options.plist').expanduser()
+        }
+    )
+    IPA_PATH = cli.ArgumentProperties(
+        key='ipa_path',
+        flags=('--ipa',),
+        type=pathlib.Path,
+        description='Path to the built ipa archive',
+        argparse_kwargs={
+            'required': False,
+            'default': pathlib.Path('~/build.ipa').expanduser()
+        }
+    )
+    ARCHIVE_PATH = cli.ArgumentProperties(
+        key='archive_path',
+        flags=('--archive',),
+        type=pathlib.Path,
+        description='Path to the built xcarchive',
+        argparse_kwargs={
+            'required': False,
+            'default': pathlib.Path('~/build.xcarchive').expanduser()
         }
     )
     CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
@@ -175,7 +222,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     def use_profiles(self,
                      xcode_project_patterns: Sequence[pathlib.Path],
                      profile_path_patterns: Sequence[pathlib.Path],
-                     export_options_path: pathlib.Path,
+                     export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
                      custom_export_options: Optional[Dict] = None):
         """
         Set up code signing settings on specified Xcode projects
@@ -203,10 +250,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         code_signing_settings_manager.notify_profile_usage(self.logger)
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
-        code_signing_settings_manager.notify_export_options(export_options, logger=self.logger)
-        with export_options_path.open('wb') as fd:
-            plistlib.dump(export_options, fd)
-        self.logger.info(Colors.GREEN(f'Saved export options to {export_options_path}'))
+        export_options.notify(logger=self.logger)
+        export_options.save(export_options_plist)
+
+        self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))
         return export_options
 
     @classmethod
@@ -214,6 +261,44 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         from .keychain import Keychain
         return Keychain() \
             .list_code_signing_certificates(should_print=False)
+
+    @cli.action('build-ipa',
+                XcodeProjectArgument.XCODE_PROJECT_PATH,
+                XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+                XcodeProjectArgument.TARGET_NAME,
+                XcodeProjectArgument.CONFIGURATION_NAME,
+                XcodeProjectArgument.SCHEME_NAME,
+                XcodeProjectArgument.ARCHIVE_PATH,
+                XcodeProjectArgument.IPA_PATH,
+                XcodeProjectArgument.EXPORT_OPTIONS_PATH)
+    def build_ipa(self,
+                  xcode_project_path: Optional[pathlib.Path] = None,
+                  xcode_workspace_path: Optional[pathlib.Path] = None,
+                  target_name: Optional[str] = None,
+                  configuration_name: Optional[str] = None,
+                  scheme_name: Optional[str] = None,
+                  archive_path: pathlib.Path = XcodeProjectArgument.ARCHIVE_PATH.get_default(),
+                  ipa_path: pathlib.Path = XcodeProjectArgument.IPA_PATH.get_default(),
+                  export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default()):
+        """
+        Build ipa by archiving the Xcode project and then exporting it
+        """
+
+        if xcode_project_path is None and xcode_workspace_path is None:
+            error = 'Workspace or project argument needs to be specified'
+            XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
+
+        xcodebuild = Xcodebuild(
+            xcode_workspace=xcode_workspace_path,
+            xcode_project=xcode_project_path,
+            scheme_name=scheme_name,
+            target_name=target_name,
+            configuration_name=configuration_name
+        )
+
+        export_options = ExportOptions.from_path(export_options_plist)
+        xcodebuild.archive(archive_path, export_options, self)
+        xcodebuild.export_archive(archive_path, ipa_path, export_options_plist)
 
 
 if __name__ == '__main__':

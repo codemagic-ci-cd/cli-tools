@@ -105,8 +105,7 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
 
     @property
     def xcode_managed(self) -> bool:
-        profile_name = self.name or ''
-        fallback = profile_name.startswith('iOS Team Provisioning Profile:')
+        fallback = self.is_xcode_managed(self.name or '')
         return self._plist.get('IsXcodeManaged', fallback)
 
     @property
@@ -133,3 +132,7 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
     def get_usable_certificates(self, certificates: Sequence[Certificate]) -> Generator[Certificate, None, None]:
         available_certificates_serials = {c.serial for c in certificates}
         return (c for c in self.certificates if c.serial in available_certificates_serials)
+
+    @classmethod
+    def is_xcode_managed(cls, profile_name: str) -> bool:
+        return profile_name.startswith('iOS Team Provisioning Profile:')
