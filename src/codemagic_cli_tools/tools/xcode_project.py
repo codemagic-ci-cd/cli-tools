@@ -297,8 +297,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         )
 
         export_options = ExportOptions.from_path(export_options_plist)
-        xcodebuild.archive(archive_path, export_options, self)
-        xcodebuild.export_archive(archive_path, ipa_path, export_options_plist)
+        xcodebuild.archive(archive_path, export_options, cli_app=self)
+        xcodebuild.export_archive(archive_path, ipa_path, export_options_plist, cli_app=self)
 
 
 if __name__ == '__main__':

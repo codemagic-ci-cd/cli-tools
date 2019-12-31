@@ -62,8 +62,10 @@ class Xcodebuild:
         cmd.append('COMPILER_INDEX_STORE_ENABLE=NO')
 
         if not export_options.has_xcode_managed_profiles():
-            cmd.append(f'DEVELOPMENT_TEAM={shlex.quote(export_options.teamID)}')
-            cmd.append(f'CODE_SIGN_IDENTITY={shlex.quote(export_options.signingCertificate)}')
+            if export_options.teamID:
+                cmd.append(f'DEVELOPMENT_TEAM={shlex.quote(export_options.teamID)}')
+            if export_options.signingCertificate:
+                cmd.append(f'CODE_SIGN_IDENTITY={shlex.quote(export_options.signingCertificate)}')
 
         if use_xcpretty:
             # TODO: Use Xcpretty if required

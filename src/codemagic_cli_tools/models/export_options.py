@@ -118,29 +118,23 @@ class ExportOptions:
         return actual_type
 
     def set_value(self, field_name: str, value: Union[enum.Enum, bool, str, Dict[str, str]]):
-        if field_name not in self.__dataclass_fields__:
-            raise ValueError(f'Unknown option {field_name}')
-
         field_type = self._get_field_type(field_name)
-
         if value is None:
-            real_value = None
+            setattr(self, field_name, None)
         elif field_name == 'manifest' and not isinstance(value, Manifest):
             if not isinstance(value, dict):
                 raise ValueError(f'Invalid value for manifest: {value}')
-            real_value = Manifest(**value)
+            self.manifest = Manifest(**value)
         elif field_name == 'provisioningProfiles' and not isinstance(value, list):
             if not isinstance(value, dict):
                 raise ValueError(f'Invalid value for provisioningProfiles: {value}')
-            real_value = [
+            self.provisioningProfiles = [
                 ProvisioningProfileInfo(identifier, name) for identifier, name in value.items()
             ]
         elif not isinstance(value, field_type):
-            real_value = field_type(value)
+            setattr(self, field_name, field_type(value))
         else:
-            real_value = value
-
-        setattr(self, field_name, real_value)
+            setattr(self, field_name, value)
 
     def update(self, **other_options):
         for field_name, value in other_options:
@@ -149,7 +143,7 @@ class ExportOptions:
     @classmethod
     def from_path(cls, path: pathlib.Path) -> ExportOptions:
         with path.open('rb') as fd:
-            data = plistlib.load(fd)
+            data = plistlib.load(fd)  # type: ignore
         return ExportOptions(**data)
 
     @classmethod
