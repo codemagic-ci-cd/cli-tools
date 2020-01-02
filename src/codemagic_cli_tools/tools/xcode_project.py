@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+import shutil
 from collections import defaultdict
 from typing import Counter
 from typing import Dict
@@ -21,6 +22,7 @@ from codemagic_cli_tools.models import CodeSigningSettingsManager
 from codemagic_cli_tools.models import ExportOptions
 from codemagic_cli_tools.models import ProvisioningProfile
 from codemagic_cli_tools.models import Xcodebuild
+from codemagic_cli_tools.models import Xcpretty
 
 
 def _json_dict(json_dict: str) -> Dict:
@@ -118,24 +120,14 @@ class XcodeProjectArgument(cli.Argument):
             'default': pathlib.Path('~/export_options.plist').expanduser()
         }
     )
-    IPA_PATH = cli.ArgumentProperties(
-        key='ipa_path',
-        flags=('--ipa',),
+    IPA_DIRECTORY = cli.ArgumentProperties(
+        key='ipa_directory',
+        flags=('--ipa-directory',),
         type=pathlib.Path,
-        description='Path to the built ipa archive',
+        description='Directory where the built ipa is stored',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('~/build.ipa').expanduser()
-        }
-    )
-    ARCHIVE_PATH = cli.ArgumentProperties(
-        key='archive_path',
-        flags=('--archive',),
-        type=pathlib.Path,
-        description='Path to the built xcarchive',
-        argparse_kwargs={
-            'required': False,
-            'default': pathlib.Path('~/build.xcarchive').expanduser()
+            'default': pathlib.Path('build/ios/ipa')
         }
     )
     CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
@@ -147,6 +139,25 @@ class XcodeProjectArgument(cli.Argument):
             'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
         ),
         argparse_kwargs={'required': False}
+    )
+
+
+class XcprettyArguments(cli.Argument):
+    DISABLE = cli.ArgumentProperties(
+        key='disable_xcpretty',
+        flags=('--disable-xcpretty',),
+        type=bool,
+        description='Do not use XCPretty formatter to process log output',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    OPTIONS = cli.ArgumentProperties(
+        key='xcpretty_options',
+        flags=('--xcpretty-options',),
+        description=(
+            'Command line options for xcpretty formatter '
+            '(for example "--no-color" or "--simple  --no-utf")'
+        ),
+        argparse_kwargs={'required': False, 'default': '--color'},
     )
 
 
@@ -268,18 +279,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.TARGET_NAME,
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
-                XcodeProjectArgument.ARCHIVE_PATH,
-                XcodeProjectArgument.IPA_PATH,
-                XcodeProjectArgument.EXPORT_OPTIONS_PATH)
+                XcodeProjectArgument.IPA_DIRECTORY,
+                XcodeProjectArgument.EXPORT_OPTIONS_PATH,
+                XcprettyArguments.DISABLE,
+                XcprettyArguments.OPTIONS)
     def build_ipa(self,
                   xcode_project_path: Optional[pathlib.Path] = None,
                   xcode_workspace_path: Optional[pathlib.Path] = None,
                   target_name: Optional[str] = None,
                   configuration_name: Optional[str] = None,
                   scheme_name: Optional[str] = None,
-                  archive_path: pathlib.Path = XcodeProjectArgument.ARCHIVE_PATH.get_default(),
-                  ipa_path: pathlib.Path = XcodeProjectArgument.IPA_PATH.get_default(),
-                  export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default()):
+                  ipa_directory: pathlib.Path = XcodeProjectArgument.IPA_DIRECTORY.get_default(),
+                  export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
+                  disable_xcpretty: bool = False,
+                  xcpretty_options: str = XcprettyArguments.OPTIONS.get_default()) -> pathlib.Path:
         """
         Build ipa by archiving the Xcode project and then exporting it
         """
@@ -288,20 +301,33 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             error = 'Workspace or project argument needs to be specified'
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
 
+        xcarchive: Optional[pathlib.Path] = None
         export_options = ExportOptions.from_path(export_options_plist)
-
         try:
             xcodebuild = Xcodebuild(
                 xcode_workspace=xcode_workspace_path,
                 xcode_project=xcode_project_path,
                 scheme_name=scheme_name,
                 target_name=target_name,
-                configuration_name=configuration_name
+                configuration_name=configuration_name,
+                xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None
             )
-            xcodebuild.archive(archive_path, export_options, cli_app=self)
-            xcodebuild.export_archive(archive_path, ipa_path, export_options_plist, cli_app=self)
+
+            self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+            xcarchive = xcodebuild.archive(export_options, cli_app=self)
+            self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}'))
+
+            self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
+            ipa = xcodebuild.export_archive(xcarchive, export_options_plist, ipa_directory, cli_app=self)
+            self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}'))
+
+            self.logger.info(f'Raw xcodebuild logs stored in {xcodebuild.logs_path}')
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
+        finally:
+            if xcarchive is not None:
+                shutil.rmtree(xcarchive, ignore_errors=True)
+        return ipa
 
 
 if __name__ == '__main__':

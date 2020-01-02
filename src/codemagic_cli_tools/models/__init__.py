@@ -9,3 +9,4 @@ from .pbx_project import PbxProject
 from .private_key import PrivateKey
 from .provisioning_profile import ProvisioningProfile
 from .xcodebuild import Xcodebuild
+from .xcpretty import Xcpretty

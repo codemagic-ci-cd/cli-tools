@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-import io
 import logging
 import pathlib
 import subprocess
 import sys
-import threading
-import time
+import tempfile
 from typing import IO
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
-from typing import Union
 
 from codemagic_cli_tools.cli import CliProcess
 from codemagic_cli_tools.utilities.levenshtein_distance import levenshtein_distance
 from .export_options import ExportOptions
+from .xcpretty import Xcpretty
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
@@ -28,23 +26,44 @@ class Xcodebuild:
                  xcode_project: Optional[pathlib.Path] = None,
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
-                 scheme_name: Optional[str] = None):
+                 scheme_name: Optional[str] = None,
+                 xcpretty: Optional[Xcpretty] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
         self.project = xcode_project.expanduser() if xcode_project else None
         self.scheme = scheme_name
         self.target = target_name
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
+        self.logs_path = self._create_logs_file()
 
-    def _ensure_scheme_or_target(self):
+    def _create_logs_file(self) -> pathlib.Path:
+        prefix = f'{self.xcode_project.stem}_xcodebuild_logs_'
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', delete=False) as tf:
+            return pathlib.Path(tf.name)
+
+    def _log_process(self, xcodebuild_cli_process: Optional[XcodebuildCliProcess]):
+        if not xcodebuild_cli_process:
+            return
+        with self.logs_path.open('a') as fd, xcodebuild_cli_process.log_path.open('r') as process_logs:
+            fd.write(f'>>> {xcodebuild_cli_process.safe_form}')
+            fd.write('\n\n')
+            for chunk in process_logs.read(8192):
+                fd.write(chunk)
+            fd.write('\n\n')
+
+    @property
+    def xcode_project(self):
         if self.workspace and not self.project:
-            project = self.workspace.parent / f'{self.workspace.stem}.xcodeproj'
+            return self.workspace.parent / f'{self.workspace.stem}.xcodeproj'
         elif self.project:
-            project = self.project
+            return self.project
         else:
             raise ValueError('Missing project and workspace')
 
+    def _ensure_scheme_or_target(self):
+        project = self.xcode_project
         if self.target or self.scheme:
             return
 
@@ -92,40 +111,37 @@ class Xcodebuild:
         return command
 
     def archive(self,
-                archive_path: pathlib.Path,
                 export_options: ExportOptions,
-                use_xcpretty: bool = True,
                 *,
-                cli_app: Optional['CliApp'] = None):
-        cmd = self._construct_archive_command(archive_path, export_options)
-
-        if use_xcpretty:
-            # TODO: Use Xcpretty if required
-            pass
+                cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+        temp_dir = tempfile.mkdtemp(prefix=f'{self.xcode_project.stem}_', suffix='.xcarchive')
+        xcarchive = pathlib.Path(temp_dir)
+        cmd = self._construct_archive_command(xcarchive, export_options)
 
         process = None
         try:
             if cli_app:
-                process = XcodebuildCliProcess(cmd, use_xcpretty=use_xcpretty).execute()
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
             raise IOError(f'Failed to archive {self.workspace or self.project}', process)
         finally:
-            pass
+            self._log_process(process)
+        return xcarchive
 
-    @classmethod
-    def export_archive(cls,
+    def export_archive(self,
                        archive_path: pathlib.Path,
-                       ipa_path: pathlib.Path,
                        export_options_plist: pathlib.Path,
+                       ipa_directory: pathlib.Path,
                        *,
-                       cli_app: Optional['CliApp'] = None):
+                       cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+        ipa_directory.mkdir(parents=True, exist_ok=True)
         cmd = (
             'xcodebuild', '-exportArchive',
             '-archivePath', archive_path,
-            '-exportPath', ipa_path,
+            '-exportPath', ipa_directory,
             '-exportOptionsPlist', export_options_plist,
             'COMPILER_INDEX_STORE_ENABLE=NO'
         )
@@ -133,43 +149,53 @@ class Xcodebuild:
         process = None
         try:
             if cli_app:
-                process = cli_app.execute(cmd)
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
             raise IOError(f'Failed to export archive {archive_path}', process)
         finally:
-            # TODO: save Xcodebuild logs to file
-            pass
+            self._log_process(process)
+
+        try:
+            return next(ipa_directory.glob('*.ipa'))
+        except StopIteration:
+            raise IOError(f'Ipa not found from {ipa_directory}')
 
 
 class XcodebuildCliProcess(CliProcess):
 
-    def __init__(self, *args, use_xcpretty: bool = True, **kwargs):
+    def __init__(self, *args, xcpretty: Optional[Xcpretty] = None, **kwargs):
         super().__init__(*args, **kwargs)
-        self._log_path = pathlib.Path('/tmp/xcodebuild.log')
-        self._log_offset: int = 0
-        self.use_xcpretty = use_xcpretty
+        with tempfile.NamedTemporaryFile(prefix='xcodebuild_', suffix='.log', delete=False) as tf:
+            self.log_path = pathlib.Path(tf.name)
+        self._buffer: Optional[IO] = None
+        self.xcpretty = xcpretty
+
+    def _print_stream(self, chunk: str):
+        if not self._print_streams:
+            return
+        elif self.xcpretty:
+            self.xcpretty.format(chunk)
+        else:
+            sys.stdout.write(chunk)
 
     def _handle_streams(self, buffer_size: Optional[int] = None):
-        with self._log_path.open('rb') as fd:
-            fd.seek(self._log_offset)
-            read_bytes = fd.read(buffer_size) if buffer_size else fd.read()
-
-        self._log_offset += len(read_bytes)
-        chunk = read_bytes.decode()
-
-        if self._print_streams:
-            if not self.use_xcpretty:
-                sys.stdout.write(chunk)
-            else:
-                xcpretty = subprocess.Popen(['xcpretty'], stdin=subprocess.PIPE)
-                xcpretty.communicate(input=read_bytes, timeout=5)
-
+        if not self._buffer:
+            self._buffer = self.log_path.open('r')
+        lines = self._buffer.readlines(buffer_size or -1)
+        chunk = ''.join(lines)
+        self._print_stream(chunk)
         self.stdout += chunk
 
-    def execute(self, *args, **kwargs) -> CliProcess:
-        with self._log_path.open('wb') as log_fd:
-            kwargs.update({'stdout': log_fd, 'stderr': log_fd})
-            return super(XcodebuildCliProcess, self).execute(*args, **kwargs)
+    def execute(self, *args, **kwargs) -> XcodebuildCliProcess:
+        try:
+            with self.log_path.open('wb') as log_fd:
+                kwargs.update({'stdout': log_fd, 'stderr': log_fd})
+                super(XcodebuildCliProcess, self).execute(*args, **kwargs)
+                return self
+        finally:
+            if self._buffer:
+                self._buffer.close()
+                self._buffer = None
