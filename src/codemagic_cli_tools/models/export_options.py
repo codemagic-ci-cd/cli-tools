@@ -9,10 +9,12 @@ from dataclasses import dataclass
 from typing import Counter
 from typing import Dict
 from typing import List
+from typing import NoReturn
 from typing import Optional
 from typing import Sequence
 from typing import Union
 from typing import get_type_hints
+from typing import overload
 
 from codemagic_cli_tools.cli import Colors
 from .matched_profile import MatchedProfile
@@ -81,9 +83,6 @@ class Manifest:
 
 @dataclass
 class ExportOptions:
-
-    # TODO: Add tests for initialization from plist file and dict!
-
     compileBitcode: Optional[bool] = None
     destination: Optional[Destination] = None
     embedOnDemandResourcesAssetPacksInBundle: Optional[bool] = None
@@ -117,20 +116,59 @@ class ExportOptions:
             actual_type = type_hint
         return actual_type
 
-    def set_value(self, field_name: str, value: Union[enum.Enum, bool, str, Dict[str, str]]):
+    @overload
+    def _set_manifest(self, new_manifest: Union[enum.Enum, bool, str, List[ProvisioningProfileInfo]]) -> NoReturn:
+        ...
+
+    @overload
+    def _set_manifest(self, new_manifest: Union[Dict[str, str], Manifest]) -> None:
+        ...
+
+    def _set_manifest(self, new_manifest):
+        if isinstance(new_manifest, Manifest):
+            self.manifest = new_manifest
+        elif isinstance(new_manifest, dict):
+            try:
+                self.manifest = Manifest(**new_manifest)
+            except TypeError:
+                raise ValueError(f'Invalid value for manifest: {new_manifest!r}')
+        else:
+            raise ValueError(f'Invalid value for manifest: {new_manifest!r}')
+
+    @overload
+    def _set_provisioning_profiles(self, new_profiles: Union[enum.Enum, bool, str, Manifest]) -> NoReturn:
+        ...
+
+    @overload
+    def _set_provisioning_profiles(self, new_profiles: Union[Dict[str, str], List[ProvisioningProfileInfo]]) -> None:
+        ...
+
+    def _set_provisioning_profiles(self, new_profiles):
+        if isinstance(new_profiles, list):
+            if not all(isinstance(profile_info, ProvisioningProfileInfo) for profile_info in new_profiles):
+                raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
+            self.provisioningProfiles = new_profiles
+        elif isinstance(new_profiles, dict):
+            self.provisioningProfiles = [
+                ProvisioningProfileInfo(identifier, name) for identifier, name in new_profiles.items()
+            ]
+        else:
+            raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
+
+    def set_value(self,
+                  field_name: str,
+                  value: Union[enum.Enum, bool, str, Dict[str, str], List[ProvisioningProfileInfo], Manifest]):
+
+        if field_name not in self.__dict__:
+            raise ValueError(f'Invalid filed {field_name}')
+
         field_type = self._get_field_type(field_name)
         if value is None:
             setattr(self, field_name, None)
-        elif field_name == 'manifest' and not isinstance(value, Manifest):
-            if not isinstance(value, dict):
-                raise ValueError(f'Invalid value for manifest: {value}')
-            self.manifest = Manifest(**value)
-        elif field_name == 'provisioningProfiles' and not isinstance(value, list):
-            if not isinstance(value, dict):
-                raise ValueError(f'Invalid value for provisioningProfiles: {value}')
-            self.provisioningProfiles = [
-                ProvisioningProfileInfo(identifier, name) for identifier, name in value.items()
-            ]
+        elif field_name == 'manifest':
+            self._set_manifest(value)
+        elif field_name == 'provisioningProfiles':
+            self._set_provisioning_profiles(value)
         elif not isinstance(value, field_type):
             setattr(self, field_name, field_type(value))
         else:
