@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import logging
+import shlex
 import subprocess
 import sys
 import time
 from typing import IO
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
@@ -17,7 +19,7 @@ from .cli_types import ObfuscatedCommand
 class CliProcess:
 
     def __init__(self, command_args: Sequence[CommandArg],
-                 safe_form: ObfuscatedCommand,
+                 safe_form: Optional[ObfuscatedCommand] = None,
                  print_streams: bool = True,
                  dry: bool = False):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -28,6 +30,9 @@ class CliProcess:
         self._print_streams = print_streams
         self._buffer_size = 8192
         self.safe_form = safe_form
+        if safe_form is None:
+            full_command = ' '.join(shlex.quote(str(arg)) for arg in command_args)
+            self.safe_form = ObfuscatedCommand(full_command)
         self.stdout = ""
         self.stderr = ""
 
@@ -43,9 +48,9 @@ class CliProcess:
 
     def _log_exec_completed(self):
         duration = time.strftime("%M:%S", time.gmtime(self.duration))
-        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
+        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode or "N/A"} in {duration}')
 
-    def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None):
+    def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None) -> str:
         chunk = (input_stream.read(buffer_size) if buffer_size else input_stream.read()).decode()
         if self._print_streams:
             output_stream.write(chunk)
@@ -57,12 +62,14 @@ class CliProcess:
         self.stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
         self.stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
 
-    def execute(self) -> CliProcess:
+    def execute(self,
+                stdout: Union[int, IO] = subprocess.PIPE,
+                stderr: Union[int, IO] = subprocess.PIPE) -> CliProcess:
         self._log_exec_started()
         start = time.time()
         try:
             if not self._dry_run:
-                self._process = subprocess.Popen(self._command_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                self._process = subprocess.Popen(self._command_args, stdout=stdout, stderr=stderr)
                 while self._process.poll() is None:
                     self._handle_streams(self._buffer_size)
                     time.sleep(0.1)

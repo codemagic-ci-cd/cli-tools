@@ -288,17 +288,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             error = 'Workspace or project argument needs to be specified'
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
 
-        xcodebuild = Xcodebuild(
-            xcode_workspace=xcode_workspace_path,
-            xcode_project=xcode_project_path,
-            scheme_name=scheme_name,
-            target_name=target_name,
-            configuration_name=configuration_name
-        )
-
         export_options = ExportOptions.from_path(export_options_plist)
-        xcodebuild.archive(archive_path, export_options, cli_app=self)
-        xcodebuild.export_archive(archive_path, ipa_path, export_options_plist, cli_app=self)
+
+        try:
+            xcodebuild = Xcodebuild(
+                xcode_workspace=xcode_workspace_path,
+                xcode_project=xcode_project_path,
+                scheme_name=scheme_name,
+                target_name=target_name,
+                configuration_name=configuration_name
+            )
+            xcodebuild.archive(archive_path, export_options, cli_app=self)
+            xcodebuild.export_archive(archive_path, ipa_path, export_options_plist, cli_app=self)
+        except (ValueError, IOError) as error:
+            raise XcodeProjectException(*error.args)
 
 
 if __name__ == '__main__':
