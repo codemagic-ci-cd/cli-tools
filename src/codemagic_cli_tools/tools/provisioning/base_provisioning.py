@@ -16,6 +16,8 @@ from .automatic_provisioning_arguments import ProvisioningArgument
     ProvisioningArgument.PROFILES_DIRECTORY)
 class BaseProvisioning(cli.CliApp):
 
+    # TODO: Remove this class
+
     def __init__(self,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
                  certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
