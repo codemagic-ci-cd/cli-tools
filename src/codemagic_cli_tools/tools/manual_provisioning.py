@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from pathlib import Path
+import pathlib
 from typing import List
 from typing import NewType
 from typing import Optional
@@ -57,14 +57,15 @@ class ManualProvisioning(BaseProvisioning):
         from .storage import Storage
         return Storage()
 
-    @cli.action('fetch',
+    @cli.action('fetch-signing-files',
                 ManualProvisioningArgument.PROVISIONING_PROFILE_OBJECT_NAME,
                 ManualProvisioningArgument.CERTIFICATE_OBJECT_NAME,
                 ManualProvisioningArgument.CERTIFICATE_PASSWORD_OBJECT_NAME)
-    def fetch(self,
-              profile_names: List[ObjectName],
-              certificate_name: ObjectName,
-              certificate_password_name: Optional[ObjectName] = None) -> Tuple[List[Path], Path]:
+    def fetch_signing_files(self,
+                            profile_names: List[ObjectName],
+                            certificate_name: ObjectName,
+                            certificate_password_name: Optional[ObjectName] = None
+                            ) -> Tuple[List[pathlib.Path], pathlib.Path]:
         """
         Fetch manual code signing files from Codemagic
         """
@@ -81,22 +82,22 @@ class ManualProvisioning(BaseProvisioning):
         certificate_path = self._download_certificate(certificate_name, certificate_password_name)
         return profile_paths, certificate_path
 
-    def _download_profile(self, profile_name: str) -> Path:
+    def _download_profile(self, profile_name: str) -> pathlib.Path:
         self.logger.info(f'Download provisioning profile {profile_name} from Codemagic')
         path = self._get_unique_path('profile.mobileprovision', self.profiles_directory)
         self._storage.save_to_file(profile_name, path, silent=True)
         self.logger.info(f'Saved provisioning profile {profile_name} to {path}')
         return path
 
-    def _download_profiles(self, profiles: Sequence[ObjectName]) -> List[Path]:
+    def _download_profiles(self, profiles: Sequence[ObjectName]) -> List[pathlib.Path]:
         return [self._download_profile(p) for p in profiles]
 
-    def _download_certificate(self, certificate_name: ObjectName, password_name: Optional[ObjectName]) -> Path:
+    def _download_certificate(self, certificate_name: ObjectName, password_name: Optional[ObjectName]) -> pathlib.Path:
         self.logger.info(f'Download certificate {certificate_name} from Codemagic')
         path = self._get_unique_path('certificate.p12', self.certificates_directory)
         self._storage.save_to_file(certificate_name, path, silent=True)
         if password_name:
-            self._storage.save_to_file(password_name, Path(f'{path}.password'), silent=True)
+            self._storage.save_to_file(password_name, pathlib.Path(f'{path}.password'), silent=True)
         self.logger.info(f'Saved certificate {certificate_name} to {path}')
         return path
 

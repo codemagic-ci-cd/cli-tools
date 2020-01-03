@@ -9,6 +9,7 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 
 from codemagic_cli_tools import cli
 from codemagic_cli_tools.apple import AppStoreConnectApiError
@@ -473,7 +474,7 @@ class AutomaticProvisioning(BaseProvisioning):
                             p12_container_password: str = 'password',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
                             profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
-                            create_resource: bool = False):
+                            create_resource: bool = False) -> Tuple[List[Profile], List[SigningCertificate]]:
         """
         Fetch provisioning profiles and code signing certificates
         for Bundle ID with given identifier.
