@@ -85,7 +85,7 @@ class ManualProvisioning(BaseProvisioning):
     def _download_profile(self, profile_name: str) -> pathlib.Path:
         self.logger.info(f'Download provisioning profile {profile_name} from Codemagic')
         path = self._get_unique_path('profile.mobileprovision', self.profiles_directory)
-        self._storage.save_to_file(profile_name, path, silent=True)
+        self._storage.save_to_file(profile_name, path)
         self.logger.info(f'Saved provisioning profile {profile_name} to {path}')
         return path
 
@@ -95,9 +95,9 @@ class ManualProvisioning(BaseProvisioning):
     def _download_certificate(self, certificate_name: ObjectName, password_name: Optional[ObjectName]) -> pathlib.Path:
         self.logger.info(f'Download certificate {certificate_name} from Codemagic')
         path = self._get_unique_path('certificate.p12', self.certificates_directory)
-        self._storage.save_to_file(certificate_name, path, silent=True)
+        self._storage.save_to_file(certificate_name, path)
         if password_name:
-            self._storage.save_to_file(password_name, pathlib.Path(f'{path}.password'), silent=True)
+            self._storage.save_to_file(password_name, pathlib.Path(f'{path}.password'))
         self.logger.info(f'Saved certificate {certificate_name} to {path}')
         return path
 
