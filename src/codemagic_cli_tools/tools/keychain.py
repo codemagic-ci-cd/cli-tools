@@ -251,6 +251,9 @@ class Keychain(cli.CliApp, PathFinderMixin):
         """
         Add p12 certificate to specified keychain.
         """
+
+        # TODO: Fix adding certificates that do not have password
+
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
         if not certificate_paths:
             raise KeychainError('Did not find any certificates from specified locations')

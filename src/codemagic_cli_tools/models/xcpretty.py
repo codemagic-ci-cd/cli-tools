@@ -23,6 +23,8 @@ class Xcpretty(StringConverterMixin):
             raise IOError('xcpretty executable not present on the system')
 
     def format(self, chunk: AnyStr, stdout: _IO = sys.stdout, stderr: _IO = sys.stderr, timeout: int = 2):
+        if not chunk:
+            return
         process = subprocess.Popen(
             self._command,
             stdin=subprocess.PIPE,
@@ -31,6 +33,8 @@ class Xcpretty(StringConverterMixin):
         )
         try:
             process.communicate(input=self._bytes(chunk), timeout=timeout)
+        except subprocess.TimeoutExpired:
+            pass
         except KeyboardInterrupt:
             process.terminate()
             raise
