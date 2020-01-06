@@ -57,7 +57,9 @@ class ResourcePrinter:
     def log_creating(self, resource_type: Type[R], **params):
         def fmt(item: Tuple[str, Any]):
             name, value = item
-            return f'{name.replace("_", " ")}: {shlex.quote(str(value))}'
+            if isinstance(value, list):
+                return f'{name.replace("_", " ")}: {[shlex.quote(el) for el in value]}'
+            return f'{name.replace("_", " ")}: {shlex.quote(value)}'
 
         message = f'Creating new {resource_type}'
         if params:
