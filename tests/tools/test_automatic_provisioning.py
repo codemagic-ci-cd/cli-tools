@@ -10,7 +10,6 @@ import pytest
 from codemagic_cli_tools.tools.automatic_provisioning import AutomaticProvisioning
 from codemagic_cli_tools.tools.provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
 from codemagic_cli_tools.tools.provisioning.automatic_provisioning_arguments import Types
-from codemagic_cli_tools.tools.provisioning.base_provisioning import ProvisioningArgument
 
 
 @pytest.fixture(autouse=True)
@@ -22,8 +21,8 @@ def register_args(cli_argument_group):
 @pytest.fixture()
 def namespace_kwargs():
     ns_kwars = {
-        ProvisioningArgument.CERTIFICATES_DIRECTORY.key: ProvisioningArgument.CERTIFICATES_DIRECTORY.get_default(),
-        ProvisioningArgument.PROFILES_DIRECTORY.key: ProvisioningArgument.PROFILES_DIRECTORY.get_default(),
+        AutomaticProvisioningArgument.CERTIFICATES_DIRECTORY.key: AutomaticProvisioningArgument.CERTIFICATES_DIRECTORY.get_default(),
+        AutomaticProvisioningArgument.PROFILES_DIRECTORY.key: AutomaticProvisioningArgument.PROFILES_DIRECTORY.get_default(),
         AutomaticProvisioningArgument.LOG_REQUESTS.key: True,
         AutomaticProvisioningArgument.JSON_OUTPUT.key: False,
         AutomaticProvisioningArgument.ISSUER_ID.key: Types.IssuerIdArgument('issuer-id'),

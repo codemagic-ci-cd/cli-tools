@@ -38,23 +38,6 @@ class Types:
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
 
 
-class ProvisioningArgument(cli.Argument):
-    CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
-        key='certificates_directory',
-        flags=('--certificates-dir',),
-        type=pathlib.Path,
-        description='Directory where the code signing certificates will be saved',
-        argparse_kwargs={'required': False, 'default': Certificate.DEFAULT_LOCATION},
-    )
-    PROFILES_DIRECTORY = cli.ArgumentProperties(
-        key='profiles_directory',
-        flags=('--profiles-dir',),
-        type=pathlib.Path,
-        description='Directory where the provisioning profiles will be saved',
-        argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
-    )
-
-
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
 
@@ -96,6 +79,20 @@ class AutomaticProvisioningArgument(cli.Argument):
         type=Types.PrivateKeyArgument,
         description=f'App Store Connect API private key. {_API_DOCS_REFERENCE}',
         argparse_kwargs={'required': False},
+    )
+    CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
+        key='certificates_directory',
+        flags=('--certificates-dir',),
+        type=pathlib.Path,
+        description='Directory where the code signing certificates will be saved',
+        argparse_kwargs={'required': False, 'default': Certificate.DEFAULT_LOCATION},
+    )
+    PROFILES_DIRECTORY = cli.ArgumentProperties(
+        key='profiles_directory',
+        flags=('--profiles-dir',),
+        type=pathlib.Path,
+        description='Directory where the provisioning profiles will be saved',
+        argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
     )
 
 
@@ -332,8 +329,8 @@ class CommonArgument(cli.Argument):
         type=bool,
         description=(
             f'Whether to save the resources to disk. See '
-            f'{Colors.CYAN(ProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
-            f'{Colors.CYAN(ProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
+            f'{Colors.CYAN(AutomaticProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
+            f'{Colors.CYAN(AutomaticProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
             f'for more information.'
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
+import tempfile
 import time
 from typing import Iterator
 from typing import List
@@ -28,6 +30,7 @@ from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
+from codemagic_cli_tools.models import ProvisioningProfile
 from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
 from .provisioning.automatic_provisioning_arguments import BundleIdArgument
 from .provisioning.automatic_provisioning_arguments import CertificateArgument
@@ -35,7 +38,6 @@ from .provisioning.automatic_provisioning_arguments import CommonArgument
 from .provisioning.automatic_provisioning_arguments import DeviceArgument
 from .provisioning.automatic_provisioning_arguments import ProfileArgument
 from .provisioning.automatic_provisioning_arguments import Types
-from .provisioning.base_provisioning import BaseProvisioning
 from .provisioning.resource_printer import ResourcePrinter
 
 
@@ -52,14 +54,8 @@ def _get_certificate_key(
     return None
 
 
-@cli.common_arguments(
-    AutomaticProvisioningArgument.LOG_REQUESTS,
-    AutomaticProvisioningArgument.ISSUER_ID,
-    AutomaticProvisioningArgument.KEY_IDENTIFIER,
-    AutomaticProvisioningArgument.PRIVATE_KEY,
-    AutomaticProvisioningArgument.JSON_OUTPUT,
-)
-class AutomaticProvisioning(BaseProvisioning):
+@cli.common_arguments(*AutomaticProvisioningArgument)
+class AutomaticProvisioning(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
     from Apple Developer Portal using App Store Connect API to perform iOS code signing.
@@ -71,8 +67,12 @@ class AutomaticProvisioning(BaseProvisioning):
                  private_key: str,
                  log_requests: bool = False,
                  json_output: bool = False,
+                 profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
+                 certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
                  **kwargs):
         super().__init__(**kwargs)
+        self.profiles_directory = profiles_directory
+        self.certificates_directory = certificates_directory
         self.printer = ResourcePrinter(bool(json_output), self.echo)
         self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
@@ -572,6 +572,17 @@ class AutomaticProvisioning(BaseProvisioning):
         created_profiles = self._create_missing_profiles(bundle_ids_without_profiles, certificates, profile_type)
         profiles.extend(created_profiles)
         return profiles
+
+    @classmethod
+    def _get_unique_path(cls, file_name: str, destination: pathlib.Path) -> pathlib.Path:
+        if destination.exists() and not destination.is_dir():
+            raise ValueError(f'Destination {destination} is not a directory')
+        destination.mkdir(parents=True, exist_ok=True)
+        name = pathlib.Path(re.sub(r'[^\w.]', '_', file_name))
+        tf = tempfile.NamedTemporaryFile(
+            prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False)
+        tf.close()
+        return pathlib.Path(tf.name)
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(f'{profile.get_display_info()}.mobileprovision', self.profiles_directory)
