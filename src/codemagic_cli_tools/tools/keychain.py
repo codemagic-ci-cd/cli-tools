@@ -143,6 +143,10 @@ class Keychain(cli.CliApp, PathFinderMixin):
         Set timeout settings for the keychain.
         If seconds are not provided, then no-timeout will be set.
         """
+
+        timeout_value = 'no-timeout' if timeout is None else f'{timeout}s'
+        self.logger.info(f'Set keychain {self.path} timeout to {timeout_value}')
+
         cmd_args = ['security', 'set-keychain-settings', str(self.path)]
         if timeout is not None:
             cmd_args[-1:-1] = ['-t', str(timeout)]
@@ -254,6 +258,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
         # TODO: Fix adding certificates that do not have password
 
+        self.logger.info(f'Add certificates to keychain {self.path}')
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
         if not certificate_paths:
             raise KeychainError('Did not find any certificates from specified locations')
