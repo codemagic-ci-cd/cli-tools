@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import pathlib
 import subprocess
 import sys
@@ -27,6 +28,7 @@ class Xcodebuild:
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
+                 xcodebuild_log: Optional[pathlib.Path] = None,
                  xcpretty: Optional[Xcpretty] = None):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
@@ -36,7 +38,7 @@ class Xcodebuild:
         self.target = target_name
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
-        self.logs_path = self._create_logs_file()
+        self.logs_path = xcodebuild_log or self._create_logs_file()
 
     def _create_logs_file(self) -> pathlib.Path:
         prefix = f'{self.xcode_project.stem}_xcodebuild_logs_'

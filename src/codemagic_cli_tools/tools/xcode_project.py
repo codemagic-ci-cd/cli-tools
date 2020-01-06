@@ -43,6 +43,11 @@ def _existing_path(path_str: str) -> pathlib.Path:
     raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
 
 
+class XcodebuildLogPathArgument(cli.EnvironmentArgumentValue[pathlib.Path]):
+    argument_type = pathlib.Path
+    environment_variable_key = 'XCODEBUILD_LOG_PATH'
+
+
 class XcodeProjectException(cli.CliAppException):
     pass
 
@@ -137,6 +142,16 @@ class XcodeProjectArgument(cli.Argument):
         description=(
             'Custom options for generated export options as JSON string. '
             'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
+        ),
+        argparse_kwargs={'required': False}
+    )
+    XCODEBUILD_LOG_PATH = cli.ArgumentProperties(
+        key='xcodebuild_log_path',
+        flags=('--xcodebuild-log',),
+        type=XcodebuildLogPathArgument,
+        description=(
+            'Where to store the raw xcodebuild logs. '
+            'By default the logs are stored in temporary directory.'
         ),
         argparse_kwargs={'required': False}
     )
@@ -281,6 +296,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.IPA_DIRECTORY,
                 XcodeProjectArgument.EXPORT_OPTIONS_PATH,
+                XcodeProjectArgument.XCODEBUILD_LOG_PATH,
                 XcprettyArguments.DISABLE,
                 XcprettyArguments.OPTIONS)
     def build_ipa(self,
@@ -292,7 +308,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                   ipa_directory: pathlib.Path = XcodeProjectArgument.IPA_DIRECTORY.get_default(),
                   export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
                   disable_xcpretty: bool = False,
-                  xcpretty_options: str = XcprettyArguments.OPTIONS.get_default()) -> pathlib.Path:
+                  xcpretty_options: str = XcprettyArguments.OPTIONS.get_default(),
+                  xcodebuild_log_path: Optional[XcodebuildLogPathArgument] = None) -> pathlib.Path:
         """
         Build ipa by archiving the Xcode project and then exporting it
         """
@@ -302,6 +319,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
 
         xcarchive: Optional[pathlib.Path] = None
+        xcodebuild: Optional[Xcodebuild] = None
         export_options = ExportOptions.from_path(export_options_plist)
         try:
             xcodebuild = Xcodebuild(
@@ -310,7 +328,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 scheme_name=scheme_name,
                 target_name=target_name,
                 configuration_name=configuration_name,
-                xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None
+                xcodebuild_log=xcodebuild_log_path.value if xcodebuild_log_path else None,
+                xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None,
             )
 
             self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
@@ -320,11 +339,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
             ipa = xcodebuild.export_archive(xcarchive, export_options_plist, ipa_directory, cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}'))
-
-            self.logger.info(f'Raw xcodebuild logs stored in {xcodebuild.logs_path}')
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
         finally:
+            if not disable_xcpretty and xcodebuild:
+                self.logger.info(f'Raw xcodebuild logs stored in {xcodebuild.logs_path}')
             if xcarchive is not None:
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa

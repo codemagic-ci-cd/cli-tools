@@ -52,6 +52,7 @@ class CliApp(metaclass=abc.ABCMeta):
     CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
     REGISTERED_CLASS_ARGUMENTS: Dict[Type[CliApp], Tuple[Argument, ...]] = {}
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
+    _printer = None
 
     def __init__(self, dry=False, verbose=False, **cli_options):
         self.dry_run = dry
@@ -66,8 +67,9 @@ class CliApp(metaclass=abc.ABCMeta):
         Log given message to the STDOUT without any extra logging formatting
         and log the message to the the logfile with proper formatting.
         """
-        printer = log.get_printer(cls)
-        printer.info(message, *args, **kwargs)
+        if cls._printer is None:
+            cls._printer = log.get_printer(cls)
+        cls._printer.info(message, *args, **kwargs)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> 'CliApp':

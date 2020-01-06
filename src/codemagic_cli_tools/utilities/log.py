@@ -56,7 +56,7 @@ def _get_logger_name(base_name: str, file_logging: bool, stream_logging: bool) -
 
 
 def get_printer(klass: Type):
-    printer = logging.getLogger(klass.__name__)
+    printer = logging.getLogger(f'{klass.__name__}Printer')
 
     printer.setLevel(logging.DEBUG)
 
