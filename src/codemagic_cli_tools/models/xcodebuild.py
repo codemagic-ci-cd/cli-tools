@@ -5,6 +5,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+import time
 from typing import IO
 from typing import List
 from typing import Optional
@@ -53,6 +54,9 @@ class Xcodebuild:
             fd.write('\n\n')
             for chunk in process_logs.read(8192):
                 fd.write(chunk)
+            fd.write('\n\n')
+            duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
+            fd.write(f'<<< Process completed with status code {xcodebuild_cli_process.returncode} in {duration}')
             fd.write('\n\n')
 
     @property
