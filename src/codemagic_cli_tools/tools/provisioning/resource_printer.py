@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 import pathlib
 import shlex
-from collections import Callable
 from typing import Any
+from typing import Callable
 from typing import Optional
 from typing import Sequence
 from typing import TYPE_CHECKING
