@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import pathlib
 import plistlib
 import shutil
@@ -14,6 +13,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic_cli_tools.utilities import log
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.cli import CliApp
@@ -24,7 +24,7 @@ class PbxProject(StringConverterMixin):
     def __init__(self, project_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = project_data
         self._project = self._get_project_section()
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = log.get_logger(self.__class__)
 
     @classmethod
     def from_path(cls, path: pathlib.Path, *, cli_app: Optional['CliApp'] = None) -> PbxProject:

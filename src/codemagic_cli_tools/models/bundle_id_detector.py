@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import logging
 import pathlib
 import shlex
 import shutil
@@ -14,6 +13,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic_cli_tools.utilities import log
 from .pbx_project import PbxProject
 
 if TYPE_CHECKING:
@@ -26,24 +26,22 @@ class BundleIdDetector(StringConverterMixin):
         self.xcode_project = xcode_project.expanduser()
         self.target = target_name
         self.config = config_name
+        self.logger = log.get_logger(self.__class__)
 
     @classmethod
     def _can_use_xcodebuild(cls) -> bool:
         return shutil.which('xcodebuild') is not None
 
-    def notify(self, logger: Optional[logging.Logger]):
-        if logger is None:
-            logger = logging.getLogger(self.__class__.__name__)
-
+    def notify(self):
         prefix = f'Detect Bundle ID from {self.xcode_project}'
         if self.target and self.config:
-            logger.info(f'{prefix} target {self.target!r} [{self.config!r}]')
+            self.logger.info(f'{prefix} target {self.target!r} [{self.config!r}]')
         elif self.target:
-            logger.info(f'{prefix} target {self.target!r}')
+            self.logger.info(f'{prefix} target {self.target!r}')
         elif self.config:
-            logger.info(f'{prefix} build configuration {self.config!r}')
+            self.logger.info(f'{prefix} build configuration {self.config!r}')
         else:
-            logger.info(prefix)
+            self.logger.info(prefix)
 
     def detect(self, *, cli_app: Optional['CliApp'] = None) -> List[str]:
         """

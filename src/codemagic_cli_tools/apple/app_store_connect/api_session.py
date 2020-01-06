@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import logging
 from typing import Callable
 from typing import Dict
 
 import requests
 
+from codemagic_cli_tools.utilities import log
 from .api_error import AppStoreConnectApiError
 
 
@@ -14,15 +14,7 @@ class AppStoreConnectApiSession(requests.Session):
     def __init__(self, auth_headers_factory: Callable[[], Dict[str, str]], log_requests: bool = False):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._configure_logging(log_requests)
-
-    def _configure_logging(self, log_requests: bool):
-        for logger_name in ('requests', 'urllib3'):
-            requests_logger = logging.getLogger(logger_name)
-            requests_logger.setLevel(logging.ERROR)
-        if not log_requests:
-            self._logger.setLevel(logging.WARNING)
+        self._logger = log.get_logger(self.__class__, log_to_stream=log_requests)
 
     def _log_response(self, response):
         try:

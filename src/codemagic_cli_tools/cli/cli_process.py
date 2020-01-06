@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import shlex
 import subprocess
 import sys
@@ -12,6 +11,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Union
 
+from codemagic_cli_tools.utilities import log
 from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 
@@ -22,7 +22,7 @@ class CliProcess:
                  safe_form: Optional[ObfuscatedCommand] = None,
                  print_streams: bool = True,
                  dry: bool = False):
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = log.get_logger(self.__class__)
         self.duration: float = 0
         self._process: Optional[subprocess.Popen] = None
         self._command_args = command_args
@@ -48,7 +48,10 @@ class CliProcess:
 
     def _log_exec_completed(self):
         duration = time.strftime("%M:%S", time.gmtime(self.duration))
-        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode or "N/A"} in {duration}')
+        file_logger = log.get_file_logger(self.__class__)
+        file_logger.debug('STDOUT: %s', self.stdout)
+        file_logger.debug('STDERR: %s', self.stderr)
+        self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None) -> str:
         chunk = (input_stream.read(buffer_size) if buffer_size else input_stream.read()).decode()

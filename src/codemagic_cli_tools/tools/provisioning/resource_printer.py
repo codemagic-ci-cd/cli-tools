@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-import logging
 import pathlib
 import shlex
+from collections import Callable
 from typing import Any
 from typing import Optional
 from typing import Sequence
@@ -18,6 +18,7 @@ from codemagic_cli_tools.apple.resources import Resource
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.utilities import log
 
 if TYPE_CHECKING:
     from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
@@ -26,18 +27,19 @@ R = TypeVar('R', bound=Resource)
 R2 = TypeVar('R2', bound=Resource)
 
 
-class Printer:
+class ResourcePrinter:
 
-    def __init__(self, logger: logging.Logger, print_json: bool):
+    def __init__(self, print_json: bool, print_function: Callable[[str], None]):
         self.print_json = print_json
-        self.logger = logger
+        self.logger = log.get_logger(self.__class__)
+        self.print = print_function
 
     def print_resources(self, resources: Sequence[R], should_print: bool):
         if should_print is not True:
             return
         if self.print_json:
             items = [resource.dict() for resource in resources]
-            print(json.dumps(items, indent=4))
+            self.print(json.dumps(items, indent=4))
         else:
             for resource in resources:
                 self.print_resource(resource, True)
@@ -46,11 +48,11 @@ class Printer:
         if should_print is not True:
             return
         if self.print_json:
-            print(resource.json())
+            self.print(resource.json())
         else:
             header = f'-- {resource.__class__}{" (Created)" if resource.created else ""} --'
-            print(Colors.BLUE(header))
-            print(resource)
+            self.print(Colors.BLUE(header))
+            self.print(str(resource))
 
     def log_creating(self, resource_type: Type[R], **params):
         def fmt(item: Tuple[str, Any]):

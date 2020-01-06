@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import enum
-import logging
 import pathlib
 import plistlib
 import re
@@ -17,6 +16,7 @@ from typing import get_type_hints
 from typing import overload
 
 from codemagic_cli_tools.cli import Colors
+from codemagic_cli_tools.utilities import log
 from .matched_profile import MatchedProfile
 from .provisioning_profile import ProvisioningProfile
 
@@ -220,10 +220,8 @@ class ExportOptions:
         with path.open('wb') as fd:
             plistlib.dump(self.dict(), fd)
 
-    def notify(self, logger: Optional[logging.Logger] = None):
-        if logger is None:
-            logger = logging.getLogger(self.__class__.__name__)
-
+    def notify(self):
+        logger = log.get_logger(self.__class__)
         logger.info(Colors.GREEN('Generated options for exporting IPA'))
         options = self.dict()
 

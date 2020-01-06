@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import logging
 import pathlib
 import shlex
 import shutil
@@ -16,6 +15,7 @@ from typing import TYPE_CHECKING
 
 from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic_cli_tools.utilities import log
 from .certificate import Certificate
 from .export_options import ExportOptions
 from .matched_profile import MatchedProfile
@@ -31,6 +31,7 @@ class CodeSigningSettingsManager(StringConverterMixin):
         self.profiles: Dict[str, ProvisioningProfile] = {profile.uuid: profile for profile in profiles}
         self._certificates = keychain_certificates
         self._matched_profiles: List[MatchedProfile] = []
+        self.logger = log.get_logger(self.__class__)
 
     @lru_cache()
     def _get_json_serialized_profiles(self) -> str:
@@ -71,19 +72,16 @@ class CodeSigningSettingsManager(StringConverterMixin):
             f'for target "{target}" [{config}] from project "{project}"'
         )
 
-    def notify_profile_usage(self, logger: Optional[logging.Logger]):
-        if logger is None:
-            logger = logging.getLogger(self.__class__.__name__)
-
-        logger.info(Colors.GREEN('Completed configuring code signing settings'))
+    def notify_profile_usage(self):
+        self.logger.info(Colors.GREEN('Completed configuring code signing settings'))
 
         if not self._matched_profiles:
             message = 'Did not find matching provisioning profiles for code signing!'
-            logger.warning(Colors.YELLOW(message))
+            self.logger.warning(Colors.YELLOW(message))
             return
 
         for info in sorted(self._matched_profiles, key=lambda i: i.sort_key()):
-            logger.info(Colors.BLUE(info.format()))
+            self.logger.info(Colors.BLUE(info.format()))
 
     def _apply(self, xcode_project, result_file_name, cli_app):
         cmd = [

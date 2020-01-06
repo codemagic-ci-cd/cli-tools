@@ -192,7 +192,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.logger.info(Colors.GREEN(f'Chose Bundle ID {bundle_id}'))
         if should_print:
-            print(bundle_id)
+            self.echo(bundle_id)
         return bundle_id
 
     def _detect_project_bundle_ids(self,
@@ -212,7 +212,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             return []
 
         detector = BundleIdDetector(xcode_project, target_name, config_name)
-        detector.notify(self.logger)
+        detector.notify()
         try:
             detected_bundle_ids = detector.detect(cli_app=self)
         except (ValueError, IOError) as error:
@@ -259,9 +259,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
-        code_signing_settings_manager.notify_profile_usage(self.logger)
+        code_signing_settings_manager.notify_profile_usage()
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
-        export_options.notify(logger=self.logger)
+        export_options.notify()
         export_options.save(export_options_plist)
 
         self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))

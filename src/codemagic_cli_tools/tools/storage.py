@@ -82,7 +82,7 @@ class Storage(cli.CliApp):
                 error = f'Unable to show contents: "{object_name}" does not exist in bucket "{self.bucket_name}"'
                 raise StorageError(error, process)
             contents = open(tf.name).read()
-            print(contents)
+            self.echo(contents)
         return contents
 
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import abc
 import argparse
-import logging
 import os
 import pathlib
 import re
@@ -23,6 +22,7 @@ from typing import Sequence
 from typing import Tuple
 from typing import Type
 
+from codemagic_cli_tools.utilities import log
 from .argument import ActionCallable
 from .argument import Argument
 from .cli_help_formatter import CliHelpFormatter
@@ -58,7 +58,16 @@ class CliApp(metaclass=abc.ABCMeta):
         self.default_obfuscation = []
         self.obfuscation = 8 * '*'
         self.verbose = verbose
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = log.get_logger(self.__class__)
+
+    @classmethod
+    def echo(cls, message: str, *args, **kwargs):
+        """
+        Log given message to the STDOUT without any extra logging formatting
+        and log the message to the the logfile with proper formatting.
+        """
+        printer = log.get_printer(cls)
+        printer.info(message, *args, **kwargs)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> 'CliApp':
@@ -74,8 +83,20 @@ class CliApp(metaclass=abc.ABCMeta):
         }
 
     @classmethod
+    def _handle_generic_exception(cls, action_name: str) -> int:
+        logger = log.get_logger(cls)
+        message = (
+            f'Executing {cls.__name__} action {action_name} failed unexpectedly. '
+            f'Detailed logs are available at "{log.get_log_path()}".'
+        )
+        logger.warning(Colors.RED(message))
+        file_logger = log.get_file_logger(cls)
+        file_logger.exception('Exception traceback:')
+        return 9
+
+    @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
-        logger = logging.getLogger(cls.__name__)
+        logger = log.get_logger(cls)
         logger.error(f'{Colors.RED(cli_exception.message)}')
         if cli_exception.cli_process:
             return cli_exception.cli_process.returncode
@@ -83,38 +104,69 @@ class CliApp(metaclass=abc.ABCMeta):
             return 1
 
     @classmethod
-    def invoke_cli(cls) -> NoReturn:
-        parser = cls._setup_cli_options()
-        args = parser.parse_args()
-        logger = cls._setup_logging(args)
-
+    def _create_instance(cls, parser: argparse.ArgumentParser, cli_args: argparse.Namespace) -> CliApp:
         try:
-            instance = cls.from_cli_args(args)
-            instance.verbose = args.verbose
+            instance = cls.from_cli_args(cli_args)
         except argparse.ArgumentError as argument_error:
             parser.error(str(argument_error))
+            raise
 
-        cli_action = {ac.action_name: ac for ac in instance.get_cli_actions()}[args.action]
+        instance.verbose = cli_args.verbose
+        return instance
+
+    def _invoke_action(self, args: argparse.Namespace):
+        actions = self.get_cli_actions()
+        cli_action = {ac.action_name: ac for ac in actions}[args.action]
         action_args = {
             arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
         }
-        start = time.time()
+        return cli_action(**action_args)
+
+    @classmethod
+    def invoke_cli(cls) -> NoReturn:
+        parser = cls._setup_cli_options()
+        args = parser.parse_args()
+        cls._setup_logging(args)
+
+        cls._log_cli_invoke_started()
+        started_at = time.time()
+        status = 0
         try:
-            cli_action(**action_args)
-            status = 0
+            app = cls._create_instance(parser, args)
+            app._invoke_action(args)
         except argparse.ArgumentError as argument_error:
             parser.error(str(argument_error))
             status = 2
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
             status = cls._handle_cli_exception(cli_exception)
         except KeyboardInterrupt:
+            logger = log.get_logger(cls)
             logger.warning(Colors.YELLOW('Terminated'))
             status = 130
+        except Exception:
+            status = cls._handle_generic_exception(args.action)
         finally:
-            seconds = int(time.time() - start)
-            logger.debug(f'Completed in {time.strftime("%M:%S", time.gmtime(seconds))}.')
+            cls._log_cli_invoke_completed(args.action, started_at, status)
         sys.exit(status)
+
+    @classmethod
+    def _log_cli_invoke_started(cls):
+        msg = f'Execute {" ".join(shlex.quote(arg) for arg in sys.argv)}'
+        file_logger = log.get_file_logger(cls)
+        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+        file_logger.debug(Colors.MAGENTA(msg))
+        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+
+    @classmethod
+    def _log_cli_invoke_completed(cls, action_name: str, started_at: float, exit_status: int):
+        seconds = int(time.time() - started_at)
+        duration = time.strftime("%M:%S", time.gmtime(seconds))
+        msg = f'Completed {cls.__name__} {action_name} in {duration} with status code {exit_status}'
+        file_logger = log.get_file_logger(cls)
+        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+        file_logger.debug(Colors.MAGENTA(msg))
+        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
 
     @classmethod
     def get_class_cli_actions(cls) -> Iterable[ActionCallable]:
@@ -129,26 +181,11 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _setup_logging(cls, cli_args: argparse.Namespace):
-        stream = {'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream]
-        if cli_args.verbose:
-            log_fmt = '[%(asctime)s] %(levelname)-5s > %(message)s'
-            log_level = logging.DEBUG
-        elif not cli_args.enable_logging:
-            log_fmt = '%(message)s'
-            log_level = logging.ERROR
-        else:
-            log_fmt = '%(message)s'
-            log_level = logging.INFO
-
-        formatter = logging.Formatter(log_fmt, '%m-%d %H:%M:%S')
-        handler = logging.StreamHandler(stream)
-        handler.setLevel(log_level)
-        handler.setFormatter(formatter)
-
-        logger = logging.getLogger()
-        logger.addHandler(handler)
-        logger.setLevel(log_level)
-        return logger
+        log.initialize_logging(
+            stream={'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream],
+            verbose=cli_args.verbose,
+            enable_logging=cli_args.enable_logging
+        )
 
     @classmethod
     def _setup_default_cli_options(cls, cli_options_parser):

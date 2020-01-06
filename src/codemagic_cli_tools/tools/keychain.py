@@ -185,7 +185,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
         self.logger.info(f'Get system default keychain')
         default = self._get_default()
-        print(default)
+        self.echo(default)
         return default
 
     def _get_default(self):
@@ -235,7 +235,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         all_certificates = self._find_certificates()
         certificates = [cert for cert in all_certificates if cert.is_code_signing_certificate()]
         if should_print:
-            print(json.dumps(certificates, sort_keys=True, indent=4))
+            self.echo(json.dumps(certificates, sort_keys=True, indent=4))
         return certificates
 
     def _generate_path(self):

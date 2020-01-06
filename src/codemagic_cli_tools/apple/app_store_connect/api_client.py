@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 from datetime import timedelta
 from typing import Dict
@@ -9,6 +8,7 @@ from typing import Optional
 
 import jwt
 
+from codemagic_cli_tools.utilities import log
 from .api_session import AppStoreConnectApiSession
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
@@ -45,7 +45,7 @@ class AppStoreConnectApiClient:
         self._jwt: Optional[str] = None
         self._jwt_expires: datetime = datetime.now()
         self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
-        self._logger = logging.getLogger(self.__class__.__name__)
+        self._logger = log.get_logger(self.__class__)
 
     @property
     def jwt(self) -> str:

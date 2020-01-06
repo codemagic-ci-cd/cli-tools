@@ -36,7 +36,7 @@ from .provisioning.automatic_provisioning_arguments import DeviceArgument
 from .provisioning.automatic_provisioning_arguments import ProfileArgument
 from .provisioning.automatic_provisioning_arguments import Types
 from .provisioning.base_provisioning import BaseProvisioning
-from .provisioning.printer import Printer
+from .provisioning.resource_printer import ResourcePrinter
 
 
 class AutomaticProvisioningError(cli.CliAppException):
@@ -73,7 +73,7 @@ class AutomaticProvisioning(BaseProvisioning):
                  json_output: bool = False,
                  **kwargs):
         super().__init__(**kwargs)
-        self.printer = Printer(self.logger, bool(json_output))
+        self.printer = ResourcePrinter(bool(json_output), self.echo)
         self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
     @classmethod

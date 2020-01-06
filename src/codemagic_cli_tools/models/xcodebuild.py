@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import pathlib
 import subprocess
 import sys
@@ -11,6 +10,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 from codemagic_cli_tools.cli import CliProcess
+from codemagic_cli_tools.utilities import log
 from codemagic_cli_tools.utilities.levenshtein_distance import levenshtein_distance
 from .export_options import ExportOptions
 from .xcpretty import Xcpretty
@@ -28,7 +28,7 @@ class Xcodebuild:
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
                  xcpretty: Optional[Xcpretty] = None):
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
         self.project = xcode_project.expanduser() if xcode_project else None

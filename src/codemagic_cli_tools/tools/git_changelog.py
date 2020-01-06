@@ -69,7 +69,7 @@ class GitChangelog(cli.CliApp):
         raw_log = self._get_raw_git_log()
         log_entries = self._get_changelog_list(raw_log)
         formatted_changelog, changelog_line_count = self._format_log(log_entries)
-        print(formatted_changelog)
+        self.echo(formatted_changelog)
         self.logger.info(f'Generated {changelog_line_count} change log lines')
         return log_entries
 
