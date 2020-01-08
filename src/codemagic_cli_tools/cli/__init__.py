@@ -7,4 +7,5 @@ from .cli_app import CliAppException
 from .cli_app import action
 from .cli_app import common_arguments
 from .cli_process import CliProcess
+from .cli_types import CommandArg
 from .colors import Colors
