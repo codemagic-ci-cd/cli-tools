@@ -557,6 +557,7 @@ class AppStoreConnect(cli.CliApp):
             except AppStoreConnectApiError as err:
                 error = f'Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly'
                 self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
+                return False
 
         def missing_profile(bundle_id) -> bool:
             try:
@@ -565,6 +566,7 @@ class AppStoreConnect(cli.CliApp):
             except AppStoreConnectApiError as err:
                 error = f'Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly'
                 self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
+                return True
 
         certificate_ids = {c.id for c in certificates}
         profiles = self.list_bundle_id_profiles(
