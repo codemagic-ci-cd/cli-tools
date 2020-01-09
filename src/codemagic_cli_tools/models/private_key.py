@@ -23,8 +23,13 @@ class PrivateKey(StringConverterMixin):
         try:
             return crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(buffer), passphrase)
         except crypto.Error as crypto_error:
-            log.get_file_logger(cls).exception('Failed to initialize private key: Invalid PEM contents')
-            raise ValueError('Not a valid PEM private key content') from crypto_error
+            file_logger = log.get_file_logger(cls)
+            for reason in crypto_error.args[0]:
+                if 'bad decrypt' in reason:
+                    file_logger.exception('Failed to initialize private key: Invalid password')
+                    raise ValueError('Invalid private key passphrase') from crypto_error
+            file_logger.exception('Failed to initialize private key: Invalid PEM contents')
+            raise ValueError('Invalid private key PEM content') from crypto_error
 
     @classmethod
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:

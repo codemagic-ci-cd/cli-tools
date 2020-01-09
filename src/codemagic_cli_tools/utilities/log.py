@@ -1,4 +1,5 @@
 import logging
+import os
 import pathlib
 import sys
 import tempfile
@@ -15,7 +16,13 @@ def get_log_path() -> pathlib.Path:
     if not tmp_dir.is_dir():
         tmp_dir = pathlib.Path(tempfile.gettempdir())
     date = datetime.now().strftime('%d-%m-%y')
-    return tmp_dir / f'codemagic-{date}.log'
+    log_path = tmp_dir / f'codemagic-{date}.log'
+
+    if os.environ.get('PYTEST_RUN_CONFIG', False):
+        # Use different log file when tests are running
+        log_path = log_path.parent / f'{log_path.stem}_tests{log_path.suffix}'
+
+    return log_path
 
 
 def _setup_stream_log_handler(

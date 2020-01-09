@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import OpenSSL
 import pytest
 
 from codemagic_cli_tools.models import PrivateKey
@@ -11,11 +10,18 @@ def test_get_public_key(pem):
     assert pem.public_key == pk.get_public_key()
 
 
+def test_private_key_invalid_key(pem):
+    with pytest.raises(ValueError) as exception_info:
+        PrivateKey.from_pem(pem.content + b'not a good suffix', pem.password)
+    error = exception_info.value
+    assert str(error) == 'Invalid private key PEM content'
+
+
 def test_pem_to_rsa_with_encrypted_key_wrong_password(encrypted_pem):
-    with pytest.raises(OpenSSL.crypto.Error) as exception_info:
+    with pytest.raises(ValueError) as exception_info:
         PrivateKey.from_pem(encrypted_pem.content, b'wrong password')
     error = exception_info.value
-    assert 'bad decrypt' in error.args[0][0]
+    assert str(error) == 'Invalid private key passphrase'
 
 
 def test_pem_to_rsa_with_unencrypted_key_wrong_password(unencrypted_pem):
