@@ -42,8 +42,11 @@ class Xcodebuild:
         self.logs_path = xcodebuild_log or self._create_logs_file()
 
     def _create_logs_file(self) -> pathlib.Path:
-        prefix = f'{self.xcode_project.stem}_xcodebuild_logs_'
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', delete=False) as tf:
+        tmp_dir = pathlib.Path('/tmp')
+        if not tmp_dir.is_dir():
+            tmp_dir = pathlib.Path(tempfile.gettempdir())
+        prefix = f'xcodebuild_{self.xcode_project.stem}'
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', delete=False, dir=tmp_dir) as tf:
             return pathlib.Path(tf.name)
 
     def _log_process(self, xcodebuild_cli_process: Optional[XcodebuildCliProcess]):
