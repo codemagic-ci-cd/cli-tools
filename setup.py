@@ -36,7 +36,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            'automatic-provisioning = codemagic_cli_tools.tools:AutomaticProvisioning.invoke_cli',
+            'app-store-connect = codemagic_cli_tools.tools:AppStoreConnect.invoke_cli',
             'git-changelog = codemagic_cli_tools.tools:GitChangelog.invoke_cli',
             'keychain = codemagic_cli_tools.tools:Keychain.invoke_cli',
             'storage = codemagic_cli_tools.tools:Storage.invoke_cli',

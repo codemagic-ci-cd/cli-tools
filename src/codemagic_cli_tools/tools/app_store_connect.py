@@ -31,17 +31,17 @@ from codemagic_cli_tools.apple.resources import SigningCertificate
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
 from codemagic_cli_tools.models import ProvisioningProfile
-from .provisioning.automatic_provisioning_arguments import AutomaticProvisioningArgument
-from .provisioning.automatic_provisioning_arguments import BundleIdArgument
-from .provisioning.automatic_provisioning_arguments import CertificateArgument
-from .provisioning.automatic_provisioning_arguments import CommonArgument
-from .provisioning.automatic_provisioning_arguments import DeviceArgument
-from .provisioning.automatic_provisioning_arguments import ProfileArgument
-from .provisioning.automatic_provisioning_arguments import Types
-from .provisioning.resource_printer import ResourcePrinter
+from ._app_store_connect.arguments import AppStoreConnectArgument
+from ._app_store_connect.arguments import BundleIdArgument
+from ._app_store_connect.arguments import CertificateArgument
+from ._app_store_connect.arguments import CommonArgument
+from ._app_store_connect.arguments import DeviceArgument
+from ._app_store_connect.arguments import ProfileArgument
+from ._app_store_connect.arguments import Types
+from ._app_store_connect.resource_printer import ResourcePrinter
 
 
-class AutomaticProvisioningError(cli.CliAppException):
+class AppStoreConnectError(cli.CliAppException):
     pass
 
 
@@ -57,8 +57,8 @@ def _get_certificate_key(
     return None
 
 
-@cli.common_arguments(*AutomaticProvisioningArgument)
-class AutomaticProvisioning(cli.CliApp):
+@cli.common_arguments(*AppStoreConnectArgument)
+class AppStoreConnect(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
     from Apple Developer Portal using App Store Connect API to perform iOS code signing.
@@ -80,18 +80,18 @@ class AutomaticProvisioning(cli.CliApp):
         self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace) -> AutomaticProvisioning:
-        key_identifier_argument = AutomaticProvisioningArgument.KEY_IDENTIFIER.from_args(cli_args)
-        issuer_id_argument = AutomaticProvisioningArgument.ISSUER_ID.from_args(cli_args)
-        private_key_argument = AutomaticProvisioningArgument.PRIVATE_KEY.from_args(cli_args)
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
+        key_identifier_argument = AppStoreConnectArgument.KEY_IDENTIFIER.from_args(cli_args)
+        issuer_id_argument = AppStoreConnectArgument.ISSUER_ID.from_args(cli_args)
+        private_key_argument = AppStoreConnectArgument.PRIVATE_KEY.from_args(cli_args)
         if issuer_id_argument is None:
-            raise AutomaticProvisioningArgument.ISSUER_ID.raise_argument_error()
+            raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error()
         if key_identifier_argument is None:
-            raise AutomaticProvisioningArgument.KEY_IDENTIFIER.raise_argument_error()
+            raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error()
         if private_key_argument is None:
-            raise AutomaticProvisioningArgument.PRIVATE_KEY.raise_argument_error()
+            raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
-        return AutomaticProvisioning(
+        return AppStoreConnect(
             issuer_id=issuer_id_argument.value,
             key_identifier=key_identifier_argument.value,
             private_key=private_key_argument.value,
@@ -109,7 +109,7 @@ class AutomaticProvisioning(cli.CliApp):
         try:
             resource = resource_manager.create(**create_params)
         except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
+            raise AppStoreConnectError(str(api_error))
 
         self.printer.print_resource(resource, should_print)
         self.printer.log_created(resource)
@@ -120,7 +120,7 @@ class AutomaticProvisioning(cli.CliApp):
         try:
             resource = resource_manager.read(resource_id)
         except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
+            raise AppStoreConnectError(str(api_error))
         self.printer.print_resource(resource, should_print)
         return resource
 
@@ -128,7 +128,7 @@ class AutomaticProvisioning(cli.CliApp):
         try:
             resources = resource_manager.list(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
+            raise AppStoreConnectError(str(api_error))
 
         self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
         self.printer.print_resources(resources, should_print)
@@ -143,7 +143,7 @@ class AutomaticProvisioning(cli.CliApp):
             if ignore_not_found is True and api_error.status_code == 404:
                 self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
             else:
-                raise AutomaticProvisioningError(str(api_error))
+                raise AppStoreConnectError(str(api_error))
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,
@@ -241,7 +241,7 @@ class AutomaticProvisioning(cli.CliApp):
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AutomaticProvisioningError('Cannot create resource without private key')
+            raise AppStoreConnectError('Cannot create resource without private key')
 
         csr = Certificate.create_certificate_signing_request(private_key)
         csr_content = Certificate.get_certificate_signing_request_content(csr)
@@ -272,7 +272,7 @@ class AutomaticProvisioning(cli.CliApp):
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AutomaticProvisioningError('Cannot save resource without private key')
+            raise AppStoreConnectError('Cannot save resource without private key')
         else:
             assert private_key is not None
 
@@ -315,7 +315,7 @@ class AutomaticProvisioning(cli.CliApp):
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AutomaticProvisioningError('Cannot create or save resource without private key')
+            raise AppStoreConnectError('Cannot create or save resource without private key')
 
         certificate_filter = self.api_client.signing_certificates.Filter(
             certificate_type=certificate_type,
@@ -360,7 +360,7 @@ class AutomaticProvisioning(cli.CliApp):
         elif profile_name is None:
             name = f'{bundle_id.attributes.name} {profile_type.value.lower()} {int(time.time())}'
         else:
-            raise AutomaticProvisioningError(f'"{profile_name}" is not a valid {Profile} name')
+            raise AppStoreConnectError(f'"{profile_name}" is not a valid {Profile} name')
 
         create_params = dict(
             name=name,
@@ -427,7 +427,7 @@ class AutomaticProvisioning(cli.CliApp):
                 bundle_id=resource_id,
                 resource_filter=profiles_filter)
         except AppStoreConnectApiError as api_error:
-            raise AutomaticProvisioningError(str(api_error))
+            raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Profile, profiles, profiles_filter, BundleId)
         return profiles
 
@@ -485,7 +485,7 @@ class AutomaticProvisioning(cli.CliApp):
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AutomaticProvisioningError(f'Cannot save {SigningCertificate.s} without private key')
+            raise AppStoreConnectError(f'Cannot save {SigningCertificate.s} without private key')
 
         bundle_ids = self._get_or_create_bundle_ids(bundle_id_identifier, platform, create_resource)
         certificates = self._get_or_create_certificates(
@@ -501,7 +501,7 @@ class AutomaticProvisioning(cli.CliApp):
         bundle_ids = self.list_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
         if not bundle_ids:
             if not create_resource:
-                raise AutomaticProvisioningError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
+                raise AppStoreConnectError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
         return bundle_ids
 
@@ -519,7 +519,7 @@ class AutomaticProvisioning(cli.CliApp):
 
         if not certificates:
             if not create_resource:
-                raise AutomaticProvisioningError(f'Did not find {certificate_type} {SigningCertificate.s}')
+                raise AppStoreConnectError(f'Did not find {certificate_type} {SigningCertificate.s}')
             certificates.append(self.create_certificate(
                 certificate_type,
                 certificate_key=certificate_key,
@@ -570,7 +570,7 @@ class AutomaticProvisioning(cli.CliApp):
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
         if bundle_ids_without_profiles and not create_resource:
             missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
-            raise AutomaticProvisioningError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
+            raise AppStoreConnectError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
 
         created_profiles = self._create_missing_profiles(bundle_ids_without_profiles, certificates, profile_type)
         profiles.extend(created_profiles)
@@ -605,7 +605,7 @@ class AutomaticProvisioning(cli.CliApp):
                 export_path=certificate_path,
                 cli_app=self)
         except (ValueError, IOError) as error:
-            raise AutomaticProvisioningError(*error.args)
+            raise AppStoreConnectError(*error.args)
         self.printer.log_saved(certificate, p12_path)
         return p12_path
 
@@ -620,4 +620,4 @@ class AutomaticProvisioning(cli.CliApp):
 
 
 if __name__ == '__main__':
-    AutomaticProvisioning.invoke_cli()
+    AppStoreConnect.invoke_cli()

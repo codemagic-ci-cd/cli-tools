@@ -41,7 +41,7 @@ class Types:
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
 
-class AutomaticProvisioningArgument(cli.Argument):
+class AppStoreConnectArgument(cli.Argument):
     LOG_REQUESTS = cli.ArgumentProperties(
         key='log_requests',
         flags=('--log-api-calls',),
@@ -329,8 +329,8 @@ class CommonArgument(cli.Argument):
         type=bool,
         description=(
             f'Whether to save the resources to disk. See '
-            f'{Colors.CYAN(AutomaticProvisioningArgument.PROFILES_DIRECTORY.key.upper())} and '
-            f'{Colors.CYAN(AutomaticProvisioningArgument.CERTIFICATES_DIRECTORY.key.upper())} '
+            f'{Colors.CYAN(AppStoreConnectArgument.PROFILES_DIRECTORY.key.upper())} and '
+            f'{Colors.CYAN(AppStoreConnectArgument.CERTIFICATES_DIRECTORY.key.upper())} '
             f'for more information.'
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
