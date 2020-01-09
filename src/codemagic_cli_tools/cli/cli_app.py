@@ -72,7 +72,7 @@ class CliApp(metaclass=abc.ABCMeta):
         cls._printer.info(message, *args, **kwargs)
 
     @classmethod
-    def from_cli_args(cls, cli_args: argparse.Namespace) -> 'CliApp':
+    def from_cli_args(cls, cli_args: argparse.Namespace) -> CliApp:
         return cls(**{argument.value.key: argument.from_args(cli_args) for argument in cls.CLASS_ARGUMENTS})
 
     @classmethod
@@ -89,7 +89,8 @@ class CliApp(metaclass=abc.ABCMeta):
         logger = log.get_logger(cls)
         message = (
             f'Executing {cls.__name__} action {action_name} failed unexpectedly. '
-            f'Detailed logs are available at "{log.get_log_path()}".'
+            f'Detailed logs are available at "{log.get_log_path()}". '
+            f'To see more details about the error, add `--verbose` command line option.'
         )
         logger.warning(Colors.RED(message))
         file_logger = log.get_file_logger(cls)

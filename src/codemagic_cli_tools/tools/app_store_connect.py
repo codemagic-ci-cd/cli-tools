@@ -28,6 +28,7 @@ from codemagic_cli_tools.apple.resources import ProfileState
 from codemagic_cli_tools.apple.resources import ProfileType
 from codemagic_cli_tools.apple.resources import ResourceId
 from codemagic_cli_tools.apple.resources import SigningCertificate
+from codemagic_cli_tools.cli import Colors
 from codemagic_cli_tools.models import Certificate
 from codemagic_cli_tools.models import PrivateKey
 from codemagic_cli_tools.models import ProvisioningProfile
@@ -550,16 +551,27 @@ class AppStoreConnect(cli.CliApp):
                                 profile_type: ProfileType,
                                 create_resource: bool):
         def has_certificate(profile) -> bool:
-            profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
-            return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
+            try:
+                profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
+                return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
+            except AppStoreConnectApiError as err:
+                error = f'Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly'
+                self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
 
         def missing_profile(bundle_id) -> bool:
-            bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
-            return not (profile_ids & {p.id for p in bundle_ids_profiles})
+            try:
+                bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
+                return not (profile_ids & {p.id for p in bundle_ids_profiles})
+            except AppStoreConnectApiError as err:
+                error = f'Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly'
+                self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
 
         certificate_ids = {c.id for c in certificates}
         profiles = self.list_bundle_id_profiles(
-            [bundle_id.id for bundle_id in bundle_ids], profile_type=profile_type, should_print=False)
+            [bundle_id.id for bundle_id in bundle_ids],
+            profile_type=profile_type,
+            profile_state=ProfileState.ACTIVE,
+            should_print=False)
         profiles = list(filter(has_certificate, profiles))
 
         certificate_names = (f'{c.attributes.displayName} [{c.attributes.serialNumber}]' for c in certificates)
