@@ -18,6 +18,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
 from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic_cli_tools.utilities import log
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import PrivateKey
@@ -32,16 +33,25 @@ class Certificate(JsonSerializable, StringConverterMixin):
     def __init__(self, x509_certificate: X509):
         self.x509 = x509_certificate
 
+    @classmethod
+    def _get_x509_certificate(cls, buffer: AnyStr, buffer_type: int):
+        try:
+            return crypto.load_certificate(buffer_type, cls._bytes(buffer))
+        except crypto.Error as crypto_error:
+            format_name = {crypto.FILETYPE_PEM: 'PEM', crypto.FILETYPE_ASN1: 'ASN1'}[buffer_type]
+            log.get_file_logger(cls).exception(f'Failed to initialize certificate: Invalid {format_name} contents')
+            raise ValueError(f'Not a valid {format_name} certificate content') from crypto_error
+
     # Factory methods #
 
     @classmethod
     def from_pem(cls, pem: AnyStr) -> Certificate:
-        x509_certificate = crypto.load_certificate(crypto.FILETYPE_PEM, cls._bytes(pem))
+        x509_certificate = cls._get_x509_certificate(pem, crypto.FILETYPE_PEM)
         return Certificate(x509_certificate)
 
     @classmethod
     def from_ans1(cls, asn1: AnyStr) -> Certificate:
-        x509_certificate = crypto.load_certificate(crypto.FILETYPE_ASN1, cls._bytes(asn1))
+        x509_certificate = cls._get_x509_certificate(asn1, crypto.FILETYPE_ASN1)
         return Certificate(x509_certificate)
 
     @property

@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
 
 from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic_cli_tools.utilities import log
 
 
 class PrivateKey(StringConverterMixin):
@@ -18,12 +19,16 @@ class PrivateKey(StringConverterMixin):
         self.rsa_key = rsa_key
 
     @classmethod
+    def _get_pkey(cls, buffer: AnyStr, passphrase: bytes):
+        try:
+            return crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(buffer), passphrase)
+        except crypto.Error as crypto_error:
+            log.get_file_logger(cls).exception('Failed to initialize private key: Invalid PEM contents')
+            raise ValueError('Not a valid PEM private key content') from crypto_error
+
+    @classmethod
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
-        if password is None:
-            key_password = b''
-        else:
-            key_password = cls._bytes(password)
-        pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(pem_key), key_password)
+        pkey = cls._get_pkey(pem_key, cls._bytes(password) if password else b'')
         return PrivateKey(pkey.to_cryptography_key())
 
     def as_pem(self, password: Optional[AnyStr] = None) -> str:

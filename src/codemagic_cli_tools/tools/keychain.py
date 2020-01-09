@@ -75,7 +75,7 @@ class KeychainArgument(cli.Argument):
         key='certificate_password',
         type=Password,
         description='Encrypted p12 certificate password',
-        argparse_kwargs={'required': False, 'default': 'password'},
+        argparse_kwargs={'required': False, 'default': ''},
     )
 
 
@@ -248,12 +248,10 @@ class Keychain(cli.CliApp, PathFinderMixin):
                 KeychainArgument.CERTIFICATE_PASSWORD)
     def add_certificates(self,
                          certificate_path_patterns: Sequence[pathlib.Path],
-                         certificate_password: Password = Password('password')):
+                         certificate_password: Password = Password('')):
         """
         Add p12 certificate to specified keychain.
         """
-
-        # TODO: Fix adding certificates that do not have password
 
         self.logger.info(f'Add certificates to keychain {self.path}')
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
@@ -294,7 +292,10 @@ class Keychain(cli.CliApp, PathFinderMixin):
         for line in process.stdout.splitlines():
             pem += line + '\n'
             if line == '-----END CERTIFICATE-----':
-                yield Certificate.from_pem(pem)
+                try:
+                    yield Certificate.from_pem(pem)
+                except ValueError:
+                    self.logger.warning(Colors.YELLOW('Failed to read certificate from keychain'))
                 pem = ''
 
 

@@ -50,7 +50,10 @@ def _get_certificate_key(
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None) -> Optional[PrivateKey]:
     password = certificate_key_password.value if certificate_key_password else None
     if certificate_key is not None:
-        return PrivateKey.from_pem(certificate_key.value, password)
+        try:
+            return PrivateKey.from_pem(certificate_key.value, password)
+        except ValueError:
+            CertificateArgument.PRIVATE_KEY.raise_argument_error('Not a valid certificate private key')
     return None
 
 
@@ -229,7 +232,7 @@ class AutomaticProvisioning(cli.CliApp):
                            certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
                            certificate_key: Optional[Types.CertificateKeyArgument] = None,
                            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                           p12_container_password: str = 'password',
+                           p12_container_password: str = '',
                            save: bool = False,
                            should_print: bool = True) -> SigningCertificate:
         """
@@ -260,7 +263,7 @@ class AutomaticProvisioning(cli.CliApp):
                         certificate_resource_id: ResourceId,
                         certificate_key: Optional[Types.CertificateKeyArgument] = None,
                         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                        p12_container_password: str = 'password',
+                        p12_container_password: str = '',
                         save: bool = False,
                         should_print: bool = True) -> SigningCertificate:
         """
@@ -303,7 +306,7 @@ class AutomaticProvisioning(cli.CliApp):
                           display_name: Optional[str] = None,
                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                          p12_container_password: str = 'password',
+                          p12_container_password: str = '',
                           save: bool = False,
                           should_print: bool = True) -> List[SigningCertificate]:
         """
@@ -471,7 +474,7 @@ class AutomaticProvisioning(cli.CliApp):
                             bundle_id_identifier: str,
                             certificate_key: Optional[Types.CertificateKeyArgument] = None,
                             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                            p12_container_password: str = 'password',
+                            p12_container_password: str = '',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
                             profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
                             create_resource: bool = False) -> Tuple[List[Profile], List[SigningCertificate]]:

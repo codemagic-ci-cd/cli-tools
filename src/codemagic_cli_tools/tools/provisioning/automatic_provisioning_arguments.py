@@ -259,7 +259,7 @@ class CertificateArgument(cli.Argument):
             'If provided, the saved p12 container will be encrypted using this password. '
             f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
         ),
-        argparse_kwargs={'required': False, 'default': 'password'},
+        argparse_kwargs={'required': False, 'default': ''},
     )
 
 
