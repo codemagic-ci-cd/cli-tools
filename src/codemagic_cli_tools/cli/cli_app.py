@@ -118,6 +118,7 @@ class CliApp(metaclass=abc.ABCMeta):
         return instance
 
     def _invoke_action(self, args: argparse.Namespace):
+        os.environ['_CODEMAGIC_CLI_TOOLS_CLI_INVOCATION'] = 'true'
         actions = self.get_cli_actions()
         cli_action = {ac.action_name: ac for ac in actions}[args.action]
         action_args = {
@@ -125,6 +126,10 @@ class CliApp(metaclass=abc.ABCMeta):
             for arg_type in cli_action.arguments
         }
         return cli_action(**action_args)
+
+    @classmethod
+    def is_cli_invocation(cls) -> bool:
+        return os.environ.get('_CODEMAGIC_CLI_TOOLS_CLI_INVOCATION') == 'true'
 
     @classmethod
     def invoke_cli(cls) -> NoReturn:

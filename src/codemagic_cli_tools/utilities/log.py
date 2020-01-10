@@ -5,10 +5,55 @@ import sys
 import tempfile
 from datetime import datetime
 from typing import IO
+from typing import Optional
 from typing import Type
 
-_BASE_LOGGER = logging.getLogger('codemagic-cli-tools-base-logger')
 Logger = logging.Logger
+
+
+class LogHandlers:
+    stream_fmt = '%(message)s'
+    stream_fmt_verbose = '[%(asctime)s] %(levelname)-5s > %(message)s'
+    file_fmt = '[%(asctime)s] %(levelname)-5s %(filename)s:%(lineno)d > %(message)s'
+
+    _stream_handler: Optional[logging.StreamHandler] = None
+    _file_handler: Optional[logging.FileHandler] = None
+
+    @classmethod
+    def configure_stream_handler(cls,
+                                 stream: IO = sys.stderr,
+                                 verbose: bool = False,
+                                 enable_logging: bool = True) -> logging.StreamHandler:
+        fmt = cls.stream_fmt
+        if verbose:
+            fmt = cls.stream_fmt_verbose
+            level = logging.DEBUG
+        elif not enable_logging:
+            level = logging.ERROR
+        else:
+            level = logging.INFO
+
+        stream_formatter = logging.Formatter(fmt, '%H:%M:%S')
+        cls._stream_handler = logging.StreamHandler(stream)
+        cls._stream_handler.setLevel(level)
+        cls._stream_handler.setFormatter(stream_formatter)
+        return cls._stream_handler
+
+    @classmethod
+    def configure_file_handler(cls) -> logging.FileHandler:
+        file_formatter = logging.Formatter(cls.file_fmt, '%H:%M:%S %d-%m-%Y')
+        cls._file_handler = logging.FileHandler(get_log_path())
+        cls._file_handler.setLevel(logging.DEBUG)
+        cls._file_handler.setFormatter(file_formatter)
+        return cls._file_handler
+
+    @classmethod
+    def get_file_handler(cls) -> logging.FileHandler:
+        return cls._file_handler or cls.configure_file_handler()
+
+    @classmethod
+    def get_stream_handler(cls) -> logging.StreamHandler:
+        return cls._stream_handler or cls.configure_stream_handler(enable_logging=False)
 
 
 def get_log_path() -> pathlib.Path:
@@ -25,37 +70,6 @@ def get_log_path() -> pathlib.Path:
     return log_path
 
 
-def _setup_stream_log_handler(
-        stream: IO = sys.stderr,
-        verbose: bool = False,
-        enable_logging: bool = True) -> logging.Handler:
-    if verbose:
-        fmt = '[%(asctime)s] %(levelname)-5s > %(message)s'
-        level = logging.DEBUG
-    elif not enable_logging:
-        fmt = '%(message)s'
-        level = logging.ERROR
-    else:
-        fmt = '%(message)s'
-        level = logging.INFO
-
-    handler = logging.StreamHandler(stream)
-    formatter = logging.Formatter(fmt, '%H:%M:%S')
-    handler.setLevel(level)
-    handler.setFormatter(formatter)
-    return handler
-
-
-def _setup_file_log_handler() -> logging.Handler:
-    fmt = '[%(asctime)s] %(levelname)-5s %(filename)s:%(lineno)d > %(message)s'
-    formatter = logging.Formatter(fmt, '%H:%M:%S %d-%m-%Y')
-    path = get_log_path()
-    handler = logging.FileHandler(path)
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-    return handler
-
-
 def _get_logger_name(base_name: str, file_logging: bool, stream_logging: bool) -> str:
     choices = ((file_logging, 'File'), (stream_logging, 'Stream'))
     middle = ''.join(name for log, name in choices if log)
@@ -63,18 +77,19 @@ def _get_logger_name(base_name: str, file_logging: bool, stream_logging: bool) -
 
 
 def get_printer(klass: Type):
+    from codemagic_cli_tools.cli import CliApp
+
     printer = logging.getLogger(f'{klass.__name__}Printer')
 
     printer.setLevel(logging.DEBUG)
+    printer.addHandler(LogHandlers.get_file_handler())
 
-    file_handlers = [h for h in _BASE_LOGGER.handlers if isinstance(h, logging.FileHandler)]
-    stream_handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(message)s')
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(formatter)
-
-    printer.addHandler(file_handlers[0])
-    printer.addHandler(stream_handler)
+    if CliApp.is_cli_invocation():
+        stream_formatter = logging.Formatter('%(message)s')
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)
+        stream_handler.setFormatter(stream_formatter)
+        printer.addHandler(stream_handler)
 
     return printer
 
@@ -87,11 +102,11 @@ def get_logger(klass: Type, *, log_to_file: bool = True, log_to_stream: bool = T
 
     logger.setLevel(logging.DEBUG)
     if log_to_file:
-        file_handlers = [h for h in _BASE_LOGGER.handlers if isinstance(h, logging.FileHandler)]
-        logger.addHandler(file_handlers[0])
+        logger.addHandler(LogHandlers.get_file_handler())
     if log_to_stream:
-        stream_handlers = [h for h in _BASE_LOGGER.handlers if isinstance(h, logging.StreamHandler)]
-        logger.addHandler(stream_handlers[0])
+        logger.addHandler(LogHandlers.get_stream_handler())
+    if not log_to_stream and not log_to_file:
+        logger.addHandler(logging.NullHandler())
 
     return logger
 
@@ -112,7 +127,5 @@ def initialize_logging(
         requests_logger = logging.getLogger(logger_name)
         requests_logger.setLevel(logging.ERROR)
 
-    stream_handler = _setup_stream_log_handler(stream, verbose, enable_logging)
-    file_handler = _setup_file_log_handler()
-    _BASE_LOGGER.addHandler(stream_handler)
-    _BASE_LOGGER.addHandler(file_handler)
+    LogHandlers.configure_stream_handler(stream, verbose, enable_logging)
+    LogHandlers.configure_file_handler()

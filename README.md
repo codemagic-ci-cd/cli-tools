@@ -23,3 +23,16 @@ For example:
 ```
 universal-apk generate --help
 ```
+
+All tools have mirroring Python api too:
+
+```python
+>>> from codemagic_cli_tools.tools import AppStoreConnect
+>>> from codemagic_cli_tools.tools import GitChangelog
+>>> from codemagic_cli_tools.tools import Keychain
+>>> from codemagic_cli_tools.tools import UniversalApkGenerator
+>>> from codemagic_cli_tools.tools import XcodeProject
+>>> Keychain().get_default()
+PosixPath('/Users/priit/Library/Keychains/login.keychain-db')
+...
+```
