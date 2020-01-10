@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import pathlib
 import subprocess
 import sys
@@ -29,7 +28,6 @@ class Xcodebuild:
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
-                 xcodebuild_log: Optional[pathlib.Path] = None,
                  xcpretty: Optional[Xcpretty] = None):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
@@ -39,14 +37,16 @@ class Xcodebuild:
         self.target = target_name
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
-        self.logs_path = xcodebuild_log or self._create_logs_file()
+        self.logs_path = self._get_logs_path()
 
-    def _create_logs_file(self) -> pathlib.Path:
+    def _get_logs_path(self) -> pathlib.Path:
         tmp_dir = pathlib.Path('/tmp')
         if not tmp_dir.is_dir():
             tmp_dir = pathlib.Path(tempfile.gettempdir())
-        prefix = f'xcodebuild_{self.xcode_project.stem}'
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', delete=False, dir=tmp_dir) as tf:
+        logs_dir = tmp_dir / 'xcodebuild_logs'
+        logs_dir.mkdir(exist_ok=True)
+        prefix = f'{self.xcode_project.stem}_'
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', dir=logs_dir) as tf:
             return pathlib.Path(tf.name)
 
     def _log_process(self, xcodebuild_cli_process: Optional[XcodebuildCliProcess]):
