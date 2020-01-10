@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from codemagic_cli_tools import models
-from codemagic_cli_tools.tools.universal_apk_generator import UniversalApkGenerator
-from codemagic_cli_tools.tools.universal_apk_generator import UniversalApkGeneratorArgument
+from codemagic import models
+from codemagic.tools.universal_apk_generator import UniversalApkGenerator
+from codemagic.tools.universal_apk_generator import UniversalApkGeneratorArgument
 
 SIGNING_INFO_ARGS = (
     UniversalApkGeneratorArgument.KEYSTORE_PATH,

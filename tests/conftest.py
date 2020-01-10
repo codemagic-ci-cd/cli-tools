@@ -13,10 +13,10 @@ import pytest
 
 sys.path.append('src')
 
-from codemagic_cli_tools.utilities import log
-from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
-from codemagic_cli_tools.apple.app_store_connect import IssuerId
-from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
+from codemagic.utilities import log
+from codemagic.apple.app_store_connect import AppStoreConnectApiClient
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
 
 log.initialize_logging(
     stream=open(os.devnull, 'w'),

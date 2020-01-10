@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from cryptography.hazmat.primitives import serialization
 
-from codemagic_cli_tools.models import Certificate
-from codemagic_cli_tools.models import PrivateKey
+from codemagic.models import Certificate
+from codemagic.models import PrivateKey
 
 public_bytes = \
     b'-----BEGIN CERTIFICATE REQUEST-----\n' \

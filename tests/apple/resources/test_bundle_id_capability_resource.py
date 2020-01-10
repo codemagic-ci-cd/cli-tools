@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codemagic_cli_tools.apple.resources import BundleIdCapability
+from codemagic.apple.resources import BundleIdCapability
 
 
 def test_bundle_id_capability_initialization(api_bundle_id_capability):

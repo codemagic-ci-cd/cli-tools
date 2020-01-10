@@ -8,10 +8,10 @@ from typing import Union
 
 import pytest
 
-from codemagic_cli_tools import cli
-from codemagic_cli_tools.cli import Colors
-from codemagic_cli_tools.cli.argument import EnvironmentArgumentValue
-from codemagic_cli_tools.cli.argument import TypedCliArgument
+from codemagic import cli
+from codemagic.cli import Colors
+from codemagic.cli.argument import EnvironmentArgumentValue
+from codemagic.cli.argument import TypedCliArgument
 
 mock_dir = pathlib.Path(__file__).parent / 'mocks'
 

@@ -1,6 +1,6 @@
 import pytest
 
-from codemagic_cli_tools.mixins import StringConverterMixin
+from codemagic.mixins import StringConverterMixin
 
 
 @pytest.mark.parametrize('bytes_or_str, expected_result', [

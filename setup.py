@@ -4,7 +4,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 package_meta = {}
-exec(pathlib.Path('src/codemagic_cli_tools/__version__.py').read_text(), package_meta)
+exec(pathlib.Path('src/codemagic/__version__.py').read_text(), package_meta)
 
 setup(
     name=package_meta['__title__'],
@@ -35,11 +35,11 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            'app-store-connect = codemagic_cli_tools.tools:AppStoreConnect.invoke_cli',
-            'git-changelog = codemagic_cli_tools.tools:GitChangelog.invoke_cli',
-            'keychain = codemagic_cli_tools.tools:Keychain.invoke_cli',
-            'universal-apk = codemagic_cli_tools.tools:UniversalApkGenerator.invoke_cli',
-            'xcode-project = codemagic_cli_tools.tools:XcodeProject.invoke_cli',
+            'app-store-connect = codemagic.tools:AppStoreConnect.invoke_cli',
+            'git-changelog = codemagic.tools:GitChangelog.invoke_cli',
+            'keychain = codemagic.tools:Keychain.invoke_cli',
+            'universal-apk = codemagic.tools:UniversalApkGenerator.invoke_cli',
+            'xcode-project = codemagic.tools:XcodeProject.invoke_cli',
         ]
     },
 )

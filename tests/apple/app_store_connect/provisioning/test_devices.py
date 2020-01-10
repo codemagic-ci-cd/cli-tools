@@ -2,11 +2,11 @@ import uuid
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import BundleIdPlatform
-from codemagic_cli_tools.apple.resources import Device
-from codemagic_cli_tools.apple.resources import DeviceStatus
-from codemagic_cli_tools.apple.resources import ResourceId
-from codemagic_cli_tools.apple.resources import ResourceType
+from codemagic.apple.resources import BundleIdPlatform
+from codemagic.apple.resources import Device
+from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 DEVICE_ID = ResourceId('D9PW3SW6K2')

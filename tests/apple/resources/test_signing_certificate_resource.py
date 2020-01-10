@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codemagic_cli_tools.apple.resources import SigningCertificate
+from codemagic.apple.resources import SigningCertificate
 
 
 def test_signing_certificate_initialization(api_certificate):

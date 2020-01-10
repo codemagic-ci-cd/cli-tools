@@ -1,6 +1,6 @@
 import pytest
 
-from codemagic_cli_tools.utilities.levenshtein_distance import levenshtein_distance
+from codemagic.utilities.levenshtein_distance import levenshtein_distance
 
 
 @pytest.mark.parametrize('s1, s2, distance', [

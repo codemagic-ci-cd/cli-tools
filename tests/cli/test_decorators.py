@@ -2,7 +2,7 @@ import argparse
 
 import pytest
 
-from codemagic_cli_tools import cli
+from codemagic import cli
 
 
 class _TestArgument(cli.Argument):

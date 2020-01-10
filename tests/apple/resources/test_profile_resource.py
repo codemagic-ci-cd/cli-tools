@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codemagic_cli_tools.apple.resources import Profile
+from codemagic.apple.resources import Profile
 
 
 def test_profile_initialization(api_profile):

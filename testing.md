@@ -37,6 +37,6 @@ For more information follow Apple's official documentation:
 Static type checks are done using [`mypy`](http://mypy-lang.org/):
 
 ```bash
-MYPYPATH=stubs mypy src/codemagic_cli_tools
+MYPYPATH=stubs mypy src/codemagic
 ```
 

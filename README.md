@@ -27,11 +27,11 @@ universal-apk generate --help
 All tools have mirroring Python api too:
 
 ```python
->>> from codemagic_cli_tools.tools import AppStoreConnect
->>> from codemagic_cli_tools.tools import GitChangelog
->>> from codemagic_cli_tools.tools import Keychain
->>> from codemagic_cli_tools.tools import UniversalApkGenerator
->>> from codemagic_cli_tools.tools import XcodeProject
+>>> from codemagic.tools import AppStoreConnect
+>>> from codemagic.tools import GitChangelog
+>>> from codemagic.tools import Keychain
+>>> from codemagic.tools import UniversalApkGenerator
+>>> from codemagic.tools import XcodeProject
 >>> Keychain().get_default()
 PosixPath('/Users/priit/Library/Keychains/login.keychain-db')
 ...

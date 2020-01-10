@@ -7,9 +7,9 @@ from unittest import mock
 
 import pytest
 
-from codemagic_cli_tools.tools.app_store_connect import AppStoreConnect
-from codemagic_cli_tools.tools.app_store_connect import AppStoreConnectArgument
-from codemagic_cli_tools.tools.app_store_connect import Types
+from codemagic.tools.app_store_connect import AppStoreConnect
+from codemagic.tools.app_store_connect import AppStoreConnectArgument
+from codemagic.tools.app_store_connect import Types
 
 
 @pytest.fixture(autouse=True)
@@ -65,7 +65,7 @@ def test_missing_private_key_arg(namespace_kwargs):
     (AppStoreConnectArgument.KEY_IDENTIFIER, 0),
     (AppStoreConnectArgument.ISSUER_ID, 1),
 ])
-@mock.patch('codemagic_cli_tools.tools.app_store_connect.AppStoreConnectApiClient')
+@mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
 def test_missing_arg_from_env(MockApiClient, namespace_kwargs, argument, api_client_arg_index):
     namespace_kwargs[argument.key] = None
 
@@ -88,7 +88,7 @@ def test_private_key_invalid_path(namespace_kwargs):
     assert 'this-is-not-a-file' in str(exception_info.value)
 
 
-@mock.patch('codemagic_cli_tools.tools.app_store_connect.AppStoreConnectApiClient')
+@mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
 def test_read_private_key(MockApiClient, namespace_kwargs):
     pk = '-----BEGIN PRIVATE KEY-----\n...'
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = Types.PrivateKeyArgument(pk)
@@ -101,7 +101,7 @@ def test_read_private_key(MockApiClient, namespace_kwargs):
     lambda filename, ns_kwargs: ns_kwargs.update(
         {AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument(f'@file:{filename}')})
 ])
-@mock.patch('codemagic_cli_tools.tools.app_store_connect.AppStoreConnectApiClient')
+@mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
 def test_private_key_path_arg(MockApiClient, configure_variable, namespace_kwargs):
     pk = '-----BEGIN PRIVATE KEY-----\n...'
     with NamedTemporaryFile(mode='w') as tf:
@@ -118,7 +118,7 @@ def test_private_key_path_arg(MockApiClient, configure_variable, namespace_kwarg
     lambda ns_kwargs: ns_kwargs.update(
         {AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument(f'@env:PK_VALUE')})
 ])
-@mock.patch('codemagic_cli_tools.tools.app_store_connect.AppStoreConnectApiClient')
+@mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
 def test_private_key_env_arg(MockApiClient, configure_variable, namespace_kwargs):
     pk = '-----BEGIN PRIVATE KEY-----\n...'
     os.environ['PK_VALUE'] = pk

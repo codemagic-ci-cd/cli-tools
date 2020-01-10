@@ -1,7 +1,7 @@
 import pytest
 
-from codemagic_cli_tools.models import ExportOptions
-from codemagic_cli_tools.models.export_options import ProvisioningProfileInfo
+from codemagic.models import ExportOptions
+from codemagic.models.export_options import ProvisioningProfileInfo
 
 
 def test_export_options_initialize_from_path(export_options_list_path, export_options_dict):

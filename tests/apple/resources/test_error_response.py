@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from codemagic_cli_tools.apple.resources import ErrorResponse
+from codemagic.apple.resources import ErrorResponse
 
 
 def test_error_response_initialization(api_error_response):

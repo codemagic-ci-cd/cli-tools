@@ -5,9 +5,9 @@ from datetime import timezone
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import Profile
-from codemagic_cli_tools.apple.resources import Resource
-from codemagic_cli_tools.apple.resources.resource import PrettyNameMeta
+from codemagic.apple.resources import Profile
+from codemagic.apple.resources import Resource
+from codemagic.apple.resources.resource import PrettyNameMeta
 
 
 @pytest.mark.parametrize('iso_8601_timestamp, expected_datetime', [

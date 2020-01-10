@@ -4,7 +4,7 @@ from typing import Optional
 
 import pytest
 
-from codemagic_cli_tools.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 
 StubEnum = enum.Enum('StubEnum', {'A': 'a', 'B': 'b'})
 
