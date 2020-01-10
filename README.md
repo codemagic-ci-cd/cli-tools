@@ -10,11 +10,11 @@ pip3 install codemagic-cli-tools
 
 Package installs the following executables to your path:
 
-* `storage`
-* `grab`
-* `keychain`
+* `app-store-connect`
 * `git-changelog`
+* `keychain`
 * `universal-apk`
+* `xcode-project`
 
 See their documentation by running `<command> --help` or `<command> <subcommand> --help`.
 
