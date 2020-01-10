@@ -57,15 +57,14 @@ class LogHandlers:
 
 
 def get_log_path() -> pathlib.Path:
-    tmp_dir = pathlib.Path('/tmp')
-    if not tmp_dir.is_dir():
-        tmp_dir = pathlib.Path(tempfile.gettempdir())
+    tmp_dir = pathlib.Path(tempfile.gettempdir())
     date = datetime.now().strftime('%d-%m-%y')
-    log_path = tmp_dir / f'codemagic-{date}.log'
 
     if os.environ.get('PYTEST_RUN_CONFIG', False):
         # Use different log file when tests are running
-        log_path = log_path.parent / f'{log_path.stem}_tests{log_path.suffix}'
+        log_path = tmp_dir / f'codemagic-{date}-tests.log'
+    else:
+        log_path = tmp_dir / f'codemagic-{date}.log'
 
     return log_path
 
