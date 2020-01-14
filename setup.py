@@ -1,24 +1,23 @@
+import pathlib
+
 from setuptools import find_packages
 from setuptools import setup
 
-
-def get_version():
-    # TODO: implement versioning
-    return '0.0.3'
-
+package_meta = {}
+exec(pathlib.Path('src/codemagic/__version__.py').read_text(), package_meta)
 
 setup(
-    name='codemagic-cli-tools',
-    version=get_version(),
-    url='https://github.com/codemagic-ci-cd/cli-tools',
+    name=package_meta['__title__'],
+    version=package_meta['__version__'],
+    description=package_meta['__description__'],
+    url=package_meta['__url__'],
     project_urls={
-        "Documentation": "https://github.com/codemagic-ci-cd/cli-tools/README.md",
+        "Documentation": "https://github.com/codemagic-ci-cd/cli-tools/blob/master/README.md",
         "Code": "https://github.com/codemagic-ci-cd/cli-tools",
         "Issue tracker": "https://github.com/codemagic-ci-cd/cli-tools/issues",
     },
-    license='GNU General Public License v3.0',
-    description="CLI tools used in Codemagic builds",
-    long_description=open('README.md').read(),
+    license=package_meta['__licence__'],
+    long_description=pathlib.Path('README.md').read_text(),
     long_description_content_type='text/markdown',
     packages=find_packages('src'),
     package_dir={'': 'src'},
@@ -36,11 +35,11 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "storage = codemagic_cli_tools.tools:Storage.invoke_cli",
-            "grab = codemagic_cli_tools.tools:Grab.invoke_cli",
-            "keychain = codemagic_cli_tools.tools:Keychain.invoke_cli",
-            "git-changelog = codemagic_cli_tools.tools:GitChangelog.invoke_cli",
-            "universal-apk = codemagic_cli_tools.tools:UniversalApkGenerator.invoke_cli",
+            'app-store-connect = codemagic.tools:AppStoreConnect.invoke_cli',
+            'git-changelog = codemagic.tools:GitChangelog.invoke_cli',
+            'keychain = codemagic.tools:Keychain.invoke_cli',
+            'universal-apk = codemagic.tools:UniversalApkGenerator.invoke_cli',
+            'xcode-project = codemagic.tools:XcodeProject.invoke_cli',
         ]
     },
 )

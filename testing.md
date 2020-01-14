@@ -23,8 +23,8 @@ export TEST_APPLE_ISSUER_ID=...  # Issued ID
 ```
 And one of either
 ```bash
-export TEST_APPLE_PRIVATE_KEY_PATH=...  # Path to private key in .m8 format
-export TEST_APPLE_PRIVATE_KEY_CONTENT=...  # Content of .m8 private key
+export TEST_APPLE_PRIVATE_KEY_PATH=...  # Path to private key in .p8 format
+export TEST_APPLE_PRIVATE_KEY_CONTENT=...  # Content of .p8 private key
 ```
 
 Those can be obtained from
@@ -37,6 +37,6 @@ For more information follow Apple's official documentation:
 Static type checks are done using [`mypy`](http://mypy-lang.org/):
 
 ```bash
-MYPYPATH=stubs mypy src/codemagic_cli_tools
+MYPYPATH=stubs mypy src/codemagic
 ```
 

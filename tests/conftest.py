@@ -6,16 +6,23 @@ import os
 import pathlib
 import sys
 from functools import lru_cache
-from typing import Optional
 from typing import NamedTuple
+from typing import Optional
 
 import pytest
 
 sys.path.append('src')
 
-from codemagic_cli_tools.apple.app_store_connect import AppStoreConnectApiClient
-from codemagic_cli_tools.apple.app_store_connect import IssuerId
-from codemagic_cli_tools.apple.app_store_connect import KeyIdentifier
+from codemagic.utilities import log
+from codemagic.apple.app_store_connect import AppStoreConnectApiClient
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
+
+log.initialize_logging(
+    stream=open(os.devnull, 'w'),
+    verbose=False,
+    enable_logging=False
+)
 
 
 class PEM(NamedTuple):
@@ -112,6 +119,13 @@ def class_encrypted_pem(request):
 @pytest.fixture
 def unencrypted_pem() -> PEM:
     return _unencrypted_pem()
+
+
+@pytest.fixture
+def certificate_asn1() -> bytes:
+    mocks_dir = pathlib.Path(__file__).parent / 'mocks'
+    asn1_path = mocks_dir / 'certificate.asn1'
+    return asn1_path.read_bytes()
 
 
 @pytest.fixture(scope='class')

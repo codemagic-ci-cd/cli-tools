@@ -2,13 +2,13 @@ import uuid
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import BundleId
-from codemagic_cli_tools.apple.resources import BundleIdCapability
-from codemagic_cli_tools.apple.resources import BundleIdPlatform
-from codemagic_cli_tools.apple.resources import LinkedResourceData
-from codemagic_cli_tools.apple.resources import Profile
-from codemagic_cli_tools.apple.resources import ResourceId
-from codemagic_cli_tools.apple.resources import ResourceType
+from codemagic.apple.resources import BundleId
+from codemagic.apple.resources import BundleIdCapability
+from codemagic.apple.resources import BundleIdPlatform
+from codemagic.apple.resources import LinkedResourceData
+from codemagic.apple.resources import Profile
+from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 CAPYBARA_ID = ResourceId('F88J43FA9J')
@@ -17,8 +17,8 @@ CAPYBARA_ID = ResourceId('F88J43FA9J')
 @pytest.mark.skip(reason='Live App Store Connect API access')
 class BundleIdsTest(ResourceManagerTestsBase):
 
-    def test_register(self):
-        bundle_id = self.api_client.bundle_ids.register(
+    def test_create(self):
+        bundle_id = self.api_client.bundle_ids.create(
             'com.example.test-app',
             'com example test app',
             BundleIdPlatform.IOS

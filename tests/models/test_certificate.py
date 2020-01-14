@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from cryptography.hazmat.primitives import serialization
 
-from codemagic_cli_tools.models import Certificate
-from codemagic_cli_tools.models import PrivateKey
+from codemagic.models import Certificate
+from codemagic.models import PrivateKey
 
 public_bytes = \
     b'-----BEGIN CERTIFICATE REQUEST-----\n' \
@@ -24,8 +24,20 @@ public_bytes = \
 
 
 def test_create_certificate_signing_request(unencrypted_pem):
-    rsa = PrivateKey.pem_to_rsa(unencrypted_pem.content)
-    csr = Certificate.create_certificate_signing_request(rsa)
+    pk = PrivateKey.from_pem(unencrypted_pem.content)
+    csr = Certificate.create_certificate_signing_request(pk)
     assert csr.signature_hash_algorithm.name == 'sha256'
     assert csr.is_signature_valid is True
     assert csr.public_bytes(serialization.Encoding.PEM) == public_bytes
+
+
+def test_certificate_has_key(certificate_asn1, unencrypted_pem):
+    pk = PrivateKey.from_pem(unencrypted_pem.content)
+    certificate = Certificate.from_ans1(certificate_asn1)
+    assert certificate.is_signed_with(pk) is True
+
+
+def test_certificate_does_not_have_key(certificate_asn1, encrypted_pem):
+    pk = PrivateKey.from_pem(encrypted_pem.content, encrypted_pem.password)
+    certificate = Certificate.from_ans1(certificate_asn1)
+    assert certificate.is_signed_with(pk) is False

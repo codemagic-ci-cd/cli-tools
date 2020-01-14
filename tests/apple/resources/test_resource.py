@@ -5,7 +5,9 @@ from datetime import timezone
 
 import pytest
 
-from codemagic_cli_tools.apple.resources import Resource
+from codemagic.apple.resources import Profile
+from codemagic.apple.resources import Resource
+from codemagic.apple.resources.resource import PrettyNameMeta
 
 
 @pytest.mark.parametrize('iso_8601_timestamp, expected_datetime', [
@@ -24,3 +26,61 @@ def test_to_iso_8601(iso_8601_timestamp, expected_datetime):
 ])
 def test_from_iso_8601(given_datetime, expected_iso_8601_timestamp):
     assert Resource.from_iso_8601(given_datetime) == expected_iso_8601_timestamp
+
+
+def test_resource_tabular_formatting(api_profile):
+    expected_format = \
+        'Id: 253YPL8VY6\n' \
+        'Type: profiles\n' \
+        'Name: test profile\n' \
+        'Platform: IOS\n' \
+        'Uuid: 55b8fdb4-b7d2-402d-b48b-2523f7b9c384\n' \
+        'Created date: 2019-11-29 13:56:50.220000+00:00\n' \
+        'State: ACTIVE\n' \
+        'Type: IOS_APP_DEVELOPMENT\n' \
+        'Expiration date: 2020-11-28 13:56:50.220000+00:00\n' \
+        'Content: "..."'
+    assert str(Profile(api_profile)) == expected_format
+
+
+@pytest.mark.parametrize('class_name, pretty_name', [
+    ('BundleId', 'Bundle ID'),
+    ('RandomNameWithIdInIt', 'Random Name With ID In It'),
+    ('Resource', 'Resource')
+])
+def test_pretty_name_meta(class_name, pretty_name):
+    class K(metaclass=PrettyNameMeta):
+        dict = lambda self: {}
+
+    K.__name__ = class_name
+    assert str(K) == pretty_name
+
+
+@pytest.mark.parametrize('class_name, pretty_name', [
+    ('BundleId', 'Bundle ID'),
+    ('RandomNameWithIdInIt', 'Random Name With ID In It'),
+    ('Resource', 'Resource'),
+    ('name', 'name'),
+])
+def test_pretty_name(class_name, pretty_name):
+    class K(metaclass=PrettyNameMeta):
+        ...
+
+    K.__name__ = class_name
+    assert str(K) == pretty_name
+    assert K.plural(1) == pretty_name
+
+
+@pytest.mark.parametrize('class_name, plural_name', [
+    ('Capability', 'Capabilities'),
+    ('Resource', 'Resources'),
+    ('name', 'names'),
+    ('BundleId', 'Bundle IDs'),
+])
+def test_pretty_name_plural(class_name, plural_name):
+    class K(metaclass=PrettyNameMeta):
+        ...
+
+    K.__name__ = class_name
+    assert K.plural() == plural_name
+    assert K.s == plural_name
