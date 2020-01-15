@@ -26,7 +26,7 @@ list_profiles
 |--type|PROFILE_TYPE_OPTIONAL|Type of the provisioning profile|ProfileType|IOS_APP_ADHOC <br />IOS_APP_DEVELOPMENT <br />IOS_APP_INHOUSE <br />IOS_APP_STORE <br />MAC_APP_DEVELOPMENT <br />MAC_APP_DIRECT <br />MAC_APP_STORE <br />TVOS_APP_ADHOC <br />TVOS_APP_DEVELOPMENT <br />TVOS_APP_INHOUSE <br />TVOS_APP_STORE|
 |--state|PROFILE_STATE_OPTIONAL|State of the provisioning profile|ProfileState|ACTIVE <br />INVALID|
 |--name|PROFILE_NAME|Name of the provisioning profile|str||
-|--save|SAVE|Whether to save the resources to disk. See [36mPROFILES_DIRECTORY[0m and [36mCERTIFICATES_DIRECTORY[0m for more information.|bool||
+|--save|SAVE|Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.|bool||
 
 ### Optional arguments for AppStoreConnect
 

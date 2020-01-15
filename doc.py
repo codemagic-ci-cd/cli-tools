@@ -5,7 +5,7 @@ from mdutils.tools.tools import Table
 from mdutils.mdutils import MdUtils
 import mdutils
 from pathlib import Path
-import inspect
+import re
 
 sys.path.append(os.path.abspath('./src'))
 from codemagic import tools
@@ -23,7 +23,7 @@ class ArgumentsSerializer:
             argument = {
                 'name': arg._name_,
                 'key': arg._value_.key,
-                'description': arg._value_.description,
+                'description': str_plain(arg._value_.description),
                 'flags': ', '.join(getattr(arg._value_, 'flags', '')),
             }
             argument.update(self._proccess_kwargs(
@@ -128,7 +128,7 @@ class ToolDocumentationGenerator:
         def _serialize_option(option):
             return {
                 'flags': ', '.join(option.option_strings),
-                'description': option.help.replace('\x1b[37m', '').replace('\x1b[0m', ''),
+                'description': str_plain(option.help),
                 'choices': ', '.join(option.choices) if option.choices else '',
             }
 
@@ -150,7 +150,7 @@ class Writer:
         self.file = file
 
     def write_description(self, content):
-        content = self._str_plain(content)
+        content = str_plain(content)
         self.file.new_header(level=4, title=content)
 
     def write_table(self, content, header):
@@ -167,7 +167,7 @@ class Writer:
         tools_source = [
             [
                 f'[{tool.__name__}]({tool.__name__}/README.md)',
-                self._str_plain(tool.__doc__)
+                str_plain(tool.__doc__)
             ] for tool in tools]
         self.write_table(tools_source, ['Tool name', 'Description'])
 
@@ -176,7 +176,7 @@ class Writer:
         actions_source = [
             [
                 f'[{action["name"]}]({action["name"]}/README.md)',
-                self._str_plain(action['description'])
+                str_plain(action['description'])
             ] for action in actions]
         self.write_table(actions_source, ['Action', 'Description'])
 
@@ -218,16 +218,15 @@ class Writer:
         self.file.new_header(level=3, title=title)
         self.write_table(content, header)
 
-    def _str_plain(self, string):
-        return string.replace('\n', '').replace('\t', '').strip()
+
+def str_plain(string):
+    string = re.compile('(\\x1b\[\d*m|\\x1b\[\d*m)').sub('', string)
+    return string.replace('\n', '').replace('\t', '').strip()
 
 
 def main():
-    from pprint import pprint
     main_dir = 'docs'
     tools = cli.CliApp.__subclasses__()
-    tool = tools[0]
-    # pprint(serialize_default_options(tool))
     MainPageDocumentationGenerator('CLI tools', main_dir).generate(tools)
     for tool in tools:
         ToolDocumentationGenerator(tool, main_dir).generate()

@@ -30,9 +30,9 @@ fetch_signing_files
 |Flags|Argument|Description|Type|Default|Choices|
 | :--- | :--- | :--- | :--- | :--- | :--- |
 |--platform|PLATFORM|Bundle ID platform|BundleIdPlatform|IOS|IOS <br />MAC_OS|
-|--certificate-key|PRIVATE_KEY|Private key used to generate the certificate. Used together with [94m--save[0m or [94m--create[0m options.|CertificateKeyArgument|||
-|--certificate-key-password|PRIVATE_KEY_PASSWORD|Password of the private key used to generate the certificate. Used together with [94m--certificate-key[0m or [94m--certificate-key-path[0m options if the provided key is encrypted.|CertificateKeyPasswordArgument|||
-|--p12-password|P12_CONTAINER_PASSWORD|If provided, the saved p12 container will be encrypted using this password. Used together with [94m--save[0m option.|str|||
+|--certificate-key|PRIVATE_KEY|Private key used to generate the certificate. Used together with --save or --create options.|CertificateKeyArgument|||
+|--certificate-key-password|PRIVATE_KEY_PASSWORD|Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted.|CertificateKeyPasswordArgument|||
+|--p12-password|P12_CONTAINER_PASSWORD|If provided, the saved p12 container will be encrypted using this password. Used together with --save option.|str|||
 |--type|PROFILE_TYPE|Type of the provisioning profile|ProfileType|IOS_APP_DEVELOPMENT|IOS_APP_ADHOC <br />IOS_APP_DEVELOPMENT <br />IOS_APP_INHOUSE <br />IOS_APP_STORE <br />MAC_APP_DEVELOPMENT <br />MAC_APP_DIRECT <br />MAC_APP_STORE <br />TVOS_APP_ADHOC <br />TVOS_APP_DEVELOPMENT <br />TVOS_APP_INHOUSE <br />TVOS_APP_STORE|
 |--create|CREATE_RESOURCE|Whether to create the resource if it does not exist yet|bool|||
 
