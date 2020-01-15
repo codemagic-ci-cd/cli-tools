@@ -25,5 +25,5 @@ use_profiles
 | :--- | :--- | :--- | :--- | :--- | :--- |
 |--project|XCODE_PROJECT_PATTERN|Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory.|Path|**/*.xcodeproj|Yes|
 |--profile|PROFILE_PATHS|Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles.|Path|$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision|Yes|
-|--export-options-plist|EXPORT_OPTIONS_PATH|Path to the generated export options plist|Path|/Users/stas/export_options.plist||
+|--export-options-plist|EXPORT_OPTIONS_PATH|Path to the generated export options plist|Path|$HOME/export_options.plist||
 |--custom-export-options|CUSTOM_EXPORT_OPTIONS|Custom options for generated export options as JSON string. For example '{"uploadBitcode": false, "uploadSymbols": false}'.|_json_dict|||

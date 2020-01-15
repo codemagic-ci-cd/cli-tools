@@ -45,7 +45,9 @@ class ArgumentsSerializer:
 
         def _process_default(default):
             if isinstance(default, tuple) and isinstance(default[0], Path):
-                default = str(default[0]).replace(str(Path.home()), '$HOME')
+                default = default[0]
+            if isinstance(default, Path):
+                default = str(default).replace(str(Path.home()), '$HOME')
             return str(default).replace('|', '&#124;') if default else ''
 
         kwargs = kwargs if kwargs else {}
