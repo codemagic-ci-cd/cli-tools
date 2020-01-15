@@ -5,6 +5,7 @@ from mdutils.tools.tools import Table
 from mdutils.mdutils import MdUtils
 import mdutils
 from pathlib import Path
+import inspect
 
 sys.path.append(os.path.abspath('./src'))
 from codemagic import tools
@@ -32,19 +33,19 @@ class ArgumentsSerializer:
             argument['type'] = arg_type.__name__ if arg_type else ''
 
             if argument['required']:
-                self.optional_args.append(argument)
-            else:
                 self.required_args.append(argument)
+            else:
+                self.optional_args.append(argument)
         return self
 
     def _proccess_kwargs(self, kwargs):
         def _process_choice(choices):
             choices = [str(c) for c in choices] if choices else ''
-            return ', '.join(choices)
+            return ' <br />'.join(choices)
 
         def _process_default(default):
-            if isinstance(default, Path):
-                default = str(default).replace(str(Path.home()), '$HOME')
+            if isinstance(default, tuple) and isinstance(default[0], Path):
+                default = str(default[0]).replace(str(Path.home()), '$HOME')
             return str(default).replace('|', '&#124;') if default else ''
 
         kwargs = kwargs if kwargs else {}
@@ -82,13 +83,15 @@ class ToolDocumentationGenerator:
         self.tool_required_args = class_args_serializer.required_args
         self.tool_optional_args = class_args_serializer.optional_args
         self.tool_serialized_actions = self._serialize_actions()
+        self.tool_optinal_argument, self.tool_options = self._serialize_default_options()
 
         # docs/<tool-name>/README.md
         md = MdUtils(file_name=f'{self.tool_dir_name}/README', title=self.tool_name)
         writer = Writer(md)
         writer.write_description(self.tool.__doc__)
+        writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
         writer.write_actions_table(self.tool_name, self.tool_serialized_actions)
-        writer.write_arguments_tables('Tool', self.tool_required_args, self.tool_optional_args)
+        writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
         md.create_md_file()
 
         for action in self.tool_serialized_actions:
@@ -99,8 +102,9 @@ class ToolDocumentationGenerator:
             md = MdUtils(file_name=f'{dir_name}/README', title=action['name'])
             writer = Writer(md)
             writer.write_description(action['description'])
-            writer.write_arguments_tables('Tool', self.tool_required_args, self.tool_optional_args)
-            writer.write_arguments_tables('Action', action['required_args'], action['optional_args'])
+            writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
+            writer.write_arguments_tables(f'command {action["name"]}', action['required_args'], action['optional_args'])
+            writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
             md.create_md_file()
 
     def _serialize_actions(self):
@@ -114,6 +118,29 @@ class ToolDocumentationGenerator:
                 'optional_args': action_args_serializer.optional_args,
             })
         return serialized_actions
+
+    def _serialize_default_options(self):
+        import argparse
+        from codemagic.cli.cli_help_formatter import CliHelpFormatter
+
+        def _serialize_option(option):
+            return {
+                'flags': ', '.join(option.option_strings),
+                'description': option.help.replace('\x1b[37m', '').replace('\x1b[0m', ''),
+                'choices': ', '.join(option.choices) if option.choices else '',
+            }
+
+        parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=CliHelpFormatter)
+        self.tool.get_default_cli_options(parser)
+        possible_arguments = parser._actions
+        help_option = {}
+        options = []
+        for arg in possible_arguments:
+            if arg.dest == 'help':
+                help_option = _serialize_option(arg)
+            else:
+                options.append(_serialize_option(arg))
+        return help_option, options
 
 
 class Writer:
@@ -133,7 +160,6 @@ class Writer:
             text_align='left'
         )
         self.file.write(table)
-        # self.file.write(f'<span style="font-size:0.7em;"> {table} </span>')
 
     def write_tools_table(self, tools):
         tools_source = [
@@ -153,33 +179,53 @@ class Writer:
         self.write_table(actions_source, ['Action', 'Description'])
 
     def write_arguments_tables(self, obj, required, optional):
-        self._write_arguments_table(f'{obj} required arguments', required)
-        self._write_arguments_table(f'{obj} optional arguments', optional)
+        self._write_arguments_table(f'Required arguments for {obj}', required)
+        self._write_arguments_table(f'Optional arguments for {obj}', optional)
+
+    def write_options_tables(self, help_option, options):
+        self._write_arguments_table(f'Optional arguments', [help_option])
+        self._write_arguments_table(f'Options', options)
 
     def _write_arguments_table(self, title, args):
         if not args:
             return
-        content = [[
-            t['flags'],
-            t['name'],
-            t['description'],
-            t['type'],
-            t['default'],
-            t['nargs'],
-            t['choices']] for t in args]
 
-        header = ['Flags', 'Argument', 'Description', 'Type', 'Default', 'Multiple arguments', 'Choices']
+        parameters_to_show = []
+
+        if [arg['flags'] for arg in args if arg.get('flags')]:
+            parameters_to_show.append({'name': 'flags', 'header': 'Flags'})
+        if [arg['name'] for arg in args if arg.get('name')]:
+            parameters_to_show.append({'name': 'name', 'header': 'Argument'})
+        if [arg['description'] for arg in args if arg.get('description')]:
+            parameters_to_show.append({'name': 'description', 'header': 'Description'})
+        if [arg['type'] for arg in args if arg.get('type')]:
+            parameters_to_show.append({'name': 'type', 'header': 'Type'})
+        if [arg['default'] for arg in args if arg.get('default')]:
+            parameters_to_show.append({'name': 'default', 'header': 'Default'})
+        if [arg['nargs'] for arg in args if arg.get('nargs')]:
+            parameters_to_show.append({'name': 'nargs', 'header': 'Multiple arguments'})
+        if [arg['choices'] for arg in args if arg.get('choices')]:
+            parameters_to_show.append({'name': 'choices', 'header': 'Choices'})
+
+        header = [parameter['header'] for parameter in parameters_to_show]
+        content = [
+            [
+                arg[parameter['name']] for parameter in parameters_to_show
+            ] for arg in args]
+
         self.file.new_header(level=3, title=title)
         self.write_table(content, header)
-
 
     def _str_plain(self, string):
         return string.replace('\n', '').replace('\t', '').strip()
 
 
 def main():
+    from pprint import pprint
     main_dir = 'docs'
     tools = cli.CliApp.__subclasses__()
+    tool = tools[0]
+    # pprint(serialize_default_options(tool))
     MainPageDocumentationGenerator('CLI tools', main_dir).generate(tools)
     for tool in tools:
         ToolDocumentationGenerator(tool, main_dir).generate()

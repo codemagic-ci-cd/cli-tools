@@ -196,7 +196,7 @@ class CliApp(metaclass=abc.ABCMeta):
         )
 
     @classmethod
-    def _setup_default_cli_options(cls, cli_options_parser):
+    def get_default_cli_options(cls, cli_options_parser):
         options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
         options_group.add_argument('-s', '--silent', dest='enable_logging', action='store_false',
                                    help='Disable log output for commands')
@@ -230,7 +230,7 @@ class CliApp(metaclass=abc.ABCMeta):
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
         parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__), formatter_class=CliHelpFormatter)
-        cls._setup_default_cli_options(parser)
+        cls.get_default_cli_options(parser)
 
         action_parsers = parser.add_subparsers(
             dest='action',
@@ -244,7 +244,7 @@ class CliApp(metaclass=abc.ABCMeta):
                 help=sub_action.__doc__,
                 description=Colors.BOLD(sub_action.__doc__))
 
-            cls._setup_default_cli_options(action_parser)
+            cls.get_default_cli_options(action_parser)
             required_arguments = action_parser.add_argument_group(
                 Colors.UNDERLINE(f'Required arguments for command {Colors.BOLD(sub_action.action_name)}'))
             optional_arguments = action_parser.add_argument_group(
