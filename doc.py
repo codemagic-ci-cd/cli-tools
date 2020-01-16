@@ -267,15 +267,13 @@ class Writer:
         if [arg['name'] for arg in args if arg.get('name')]:
             parameters_to_show.append({'name': 'name', 'header': 'Argument'})
         if [arg['description'] for arg in args if arg.get('description')]:
-            parameters_to_show.append(
-                {'name': 'description', 'header': 'Description'})
+            parameters_to_show.append({'name': 'description', 'header': 'Description'})
         if [arg['type'] for arg in args if arg.get('type')]:
             parameters_to_show.append({'name': 'type', 'header': 'Type'})
         if [arg['default'] for arg in args if arg.get('default')]:
             parameters_to_show.append({'name': 'default', 'header': 'Default'})
         if [arg['nargs'] for arg in args if arg.get('nargs')]:
-            parameters_to_show.append(
-                {'name': 'nargs', 'header': 'Multiple arguments'})
+            parameters_to_show.append({'name': 'nargs', 'header': 'Multiple arguments'})
         if [arg['choices'] for arg in args if arg.get('choices')]:
             parameters_to_show.append({'name': 'choices', 'header': 'Choices'})
 
