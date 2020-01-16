@@ -39,8 +39,7 @@ class ArgumentsSerializer:
 
     def _proccess_kwargs(self, kwargs):
         def _process_choice(choices):
-            choices = [str(c) for c in choices] if choices else ''
-            return '<br />'.join(choices)
+            return ', '.join([str(c) for c in choices] if choices else '')
 
         def _process_default(default):
             if isinstance(default, tuple) and isinstance(default[0], Path):
@@ -75,39 +74,33 @@ class ToolDocumentationGenerator:
     def __init__(self, tool, main_dir):
         self.tool = tool
         self.tool_name = tool.__name__
-        self.tool_dir_name = f'{main_dir}/{self.tool_name}'
+        self.tool_prefix = f'{main_dir}/{self.tool_name}'
 
     def generate(self):
-        os.makedirs(self.tool_dir_name, exist_ok=True)
-
         class_args_serializer = ArgumentsSerializer(self.tool.CLASS_ARGUMENTS).serialize()
-        self.tool_required_args = class_args_serializer.required_args
         self.tool_optional_args = class_args_serializer.optional_args
         self.tool_serialized_actions = self._serialize_actions()
-        self.tool_optinal_argument, self.tool_options = self._serialize_default_options()
+        self.tool_options = self._serialize_default_options()
 
-        # docs/<tool-name>/README.md
-        md = MdUtils(file_name=f'{self.tool_dir_name}/README', title=self.tool_name)
+        # docs/<tool-name>.md
+        md = MdUtils(file_name=f'{self.tool_prefix}', title=self.tool_name)
         writer = Writer(md)
         writer.write_tool_command_usage(self)
         writer.write_description(self.tool.__doc__)
-        writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
+        writer.write_options_tables(self.tool_options)
         writer.write_actions_table(self.tool_name, self.tool_serialized_actions)
-        writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
+        writer.write_arguments_tables(self.tool_name, self.tool_optional_args, [])
         md.create_md_file()
 
         for action in self.tool_serialized_actions:
-            # docs/<tool-name>/<action-name>/README.md
-            dir_name = f'{self.tool_dir_name}/{action["name"]}'
-            os.makedirs(f'{dir_name}', exist_ok=True)
-
-            md = MdUtils(file_name=f'{dir_name}/README', title=action['name'])
+            # docs/<tool-name>_<action-name>.md
+            md = MdUtils(file_name=f'{self.tool_prefix}_{action["name"]}', title=action['name'])
             writer = Writer(md)
             writer.write_action_command_usage(self, action)
             writer.write_description(action['description'])
-            writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
-            writer.write_arguments_tables(f'command {action["name"]}', action['required_args'], action['optional_args'])
-            writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
+            writer.write_options_tables(self.tool_options)
+            writer.write_arguments_tables(f'command {action["name"]}', action['optional_args'], action['required_args'])
+            writer.write_arguments_tables(self.tool_name, self.tool_optional_args, [])
             md.create_md_file()
 
     def _serialize_actions(self):
@@ -137,14 +130,7 @@ class ToolDocumentationGenerator:
         parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=CliHelpFormatter)
         self.tool.get_default_cli_options(parser)
         possible_arguments = parser._actions
-        help_option = {}
-        options = []
-        for arg in possible_arguments:
-            if arg.dest == 'help':
-                help_option = _serialize_option(arg)
-            else:
-                options.append(_serialize_option(arg))
-        return help_option, options
+        return [_serialize_option(arg) for arg in possible_arguments]
 
 
 class CommandUsageGenerator:
@@ -156,14 +142,17 @@ class CommandUsageGenerator:
         tool_actions = self._wrap_in_brackets(', '.join(
             [action['name'] for action in self.doc_generator.tool_serialized_actions]
         ))
-        return f'{self.tool_name} {self._get_optional_common_flags()} {tool_actions}'
+        tool_optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
+        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
+        return f'{self.tool_name} {tool_optional_common_flags} {tool_flags} {tool_actions}'
 
     def get_action_command_usage(self, action):
         from pprint import pprint
-        optional_common_flags = self._get_optional_common_flags()
-        optional_flags = self._prepare_action_arguments(action['optional_args'])
-        required_flags = self._prepare_action_arguments(action['required_args'])
-        return f'{self.tool_name} {action["action_name"]} {optional_common_flags} {optional_flags} {required_flags}'
+        optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
+        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
+        optional_flags = self._prepare_arguments(action['optional_args'])
+        required_flags = self._prepare_arguments(action['required_args'])
+        return f'{self.tool_name} {action["action_name"]} {optional_common_flags} {tool_flags} {optional_flags} {required_flags}'
 
     def _get_tool_name(self):
         tool_names = {
@@ -176,33 +165,22 @@ class CommandUsageGenerator:
         return tool_names[self.doc_generator.tool.__name__]
 
     def _get_formatted_flag(self, arg):
-        if not arg['flags'] and 'name' in arg:
-            return arg['name']
         flag = f'{arg["flags"].split(",")[0]}'
-        if arg['choices']:
-            return f'[{flag} {self._wrap_in_brackets(arg["choices"])}]'
-        if 'name' in arg and arg['name']:
-            return f'[{flag} {arg["name"]}]'
-        return f'[{flag}]'
+        if not arg['flags'] and 'name' in arg:
+            flag = arg['name']
+        elif arg['choices'] and 'name' not in arg:
+            flag = f'{flag} CHOSEN_OPTION'
+        elif 'name' in arg:
+            flag = f'{flag} {arg["name"]}'
+        return flag if 'required' in arg and arg['required'] else f'[{flag}]'
+
 
     def _wrap_in_brackets(self, string):
         l_br, r_br = '{', '}'
         return f'{l_br}{string}{r_br}'
 
-    def _get_optional_common_flags(self):
-        help_option = self._get_formatted_flag(self.doc_generator.tool_optinal_argument)
-        tool_options = ' '.join(
-            [self._get_formatted_flag(option) for option in self.doc_generator.tool_options]
-        )
-        return f'{help_option} {tool_options}'
-
-    def _prepare_action_arguments(self, args):
-        def _remove_styling_from_arg(arg):
-            arg['choices'] = arg['choices'].replace('<br />', ', ')
-            return arg
-
-        args_without_styling = [_remove_styling_from_arg(arg) for arg in args]
-        return ' '.join([self._get_formatted_flag(arg) for arg in args_without_styling])
+    def _prepare_arguments(self, args):
+        return ' '.join([self._get_formatted_flag(arg) for arg in args])
 
 
 class Writer:
@@ -234,7 +212,7 @@ class Writer:
     def write_tools_table(self, tools):
         tools_source = [
             [
-                f'[{tool.__name__}]({tool.__name__}/README.md)',
+                f'[{tool.__name__}]({tool.__name__}.md)',
                 str_plain(tool.__doc__)
             ] for tool in tools]
         self.write_table(tools_source, ['Tool name', 'Description'])
@@ -243,18 +221,18 @@ class Writer:
         self.file.new_header(level=3, title=f'{tool_name} actions')
         actions_source = [
             [
-                f'[{action["name"]}]({action["name"]}/README.md)',
+                f'[{action["name"]}]({tool_name}_{action["name"]}.md)',
                 str_plain(action['description'])
             ] for action in actions]
         self.write_table(actions_source, ['Action', 'Description'])
 
-    def write_arguments_tables(self, obj, required, optional):
-        self._write_arguments_table(f'Required arguments for {obj}', required)
+    def write_arguments_tables(self, obj, optional, required):
+        if required:
+            self._write_arguments_table(f'Required arguments for {obj}', required)
         self._write_arguments_table(f'Optional arguments for {obj}', optional)
 
-    def write_options_tables(self, help_option, options):
-        self._write_arguments_table(f'Optional arguments', [help_option])
-        self._write_arguments_table(f'Options', options)
+    def write_options_tables(self, options):
+        self._write_arguments_table(f'Optional arguments', options)
 
     def _write_arguments_table(self, title, args):
         if not args:
