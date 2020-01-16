@@ -1,7 +1,7 @@
 
 generate
 ========
-<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
+
 
 ``git-changelog generate [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}]  ``
 #### Generate a changelog text from git history
@@ -25,6 +25,6 @@ generate
 
 |Flags|Argument|Description|Type|Default|
 | :--- | :--- | :--- | :--- | :--- |
-|<span style="white-space: nowrap">--previous-commit</span>|PREVIOUS_COMMIT|Commit ID starting from which to generate the log|str||
-|<span style="white-space: nowrap">--skip-pattern</span>|SKIP_PATTERN|Regex pattern to skip unneeded commit message lines|compile|^[Mm]erged? (remote-tracking )?(branch&#124;pull request&#124;in) .*|
-|<span style="white-space: nowrap">--commit-limit</span>|COMMIT_LIMIT|Maxmimum number of commits to retrieve from git before filtering|int|50|
+|--previous-commit|PREVIOUS_COMMIT|Commit ID starting from which to generate the log|str||
+|--skip-pattern|SKIP_PATTERN|Regex pattern to skip unneeded commit message lines|compile|^[Mm]erged? (remote-tracking )?(branch&#124;pull request&#124;in) .*|
+|--commit-limit|COMMIT_LIMIT|Maxmimum number of commits to retrieve from git before filtering|int|50|

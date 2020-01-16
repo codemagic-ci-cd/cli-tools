@@ -1,5 +1,3 @@
-from codemagic import cli
-from codemagic import tools
 import os
 import sys
 from types import FunctionType
@@ -10,7 +8,8 @@ from pathlib import Path
 import re
 
 sys.path.append(os.path.abspath('./src'))
-
+from codemagic import cli
+from codemagic import tools
 
 class ArgumentsSerializer:
     def __init__(self, raw_arguments):
@@ -21,18 +20,16 @@ class ArgumentsSerializer:
     def serialize(self):
         for arg in self.raw_arguments:
             argument = {
-                'name': arg._name_,
                 'key': arg._value_.key,
                 'description': str_plain(arg._value_.description),
-                'flags': str_no_wrap(', '.join(getattr(arg._value_, 'flags', ''))),
+                'flags': ', '.join(getattr(arg._value_, 'flags', '')),
             }
             argument.update(self._proccess_kwargs(
                 getattr(arg._value_, 'argparse_kwargs')))
 
             arg_type = getattr(arg._value_, 'type')
             argument['type'] = arg_type.__name__ if arg_type else ''
-
-            argument['name'] == arg.__name__ if argument['type'] == 'bool' else ''
+            argument['name'] = '' if argument['type'] == 'bool' else arg._name_
 
             if argument['required']:
                 self.required_args.append(argument)
@@ -43,7 +40,7 @@ class ArgumentsSerializer:
     def _proccess_kwargs(self, kwargs):
         def _process_choice(choices):
             choices = [str(c) for c in choices] if choices else ''
-            return ' <br />'.join(choices)
+            return '<br />'.join(choices)
 
         def _process_default(default):
             if isinstance(default, tuple) and isinstance(default[0], Path):
@@ -57,7 +54,7 @@ class ArgumentsSerializer:
             'nargs': 'Yes' if kwargs.get('nargs', '') == '+' else '',
             'required': kwargs.get('required', True),
             'default': _process_default(kwargs.get('default', '')),
-            'choices': str_no_wrap(_process_choice(kwargs.get('choices'))),
+            'choices': _process_choice(kwargs.get('choices')),
         }
 
 
@@ -83,25 +80,20 @@ class ToolDocumentationGenerator:
     def generate(self):
         os.makedirs(self.tool_dir_name, exist_ok=True)
 
-        class_args_serializer = ArgumentsSerializer(
-            self.tool.CLASS_ARGUMENTS).serialize()
+        class_args_serializer = ArgumentsSerializer(self.tool.CLASS_ARGUMENTS).serialize()
         self.tool_required_args = class_args_serializer.required_args
         self.tool_optional_args = class_args_serializer.optional_args
         self.tool_serialized_actions = self._serialize_actions()
         self.tool_optinal_argument, self.tool_options = self._serialize_default_options()
 
         # docs/<tool-name>/README.md
-        md = MdUtils(
-            file_name=f'{self.tool_dir_name}/README', title=self.tool_name)
+        md = MdUtils(file_name=f'{self.tool_dir_name}/README', title=self.tool_name)
         writer = Writer(md)
         writer.write_tool_command_usage(self)
         writer.write_description(self.tool.__doc__)
-        writer.write_options_tables(
-            self.tool_optinal_argument, self.tool_options)
-        writer.write_actions_table(
-            self.tool_name, self.tool_serialized_actions)
-        writer.write_arguments_tables(
-            self.tool_name, self.tool_required_args, self.tool_optional_args)
+        writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
+        writer.write_actions_table(self.tool_name, self.tool_serialized_actions)
+        writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
         md.create_md_file()
 
         for action in self.tool_serialized_actions:
@@ -113,19 +105,15 @@ class ToolDocumentationGenerator:
             writer = Writer(md)
             writer.write_action_command_usage(self, action)
             writer.write_description(action['description'])
-            writer.write_options_tables(
-                self.tool_optinal_argument, self.tool_options)
-            writer.write_arguments_tables(
-                f'command {action["name"]}', action['required_args'], action['optional_args'])
-            writer.write_arguments_tables(
-                self.tool_name, self.tool_required_args, self.tool_optional_args)
+            writer.write_options_tables(self.tool_optinal_argument, self.tool_options)
+            writer.write_arguments_tables(f'command {action["name"]}', action['required_args'], action['optional_args'])
+            writer.write_arguments_tables(self.tool_name, self.tool_required_args, self.tool_optional_args)
             md.create_md_file()
 
     def _serialize_actions(self):
         serialized_actions = []
         for f in self.tool.get_class_cli_actions():
-            action_args_serializer = ArgumentsSerializer(
-                f.arguments).serialize()
+            action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
             serialized_actions.append({
                 'action_name': f.action_name,
                 'name': f.__name__,
@@ -146,8 +134,7 @@ class ToolDocumentationGenerator:
                 'choices': ', '.join(option.choices) if option.choices else '',
             }
 
-        parser = argparse.ArgumentParser(
-            description=self.tool.__doc__, formatter_class=CliHelpFormatter)
+        parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=CliHelpFormatter)
         self.tool.get_default_cli_options(parser)
         possible_arguments = parser._actions
         help_option = {}
@@ -167,18 +154,15 @@ class CommandUsageGenerator:
 
     def get_tool_command_usage(self):
         tool_actions = self._wrap_in_brackets(', '.join(
-            [action['name']
-                for action in self.doc_generator.tool_serialized_actions]
+            [action['name'] for action in self.doc_generator.tool_serialized_actions]
         ))
         return f'{self.tool_name} {self._get_optional_common_flags()} {tool_actions}'
 
     def get_action_command_usage(self, action):
         from pprint import pprint
         optional_common_flags = self._get_optional_common_flags()
-        optional_flags = self._prepare_action_arguments(
-            action['optional_args'])
-        required_flags = self._prepare_action_arguments(
-            action['required_args'])
+        optional_flags = self._prepare_action_arguments(action['optional_args'])
+        required_flags = self._prepare_action_arguments(action['required_args'])
         return f'{self.tool_name} {action["action_name"]} {optional_common_flags} {optional_flags} {required_flags}'
 
     def _get_tool_name(self):
@@ -206,21 +190,16 @@ class CommandUsageGenerator:
         return f'{l_br}{string}{r_br}'
 
     def _get_optional_common_flags(self):
-        help_option = self._get_formatted_flag(
-            self.doc_generator.tool_optinal_argument)
-        tool_options = ' '.join([self._get_formatted_flag(option)
-                                 for option in self.doc_generator.tool_options])
+        help_option = self._get_formatted_flag(self.doc_generator.tool_optinal_argument)
+        tool_options = ' '.join(
+            [self._get_formatted_flag(option) for option in self.doc_generator.tool_options]
+        )
         return f'{help_option} {tool_options}'
 
     def _prepare_action_arguments(self, args):
         def _remove_styling_from_arg(arg):
-            arg['choices'] = _remove_styling(arg['choices']).replace(' ,', ',')
-            arg['flags'] = _remove_styling(arg['flags'])
+            arg['choices'] = arg['choices'].replace('<br />', ', ')
             return arg
-
-        def _remove_styling(string):
-            string = re.compile('<br />').sub(', ', string)
-            return re.compile('<.*?>').sub('', string)
 
         args_without_styling = [_remove_styling_from_arg(arg) for arg in args]
         return ' '.join([self._get_formatted_flag(arg) for arg in args_without_styling])
@@ -229,20 +208,17 @@ class CommandUsageGenerator:
 class Writer:
     def __init__(self, file):
         self.file = file
-        self.file.write(get_table_styles())
 
     def write_description(self, content):
         content = str_plain(content)
         self.file.new_header(level=4, title=content)
 
     def write_tool_command_usage(self, documentation_generator):
-        content = CommandUsageGenerator(
-            documentation_generator).get_tool_command_usage()
+        content = CommandUsageGenerator(documentation_generator).get_tool_command_usage()
         self.file.new_paragraph(f"``{content}``")
 
     def write_action_command_usage(self, documentation_generator, action):
-        content = CommandUsageGenerator(
-            documentation_generator).get_action_command_usage(action)
+        content = CommandUsageGenerator(documentation_generator).get_action_command_usage(action)
         self.file.new_paragraph(f"``{content}``")
 
     def write_table(self, content, header):
@@ -315,14 +291,6 @@ class Writer:
 
 def str_plain(string):
     return re.compile('(\\x1b\[\d*m|\\x1b\[\d*m|\\n|\\t)').sub('', string).strip()
-
-
-def str_no_wrap(string):
-    return f'<span style="white-space: nowrap">{string}</span>' if string else ''
-
-
-def get_table_styles():
-    return '<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>'
 
 
 def main():

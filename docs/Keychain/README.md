@@ -1,7 +1,7 @@
 
 Keychain
 ========
-<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
+
 
 ``keychain [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] {add_certificates, create, delete, get_default, initialize, list_code_signing_certificates, lock, make_default, set_timeout, show_info, unlock}``
 #### Utility to manage macOS keychains and certificates
@@ -41,4 +41,4 @@ Keychain
 
 |Flags|Argument|Description|Type|
 | :--- | :--- | :--- | :--- |
-|<span style="white-space: nowrap">-p, --path</span>|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
+|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|

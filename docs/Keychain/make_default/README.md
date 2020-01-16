@@ -1,7 +1,7 @@
 
 make_default
 ============
-<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
+
 
 ``keychain make-default [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}]  ``
 #### Set the keychain as the system default keychain.
@@ -25,4 +25,4 @@ make_default
 
 |Flags|Argument|Description|Type|
 | :--- | :--- | :--- | :--- |
-|<span style="white-space: nowrap">-p, --path</span>|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
+|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|

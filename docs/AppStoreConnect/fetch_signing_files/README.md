@@ -1,7 +1,7 @@
 
 fetch_signing_files
 ===================
-<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
+
 
 ``app-store-connect fetch-signing-files [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] [--platform {IOS, MAC_OS}] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--type {IOS_APP_ADHOC, IOS_APP_DEVELOPMENT, IOS_APP_INHOUSE, IOS_APP_STORE, MAC_APP_DEVELOPMENT, MAC_APP_DIRECT, MAC_APP_STORE, TVOS_APP_ADHOC, TVOS_APP_DEVELOPMENT, TVOS_APP_INHOUSE, TVOS_APP_STORE}] [--create] BUNDLE_ID_IDENTIFIER``
 #### Fetch provisioning profiles and code signing certificates        for Bundle ID with given identifier.
@@ -42,10 +42,10 @@ fetch_signing_files
 
 |Flags|Argument|Description|Type|Default|
 | :--- | :--- | :--- | :--- | :--- |
-|<span style="white-space: nowrap">--log-api-calls</span>||Turn on logging for App Store Connect API HTTP requests|bool||
-|<span style="white-space: nowrap">--json</span>||Whether to show the resource in JSON format|bool||
-|<span style="white-space: nowrap">--issuer-id</span>|ISSUER_ID|App Store Connect API Key Issuer ID. Identifies the issuer who created the authentication token. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|IssuerIdArgument||
-|<span style="white-space: nowrap">--key-id</span>|KEY_IDENTIFIER|App Store Connect API Key ID. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|KeyIdentifierArgument||
-|<span style="white-space: nowrap">--private-key</span>|PRIVATE_KEY|App Store Connect API private key. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|PrivateKeyArgument||
-|<span style="white-space: nowrap">--certificates-dir</span>|CERTIFICATES_DIRECTORY|Directory where the code signing certificates will be saved|Path|$HOME/Library/MobileDevice/Certificates|
-|<span style="white-space: nowrap">--profiles-dir</span>|PROFILES_DIRECTORY|Directory where the provisioning profiles will be saved|Path|$HOME/Library/MobileDevice/Provisioning Profiles|
+|--log-api-calls||Turn on logging for App Store Connect API HTTP requests|bool||
+|--json||Whether to show the resource in JSON format|bool||
+|--issuer-id|ISSUER_ID|App Store Connect API Key Issuer ID. Identifies the issuer who created the authentication token. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|IssuerIdArgument||
+|--key-id|KEY_IDENTIFIER|App Store Connect API Key ID. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|KeyIdentifierArgument||
+|--private-key|PRIVATE_KEY|App Store Connect API private key. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api.|PrivateKeyArgument||
+|--certificates-dir|CERTIFICATES_DIRECTORY|Directory where the code signing certificates will be saved|Path|$HOME/Library/MobileDevice/Certificates|
+|--profiles-dir|PROFILES_DIRECTORY|Directory where the provisioning profiles will be saved|Path|$HOME/Library/MobileDevice/Provisioning Profiles|
