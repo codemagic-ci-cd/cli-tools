@@ -1,7 +1,9 @@
 
 build_ipa
 =========
+<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
 
+``xcode-project build-ipa [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] [--project XCODE_PROJECT_PATH] [--workspace XCODE_WORKSPACE_PATH] [--target TARGET_NAME] [--config CONFIGURATION_NAME] [--scheme SCHEME_NAME] [--ipa-directory IPA_DIRECTORY] [--export-options-plist EXPORT_OPTIONS_PATH] [--disable-xcpretty] [--xcpretty-options OPTIONS] ``
 #### Build ipa by archiving the Xcode project and then exporting it
 
 ### Optional arguments
@@ -30,5 +32,5 @@ build_ipa
 |--scheme|SCHEME_NAME|Name of the Xcode Scheme|str||
 |--ipa-directory|IPA_DIRECTORY|Directory where the built ipa is stored|Path|build/ios/ipa|
 |--export-options-plist|EXPORT_OPTIONS_PATH|Path to the generated export options plist|Path|$HOME/export_options.plist|
-|--disable-xcpretty|DISABLE|Do not use XCPretty formatter to process log output|bool||
+|--disable-xcpretty||Do not use XCPretty formatter to process log output|bool||
 |--xcpretty-options|OPTIONS|Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf")|str|--color|

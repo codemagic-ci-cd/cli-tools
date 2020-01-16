@@ -1,7 +1,9 @@
 
 detect_bundle_id
 ================
+<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
 
+``xcode-project detect-bundle-id [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] [--project XCODE_PROJECT_PATTERN] [--target TARGET_NAME] [--config CONFIGURATION_NAME] ``
 #### Try to deduce the Bundle ID from specified Xcode project
 
 ### Optional arguments

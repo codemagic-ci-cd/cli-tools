@@ -1,7 +1,9 @@
 
 use_profiles
 ============
+<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
 
+``xcode-project use-profiles [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] [--project XCODE_PROJECT_PATTERN] [--profile PROFILE_PATHS] [--export-options-plist EXPORT_OPTIONS_PATH] [--custom-export-options CUSTOM_EXPORT_OPTIONS] ``
 #### Set up code signing settings on specified Xcode projects        to use given provisioning profiles
 
 ### Optional arguments

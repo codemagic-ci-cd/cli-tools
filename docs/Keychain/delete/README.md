@@ -1,7 +1,9 @@
 
 delete
 ======
+<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
 
+``keychain delete [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}]  ``
 #### Delete keychains and remove them from the search list.
 
 ### Optional arguments
@@ -23,4 +25,4 @@ delete
 
 |Flags|Argument|Description|Type|
 | :--- | :--- | :--- | :--- |
-|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
+|<span style="white-space: nowrap">-p, --path</span>|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|

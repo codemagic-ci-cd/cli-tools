@@ -1,7 +1,9 @@
 
 set_timeout
 ===========
+<style> td { font-size: 85%; word-break: break-word; width: 16%;} table { width:100%; border-spacing: 1px;}</style>
 
+``keychain set-timeout [-h] [-s] [-v] [--no-color] [--log-stream {stderr, stdout}] [-t TIMEOUT] ``
 #### Set timeout settings for the keychain.        If seconds are not provided, then no-timeout will be set.
 
 ### Optional arguments
@@ -29,4 +31,4 @@ set_timeout
 
 |Flags|Argument|Description|Type|
 | :--- | :--- | :--- | :--- |
-|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
+|<span style="white-space: nowrap">-p, --path</span>|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
