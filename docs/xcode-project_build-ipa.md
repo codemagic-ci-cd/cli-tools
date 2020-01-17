@@ -25,39 +25,39 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Optional arguments for command build_ipa
 
 
 **--project=XCODE_PROJECT_PATH**
 
-Path to Xcode project (*.xcodeproj). Type `_existing_path`
+Path to Xcode project (*.xcodeproj)
 
 **--workspace=XCODE_WORKSPACE_PATH**
 
-Path to Xcode workspace (*.xcworkspace). Type `_existing_path`
+Path to Xcode workspace (*.xcworkspace)
 
 **--target=TARGET_NAME**
 
-Name of the Xcode Target. Type `str`
+Name of the Xcode Target
 
 **--config=CONFIGURATION_NAME**
 
-Name of the Xcode build configuration. Type `str`
+Name of the Xcode build configuration
 
 **--scheme=SCHEME_NAME**
 
-Name of the Xcode Scheme. Type `str`
+Name of the Xcode Scheme
 
 **--ipa-directory=IPA_DIRECTORY**
 
-Directory where the built ipa is stored. Type `Path`. Default: `build/ios/ipa`
+Directory where the built ipa is stored. Default:&nbsp;`build/ios/ipa`
 
 **--export-options-plist=EXPORT_OPTIONS_PATH**
 
-Path to the generated export options plist. Type `Path`. Default: `$HOME/export_options.plist`
+Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
 
 **--disable-xcpretty**
 
@@ -65,4 +65,4 @@ Do not use XCPretty formatter to process log output
 
 **--xcpretty-options=OPTIONS**
 
-Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf"). Type `str`. Default: `--color`
+Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf"). Default:&nbsp;`--color`

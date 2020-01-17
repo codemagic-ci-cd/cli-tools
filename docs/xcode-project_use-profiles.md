@@ -25,24 +25,24 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Optional arguments for command use_profiles
 
 
 **--project=XCODE_PROJECT_PATTERN**
 
-Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory. Type `Path`. Multiple arguments. Default: `**/*.xcodeproj`
+Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory. Multiple arguments. Default:&nbsp;`**/*.xcodeproj`
 
 **--profile=PROFILE_PATHS**
 
-Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Type `Path`. Multiple arguments. Default: `$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision`
+Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision`
 
 **--export-options-plist=EXPORT_OPTIONS_PATH**
 
-Path to the generated export options plist. Type `Path`. Default: `$HOME/export_options.plist`
+Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
 
 **--custom-export-options=CUSTOM_EXPORT_OPTIONS**
 
-Custom options for generated export options as JSON string. For example '{"uploadBitcode": false, "uploadSymbols": false}'. Type `_json_dict`
+Custom options for generated export options as JSON string. For example '{"uploadBitcode": false, "uploadSymbols": false}'.

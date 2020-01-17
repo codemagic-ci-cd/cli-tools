@@ -25,13 +25,13 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Actions
 
 |Action|Description|
 | :--- | :--- |
-|[build_ipa](XcodeProject_build_ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
-|[detect_bundle_id](XcodeProject_detect_bundle_id.md)|Try to deduce the Bundle ID from specified Xcode project|
-|[use_profiles](XcodeProject_use_profiles.md)|Set up code signing settings on specified Xcode projects        to use given provisioning profiles|
+|[build-ipa](xcode-project_build-ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
+|[detect-bundle-id](xcode-project_detect-bundle-id.md)|Try to deduce the Bundle ID from specified Xcode project|
+|[use-profiles](xcode-project_use-profiles.md)|Set up code signing settings on specified Xcode projects        to use given provisioning profiles|

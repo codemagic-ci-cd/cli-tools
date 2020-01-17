@@ -25,22 +25,22 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Optional arguments for command initialize
 
 
 **-pw, --password=PASSWORD**
 
-Keychain password. Type `Password`
+Keychain password
 
 **-t, --timeout=TIMEOUT**
 
-Keychain timeout in seconds, defaults to no timeout. Type `Seconds`. Default: `None`
-### Optional arguments for Keychain
+Keychain timeout in seconds, defaults to no timeout
+### Optional arguments for keychain
 
 
 **-p, --path=PATH**
 
-Keychain path. If not provided, the system default keychain will be used instead. Type `Path`
+Keychain path. If not provided, the system default keychain will be used instead

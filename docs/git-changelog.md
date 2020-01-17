@@ -25,25 +25,25 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
-### Optional arguments for GitChangelog
+Log output stream. Default: stderr
+### Optional arguments for git-changelog
 
 
 **--previous-commit=PREVIOUS_COMMIT**
 
-Commit ID starting from which to generate the log. Type `str`. Default: `None`
+Commit ID starting from which to generate the log
 
 **--skip-pattern=SKIP_PATTERN**
 
-Regex pattern to skip unneeded commit message lines. Type `compile`. Default: `^[Mm]erged? (remote-tracking )?(branch|pull request|in) .*`
+Regex pattern to skip unneeded commit message lines. Default:&nbsp;`^[Mm]erged? (remote-tracking )?(branch|pull request|in) .*`
 
 **--commit-limit=COMMIT_LIMIT**
 
-Maxmimum number of commits to retrieve from git before filtering. Type `int`. Default: `50`
+Maxmimum number of commits to retrieve from git before filtering. Default:&nbsp;`50`
 ### Actions
 
 |Action|Description|
 | :--- | :--- |
-|[generate](GitChangelog_generate.md)|Generate a changelog text from git history|
+|[generate](git-changelog_generate.md)|Generate a changelog text from git history|

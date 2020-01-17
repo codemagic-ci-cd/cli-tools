@@ -25,12 +25,12 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
-### Optional arguments for Keychain
+Log output stream. Default: stderr
+### Optional arguments for keychain
 
 
 **-p, --path=PATH**
 
-Keychain path. If not provided, the system default keychain will be used instead. Type `Path`
+Keychain path. If not provided, the system default keychain will be used instead

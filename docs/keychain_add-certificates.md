@@ -25,22 +25,22 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Optional arguments for command add_certificates
 
 
 **-c, --certificate=CERTIFICATE_PATHS**
 
-Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to match certificates. Type `Path`. Multiple arguments. Default: `$HOME/Library/MobileDevice/Certificates/*.p12`
+Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to match certificates. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Certificates/*.p12`
 
 **--certificate-password=CERTIFICATE_PASSWORD**
 
-Encrypted p12 certificate password. Type `Password`
-### Optional arguments for Keychain
+Encrypted p12 certificate password
+### Optional arguments for keychain
 
 
 **-p, --path=PATH**
 
-Keychain path. If not provided, the system default keychain will be used instead. Type `Path`
+Keychain path. If not provided, the system default keychain will be used instead

@@ -25,37 +25,37 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
-### Optional arguments for UniversalApkGenerator
+Log output stream. Default: stderr
+### Optional arguments for universal-apk
 
 
 **--pattern=PATTERN**
 
-glob pattern to parse files, relative to current folder. Type `Path`. Default: `**/*.aab`
+glob pattern to parse files, relative to current folder. Default:&nbsp;`**/*.aab`
 
 **--bundletool=BUNDLETOOL_PATH**
 
-glob pattern to parse files, relative to current folder. Type `Path`. Default: `/usr/local/bin/bundletool.jar`
+glob pattern to parse files, relative to current folder. Default:&nbsp;`/usr/local/bin/bundletool.jar`
 
 **--ks=KEYSTORE_PATH**
 
-path to the keystore to sign the apk files with. Type `Path`. Default: `None`
+path to the keystore to sign the apk files with
 
 **--ks-pass=KEYSTORE_PASSWORD**
 
-keystore password. Type `str`. Default: `None`
+keystore password
 
 **--ks-key-alias=KEY_ALIAS**
 
-keystore key alias. Type `str`. Default: `None`
+keystore key alias
 
 **--key-pass=KEY_PASSWORD**
 
-keystore key password. Type `str`. Default: `None`
+keystore key password
 ### Actions
 
 |Action|Description|
 | :--- | :--- |
-|[generate](UniversalApkGenerator_generate.md)|Generate universal APK files from Android App Bundles|
+|[generate](universal-apk_generate.md)|Generate universal APK files from Android App Bundles|

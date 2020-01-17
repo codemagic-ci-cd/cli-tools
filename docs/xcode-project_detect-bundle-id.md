@@ -25,20 +25,20 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream={stderr, stdout}**
+**--log-stream=stderr|stdout**
 
-Log output stream. [Default: stderr]
+Log output stream. Default: stderr
 ### Optional arguments for command detect_bundle_id
 
 
 **--project=XCODE_PROJECT_PATTERN**
 
-Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory. Type `Path`. Multiple arguments. Default: `**/*.xcodeproj`
+Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory. Multiple arguments. Default:&nbsp;`**/*.xcodeproj`
 
 **--target=TARGET_NAME**
 
-Name of the Xcode Target. Type `str`
+Name of the Xcode Target
 
 **--config=CONFIGURATION_NAME**
 
-Name of the Xcode build configuration. Type `str`
+Name of the Xcode build configuration
