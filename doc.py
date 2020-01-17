@@ -46,7 +46,7 @@ class ArgumentsSerializer:
                 default = default[0]
             if isinstance(default, Path):
                 default = str(default).replace(str(Path.home()), '$HOME')
-            return str(default).replace('|', '&#124;') if default else ''
+            return str(default)
 
         kwargs = kwargs if kwargs else {}
         return {
@@ -87,9 +87,9 @@ class ToolDocumentationGenerator:
         writer = Writer(md)
         writer.write_tool_command_usage(self)
         writer.write_description(self.tool.__doc__)
-        writer.write_options_tables(self.tool_options)
+        writer.write_options(self.tool_options)
+        writer.write_arguments(self.tool_name, self.tool_optional_args, [])
         writer.write_actions_table(self.tool_name, self.tool_serialized_actions)
-        writer.write_arguments_tables(self.tool_name, self.tool_optional_args, [])
         md.create_md_file()
 
         for action in self.tool_serialized_actions:
@@ -98,9 +98,9 @@ class ToolDocumentationGenerator:
             writer = Writer(md)
             writer.write_action_command_usage(self, action)
             writer.write_description(action['description'])
-            writer.write_options_tables(self.tool_options)
-            writer.write_arguments_tables(f'command {action["name"]}', action['optional_args'], action['required_args'])
-            writer.write_arguments_tables(self.tool_name, self.tool_optional_args, [])
+            writer.write_options(self.tool_options)
+            writer.write_arguments(f'command {action["name"]}', action['optional_args'], action['required_args'])
+            writer.write_arguments(self.tool_name, self.tool_optional_args, [])
             md.create_md_file()
 
     def _serialize_actions(self):
@@ -125,6 +125,11 @@ class ToolDocumentationGenerator:
                 'flags': ', '.join(option.option_strings),
                 'description': str_plain(option.help),
                 'choices': ', '.join(option.choices) if option.choices else '',
+                'name': '',
+                'default': '',
+                'nargs': False,
+                'required': False,
+                'type': '',
             }
 
         parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=CliHelpFormatter)
@@ -139,20 +144,19 @@ class CommandUsageGenerator:
         self.tool_name = self._get_tool_name()
 
     def get_tool_command_usage(self):
-        tool_actions = self._wrap_in_brackets(', '.join(
-            [action['name'] for action in self.doc_generator.tool_serialized_actions]
-        ))
-        tool_optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
-        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
-        return f'{self.tool_name} {tool_optional_common_flags} {tool_flags} {tool_actions}'
+        return f'{self.tool_name} {self._get_tool_flags()} ACTION'
 
     def get_action_command_usage(self, action):
         from pprint import pprint
-        optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
-        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
+        tool_flags = self._get_tool_flags()
         optional_flags = self._prepare_arguments(action['optional_args'])
         required_flags = self._prepare_arguments(action['required_args'])
-        return f'{self.tool_name} {action["action_name"]} {optional_common_flags} {tool_flags} {optional_flags} {required_flags}'
+        return f'{self.tool_name} {action["action_name"]} {tool_flags} {optional_flags} {required_flags}'
+
+    def _get_tool_flags(self):
+        optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
+        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
+        return f'{optional_common_flags} {tool_flags}'
 
     def _get_tool_name(self):
         tool_names = {
@@ -166,18 +170,13 @@ class CommandUsageGenerator:
 
     def _get_formatted_flag(self, arg):
         flag = f'{arg["flags"].split(",")[0]}'
-        if not arg['flags'] and 'name' in arg:
+        if not arg['flags'] and arg['name']:
             flag = arg['name']
-        elif arg['choices'] and 'name' not in arg:
+        elif arg['choices'] and not arg['name']:
             flag = f'{flag} CHOSEN_OPTION'
-        elif 'name' in arg:
+        elif arg['name']:
             flag = f'{flag} {arg["name"]}'
-        return flag if 'required' in arg and arg['required'] else f'[{flag}]'
-
-
-    def _wrap_in_brackets(self, string):
-        l_br, r_br = '{', '}'
-        return f'{l_br}{string}{r_br}'
+        return flag if arg['required'] else f'[{flag}]'
 
     def _prepare_arguments(self, args):
         return ' '.join([self._get_formatted_flag(arg) for arg in args])
@@ -218,7 +217,7 @@ class Writer:
         self.write_table(tools_source, ['Tool name', 'Description'])
 
     def write_actions_table(self, tool_name, actions):
-        self.file.new_header(level=3, title=f'{tool_name} actions')
+        self.file.new_header(level=3, title='Actions')
         actions_source = [
             [
                 f'[{action["name"]}]({tool_name}_{action["name"]}.md)',
@@ -226,43 +225,38 @@ class Writer:
             ] for action in actions]
         self.write_table(actions_source, ['Action', 'Description'])
 
-    def write_arguments_tables(self, obj, optional, required):
+    def write_arguments(self, obj, optional, required):
         if required:
-            self._write_arguments_table(f'Required arguments for {obj}', required)
-        self._write_arguments_table(f'Optional arguments for {obj}', optional)
+            self._write_arguments(f'Required arguments for {obj}', required)
+        self._write_arguments(f'Optional arguments for {obj}', optional)
 
-    def write_options_tables(self, options):
-        self._write_arguments_table(f'Optional arguments', options)
+    def write_options(self, options):
+        self._write_arguments(f'Optional arguments', options)
 
-    def _write_arguments_table(self, title, args):
+    def _write_arguments(self, title, args):
+        def _process_flag(arg):
+            flag = arg['flags']
+            if flag and arg['choices']:
+                return f'{flag}={{{arg["choices"]}}}'
+            if flag and arg['name']:
+                return f'{flag}={arg["name"]}'
+            return arg['name'] if arg['name'] else flag
+
+        def _process_description(arg):
+            description = arg['description']
+            description += f'. Type `{arg["type"]}`' if arg['type'] and arg['type'] != 'bool' else ''
+            description += '. Multiple arguments' if arg['nargs'] else ''
+            return f'{description}. Default: `{arg["default"]}`' if arg['default'] else description
+
         if not args:
             return
-
-        parameters_to_show = []
-
-        if [arg['flags'] for arg in args if arg.get('flags')]:
-            parameters_to_show.append({'name': 'flags', 'header': 'Flags'})
-        if [arg['name'] for arg in args if arg.get('name')]:
-            parameters_to_show.append({'name': 'name', 'header': 'Argument'})
-        if [arg['description'] for arg in args if arg.get('description')]:
-            parameters_to_show.append({'name': 'description', 'header': 'Description'})
-        if [arg['type'] for arg in args if arg.get('type')]:
-            parameters_to_show.append({'name': 'type', 'header': 'Type'})
-        if [arg['default'] for arg in args if arg.get('default')]:
-            parameters_to_show.append({'name': 'default', 'header': 'Default'})
-        if [arg['nargs'] for arg in args if arg.get('nargs')]:
-            parameters_to_show.append({'name': 'nargs', 'header': 'Multiple arguments'})
-        if [arg['choices'] for arg in args if arg.get('choices')]:
-            parameters_to_show.append({'name': 'choices', 'header': 'Choices'})
-
-        header = [parameter['header'] for parameter in parameters_to_show]
-        content = [
-            [
-                arg[parameter['name']] for parameter in parameters_to_show
-            ] for arg in args]
-
+        
         self.file.new_header(level=3, title=title)
-        self.write_table(content, header)
+        for arg in args:
+            flag = _process_flag(arg)
+            description = _process_description(arg).replace('..','.')
+            self.file.new_paragraph(f'**{flag}**')
+            self.file.new_paragraph(description)
 
 
 def str_plain(string):

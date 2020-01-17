@@ -3,29 +3,66 @@ build_ipa
 =========
 
 
-``xcode-project build-ipa [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATH] [--workspace XCODE_WORKSPACE_PATH] [--target TARGET_NAME] [--config CONFIGURATION_NAME] [--scheme SCHEME_NAME] [--ipa-directory IPA_DIRECTORY] [--export-options-plist EXPORT_OPTIONS_PATH] [--disable-xcpretty ] [--xcpretty-options OPTIONS] ``
+``xcode-project build-ipa [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATH] [--workspace XCODE_WORKSPACE_PATH] [--target TARGET_NAME] [--config CONFIGURATION_NAME] [--scheme SCHEME_NAME] [--ipa-directory IPA_DIRECTORY] [--export-options-plist EXPORT_OPTIONS_PATH] [--disable-xcpretty] [--xcpretty-options OPTIONS] ``
 #### Build ipa by archiving the Xcode project and then exporting it
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
 ### Optional arguments for command build_ipa
 
-|Flags|Argument|Description|Type|Default|
-| :--- | :--- | :--- | :--- | :--- |
-|--project|XCODE_PROJECT_PATH|Path to Xcode project (*.xcodeproj)|_existing_path||
-|--workspace|XCODE_WORKSPACE_PATH|Path to Xcode workspace (*.xcworkspace)|_existing_path||
-|--target|TARGET_NAME|Name of the Xcode Target|str||
-|--config|CONFIGURATION_NAME|Name of the Xcode build configuration|str||
-|--scheme|SCHEME_NAME|Name of the Xcode Scheme|str||
-|--ipa-directory|IPA_DIRECTORY|Directory where the built ipa is stored|Path|build/ios/ipa|
-|--export-options-plist|EXPORT_OPTIONS_PATH|Path to the generated export options plist|Path|$HOME/export_options.plist|
-|--disable-xcpretty||Do not use XCPretty formatter to process log output|bool||
-|--xcpretty-options|OPTIONS|Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf")|str|--color|
+
+**--project=XCODE_PROJECT_PATH**
+
+Path to Xcode project (*.xcodeproj). Type `_existing_path`
+
+**--workspace=XCODE_WORKSPACE_PATH**
+
+Path to Xcode workspace (*.xcworkspace). Type `_existing_path`
+
+**--target=TARGET_NAME**
+
+Name of the Xcode Target. Type `str`
+
+**--config=CONFIGURATION_NAME**
+
+Name of the Xcode build configuration. Type `str`
+
+**--scheme=SCHEME_NAME**
+
+Name of the Xcode Scheme. Type `str`
+
+**--ipa-directory=IPA_DIRECTORY**
+
+Directory where the built ipa is stored. Type `Path`. Default: `build/ios/ipa`
+
+**--export-options-plist=EXPORT_OPTIONS_PATH**
+
+Path to the generated export options plist. Type `Path`. Default: `$HOME/export_options.plist`
+
+**--disable-xcpretty**
+
+Do not use XCPretty formatter to process log output
+
+**--xcpretty-options=OPTIONS**
+
+Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf"). Type `str`. Default: `--color`

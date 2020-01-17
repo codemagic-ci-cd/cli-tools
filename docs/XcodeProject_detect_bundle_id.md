@@ -8,18 +8,37 @@ detect_bundle_id
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
 ### Optional arguments for command detect_bundle_id
 
-|Flags|Argument|Description|Type|Default|Multiple arguments|
-| :--- | :--- | :--- | :--- | :--- | :--- |
-|--project|XCODE_PROJECT_PATTERN|Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory.|Path|**/*.xcodeproj|Yes|
-|--target|TARGET_NAME|Name of the Xcode Target|str|||
-|--config|CONFIGURATION_NAME|Name of the Xcode build configuration|str|||
+
+**--project=XCODE_PROJECT_PATTERN**
+
+Path to Xcode project (*.xcodeproj). Can be either a path literal, or a glob pattern to match projects in working directory. Type `Path`. Multiple arguments. Default: `**/*.xcodeproj`
+
+**--target=TARGET_NAME**
+
+Name of the Xcode Target. Type `str`
+
+**--config=CONFIGURATION_NAME**
+
+Name of the Xcode build configuration. Type `str`

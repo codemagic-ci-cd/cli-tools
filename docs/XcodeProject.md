@@ -3,20 +3,32 @@ XcodeProject
 ============
 
 
-``xcode-project [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  {build_ipa, detect_bundle_id, use_profiles}``
+``xcode-project [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  ACTION``
 #### Utility to prepare iOS application code signing properties for build
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
-### XcodeProject actions
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
+### Actions
 
 |Action|Description|
 | :--- | :--- |

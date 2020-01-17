@@ -8,22 +8,35 @@ set_timeout
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
 ### Optional arguments for command set_timeout
 
-|Flags|Argument|Description|Type|
-| :--- | :--- | :--- | :--- |
-|-t, --timeout|TIMEOUT|Keychain timeout in seconds, defaults to no timeout|Seconds|
 
+**-t, --timeout=TIMEOUT**
+
+Keychain timeout in seconds, defaults to no timeout. Type `Seconds`. Default: `None`
 ### Optional arguments for Keychain
 
-|Flags|Argument|Description|Type|
-| :--- | :--- | :--- | :--- |
-|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
+
+**-p, --path=PATH**
+
+Keychain path. If not provided, the system default keychain will be used instead. Type `Path`

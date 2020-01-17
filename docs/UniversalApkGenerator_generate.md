@@ -8,21 +8,49 @@ generate
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
 ### Optional arguments for UniversalApkGenerator
 
-|Flags|Argument|Description|Type|Default|
-| :--- | :--- | :--- | :--- | :--- |
-|--pattern|PATTERN|glob pattern to parse files, relative to current folder|Path|**/*.aab|
-|--bundletool|BUNDLETOOL_PATH|glob pattern to parse files, relative to current folder|Path|/usr/local/bin/bundletool.jar|
-|--ks|KEYSTORE_PATH|path to the keystore to sign the apk files with|Path||
-|--ks-pass|KEYSTORE_PASSWORD|keystore password|str||
-|--ks-key-alias|KEY_ALIAS|keystore key alias|str||
-|--key-pass|KEY_PASSWORD|keystore key password|str||
+
+**--pattern=PATTERN**
+
+glob pattern to parse files, relative to current folder. Type `Path`. Default: `**/*.aab`
+
+**--bundletool=BUNDLETOOL_PATH**
+
+glob pattern to parse files, relative to current folder. Type `Path`. Default: `/usr/local/bin/bundletool.jar`
+
+**--ks=KEYSTORE_PATH**
+
+path to the keystore to sign the apk files with. Type `Path`. Default: `None`
+
+**--ks-pass=KEYSTORE_PASSWORD**
+
+keystore password. Type `str`. Default: `None`
+
+**--ks-key-alias=KEY_ALIAS**
+
+keystore key alias. Type `str`. Default: `None`
+
+**--key-pass=KEY_PASSWORD**
+
+keystore key password. Type `str`. Default: `None`

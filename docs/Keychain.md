@@ -3,20 +3,38 @@ Keychain
 ========
 
 
-``keychain [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] {add_certificates, create, delete, get_default, initialize, list_code_signing_certificates, lock, make_default, set_timeout, show_info, unlock}``
+``keychain [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] ACTION``
 #### Utility to manage macOS keychains and certificates
 
 ### Optional arguments
 
-|Flags|Description|Choices|
-| :--- | :--- | :--- |
-|-h, --help|show this help message and exit||
-|-s, --silent|Disable log output for commands||
-|-v, --verbose|Enable verbose logging for commands||
-|--no-color|Do not use ANSI colors to format terminal output||
-|--log-stream|Log output stream. [Default: stderr]|stderr, stdout|
 
-### Keychain actions
+**-h, --help**
+
+show this help message and exit
+
+**-s, --silent**
+
+Disable log output for commands
+
+**-v, --verbose**
+
+Enable verbose logging for commands
+
+**--no-color**
+
+Do not use ANSI colors to format terminal output
+
+**--log-stream={stderr, stdout}**
+
+Log output stream. [Default: stderr]
+### Optional arguments for Keychain
+
+
+**-p, --path=PATH**
+
+Keychain path. If not provided, the system default keychain will be used instead. Type `Path`
+### Actions
 
 |Action|Description|
 | :--- | :--- |
@@ -31,9 +49,3 @@ Keychain
 |[set_timeout](Keychain_set_timeout.md)|Set timeout settings for the keychain.        If seconds are not provided, then no-timeout will be set.|
 |[show_info](Keychain_show_info.md)|Show all settings for the keychain.|
 |[unlock](Keychain_unlock.md)|Unlock the specified keychain.|
-
-### Optional arguments for Keychain
-
-|Flags|Argument|Description|Type|
-| :--- | :--- | :--- | :--- |
-|-p, --path|PATH|Keychain path. If not provided, the system default keychain will be used instead|Path|
