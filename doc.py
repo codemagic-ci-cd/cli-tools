@@ -17,22 +17,22 @@ from codemagic import cli
 from codemagic import tools
 
 SerializedArgument = NamedTuple('SerializedArgument', [
-    ('key', str), 
+    ('key', str),
     ('description', str),
-    ('flags', str), 
-    ('type', str), 
+    ('flags', str),
+    ('type', str),
     ('name', str),
-    ('required', bool), 
-    ('default', str), 
-    ('nargs', bool), 
+    ('required', bool),
+    ('default', str),
+    ('nargs', bool),
     ('choices', str)
 ])
 
 Action = NamedTuple('Action', [
-    ('action_name', str), 
-    ('name', str), 
-    ('description', str), 
-    ('required_args', List[SerializedArgument]), 
+    ('action_name', str),
+    ('name', str),
+    ('description', str),
+    ('required_args', List[SerializedArgument]),
     ('optional_args', List[SerializedArgument])
 ])
 
