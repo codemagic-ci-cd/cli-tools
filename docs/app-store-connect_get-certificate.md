@@ -25,7 +25,7 @@ Enable verbose logging for commands
 
 Do not use ANSI colors to format terminal output
 
-**--log-stream=stderr|stdout**
+**--log-stream=stderr | stdout**
 
 Log output stream. Default: stderr
 ### Required arguments for command get_certificate

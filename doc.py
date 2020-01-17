@@ -163,7 +163,7 @@ class ToolDocumentationGenerator:
                 required=False,
                 default='',
                 nargs=False,
-                choices='|'.join(option.choices) if option.choices else '',
+                choices=' | '.join(option.choices) if option.choices else '',
             )
 
         parser = argparse.ArgumentParser(
