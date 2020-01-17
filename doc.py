@@ -3,66 +3,95 @@ from __future__ import annotations
 import os
 import sys
 from types import FunctionType
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Any, NamedTuple
 from mdutils.tools.tools import Table
 from mdutils.mdutils import MdUtils
 import mdutils
 from pathlib import Path
 import re
 import argparse
+from collections import namedtuple
 
 sys.path.append(os.path.abspath('./src'))
 from codemagic import cli
 from codemagic import tools
 
-SerializedArgument = Dict[str, Union[str, bool]]
-CommonOptionalArgument = Union[argparse._HelpAction, argparse._StoreFalseAction, argparse._StoreTrueAction, argparse._StoreTrueAction, argparse._StoreAction]
+SerializedArgument = NamedTuple('SerializedArgument', [
+    ('key', str), 
+    ('description', str),
+    ('flags', str), 
+    ('type', str), 
+    ('name', str),
+    ('required', bool), 
+    ('default', str), 
+    ('nargs', bool), 
+    ('choices', str)
+])
+
+Action = NamedTuple('Action', [
+    ('action_name', str), 
+    ('name', str), 
+    ('description', str), 
+    ('required_args', List[SerializedArgument]), 
+    ('optional_args', List[SerializedArgument])
+])
+
+ArgumentKwargs = NamedTuple('ArgumentKwargs', [
+    ('nargs', bool),
+    ('required', bool),
+    ('default', str),
+    ('choices', str)
+])
+
 
 class ArgumentsSerializer:
-    def __init__(self, raw_arguments: Tuple) -> None:
+    def __init__(self, raw_arguments: Tuple[Any]) -> None:
         self.raw_arguments = raw_arguments
         self.required_args: List[SerializedArgument] = []
         self.optional_args: List[SerializedArgument] = []
 
     def serialize(self) -> ArgumentsSerializer:
         for arg in self.raw_arguments:
-            argument = {
-                'key': arg._value_.key,
-                'description': str_plain(arg._value_.description),
-                'flags': ', '.join(getattr(arg._value_, 'flags', '')),
-            }
-            argument.update(self._proccess_kwargs(
-                getattr(arg._value_, 'argparse_kwargs')))
-
             arg_type = getattr(arg._value_, 'type')
-            argument['type'] = arg_type.__name__ if arg_type else ''
-            argument['name'] = '' if argument['type'] == 'bool' else arg._name_
+            arg_type = arg_type.__name__ if arg_type else ''
+            kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
 
-            if argument['required']:
+            argument: SerializedArgument = SerializedArgument(
+                key=arg._value_.key,
+                description=str_plain(arg._value_.description),
+                flags=', '.join(getattr(arg._value_, 'flags', '')),
+                type=arg_type,
+                name='' if arg_type == 'bool' else arg._name_,
+                required=kwargs.required,
+                default=kwargs.default,
+                nargs=kwargs.nargs,
+                choices=kwargs.choices,
+            )
+
+            if argument.required:
                 self.required_args.append(argument)
             else:
                 self.optional_args.append(argument)
         return self
 
-    def _proccess_kwargs(self, kwargs: Dict) -> Dict:
-        def _process_choice(choices: Optional[List]) -> str:
+    def _proccess_kwargs(self, kwargs: Dict[str, Any]) -> ArgumentKwargs:
+        def _process_choice(choices: Optional[List[Any]]) -> str:
             return ', '.join([str(c) for c in choices] if choices else '')
 
-        def _process_default(default) -> str:
+        def _process_default(default: Any) -> str:
             if isinstance(default, tuple) and isinstance(default[0], Path):
                 default = default[0]
             if isinstance(default, Path):
                 default = str(default).replace(str(Path.home()), '$HOME')
             return str(default)
 
-
         kwargs = kwargs if kwargs else {}
-        return {
-            'nargs': kwargs.get('nargs', '') == '+',
-            'required': kwargs.get('required', True),
-            'default': _process_default(kwargs.get('default', '')),
-            'choices': _process_choice(kwargs.get('choices')),
-        }
+        return ArgumentKwargs(
+            nargs=kwargs.get('nargs', '') == '+',
+            required=kwargs.get('required', True),
+            default=_process_default(kwargs.get('default', '')),
+            choices=_process_choice(kwargs.get('choices'))
+        )
 
 
 # docs/README.md
@@ -71,7 +100,7 @@ class MainPageDocumentationGenerator:
         self.title = title
         self.main_dir = main_dir
 
-    def generate(self, tools: List[abc.ABCMeta]) -> None:
+    def generate(self, tools: List[Any]) -> None:
         os.makedirs(self.main_dir, exist_ok=True)
         md = MdUtils(file_name=f'{self.main_dir}/README', title=self.title)
         Writer(md).write_tools_table(tools)
@@ -79,7 +108,7 @@ class MainPageDocumentationGenerator:
 
 
 class ToolDocumentationGenerator:
-    def __init__(self, tool, main_dir: str) -> None:
+    def __init__(self, tool: Any, main_dir: str) -> None:
         self.tool = tool
         self.tool_name: str = tool.__name__
         self.tool_prefix: str = f'{main_dir}/{self.tool_name}'
@@ -102,45 +131,46 @@ class ToolDocumentationGenerator:
 
         for action in self.tool_serialized_actions:
             # docs/<tool-name>_<action-name>.md
-            md = MdUtils(file_name=f'{self.tool_prefix}_{action["name"]}', title=action['name'])
+            md = MdUtils(file_name=f'{self.tool_prefix}_{action.name}', title=action.name)
             writer = Writer(md)
             writer.write_action_command_usage(self, action)
-            writer.write_description(action['description'])
+            writer.write_description(action.description)
             writer.write_options(self.tool_options)
-            writer.write_arguments(f'command {action["name"]}', action['optional_args'], action['required_args'])
+            writer.write_arguments(f'command {action.name}', action.optional_args, action.required_args)
             writer.write_arguments(self.tool_name, self.tool_optional_args, [])
             md.create_md_file()
 
-    def _serialize_actions(self) -> List[Dict]:
-        serialized_actions = []
+    def _serialize_actions(self) -> List[Action]:
+        serialized_actions: List[Action] = []
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
-            serialized_actions.append({
-                'action_name': f.action_name,
-                'name': f.__name__,
-                'description': f.__doc__,
-                'required_args': action_args_serializer.required_args,
-                'optional_args': action_args_serializer.optional_args,
-            })
+            serialized_actions.append(Action(
+                action_name=f.action_name,
+                name=f.__name__,
+                description=f.__doc__,
+                required_args=action_args_serializer.required_args,
+                optional_args=action_args_serializer.optional_args,
+
+            ))
         return serialized_actions
 
     def _serialize_default_options(self) -> List[SerializedArgument]:
-        def _serialize_option(option: CommonOptionalArgument) -> SerializedArgument:
-            return {
-                'flags': ', '.join(option.option_strings),
-                'description': str_plain(option.help),
-                'choices': ', '.join(option.choices) if option.choices else '',
-                'name': '',
-                'default': '',
-                'nargs': False,
-                'required': False,
-                'type': '',
-            }
+        def _serialize_option(option: Any) -> SerializedArgument:
+            return SerializedArgument(
+                key='',
+                description=str_plain(str(option.help)),
+                flags=', '.join(option.option_strings),
+                type='',
+                name='',
+                required=False,
+                default='',
+                nargs=False,
+                choices=', '.join(option.choices) if option.choices else '',
+            )
 
         parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=cli.cli_help_formatter.CliHelpFormatter)
         self.tool.get_default_cli_options(parser)
-        possible_arguments = parser._actions
-        return [_serialize_option(arg) for arg in possible_arguments]
+        return [_serialize_option(arg) for arg in parser._actions]
 
 
 class CommandUsageGenerator:
@@ -151,11 +181,11 @@ class CommandUsageGenerator:
     def get_tool_command_usage(self) -> str:
         return f'{self.tool_name} {self._get_tool_flags()} ACTION'
 
-    def get_action_command_usage(self, action: Dict) -> str:
+    def get_action_command_usage(self, action: Action) -> str:
         tool_flags = self._get_tool_flags()
-        optional_flags = self._prepare_arguments(action['optional_args'])
-        required_flags = self._prepare_arguments(action['required_args'])
-        return f'{self.tool_name} {action["action_name"]} {tool_flags} {optional_flags} {required_flags}'
+        optional_flags = self._prepare_arguments(action.optional_args)
+        required_flags = self._prepare_arguments(action.required_args)
+        return f'{self.tool_name} {action.action_name} {tool_flags} {optional_flags} {required_flags}'
 
     def _get_tool_flags(self) -> str:
         optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
@@ -173,14 +203,14 @@ class CommandUsageGenerator:
         return tool_names[self.doc_generator.tool.__name__]
 
     def _get_formatted_flag(self, arg: SerializedArgument) -> str:
-        flag = f'{arg["flags"].split(",")[0]}'
-        if not arg['flags'] and arg['name']:
-            flag = arg['name']
-        elif arg['choices'] and not arg['name']:
+        flag = f'{arg.flags.split(",")[0]}'
+        if not arg.flags and arg.name:
+            flag = arg.name
+        elif arg.choices and not arg.name:
             flag = f'{flag} CHOSEN_OPTION'
-        elif arg['name']:
-            flag = f'{flag} {arg["name"]}'
-        return flag if arg['required'] else f'[{flag}]'
+        elif arg.name:
+            flag = f'{flag} {arg.name}'
+        return flag if arg.required else f'[{flag}]'
 
     def _prepare_arguments(self, args: List[SerializedArgument]) -> str:
         return ' '.join([self._get_formatted_flag(arg) for arg in args])
@@ -198,7 +228,7 @@ class Writer:
         content = CommandUsageGenerator(documentation_generator).get_tool_command_usage()
         self.file.new_paragraph(f"``{content}``")
 
-    def write_action_command_usage(self, documentation_generator: ToolDocumentationGenerator, action: Dict) -> None:
+    def write_action_command_usage(self, documentation_generator: ToolDocumentationGenerator, action: Action) -> None:
         content = CommandUsageGenerator(documentation_generator).get_action_command_usage(action)
         self.file.new_paragraph(f"``{content}``")
 
@@ -212,7 +242,7 @@ class Writer:
         )
         self.file.write(table)
 
-    def write_tools_table(self, tools: List) -> None:
+    def write_tools_table(self, tools: List[Any]) -> None:
         content = [
             [
                 f'[{tool.__name__}]({tool.__name__}.md)',
@@ -220,12 +250,12 @@ class Writer:
             ] for tool in tools]
         self.write_table(content, ['Tool name', 'Description'])
 
-    def write_actions_table(self, tool_name: str, actions: List[Dict]) -> None:
+    def write_actions_table(self, tool_name: str, actions: List[Action]) -> None:
         self.file.new_header(level=3, title='Actions')
         content = [
             [
-                f'[{action["name"]}]({tool_name}_{action["name"]}.md)',
-                str_plain(action['description'])
+                f'[{action.name}]({tool_name}_{action.name}.md)',
+                str_plain(action.description)
             ] for action in actions]
         self.write_table(content, ['Action', 'Description'])
 
@@ -238,18 +268,18 @@ class Writer:
 
     def _write_arguments(self, title: str, args: List[SerializedArgument]) -> None:
         def _process_flag(arg: SerializedArgument) -> str:
-            flag: str = arg['flags']
-            if flag and arg['choices']:
-                return f'{flag}={{{arg["choices"]}}}'
-            if flag and arg['name']:
-                return f'{flag}={arg["name"]}'
-            return arg['name'] if arg['name'] else flag
+            flag: str = arg.flags
+            if flag and arg.choices:
+                return f'{flag}={{{arg.choices}}}'
+            if flag and arg.name:
+                return f'{flag}={arg.name}'
+            return arg.name if arg.name else flag
 
         def _process_description(arg: SerializedArgument) -> str:
-            description: str = arg['description']
-            description += f'. Type `{arg["type"]}`' if arg['type'] and arg['type'] != 'bool' else ''
-            description += '. Multiple arguments' if arg['nargs'] else ''
-            return f'{description}. Default: `{arg["default"]}`' if arg['default'] else description
+            description: str = arg.description
+            description += f'. Type `{arg.type}`' if arg.type and arg.type != 'bool' else ''
+            description += '. Multiple arguments' if arg.nargs else ''
+            return f'{description}. Default: `{arg.default}`' if arg.default else description
 
         if not args:
             return
