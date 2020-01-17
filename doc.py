@@ -3,22 +3,26 @@ from __future__ import annotations
 import os
 import sys
 from types import FunctionType
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from mdutils.tools.tools import Table
 from mdutils.mdutils import MdUtils
 import mdutils
 from pathlib import Path
 import re
+import argparse
 
 sys.path.append(os.path.abspath('./src'))
 from codemagic import cli
 from codemagic import tools
 
+SerializedArgument = Dict[str, Union[str, bool]]
+CommonOptionalArgument = Union[argparse._HelpAction, argparse._StoreFalseAction, argparse._StoreTrueAction, argparse._StoreTrueAction, argparse._StoreAction]
+
 class ArgumentsSerializer:
     def __init__(self, raw_arguments: Tuple) -> None:
         self.raw_arguments = raw_arguments
-        self.required_args: List[Dict] = []
-        self.optional_args: List[Dict] = []
+        self.required_args: List[SerializedArgument] = []
+        self.optional_args: List[SerializedArgument] = []
 
     def serialize(self) -> ArgumentsSerializer:
         for arg in self.raw_arguments:
@@ -51,6 +55,7 @@ class ArgumentsSerializer:
                 default = str(default).replace(str(Path.home()), '$HOME')
             return str(default)
 
+
         kwargs = kwargs if kwargs else {}
         return {
             'nargs': kwargs.get('nargs', '') == '+',
@@ -66,7 +71,7 @@ class MainPageDocumentationGenerator:
         self.title = title
         self.main_dir = main_dir
 
-    def generate(self, tools: List) -> None:
+    def generate(self, tools: List[abc.ABCMeta]) -> None:
         os.makedirs(self.main_dir, exist_ok=True)
         md = MdUtils(file_name=f'{self.main_dir}/README', title=self.title)
         Writer(md).write_tools_table(tools)
@@ -119,11 +124,8 @@ class ToolDocumentationGenerator:
             })
         return serialized_actions
 
-    def _serialize_default_options(self) -> List[Dict]:
-        import argparse
-        from codemagic.cli.cli_help_formatter import CliHelpFormatter
-
-        def _serialize_option(option) -> Dict:
+    def _serialize_default_options(self) -> List[SerializedArgument]:
+        def _serialize_option(option: CommonOptionalArgument) -> SerializedArgument:
             return {
                 'flags': ', '.join(option.option_strings),
                 'description': str_plain(option.help),
@@ -135,7 +137,7 @@ class ToolDocumentationGenerator:
                 'type': '',
             }
 
-        parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=CliHelpFormatter)
+        parser = argparse.ArgumentParser(description=self.tool.__doc__, formatter_class=cli.cli_help_formatter.CliHelpFormatter)
         self.tool.get_default_cli_options(parser)
         possible_arguments = parser._actions
         return [_serialize_option(arg) for arg in possible_arguments]
@@ -170,7 +172,7 @@ class CommandUsageGenerator:
         }
         return tool_names[self.doc_generator.tool.__name__]
 
-    def _get_formatted_flag(self, arg: Dict) -> str:
+    def _get_formatted_flag(self, arg: SerializedArgument) -> str:
         flag = f'{arg["flags"].split(",")[0]}'
         if not arg['flags'] and arg['name']:
             flag = arg['name']
@@ -180,7 +182,7 @@ class CommandUsageGenerator:
             flag = f'{flag} {arg["name"]}'
         return flag if arg['required'] else f'[{flag}]'
 
-    def _prepare_arguments(self, args: List[Dict]) -> str:
+    def _prepare_arguments(self, args: List[SerializedArgument]) -> str:
         return ' '.join([self._get_formatted_flag(arg) for arg in args])
 
 
@@ -227,24 +229,24 @@ class Writer:
             ] for action in actions]
         self.write_table(content, ['Action', 'Description'])
 
-    def write_arguments(self, obj: str, optional: List[Dict], required: List[Dict]) -> None:
+    def write_arguments(self, obj: str, optional: List[SerializedArgument], required: List[SerializedArgument]) -> None:
         self._write_arguments(f'Required arguments for {obj}', required)
         self._write_arguments(f'Optional arguments for {obj}', optional)
 
-    def write_options(self, options: List[Dict]) -> None:
+    def write_options(self, options: List[SerializedArgument]) -> None:
         self._write_arguments(f'Optional arguments', options)
 
-    def _write_arguments(self, title: str, args: List[Dict]) -> None:
-        def _process_flag(arg: Dict) -> str:
-            flag = arg['flags']
+    def _write_arguments(self, title: str, args: List[SerializedArgument]) -> None:
+        def _process_flag(arg: SerializedArgument) -> str:
+            flag: str = arg['flags']
             if flag and arg['choices']:
                 return f'{flag}={{{arg["choices"]}}}'
             if flag and arg['name']:
                 return f'{flag}={arg["name"]}'
             return arg['name'] if arg['name'] else flag
 
-        def _process_description(arg: Dict) -> str:
-            description = arg['description']
+        def _process_description(arg: SerializedArgument) -> str:
+            description: str = arg['description']
             description += f'. Type `{arg["type"]}`' if arg['type'] and arg['type'] != 'bool' else ''
             description += '. Multiple arguments' if arg['nargs'] else ''
             return f'{description}. Default: `{arg["default"]}`' if arg['default'] else description
@@ -264,7 +266,7 @@ def str_plain(string: str) -> str:
     return re.compile('(\\x1b\[\d*m|\\x1b\[\d*m|\\n|\\t)').sub('', string).strip()
 
 
-def main():
+def main() -> None:
     main_dir = 'docs'
     tools = cli.CliApp.__subclasses__()
     MainPageDocumentationGenerator('CLI tools', main_dir).generate(tools)
