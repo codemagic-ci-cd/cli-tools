@@ -1,6 +1,9 @@
+
+from __future__ import annotations
 import os
 import sys
 from types import FunctionType
+from typing import Dict, List, Optional, Tuple
 from mdutils.tools.tools import Table
 from mdutils.mdutils import MdUtils
 import mdutils
@@ -12,12 +15,12 @@ from codemagic import cli
 from codemagic import tools
 
 class ArgumentsSerializer:
-    def __init__(self, raw_arguments):
+    def __init__(self, raw_arguments: Tuple) -> None:
         self.raw_arguments = raw_arguments
-        self.required_args = []
-        self.optional_args = []
+        self.required_args: List[Dict] = []
+        self.optional_args: List[Dict] = []
 
-    def serialize(self):
+    def serialize(self) -> ArgumentsSerializer:
         for arg in self.raw_arguments:
             argument = {
                 'key': arg._value_.key,
@@ -37,11 +40,11 @@ class ArgumentsSerializer:
                 self.optional_args.append(argument)
         return self
 
-    def _proccess_kwargs(self, kwargs):
-        def _process_choice(choices):
+    def _proccess_kwargs(self, kwargs: Dict) -> Dict:
+        def _process_choice(choices: Optional[List]) -> str:
             return ', '.join([str(c) for c in choices] if choices else '')
 
-        def _process_default(default):
+        def _process_default(default) -> str:
             if isinstance(default, tuple) and isinstance(default[0], Path):
                 default = default[0]
             if isinstance(default, Path):
@@ -59,11 +62,11 @@ class ArgumentsSerializer:
 
 # docs/README.md
 class MainPageDocumentationGenerator:
-    def __init__(self, title, main_dir):
+    def __init__(self, title: str, main_dir: str) -> None:
         self.title = title
         self.main_dir = main_dir
 
-    def generate(self, tools):
+    def generate(self, tools: List) -> None:
         os.makedirs(self.main_dir, exist_ok=True)
         md = MdUtils(file_name=f'{self.main_dir}/README', title=self.title)
         Writer(md).write_tools_table(tools)
@@ -71,12 +74,12 @@ class MainPageDocumentationGenerator:
 
 
 class ToolDocumentationGenerator:
-    def __init__(self, tool, main_dir):
+    def __init__(self, tool, main_dir: str) -> None:
         self.tool = tool
-        self.tool_name = tool.__name__
-        self.tool_prefix = f'{main_dir}/{self.tool_name}'
+        self.tool_name: str = tool.__name__
+        self.tool_prefix: str = f'{main_dir}/{self.tool_name}'
 
-    def generate(self):
+    def generate(self) -> None:
         class_args_serializer = ArgumentsSerializer(self.tool.CLASS_ARGUMENTS).serialize()
         self.tool_optional_args = class_args_serializer.optional_args
         self.tool_serialized_actions = self._serialize_actions()
@@ -103,7 +106,7 @@ class ToolDocumentationGenerator:
             writer.write_arguments(self.tool_name, self.tool_optional_args, [])
             md.create_md_file()
 
-    def _serialize_actions(self):
+    def _serialize_actions(self) -> List[Dict]:
         serialized_actions = []
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
@@ -116,11 +119,11 @@ class ToolDocumentationGenerator:
             })
         return serialized_actions
 
-    def _serialize_default_options(self):
+    def _serialize_default_options(self) -> List[Dict]:
         import argparse
         from codemagic.cli.cli_help_formatter import CliHelpFormatter
 
-        def _serialize_option(option):
+        def _serialize_option(option) -> Dict:
             return {
                 'flags': ', '.join(option.option_strings),
                 'description': str_plain(option.help),
@@ -139,26 +142,25 @@ class ToolDocumentationGenerator:
 
 
 class CommandUsageGenerator:
-    def __init__(self, doc_generator):
+    def __init__(self, doc_generator: ToolDocumentationGenerator) -> None:
         self.doc_generator = doc_generator
         self.tool_name = self._get_tool_name()
 
-    def get_tool_command_usage(self):
+    def get_tool_command_usage(self) -> str:
         return f'{self.tool_name} {self._get_tool_flags()} ACTION'
 
-    def get_action_command_usage(self, action):
-        from pprint import pprint
+    def get_action_command_usage(self, action: Dict) -> str:
         tool_flags = self._get_tool_flags()
         optional_flags = self._prepare_arguments(action['optional_args'])
         required_flags = self._prepare_arguments(action['required_args'])
         return f'{self.tool_name} {action["action_name"]} {tool_flags} {optional_flags} {required_flags}'
 
-    def _get_tool_flags(self):
+    def _get_tool_flags(self) -> str:
         optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
         tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
         return f'{optional_common_flags} {tool_flags}'
 
-    def _get_tool_name(self):
+    def _get_tool_name(self) -> str:
         tool_names = {
             'AppStoreConnect': 'app-store-connect',
             'GitChangelog': 'git-changelog',
@@ -168,7 +170,7 @@ class CommandUsageGenerator:
         }
         return tool_names[self.doc_generator.tool.__name__]
 
-    def _get_formatted_flag(self, arg):
+    def _get_formatted_flag(self, arg: Dict) -> str:
         flag = f'{arg["flags"].split(",")[0]}'
         if not arg['flags'] and arg['name']:
             flag = arg['name']
@@ -178,28 +180,28 @@ class CommandUsageGenerator:
             flag = f'{flag} {arg["name"]}'
         return flag if arg['required'] else f'[{flag}]'
 
-    def _prepare_arguments(self, args):
+    def _prepare_arguments(self, args: List[Dict]) -> str:
         return ' '.join([self._get_formatted_flag(arg) for arg in args])
 
 
 class Writer:
-    def __init__(self, file):
+    def __init__(self, file: MdUtils) -> None:
         self.file = file
 
-    def write_description(self, content):
+    def write_description(self, content: str) -> None:
         content = str_plain(content)
         self.file.new_header(level=4, title=content)
 
-    def write_tool_command_usage(self, documentation_generator):
+    def write_tool_command_usage(self, documentation_generator: ToolDocumentationGenerator) -> None:
         content = CommandUsageGenerator(documentation_generator).get_tool_command_usage()
         self.file.new_paragraph(f"``{content}``")
 
-    def write_action_command_usage(self, documentation_generator, action):
+    def write_action_command_usage(self, documentation_generator: ToolDocumentationGenerator, action: Dict) -> None:
         content = CommandUsageGenerator(documentation_generator).get_action_command_usage(action)
         self.file.new_paragraph(f"``{content}``")
 
-    def write_table(self, content, header):
-        flat_content = sum(content, [])
+    def write_table(self, content: List[List[str]], header: List[str]) -> None:
+        flat_content: List[str] = sum(content, [])
         table = Table().create_table(
             columns=len(header),
             rows=len(content) + 1,
@@ -208,33 +210,32 @@ class Writer:
         )
         self.file.write(table)
 
-    def write_tools_table(self, tools):
-        tools_source = [
+    def write_tools_table(self, tools: List) -> None:
+        content = [
             [
                 f'[{tool.__name__}]({tool.__name__}.md)',
                 str_plain(tool.__doc__)
             ] for tool in tools]
-        self.write_table(tools_source, ['Tool name', 'Description'])
+        self.write_table(content, ['Tool name', 'Description'])
 
-    def write_actions_table(self, tool_name, actions):
+    def write_actions_table(self, tool_name: str, actions: List[Dict]) -> None:
         self.file.new_header(level=3, title='Actions')
-        actions_source = [
+        content = [
             [
                 f'[{action["name"]}]({tool_name}_{action["name"]}.md)',
                 str_plain(action['description'])
             ] for action in actions]
-        self.write_table(actions_source, ['Action', 'Description'])
+        self.write_table(content, ['Action', 'Description'])
 
-    def write_arguments(self, obj, optional, required):
-        if required:
-            self._write_arguments(f'Required arguments for {obj}', required)
+    def write_arguments(self, obj: str, optional: List[Dict], required: List[Dict]) -> None:
+        self._write_arguments(f'Required arguments for {obj}', required)
         self._write_arguments(f'Optional arguments for {obj}', optional)
 
-    def write_options(self, options):
+    def write_options(self, options: List[Dict]) -> None:
         self._write_arguments(f'Optional arguments', options)
 
-    def _write_arguments(self, title, args):
-        def _process_flag(arg):
+    def _write_arguments(self, title: str, args: List[Dict]) -> None:
+        def _process_flag(arg: Dict) -> str:
             flag = arg['flags']
             if flag and arg['choices']:
                 return f'{flag}={{{arg["choices"]}}}'
@@ -242,7 +243,7 @@ class Writer:
                 return f'{flag}={arg["name"]}'
             return arg['name'] if arg['name'] else flag
 
-        def _process_description(arg):
+        def _process_description(arg: Dict) -> str:
             description = arg['description']
             description += f'. Type `{arg["type"]}`' if arg['type'] and arg['type'] != 'bool' else ''
             description += '. Multiple arguments' if arg['nargs'] else ''
@@ -259,7 +260,7 @@ class Writer:
             self.file.new_paragraph(description)
 
 
-def str_plain(string):
+def str_plain(string: str) -> str:
     return re.compile('(\\x1b\[\d*m|\\x1b\[\d*m|\\n|\\t)').sub('', string).strip()
 
 
