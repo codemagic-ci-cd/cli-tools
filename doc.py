@@ -53,7 +53,7 @@ class ArgumentsSerializer:
 
         kwargs = kwargs if kwargs else {}
         return {
-            'nargs': 'Yes' if kwargs.get('nargs', '') == '+' else '',
+            'nargs': kwargs.get('nargs', '') == '+',
             'required': kwargs.get('required', True),
             'default': _process_default(kwargs.get('default', '')),
             'choices': _process_choice(kwargs.get('choices')),
@@ -251,11 +251,11 @@ class Writer:
 
         if not args:
             return
-        
+
         self.file.new_header(level=3, title=title)
         for arg in args:
             flag = _process_flag(arg)
-            description = _process_description(arg).replace('..','.')
+            description = _process_description(arg).replace('..', '.')
             self.file.new_paragraph(f'**{flag}**')
             self.file.new_paragraph(description)
 
