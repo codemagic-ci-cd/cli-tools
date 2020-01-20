@@ -2,10 +2,10 @@
 generate
 ========
 
-
-``git-changelog generate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--previous-commit PREVIOUS_COMMIT] [--skip-pattern SKIP_PATTERN] [--commit-limit COMMIT_LIMIT]  ``
 #### Generate a changelog text from git history
 
+
+``git-changelog generate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--previous-commit PREVIOUS_COMMIT] [--skip-pattern SKIP_PATTERN] [--commit-limit COMMIT_LIMIT]  ``
 ### Optional arguments
 
 

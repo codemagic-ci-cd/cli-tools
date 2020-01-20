@@ -2,10 +2,10 @@
 get_default
 ===========
 
-
-``keychain get-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 #### Show the system default keychain.
 
+
+``keychain get-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 ### Optional arguments
 
 

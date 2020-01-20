@@ -2,10 +2,10 @@
 use_profiles
 ============
 
-
-``xcode-project use-profiles [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATTERN] [--profile PROFILE_PATHS] [--export-options-plist EXPORT_OPTIONS_PATH] [--custom-export-options CUSTOM_EXPORT_OPTIONS] ``
 #### Set up code signing settings on specified Xcode projects        to use given provisioning profiles
 
+
+``xcode-project use-profiles [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATTERN] [--profile PROFILE_PATHS] [--export-options-plist EXPORT_OPTIONS_PATH] [--custom-export-options CUSTOM_EXPORT_OPTIONS] ``
 ### Optional arguments
 
 

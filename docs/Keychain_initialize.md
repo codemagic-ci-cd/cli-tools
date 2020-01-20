@@ -2,10 +2,10 @@
 initialize
 ==========
 
-
-``keychain initialize [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] [-t TIMEOUT] ``
 #### Set up the keychain to be used for code signing. Create the keychain        at specified path with specified password with given timeout.        Make it default and unlock it for upcoming use.
 
+
+``keychain initialize [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] [-t TIMEOUT] ``
 ### Optional arguments
 
 

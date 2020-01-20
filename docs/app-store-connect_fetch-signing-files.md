@@ -2,10 +2,10 @@
 fetch_signing_files
 ===================
 
-
-``app-store-connect fetch-signing-files [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--platform PLATFORM] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--type PROFILE_TYPE] [--create] BUNDLE_ID_IDENTIFIER``
 #### Fetch provisioning profiles and code signing certificates        for Bundle ID with given identifier.
 
+
+``app-store-connect fetch-signing-files [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--platform PLATFORM] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--type PROFILE_TYPE] [--create] BUNDLE_ID_IDENTIFIER``
 ### Optional arguments
 
 

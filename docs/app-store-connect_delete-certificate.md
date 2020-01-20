@@ -2,10 +2,10 @@
 delete_certificate
 ==================
 
-
-``app-store-connect delete-certificate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--ignore-not-found] CERTIFICATE_RESOURCE_ID``
 #### Delete specified Signing Certificate from Apple Developer portal.
 
+
+``app-store-connect delete-certificate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--ignore-not-found] CERTIFICATE_RESOURCE_ID``
 ### Optional arguments
 
 

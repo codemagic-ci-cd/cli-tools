@@ -2,10 +2,10 @@
 list_devices
 ============
 
-
-``app-store-connect list-devices [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--platform PLATFORM_OPTIONAL] [--name DEVICE_NAME] [--status DEVICE_STATUS] ``
 #### List Devices from Apple Developer portal matching given constraints.
 
+
+``app-store-connect list-devices [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--platform PLATFORM_OPTIONAL] [--name DEVICE_NAME] [--status DEVICE_STATUS] ``
 ### Optional arguments
 
 

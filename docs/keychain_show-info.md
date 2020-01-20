@@ -2,10 +2,10 @@
 show_info
 =========
 
-
-``keychain show-info [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 #### Show all settings for the keychain.
 
+
+``keychain show-info [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 ### Optional arguments
 
 

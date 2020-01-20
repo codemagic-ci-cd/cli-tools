@@ -2,10 +2,10 @@
 make_default
 ============
 
-
-``keychain make-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 #### Set the keychain as the system default keychain.
 
+
+``keychain make-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 ### Optional arguments
 
 

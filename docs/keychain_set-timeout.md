@@ -2,10 +2,10 @@
 set_timeout
 ===========
 
-
-``keychain set-timeout [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-t TIMEOUT] ``
 #### Set timeout settings for the keychain.        If seconds are not provided, then no-timeout will be set.
 
+
+``keychain set-timeout [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-t TIMEOUT] ``
 ### Optional arguments
 
 

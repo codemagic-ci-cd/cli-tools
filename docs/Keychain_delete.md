@@ -2,10 +2,10 @@
 delete
 ======
 
-
-``keychain delete [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 #### Delete keychains and remove them from the search list.
 
+
+``keychain delete [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 ### Optional arguments
 
 

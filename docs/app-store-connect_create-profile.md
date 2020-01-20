@@ -2,10 +2,10 @@
 create_profile
 ==============
 
-
-``app-store-connect create-profile [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type PROFILE_TYPE] [--name PROFILE_NAME] [--save] BUNDLE_ID_RESOURCE_ID --certificate-ids CERTIFICATE_RESOURCE_IDS --device-ids DEVICE_RESOURCE_IDS``
 #### Create provisioning profile of given type
 
+
+``app-store-connect create-profile [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type PROFILE_TYPE] [--name PROFILE_NAME] [--save] BUNDLE_ID_RESOURCE_ID --certificate-ids CERTIFICATE_RESOURCE_IDS --device-ids DEVICE_RESOURCE_IDS``
 ### Optional arguments
 
 

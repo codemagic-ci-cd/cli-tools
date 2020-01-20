@@ -2,10 +2,10 @@
 XcodeProject
 ============
 
-
-``xcode-project [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  ACTION``
 #### Utility to prepare iOS application code signing properties for build
 
+
+``xcode-project [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  ACTION``
 ### Optional arguments
 
 

@@ -2,10 +2,10 @@
 Keychain
 ========
 
-
-``keychain [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] ACTION``
 #### Utility to manage macOS keychains and certificates
 
+
+``keychain [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] ACTION``
 ### Optional arguments
 
 

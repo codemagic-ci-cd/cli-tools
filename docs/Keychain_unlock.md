@@ -2,10 +2,10 @@
 unlock
 ======
 
-
-``keychain unlock [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] ``
 #### Unlock the specified keychain.
 
+
+``keychain unlock [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] ``
 ### Optional arguments
 
 

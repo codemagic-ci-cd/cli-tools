@@ -2,10 +2,10 @@
 list_bundle_ids
 ===============
 
-
-``app-store-connect list-bundle-ids [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL] [--name BUNDLE_ID_NAME] [--platform PLATFORM_OPTIONAL] ``
 #### List Bundle IDs from Apple Developer portal matching given constraints.
 
+
+``app-store-connect list-bundle-ids [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL] [--name BUNDLE_ID_NAME] [--platform PLATFORM_OPTIONAL] ``
 ### Optional arguments
 
 

@@ -2,10 +2,10 @@
 list_profiles
 =============
 
-
-``app-store-connect list-profiles [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type PROFILE_TYPE_OPTIONAL] [--state PROFILE_STATE_OPTIONAL] [--name PROFILE_NAME] [--save] ``
 #### List Profiles from Apple Developer portal matching given constraints.
 
+
+``app-store-connect list-profiles [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type PROFILE_TYPE_OPTIONAL] [--state PROFILE_STATE_OPTIONAL] [--name PROFILE_NAME] [--save] ``
 ### Optional arguments
 
 

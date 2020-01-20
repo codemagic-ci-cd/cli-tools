@@ -2,10 +2,10 @@
 lock
 ====
 
-
-``keychain lock [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 #### Lock the specified keychain.
 
+
+``keychain lock [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
 ### Optional arguments
 
 

@@ -2,10 +2,10 @@
 create
 ======
 
-
-``keychain create [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] ``
 #### Create a macOS keychain, add it to the search list.
 
+
+``keychain create [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] ``
 ### Optional arguments
 
 

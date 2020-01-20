@@ -2,10 +2,10 @@
 add_certificates
 ================
 
-
-``keychain add-certificates [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-c CERTIFICATE_PATHS] [--certificate-password CERTIFICATE_PASSWORD] ``
 #### Add p12 certificate to specified keychain.
 
+
+``keychain add-certificates [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-c CERTIFICATE_PATHS] [--certificate-password CERTIFICATE_PASSWORD] ``
 ### Optional arguments
 
 

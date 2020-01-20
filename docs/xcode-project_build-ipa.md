@@ -2,10 +2,10 @@
 build_ipa
 =========
 
-
-``xcode-project build-ipa [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATH] [--workspace XCODE_WORKSPACE_PATH] [--target TARGET_NAME] [--config CONFIGURATION_NAME] [--scheme SCHEME_NAME] [--ipa-directory IPA_DIRECTORY] [--export-options-plist EXPORT_OPTIONS_PATH] [--disable-xcpretty] [--xcpretty-options OPTIONS] ``
 #### Build ipa by archiving the Xcode project and then exporting it
 
+
+``xcode-project build-ipa [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATH] [--workspace XCODE_WORKSPACE_PATH] [--target TARGET_NAME] [--config CONFIGURATION_NAME] [--scheme SCHEME_NAME] [--ipa-directory IPA_DIRECTORY] [--export-options-plist EXPORT_OPTIONS_PATH] [--disable-xcpretty] [--xcpretty-options OPTIONS] ``
 ### Optional arguments
 
 

@@ -2,10 +2,10 @@
 get_bundle_id
 =============
 
-
-``app-store-connect get-bundle-id [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY]  BUNDLE_ID_RESOURCE_ID``
 #### Get specified Bundle ID from Apple Developer portal.
 
+
+``app-store-connect get-bundle-id [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY]  BUNDLE_ID_RESOURCE_ID``
 ### Optional arguments
 
 
