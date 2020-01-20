@@ -121,8 +121,8 @@ class ToolDocumentationGenerator:
         # docs/<tool-name>.md
         md = MdUtils(file_name=f'{self.tool_prefix}', title=self.tool_name)
         writer = Writer(md)
-        writer.write_tool_command_usage(self)
         writer.write_description(self.tool.__doc__)
+        writer.write_tool_command_usage(self)
         writer.write_options(self.tool_options)
         writer.write_arguments(self.tool_command, self.tool_optional_args, [])
         writer.write_actions_table(self.tool_command, self.tool_serialized_actions)
@@ -132,8 +132,8 @@ class ToolDocumentationGenerator:
             # docs/<tool-name>_<action-name>.md
             md = MdUtils(file_name=f'{self.tool_prefix}_{action.action_name}', title=action.name)
             writer = Writer(md)
-            writer.write_action_command_usage(self, action)
             writer.write_description(action.description)
+            writer.write_action_command_usage(self, action)
             writer.write_options(self.tool_options)
             writer.write_arguments(f'command {action.name}', action.optional_args, action.required_args)
             writer.write_arguments(self.tool_command, self.tool_optional_args, [])
