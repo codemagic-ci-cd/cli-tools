@@ -2,7 +2,9 @@
 list_certificates
 =================
 
-#### List Signing Certificates from Apple Developer Portal matching given constraints.
+
+**List Signing Certificates from Apple Developer Portal matching given constraints.**
+### Usage
 
 
 ``app-store-connect list-certificates [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type CERTIFICATE_TYPE_OPTIONAL] [--display-name DISPLAY_NAME] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--save] ``

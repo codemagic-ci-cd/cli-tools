@@ -2,7 +2,9 @@
 make_default
 ============
 
-#### Set the keychain as the system default keychain.
+
+**Set the keychain as the system default keychain.**
+### Usage
 
 
 ``keychain make-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``

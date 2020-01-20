@@ -2,7 +2,9 @@
 AppStoreConnect
 ===============
 
-#### Utility to download code signing certificates and provisioning profiles    from Apple Developer Portal using App Store Connect API to perform iOS code signing.
+
+**Utility to download code signing certificates and provisioning profiles    from Apple Developer Portal using App Store Connect API to perform iOS code signing.**
+### Usage
 
 
 ``app-store-connect [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] ACTION``

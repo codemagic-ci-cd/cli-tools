@@ -2,7 +2,9 @@
 get_profile
 ===========
 
-#### Get specified Profile from Apple Developer portal.
+
+**Get specified Profile from Apple Developer portal.**
+### Usage
 
 
 ``app-store-connect get-profile [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY]  PROFILE_RESOURCE_ID``

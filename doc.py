@@ -212,14 +212,16 @@ class Writer:
 
     def write_description(self, content: str):
         content = str_plain(content)
-        self.file.new_header(level=4, title=content)
+        self.file.new_paragraph(f'**{content}**')
 
     def write_tool_command_usage(self, documentation_generator: ToolDocumentationGenerator):
-        content = CommandUsageGenerator(documentation_generator).get_tool_command_usage()
-        self.file.new_paragraph(f"``{content}``")
+        self._write_command_usage(CommandUsageGenerator(documentation_generator).get_tool_command_usage())
 
     def write_action_command_usage(self, documentation_generator: ToolDocumentationGenerator, action: Action):
-        content = CommandUsageGenerator(documentation_generator).get_action_command_usage(action)
+        self._write_command_usage(CommandUsageGenerator(documentation_generator).get_action_command_usage(action))
+
+    def _write_command_usage(self, content):
+        self.file.new_header(level=3, title='Usage')
         self.file.new_paragraph(f"``{content}``")
 
     def write_table(self, content: List[List[str]], header: List[str]):

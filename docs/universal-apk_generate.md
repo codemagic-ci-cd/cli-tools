@@ -2,7 +2,9 @@
 generate
 ========
 
-#### Generate universal APK files from Android App Bundles
+
+**Generate universal APK files from Android App Bundles**
+### Usage
 
 
 ``universal-apk generate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--pattern PATTERN] [--bundletool BUNDLETOOL_PATH] [--ks KEYSTORE_PATH] [--ks-pass KEYSTORE_PASSWORD] [--ks-key-alias KEY_ALIAS] [--key-pass KEY_PASSWORD]  ``

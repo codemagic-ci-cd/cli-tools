@@ -2,7 +2,9 @@
 create
 ======
 
-#### Create a macOS keychain, add it to the search list.
+
+**Create a macOS keychain, add it to the search list.**
+### Usage
 
 
 ``keychain create [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-pw PASSWORD] ``

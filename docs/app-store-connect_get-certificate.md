@@ -2,7 +2,9 @@
 get_certificate
 ===============
 
-#### Get specified Signing Certificate from Apple Developer portal.
+
+**Get specified Signing Certificate from Apple Developer portal.**
+### Usage
 
 
 ``app-store-connect get-certificate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--save] CERTIFICATE_RESOURCE_ID``

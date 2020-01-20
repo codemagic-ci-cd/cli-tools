@@ -2,7 +2,9 @@
 detect_bundle_id
 ================
 
-#### Try to deduce the Bundle ID from specified Xcode project
+
+**Try to deduce the Bundle ID from specified Xcode project**
+### Usage
 
 
 ``xcode-project detect-bundle-id [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION]  [--project XCODE_PROJECT_PATTERN] [--target TARGET_NAME] [--config CONFIGURATION_NAME] ``

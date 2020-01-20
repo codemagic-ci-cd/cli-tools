@@ -2,7 +2,9 @@
 Keychain
 ========
 
-#### Utility to manage macOS keychains and certificates
+
+**Utility to manage macOS keychains and certificates**
+### Usage
 
 
 ``keychain [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] ACTION``

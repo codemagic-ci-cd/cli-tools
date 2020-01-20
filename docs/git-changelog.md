@@ -2,7 +2,9 @@
 GitChangelog
 ============
 
-#### Generate a changelog text from git history
+
+**Generate a changelog text from git history**
+### Usage
 
 
 ``git-changelog [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--previous-commit PREVIOUS_COMMIT] [--skip-pattern SKIP_PATTERN] [--commit-limit COMMIT_LIMIT] ACTION``

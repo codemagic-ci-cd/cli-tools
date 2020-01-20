@@ -2,7 +2,9 @@
 create_bundle_id
 ================
 
-#### Create Bundle ID in Apple Developer portal for specifier identifier.
+
+**Create Bundle ID in Apple Developer portal for specifier identifier.**
+### Usage
 
 
 ``app-store-connect create-bundle-id [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--name BUNDLE_ID_NAME] [--platform PLATFORM] BUNDLE_ID_IDENTIFIER``

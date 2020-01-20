@@ -2,7 +2,9 @@
 create_certificate
 ==================
 
-#### Create code signing certificates of given type
+
+**Create code signing certificates of given type**
+### Usage
 
 
 ``app-store-connect create-certificate [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [--log-api-calls] [--json] [--issuer-id ISSUER_ID] [--key-id KEY_IDENTIFIER] [--private-key PRIVATE_KEY] [--certificates-dir CERTIFICATES_DIRECTORY] [--profiles-dir PROFILES_DIRECTORY] [--type CERTIFICATE_TYPE] [--certificate-key PRIVATE_KEY] [--certificate-key-password PRIVATE_KEY_PASSWORD] [--p12-password P12_CONTAINER_PASSWORD] [--save] ``

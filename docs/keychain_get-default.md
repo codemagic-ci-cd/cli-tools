@@ -2,7 +2,9 @@
 get_default
 ===========
 
-#### Show the system default keychain.
+
+**Show the system default keychain.**
+### Usage
 
 
 ``keychain get-default [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``

@@ -2,7 +2,9 @@
 list_code_signing_certificates
 ==============================
 
-#### List available code signing certificates in specified keychain.
+
+**List available code signing certificates in specified keychain.**
+### Usage
 
 
 ``keychain list-certificates [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``

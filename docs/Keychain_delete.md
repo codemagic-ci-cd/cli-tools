@@ -2,7 +2,9 @@
 delete
 ======
 
-#### Delete keychains and remove them from the search list.
+
+**Delete keychains and remove them from the search list.**
+### Usage
 
 
 ``keychain delete [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``

@@ -2,7 +2,9 @@
 add_certificates
 ================
 
-#### Add p12 certificate to specified keychain.
+
+**Add p12 certificate to specified keychain.**
+### Usage
 
 
 ``keychain add-certificates [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH] [-c CERTIFICATE_PATHS] [--certificate-password CERTIFICATE_PASSWORD] ``

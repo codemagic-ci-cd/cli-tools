@@ -2,7 +2,9 @@
 lock
 ====
 
-#### Lock the specified keychain.
+
+**Lock the specified keychain.**
+### Usage
 
 
 ``keychain lock [-h] [-s] [-v] [--no-color] [--log-stream CHOSEN_OPTION] [-p PATH]  ``
