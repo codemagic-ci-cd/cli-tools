@@ -11,6 +11,7 @@ twine = "*"
 ipdb = "*"
 pytest = "*"
 pytest-cov = "*"
+mdutils = "*"
 
 [packages]
 pyopenssl = "~=19.0"
