@@ -69,9 +69,10 @@ class VariableResolver
     Log.info "> Resolved variable '#{source_str}' to '#{target_str}'"
     # In case target str is still a variable look it up from xcconfig if possible
     Variable.new(target_str).keys_and_modifiers.each do |_variable, key, modifiers|
+      real_path = @build_configuration&.base_configuration_reference&.real_path || 'unknown path'
       value = resolve_variable_from_xcconfig_attributes(key)
       unless value.nil?
-        Log.info "Got '#{value}' for '#{target_str}' from xcconfig #{base_configuration_reference.real_path}"
+        Log.info "Got '#{value}' for '#{target_str}' from xcconfig #{real_path}"
         target_str = Variable.new(value).apply modifiers
       end
     end
