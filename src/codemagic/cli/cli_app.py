@@ -62,6 +62,10 @@ class CliApp(metaclass=abc.ABCMeta):
         self.logger = log.get_logger(self.__class__)
 
     @classmethod
+    def get_executable_name(cls) -> str:
+        return re.sub(r'(.)([A-Z])', r'\1-\2', cls.__name__).lower()
+
+    @classmethod
     def echo(cls, message: str, *args, **kwargs):
         """
         Log given message to the STDOUT without any extra logging formatting

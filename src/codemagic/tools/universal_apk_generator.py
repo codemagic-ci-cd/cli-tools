@@ -90,6 +90,10 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         self.signing_info = signing_info
 
     @classmethod
+    def get_executable_name(cls) -> str:
+        return 'universal-apk'
+
+    @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> UniversalApkGenerator:
         keystore_arguments = (
             UniversalApkGeneratorArgument.KEYSTORE_PATH,
