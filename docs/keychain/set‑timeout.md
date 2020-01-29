@@ -3,7 +3,7 @@ set‑timeout
 ===========
 
 
-**Set timeout settings for the keychain.        If seconds are not provided, then no-timeout will be set.**
+**Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set.**
 ### Usage
 ```bash
 keychain set‑timeout [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
@@ -43,4 +43,4 @@ Do not use ANSI colors to format terminal output
 ##### `--log-stream=stderr | stdout`
 
 
-Log output stream. Default: stderr
+Log output stream. Default `stderr`

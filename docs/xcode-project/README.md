@@ -30,11 +30,11 @@ Do not use ANSI colors to format terminal output
 ##### `--log-stream=stderr | stdout`
 
 
-Log output stream. Default: stderr
+Log output stream. Default `stderr`
 ### Actions
 
 |Action|Description|
 | :--- | :--- |
 |[`build‑ipa`](build‑ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
 |[`detect‑bundle‑id`](detect‑bundle‑id.md)|Try to deduce the Bundle ID from specified Xcode project|
-|[`use‑profiles`](use‑profiles.md)|Set up code signing settings on specified Xcode projects        to use given provisioning profiles|
+|[`use‑profiles`](use‑profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|

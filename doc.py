@@ -6,15 +6,17 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, NamedTuple, Tuple
-
-import mdutils
+from typing import List
+from typing import NamedTuple
+from typing import Tuple
 from mdutils.mdutils import MdUtils
 from mdutils.tools.tools import Table
 
 sys.path.append(os.path.abspath('./src'))
-from codemagic import cli, tools
+from codemagic import cli
+from codemagic import tools
 print(f'{tools} imported')
+
 
 class SerializedArgument(NamedTuple):
     key: str
@@ -50,13 +52,20 @@ class ArgumentsSerializer:
 
     def serialize(self) -> ArgumentsSerializer:
         for arg in self.raw_arguments:
+            description = str_plain(arg._value_.description)
             arg_type = getattr(arg._value_, 'type')
+            if isinstance(arg_type, type) and issubclass(arg_type, cli.argument.EnvironmentArgumentValue):
+                description = str_plain(arg.get_description())
+                env_var = arg_type.__dict__.get('environment_variable_key')
+                if (env_var):
+                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description).replace('"','`')
+
             arg_type = arg_type.__name__ if arg_type else ''
             kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
 
             argument = SerializedArgument(
                 key=arg._value_.key,
-                description=str_plain(arg._value_.description),
+                description=description,
                 flags=', '.join(getattr(arg._value_, 'flags', '')),
                 name='' if arg_type == 'bool' else arg._name_,
                 required=kwargs.required,
@@ -161,7 +170,7 @@ class ToolDocumentationGenerator:
         def _serialize_option(option):
             return SerializedArgument(
                 key='',
-                description=str_plain(str(option.help)).replace('[','').replace(']',''),
+                description=str_plain(str(option.help)).replace('[', '').replace(': ', ' `').replace(']', '`'),
                 flags=', '.join(option.option_strings),
                 name='',
                 required=False,
@@ -250,7 +259,7 @@ class Writer:
     def write_tools_table(self, tools: List[cli.CliApp]):
         def _get_tool_link(tool):
             command = tool.get_executable_name().replace('-', '‑')
-            return f'[{command}]({tool.get_executable_name()}/README.md)'
+            return f'[`{command}`]({tool.get_executable_name()}/README.md)'
 
         content = [
             [
@@ -301,7 +310,7 @@ class Writer:
 
 
 def str_plain(string):
-    return re.compile('(\\x1b\[\d*m|\\x1b\[\d*m|\\n|\\t)').sub('', string).strip()
+    return re.compile(r'(\x1b\[\d*m|\x1b\[\d*m|\t)').sub('', string).replace('\n', ' ').strip()
 
 
 def main():

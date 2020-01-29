@@ -3,7 +3,7 @@ use‑profiles
 ============
 
 
-**Set up code signing settings on specified Xcode projects        to use given provisioning profiles**
+**Set up code signing settings on specified Xcode projects         to use given provisioning profiles**
 ### Usage
 ```bash
 xcode-project use‑profiles [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
@@ -51,4 +51,4 @@ Do not use ANSI colors to format terminal output
 ##### `--log-stream=stderr | stdout`
 
 
-Log output stream. Default: stderr
+Log output stream. Default `stderr`

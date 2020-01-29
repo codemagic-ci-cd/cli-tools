@@ -36,4 +36,4 @@ Do not use ANSI colors to format terminal output
 ##### `--log-stream=stderr | stdout`
 
 
-Log output stream. Default: stderr
+Log output stream. Default `stderr`
