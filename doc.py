@@ -1,48 +1,49 @@
 
 from __future__ import annotations
-import os
-import sys
-from typing import List, Tuple, NamedTuple
-from mdutils.tools.tools import Table
-from mdutils.mdutils import MdUtils
-import mdutils
-from pathlib import Path
-import re
+
 import argparse
+import os
+import re
+import sys
+from pathlib import Path
+from typing import List, NamedTuple, Tuple
+
+import mdutils
+from mdutils.mdutils import MdUtils
+from mdutils.tools.tools import Table
 
 sys.path.append(os.path.abspath('./src'))
-from codemagic import cli
-from codemagic import tools
+from codemagic import cli, tools
+print(f'{tools} imported')
 
-SerializedArgument = NamedTuple('SerializedArgument', [
-    ('key', str),
-    ('description', str),
-    ('flags', str),
-    ('name', str),
-    ('required', bool),
-    ('default', str),
-    ('nargs', bool),
-    ('choices', str)
-])
+class SerializedArgument(NamedTuple):
+    key: str
+    description: str
+    flags: str
+    name: str
+    required: bool
+    default: str
+    nargs: bool
+    choices: str
 
-Action = NamedTuple('Action', [
-    ('action_name', str),
-    ('name', str),
-    ('description', str),
-    ('required_args', List[SerializedArgument]),
-    ('optional_args', List[SerializedArgument])
-])
 
-ArgumentKwargs = NamedTuple('ArgumentKwargs', [
-    ('nargs', bool),
-    ('required', bool),
-    ('default', str),
-    ('choices', str)
-])
+class Action(NamedTuple):
+    action_name: str
+    name: str
+    description: str
+    required_args: List[SerializedArgument]
+    optional_args: List[SerializedArgument]
+
+
+class ArgumentKwargs(NamedTuple):
+    nargs: bool
+    required: bool
+    default: str
+    choices: str
 
 
 class ArgumentsSerializer:
-    def __init__(self, raw_arguments: Tuple):
+    def __init__(self, raw_arguments):
         self.raw_arguments = raw_arguments
         self.required_args: List[SerializedArgument] = []
         self.optional_args: List[SerializedArgument] = []
@@ -53,7 +54,7 @@ class ArgumentsSerializer:
             arg_type = arg_type.__name__ if arg_type else ''
             kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
 
-            argument: SerializedArgument = SerializedArgument(
+            argument = SerializedArgument(
                 key=arg._value_.key,
                 description=str_plain(arg._value_.description),
                 flags=', '.join(getattr(arg._value_, 'flags', '')),
@@ -98,7 +99,7 @@ class MainPageDocumentationGenerator:
         self.title = title
         self.main_dir = main_dir
 
-    def generate(self, tools: List):
+    def generate(self, tools: List[cli.CliApp]):
         os.makedirs(self.main_dir, exist_ok=True)
         md = MdUtils(file_name=f'{self.main_dir}/README', title=self.title)
         Writer(md).write_tools_table(tools)
@@ -108,9 +109,11 @@ class MainPageDocumentationGenerator:
 class ToolDocumentationGenerator:
     def __init__(self, tool, main_dir: str):
         self.tool = tool
-        self.tool_name: str = tool.__name__
-        self.tool_command: str = get_tool_command(self.tool_name)
-        self.tool_prefix: str = f'{main_dir}/{self.tool_command}'
+        self.tool_command = tool.get_executable_name()
+        self.tool_prefix = f'{main_dir}/{self.tool_command}'
+        self.tool_optional_args = None
+        self.tool_serialized_actions = None
+        self.tool_options = None
 
     def generate(self):
         class_args_serializer = ArgumentsSerializer(self.tool.CLASS_ARGUMENTS).serialize()
@@ -118,33 +121,34 @@ class ToolDocumentationGenerator:
         self.tool_serialized_actions = self._serialize_actions()
         self.tool_options = self._serialize_default_options()
 
-        # docs/<tool-name>.md
-        md = MdUtils(file_name=f'{self.tool_prefix}', title=self.tool_name)
+        # docs/<tool-name>/README.md
+        os.makedirs(self.tool_prefix, exist_ok=True)
+        md = MdUtils(file_name=f'{self.tool_prefix}/README', title=self.tool_command)
         writer = Writer(md)
         writer.write_description(self.tool.__doc__)
         writer.write_tool_command_usage(self)
+        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, [])
         writer.write_options(self.tool_options)
-        writer.write_arguments(self.tool_command, self.tool_optional_args, [])
-        writer.write_actions_table(self.tool_command, self.tool_serialized_actions)
+        writer.write_actions_table(self.tool_serialized_actions)
         md.create_md_file()
 
         for action in self.tool_serialized_actions:
-            # docs/<tool-name>_<action-name>.md
-            md = MdUtils(file_name=f'{self.tool_prefix}_{action.action_name}', title=action.name)
+            # docs/<tool-name>/<action-name>.md
+            md = MdUtils(file_name=f'{self.tool_prefix}/{action.action_name}', title=action.action_name)
             writer = Writer(md)
             writer.write_description(action.description)
             writer.write_action_command_usage(self, action)
+            writer.write_arguments(f'action `{action.action_name}`', action.optional_args, action.required_args)
+            writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, [])
             writer.write_options(self.tool_options)
-            writer.write_arguments(f'command {action.name}', action.optional_args, action.required_args)
-            writer.write_arguments(self.tool_command, self.tool_optional_args, [])
             md.create_md_file()
 
     def _serialize_actions(self):
-        serialized_actions: List[Action] = []
+        serialized_actions = []
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
             serialized_actions.append(Action(
-                action_name=f.action_name,
+                action_name=f.action_name.replace('-', '‑'),
                 name=f.__name__,
                 description=f.__doc__,
                 required_args=action_args_serializer.required_args,
@@ -178,32 +182,37 @@ class CommandUsageGenerator:
     def __init__(self, doc_generator: ToolDocumentationGenerator):
         self.doc_generator = doc_generator
 
-    def get_tool_command_usage(self) -> str:
-        return f'{self.doc_generator.tool_command} {self._get_tool_flags()} ACTION'
+    def get_tool_command_usage(self) -> List[str]:
+        lines = [f'{self.doc_generator.tool_command} {self._get_optional_common_flags()}']
+        lines.extend(self._get_tool_flags())
+        lines.append('ACTION')
+        return lines
 
-    def get_action_command_usage(self, action: Action) -> str:
-        tool_flags = self._get_tool_flags()
-        optional_flags = self._prepare_arguments(action.optional_args)
-        required_flags = self._prepare_arguments(action.required_args)
-        return f'{self.doc_generator.tool_command} {action.action_name} {tool_flags} {optional_flags} {required_flags}'
+    def get_action_command_usage(self, action: Action) -> List[str]:
+        lines = [f'{self.doc_generator.tool_command} {action.action_name} {self._get_optional_common_flags()}']
+        lines.extend(self._get_tool_flags())
+        lines.extend(self._prepare_arguments(action.optional_args))
+        lines.extend(self._prepare_arguments(action.required_args))
+        return lines
+
+    def _get_optional_common_flags(self):
+        return ' '.join(self._prepare_arguments(self.doc_generator.tool_options))
 
     def _get_tool_flags(self):
-        optional_common_flags = self._prepare_arguments(self.doc_generator.tool_options)
-        tool_flags = self._prepare_arguments(self.doc_generator.tool_optional_args)
-        return f'{optional_common_flags} {tool_flags}'
+        return self._prepare_arguments(self.doc_generator.tool_optional_args)
 
     def _get_formatted_flag(self, arg):
         flag = f'{arg.flags.split(",")[0]}'
         if not arg.flags and arg.name:
             flag = arg.name
         elif arg.choices and not arg.name:
-            flag = f'{flag} CHOSEN_OPTION'
+            flag = f'{flag} STREAM'
         elif arg.name:
             flag = f'{flag} {arg.name}'
         return flag if arg.required else f'[{flag}]'
 
     def _prepare_arguments(self, args):
-        return ' '.join([self._get_formatted_flag(arg) for arg in args])
+        return [self._get_formatted_flag(arg) for arg in args]
 
 
 class Writer:
@@ -220,9 +229,13 @@ class Writer:
     def write_action_command_usage(self, documentation_generator: ToolDocumentationGenerator, action: Action):
         self._write_command_usage(CommandUsageGenerator(documentation_generator).get_action_command_usage(action))
 
-    def _write_command_usage(self, content):
+    def _write_command_usage(self, lines):
         self.file.new_header(level=3, title='Usage')
-        self.file.new_paragraph(f"``{content}``")
+        self.file.write('```bash\n')
+        self.file.write(f'{lines[0]}\n')
+        for line in lines[1:]:
+            self.file.write(f'    {line}\n')
+        self.file.write('```')
 
     def write_table(self, content: List[List[str]], header: List[str]):
         flat_content: List[str] = sum(content, [])
@@ -234,23 +247,23 @@ class Writer:
         )
         self.file.write(table)
 
-    def write_tools_table(self, tools: List):
-        def _get_tool_link(name):
-            command = get_tool_command(name)
-            return f'[{name}]({command}.md)'
+    def write_tools_table(self, tools: List[cli.CliApp]):
+        def _get_tool_link(tool):
+            command = tool.get_executable_name().replace('-', '‑')
+            return f'[{command}]({tool.get_executable_name()}/README.md)'
 
         content = [
             [
-                _get_tool_link(tool.__name__),
+                _get_tool_link(tool),
                 str_plain(tool.__doc__)
             ] for tool in tools]
         self.write_table(content, ['Tool name', 'Description'])
 
-    def write_actions_table(self, tool_command: str, actions: List[Action]):
+    def write_actions_table(self, actions: List[Action]):
         self.file.new_header(level=3, title='Actions')
         content = [
             [
-                f'[{action.action_name}]({tool_command}_{action.action_name}.md)',
+                f"[`{action.action_name}`]({action.action_name}.md)",
                 str_plain(action.description)
             ] for action in actions]
         self.write_table(content, ['Action', 'Description'])
@@ -260,11 +273,11 @@ class Writer:
         self._write_arguments(f'Optional arguments for {obj}', optional)
 
     def write_options(self, options: List[SerializedArgument]):
-        self._write_arguments(f'Optional arguments', options)
+        self._write_arguments(f'Common options', options)
 
     def _write_arguments(self, title, args):
         def _process_flag(arg):
-            flag: str = arg.flags
+            flag = arg.flags
             if flag and arg.choices:
                 return f'{flag}={arg.choices}'
             if flag and arg.name:
@@ -272,7 +285,7 @@ class Writer:
             return arg.name if arg.name else flag
 
         def _process_description(arg):
-            description: str = arg.description
+            description = arg.description.replace('*', '\*')
             description += '. Multiple arguments' if arg.nargs else ''
             return f'{description}. Default:&nbsp;`{arg.default}`' if arg.default else description
 
@@ -281,21 +294,10 @@ class Writer:
 
         self.file.new_header(level=3, title=title)
         for arg in args:
-            flag = _process_flag(arg)
+            flag = f'`{_process_flag(arg)}`'
             description = _process_description(arg).replace('..', '.')
-            self.file.new_paragraph(f'**{flag}**')
+            self.file.new_header(level=5, title=flag)
             self.file.new_paragraph(description)
-
-
-def get_tool_command(tool_name):
-    tool_commands = {
-        'AppStoreConnect': 'app-store-connect',
-        'GitChangelog': 'git-changelog',
-        'Keychain': 'keychain',
-        'UniversalApkGenerator': 'universal-apk',
-        'XcodeProject': 'xcode-project'
-    }
-    return tool_commands[tool_name]
 
 
 def str_plain(string):
