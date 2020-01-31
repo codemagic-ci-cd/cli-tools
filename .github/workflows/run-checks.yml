@@ -21,12 +21,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - uses: actions/cache@v1
-      with:
-        path: /home/runner/.local/share/virtualenvs/
-        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-pipenv-
+#    - uses: actions/cache@v1
+#      with:
+#        path: /home/runner/.local/share/virtualenvs/
+#        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+#        restore-keys: |
+#          ${{ runner.os }}-pipenv-
 
     - name: Install dependencies
       run: |
