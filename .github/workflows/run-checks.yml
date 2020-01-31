@@ -30,8 +30,6 @@ jobs:
 
     - name: Install dependencies
       run: |
-        rm -rf /home/runner/.cache/pip
-        rm -rf /home/runner/.local/share/virtualenvs
         python -m pip install --upgrade pip pipenv
         pipenv install --dev
 
