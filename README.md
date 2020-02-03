@@ -35,7 +35,7 @@ to get detailed information of the subcommand.
  
 For example:
 
-```bash
+```
 $ keychain create --help     
 usage: keychain create [-h] [-s] [-v] [--no-color] [--log-stream {stderr,stdout}] [-pw PASSWORD] [-p PATH]
 
