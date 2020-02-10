@@ -60,7 +60,8 @@ class Xcodebuild:
             while chunk:
                 fd.write(chunk)
                 chunk = process_logs.read(8192)
-            fd.write(process_logs.read())
+            # do an extra read in case xcodebuild exited unexpectedly and did not flush last buffer
+            fd.write(process_logs.read()) 
 
             fd.write('\n\n')
             duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
