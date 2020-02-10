@@ -55,8 +55,14 @@ class Xcodebuild:
         with self.logs_path.open('a') as fd, xcodebuild_cli_process.log_path.open('r') as process_logs:
             fd.write(f'>>> {xcodebuild_cli_process.safe_form}')
             fd.write('\n\n')
-            for chunk in process_logs.read(8192):
+
+            chunk = process_logs.read(8192)
+            while chunk:
                 fd.write(chunk)
+                chunk = process_logs.read(8192)
+            # do an extra read in case xcodebuild exited unexpectedly and did not flush last buffer
+            fd.write(process_logs.read()) 
+
             fd.write('\n\n')
             duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
             fd.write(f'<<< Process completed with status code {xcodebuild_cli_process.returncode} in {duration}')
