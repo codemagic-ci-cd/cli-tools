@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import plistlib
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -135,4 +136,6 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
 
     @classmethod
     def is_xcode_managed(cls, profile_name: str) -> bool:
-        return profile_name.startswith('iOS Team Provisioning Profile:')
+        xcode_managed_profile_name_patt = re.compile(r'^iOS Team ((Ad Hoc|Store) )?Provisioning Profile:')
+        xcode_managed_name_match = xcode_managed_profile_name_patt.match(profile_name)
+        return xcode_managed_name_match is not None
