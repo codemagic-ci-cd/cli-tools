@@ -28,7 +28,7 @@ jobs:
 
     - name: Pipenv checks
       run: |
-        pipenv check
+        pipenv check --ignore 37752
 
     - name: Static type checks with mypy
       env:
