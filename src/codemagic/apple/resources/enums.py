@@ -13,6 +13,7 @@ class _ResourceEnum(enum.Enum):
 class BundleIdPlatform(_ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
+    UNIVERSAL = 'UNIVERSAL'
 
 
 class CapabilityOptionKey(_ResourceEnum):
