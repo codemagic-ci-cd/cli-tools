@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import json
 import pathlib
 import shlex
@@ -59,6 +60,10 @@ class ResourcePrinter:
             name, value = item
             if isinstance(value, list):
                 return f'{name.replace("_", " ")}: {[shlex.quote(el) for el in value]}'
+            elif isinstance(value, enum.Enum):
+                value = str(value.value)
+            elif not isinstance(value, (str, bytes)):
+                value = str(value)
             return f'{name.replace("_", " ")}: {shlex.quote(value)}'
 
         message = f'Creating new {resource_type}'
