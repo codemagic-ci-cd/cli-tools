@@ -59,7 +59,7 @@ class ResourcePrinter:
         def fmt(item: Tuple[str, Any]):
             name, value = item
             if isinstance(value, list):
-                return f'{name.replace("_", " ")}: {[shlex.quote(el) for el in value]}'
+                return f'{name.replace("_", " ")}: {[shlex.quote(str(el)) for el in value]}'
             elif isinstance(value, enum.Enum):
                 value = str(value.value)
             elif not isinstance(value, (str, bytes)):
