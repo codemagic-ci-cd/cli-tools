@@ -3,6 +3,13 @@ Version 0.1.4
 
 Unreleased
 
+- Bugfix: Fix `TypeError` on Apple Developer Portal resource creation
+
+Version 0.1.4
+-------------
+
+Unreleased
+
 - Bugfix: Accept `UNIVERSAL` as valid Bundle ID platform value
 
 Version 0.1.3
