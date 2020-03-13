@@ -19,7 +19,7 @@ workflows:
         set -e
 
         TAG_NAME=v$(python3 setup.py --version)
-        PAYLOAD=$(python3 -c "import json; print(json.dumps({'tag_name': '$TAG_NAME', 'name': '$TAG_NAME', 'body': open('release_notes.txt').read().lstrip(), 'draft': True, 'prerelease': True}))")
+        PAYLOAD=$(python3 -c "import json; print(json.dumps({'tag_name': '$TAG_NAME', 'name': '$TAG_NAME', 'body': open('release_notes.txt').read().strip(), 'draft': True, 'prerelease': True}))")
         RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "$PAYLOAD" "https://api.github.com/repos/${REPOSITORY}/releases")
         EDIT_URL=$(echo $RELEASE | python -c 'import sys, json; print json.load(sys.stdin).get("html_url").replace("/tag/", "/edit/")')
         FILE_NAME=$(cd dist && ls *.whl | tail -n1)
