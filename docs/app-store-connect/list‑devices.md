@@ -20,7 +20,7 @@ app-store-connect list‑devices [-h] [-s] [-v] [--no-color] [--log-stream STREA
 ```
 ### Optional arguments for action `list‑devices`
 
-##### `--platform=IOS | MAC_OS`
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
 Bundle ID platform

@@ -30,7 +30,7 @@ app-store-connect fetch‑signing‑files [-h] [-s] [-v] [--no-color] [--log-str
 Identifier of the Bundle ID
 ### Optional arguments for action `fetch‑signing‑files`
 
-##### `--platform=IOS | MAC_OS`
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
 Bundle ID platform. Default:&nbsp;`IOS`
