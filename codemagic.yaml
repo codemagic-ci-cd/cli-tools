@@ -11,19 +11,19 @@ workflows:
       - python3 setup.py bdist_wheel
       - git push "https://$GH_USER:$GH_PAT@github.com/$REPOSITORY" --tags
       - |
-        # create release notes
+        # Prepare release metadata
+        TAG_NAME=v$(python3 setup.py --version)
         previous_version_line=$(grep -n "^Version " CHANGELOG.md | head -2 | tail -1 | cut -f1 -d:)
         head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.txt
+        python3 -c "import json; json.dump({'tag_name': '$TAG_NAME', 'name': '$TAG_NAME', 'body': open('release_notes.txt').read().strip(), 'draft': True, 'prerelease': True}, open('release_payload.json', 'w'))"
       - |
-        # draft a release
+        # Draft a release
         set -e
 
-        TAG_NAME=v$(python3 setup.py --version)
-        PAYLOAD=$(python3 -c "import json; print(json.dumps({'tag_name': '$TAG_NAME', 'name': '$TAG_NAME', 'body': open('release_notes.txt').read().strip(), 'draft': True, 'prerelease': True}))")
-        RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "$PAYLOAD" "https://api.github.com/repos/${REPOSITORY}/releases")
+        RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "@release_payload.json" "https://api.github.com/repos/${REPOSITORY}/releases")
         EDIT_URL=$(echo $RELEASE | python -c 'import sys, json; print json.load(sys.stdin).get("html_url").replace("/tag/", "/edit/")')
         FILE_NAME=$(cd dist && ls *.whl | tail -n1)
-        UPLOAD_URL=$(echo $RELEASE | python -c "import sys, json; print json.load(sys.stdin).get('upload_url').replace('{?name,label}', '?name=$FILE_NAME')")
+        UPLOAD_URL=$(echo $RELEASE | python3 -c "import sys, json; print(json.load(sys.stdin).get('upload_url').replace('{?name,label}', '?name=$FILE_NAME'))")
         curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/x-wheel+zip' -X POST "$UPLOAD_URL" --data-binary "@dist/$FILE_NAME" > /dev/null
         echo "Draft release created. Finalize it at $EDIT_URL"
     artifacts:
