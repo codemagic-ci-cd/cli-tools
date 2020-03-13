@@ -20,8 +20,8 @@ workflows:
         # Draft a release
         set -e
 
-        RELEASE=$(curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "@release_payload.json" "https://api.github.com/repos/${REPOSITORY}/releases")
-        EDIT_URL=$(echo $RELEASE | python -c 'import sys, json; print json.load(sys.stdin).get("html_url").replace("/tag/", "/edit/")')
+        curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "@release_payload.json" "https://api.github.com/repos/${REPOSITORY}/releases" > release_response.json
+        EDIT_URL=$(python3 -c "import json; json.load(open('release_response.json')).get("html_url").replace("/tag/", "/edit/")'))
         FILE_NAME=$(cd dist && ls *.whl | tail -n1)
         UPLOAD_URL=$(echo $RELEASE | python3 -c "import sys, json; print(json.load(sys.stdin).get('upload_url').replace('{?name,label}', '?name=$FILE_NAME'))")
         curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/x-wheel+zip' -X POST "$UPLOAD_URL" --data-binary "@dist/$FILE_NAME" > /dev/null
