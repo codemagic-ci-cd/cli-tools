@@ -13,15 +13,6 @@ from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
-class _MockResponse:
-
-    def __init__(self, mock_response_payload):
-        self.mock_response_payload = mock_response_payload
-
-    def json(self):
-        return self.mock_response_payload
-
-
 @pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE])
 def test_create_profile_failure_with_devices(profile_type, api_client):
     with pytest.raises(ValueError):
@@ -36,9 +27,7 @@ def test_create_profile_failure_with_devices(profile_type, api_client):
 
 @pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_DEVELOPMENT, ProfileType.IOS_APP_ADHOC])
 def test_create_profile_success_with_devices(profile_type, profile_response, api_client):
-    mock_post = mock.Mock(return_value=_MockResponse(profile_response))
-    api_client.session.post = mock_post
-
+    api_client.session.post = mock.Mock(return_value=profile_response)
     api_client.profiles.create(
         name='test profile',
         profile_type=profile_type,
@@ -46,7 +35,7 @@ def test_create_profile_success_with_devices(profile_type, profile_response, api
         certificates=[ResourceId('certificate_resource_id')],
         devices=[ResourceId('device_resource_id')],
     )
-    mock_post.assert_called_once()
+    api_client.session.post.assert_called_once()
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
