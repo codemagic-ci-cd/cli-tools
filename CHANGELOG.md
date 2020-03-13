@@ -1,4 +1,12 @@
-Version 0.1.4
+Version 0.1.6
+-------------
+
+Unreleased
+
+- Bugfix: Fix creating iOS App Store and iOS In House provisioning profiles.
+Do not include devices in the create resource payload.
+
+Version 0.1.5
 -------------
 
 Unreleased

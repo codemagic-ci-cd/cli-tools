@@ -55,6 +55,8 @@ class Profiles(ResourceManager[Profile]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_profile
         """
+        if profile_type.devices_not_allowed() and devices:
+            raise ValueError(f'Cannot assign devices to profile with type {profile_type}')
         if devices is None:
             devices = []
         attributes = {

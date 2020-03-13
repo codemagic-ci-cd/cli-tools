@@ -28,7 +28,7 @@ Identifier of the Bundle ID
 
 
 Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
-##### `--platform=IOS | MAC_OS`
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
 Bundle ID platform
