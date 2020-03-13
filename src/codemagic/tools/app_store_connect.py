@@ -368,12 +368,11 @@ class AppStoreConnect(cli.CliApp):
             profile_type=profile_type,
             bundle_id=bundle_id_resource_id,
             certificates=certificate_resource_ids,
+            devices=[],
+            omit_keys=['devices']
         )
         if profile_type.devices_allowed():
-            create_params.update({
-                'devices': device_resource_ids,
-                'omit_keys': ['devices']
-            })
+            create_params['devices'] = device_resource_ids
         profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
 
         if save:
