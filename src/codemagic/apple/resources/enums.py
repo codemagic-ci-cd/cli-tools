@@ -118,8 +118,11 @@ class ProfileType(_ResourceEnum):
     TVOS_APP_INHOUSE = 'TVOS_APP_INHOUSE'
     TVOS_APP_STORE = 'TVOS_APP_STORE'
 
-    def requires_devices(self) -> bool:
+    def devices_not_allowed(self) -> bool:
         return self in (ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE)
+
+    def devices_allowed(self) -> bool:
+        return not self.devices_not_allowed()
 
 
 class ResourceType(_ResourceEnum):

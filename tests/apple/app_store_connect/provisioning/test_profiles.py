@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from codemagic.apple.resources import BundleId
@@ -9,6 +11,42 @@ from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
+
+
+class _MockResponse:
+
+    def __init__(self, mock_response_payload):
+        self.mock_response_payload = mock_response_payload
+
+    def json(self):
+        return self.mock_response_payload
+
+
+@pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE])
+def test_create_profile_failure_with_devices(profile_type, api_client):
+    with pytest.raises(ValueError):
+        api_client.profiles.create(
+            name='test profile',
+            profile_type=profile_type,
+            bundle_id=ResourceId('bundle_id_resource_id'),
+            certificates=[ResourceId('certificate_resource_id')],
+            devices=[ResourceId('device_resource_id')],
+        )
+
+
+@pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_DEVELOPMENT, ProfileType.IOS_APP_ADHOC])
+def test_create_profile_success_with_devices(profile_type, profile_response, api_client):
+    mock_post = mock.Mock(return_value=_MockResponse(profile_response))
+    api_client.session.post = mock_post
+
+    api_client.profiles.create(
+        name='test profile',
+        profile_type=profile_type,
+        bundle_id=ResourceId('bundle_id_resource_id'),
+        certificates=[ResourceId('certificate_resource_id')],
+        devices=[ResourceId('device_resource_id')],
+    )
+    mock_post.assert_called_once()
 
 
 @pytest.mark.skip(reason='Live App Store Connect API access')
