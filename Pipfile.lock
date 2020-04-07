@@ -180,13 +180,6 @@
             ],
             "version": "==0.1.0"
         },
-        "bleach": {
-            "hashes": [
-                "sha256:44f69771e2ac81ff30d929d485b7f9919f3ad6d019b6b20c74f3b8687c3f70df",
-                "sha256:aa8b870d0f46965bac2c073a93444636b0e1ca74e9777e34f03dd494b8a59d48"
-            ],
-            "version": "==3.1.1"
-        },
         "certifi": {
             "hashes": [
                 "sha256:017c25db2a153ce562900032d5bc68e9f191e44e9a0f762f373977de9df1fbb3",
