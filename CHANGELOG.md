@@ -1,3 +1,9 @@
+Version 0.1.7
+-------------
+
+- Bugfix: Fix Apple Developer Portal API pagination.
+Avoid duplicate query parameters in subsequent pagination calls when listing resources.
+
 Version 0.1.6
 -------------
 

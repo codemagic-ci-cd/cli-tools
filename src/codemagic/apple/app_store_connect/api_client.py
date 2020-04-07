@@ -5,6 +5,7 @@ from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
+from urllib import parse
 
 import jwt
 
@@ -92,7 +93,12 @@ class AppStoreConnectApiClient:
         except KeyError:
             results = []
         while 'next' in response['links']:
-            response = self.session.get(response['links']['next'], params=params).json()
+            # Query params from previous pagination call can be included in the next URL
+            # and duplicate parameters are not allowed, so we need to filter those out.
+            parsed_url = parse.urlparse(response['links']['next'])
+            included_params = parse.parse_qs(parsed_url.query)
+            step_params = {k: v for k, v in params.items() if k not in included_params}
+            response = self.session.get(response['links']['next'], params=step_params).json()
             results.extend(response['data'])
         return results
 
