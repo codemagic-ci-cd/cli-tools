@@ -62,8 +62,10 @@ class CliProcess:
     def _handle_streams(self, buffer_size: Optional[int] = None):
         if self._process is None:
             return
-        self.stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
-        self.stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
+        if self._process.stdout:
+            self.stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
+        if self._process.stderr:
+            self.stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
 
     def execute(self,
                 stdout: Union[int, IO] = subprocess.PIPE,
