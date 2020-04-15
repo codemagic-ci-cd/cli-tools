@@ -32,8 +32,10 @@ workflows:
 
         echo $GOOGLE_CLIENT_SECRET | base64 --decode --output $HOME/client-secret.json
         gcloud auth activate-service-account --key-file $HOME/client-secret.json
-        UPLOAD_URL=$(gsutil signurl -m PUT -c 'application/x-wheel+zip' -r us $HOME/client-secret.json gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl | tail -n 1 | awk '{print $NF}')
-        FILE_NAME=$(cd dist && ls *.whl | tail -n1)
-        curl -X PUT -H 'Content-Type: application/x-wheel+zip' --data-binary "@dist/$FILE_NAME" $UPLOAD_URL
+        SRC_PATH=$(find dist -name "*.whl" | tail -n1)
+        DST_URL="gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
+        gsutil -h "Content-Type:application/x-wheel+zip" \
+               -h "Cache-Control:no-cache,max-age=0" \
+               cp -a public-read "$SRC_PATH" "$DST_URL"
     artifacts:
       - dist/codemagic-*.whl
