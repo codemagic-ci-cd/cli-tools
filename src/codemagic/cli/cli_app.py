@@ -8,6 +8,7 @@ import os
 import pathlib
 import re
 import shlex
+import shutil
 import sys
 import time
 from functools import wraps
@@ -22,6 +23,7 @@ from typing import Sequence
 from typing import Tuple
 from typing import Type
 
+from codemagic import __version__
 from codemagic.utilities import log
 from .argument import ActionCallable
 from .argument import Argument
@@ -63,7 +65,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_executable_name(cls) -> str:
-        return re.sub(r'(.)([A-Z])', r'\1-\2', cls.__name__).lower()
+        return argparse.ArgumentParser().prog
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):
@@ -122,7 +124,6 @@ class CliApp(metaclass=abc.ABCMeta):
         return instance
 
     def _invoke_action(self, args: argparse.Namespace):
-        os.environ['_CLI_INVOCATION'] = 'true'
         actions = self.get_cli_actions()
         cli_action = {ac.action_name: ac for ac in actions}[args.action]
         action_args = {
@@ -132,11 +133,19 @@ class CliApp(metaclass=abc.ABCMeta):
         return cli_action(**action_args)
 
     @classmethod
+    def show_version(cls):
+        executable = cls.get_executable_name()
+        cls.echo(f'{cls.__name__} installed at {shutil.which(executable) or executable}')
+        cls.echo(f'{executable} {__version__}')
+        return __version__
+
+    @classmethod
     def is_cli_invocation(cls) -> bool:
         return os.environ.get('_CLI_INVOCATION') == 'true'
 
     @classmethod
     def invoke_cli(cls) -> NoReturn:
+        os.environ['_CLI_INVOCATION'] = 'true'
         parser = cls._setup_cli_options()
         args = parser.parse_args()
         cls._setup_logging(args)
@@ -145,8 +154,13 @@ class CliApp(metaclass=abc.ABCMeta):
         started_at = time.time()
         status = 0
         try:
-            app = cls._create_instance(parser, args)
-            app._invoke_action(args)
+            if args.show_version:
+                cls.show_version()
+            elif args.action:
+                app = cls._create_instance(parser, args)
+                app._invoke_action(args)
+            else:
+                raise argparse.ArgumentError(args.action, 'the following argument is required: action')
         except argparse.ArgumentError as argument_error:
             parser.error(str(argument_error))
             status = 2
@@ -202,19 +216,22 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def get_default_cli_options(cls, cli_options_parser):
         options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
+        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+                                   help=f'Log output stream. {Argument.format_default("stderr")}')
+        options_group.add_argument('--no-color', dest='no_color', action='store_true',
+                                   help='Do not use ANSI colors to format terminal output')
+        options_group.add_argument('--version', dest='show_version', action='store_true',
+                                   help='Show tool version and exit')
         options_group.add_argument('-s', '--silent', dest='enable_logging', action='store_false',
                                    help='Disable log output for commands')
         options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                                    help='Enable verbose logging for commands')
-        options_group.add_argument('--no-color', dest='no_color', action='store_true',
-                                   help='Do not use ANSI colors to format terminal output')
-        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help=f'Log output stream. {Argument.format_default("stderr")}')
 
         options_group.set_defaults(
             enable_logging=True,
-            verbose=False,
             no_color=False,
+            show_version=False,
+            verbose=False,
         )
 
     @classmethod
@@ -236,11 +253,9 @@ class CliApp(metaclass=abc.ABCMeta):
         parser = argparse.ArgumentParser(description=Colors.BOLD(cls.__doc__), formatter_class=CliHelpFormatter)
         cls.get_default_cli_options(parser)
 
-        action_parsers = parser.add_subparsers(
-            dest='action',
-            required=True,
-            title=Colors.BOLD(Colors.UNDERLINE('Available commands'))
-        )
+        actions_title = Colors.BOLD(Colors.UNDERLINE('Available commands'))
+        action_parsers = parser.add_subparsers(dest='action', title=actions_title)
+
         for sub_action in cls.get_class_cli_actions():
             action_parser = action_parsers.add_parser(
                 sub_action.action_name,

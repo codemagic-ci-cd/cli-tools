@@ -1,3 +1,8 @@
+Version 0.1.8
+-------------
+
+- Add `--version` option to tools to display current version
+
 Version 0.1.7
 -------------
 
