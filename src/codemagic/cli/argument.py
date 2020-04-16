@@ -190,7 +190,10 @@ class Argument(ArgumentProperties, enum.Enum):
         if not value and \
                 inspect.isclass(self.value.type) and \
                 issubclass(self.value.type, TypedCliArgument):
-            return self.value.type.from_environment_variable_default()
+            try:
+                return self.value.type.from_environment_variable_default()
+            except ValueError as ve:
+                self.raise_argument_error(str(ve))
         return value
 
     @classmethod
