@@ -79,6 +79,15 @@ def test_missing_arg_from_env(MockApiClient, namespace_kwargs, argument, api_cli
     assert client_arg == argument.type.argument_type('environment-value')
 
 
+def test_invalid_private_key_from_env(namespace_kwargs):
+    os.environ[Types.PrivateKeyArgument.environment_variable_key] = 'this is not a private key'
+    namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
+    cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
+    with pytest.raises(argparse.ArgumentError) as exception_info:
+        AppStoreConnect.from_cli_args(cli_args)
+    assert 'this is not a private key' in str(exception_info.value)
+
+
 def test_private_key_invalid_path(namespace_kwargs):
     os.environ[Types.PrivateKeyArgument.environment_variable_key] = '@file:this-is-not-a-file'
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
