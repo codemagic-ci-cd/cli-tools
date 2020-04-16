@@ -6,6 +6,7 @@ import abc
 import argparse
 import os
 import pathlib
+import platform
 import re
 import shlex
 import shutil
@@ -178,11 +179,16 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _log_cli_invoke_started(cls):
-        msg = f'Execute {" ".join(shlex.quote(arg) for arg in sys.argv)}'
+        exec_line = f'Execute {" ".join(map(shlex.quote, sys.argv))}'
+        install_line = f'From {pathlib.Path(__file__).parent.parent.resolve()}'
+        version_line = f'Using Python {platform.python_version()} on {platform.system()} {platform.release()}'
+        separator = '-' * max(len(exec_line), len(version_line), len(install_line))
         file_logger = log.get_file_logger(cls)
-        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
-        file_logger.debug(Colors.MAGENTA(msg))
-        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+        file_logger.debug(Colors.MAGENTA(separator))
+        file_logger.debug(Colors.MAGENTA(exec_line))
+        file_logger.debug(Colors.MAGENTA(install_line))
+        file_logger.debug(Colors.MAGENTA(version_line))
+        file_logger.debug(Colors.MAGENTA(separator))
 
     @classmethod
     def _log_cli_invoke_completed(cls, action_name: str, started_at: float, exit_status: int):
