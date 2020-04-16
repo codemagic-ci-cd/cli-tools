@@ -39,3 +39,4 @@ workflows:
                cp -a public-read "$SRC_PATH" "$DST_URL"
     artifacts:
       - dist/codemagic-*.whl
+      - dist/codemagic-*.tar.gz
