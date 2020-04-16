@@ -88,7 +88,7 @@ class P12Exporter(StringConverterMixin):
             '-out', decrypted_pkcs12,
         )
         self._run_openssl_command(decrypt_args, cli_app)
-        shutil.move(decrypted_pkcs12, pkcs12)
+        decrypted_pkcs12.rename(pkcs12)
 
     def export(self, export_path: Optional[pathlib.Path] = None, *, cli_app: Optional[CliApp] = None) -> pathlib.Path:
         self._ensure_openssl()

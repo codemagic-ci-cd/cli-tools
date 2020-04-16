@@ -12,6 +12,7 @@ ipdb = "*"
 pytest = "*"
 pytest-cov = "*"
 mdutils = "*"
+pipenv = "*"
 
 [packages]
 pyopenssl = "~=19.0"

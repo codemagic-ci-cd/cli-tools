@@ -28,8 +28,8 @@ jobs:
 
     - name: Pipenv checks
       run: |
-        # --ignore 37752 is workaround for https://github.com/pypa/pipenv/issues/4147
-        pipenv check --ignore 37752
+        # Disable until https://github.com/pypa/pipenv/issues/4188 is resolved
+        # pipenv check
 
     - name: Static type checks with mypy
       env:
