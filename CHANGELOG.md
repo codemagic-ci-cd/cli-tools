@@ -1,7 +1,12 @@
+Version 0.1.9
+-------------
+
+- Improve error messages on invalid inputs when using argument values from environment variables.
+
 Version 0.1.8
 -------------
 
-- Add `--version` option to tools to display current version
+- Add `--version` option to tools to display current version.
 
 Version 0.1.7
 -------------
