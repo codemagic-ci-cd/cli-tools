@@ -220,7 +220,20 @@ class CodeSigningManager
 
   def set_code_signing_settings
     set_xcodeproj_build_settings
-    @project.save
+    begin
+      @project.save
+    rescue Exception => e
+      Log.error "Failed to save project #{@project}"
+      Log.error "Error: #{e}"
+      # Do not raise error on "Consistency issue: no parent for object"
+      # https://github.com/CocoaPods/Xcodeproj/issues/691
+      if e.message.include? "Consistency issue: no parent for object"
+        Log.info "Ignore error, this is open xcodeproj issue"
+        @used_provisioning_profiles = Hash.new
+      else
+        raise  # Unknown error, panic
+      end
+    end
     save_used_provisioning_profiles
   end
 
