@@ -40,7 +40,6 @@ class BundleToolArgument(cli.Argument):
             'required': False,
         },
     )
-
     KEYSTORE_PATH = cli.ArgumentProperties(
         flags=('--ks',),
         key='keystore_path',
@@ -51,7 +50,6 @@ class BundleToolArgument(cli.Argument):
             'required': False,
         },
     )
-
     KEYSTORE_PASSWORD = cli.ArgumentProperties(
         flags=('--ks-pass',),
         key='keystore_password',
@@ -62,7 +60,6 @@ class BundleToolArgument(cli.Argument):
             'required': False,
         },
     )
-
     KEY_ALIAS = cli.ArgumentProperties(
         flags=('--ks-key-alias',),
         key='key_alias',
@@ -73,7 +70,6 @@ class BundleToolArgument(cli.Argument):
             'required': False,
         },
     )
-
     KEY_PASSWORD = cli.ArgumentProperties(
         flags=('--key-pass',),
         key='key_password',
@@ -83,6 +79,20 @@ class BundleToolArgument(cli.Argument):
             'default': None,
             'required': False,
         },
+    )
+    BUILD_APKS_MODE = cli.ArgumentProperties(
+        flags=('--mode',),
+        key='mode',
+        description=(
+            'Set the mode to universal if you want bundletool to build only a single APK '
+            'that includes all of your app\'s code and resources such that the APK is '
+            'compatible with all device configurations your app supports.'
+        ),
+        argparse_kwargs={
+            'default': None,
+            'required': False,
+            'choices': ['universal'],
+        }
     )
 
 
@@ -137,7 +147,8 @@ class BundleTool(cli.CliApp, PathFinderMixin):
                 BundleToolArgument.KEYSTORE_PATH,
                 BundleToolArgument.KEYSTORE_PASSWORD,
                 BundleToolArgument.KEY_ALIAS,
-                BundleToolArgument.KEY_PASSWORD)
+                BundleToolArgument.KEY_PASSWORD,
+                BundleToolArgument.BUILD_APKS_MODE)
     def build_apks(
             self,
             aab_pattern: pathlib.Path,
@@ -171,7 +182,12 @@ class BundleTool(cli.CliApp, PathFinderMixin):
                 self.echo(str(apks_path))
         return apks_paths
 
-    @cli.action('build-universal-apk')
+    @cli.action('build-universal-apk',
+                BundleToolArgument.BUNDLE_PATTERN,
+                BundleToolArgument.KEYSTORE_PATH,
+                BundleToolArgument.KEYSTORE_PASSWORD,
+                BundleToolArgument.KEY_ALIAS,
+                BundleToolArgument.KEY_PASSWORD)
     def build_universal_apks(
             self,
             aab_pattern: pathlib.Path,
@@ -236,13 +252,17 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             *(['--mode', mode] if mode else []),
         ]
         if signing_info:
+            store_pass_arg = f'pass:{signing_info.store_pass}'
+            key_pass_arg = f'pass:{signing_info.key_pass}'
             command.extend([
                 '--ks', signing_info.store_path,
-                '--ks-pass', f'pass:{signing_info.store_pass}',
+                '--ks-pass', store_pass_arg,
                 '--ks-key-alias', signing_info.key_alias,
-                '--key-pass', f'pass:{signing_info.key_pass}',
+                '--key-pass', key_pass_arg,
             ])
-        obfuscate_patterns = [signing_info.store_pass, signing_info.key_pass] if signing_info else []
+            obfuscate_patterns = [key_pass_arg, store_pass_arg]
+        else:
+            obfuscate_patterns = []
 
         process = self.execute(command, obfuscate_patterns=obfuscate_patterns)
         if process.returncode != 0:
