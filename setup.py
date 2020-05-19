@@ -22,7 +22,9 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
-    scripts=['bin/code_signing_manager.rb'],
+    scripts=[
+        'bin/code_signing_manager.rb'
+    ],
     python_requires=">=3.7",
     install_requires=[
         'cryptography>=2.8',

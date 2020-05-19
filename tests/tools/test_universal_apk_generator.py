@@ -22,7 +22,6 @@ SIGNING_INFO_ARGS = (
 def namespace_kwargs():
     return {
         UniversalApkGeneratorArgument.PATTERN.key: Path('**/*.aab'),
-        UniversalApkGeneratorArgument.BUNDLETOOL_PATH.key: models.Bundletool.DEFAULT_PATH,
     }
 
 

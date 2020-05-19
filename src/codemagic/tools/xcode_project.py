@@ -36,13 +36,6 @@ def _json_dict(json_dict: str) -> Dict:
     return d
 
 
-def _existing_path(path_str: str) -> pathlib.Path:
-    path = pathlib.Path(path_str)
-    if path.exists():
-        return path
-    raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
-
-
 class XcodeProjectException(cli.CliAppException):
     pass
 
@@ -66,14 +59,14 @@ class XcodeProjectArgument(cli.Argument):
     XCODE_PROJECT_PATH = cli.ArgumentProperties(
         key='xcode_project_path',
         flags=('--project',),
-        type=_existing_path,
+        type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode project (*.xcodeproj)',
         argparse_kwargs={'required': False}
     )
     XCODE_WORKSPACE_PATH = cli.ArgumentProperties(
         key='xcode_workspace_path',
         flags=('--workspace',),
-        type=_existing_path,
+        type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode workspace (*.xcworkspace)',
         argparse_kwargs={'required': False}
     )

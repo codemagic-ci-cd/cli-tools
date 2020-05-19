@@ -1,5 +1,6 @@
 from .argument import Argument
 from .argument import ArgumentProperties
+from .argument import CommonArgumentTypes
 from .argument import EnvironmentArgumentValue
 from .argument import TypedCliArgument
 from .cli_app import CliApp
