@@ -116,15 +116,15 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     def _deprecation_notice(self):
         from .bundletool import BundleTool
 
-        current_action = self.generate.action_name
-        new_action = BundleTool.build_universal_apks.action_name
-        msg = (
-            f'Warning! Action "{self.get_executable_name()} {current_action}" '
-            f'is deprecated and will be removed in future releases.\n'
-            f'Please use action "{BundleTool.__name__.lower()} {new_action}" instead.\n'
-            f'See "{BundleTool.__name__.lower()} --help" for more information.'
+        current_action = f'{self.get_executable_name()} {self.generate.action_name}'
+        new_action = f'{BundleTool.__name__.lower()} {BundleTool.build_universal_apks.action_name}'
+        lines = (
+            f'Warning! Action "{current_action}" is deprecated and will be removed in future releases.',
+            f'Please use action "{new_action}" instead.',
+            f'See "{BundleTool.__name__.lower()} --help" for more information.',
         )
-        self.echo(Colors.YELLOW(msg))
+        for line in lines:
+            self.logger.info(Colors.YELLOW(line))
 
 
 if __name__ == '__main__':
