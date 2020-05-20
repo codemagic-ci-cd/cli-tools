@@ -133,8 +133,8 @@ KeyPassword = Union[str, AndroidAppBundleTypes.KeyPassword]
 @cli.common_arguments()
 class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     """
-    Manage Android App Bundles using Bundletool
-    https://developer.android.com/studio/command-line/bundletool
+    Manage Android App Bundles using
+    [Bundletool](https://developer.android.com/studio/command-line/bundletool)
     """
 
     def __init__(self, *args, **kwargs):

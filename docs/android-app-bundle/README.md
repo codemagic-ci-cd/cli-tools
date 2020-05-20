@@ -3,7 +3,7 @@ android-app-bundle
 ==================
 
 
-**Manage Android App Bundles using Bundletool     https://developer.android.com/studio/command-line/bundletool**
+**Manage Android App Bundles using     [Bundletool](https://developer.android.com/studio/command-line/bundletool)**
 ### Usage
 ```bash
 android-app-bundle [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -39,8 +39,8 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[<nobr><code>build-apks</code></nobr>](build-apks.md)|Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives.|
-|[<nobr><code>build-universal-apk</code></nobr>](build-universal-apk.md)|Shortcut for `build-apks` to build universal APKs from bundles.|
-|[<nobr><code>dump</code></nobr>](dump.md)|Get files list or extract values from the bundle in a human-readable form.|
-|[<nobr><code>validate</code></nobr>](validate.md)|Verify that given Android App Bundle is valid and print         out information about it.|
-|[<nobr><code>version</code></nobr>](version.md)|Get Bundletool version|
+|[`build‑apks`](build-apks.md)|Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives.|
+|[`build‑universal‑apk`](build-universal-apk.md)|Shortcut for `build-apks` to build universal APKs from bundles.|
+|[`dump`](dump.md)|Get files list or extract values from the bundle in a human-readable form.|
+|[`validate`](validate.md)|Verify that given Android App Bundle is valid and print         out information about it.|
+|[`version`](version.md)|Get Bundletool version|

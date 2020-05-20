@@ -260,7 +260,7 @@ class Writer:
     def write_tools_table(self, tools: List[cli.CliApp]):
         def _get_tool_link(tool):
             tool_name = tool.get_executable_name()
-            return f'[<nobr><code>{tool_name}</code></nobr>]({tool_name}/README.md)'
+            return f'[`{tool_name.replace("-", "‑")}`]({tool_name}/README.md)'
 
         content = [
             [
@@ -273,7 +273,7 @@ class Writer:
         self.file.new_header(level=3, title='Actions')
         content = [
             [
-                f"[<nobr><code>{action.action_name}</code></nobr>]({action.action_name}.md)",
+                f'[`{action.action_name.replace("-", "‑")}`]({action.action_name}.md)',
                 str_plain(action.description)
             ] for action in actions]
         self.write_table(content, ['Action', 'Description'])
