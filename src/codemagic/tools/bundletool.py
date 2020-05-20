@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 from typing import Union
 
+import codemagic
 from codemagic import cli
 from codemagic.mixins import PathFinderMixin
 from codemagic.models import AndroidSigningInfo
@@ -143,11 +144,10 @@ class BundleTool(cli.CliApp, PathFinderMixin):
     @property
     def _jar_path(self) -> pathlib.Path:
         if self._bundletool_jar_path is None:
-            current_dir = pathlib.Path(__file__).parent.resolve()
-            binaries_dir = current_dir.parent.parent.parent / 'bin'
-            bundletool_jar = next(binaries_dir.glob('bundletool*.jar'), None)
+            data_dir = pathlib.Path(codemagic.__file__).parent / 'data'
+            bundletool_jar = next(data_dir.rglob('bundletool*.jar'), None)
             if not bundletool_jar:
-                raise IOError(f'BundleTool jar not available in {current_dir}')
+                raise IOError(f'BundleTool jar not available in {data_dir}')
             self._bundletool_jar_path = bundletool_jar.resolve()
         return self._bundletool_jar_path
 

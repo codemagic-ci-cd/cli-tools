@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import itertools
 import pathlib
+import re
 from unittest import mock
 
 import pytest
@@ -74,3 +75,8 @@ def test_build_apks_signing_info_args(bundletool, cli_argument_group):
             **signing_info_kwargs
         )
     assert built_apks == [pathlib.Path('android_app_bundle-signed.apks')]
+
+
+def test_bundletool_jar_executable(bundletool):
+    version = bundletool.version()
+    assert re.match(r'^(\d+\.?)+$', version) is not None

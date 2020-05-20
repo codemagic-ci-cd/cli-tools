@@ -22,9 +22,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
-    scripts=[
-        'bin/code_signing_manager.rb'
-    ],
+    scripts=['bin/code_signing_manager.rb'],
     python_requires=">=3.7",
     install_requires=[
         'cryptography>=2.8',
@@ -38,6 +36,7 @@ setup(
     entry_points={
         "console_scripts": [
             'app-store-connect = codemagic.tools:AppStoreConnect.invoke_cli',
+            'bundletool = codemagic.tools:BundleTool.invoke_cli',
             'git-changelog = codemagic.tools:GitChangelog.invoke_cli',
             'keychain = codemagic.tools:Keychain.invoke_cli',
             'universal-apk = codemagic.tools:UniversalApkGenerator.invoke_cli',
