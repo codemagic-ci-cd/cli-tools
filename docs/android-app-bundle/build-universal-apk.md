@@ -3,7 +3,7 @@ build-universal-apk
 ===================
 
 
-**Shortcut for 'build-apks' action to build universal APKs from bundles.**
+**Shortcut for `build-apks` to build universal APKs from bundles.**
 ### Usage
 ```bash
 android-app-bundle build-universal-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

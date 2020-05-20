@@ -237,7 +237,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             key_alias: Optional[KeyAlias] = None,
             key_password: Optional[KeyPassword] = None) -> List[pathlib.Path]:
         """
-        Shortcut for 'build-apks' action to build universal APKs from bundles.
+        Shortcut for `build-apks` to build universal APKs from bundles.
         """
 
         apks_paths = self.build_apks(

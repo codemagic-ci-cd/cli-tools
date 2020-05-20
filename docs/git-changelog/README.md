@@ -56,4 +56,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`generate`](generate.md)|Generate a changelog text from git history|
+|[<nobr><pre>generate</pre></nobr>](generate.md)|Generate a changelog text from git history|

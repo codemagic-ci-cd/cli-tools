@@ -46,14 +46,14 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-certificates`](add-certificates.md)|Add p12 certificate to specified keychain.|
-|[`create`](create.md)|Create a macOS keychain, add it to the search list.|
-|[`delete`](delete.md)|Delete keychains and remove them from the search list.|
-|[`get-default`](get-default.md)|Show the system default keychain.|
-|[`initialize`](initialize.md)|Set up the keychain to be used for code signing. Create the keychain         at specified path with specified password with given timeout.         Make it default and unlock it for upcoming use.|
-|[`list-certificates`](list-certificates.md)|List available code signing certificates in specified keychain.|
-|[`lock`](lock.md)|Lock the specified keychain.|
-|[`make-default`](make-default.md)|Set the keychain as the system default keychain.|
-|[`set-timeout`](set-timeout.md)|Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set.|
-|[`show-info`](show-info.md)|Show all settings for the keychain.|
-|[`unlock`](unlock.md)|Unlock the specified keychain.|
+|[<nobr><pre>add-certificates</pre></nobr>](add-certificates.md)|Add p12 certificate to specified keychain.|
+|[<nobr><pre>create</pre></nobr>](create.md)|Create a macOS keychain, add it to the search list.|
+|[<nobr><pre>delete</pre></nobr>](delete.md)|Delete keychains and remove them from the search list.|
+|[<nobr><pre>get-default</pre></nobr>](get-default.md)|Show the system default keychain.|
+|[<nobr><pre>initialize</pre></nobr>](initialize.md)|Set up the keychain to be used for code signing. Create the keychain         at specified path with specified password with given timeout.         Make it default and unlock it for upcoming use.|
+|[<nobr><pre>list-certificates</pre></nobr>](list-certificates.md)|List available code signing certificates in specified keychain.|
+|[<nobr><pre>lock</pre></nobr>](lock.md)|Lock the specified keychain.|
+|[<nobr><pre>make-default</pre></nobr>](make-default.md)|Set the keychain as the system default keychain.|
+|[<nobr><pre>set-timeout</pre></nobr>](set-timeout.md)|Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set.|
+|[<nobr><pre>show-info</pre></nobr>](show-info.md)|Show all settings for the keychain.|
+|[<nobr><pre>unlock</pre></nobr>](unlock.md)|Unlock the specified keychain.|

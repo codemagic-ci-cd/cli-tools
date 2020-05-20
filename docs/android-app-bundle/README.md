@@ -39,8 +39,8 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`build-apks`](build-apks.md)|Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives.|
-|[`build-universal-apk`](build-universal-apk.md)|Shortcut for 'build-apks' action to build universal APKs from bundles.|
-|[`dump`](dump.md)|Get files list or extract values from the bundle in a human-readable form.|
-|[`validate`](validate.md)|Verify that given Android App Bundle is valid and print         out information about it.|
-|[`version`](version.md)|Get Bundletool version|
+|[<nobr><pre>build-apks</pre></nobr>](build-apks.md)|Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives.|
+|[<nobr><pre>build-universal-apk</pre></nobr>](build-universal-apk.md)|Shortcut for `build-apks` to build universal APKs from bundles.|
+|[<nobr><pre>dump</pre></nobr>](dump.md)|Get files list or extract values from the bundle in a human-readable form.|
+|[<nobr><pre>validate</pre></nobr>](validate.md)|Verify that given Android App Bundle is valid and print         out information about it.|
+|[<nobr><pre>version</pre></nobr>](version.md)|Get Bundletool version|
