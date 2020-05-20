@@ -102,15 +102,20 @@ class BundleTool(cli.CliApp, PathFinderMixin):
     Manage Android App Bundles using Bundletool
     """
 
+    def __init__(self, *args, **kwargs):
+        super(BundleTool, self).__init__(*args, **kwargs)
+        self._bundletool_jar_path: Optional[pathlib.Path] = None
+
     @property
-    @lru_cache(1)
     def _jar_path(self) -> pathlib.Path:
-        current_dir = pathlib.Path(__file__).parent.resolve()
-        binaries_dir = current_dir.parent.parent.parent / 'bin'
-        bundletool_jar = next(binaries_dir.glob('bundletool*.jar'), None)
-        if not bundletool_jar:
-            raise IOError(f'BundleTool jar not available in {current_dir}')
-        return bundletool_jar.resolve()
+        if self._bundletool_jar_path is None:
+            current_dir = pathlib.Path(__file__).parent.resolve()
+            binaries_dir = current_dir.parent.parent.parent / 'bin'
+            bundletool_jar = next(binaries_dir.glob('bundletool*.jar'), None)
+            if not bundletool_jar:
+                raise IOError(f'BundleTool jar not available in {current_dir}')
+            self._bundletool_jar_path = bundletool_jar.resolve()
+        return self._bundletool_jar_path
 
     @classmethod
     def _get_android_signing_info(
@@ -119,17 +124,17 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
             key_alias: Optional[BundleToolTypes.KeyAlias] = None,
             key_password: Optional[BundleToolTypes.KeyPassword] = None) -> Optional[AndroidSigningInfo]:
-        signing_info = AndroidSigningInfo(
-            store_path=keystore_path,
-            store_pass=keystore_password.value if key_password else '',
-            key_alias=key_alias,
-            key_pass=key_password.value if key_password else '')
-
-        if any(signing_info) and not all(signing_info):
-            raise BundleToolArgument.KEYSTORE_PATH.raise_argument_error(
-                'Either all signing info arguments should be specified, or none of them should')
-
-        return signing_info if all(signing_info) else None
+        if keystore_path and keystore_password and key_alias and key_password:
+            return AndroidSigningInfo(
+                store_path=keystore_path,
+                store_pass=keystore_password.value if keystore_password else '',
+                key_alias=str(key_alias),
+                key_pass=key_password.value if key_password else '')
+        elif keystore_path or keystore_password or key_alias or key_password:
+            error_msg = 'Either all signing info arguments should be specified, or none of them should'
+            raise BundleToolArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
+        else:
+            return None
 
     @cli.action('version')
     def version(self) -> str:
@@ -255,7 +260,7 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             store_pass_arg = f'pass:{signing_info.store_pass}'
             key_pass_arg = f'pass:{signing_info.key_pass}'
             command.extend([
-                '--ks', signing_info.store_path,
+                '--ks', str(signing_info.store_path),
                 '--ks-pass', store_pass_arg,
                 '--ks-key-alias', signing_info.key_alias,
                 '--key-pass', key_pass_arg,
