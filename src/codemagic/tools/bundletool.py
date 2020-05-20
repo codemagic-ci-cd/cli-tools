@@ -124,13 +124,16 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
             key_alias: Optional[BundleToolTypes.KeyAlias] = None,
             key_password: Optional[BundleToolTypes.KeyPassword] = None) -> Optional[AndroidSigningInfo]:
-        if keystore_path and keystore_password and key_alias and key_password:
+
+        keystore_password_value = keystore_password.value if keystore_password else None
+        key_password_value = key_password.value if key_password else None
+        if keystore_path and keystore_password_value and key_alias and key_password_value:
             return AndroidSigningInfo(
                 store_path=keystore_path,
-                store_pass=keystore_password.value if keystore_password else '',
+                store_pass=keystore_password_value,
                 key_alias=str(key_alias),
-                key_pass=key_password.value if key_password else '')
-        elif keystore_path or keystore_password or key_alias or key_password:
+                key_pass=key_password_value)
+        elif keystore_path or keystore_password_value or key_alias or key_password_value:
             error_msg = 'Either all signing info arguments should be specified, or none of them should'
             raise BundleToolArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
         else:
