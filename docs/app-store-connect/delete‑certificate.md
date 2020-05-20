@@ -1,12 +1,12 @@
 
-list-certificates
-=================
+delete‑certificate
+==================
 
 
-**List Signing Certificates from Apple Developer Portal matching given constraints.**
+**Delete specified Signing Certificate from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect delete‑certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,39 +14,21 @@ app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--v
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type CERTIFICATE_TYPE_OPTIONAL]
-    [--display-name DISPLAY_NAME]
-    [--certificate-key PRIVATE_KEY]
-    [--certificate-key-password PRIVATE_KEY_PASSWORD]
-    [--p12-password P12_CONTAINER_PASSWORD]
-    [--save]
+    [--ignore-not-found]
+    CERTIFICATE_RESOURCE_ID
 ```
-### Optional arguments for action `list-certificates`
+### Required arguments for action `delete‑certificate`
 
-##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
-
-
-Type of the certificate
-##### `--display-name=DISPLAY_NAME`
+##### `CERTIFICATE_RESOURCE_ID`
 
 
-Code signing certificate display name
-##### `--certificate-key=PRIVATE_KEY`
+Alphanumeric ID value of the Signing Certificate
+### Optional arguments for action `delete‑certificate`
+
+##### `--ignore-not-found`
 
 
-Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
-
-
-Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--p12-password=P12_CONTAINER_PASSWORD`
-
-
-If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

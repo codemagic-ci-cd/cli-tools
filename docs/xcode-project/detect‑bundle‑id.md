@@ -1,17 +1,17 @@
 
-detect-bundle-id
+detect‑bundle‑id
 ================
 
 
 **Try to deduce the Bundle ID from specified Xcode project**
 ### Usage
 ```bash
-xcode-project detect-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+xcode-project detect‑bundle‑id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--project XCODE_PROJECT_PATTERN]
     [--target TARGET_NAME]
     [--config CONFIGURATION_NAME]
 ```
-### Optional arguments for action `detect-bundle-id`
+### Optional arguments for action `detect‑bundle‑id`
 
 ##### `--project=XCODE_PROJECT_PATTERN`
 

@@ -1,12 +1,12 @@
 
-create-bundle-id
-================
+list‑bundle‑ids
+===============
 
 
-**Create Bundle ID in Apple Developer portal for specifier identifier.**
+**List Bundle IDs from Apple Developer portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list‑bundle‑ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,18 +14,16 @@ app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--ve
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
     [--name BUNDLE_ID_NAME]
-    [--platform PLATFORM]
-    BUNDLE_ID_IDENTIFIER
+    [--platform PLATFORM_OPTIONAL]
 ```
-### Required arguments for action `create-bundle-id`
+### Optional arguments for action `list‑bundle‑ids`
 
-##### `BUNDLE_ID_IDENTIFIER`
+##### `--bundle-id-identifier=BUNDLE_ID_IDENTIFIER_OPTIONAL`
 
 
 Identifier of the Bundle ID
-### Optional arguments for action `create-bundle-id`
-
 ##### `--name=BUNDLE_ID_NAME`
 
 
@@ -33,7 +31,7 @@ Name of the Bundle ID. If the resource is being created, the default will be ded
 ##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
-Bundle ID platform. Default:&nbsp;`IOS`
+Bundle ID platform
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

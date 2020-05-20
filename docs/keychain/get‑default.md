@@ -1,12 +1,12 @@
 
-get-default
+get‑default
 ===========
 
 
 **Show the system default keychain.**
 ### Usage
 ```bash
-keychain get-default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain get‑default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`

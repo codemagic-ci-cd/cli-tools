@@ -1,12 +1,12 @@
 
-build-ipa
+build‑ipa
 =========
 
 
 **Build ipa by archiving the Xcode project and then exporting it**
 ### Usage
 ```bash
-xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+xcode-project build‑ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--project XCODE_PROJECT_PATH]
     [--workspace XCODE_WORKSPACE_PATH]
     [--target TARGET_NAME]
@@ -17,7 +17,7 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--disable-xcpretty]
     [--xcpretty-options OPTIONS]
 ```
-### Optional arguments for action `build-ipa`
+### Optional arguments for action `build‑ipa`
 
 ##### `--project=XCODE_PROJECT_PATH`
 

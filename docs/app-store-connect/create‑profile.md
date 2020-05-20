@@ -1,12 +1,12 @@
 
-create-certificate
-==================
+create‑profile
+==============
 
 
-**Create code signing certificates of given type**
+**Create provisioning profile of given type**
 ### Usage
 ```bash
-app-store-connect create-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect create‑profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,30 +14,37 @@ app-store-connect create-certificate [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type CERTIFICATE_TYPE]
-    [--certificate-key PRIVATE_KEY]
-    [--certificate-key-password PRIVATE_KEY_PASSWORD]
-    [--p12-password P12_CONTAINER_PASSWORD]
+    [--type PROFILE_TYPE]
+    [--name PROFILE_NAME]
     [--save]
+    BUNDLE_ID_RESOURCE_ID
+    --certificate-ids CERTIFICATE_RESOURCE_IDS
+    --device-ids DEVICE_RESOURCE_IDS
 ```
-### Optional arguments for action `create-certificate`
+### Required arguments for action `create‑profile`
 
-##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
-
-
-Type of the certificate. Default:&nbsp;`IOS_DEVELOPMENT`
-##### `--certificate-key=PRIVATE_KEY`
+##### `BUNDLE_ID_RESOURCE_ID`
 
 
-Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+Alphanumeric ID value of the Bundle ID
+##### `--certificate-ids=CERTIFICATE_RESOURCE_IDS`
 
 
-Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--p12-password=P12_CONTAINER_PASSWORD`
+Alphanumeric ID value of the Signing Certificate. Multiple arguments
+##### `--device-ids=DEVICE_RESOURCE_IDS`
 
 
-If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
+Alphanumeric ID value of the Device. Multiple arguments
+### Optional arguments for action `create‑profile`
+
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
 ##### `--save`
 
 

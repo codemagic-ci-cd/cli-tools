@@ -1,14 +1,21 @@
 
-list-certificates
-=================
+set‑timeout
+===========
 
 
-**List available code signing certificates in specified keychain.**
+**Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set.**
 ### Usage
 ```bash
-keychain list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain set‑timeout [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
+    [-t TIMEOUT]
 ```
+### Optional arguments for action `set‑timeout`
+
+##### `-t, --timeout=TIMEOUT`
+
+
+Keychain timeout in seconds, defaults to no timeout
 ### Optional arguments for command `keychain`
 
 ##### `-p, --path=PATH`

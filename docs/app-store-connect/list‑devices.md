@@ -1,12 +1,12 @@
 
-list-bundle-id-profiles
-=======================
+list‑devices
+============
 
 
-**List provisioning profiles from Apple Developer Portal for specified Bundle IDs.**
+**List Devices from Apple Developer portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list‑devices [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,36 +14,24 @@ app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
-    --bundle-ids BUNDLE_ID_RESOURCE_IDS
+    [--platform PLATFORM_OPTIONAL]
+    [--name DEVICE_NAME]
+    [--status DEVICE_STATUS]
 ```
-### Required arguments for action `list-bundle-id-profiles`
+### Optional arguments for action `list‑devices`
 
-##### `--bundle-ids=BUNDLE_ID_RESOURCE_IDS`
-
-
-Alphanumeric ID value of the Bundle ID. Multiple arguments
-### Optional arguments for action `list-bundle-id-profiles`
-
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID`
+Bundle ID platform
+##### `--name=DEVICE_NAME`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
+Name of the Device
+##### `--status=DISABLED | ENABLED`
 
 
-Name of the provisioning profile
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Status of the Device
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

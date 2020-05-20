@@ -1,18 +1,18 @@
 
-use-profiles
+use‑profiles
 ============
 
 
 **Set up code signing settings on specified Xcode projects         to use given provisioning profiles**
 ### Usage
 ```bash
-xcode-project use-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+xcode-project use‑profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--project XCODE_PROJECT_PATTERN]
     [--profile PROFILE_PATHS]
     [--export-options-plist EXPORT_OPTIONS_PATH]
     [--custom-export-options CUSTOM_EXPORT_OPTIONS]
 ```
-### Optional arguments for action `use-profiles`
+### Optional arguments for action `use‑profiles`
 
 ##### `--project=XCODE_PROJECT_PATTERN`
 

@@ -1,12 +1,12 @@
 
-show-info
-=========
+make‑default
+============
 
 
-**Show all settings for the keychain.**
+**Set the keychain as the system default keychain.**
 ### Usage
 ```bash
-keychain show-info [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain make‑default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`

@@ -1,12 +1,12 @@
 
-create-profile
-==============
+list‑profiles
+=============
 
 
-**Create provisioning profile of given type**
+**List Profiles from Apple Developer portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list‑profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,33 +14,21 @@ app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--vers
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE]
+    [--type PROFILE_TYPE_OPTIONAL]
+    [--state PROFILE_STATE_OPTIONAL]
     [--name PROFILE_NAME]
     [--save]
-    BUNDLE_ID_RESOURCE_ID
-    --certificate-ids CERTIFICATE_RESOURCE_IDS
-    --device-ids DEVICE_RESOURCE_IDS
 ```
-### Required arguments for action `create-profile`
-
-##### `BUNDLE_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Bundle ID
-##### `--certificate-ids=CERTIFICATE_RESOURCE_IDS`
-
-
-Alphanumeric ID value of the Signing Certificate. Multiple arguments
-##### `--device-ids=DEVICE_RESOURCE_IDS`
-
-
-Alphanumeric ID value of the Device. Multiple arguments
-### Optional arguments for action `create-profile`
+### Optional arguments for action `list‑profiles`
 
 ##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 
-Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
+Type of the provisioning profile
+##### `--state=ACTIVE | INVALID`
+
+
+State of the provisioning profile
 ##### `--name=PROFILE_NAME`
 
 

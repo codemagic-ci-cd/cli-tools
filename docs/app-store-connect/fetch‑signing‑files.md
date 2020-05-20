@@ -1,12 +1,12 @@
 
-fetch-signing-files
+fetch‑signing‑files
 ===================
 
 
 **Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier.**
 ### Usage
 ```bash
-app-store-connect fetch-signing-files [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect fetch‑signing‑files [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -22,13 +22,13 @@ app-store-connect fetch-signing-files [-h] [--log-stream STREAM] [--no-color] [-
     [--create]
     BUNDLE_ID_IDENTIFIER
 ```
-### Required arguments for action `fetch-signing-files`
+### Required arguments for action `fetch‑signing‑files`
 
 ##### `BUNDLE_ID_IDENTIFIER`
 
 
 Identifier of the Bundle ID
-### Optional arguments for action `fetch-signing-files`
+### Optional arguments for action `fetch‑signing‑files`
 
 ##### `--platform=IOS | MAC_OS | UNIVERSAL`
 

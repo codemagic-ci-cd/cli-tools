@@ -1,12 +1,12 @@
 
-list-profiles
+get‑bundle‑id
 =============
 
 
-**List Profiles from Apple Developer portal matching given constraints.**
+**Get specified Bundle ID from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect get‑bundle‑id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,29 +14,14 @@ app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
+    BUNDLE_ID_RESOURCE_ID
 ```
-### Optional arguments for action `list-profiles`
+### Required arguments for action `get‑bundle‑id`
 
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
-
-
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID`
+##### `BUNDLE_ID_RESOURCE_ID`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
-
-
-Name of the provisioning profile
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Alphanumeric ID value of the Bundle ID
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

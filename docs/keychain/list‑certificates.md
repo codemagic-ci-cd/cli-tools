@@ -1,12 +1,12 @@
 
-make-default
-============
+list‑certificates
+=================
 
 
-**Set the keychain as the system default keychain.**
+**List available code signing certificates in specified keychain.**
 ### Usage
 ```bash
-keychain make-default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain list‑certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`

@@ -1,17 +1,17 @@
 
-add-certificates
+add‑certificates
 ================
 
 
 **Add p12 certificate to specified keychain.**
 ### Usage
 ```bash
-keychain add-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain add‑certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
     [-c CERTIFICATE_PATHS]
     [--certificate-password CERTIFICATE_PASSWORD]
 ```
-### Optional arguments for action `add-certificates`
+### Optional arguments for action `add‑certificates`
 
 ##### `-c, --certificate=CERTIFICATE_PATHS`
 

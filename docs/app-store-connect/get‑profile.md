@@ -1,12 +1,12 @@
 
-get-profile
+get‑profile
 ===========
 
 
 **Get specified Profile from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect get‑profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -16,7 +16,7 @@ app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version
     [--profiles-dir PROFILES_DIRECTORY]
     PROFILE_RESOURCE_ID
 ```
-### Required arguments for action `get-profile`
+### Required arguments for action `get‑profile`
 
 ##### `PROFILE_RESOURCE_ID`
 

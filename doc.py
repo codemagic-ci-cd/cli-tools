@@ -158,7 +158,7 @@ class ToolDocumentationGenerator:
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
             serialized_actions.append(Action(
-                action_name=f.action_name,
+                action_name=f.action_name.replace('-', '‑'),
                 name=f.__name__,
                 description=f.__doc__,
                 required_args=action_args_serializer.required_args,
@@ -259,8 +259,8 @@ class Writer:
 
     def write_tools_table(self, tools: List[cli.CliApp]):
         def _get_tool_link(tool):
-            tool_name = tool.get_executable_name()
-            return f'[`{tool_name.replace("-", "‑")}`]({tool_name}/README.md)'
+            command = tool.get_executable_name().replace('-', '‑')
+            return f'[`{command}`]({tool.get_executable_name()}/README.md)'
 
         content = [
             [
@@ -273,7 +273,7 @@ class Writer:
         self.file.new_header(level=3, title='Actions')
         content = [
             [
-                f'[`{action.action_name.replace("-", "‑")}`]({action.action_name}.md)',
+                f"[`{action.action_name}`]({action.action_name}.md)",
                 str_plain(action.description)
             ] for action in actions]
         self.write_table(content, ['Action', 'Description'])

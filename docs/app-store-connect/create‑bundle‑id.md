@@ -1,12 +1,12 @@
 
-delete-profile
-==============
+create‑bundle‑id
+================
 
 
-**Delete specified Profile from Apple Developer portal.**
+**Create Bundle ID in Apple Developer portal for specifier identifier.**
 ### Usage
 ```bash
-app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect create‑bundle‑id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,21 +14,26 @@ app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--vers
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    PROFILE_RESOURCE_ID
+    [--name BUNDLE_ID_NAME]
+    [--platform PLATFORM]
+    BUNDLE_ID_IDENTIFIER
 ```
-### Required arguments for action `delete-profile`
+### Required arguments for action `create‑bundle‑id`
 
-##### `PROFILE_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Profile
-### Optional arguments for action `delete-profile`
-
-##### `--ignore-not-found`
+##### `BUNDLE_ID_IDENTIFIER`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Identifier of the Bundle ID
+### Optional arguments for action `create‑bundle‑id`
+
+##### `--name=BUNDLE_ID_NAME`
+
+
+Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
+
+
+Bundle ID platform. Default:&nbsp;`IOS`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

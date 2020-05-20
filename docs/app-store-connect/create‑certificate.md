@@ -1,12 +1,12 @@
 
-get-bundle-id
-=============
+create‑certificate
+==================
 
 
-**Get specified Bundle ID from Apple Developer portal.**
+**Create code signing certificates of given type**
 ### Usage
 ```bash
-app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect create‑certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,14 +14,34 @@ app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    BUNDLE_ID_RESOURCE_ID
+    [--type CERTIFICATE_TYPE]
+    [--certificate-key PRIVATE_KEY]
+    [--certificate-key-password PRIVATE_KEY_PASSWORD]
+    [--p12-password P12_CONTAINER_PASSWORD]
+    [--save]
 ```
-### Required arguments for action `get-bundle-id`
+### Optional arguments for action `create‑certificate`
 
-##### `BUNDLE_ID_RESOURCE_ID`
+##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
 
 
-Alphanumeric ID value of the Bundle ID
+Type of the certificate. Default:&nbsp;`IOS_DEVELOPMENT`
+##### `--certificate-key=PRIVATE_KEY`
+
+
+Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+
+
+Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--p12-password=P12_CONTAINER_PASSWORD`
+
+
+If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

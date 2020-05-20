@@ -1,12 +1,12 @@
 
-delete-bundle-id
-================
+list‑bundle‑id‑profiles
+=======================
 
 
-**Delete specified Bundle ID from Apple Developer portal.**
+**List provisioning profiles from Apple Developer Portal for specified Bundle IDs.**
 ### Usage
 ```bash
-app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list‑bundle‑id‑profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,21 +14,36 @@ app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--ve
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    BUNDLE_ID_RESOURCE_ID
+    [--type PROFILE_TYPE_OPTIONAL]
+    [--state PROFILE_STATE_OPTIONAL]
+    [--name PROFILE_NAME]
+    [--save]
+    --bundle-ids BUNDLE_ID_RESOURCE_IDS
 ```
-### Required arguments for action `delete-bundle-id`
+### Required arguments for action `list‑bundle‑id‑profiles`
 
-##### `BUNDLE_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Bundle ID
-### Optional arguments for action `delete-bundle-id`
-
-##### `--ignore-not-found`
+##### `--bundle-ids=BUNDLE_ID_RESOURCE_IDS`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Alphanumeric ID value of the Bundle ID. Multiple arguments
+### Optional arguments for action `list‑bundle‑id‑profiles`
+
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile
+##### `--state=ACTIVE | INVALID`
+
+
+State of the provisioning profile
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
