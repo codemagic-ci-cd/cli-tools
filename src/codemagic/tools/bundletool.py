@@ -1,6 +1,5 @@
 import pathlib
 import zipfile
-from functools import lru_cache
 from typing import List
 from typing import Optional
 
@@ -258,8 +257,8 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             self.logger.info(f'Dump target "{target}" from {aab_path}')
 
         command = [
-            'java', '-jar', str(self._jar_path), 'dump', target,
-            '--bundle', aab_path
+            'java', '-jar', str(self._jar_path),
+            'dump', target, '--bundle', aab_path
         ]
         if xpath:
             command.extend(['--xpath', xpath])
@@ -269,21 +268,21 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             raise BundleToolError(f'Unable to dump {target} for bundle {aab_path}', process)
         return process.stdout
 
-    @cli.action('get-size')
-    def get_size(self):
-        """
-        Get the min and max download sizes of APKs served to different devices
-        configurations from an APK Set.
-        """
-        raise BundleToolError('Not implemented')
-
-    @cli.action('validate')
-    def validate(self):
+    @cli.action('validate', BundleToolArgument.BUNDLE_PATH, )
+    def validate(self, aab_path: pathlib.Path) -> str:
         """
         Verify that given Android App Bundle is valid and print
         out information about it.
         """
-        raise BundleToolError('Not implemented')
+        self.logger.info(f'Validate {aab_path}')
+        command = [
+            'java', '-jar', str(self._jar_path),
+            'validate', '--bundle', aab_path
+        ]
+        process = self.execute(command)
+        if process.returncode != 0:
+            raise BundleToolError(f'Unable to validate bundle {aab_path}', process)
+        return process.stdout
 
     @cli.action('version')
     def version(self) -> str:
@@ -304,7 +303,8 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         self.logger.info(f'Generating APKs from bundle {aab_path}')
         apks_path = aab_path.parent / f'{aab_path.stem}.apks'
         command = [
-            'java', '-jar', str(self._jar_path), 'build-apks',
+            'java', '-jar', str(self._jar_path),
+            'build-apks',
             '--bundle', str(aab_path),
             '--output', str(apks_path),
             *(['--mode', mode] if mode else []),
