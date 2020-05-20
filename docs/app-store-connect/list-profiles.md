@@ -1,12 +1,12 @@
 
-list‑profiles
+list-profiles
 =============
 
 
 **List Profiles from Apple Developer portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect list‑profiles [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -19,7 +19,7 @@ app-store-connect list‑profiles [-h] [-s] [-v] [--no-color] [--log-stream STRE
     [--name PROFILE_NAME]
     [--save]
 ```
-### Optional arguments for action `list‑profiles`
+### Optional arguments for action `list-profiles`
 
 ##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
@@ -73,6 +73,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -81,11 +93,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

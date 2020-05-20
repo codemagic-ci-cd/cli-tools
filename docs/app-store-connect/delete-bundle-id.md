@@ -1,12 +1,12 @@
 
-get‑certificate
-===============
+delete-bundle-id
+================
 
 
-**Get specified Signing Certificate from Apple Developer portal.**
+**Delete specified Bundle ID from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect get‑certificate [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,36 +14,21 @@ app-store-connect get‑certificate [-h] [-s] [-v] [--no-color] [--log-stream ST
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--certificate-key PRIVATE_KEY]
-    [--certificate-key-password PRIVATE_KEY_PASSWORD]
-    [--p12-password P12_CONTAINER_PASSWORD]
-    [--save]
-    CERTIFICATE_RESOURCE_ID
+    [--ignore-not-found]
+    BUNDLE_ID_RESOURCE_ID
 ```
-### Required arguments for action `get‑certificate`
+### Required arguments for action `delete-bundle-id`
 
-##### `CERTIFICATE_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Signing Certificate
-### Optional arguments for action `get‑certificate`
-
-##### `--certificate-key=PRIVATE_KEY`
+##### `BUNDLE_ID_RESOURCE_ID`
 
 
-Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+Alphanumeric ID value of the Bundle ID
+### Optional arguments for action `delete-bundle-id`
+
+##### `--ignore-not-found`
 
 
-Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--p12-password=P12_CONTAINER_PASSWORD`
-
-
-If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -80,6 +65,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -88,11 +85,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

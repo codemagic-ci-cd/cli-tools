@@ -1,12 +1,12 @@
 
-list‑bundle‑ids
-===============
+get-bundle-id
+=============
 
 
-**List Bundle IDs from Apple Developer portal matching given constraints.**
+**Get specified Bundle ID from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect list‑bundle‑ids [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,24 +14,14 @@ app-store-connect list‑bundle‑ids [-h] [-s] [-v] [--no-color] [--log-stream 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
-    [--name BUNDLE_ID_NAME]
-    [--platform PLATFORM_OPTIONAL]
+    BUNDLE_ID_RESOURCE_ID
 ```
-### Optional arguments for action `list‑bundle‑ids`
+### Required arguments for action `get-bundle-id`
 
-##### `--bundle-id-identifier=BUNDLE_ID_IDENTIFIER_OPTIONAL`
-
-
-Identifier of the Bundle ID
-##### `--name=BUNDLE_ID_NAME`
+##### `BUNDLE_ID_RESOURCE_ID`
 
 
-Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
-##### `--platform=IOS | MAC_OS | UNIVERSAL`
-
-
-Bundle ID platform
+Alphanumeric ID value of the Bundle ID
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -68,6 +58,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -76,11 +78,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

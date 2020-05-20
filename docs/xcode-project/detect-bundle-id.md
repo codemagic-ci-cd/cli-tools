@@ -1,17 +1,17 @@
 
-detect‑bundle‑id
+detect-bundle-id
 ================
 
 
 **Try to deduce the Bundle ID from specified Xcode project**
 ### Usage
 ```bash
-xcode-project detect‑bundle‑id [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+xcode-project detect-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--project XCODE_PROJECT_PATTERN]
     [--target TARGET_NAME]
     [--config CONFIGURATION_NAME]
 ```
-### Optional arguments for action `detect‑bundle‑id`
+### Optional arguments for action `detect-bundle-id`
 
 ##### `--project=XCODE_PROJECT_PATTERN`
 
@@ -31,6 +31,18 @@ Name of the Xcode build configuration
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -39,11 +51,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

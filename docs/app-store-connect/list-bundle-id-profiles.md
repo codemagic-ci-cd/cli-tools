@@ -1,12 +1,12 @@
 
-get‑profile
-===========
+list-bundle-id-profiles
+=======================
 
 
-**Get specified Profile from Apple Developer portal.**
+**List provisioning profiles from Apple Developer Portal for specified Bundle IDs.**
 ### Usage
 ```bash
-app-store-connect get‑profile [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,14 +14,36 @@ app-store-connect get‑profile [-h] [-s] [-v] [--no-color] [--log-stream STREAM
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    PROFILE_RESOURCE_ID
+    [--type PROFILE_TYPE_OPTIONAL]
+    [--state PROFILE_STATE_OPTIONAL]
+    [--name PROFILE_NAME]
+    [--save]
+    --bundle-ids BUNDLE_ID_RESOURCE_IDS
 ```
-### Required arguments for action `get‑profile`
+### Required arguments for action `list-bundle-id-profiles`
 
-##### `PROFILE_RESOURCE_ID`
+##### `--bundle-ids=BUNDLE_ID_RESOURCE_IDS`
 
 
-Alphanumeric ID value of the Profile
+Alphanumeric ID value of the Bundle ID. Multiple arguments
+### Optional arguments for action `list-bundle-id-profiles`
+
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile
+##### `--state=ACTIVE | INVALID`
+
+
+State of the provisioning profile
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -58,6 +80,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -66,11 +100,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

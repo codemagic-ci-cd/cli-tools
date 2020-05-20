@@ -1,12 +1,12 @@
 
-delete‑profile
-==============
+get-profile
+===========
 
 
-**Delete specified Profile from Apple Developer portal.**
+**Get specified Profile from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect delete‑profile [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,21 +14,14 @@ app-store-connect delete‑profile [-h] [-s] [-v] [--no-color] [--log-stream STR
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
     PROFILE_RESOURCE_ID
 ```
-### Required arguments for action `delete‑profile`
+### Required arguments for action `get-profile`
 
 ##### `PROFILE_RESOURCE_ID`
 
 
 Alphanumeric ID value of the Profile
-### Optional arguments for action `delete‑profile`
-
-##### `--ignore-not-found`
-
-
-Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -65,6 +58,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -73,11 +78,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

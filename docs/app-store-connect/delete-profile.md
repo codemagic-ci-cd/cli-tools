@@ -1,12 +1,12 @@
 
-list‑devices
-============
+delete-profile
+==============
 
 
-**List Devices from Apple Developer portal matching given constraints.**
+**Delete specified Profile from Apple Developer portal.**
 ### Usage
 ```bash
-app-store-connect list‑devices [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,24 +14,21 @@ app-store-connect list‑devices [-h] [-s] [-v] [--no-color] [--log-stream STREA
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--platform PLATFORM_OPTIONAL]
-    [--name DEVICE_NAME]
-    [--status DEVICE_STATUS]
+    [--ignore-not-found]
+    PROFILE_RESOURCE_ID
 ```
-### Optional arguments for action `list‑devices`
+### Required arguments for action `delete-profile`
 
-##### `--platform=IOS | MAC_OS | UNIVERSAL`
-
-
-Bundle ID platform
-##### `--name=DEVICE_NAME`
+##### `PROFILE_RESOURCE_ID`
 
 
-Name of the Device
-##### `--status=DISABLED | ENABLED`
+Alphanumeric ID value of the Profile
+### Optional arguments for action `delete-profile`
+
+##### `--ignore-not-found`
 
 
-Status of the Device
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -68,6 +65,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -76,11 +85,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

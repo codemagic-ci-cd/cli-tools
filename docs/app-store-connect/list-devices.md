@@ -1,12 +1,12 @@
 
-delete‑certificate
-==================
+list-devices
+============
 
 
-**Delete specified Signing Certificate from Apple Developer portal.**
+**List Devices from Apple Developer portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect delete‑certificate [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,21 +14,24 @@ app-store-connect delete‑certificate [-h] [-s] [-v] [--no-color] [--log-stream
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    CERTIFICATE_RESOURCE_ID
+    [--platform PLATFORM_OPTIONAL]
+    [--name DEVICE_NAME]
+    [--status DEVICE_STATUS]
 ```
-### Required arguments for action `delete‑certificate`
+### Optional arguments for action `list-devices`
 
-##### `CERTIFICATE_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Signing Certificate
-### Optional arguments for action `delete‑certificate`
-
-##### `--ignore-not-found`
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Bundle ID platform
+##### `--name=DEVICE_NAME`
+
+
+Name of the Device
+##### `--status=DISABLED | ENABLED`
+
+
+Status of the Device
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -65,6 +68,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -73,11 +88,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

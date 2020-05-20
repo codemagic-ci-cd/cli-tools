@@ -1,12 +1,12 @@
 
-delete‑bundle‑id
+create-bundle-id
 ================
 
 
-**Delete specified Bundle ID from Apple Developer portal.**
+**Create Bundle ID in Apple Developer portal for specifier identifier.**
 ### Usage
 ```bash
-app-store-connect delete‑bundle‑id [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,21 +14,26 @@ app-store-connect delete‑bundle‑id [-h] [-s] [-v] [--no-color] [--log-stream
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    BUNDLE_ID_RESOURCE_ID
+    [--name BUNDLE_ID_NAME]
+    [--platform PLATFORM]
+    BUNDLE_ID_IDENTIFIER
 ```
-### Required arguments for action `delete‑bundle‑id`
+### Required arguments for action `create-bundle-id`
 
-##### `BUNDLE_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Bundle ID
-### Optional arguments for action `delete‑bundle‑id`
-
-##### `--ignore-not-found`
+##### `BUNDLE_ID_IDENTIFIER`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Identifier of the Bundle ID
+### Optional arguments for action `create-bundle-id`
+
+##### `--name=BUNDLE_ID_NAME`
+
+
+Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
+##### `--platform=IOS | MAC_OS | UNIVERSAL`
+
+
+Bundle ID platform. Default:&nbsp;`IOS`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -65,6 +70,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -73,11 +90,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

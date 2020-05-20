@@ -1,18 +1,18 @@
 
-use‑profiles
+use-profiles
 ============
 
 
 **Set up code signing settings on specified Xcode projects         to use given provisioning profiles**
 ### Usage
 ```bash
-xcode-project use‑profiles [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+xcode-project use-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--project XCODE_PROJECT_PATTERN]
     [--profile PROFILE_PATHS]
     [--export-options-plist EXPORT_OPTIONS_PATH]
     [--custom-export-options CUSTOM_EXPORT_OPTIONS]
 ```
-### Optional arguments for action `use‑profiles`
+### Optional arguments for action `use-profiles`
 
 ##### `--project=XCODE_PROJECT_PATTERN`
 
@@ -36,6 +36,18 @@ Custom options for generated export options as JSON string. For example '{"uploa
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -44,11 +56,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

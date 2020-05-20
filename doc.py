@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 from __future__ import annotations
 
@@ -8,14 +9,14 @@ import sys
 from pathlib import Path
 from typing import List
 from typing import NamedTuple
-from typing import Tuple
+
 from mdutils.mdutils import MdUtils
 from mdutils.tools.tools import Table
 
-sys.path.append(os.path.abspath('./src'))
+sys.path.insert(0, os.path.abspath('./src'))
+
 from codemagic import cli
 from codemagic import tools
-print(f'{tools} imported')
 
 
 class SerializedArgument(NamedTuple):
@@ -58,7 +59,7 @@ class ArgumentsSerializer:
                 description = str_plain(arg.get_description())
                 env_var = arg_type.__dict__.get('environment_variable_key')
                 if (env_var):
-                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description).replace('"','`')
+                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description).replace('"', '`')
 
             arg_type = arg_type.__name__ if arg_type else ''
             kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
@@ -157,7 +158,7 @@ class ToolDocumentationGenerator:
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
             serialized_actions.append(Action(
-                action_name=f.action_name.replace('-', '‑'),
+                action_name=f.action_name,
                 name=f.__name__,
                 description=f.__doc__,
                 required_args=action_args_serializer.required_args,
@@ -314,11 +315,13 @@ def str_plain(string):
 
 
 def main():
+    print(f'Generate documentation for module {tools.__name__} from {tools.__file__}')
     main_dir = 'docs'
-    tools = cli.CliApp.__subclasses__()
-    MainPageDocumentationGenerator('CLI tools', main_dir).generate(tools)
-    for tool in tools:
-        ToolDocumentationGenerator(tool, main_dir).generate()
+    tool_classes = cli.CliApp.__subclasses__()
+    MainPageDocumentationGenerator('CLI tools', main_dir).generate(tool_classes)
+    for tool_class in tool_classes:
+        print(f'Generate documentation for tool {tool_class.get_executable_name()}')
+        ToolDocumentationGenerator(tool_class, main_dir).generate()
 
 
 if __name__ == "__main__":
