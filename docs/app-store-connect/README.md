@@ -76,18 +76,18 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[<nobr><pre>create-bundle-id</pre></nobr>](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier.|
-|[<nobr><pre>create-certificate</pre></nobr>](create-certificate.md)|Create code signing certificates of given type|
-|[<nobr><pre>create-profile</pre></nobr>](create-profile.md)|Create provisioning profile of given type|
-|[<nobr><pre>delete-bundle-id</pre></nobr>](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal.|
-|[<nobr><pre>delete-certificate</pre></nobr>](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal.|
-|[<nobr><pre>delete-profile</pre></nobr>](delete-profile.md)|Delete specified Profile from Apple Developer portal.|
-|[<nobr><pre>fetch-signing-files</pre></nobr>](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier.|
-|[<nobr><pre>get-bundle-id</pre></nobr>](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal.|
-|[<nobr><pre>get-certificate</pre></nobr>](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal.|
-|[<nobr><pre>get-profile</pre></nobr>](get-profile.md)|Get specified Profile from Apple Developer portal.|
-|[<nobr><pre>list-bundle-id-profiles</pre></nobr>](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs.|
-|[<nobr><pre>list-bundle-ids</pre></nobr>](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints.|
-|[<nobr><pre>list-certificates</pre></nobr>](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints.|
-|[<nobr><pre>list-devices</pre></nobr>](list-devices.md)|List Devices from Apple Developer portal matching given constraints.|
-|[<nobr><pre>list-profiles</pre></nobr>](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints.|
+|[<nobr><code>create-bundle-id</code></nobr>](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier.|
+|[<nobr><code>create-certificate</code></nobr>](create-certificate.md)|Create code signing certificates of given type|
+|[<nobr><code>create-profile</code></nobr>](create-profile.md)|Create provisioning profile of given type|
+|[<nobr><code>delete-bundle-id</code></nobr>](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal.|
+|[<nobr><code>delete-certificate</code></nobr>](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal.|
+|[<nobr><code>delete-profile</code></nobr>](delete-profile.md)|Delete specified Profile from Apple Developer portal.|
+|[<nobr><code>fetch-signing-files</code></nobr>](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier.|
+|[<nobr><code>get-bundle-id</code></nobr>](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal.|
+|[<nobr><code>get-certificate</code></nobr>](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal.|
+|[<nobr><code>get-profile</code></nobr>](get-profile.md)|Get specified Profile from Apple Developer portal.|
+|[<nobr><code>list-bundle-id-profiles</code></nobr>](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs.|
+|[<nobr><code>list-bundle-ids</code></nobr>](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints.|
+|[<nobr><code>list-certificates</code></nobr>](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints.|
+|[<nobr><code>list-devices</code></nobr>](list-devices.md)|List Devices from Apple Developer portal matching given constraints.|
+|[<nobr><code>list-profiles</code></nobr>](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints.|

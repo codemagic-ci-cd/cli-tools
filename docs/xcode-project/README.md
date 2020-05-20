@@ -39,6 +39,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[<nobr><pre>build-ipa</pre></nobr>](build-ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
-|[<nobr><pre>detect-bundle-id</pre></nobr>](detect-bundle-id.md)|Try to deduce the Bundle ID from specified Xcode project|
-|[<nobr><pre>use-profiles</pre></nobr>](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|
+|[<nobr><code>build-ipa</code></nobr>](build-ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
+|[<nobr><code>detect-bundle-id</code></nobr>](detect-bundle-id.md)|Try to deduce the Bundle ID from specified Xcode project|
+|[<nobr><code>use-profiles</code></nobr>](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|

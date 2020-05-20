@@ -66,4 +66,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[<nobr><pre>generate</pre></nobr>](generate.md)|DEPRECATED! Generate universal APK files from Android App Bundles|
+|[<nobr><code>generate</code></nobr>](generate.md)|DEPRECATED! Generate universal APK files from Android App Bundles|
