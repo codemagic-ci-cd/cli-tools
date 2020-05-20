@@ -2,6 +2,7 @@ import pathlib
 import zipfile
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.mixins import PathFinderMixin
@@ -123,6 +124,11 @@ class BundleToolArgument(cli.Argument):
     )
 
 
+KeystorePassword = Union[str, BundleToolTypes.KeystorePassword]
+KeyAlias = Union[str, BundleToolTypes.KeyAlias]
+KeyPassword = Union[str, BundleToolTypes.KeyPassword]
+
+
 @cli.common_arguments()
 class BundleTool(cli.CliApp, PathFinderMixin):
     """
@@ -146,15 +152,24 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         return self._bundletool_jar_path
 
     @classmethod
+    def _get_password_value(cls, password: Optional[Union[KeyPassword, KeystorePassword]]):
+        if password is None:
+            return None
+        elif isinstance(password, str):
+            return password
+        elif isinstance(password, (BundleToolTypes.KeystorePassword, BundleToolTypes.KeyPassword)):
+            return password.value
+        raise TypeError(f'Invalid type {type(password)} for password')
+
+    @classmethod
     def _convert_cli_args_to_signing_info(
             cls,
             keystore_path: Optional[pathlib.Path] = None,
-            keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
-            key_alias: Optional[BundleToolTypes.KeyAlias] = None,
-            key_password: Optional[BundleToolTypes.KeyPassword] = None) -> Optional[AndroidSigningInfo]:
-
-        keystore_password_value = keystore_password.value if keystore_password else None
-        key_password_value = key_password.value if key_password else None
+            keystore_password: Optional[KeystorePassword] = None,
+            key_alias: Optional[KeyAlias] = None,
+            key_password: Optional[KeyPassword] = None) -> Optional[AndroidSigningInfo]:
+        keystore_password_value = cls._get_password_value(keystore_password)
+        key_password_value = cls._get_password_value(key_password)
         if keystore_path and keystore_password_value and key_alias and key_password_value:
             return AndroidSigningInfo(
                 store_path=keystore_path,
@@ -178,9 +193,9 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             self,
             aab_pattern: pathlib.Path,
             keystore_path: Optional[pathlib.Path] = None,
-            keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
-            key_alias: Optional[BundleToolTypes.KeyAlias] = None,
-            key_password: Optional[BundleToolTypes.KeyPassword] = None,
+            keystore_password: Optional[KeystorePassword] = None,
+            key_alias: Optional[KeyAlias] = None,
+            key_password: Optional[KeyPassword] = None,
             mode: Optional[str] = None,
             should_print: bool = True) -> List[pathlib.Path]:
         """
@@ -188,7 +203,8 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         standalone APKs or APKs optimized for the connected device (see connected-
         device flag). Returns list of generated APK set archives.
         """
-        signing_info = self._convert_cli_args_to_signing_info(keystore_path, keystore_password, key_alias, key_password)
+        signing_info = self._convert_cli_args_to_signing_info(
+            keystore_path, keystore_password, key_alias, key_password)
 
         aab_paths = [
             aab_path for aab_path in self.find_paths(aab_pattern.expanduser())
@@ -217,9 +233,9 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             self,
             aab_pattern: pathlib.Path,
             keystore_path: Optional[pathlib.Path] = None,
-            keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
-            key_alias: Optional[BundleToolTypes.KeyAlias] = None,
-            key_password: Optional[BundleToolTypes.KeyPassword] = None) -> List[pathlib.Path]:
+            keystore_password: Optional[KeystorePassword] = None,
+            key_alias: Optional[KeyAlias] = None,
+            key_password: Optional[KeyPassword] = None) -> List[pathlib.Path]:
         """
         Shortcut for 'build-apks' action to build universal APKs from bundles.
         """
@@ -298,7 +314,7 @@ class BundleTool(cli.CliApp, PathFinderMixin):
     def _build_apk_set_archive(self,
                                aab_path: pathlib.Path,
                                *,
-                               signing_info: Optional[AndroidSigningInfo],
+                               signing_info: Optional[AndroidSigningInfo] = None,
                                mode: Optional[str] = None) -> pathlib.Path:
         self.logger.info(f'Generating APKs from bundle {aab_path}')
         apks_path = aab_path.parent / f'{aab_path.stem}.apks'
