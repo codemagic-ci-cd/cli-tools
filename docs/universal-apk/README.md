@@ -3,7 +3,7 @@ universal-apk
 =============
 
 
-**DEPRECATED! Generate universal APK files from Android App Bundles**
+**Generate universal APK files from Android App Bundles.     DEPRECATED! Use `android-app-bundle` instead.**
 ### Usage
 ```bash
 universal-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -66,4 +66,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`generate`](generate.md)|DEPRECATED! Generate universal APK files from Android App Bundles|
+|[`generate`](generate.md)|Generate universal APK files from Android App Bundles.         DEPRECATED! Use `android-app-bundle build-universal-apk` instead.|
