@@ -12,6 +12,7 @@ pip3 install codemagic-cli-tools
 
 Package installs the following executables to your path:
 
+* [`android-app-bundle`](https://github.com/codemagic-ci-cd/cli-tools/blob/master/docs/android-app-bundle/README.md)
 * [`app-store-connect`](https://github.com/codemagic-ci-cd/cli-tools/blob/master/docs/app-store-connect/README.md)
 * [`git-changelog`](https://github.com/codemagic-ci-cd/cli-tools/blob/master/docs/git-changelog/README.md)
 * [`keychain`](https://github.com/codemagic-ci-cd/cli-tools/blob/master/docs/keychain/README.md)
@@ -35,7 +36,7 @@ to get detailed information of the subcommand.
  
 For example:
 
-```
+```bash
 $ keychain create --help     
 usage: keychain create [-h] [-s] [-v] [--no-color] [--log-stream {stderr,stdout}] [-pw PASSWORD] [-p PATH]
 

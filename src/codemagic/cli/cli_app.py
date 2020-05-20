@@ -67,7 +67,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_executable_name(cls) -> str:
-        return argparse.ArgumentParser().prog
+        return re.sub(r'(.)([A-Z])', r'\1-\2', cls.__name__).lower()
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):

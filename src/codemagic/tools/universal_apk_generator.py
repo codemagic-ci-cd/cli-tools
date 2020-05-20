@@ -99,29 +99,29 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         """
         DEPRECATED! Generate universal APK files from Android App Bundles
         """
-        from .bundletool import BundleTool
-        from .bundletool import BundleToolTypes
+        from .android_app_bundle import AndroidAppBundle
+        from .android_app_bundle import AndroidAppBundleTypes
 
         self._deprecation_notice()
         signing_info_kwargs = {}
         if self.android_signing_info:
             signing_info_kwargs = {
                 'keystore_path': self.android_signing_info.store_path,
-                'keystore_password': BundleToolTypes.KeystorePassword(self.android_signing_info.store_pass),
-                'key_alias': BundleToolTypes.KeyAlias(self.android_signing_info.key_alias),
-                'key_password': BundleToolTypes.KeyPassword(self.android_signing_info.key_pass),
+                'keystore_password': AndroidAppBundleTypes.KeystorePassword(self.android_signing_info.store_pass),
+                'key_alias': AndroidAppBundleTypes.KeyAlias(self.android_signing_info.key_alias),
+                'key_password': AndroidAppBundleTypes.KeyPassword(self.android_signing_info.key_pass),
             }
-        return BundleTool().build_universal_apks(self.pattern, **signing_info_kwargs)
+        return AndroidAppBundle().build_universal_apks(self.pattern, **signing_info_kwargs)
 
     def _deprecation_notice(self):
-        from .bundletool import BundleTool
+        from .android_app_bundle import AndroidAppBundle
 
         current_action = f'{self.get_executable_name()} {self.generate.action_name}'
-        new_action = f'{BundleTool.__name__.lower()} {BundleTool.build_universal_apks.action_name}'
+        new_action = f'{AndroidAppBundle.get_executable_name()} {AndroidAppBundle.build_universal_apks.action_name}'
         lines = (
             f'Warning! Action "{current_action}" is deprecated and will be removed in future releases.',
             f'Please use action "{new_action}" instead.',
-            f'See "{BundleTool.__name__.lower()} --help" for more information.',
+            f'See "{AndroidAppBundle.get_executable_name()} --help" for more information.',
         )
         for line in lines:
             self.logger.info(Colors.YELLOW(line))
