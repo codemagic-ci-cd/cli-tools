@@ -118,7 +118,7 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         return self._bundletool_jar_path
 
     @classmethod
-    def _get_android_signing_info(
+    def _convert_cli_args_to_signing_info(
             cls,
             keystore_path: Optional[pathlib.Path] = None,
             keystore_password: Optional[BundleToolTypes.KeystorePassword] = None,
@@ -135,17 +135,6 @@ class BundleTool(cli.CliApp, PathFinderMixin):
             raise BundleToolArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
         else:
             return None
-
-    @cli.action('version')
-    def version(self) -> str:
-        """ Get BundleTool version """
-        self.logger.info(f'Get Bundletool version')
-        process = self.execute(('java', '-jar', str(self._jar_path), 'version'), show_output=False)
-        if process.returncode != 0:
-            raise BundleToolError('Unable to get Bundletool version', process)
-        version = process.stdout.strip()
-        self.echo(version)
-        return version
 
     @cli.action('build-apks',
                 BundleToolArgument.BUNDLE_PATTERN,
@@ -168,7 +157,7 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         standalone APKs or APKs optimized for the connected device (see connected-
         device flag). Returns list of generated APK set archives.
         """
-        signing_info = self._get_android_signing_info(keystore_path, keystore_password, key_alias, key_password)
+        signing_info = self._convert_cli_args_to_signing_info(keystore_path, keystore_password, key_alias, key_password)
 
         aab_paths = [
             aab_path for aab_path in self.find_paths(aab_pattern.expanduser())
@@ -223,18 +212,12 @@ class BundleTool(cli.CliApp, PathFinderMixin):
 
         return apk_paths
 
-    @cli.action('validate')
-    def validate(self):
-        """
-        Verify that given Android App Bundle is valid and print
-        out information about it.
-        """
-
     @cli.action('dump')
     def dump(self):
         """
         Get files list or extract values from the bundle in a human-readable form.
         """
+        raise BundleToolError('Not implemented')
 
     @cli.action('get-size')
     def get_size(self):
@@ -242,6 +225,26 @@ class BundleTool(cli.CliApp, PathFinderMixin):
         Get the min and max download sizes of APKs served to different devices
         configurations from an APK Set.
         """
+        raise BundleToolError('Not implemented')
+
+    @cli.action('validate')
+    def validate(self):
+        """
+        Verify that given Android App Bundle is valid and print
+        out information about it.
+        """
+        raise BundleToolError('Not implemented')
+
+    @cli.action('version')
+    def version(self) -> str:
+        """ Get BundleTool version """
+        self.logger.info(f'Get Bundletool version')
+        process = self.execute(('java', '-jar', str(self._jar_path), 'version'), show_output=False)
+        if process.returncode != 0:
+            raise BundleToolError('Unable to get Bundletool version', process)
+        version = process.stdout.strip()
+        self.echo(version)
+        return version
 
     def _build_apk_set_archive(self,
                                aab_path: pathlib.Path,

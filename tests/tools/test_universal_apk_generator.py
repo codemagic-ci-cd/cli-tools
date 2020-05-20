@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from codemagic import models
 from codemagic.tools.universal_apk_generator import UniversalApkGenerator
 from codemagic.tools.universal_apk_generator import UniversalApkGeneratorArgument
 
@@ -48,7 +47,7 @@ def test_no_signing_info_args(cli_argument_group, namespace_kwargs):
 
     cli_namespace = argparse.Namespace(**namespace_kwargs)
     uag = UniversalApkGenerator.from_cli_args(cli_namespace)
-    assert uag.signing_info is None
+    assert uag.android_signing_info is None
 
 
 def test_signing_info_args(cli_argument_group, namespace_kwargs):
@@ -57,8 +56,8 @@ def test_signing_info_args(cli_argument_group, namespace_kwargs):
 
     cli_namespace = argparse.Namespace(**namespace_kwargs)
     uag = UniversalApkGenerator.from_cli_args(cli_namespace)
-    assert uag.signing_info is not None
-    assert uag.signing_info.store_path == UniversalApkGeneratorArgument.KEYSTORE_PATH.key
-    assert uag.signing_info.store_pass == UniversalApkGeneratorArgument.KEYSTORE_PASSWORD.key
-    assert uag.signing_info.key_alias == UniversalApkGeneratorArgument.KEY_ALIAS.key
-    assert uag.signing_info.key_pass == UniversalApkGeneratorArgument.KEY_PASSWORD.key
+    assert uag.android_signing_info is not None
+    assert uag.android_signing_info.store_path == UniversalApkGeneratorArgument.KEYSTORE_PATH.key
+    assert uag.android_signing_info.store_pass == UniversalApkGeneratorArgument.KEYSTORE_PASSWORD.key
+    assert uag.android_signing_info.key_alias == UniversalApkGeneratorArgument.KEY_ALIAS.key
+    assert uag.android_signing_info.key_pass == UniversalApkGeneratorArgument.KEY_PASSWORD.key
