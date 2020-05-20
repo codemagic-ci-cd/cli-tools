@@ -40,6 +40,15 @@ class BundleToolArgument(cli.Argument):
             'required': False,
         },
     )
+    BUNDLE_PATH = cli.ArgumentProperties(
+        flags=('--bundle',),
+        key='aab_path',
+        type=cli.CommonArgumentTypes.existing_path,
+        description='Path to Android app bundle file',
+        argparse_kwargs={
+            'required': True,
+        },
+    )
     KEYSTORE_PATH = cli.ArgumentProperties(
         flags=('--ks',),
         key='keystore_path',
@@ -94,12 +103,32 @@ class BundleToolArgument(cli.Argument):
             'choices': ['universal'],
         }
     )
+    DUMP_TARGET = cli.ArgumentProperties(
+        key='target',
+        description='Target of the dump',
+        argparse_kwargs={
+            'choices': ['manifest', 'resources', 'config']
+        }
+    )
+    DUMP_XPATH = cli.ArgumentProperties(
+        flags=('--xpath',),
+        key='xpath',
+        description=(
+            'XML path to specific attribute in the target. '
+            'For example "/manifest/@android:versionCode" to obtain the version code from manifest. '
+            'If not given, the full target will be dumped.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        }
+    )
 
 
 @cli.common_arguments()
 class BundleTool(cli.CliApp, PathFinderMixin):
     """
     Manage Android App Bundles using Bundletool
+    https://developer.android.com/studio/command-line/bundletool
     """
 
     def __init__(self, *args, **kwargs):
@@ -215,12 +244,30 @@ class BundleTool(cli.CliApp, PathFinderMixin):
 
         return apk_paths
 
-    @cli.action('dump')
-    def dump(self):
+    @cli.action('dump',
+                BundleToolArgument.DUMP_TARGET,
+                BundleToolArgument.BUNDLE_PATH,
+                BundleToolArgument.DUMP_XPATH)
+    def dump(self, target: str, aab_path: pathlib.Path, xpath: Optional[str] = None) -> str:
         """
         Get files list or extract values from the bundle in a human-readable form.
         """
-        raise BundleToolError('Not implemented')
+        if xpath:
+            self.logger.info(f'Dump attribute "{xpath}" from target "{target}" from {aab_path}')
+        else:
+            self.logger.info(f'Dump target "{target}" from {aab_path}')
+
+        command = [
+            'java', '-jar', str(self._jar_path), 'dump', target,
+            '--bundle', aab_path
+        ]
+        if xpath:
+            command.extend(['--xpath', xpath])
+
+        process = self.execute(command)
+        if process.returncode != 0:
+            raise BundleToolError(f'Unable to dump {target} for bundle {aab_path}', process)
+        return process.stdout
 
     @cli.action('get-size')
     def get_size(self):
