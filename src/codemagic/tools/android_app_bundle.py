@@ -182,6 +182,21 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         else:
             return None
 
+    def _get_aab_paths_from_pattern(self, pattern: pathlib.Path) -> List[pathlib.Path]:
+        def is_valid_aab(aab_path):  # Exclude intermediate Android app bundles
+            return 'intermediates' not in aab_path.parts
+
+        if pattern.is_file():  # No need to glob in case of verbatim path
+            aab_paths = [pattern]
+        else:
+            aab_paths = [aab for aab in self.find_paths(pattern) if is_valid_aab(aab)]
+            if not aab_paths:
+                error_msg = 'Did not find any matching Android app bundles from which to generate APKs'
+                raise AndroidAppBundleError(error_msg)
+            self.logger.info(f'Found {len(aab_paths)} matching files')
+
+        return aab_paths
+
     @cli.action('build-apks',
                 AndroidAppBundleArgument.BUNDLE_PATTERN,
                 AndroidAppBundleArgument.KEYSTORE_PATH,
@@ -206,17 +221,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         signing_info = self._convert_cli_args_to_signing_info(
             keystore_path, keystore_password, key_alias, key_password)
 
-        aab_paths = [
-            aab_path for aab_path in self.find_paths(aab_pattern.expanduser())
-            if 'intermediates' not in aab_path.parts  # Exclude intermediate Android app bundles
-        ]
-        if aab_paths:
-            self.logger.info(f'Found {len(aab_paths)} matching files')
-        else:
-            raise AndroidAppBundleError('Did not find any matching Android app bundles from which to generate APKs')
-
         apks_paths = []
-        for aab_path in aab_paths:
+        for aab_path in self._get_aab_paths_from_pattern(aab_pattern):
             apks_path = self._build_apk_set_archive(aab_path, signing_info=signing_info, mode=mode)
             apks_paths.append(apks_path)
             if should_print:
