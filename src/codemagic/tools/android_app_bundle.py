@@ -4,6 +4,7 @@ import zipfile
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import overload
 
 import codemagic
 from codemagic import cli
@@ -162,7 +163,17 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             raise IOError('Missing executable "jarsigner"')
 
     @classmethod
-    def _get_password_value(cls, password: Optional[Union[KeyPassword, KeystorePassword]]):
+    @overload
+    def _get_password_value(cls, password: Union[KeyPassword, KeystorePassword]) -> str:
+        ...
+
+    @classmethod
+    @overload
+    def _get_password_value(cls, password: None) -> None:
+        ...
+
+    @classmethod
+    def _get_password_value(cls, password: Optional[Union[KeyPassword, KeystorePassword]]) -> Optional[str]:
         if password is None:
             return None
         elif isinstance(password, str):
@@ -172,33 +183,45 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         raise TypeError(f'Invalid type {type(password)} for password')
 
     @classmethod
+    @overload
     def _convert_cli_args_to_signing_info(
             cls,
-            keystore_path: Optional[pathlib.Path] = None,
-            keystore_password: Optional[KeystorePassword] = None,
-            key_alias: Optional[KeyAlias] = None,
-            key_password: Optional[KeyPassword] = None,
-            require_all_signing_info_args: bool = False) -> Optional[AndroidSigningInfo]:
+            keystore_path: pathlib.Path,
+            keystore_password: KeystorePassword,
+            key_alias: KeyAlias,
+            key_password: KeyPassword) -> AndroidSigningInfo:
+        ...
+
+    @classmethod
+    @overload
+    def _convert_cli_args_to_signing_info(
+            cls,
+            keystore_path: Optional[pathlib.Path],
+            keystore_password: Optional[KeystorePassword],
+            key_alias: Optional[KeyAlias],
+            key_password: Optional[KeyPassword]) -> Optional[AndroidSigningInfo]:
+        ...
+
+    @classmethod
+    def _convert_cli_args_to_signing_info(
+            cls,
+            keystore_path: Optional[pathlib.Path],
+            keystore_password: Optional[KeystorePassword],
+            key_alias: Optional[KeyAlias],
+            key_password: Optional[KeyPassword]) -> Optional[AndroidSigningInfo]:
         keystore_password_value = cls._get_password_value(keystore_password)
         key_password_value = cls._get_password_value(key_password)
-        values = (keystore_path, keystore_password_value, key_alias, key_password_value)
-        args = (AndroidAppBundleArgument.KEYSTORE_PATH, AndroidAppBundleArgument.KEYSTORE_PASSWORD,
-                AndroidAppBundleArgument.KEY_ALIAS, AndroidAppBundleArgument.KEY_PASSWORD)
-
-        if all(values):
+        if keystore_path and keystore_password_value and key_alias and key_password_value:
             return AndroidSigningInfo(
                 store_path=keystore_path,
                 store_pass=keystore_password_value,
                 key_alias=str(key_alias),
                 key_pass=key_password_value)
-        elif require_all_signing_info_args:
-            for value, arg in zip(values, args):
-                if not value:
-                    raise arg.raise_argument_error('All signing info arguments are required')
-        elif any(values):
+        elif keystore_path or keystore_password_value or key_alias or key_password_value:
             error_msg = 'Either all signing info arguments should be specified, or none of them should'
             raise AndroidAppBundleArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
-        return None
+        else:
+            return None
 
     def _get_aab_paths_from_pattern(self, pattern: pathlib.Path) -> List[pathlib.Path]:
         def is_valid_aab(aab_path):  # Exclude intermediate Android app bundles
@@ -325,7 +348,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         """
         self._ensure_jarsigner()
         signing_info = self._convert_cli_args_to_signing_info(
-            keystore_path, keystore_password, key_alias, key_password, require_all_signing_info_args=True)
+            keystore_path, keystore_password, key_alias, key_password)
 
         self.logger.info(f'Sign {aab_path}')
         command = [
