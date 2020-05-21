@@ -368,20 +368,11 @@ class AppStoreConnect(cli.CliApp):
             profile_type=profile_type,
             bundle_id=bundle_id_resource_id,
             certificates=certificate_resource_ids,
-<<<<<<< Updated upstream
             devices=[],
             omit_keys=['devices']
         )
         if profile_type.devices_allowed():
             create_params['devices'] = device_resource_ids
-=======
-        )
-        if profile_type.requires_devices():
-            create_params.update({
-                'devices': device_resource_ids,
-                'omit_keys': ['devices'],
-            })
->>>>>>> Stashed changes
         profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
 
         if save:
