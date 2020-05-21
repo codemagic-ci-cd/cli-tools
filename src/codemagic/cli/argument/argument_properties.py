@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import copy
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -17,6 +18,16 @@ class ArgumentProperties(NamedTuple):
     type: Union[Type, Callable[[str], Any]] = str
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, object]] = None
+
+    def duplicate(self, **overwrites) -> ArgumentProperties:
+        kwargs = {}
+        for field in self._fields:
+            if field in overwrites:
+                kwargs[field] = overwrites[field]
+            else:
+                kwargs[field] = copy.deepcopy(getattr(self, field))
+
+        return ArgumentProperties(**kwargs)
 
     @property
     def _parser_argument(self):

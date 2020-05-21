@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 import zipfile
 from typing import List
 from typing import Optional
@@ -60,6 +61,7 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
+    KEYSTORE_PATH_REQUIRED = KEYSTORE_PATH.duplicate(argparse_kwargs={'required': True})
     KEYSTORE_PASSWORD = cli.ArgumentProperties(
         flags=('--ks-pass',),
         key='keystore_password',
@@ -70,6 +72,7 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
+    KEYSTORE_PASSWORD_REQUIRED = KEYSTORE_PASSWORD.duplicate(argparse_kwargs={'required': True})
     KEY_ALIAS = cli.ArgumentProperties(
         flags=('--ks-key-alias',),
         key='key_alias',
@@ -80,6 +83,7 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
+    KEY_ALIAS_REQUIRED = KEY_ALIAS.duplicate(argparse_kwargs={'required': True})
     KEY_PASSWORD = cli.ArgumentProperties(
         flags=('--key-pass',),
         key='key_password',
@@ -90,6 +94,7 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
+    KEY_PASSWORD_REQUIRED = KEY_PASSWORD.duplicate(argparse_kwargs={'required': True})
     BUILD_APKS_MODE = cli.ArgumentProperties(
         flags=('--mode',),
         key='mode',
@@ -152,6 +157,11 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         return self.__bundletool_jar
 
     @classmethod
+    def _ensure_jarsigner(cls):
+        if shutil.which('jarsigner') is None:
+            raise IOError('Missing executable "jarsigner"')
+
+    @classmethod
     def _get_password_value(cls, password: Optional[Union[KeyPassword, KeystorePassword]]):
         if password is None:
             return None
@@ -167,20 +177,28 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             keystore_path: Optional[pathlib.Path] = None,
             keystore_password: Optional[KeystorePassword] = None,
             key_alias: Optional[KeyAlias] = None,
-            key_password: Optional[KeyPassword] = None) -> Optional[AndroidSigningInfo]:
+            key_password: Optional[KeyPassword] = None,
+            require_all_signing_info_args: bool = False) -> Optional[AndroidSigningInfo]:
         keystore_password_value = cls._get_password_value(keystore_password)
         key_password_value = cls._get_password_value(key_password)
-        if keystore_path and keystore_password_value and key_alias and key_password_value:
+        values = (keystore_path, keystore_password_value, key_alias, key_password_value)
+        args = (AndroidAppBundleArgument.KEYSTORE_PATH, AndroidAppBundleArgument.KEYSTORE_PASSWORD,
+                AndroidAppBundleArgument.KEY_ALIAS, AndroidAppBundleArgument.KEY_PASSWORD)
+
+        if all(values):
             return AndroidSigningInfo(
                 store_path=keystore_path,
                 store_pass=keystore_password_value,
                 key_alias=str(key_alias),
                 key_pass=key_password_value)
-        elif keystore_path or keystore_password_value or key_alias or key_password_value:
+        elif require_all_signing_info_args:
+            for value, arg in zip(values, args):
+                if not value:
+                    raise arg.raise_argument_error('All signing info arguments are required')
+        elif any(values):
             error_msg = 'Either all signing info arguments should be specified, or none of them should'
             raise AndroidAppBundleArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
-        else:
-            return None
+        return None
 
     def _get_aab_paths_from_pattern(self, pattern: pathlib.Path) -> List[pathlib.Path]:
         def is_valid_aab(aab_path):  # Exclude intermediate Android app bundles
@@ -290,7 +308,52 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             raise AndroidAppBundleError(f'Unable to dump {target} for bundle {aab_path}', process)
         return process.stdout
 
-    @cli.action('validate', AndroidAppBundleArgument.BUNDLE_PATH, )
+    @cli.action('sign',
+                AndroidAppBundleArgument.BUNDLE_PATH,
+                AndroidAppBundleArgument.KEYSTORE_PATH_REQUIRED,
+                AndroidAppBundleArgument.KEYSTORE_PASSWORD_REQUIRED,
+                AndroidAppBundleArgument.KEY_ALIAS_REQUIRED,
+                AndroidAppBundleArgument.KEY_PASSWORD_REQUIRED)
+    def sign(self,
+             aab_path: pathlib.Path,
+             keystore_path: pathlib.Path,
+             keystore_password: KeystorePassword,
+             key_alias: KeyAlias,
+             key_password: KeyPassword):
+        """
+        Sign Android app bundle with specified key and keystore
+        """
+        self._ensure_jarsigner()
+        signing_info = self._convert_cli_args_to_signing_info(
+            keystore_path, keystore_password, key_alias, key_password, require_all_signing_info_args=True)
+
+        self.logger.info(f'Sign {aab_path}')
+        command = [
+            'jarsigner', '-verbose',
+            '-sigalg', 'SHA1withRSA',
+            '-digestalg', 'SHA1',
+            '-keystore', str(signing_info.store_path),
+            '-storepass', signing_info.store_pass,
+            '-keypass', signing_info.key_pass,
+            str(aab_path),
+            signing_info.key_alias
+        ]
+        obfuscate_patterns = [signing_info.store_pass, signing_info.key_pass]
+        process = self.execute(command, obfuscate_patterns=obfuscate_patterns, show_output=False)
+        if process.returncode != 0:
+            raise AndroidAppBundleError(f'Unable to sign bundle {aab_path}', process)
+
+    @cli.action('is-signed', AndroidAppBundleArgument.BUNDLE_PATH)
+    def is_signed(self, aab_path: pathlib.Path):
+        """ Check if given Android app bundle is signed """
+        self._ensure_jarsigner()
+        command = ['jarsigner', '-verbose', '-verify', str(aab_path)]
+        process = self.execute(command, show_output=False)
+        if 'jar is unsigned' in process.stdout:
+            raise AndroidAppBundleError(f'Bundle {aab_path} is not signed')
+        self.echo(f'Bundle {aab_path} is signed')
+
+    @cli.action('validate', AndroidAppBundleArgument.BUNDLE_PATH)
     def validate(self, aab_path: pathlib.Path) -> str:
         """
         Verify that given Android App Bundle is valid and print
@@ -306,8 +369,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             raise AndroidAppBundleError(f'Unable to validate bundle {aab_path}', process)
         return process.stdout
 
-    @cli.action('version')
-    def version(self) -> str:
+    @cli.action('bundletool-version')
+    def bundletool_version(self) -> str:
         """ Get Bundletool version """
         self.logger.info(f'Get Bundletool version')
         process = self.execute(('java', '-jar', str(self._bundletool_jar), 'version'), show_output=False)
