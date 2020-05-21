@@ -78,5 +78,5 @@ def test_build_apks_signing_info_args(android_app_bundle, cli_argument_group):
 
 
 def test_bundletool_jar_executable(android_app_bundle):
-    version = android_app_bundle.version()
-    assert re.match(r'^(\d+\.?)+$', version) is not None
+    bundletool_version = android_app_bundle.bundletool_version()
+    assert re.match(r'^(\d+\.?)+$', bundletool_version) is not None
