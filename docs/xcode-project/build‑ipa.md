@@ -6,7 +6,7 @@ build‑ipa
 **Build ipa by archiving the Xcode project and then exporting it**
 ### Usage
 ```bash
-xcode-project build‑ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+xcode-project build‑ipa [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [--project XCODE_PROJECT_PATH]
     [--workspace XCODE_WORKSPACE_PATH]
     [--target TARGET_NAME]
@@ -54,25 +54,13 @@ Do not use XCPretty formatter to process log output
 ##### `--xcpretty-options=OPTIONS`
 
 
-Command line options for xcpretty formatter. For example "--no-color" or "--simple  --no-utf". Default:&nbsp;`--color`
+Command line options for xcpretty formatter (for example "--no-color" or "--simple  --no-utf"). Default:&nbsp;`--color`
 ### Common options
 
 ##### `-h, --help`
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -81,3 +69,11 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`

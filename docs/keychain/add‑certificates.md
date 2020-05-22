@@ -6,7 +6,7 @@ add‑certificates
 **Add p12 certificate to specified keychain.**
 ### Usage
 ```bash
-keychain add‑certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain add‑certificates [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [-p PATH]
     [-c CERTIFICATE_PATHS]
     [--certificate-password CERTIFICATE_PASSWORD]
@@ -33,18 +33,6 @@ Keychain path. If not provided, the system default keychain will be used instead
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -53,3 +41,11 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`

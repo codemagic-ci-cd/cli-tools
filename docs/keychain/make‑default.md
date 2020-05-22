@@ -6,7 +6,7 @@ make‑default
 **Set the keychain as the system default keychain.**
 ### Usage
 ```bash
-keychain make‑default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain make‑default [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`
@@ -21,18 +21,6 @@ Keychain path. If not provided, the system default keychain will be used instead
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -41,3 +29,11 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`

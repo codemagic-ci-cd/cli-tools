@@ -6,7 +6,7 @@ keychain
 **Utility to manage macOS keychains and certificates**
 ### Usage
 ```bash
-keychain [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [-p PATH]
     ACTION
 ```
@@ -22,18 +22,6 @@ Keychain path. If not provided, the system default keychain will be used instead
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -42,6 +30,14 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
 ### Actions
 
 |Action|Description|

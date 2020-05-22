@@ -3,11 +3,12 @@ universal-apk
 =============
 
 
-**Generate universal APK files from Android App Bundles.     DEPRECATED! Use `android-app-bundle` instead.**
+**Generate universal APK files from Android App Bundles**
 ### Usage
 ```bash
-universal-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+universal-apk [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [--pattern PATTERN]
+    [--bundletool BUNDLETOOL_PATH]
     [--ks KEYSTORE_PATH]
     [--ks-pass KEYSTORE_PASSWORD]
     [--ks-key-alias KEY_ALIAS]
@@ -20,6 +21,10 @@ universal-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
 
 
 glob pattern to parse files, relative to current folder. Default:&nbsp;`**/*.aab`
+##### `--bundletool=BUNDLETOOL_PATH`
+
+
+glob pattern to parse files, relative to current folder. Default:&nbsp;`/usr/local/bin/bundletool.jar`
 ##### `--ks=KEYSTORE_PATH`
 
 
@@ -42,18 +47,6 @@ keystore key password
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -62,8 +55,16 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
 ### Actions
 
 |Action|Description|
 | :--- | :--- |
-|[`generate`](generate.md)|Generate universal APK files from Android App Bundles.         DEPRECATED! Use `android-app-bundle build-universal-apk` instead.|
+|[`generate`](generate.md)|Generate universal APK files from Android App Bundles|

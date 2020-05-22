@@ -6,7 +6,7 @@ fetch‑signing‑files
 **Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier.**
 ### Usage
 ```bash
-app-store-connect fetch‑signing‑files [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect fetch‑signing‑files [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -90,18 +90,6 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--version`
-
-
-Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -110,3 +98,11 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
