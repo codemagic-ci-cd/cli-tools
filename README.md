@@ -36,8 +36,8 @@ to get detailed information of the subcommand.
  
 For example:
 
-```bash
-$ keychain create --help     
+```
+$ keychain create --help
 usage: keychain create [-h] [-s] [-v] [--no-color] [--log-stream {stderr,stdout}] [-pw PASSWORD] [-p PATH]
 
 Create a macOS keychain, add it to the search list.
