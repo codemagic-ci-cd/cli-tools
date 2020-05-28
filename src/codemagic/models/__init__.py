@@ -1,5 +1,5 @@
+from .android_signing_info import AndroidSigningInfo
 from .bundle_id_detector import BundleIdDetector
-from .bundletool import Bundletool
 from .certificate import Certificate
 from .code_signing_settings_manager import CodeSigningSettingsManager
 from .export_options import ExportOptions

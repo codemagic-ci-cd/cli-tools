@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
-import json
 import pathlib
 import shutil
 from collections import defaultdict
@@ -23,24 +21,6 @@ from codemagic.models import ExportOptions
 from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
-
-
-def _json_dict(json_dict: str) -> Dict:
-    try:
-        d = json.loads(json_dict)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f'"{json_dict}" is not a valid JSON')
-
-    if not isinstance(d, dict):
-        raise argparse.ArgumentTypeError(f'"{json_dict}" is not a dictionary')
-    return d
-
-
-def _existing_path(path_str: str) -> pathlib.Path:
-    path = pathlib.Path(path_str)
-    if path.exists():
-        return path
-    raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -66,14 +46,14 @@ class XcodeProjectArgument(cli.Argument):
     XCODE_PROJECT_PATH = cli.ArgumentProperties(
         key='xcode_project_path',
         flags=('--project',),
-        type=_existing_path,
+        type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode project (*.xcodeproj)',
         argparse_kwargs={'required': False}
     )
     XCODE_WORKSPACE_PATH = cli.ArgumentProperties(
         key='xcode_workspace_path',
         flags=('--workspace',),
-        type=_existing_path,
+        type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode workspace (*.xcworkspace)',
         argparse_kwargs={'required': False}
     )
@@ -133,7 +113,7 @@ class XcodeProjectArgument(cli.Argument):
     CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
         key='custom_export_options',
         flags=('--custom-export-options',),
-        type=_json_dict,
+        type=cli.CommonArgumentTypes.json_dict,
         description=(
             'Custom options for generated export options as JSON string. '
             'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
@@ -154,8 +134,8 @@ class XcprettyArguments(cli.Argument):
         key='xcpretty_options',
         flags=('--xcpretty-options',),
         description=(
-            'Command line options for xcpretty formatter '
-            '(for example "--no-color" or "--simple  --no-utf")'
+            'Command line options for xcpretty formatter. '
+            'For example "--no-color" or "--simple  --no-utf".'
         ),
         argparse_kwargs={'required': False, 'default': '--color'},
     )
