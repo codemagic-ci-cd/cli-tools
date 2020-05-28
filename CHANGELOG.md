@@ -1,9 +1,15 @@
 Version 0.2.0
 -------------
 
-- Add new command `android-app-bundle`
+**Improvements**
+
+- Feature: Add new command `android-app-bundle`
+- Feature: Include [Bundletool](https://developer.android.com/studio/command-line/bundletool) jar in the distribution
+- Bugfix: Gracefully handle Xcodeproj exceptions on saving React Native iOS project code signing settings 
+
+**Deprecations**
+
 - Add deprecation notice to `universal-apk` command
-- Include [Bundletool](https://developer.android.com/studio/command-line/bundletool) jar in the distribution
 
 Version 0.1.9
 -------------
