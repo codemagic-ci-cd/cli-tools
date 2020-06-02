@@ -1,3 +1,10 @@
+Version 0.2.1
+-------------
+
+**Improvements**
+
+- Bugfix: Reading `jarsigner verify` output streams got stuck on some Android App bundles.
+
 Version 0.2.0
 -------------
 

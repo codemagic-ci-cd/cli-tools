@@ -5,7 +5,9 @@ from __future__ import annotations
 import shlex
 import subprocess
 import sys
+import threading
 import time
+import queue
 from typing import IO
 from typing import Optional
 from typing import Sequence
@@ -54,7 +56,23 @@ class CliProcess:
         self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None) -> str:
-        chunk = (input_stream.read(buffer_size) if buffer_size else input_stream.read()).decode()
+        result: queue.Queue[bytes] = queue.Queue()
+
+        def read_result():
+            if buffer_size:
+                result.put(input_stream.read(buffer_size))
+            else:
+                result.put(input_stream.read())
+
+        stream_reader = threading.Thread(target=read_result)
+        stream_reader.start()
+        stream_reader.join(1)  # Under normal circumstances reading the stream should never take full second
+
+        try:
+            chunk = result.get(block=False).decode()
+        except queue.Empty:
+            chunk = ''
+
         if self._print_streams:
             output_stream.write(chunk)
         return chunk
