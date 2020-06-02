@@ -56,7 +56,7 @@ class CliProcess:
         self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None) -> str:
-        result = queue.Queue()
+        result: queue.Queue[bytes] = queue.Queue()
 
         def read_result():
             if buffer_size:
