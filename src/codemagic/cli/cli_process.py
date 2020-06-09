@@ -57,6 +57,8 @@ class CliProcess:
 
     def _ensure_process_streams_are_non_blocking(self):
         for stream in (self._process.stdout, self._process.stderr):
+            if stream is None:
+                continue
             stream_descriptor = stream.fileno()
             current_stream_flags = fcntl.fcntl(stream_descriptor, fcntl.F_GETFL)
             fcntl.fcntl(stream_descriptor, fcntl.F_SETFL, current_stream_flags | os.O_NONBLOCK)

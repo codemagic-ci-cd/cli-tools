@@ -1,3 +1,10 @@
+Version 0.2.2
+-------------
+
+**Improvements**
+
+- Bugfix: Fix nullpointer on setting process stream flags.
+
 Version 0.2.1
 -------------
 
