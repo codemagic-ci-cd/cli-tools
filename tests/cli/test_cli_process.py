@@ -14,7 +14,7 @@ def assert_non_blocking(stream):
 def test_non_blocking_streams():
     cli_process = cli.CliProcess([])
     cli_process._process = subprocess.Popen(
-        ['read', 'var'],
+        ['sleep', '3'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     cli_process._ensure_process_streams_are_non_blocking()
@@ -29,7 +29,7 @@ def test_non_blocking_streams_file_fd():
     with NamedTemporaryFile(mode='wb') as tf:
         cli_process = cli.CliProcess([])
         cli_process._process = subprocess.Popen(
-            ['read', 'var'],
+            ['sleep', '3'],
             stdout=tf,
             stderr=tf)
         cli_process._ensure_process_streams_are_non_blocking()
