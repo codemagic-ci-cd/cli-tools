@@ -28,6 +28,7 @@ from codemagic import __version__
 from codemagic.utilities import log
 from .argument import ActionCallable
 from .argument import Argument
+from .argument import ArgumentFormatter
 from .cli_help_formatter import CliHelpFormatter
 from .cli_process import CliProcess
 from .cli_types import CommandArg
@@ -66,7 +67,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_executable_name(cls) -> str:
-        return argparse.ArgumentParser().prog
+        return re.sub(r'(.)([A-Z])', r'\1-\2', cls.__name__).lower()
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):
@@ -223,7 +224,7 @@ class CliApp(metaclass=abc.ABCMeta):
     def get_default_cli_options(cls, cli_options_parser):
         options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
         options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help=f'Log output stream. {Argument.format_default("stderr")}')
+                                   help=f'Log output stream. {ArgumentFormatter.format_default_value("stderr")}')
         options_group.add_argument('--no-color', dest='no_color', action='store_true',
                                    help='Do not use ANSI colors to format terminal output')
         options_group.add_argument('--version', dest='show_version', action='store_true',

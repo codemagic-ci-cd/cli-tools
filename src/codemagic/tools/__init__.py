@@ -1,3 +1,4 @@
+from .android_app_bundle import AndroidAppBundle
 from .app_store_connect import AppStoreConnect
 from .git_changelog import GitChangelog
 from .keychain import Keychain

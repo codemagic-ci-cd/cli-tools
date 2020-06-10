@@ -3,16 +3,13 @@ from __future__ import annotations
 
 import argparse
 import pathlib
-import tempfile
-import urllib.request
-import zipfile
 from typing import List
-from typing import NamedTuple
 from typing import Optional
 
 from codemagic import cli
-from codemagic import models
+from codemagic.cli import Colors
 from codemagic.mixins import PathFinderMixin
+from codemagic.models import AndroidSigningInfo
 
 
 class UniversalApkGeneratorError(cli.CliAppException):
@@ -26,14 +23,6 @@ class UniversalApkGeneratorArgument(cli.Argument):
         type=pathlib.Path,
         description='glob pattern to parse files, relative to current folder',
         argparse_kwargs={'required': False, 'default': '**/*.aab'},
-    )
-
-    BUNDLETOOL_PATH = cli.ArgumentProperties(
-        flags=('--bundletool',),
-        key='bundletool_path',
-        type=pathlib.Path,
-        description='glob pattern to parse files, relative to current folder',
-        argparse_kwargs={'required': False, 'default': models.Bundletool.DEFAULT_PATH},
     )
 
     KEYSTORE_PATH = cli.ArgumentProperties(
@@ -66,28 +55,20 @@ class UniversalApkGeneratorArgument(cli.Argument):
     )
 
 
-class SigningInfo(NamedTuple):
-    store_path: pathlib.Path
-    store_pass: str
-    key_alias: str
-    key_pass: str
-
-
 @cli.common_arguments(*UniversalApkGeneratorArgument)
 class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     """
-    Generate universal APK files from Android App Bundles
+    Generate universal APK files from Android App Bundles.
+    DEPRECATED! Use `android-app-bundle` instead.
     """
 
     def __init__(self,
-                 bundletool_path: pathlib.Path,
                  pattern: pathlib.Path,
-                 signing_info: Optional[SigningInfo],
+                 android_signing_info: Optional[AndroidSigningInfo],
                  **kwargs):
         super().__init__(**kwargs)
-        self.bundletool_path = bundletool_path
         self.pattern = pattern
-        self.signing_info = signing_info
+        self.android_signing_info = android_signing_info
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -107,73 +88,45 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
                 'either all signing info arguments should be specified, or none of them should')
 
         pattern = cli_args.pattern.expanduser()
-
+        signing_info = AndroidSigningInfo(*signing_info_args) if all(signing_info_args) else None
         return UniversalApkGenerator(
-            bundletool_path=cli_args.bundletool_path,
             pattern=pattern,
-            signing_info=SigningInfo(*signing_info_args) if all(signing_info_args) else None,
+            android_signing_info=signing_info,
             **cls._parent_class_kwargs(cli_args)
         )
 
     @cli.action('generate')
     def generate(self) -> List[pathlib.Path]:
         """
-        Generate universal APK files from Android App Bundles
+        Generate universal APK files from Android App Bundles.
+        DEPRECATED! Use `android-app-bundle build-universal-apk` instead.
         """
+        from .android_app_bundle import AndroidAppBundle
+        from .android_app_bundle import AndroidAppBundleTypes
 
-        aab_paths = list(self.find_paths(self.pattern))
-        if aab_paths:
-            self.logger.info(f'Found {len(aab_paths)} matching files')
-        else:
-            raise UniversalApkGeneratorError('Did not find any matching files from which to generate apk')
+        self._deprecation_notice()
+        signing_info_kwargs = {}
+        if self.android_signing_info:
+            signing_info_kwargs = {
+                'keystore_path': self.android_signing_info.store_path,
+                'keystore_password': AndroidAppBundleTypes.KeystorePassword(self.android_signing_info.store_pass),
+                'key_alias': AndroidAppBundleTypes.KeyAlias(self.android_signing_info.key_alias),
+                'key_password': AndroidAppBundleTypes.KeyPassword(self.android_signing_info.key_pass),
+            }
+        return AndroidAppBundle().build_universal_apks(self.pattern, **signing_info_kwargs)
 
-        with tempfile.TemporaryDirectory() as d:
-            if not self.bundletool_path.exists():
-                self.bundletool_path = pathlib.Path(d) / 'bundletool.jar'
-                self.logger.info(
-                    f'Downloading bundletool from {models.Bundletool.DOWNLOAD_URL} to {self.bundletool_path}')
-                urllib.request.urlretrieve(models.Bundletool.DOWNLOAD_URL, self.bundletool_path)
+    def _deprecation_notice(self):
+        from .android_app_bundle import AndroidAppBundle
 
-            apk_paths = []
-            for path in aab_paths:
-                self.logger.info(f'Generating universal apk for {path}')
-                apk_path = self._generate_apk(path).resolve()
-                self.logger.info(f'Generated {apk_path}')
-                apk_paths.append(apk_path)
-
-        return apk_paths
-
-    def _generate_apk(self, path):
-        apk_path = self._get_apk_path(path)
-
-        with tempfile.TemporaryDirectory() as d:
-            apks_path = pathlib.Path(d) / 'universal.apks'
-
-            command = [
-                'java', '-jar', str(self.bundletool_path),
-                'build-apks', '--mode', 'universal',
-                '--bundle', str(path), '--output', str(apks_path)
-            ]
-            obfuscate_patterns = []
-
-            if self.signing_info:
-                command.extend([
-                    '--ks', self.signing_info.store_path, '--ks-pass', f'pass:{self.signing_info.store_pass}',
-                    '--ks-key-alias', self.signing_info.key_alias, '--key-pass', f'pass:{self.signing_info.key_pass}',
-                ])
-                obfuscate_patterns = [self.signing_info.store_pass, self.signing_info.key_pass]
-
-            process = self.execute(command, obfuscate_patterns=obfuscate_patterns)
-            if process.returncode != 0:
-                raise UniversalApkGeneratorError(f'Unable to generate apks file for bundle {path}', process)
-            self.logger.info('Extracting universal apk')
-            with zipfile.ZipFile(apks_path, 'r') as zf, open(apk_path, 'wb+') as of:
-                of.write(zf.read('universal.apk'))
-        return apk_path
-
-    @staticmethod
-    def _get_apk_path(aab_path):
-        return aab_path.parent / f'{aab_path.stem}-universal.apk'
+        current_action = f'{self.get_executable_name()} {self.generate.action_name}'
+        new_action = f'{AndroidAppBundle.get_executable_name()} {AndroidAppBundle.build_universal_apks.action_name}'
+        lines = (
+            f'Warning! Action "{current_action}" is deprecated and will be removed in future releases.',
+            f'Please use action "{new_action}" instead.',
+            f'See "{AndroidAppBundle.get_executable_name()} --help" for more information.',
+        )
+        for line in lines:
+            self.logger.info(Colors.YELLOW(line))
 
 
 if __name__ == '__main__':
