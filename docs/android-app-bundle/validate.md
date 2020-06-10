@@ -1,20 +1,20 @@
 
-lock
-====
+validate
+========
 
 
-**Lock the specified keychain.**
+**Verify that given Android App Bundle is valid and print         out information about it.**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [-p PATH]
+android-app-bundle validate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    --bundle BUNDLE_PATH
 ```
-### Optional arguments for command `keychain`
+### Required arguments for action `validate`
 
-##### `-p, --path=PATH`
+##### `--bundle=BUNDLE_PATH`
 
 
-Keychain path. If not provided, the system default keychain will be used instead
+Path to Android app bundle file
 ### Common options
 
 ##### `-h, --help`

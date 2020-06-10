@@ -1,20 +1,13 @@
 
-lock
-====
+bundletool-version
+==================
 
 
-**Lock the specified keychain.**
+**Get Bundletool version**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [-p PATH]
+android-app-bundle bundletool-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
 ```
-### Optional arguments for command `keychain`
-
-##### `-p, --path=PATH`
-
-
-Keychain path. If not provided, the system default keychain will be used instead
 ### Common options
 
 ##### `-h, --help`

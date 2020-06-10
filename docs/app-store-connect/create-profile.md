@@ -1,12 +1,12 @@
 
-get‑bundle‑id
-=============
+create-profile
+==============
 
 
-**Get specified Bundle ID from Apple Developer portal.**
+**Create provisioning profile of given type**
 ### Usage
 ```bash
-app-store-connect get‑bundle‑id [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,14 +14,41 @@ app-store-connect get‑bundle‑id [-h] [-s] [-v] [--no-color] [--log-stream ST
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--type PROFILE_TYPE]
+    [--name PROFILE_NAME]
+    [--save]
     BUNDLE_ID_RESOURCE_ID
+    --certificate-ids CERTIFICATE_RESOURCE_IDS
+    --device-ids DEVICE_RESOURCE_IDS
 ```
-### Required arguments for action `get‑bundle‑id`
+### Required arguments for action `create-profile`
 
 ##### `BUNDLE_ID_RESOURCE_ID`
 
 
 Alphanumeric ID value of the Bundle ID
+##### `--certificate-ids=CERTIFICATE_RESOURCE_IDS`
+
+
+Alphanumeric ID value of the Signing Certificate. Multiple arguments
+##### `--device-ids=DEVICE_RESOURCE_IDS`
+
+
+Alphanumeric ID value of the Device. Multiple arguments
+### Optional arguments for action `create-profile`
+
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -58,6 +85,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -66,11 +105,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

@@ -6,7 +6,7 @@ git-changelog
 **Generate a changelog text from git history**
 ### Usage
 ```bash
-git-changelog [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+git-changelog [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--previous-commit PREVIOUS_COMMIT]
     [--skip-pattern SKIP_PATTERN]
     [--commit-limit COMMIT_LIMIT]
@@ -32,6 +32,18 @@ Maxmimum number of commits to retrieve from git before filtering. Default:&nbsp;
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -40,14 +52,6 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
 ### Actions
 
 |Action|Description|

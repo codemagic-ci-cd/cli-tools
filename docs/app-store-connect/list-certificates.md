@@ -1,12 +1,12 @@
 
-list‑bundle‑id‑profiles
-=======================
+list-certificates
+=================
 
 
-**List provisioning profiles from Apple Developer Portal for specified Bundle IDs.**
+**List Signing Certificates from Apple Developer Portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect list‑bundle‑id‑profiles [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,32 +14,35 @@ app-store-connect list‑bundle‑id‑profiles [-h] [-s] [-v] [--no-color] [--l
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
+    [--type CERTIFICATE_TYPE_OPTIONAL]
+    [--display-name DISPLAY_NAME]
+    [--certificate-key PRIVATE_KEY]
+    [--certificate-key-password PRIVATE_KEY_PASSWORD]
+    [--p12-password P12_CONTAINER_PASSWORD]
     [--save]
-    --bundle-ids BUNDLE_ID_RESOURCE_IDS
 ```
-### Required arguments for action `list‑bundle‑id‑profiles`
+### Optional arguments for action `list-certificates`
 
-##### `--bundle-ids=BUNDLE_ID_RESOURCE_IDS`
-
-
-Alphanumeric ID value of the Bundle ID. Multiple arguments
-### Optional arguments for action `list‑bundle‑id‑profiles`
-
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
 
 
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID`
+Type of the certificate
+##### `--display-name=DISPLAY_NAME`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
+Code signing certificate display name
+##### `--certificate-key=PRIVATE_KEY`
 
 
-Name of the provisioning profile
+Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+
+
+Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--p12-password=P12_CONTAINER_PASSWORD`
+
+
+If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
 ##### `--save`
 
 
@@ -80,6 +83,18 @@ Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Li
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -88,11 +103,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`

@@ -1,20 +1,20 @@
 
-lock
-====
+is-signed
+=========
 
 
-**Lock the specified keychain.**
+**Check if given Android app bundle is signed**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [-p PATH]
+android-app-bundle is-signed [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    --bundle BUNDLE_PATH
 ```
-### Optional arguments for command `keychain`
+### Required arguments for action `is-signed`
 
-##### `-p, --path=PATH`
+##### `--bundle=BUNDLE_PATH`
 
 
-Keychain path. If not provided, the system default keychain will be used instead
+Path to Android app bundle file
 ### Common options
 
 ##### `-h, --help`

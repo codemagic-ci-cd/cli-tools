@@ -1,16 +1,16 @@
 
-set‑timeout
+set-timeout
 ===========
 
 
 **Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set.**
 ### Usage
 ```bash
-keychain set‑timeout [-h] [-s] [-v] [--no-color] [--log-stream STREAM]
+keychain set-timeout [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
     [-t TIMEOUT]
 ```
-### Optional arguments for action `set‑timeout`
+### Optional arguments for action `set-timeout`
 
 ##### `-t, --timeout=TIMEOUT`
 
@@ -28,6 +28,18 @@ Keychain path. If not provided, the system default keychain will be used instead
 
 
 show this help message and exit
+##### `--log-stream=stderr | stdout`
+
+
+Log output stream. Default `stderr`
+##### `--no-color`
+
+
+Do not use ANSI colors to format terminal output
+##### `--version`
+
+
+Show tool version and exit
 ##### `-s, --silent`
 
 
@@ -36,11 +48,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-##### `--no-color`
-
-
-Do not use ANSI colors to format terminal output
-##### `--log-stream=stderr | stdout`
-
-
-Log output stream. Default `stderr`
