@@ -1,12 +1,12 @@
 
-app-store-connect
+list-certificates
 =================
 
 
-**Utility to download code signing certificates and provisioning profiles     from Apple Developer Portal using App Store Connect API to perform iOS code signing.**
+**List Signing Certificates from Apple Developer Portal matching given constraints.**
 ### Usage
 ```bash
-app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,39 @@ app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--type CERTIFICATE_TYPE_OPTIONAL]
+    [--display-name DISPLAY_NAME]
+    [--certificate-key PRIVATE_KEY]
+    [--certificate-key-password PRIVATE_KEY_PASSWORD]
+    [--p12-password P12_CONTAINER_PASSWORD]
+    [--save]
 ```
+### Optional arguments for action `list-certificates`
+
+##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
+
+
+Type of the certificate
+##### `--display-name=DISPLAY_NAME`
+
+
+Code signing certificate display name
+##### `--certificate-key=PRIVATE_KEY`
+
+
+Private key used to generate the certificate. Used together with --save or --create options. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+
+
+Password of the private key used to generate the certificate. Used together with --certificate-key or --certificate-key-path options if the provided key is encrypted. If not given, the value will be checked from environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--p12-password=P12_CONTAINER_PASSWORD`
+
+
+If provided, the saved p12 container will be encrypted using this password. Used together with --save option.
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,22 +103,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create-bundle-id`](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier.|
-|[`create-certificate`](create-certificate.md)|Create code signing certificates of given type|
-|[`create-profile`](create-profile.md)|Create provisioning profile of given type|
-|[`delete-bundle-id`](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal.|
-|[`delete-certificate`](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal.|
-|[`delete-profile`](delete-profile.md)|Delete specified Profile from Apple Developer portal.|
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier.|
-|[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal.|
-|[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal.|
-|[`get-profile`](get-profile.md)|Get specified Profile from Apple Developer portal.|
-|[`list-bundle-id-profiles`](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs.|
-|[`list-bundle-ids`](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints.|
-|[`list-certificates`](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints.|
-|[`list-devices`](list-devices.md)|List Devices from Apple Developer portal matching given constraints.|
-|[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints.|

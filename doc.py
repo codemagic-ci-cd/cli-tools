@@ -158,8 +158,7 @@ class ToolDocumentationGenerator:
         for f in self.tool.get_class_cli_actions():
             action_args_serializer = ArgumentsSerializer(f.arguments).serialize()
             serialized_actions.append(Action(
-                # TODO: remove non-breaking hyphens
-                action_name=f.action_name.replace('-', '‑'),
+                action_name=f.action_name,
                 name=f.__name__,
                 description=f.__doc__,
                 required_args=action_args_serializer.required_args,
@@ -260,9 +259,7 @@ class Writer:
 
     def write_tools_table(self, tools: List[cli.CliApp]):
         def _get_tool_link(tool):
-            # TODO: remove non-breaking hyphens
-            command = tool.get_executable_name().replace('-', '‑')
-            return f'[`{command}`]({tool.get_executable_name()}/README.md)'
+            return f'[`{tool.get_executable_name()}`]({tool.get_executable_name()}/README.md)'
 
         content = [
             [

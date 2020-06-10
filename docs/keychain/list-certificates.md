@@ -1,12 +1,12 @@
 
-lock
-====
+list-certificates
+=================
 
 
-**Lock the specified keychain.**
+**List available code signing certificates in specified keychain.**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`

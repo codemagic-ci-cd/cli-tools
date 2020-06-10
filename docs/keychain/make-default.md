@@ -1,12 +1,12 @@
 
-lock
-====
+make-default
+============
 
 
-**Lock the specified keychain.**
+**Set the keychain as the system default keychain.**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain make-default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`

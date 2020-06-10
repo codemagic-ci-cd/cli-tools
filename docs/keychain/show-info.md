@@ -1,12 +1,12 @@
 
-lock
-====
+show-info
+=========
 
 
-**Lock the specified keychain.**
+**Show all settings for the keychain.**
 ### Usage
 ```bash
-keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+keychain show-info [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-p PATH]
 ```
 ### Optional arguments for command `keychain`
