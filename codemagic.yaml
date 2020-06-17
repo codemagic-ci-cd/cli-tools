@@ -40,8 +40,10 @@ workflows:
                -h "Cache-Control:no-cache,max-age=0" \
                cp -a public-read "$SRC_PATH" "$DST_URL"
 
-      - python3 -m pip install --user --upgrade twine
-      - python3 -m twine upload dist/* --username $PYPI_USER --password $PYPI_TOKEN
+      - |
+        # Publish the release to PyPI codemagic-cli-tools
+        python3 -m pip install --user --upgrade twine
+        python3 -m twine upload dist/* --username $PYPI_USER --password $PYPI_TOKEN
     artifacts:
       - dist/codemagic-*.whl
       - dist/codemagic-*.tar.gz
