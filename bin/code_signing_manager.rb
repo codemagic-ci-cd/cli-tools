@@ -131,11 +131,19 @@ class VariableResolver
   end
 
   def resolve_from_target_or_config(variable_name)
+    def discard(resolved_value, original_name)
+      # Return resolved variable if it does not contain recursive reference to
+      # original key. Otherwise discard this value as it is recursive definition.
+      if !resolved_value.nil? && !(resolved_value.include? original_name)
+        resolved_value
+      end
+    end
+
     default_options = {:TARGET_NAME => @build_target.name, :CONFIGURATION => @build_configuration.name}
-    value = default_options[variable_name.to_sym] \
-        || @build_configuration.build_settings[variable_name] \
-        || resolve_variable_from_xcconfig(variable_name) \
-        || resolve_variable_from_target_configs(variable_name)
+    value = discard(default_options[variable_name.to_sym], variable_name) \
+        || discard(@build_configuration.build_settings[variable_name], variable_name) \
+        || discard(resolve_variable_from_xcconfig(variable_name), variable_name) \
+        || discard(resolve_variable_from_target_configs(variable_name), variable_name)
     value
   end
 

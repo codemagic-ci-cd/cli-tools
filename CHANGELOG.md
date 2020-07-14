@@ -1,3 +1,10 @@
+Version 0.2.3
+-------------
+
+**Improvements**
+
+- Bugfix: Improve variable resolving from Xcode projects for setting code signing settings.
+
 Version 0.2.2
 -------------
 
