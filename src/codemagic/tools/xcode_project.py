@@ -306,7 +306,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
 
             self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
-            xcarchive = xcodebuild.archive(export_options, cli_app=self, archive_directory=archive_directory)
+            xcarchive = xcodebuild.archive(export_options, archive_directory, cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}'))
 
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
