@@ -128,8 +128,13 @@ class Xcodebuild:
     def archive(self,
                 export_options: ExportOptions,
                 *,
+                archive_directory: Optional[pathlib.Path] = None,
                 cli_app: Optional['CliApp'] = None) -> pathlib.Path:
-        temp_dir = tempfile.mkdtemp(prefix=f'{self.xcode_project.stem}_', suffix='.xcarchive')
+        temp_dir = tempfile.mkdtemp(
+            prefix=f'{self.xcode_project.stem}_',
+            suffix='.xcarchive',
+            dir=archive_directory,
+        )
         xcarchive = pathlib.Path(temp_dir)
         cmd = self._construct_archive_command(xcarchive, export_options)
 

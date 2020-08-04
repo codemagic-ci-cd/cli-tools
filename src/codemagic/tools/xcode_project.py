@@ -100,6 +100,16 @@ class XcodeProjectArgument(cli.Argument):
             'default': pathlib.Path('~/export_options.plist').expanduser()
         }
     )
+    ARCHIVE_DIRECTORY = cli.ArgumentProperties(
+        key='archive_directory',
+        flags=('--archive-directory',),
+        type=pathlib.Path,
+        description='Directory where the created archive is stored',
+        argparse_kwargs={
+            'required': False,
+            'default': pathlib.Path('build/ios/xcarchive')
+        }
+    )
     IPA_DIRECTORY = cli.ArgumentProperties(
         key='ipa_directory',
         flags=('--ipa-directory',),
@@ -269,6 +279,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                   target_name: Optional[str] = None,
                   configuration_name: Optional[str] = None,
                   scheme_name: Optional[str] = None,
+                  archive_directory: pathlib.Path = XcodeProjectArgument.ARCHIVE_DIRECTORY.get_default(),
                   ipa_directory: pathlib.Path = XcodeProjectArgument.IPA_DIRECTORY.get_default(),
                   export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
                   disable_xcpretty: bool = False,
@@ -295,7 +306,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
 
             self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
-            xcarchive = xcodebuild.archive(export_options, cli_app=self)
+            xcarchive = xcodebuild.archive(export_options, cli_app=self, archive_directory=archive_directory)
             self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}'))
 
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
