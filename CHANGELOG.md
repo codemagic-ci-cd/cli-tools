@@ -3,7 +3,7 @@ Version 0.2.4
 
 **Improvements**
 
-- Feature: Add option to specify archive directory to `xcode-project archive` using `--archive-directory` flag.
+- Feature: Add option to specify archive directory to `xcode-project build-ipa` using `--archive-directory` flag.
 
 Version 0.2.3
 -------------
