@@ -12,6 +12,7 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--target TARGET_NAME]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
+    [--archive-directory ARCHIVE_DIRECTORY]
     [--ipa-directory IPA_DIRECTORY]
     [--export-options-plist EXPORT_OPTIONS_PATH]
     [--disable-xcpretty]
@@ -39,6 +40,10 @@ Name of the Xcode build configuration
 
 
 Name of the Xcode Scheme
+##### `--archive-directory=ARCHIVE_DIRECTORY`
+
+
+Directory where the created archive is stored. Default:&nbsp;`build/ios/xcarchive`
 ##### `--ipa-directory=IPA_DIRECTORY`
 
 

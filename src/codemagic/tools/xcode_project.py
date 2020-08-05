@@ -269,6 +269,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.TARGET_NAME,
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
+                XcodeProjectArgument.ARCHIVE_DIRECTORY,
                 XcodeProjectArgument.IPA_DIRECTORY,
                 XcodeProjectArgument.EXPORT_OPTIONS_PATH,
                 XcprettyArguments.DISABLE,
