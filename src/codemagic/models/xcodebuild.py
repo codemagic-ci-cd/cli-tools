@@ -127,17 +127,24 @@ class Xcodebuild:
 
     def archive(self,
                 export_options: ExportOptions,
+                archive_directory: pathlib.Path,
                 *,
                 cli_app: Optional['CliApp'] = None) -> pathlib.Path:
-        temp_dir = tempfile.mkdtemp(prefix=f'{self.xcode_project.stem}_', suffix='.xcarchive')
+        archive_directory.mkdir(parents=True, exist_ok=True)
+        temp_dir = tempfile.mkdtemp(
+            prefix=f'{self.xcode_project.stem}_',
+            suffix='.xcarchive',
+            dir=archive_directory,
+        )
         xcarchive = pathlib.Path(temp_dir)
         cmd = self._construct_archive_command(xcarchive, export_options)
 
         process = None
         try:
             if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
-                process.raise_for_returncode()
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
+                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                process.execute().raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
@@ -164,8 +171,9 @@ class Xcodebuild:
         process = None
         try:
             if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
-                process.raise_for_returncode()
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
+                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                process.execute().raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
