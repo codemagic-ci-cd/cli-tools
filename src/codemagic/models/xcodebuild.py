@@ -142,8 +142,9 @@ class Xcodebuild:
         process = None
         try:
             if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
-                process.raise_for_returncode()
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
+                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                process.execute().raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:
@@ -170,8 +171,9 @@ class Xcodebuild:
         process = None
         try:
             if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty).execute()
-                process.raise_for_returncode()
+                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
+                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                process.execute().raise_for_returncode()
             else:
                 subprocess.check_output(cmd)
         except subprocess.CalledProcessError:

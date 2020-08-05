@@ -307,11 +307,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
             self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
             xcarchive = xcodebuild.archive(export_options, archive_directory, cli_app=self)
-            self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}'))
+            self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
 
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
             ipa = xcodebuild.export_archive(xcarchive, export_options_plist, ipa_directory, cli_app=self)
-            self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}'))
+            self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}\n'))
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
         finally:
