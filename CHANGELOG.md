@@ -1,3 +1,10 @@
+Version 0.2.5
+-------------
+
+**Improvements**
+
+- Bugfix: Improve product bundle identifier resolving for settings code signing settings.
+
 Version 0.2.4
 -------------
 

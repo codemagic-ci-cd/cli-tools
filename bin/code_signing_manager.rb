@@ -321,10 +321,25 @@ class CodeSigningManager
     resolver.resolve('PRODUCT_BUNDLE_IDENTIFIER', bundle_id)
   end
 
+  def get_bundle_id_from_root_project(build_configuration_name)
+    Log.info 'Attempt to obtain bundle id value from root object build configuration'
+    root_configurations = @project.root_object.build_configuration_list
+    unless root_configurations
+      Log.info 'Did not find root configurations from project'
+      return
+    end
+    root_configuration_settings = root_configurations.build_settings build_configuration_name
+    unless root_configuration_settings
+      Log.info "Did not find root configurations for configuration #{build_configuration_name}"
+      return
+    end
+    root_configuration_settings["PRODUCT_BUNDLE_IDENTIFIER"]
+  end
+
   def get_bundle_id_from_base_conf(build_configuration)
     base_configuration_reference = build_configuration.base_configuration_reference
     if base_configuration_reference.nil?
-      return
+      return get_bundle_id_from_root_project build_configuration.name
     end
     unless File.exist?(base_configuration_reference.real_path)
       return
@@ -354,7 +369,7 @@ class CodeSigningManager
     resolver = VariableResolver.new(target, build_configuration)
     infoplist_file = resolver.resolve('INFOPLIST_FILE', infoplist_file)
 
-    Log.info "Build configuration #{build_configuration.name} INFOPLIST_FILE is '#{infoplist_file}"
+    Log.info "Build configuration #{build_configuration.name} INFOPLIST_FILE is '#{infoplist_file}'"
     if !infoplist_file
       _value = get_bundle_id_from_base_conf(build_configuration)
     else
