@@ -493,7 +493,7 @@ class AppStoreConnect(cli.CliApp):
         bundle_ids = self._get_or_create_bundle_ids(bundle_id_identifier, platform, create_resource)
         certificates = self._get_or_create_certificates(
             profile_type, certificate_key, certificate_key_password, create_resource)
-        profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource)
+        profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource, platform)
 
         self._save_certificates(certificates, private_key, p12_container_password)
         self._save_profiles(profiles)
@@ -533,10 +533,13 @@ class AppStoreConnect(cli.CliApp):
     def _create_missing_profiles(self,
                                  bundle_ids_without_profiles: Sequence[BundleId],
                                  certificates: Sequence[SigningCertificate],
-                                 profile_type: ProfileType) -> Iterator[Profile]:
+                                 profile_type: ProfileType,
+                                 platform: Optional[BundleIdPlatform] = None) -> Iterator[Profile]:
         if not bundle_ids_without_profiles:
             return []
-        platform = bundle_ids_without_profiles[0].attributes.platform
+        if platform is None:
+            platform = bundle_ids_without_profiles[0].attributes.platform
+
         devices = self.list_devices(platform=platform, device_status=DeviceStatus.ENABLED, should_print=False)
         for bundle_id in bundle_ids_without_profiles:
             yield self.create_profile(
@@ -551,7 +554,8 @@ class AppStoreConnect(cli.CliApp):
                                 bundle_ids: Sequence[BundleId],
                                 certificates: Sequence[SigningCertificate],
                                 profile_type: ProfileType,
-                                create_resource: bool):
+                                create_resource: bool,
+                                platform: Optional[BundleIdPlatform] = None):
         def has_certificate(profile) -> bool:
             try:
                 profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
@@ -588,7 +592,8 @@ class AppStoreConnect(cli.CliApp):
             missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
             raise AppStoreConnectError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
 
-        created_profiles = self._create_missing_profiles(bundle_ids_without_profiles, certificates, profile_type)
+        created_profiles = self._create_missing_profiles(
+            bundle_ids_without_profiles, certificates, profile_type, platform)
         profiles.extend(created_profiles)
         return profiles
 
