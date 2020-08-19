@@ -37,12 +37,12 @@ class PrivateKey(StringConverterMixin):
         try:
             return cls.from_openssh_key(buffer, password)
         except ValueError:
-            # Probably not a RSA key, try to load as PEM
+            # Probably not an OpenSSH private key, try to load as PEM
             return cls.from_pem(buffer, password)
 
     @classmethod
     def from_openssh_key(cls, buffer: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
-        rsa_key = serialization.load_ssh_private_key(
+        rsa_key = serialization.load_ssh_private_key(  # type: ignore
             cls._bytes(buffer), cls._bytes(password) if password else b'', default_backend())
         return PrivateKey(rsa_key)
 
