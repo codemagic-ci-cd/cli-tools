@@ -1,3 +1,10 @@
+Version 0.2.6
+-------------
+
+**Improvements**
+
+- Feature: Support OpenSSH private key format for certificate private key (`--certificate-key` option for `app-store-connect`).
+
 Version 0.2.5
 -------------
 

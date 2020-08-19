@@ -25,7 +25,7 @@ class AppStoreConnectApiSession(requests.Session):
     def _log_request(self, *args, **kwargs):
         method = args[0].upper()
         url = args[1]
-        body = kwargs.get('params') or kwargs.get('data')
+        body = kwargs.get('params') or kwargs.get('data') or kwargs.get('json')
         if isinstance(body, dict):
             body = {k: (v if 'password' not in k.lower() else '*******') for k, v in body.items()}
         self._logger.info(f'>>> {method} {url} {body}')

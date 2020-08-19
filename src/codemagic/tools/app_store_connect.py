@@ -52,7 +52,7 @@ def _get_certificate_key(
     password = certificate_key_password.value if certificate_key_password else None
     if certificate_key is not None:
         try:
-            return PrivateKey.from_pem(certificate_key.value, password)
+            return PrivateKey.from_buffer(certificate_key.value, password)
         except ValueError:
             CertificateArgument.PRIVATE_KEY.raise_argument_error('Not a valid certificate private key')
     return None
