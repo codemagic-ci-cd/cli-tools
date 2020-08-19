@@ -4,6 +4,7 @@ from typing import AnyStr
 from typing import Optional
 
 from OpenSSL import crypto
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
@@ -30,6 +31,20 @@ class PrivateKey(StringConverterMixin):
                     raise ValueError('Invalid private key passphrase') from crypto_error
             file_logger.exception('Failed to initialize private key: Invalid PEM contents')
             raise ValueError('Invalid private key PEM content') from crypto_error
+
+    @classmethod
+    def from_buffer(cls, buffer: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
+        try:
+            return cls.from_openssh_key(buffer, password)
+        except ValueError:
+            # Probably not a RSA key, try to load as PEM
+            return cls.from_pem(buffer, password)
+
+    @classmethod
+    def from_openssh_key(cls, buffer: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
+        rsa_key = serialization.load_ssh_private_key(
+            cls._bytes(buffer), cls._bytes(password) if password else b'', default_backend())
+        return PrivateKey(rsa_key)
 
     @classmethod
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:

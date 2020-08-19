@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+import pathlib
+
 import pytest
 
 from codemagic.models import PrivateKey
@@ -28,3 +32,16 @@ def test_pem_to_rsa_with_unencrypted_key_wrong_password(unencrypted_pem):
     pk = PrivateKey.from_pem(unencrypted_pem.content, b'wrong password')
     # Unencrypted keys can be opened with any password
     assert pk.rsa_key.key_size == unencrypted_pem.key_size
+
+
+@pytest.mark.parametrize('mock_file_name, expected_fingerprint', [
+    ('mock_rsa_private_key', 'fb8ca2f11c34fcfb01332256d138cfd1'),
+    ('mock_openssh_private_key', '9c34c3684fccaaaf5e706bb65158ac1a'),
+])
+def test_load_private_key_from_buffer(mock_file_name, expected_fingerprint):
+    rsa_path = pathlib.Path(__file__).parent / 'mocks' / mock_file_name
+    pk = PrivateKey.from_buffer(rsa_path.read_text())
+    public_key_content = pk.get_public_key().split()[1]
+    key_bytes = base64.b64decode(public_key_content)
+    fingerprint = hashlib.md5(key_bytes).hexdigest()
+    assert fingerprint == expected_fingerprint

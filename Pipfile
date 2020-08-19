@@ -18,7 +18,7 @@ pipenv = "*"
 pyopenssl = "~=19.0"
 pyjwt = "~=1.7.1"
 requests = "~=2.22.0"
-cryptography = "~=2.8"
+cryptography = "~=3.0"
 
 [requires]
 python_version = "3.7"
