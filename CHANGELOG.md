@@ -4,6 +4,7 @@ Version 0.2.6
 **Improvements**
 
 - Feature: Support OpenSSH private key format for certificate private key (`--certificate-key` option for `app-store-connect`).
+- Bugfix: For `app-store-connect fetch-signing-files` use given platform type for listing devices on creating new provisioning profiles instead of detecting it from bundle identifier. 
 
 Version 0.2.5
 -------------
