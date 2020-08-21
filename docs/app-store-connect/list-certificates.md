@@ -15,6 +15,7 @@ app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--v
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--type CERTIFICATE_TYPE_OPTIONAL]
+    [--profile-type PROFILE_TYPE_OPTIONAL]
     [--display-name DISPLAY_NAME]
     [--certificate-key PRIVATE_KEY]
     [--certificate-key-password PRIVATE_KEY_PASSWORD]
@@ -23,10 +24,14 @@ app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--v
 ```
 ### Optional arguments for action `list-certificates`
 
-##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
+##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | DEVELOPMENT | DISTRIBUTION | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
 
 
 Type of the certificate
+##### `--profile-type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile that the certificate is used with
 ##### `--display-name=DISPLAY_NAME`
 
 

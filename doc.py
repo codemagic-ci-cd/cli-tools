@@ -11,7 +11,7 @@ from typing import List
 from typing import NamedTuple
 
 from mdutils.mdutils import MdUtils
-from mdutils.tools.tools import Table
+from mdutils.tools.Table import Table
 
 sys.path.insert(0, os.path.abspath('./src'))
 
