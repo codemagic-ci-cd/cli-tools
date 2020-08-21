@@ -93,11 +93,13 @@ class AppStoreConnect(cli.CliApp):
             raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
         return AppStoreConnect(
-            issuer_id=issuer_id_argument.value,
             key_identifier=key_identifier_argument.value,
+            issuer_id=issuer_id_argument.value,
             private_key=private_key_argument.value,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,
+            profiles_directory=cli_args.profiles_directory,
+            certificates_directory=cli_args.certificates_directory,
             **cls._parent_class_kwargs(cli_args)
         )
 
@@ -297,6 +299,7 @@ class AppStoreConnect(cli.CliApp):
 
     @cli.action('list-certificates',
                 CertificateArgument.CERTIFICATE_TYPE_OPTIONAL,
+                CertificateArgument.PROFILE_TYPE_OPTIONAL,
                 CertificateArgument.DISPLAY_NAME,
                 CertificateArgument.PRIVATE_KEY,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
@@ -304,6 +307,7 @@ class AppStoreConnect(cli.CliApp):
                 CommonArgument.SAVE)
     def list_certificates(self,
                           certificate_type: Optional[CertificateType] = None,
+                          profile_type: Optional[ProfileType] = None,
                           display_name: Optional[str] = None,
                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
                           certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
@@ -317,6 +321,9 @@ class AppStoreConnect(cli.CliApp):
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
             raise AppStoreConnectError('Cannot create or save resource without private key')
+
+        if profile_type:
+            certificate_type = CertificateType.from_profile_type(profile_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
             certificate_type=certificate_type,

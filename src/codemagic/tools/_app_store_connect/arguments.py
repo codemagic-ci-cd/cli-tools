@@ -223,6 +223,16 @@ class CertificateArgument(cli.Argument):
             'choices': list(CertificateType),
         }
     )
+    PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
+        key='profile_type',
+        flags=('--profile-type',),
+        type=ProfileType,
+        description='Type of the provisioning profile that the certificate is used with',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ProfileType),
+        }
+    )
     DISPLAY_NAME = cli.ArgumentProperties(
         key='display_name',
         flags=('--display-name',),

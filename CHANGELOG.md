@@ -1,3 +1,13 @@
+Version 0.2.7
+-------------
+
+**Improvements**
+
+- Bugfix: Respect custom values specified by `--certificates-dir` and `--profiles-dir` flags for `app-store-connect`.
+- Feature: Add `--profile-type` filter to `app-store-connect list-certificates` to show only certificates that can be used with given profile type.
+- Feature: Support new certificate types `DEVELOPMENT` and `DISTRIBUTION`.
+- Feature: Support new profile types `MAC_CATALYST_APP_DEVELOPMENT`, `MAC_CATALYST_APP_DIRECT` and `MAC_CATALYST_APP_STORE`.
+
 Version 0.2.6
 -------------
 
