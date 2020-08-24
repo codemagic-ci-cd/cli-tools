@@ -105,6 +105,7 @@ class DeviceStatus(_ResourceEnum):
 class ProfileState(_ResourceEnum):
     ACTIVE = 'ACTIVE'
     INVALID = 'INVALID'
+    EXPIRED = 'EXPIRED'  # Undocumented Profile State
 
 
 class ProfileType(_ResourceEnum):

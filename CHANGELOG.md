@@ -1,3 +1,10 @@
+Version 0.2.8
+-------------
+
+**Improvements**
+
+- Bugfix: Support profile state `EXPIRED`.
+
 Version 0.2.7
 -------------
 

@@ -25,7 +25,7 @@ app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--versi
 
 
 Type of the provisioning profile
-##### `--state=ACTIVE | INVALID`
+##### `--state=ACTIVE | INVALID | EXPIRED`
 
 
 State of the provisioning profile
