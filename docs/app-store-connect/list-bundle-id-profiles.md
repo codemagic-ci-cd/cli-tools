@@ -32,7 +32,7 @@ Alphanumeric ID value of the Bundle ID. Multiple arguments
 
 
 Type of the provisioning profile
-##### `--state=ACTIVE | INVALID`
+##### `--state=ACTIVE | INVALID | EXPIRED`
 
 
 State of the provisioning profile
