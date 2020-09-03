@@ -1,16 +1,9 @@
-Version 0.2.10
--------------
-
-**Improvements**
-
-- Update: Make removing generated xcarchive optional.
-
 Version 0.2.9
 -------------
 
 **Improvements**
 
-- Update: Change included `bundletool.jar` to version 1.2.0 from 0.15.0.
+- Update: Make removing generated xcarchive optional.
 
 Version 0.2.8
 -------------
