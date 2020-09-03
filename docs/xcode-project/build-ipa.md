@@ -15,6 +15,7 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--archive-directory ARCHIVE_DIRECTORY]
     [--ipa-directory IPA_DIRECTORY]
     [--export-options-plist EXPORT_OPTIONS_PATH]
+    [--remove-xcarchive]
     [--disable-xcpretty]
     [--xcpretty-options OPTIONS]
 ```
@@ -52,6 +53,10 @@ Directory where the built ipa is stored. Default:&nbsp;`build/ios/ipa`
 
 
 Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
+##### `--remove-xcarchive`
+
+
+Remove generated xcarchive container while building ipa
 ##### `--disable-xcpretty`
 
 

@@ -1,3 +1,10 @@
+Version 0.2.9
+-------------
+
+**Improvements**
+
+- Update: Make removing generated xcarchive optional.
+
 Version 0.2.8
 -------------
 

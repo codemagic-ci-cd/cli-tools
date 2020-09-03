@@ -130,6 +130,13 @@ class XcodeProjectArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False}
     )
+    REMOVE_XCARCHIVE = cli.ArgumentProperties(
+        key='remove_xcarchive',
+        flags=('--remove-xcarchive',),
+        type=bool,
+        description='Remove generated xcarchive container while building ipa',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
 
 
 class XcprettyArguments(cli.Argument):
@@ -272,6 +279,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.ARCHIVE_DIRECTORY,
                 XcodeProjectArgument.IPA_DIRECTORY,
                 XcodeProjectArgument.EXPORT_OPTIONS_PATH,
+                XcodeProjectArgument.REMOVE_XCARCHIVE,
                 XcprettyArguments.DISABLE,
                 XcprettyArguments.OPTIONS)
     def build_ipa(self,
@@ -283,6 +291,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                   archive_directory: pathlib.Path = XcodeProjectArgument.ARCHIVE_DIRECTORY.get_default(),
                   ipa_directory: pathlib.Path = XcodeProjectArgument.IPA_DIRECTORY.get_default(),
                   export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
+                  remove_xcarchive: bool = False,
                   disable_xcpretty: bool = False,
                   xcpretty_options: str = XcprettyArguments.OPTIONS.get_default()) -> pathlib.Path:
         """
@@ -318,7 +327,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         finally:
             if not disable_xcpretty and xcodebuild:
                 self.logger.info(f'Raw xcodebuild logs stored in {xcodebuild.logs_path}')
-            if xcarchive is not None:
+            if xcarchive is not None and remove_xcarchive:
+                self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
