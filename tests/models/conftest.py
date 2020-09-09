@@ -10,6 +10,16 @@ def _export_options_plist_path():
 
 
 @pytest.fixture
+def mock_ipa_path():
+    return pathlib.Path(__file__).parent / 'mocks' / 'mock.ipa'
+
+
+@pytest.fixture
+def mock_xcarchive_path():
+    return pathlib.Path(__file__).parent / 'mocks' / 'mock.xcarchive'
+
+
+@pytest.fixture
 def export_options_list_path() -> pathlib.Path:
     return _export_options_plist_path()
 
