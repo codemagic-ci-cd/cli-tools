@@ -220,9 +220,9 @@ class ExportOptions:
         with path.open('wb') as fd:
             plistlib.dump(self.dict(), fd)
 
-    def notify(self):
+    def notify(self, title: str):
         logger = log.get_logger(self.__class__)
-        logger.info(Colors.GREEN('Generated options for exporting IPA'))
+        logger.info(title)
         options = self.dict()
 
         for key in sorted(options.keys()):
@@ -234,3 +234,6 @@ class ExportOptions:
                     logger.info(Colors.BLUE(f'     - {k}: {v}'))
             else:
                 logger.info(Colors.BLUE(f' - {option}: {value}'))
+
+    def is_app_store_export(self):
+        return self.method is ArchiveMethod.APP_STORE

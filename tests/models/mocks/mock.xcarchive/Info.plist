@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ApplicationProperties</key>
+	<dict>
+		<key>ApplicationPath</key>
+		<string>Applications/Capybara App.app</string>
+		<key>CFBundleIdentifier</key>
+		<string>io.codemagic.capybara</string>
+		<key>CFBundleShortVersionString</key>
+		<string>1.0.2</string>
+		<key>CFBundleVersion</key>
+		<string>3</string>
+		<key>SigningIdentity</key>
+		<string>Apple Development: Priit Lätt (54U3P2BWD2)</string>
+		<key>Team</key>
+		<string>X8NNQ9CYL2</string>
+	</dict>
+	<key>ArchiveVersion</key>
+	<integer>2</integer>
+	<key>CreationDate</key>
+	<date>2020-09-09T10:03:29Z</date>
+	<key>Name</key>
+	<string>Capybara App</string>
+	<key>SchemeName</key>
+	<string>Runner</string>
+</dict>
+</plist>

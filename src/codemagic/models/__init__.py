@@ -1,6 +1,7 @@
 from .android_signing_info import AndroidSigningInfo
 from .bundle_id_detector import BundleIdDetector
 from .certificate import Certificate
+from .code_sign_entitlements import CodeSignEntitlements
 from .code_signing_settings_manager import CodeSigningSettingsManager
 from .export_options import ExportOptions
 from .json_serializable import JsonSerializable

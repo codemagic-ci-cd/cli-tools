@@ -1,3 +1,10 @@
+Version 0.2.10
+-------------
+
+**Improvements**
+
+- Bugfix: Specify `iCloudContainerEnvironment` export option when exporting xcarchive to ipa using `xcode-project build-ipa`.
+
 Version 0.2.9
 -------------
 

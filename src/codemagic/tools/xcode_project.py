@@ -16,6 +16,7 @@ from codemagic.cli import Colors
 from codemagic.mixins import PathFinderMixin
 from codemagic.models import BundleIdDetector
 from codemagic.models import Certificate
+from codemagic.models import CodeSignEntitlements
 from codemagic.models import CodeSigningSettingsManager
 from codemagic.models import ExportOptions
 from codemagic.models import ProvisioningProfile
@@ -258,7 +259,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         code_signing_settings_manager.notify_profile_usage()
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
-        export_options.notify()
+        export_options.notify(Colors.GREEN('Generated options for exporting IPA'))
         export_options.save(export_options_plist)
 
         self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))
@@ -319,6 +320,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             xcarchive = xcodebuild.archive(export_options, archive_directory, cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
 
+            self._update_export_options(xcarchive, export_options_plist, export_options)
+
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
             ipa = xcodebuild.export_archive(xcarchive, export_options_plist, ipa_directory, cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}\n'))
@@ -331,6 +334,28 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
+
+    def _update_export_options(
+            self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):
+        # For non-App Store exports, if the app is using either CloudKit or CloudDocuments
+        # extensions, then "com.apple.developer.icloud-container-environment" entitlement
+        # needs to be specified. Available options are Development and Production.
+        # Defaults to Development.
+
+        if export_options.is_app_store_export():
+            return
+
+        archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive, cli_app=self)
+        icloud_services = archive_entitlements.get_icloud_services()
+        if not {'CloudKit', 'CloudDocuments'}.intersection(icloud_services):
+            return
+
+        icloud_container_environment = archive_entitlements.get_icloud_container_environment() or 'Development'
+        self.echo('App is using iCloud services that require iCloudContainerEnvironment export option')
+        self.echo('Set iCloudContainerEnvironment export option to %s', icloud_container_environment)
+        export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
+        export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
+        export_options.save(export_options_path)
 
 
 if __name__ == '__main__':
