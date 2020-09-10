@@ -1,3 +1,10 @@
+Version 0.2.11
+-------------
+
+**Improvements**
+
+- Bugfix: Fix obtaining `iCloudContainerEnvironment` export option when multiple values are available.
+
 Version 0.2.10
 -------------
 

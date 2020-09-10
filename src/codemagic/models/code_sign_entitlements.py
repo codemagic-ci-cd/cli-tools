@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import zipfile
 from typing import Any
+from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -31,6 +32,11 @@ class CodeSignEntitlements(StringConverterMixin):
             raise IOError('Missing executable "codesign"')
 
     @classmethod
+    def from_plist(cls, plist: AnyStr) -> CodeSignEntitlements:
+        parsed_plist = plistlib.loads(cls._bytes(plist))
+        return CodeSignEntitlements(parsed_plist)
+
+    @classmethod
     def from_app(cls, app_path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> CodeSignEntitlements:
         cls._ensure_codesign()
         cmd = ('codesign', '-d', '--entitlements', ':-', str(app_path))
@@ -44,7 +50,7 @@ class CodeSignEntitlements(StringConverterMixin):
         except subprocess.CalledProcessError as cpe:
             raise IOError(f'Failed to obtain entitlements from {app_path}, {cls._str(cpe.stderr)}')
 
-        return CodeSignEntitlements(plistlib.loads(output))
+        return cls.from_plist(output)
 
     @classmethod
     def from_ipa(cls, ipa_path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> CodeSignEntitlements:
@@ -70,8 +76,15 @@ class CodeSignEntitlements(StringConverterMixin):
             raise IOError(f'Failed to obtain entitlements from {xcarchive_path}, .app not found')
         return cls.from_app(app_path, cli_app=cli_app)
 
-    def get_icloud_container_environment(self) -> Optional[str]:
-        return self.plist.get('com.apple.developer.icloud-container-environment')
+    def get_icloud_container_environments(self) -> List[str]:
+        environment = self.plist.get('com.apple.developer.icloud-container-environment')
+        if environment is None:
+            return []
+        elif isinstance(environment, str):
+            return [environment]
+        elif isinstance(environment, list):
+            return environment
+        raise ValueError(f'Unknown type for environment: {type(environment)}')
 
     def get_icloud_services(self) -> List[str]:
         return self.plist.get('com.apple.developer.icloud-services', [])
