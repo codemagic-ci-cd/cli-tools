@@ -44,7 +44,7 @@ class CodeSignEntitlements(StringConverterMixin):
             if cli_app:
                 process = cli_app.execute(cmd, show_output=False)
                 process.raise_for_returncode()
-                output = process.stdout
+                output = cls._bytes(process.stdout)
             else:
                 output = subprocess.check_output(cmd, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as cpe:
