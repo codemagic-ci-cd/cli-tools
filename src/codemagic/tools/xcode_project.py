@@ -342,7 +342,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         # needs to be specified. Available options are Development and Production.
         # Defaults to Development.
 
-        if export_options.is_app_store_export():
+        if export_options.is_app_store_export() or export_options.iCloudContainerEnvironment:
             return
 
         archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive, cli_app=self)
@@ -350,7 +350,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if not {'CloudKit', 'CloudDocuments'}.intersection(icloud_services):
             return
 
-        icloud_container_environment = archive_entitlements.get_icloud_container_environment() or 'Development'
+        if 'Production' in archive_entitlements.get_icloud_container_environments():
+            icloud_container_environment = 'Production'
+        else:
+            icloud_container_environment = 'Development'
+
         self.echo('App is using iCloud services that require iCloudContainerEnvironment export option')
         self.echo('Set iCloudContainerEnvironment export option to %s', icloud_container_environment)
         export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
