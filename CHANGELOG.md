@@ -1,3 +1,10 @@
+Version 0.2.12
+-------------
+
+**Improvements**
+
+- Improvement: Fail gracefully with appropriate error message when non-existent export options plist path is passed to `xcode-project build-ipa`. 
+
 Version 0.2.11
 -------------
 

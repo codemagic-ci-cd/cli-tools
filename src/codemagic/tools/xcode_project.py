@@ -302,6 +302,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if xcode_project_path is None and xcode_workspace_path is None:
             error = 'Workspace or project argument needs to be specified'
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
+        if not export_options_plist.is_file():
+            error = f'Path "{export_options_plist}" does not exist'
+            XcodeProjectArgument.EXPORT_OPTIONS_PATH.raise_argument_error(error)
 
         xcarchive: Optional[pathlib.Path] = None
         xcodebuild: Optional[Xcodebuild] = None
