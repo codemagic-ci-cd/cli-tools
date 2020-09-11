@@ -299,9 +299,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         Build ipa by archiving the Xcode project and then exporting it
         """
 
-        # if xcode_project_path is None and xcode_workspace_path is None:
-        #     error = 'Workspace or project argument needs to be specified'
-        #     XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
+        if xcode_project_path is None and xcode_workspace_path is None:
+            error = 'Workspace or project argument needs to be specified'
+            XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
         if not export_options_plist.is_file():
             error = f'Path "{export_options_plist}" does not exist'
             XcodeProjectArgument.EXPORT_OPTIONS_PATH.raise_argument_error(error)
