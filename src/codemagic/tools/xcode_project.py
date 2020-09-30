@@ -138,6 +138,46 @@ class XcodeProjectArgument(cli.Argument):
         description='Remove generated xcarchive container while building ipa',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    ARCHIVE_XCARGS = cli.ArgumentProperties(
+        key='archive_xcargs',
+        flags=('--archive-xcargs',),
+        type=str,
+        description=(
+            'Pass additional arguments to xcodebuild for the archive phase. '
+            'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
+        ),
+        argparse_kwargs={'required': False, 'default': 'COMPILER_INDEX_STORE_ENABLE=NO'},
+    )
+    ARCHIVE_FLAGS = cli.ArgumentProperties(
+        key='archive_flags',
+        flags=('--archive-flags',),
+        type=str,
+        description=(
+            'Pass additional command line options to xcodebuild for the archive phase. '
+            'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
+        ),
+        argparse_kwargs={'required': False, 'default': ''},
+    )
+    EXPORT_XCARGS = cli.ArgumentProperties(
+        key='export_xcargs',
+        flags=('--export-xcargs',),
+        type=str,
+        description=(
+            'Pass additional arguments to xcodebuild for the exportArchive phase. '
+            'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
+        ),
+        argparse_kwargs={'required': False, 'default': 'COMPILER_INDEX_STORE_ENABLE=NO'},
+    )
+    EXPORT_FLAGS = cli.ArgumentProperties(
+        key='export_flags',
+        flags=('--export-flags',),
+        type=str,
+        description=(
+            'Pass additional command line options to xcodebuild for the exportArchive phase. '
+            'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
+        ),
+        argparse_kwargs={'required': False, 'default': ''},
+    )
 
 
 class XcprettyArguments(cli.Argument):
@@ -278,8 +318,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.ARCHIVE_DIRECTORY,
+                XcodeProjectArgument.ARCHIVE_FLAGS,
+                XcodeProjectArgument.ARCHIVE_XCARGS,
                 XcodeProjectArgument.IPA_DIRECTORY,
                 XcodeProjectArgument.EXPORT_OPTIONS_PATH,
+                XcodeProjectArgument.EXPORT_FLAGS,
+                XcodeProjectArgument.EXPORT_XCARGS,
                 XcodeProjectArgument.REMOVE_XCARCHIVE,
                 XcprettyArguments.DISABLE,
                 XcprettyArguments.OPTIONS)
@@ -290,8 +334,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                   configuration_name: Optional[str] = None,
                   scheme_name: Optional[str] = None,
                   archive_directory: pathlib.Path = XcodeProjectArgument.ARCHIVE_DIRECTORY.get_default(),
+                  archive_xcargs: Optional[str] = XcodeProjectArgument.ARCHIVE_XCARGS.get_default(),
+                  archive_flags: Optional[str] = XcodeProjectArgument.ARCHIVE_FLAGS.get_default(),
                   ipa_directory: pathlib.Path = XcodeProjectArgument.IPA_DIRECTORY.get_default(),
                   export_options_plist: pathlib.Path = XcodeProjectArgument.EXPORT_OPTIONS_PATH.get_default(),
+                  export_xcargs: Optional[str] = XcodeProjectArgument.EXPORT_XCARGS.get_default(),
+                  export_flags: Optional[str] = XcodeProjectArgument.EXPORT_FLAGS.get_default(),
                   remove_xcarchive: bool = False,
                   disable_xcpretty: bool = False,
                   xcpretty_options: str = XcprettyArguments.OPTIONS.get_default()) -> pathlib.Path:
@@ -320,13 +368,24 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
 
             self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
-            xcarchive = xcodebuild.archive(export_options, archive_directory, cli_app=self)
+            xcarchive = xcodebuild.archive(
+                export_options,
+                archive_directory,
+                xcargs=archive_xcargs,
+                custom_flags=archive_flags,
+                cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
 
             self._update_export_options(xcarchive, export_options_plist, export_options)
 
             self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
-            ipa = xcodebuild.export_archive(xcarchive, export_options_plist, ipa_directory, cli_app=self)
+            ipa = xcodebuild.export_archive(
+                xcarchive,
+                export_options_plist,
+                ipa_directory,
+                xcargs=export_xcargs,
+                custom_flags=export_flags,
+                cli_app=self)
             self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}\n'))
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)

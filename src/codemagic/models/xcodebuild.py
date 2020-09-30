@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import pathlib
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -9,6 +11,7 @@ from typing import IO
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Union
 
 from codemagic.cli import CliProcess
 from codemagic.utilities import log
@@ -61,7 +64,7 @@ class Xcodebuild:
                 fd.write(chunk)
                 chunk = process_logs.read(8192)
             # do an extra read in case xcodebuild exited unexpectedly and did not flush last buffer
-            fd.write(process_logs.read()) 
+            fd.write(process_logs.read())
 
             fd.write('\n\n')
             duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
@@ -97,7 +100,11 @@ class Xcodebuild:
     def _detect_schemes(cls, project: pathlib.Path) -> List[str]:
         return [scheme.stem for scheme in project.glob('**/*.xcscheme')]
 
-    def _construct_archive_command(self, archive_path: pathlib.Path, export_options: ExportOptions) -> List[str]:
+    def _construct_archive_command(self,
+                                   archive_path: pathlib.Path,
+                                   export_options: ExportOptions,
+                                   xcargs: Optional[str],
+                                   custom_flags: Optional[str]) -> List[str]:
         command = ['xcodebuild']
 
         if self.workspace:
@@ -110,12 +117,15 @@ class Xcodebuild:
             command.extend(['-target', self.target])
         if self.configuration:
             command.extend(['-config', self.configuration])
+        if custom_flags:
+            command.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
 
         command.extend([
             '-archivePath', str(archive_path),
-            'archive',
-            'COMPILER_INDEX_STORE_ENABLE=NO'
+            'archive'
         ])
+        if xcargs:
+            command.extend(shlex.split(xcargs))
 
         if not export_options.has_xcode_managed_profiles():
             if export_options.teamID:
@@ -169,6 +179,8 @@ class Xcodebuild:
                 export_options: ExportOptions,
                 archive_directory: pathlib.Path,
                 *,
+                xcargs: Optional[str] = None,
+                custom_flags: Optional[str] = None,
                 cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         archive_directory.mkdir(parents=True, exist_ok=True)
         temp_dir = tempfile.mkdtemp(
@@ -177,7 +189,7 @@ class Xcodebuild:
             dir=archive_directory,
         )
         xcarchive = pathlib.Path(temp_dir)
-        cmd = self._construct_archive_command(xcarchive, export_options)
+        cmd = self._construct_archive_command(xcarchive, export_options, xcargs, custom_flags)
 
         self._ensure_clean_core_simulator_service(cli_app)
 
@@ -200,15 +212,20 @@ class Xcodebuild:
                        export_options_plist: pathlib.Path,
                        ipa_directory: pathlib.Path,
                        *,
+                       xcargs: Optional[str] = None,
+                       custom_flags: Optional[str] = None,
                        cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         ipa_directory.mkdir(parents=True, exist_ok=True)
-        cmd = (
+        cmd: List[Union[str, pathlib.Path]] = [
             'xcodebuild', '-exportArchive',
             '-archivePath', archive_path,
             '-exportPath', ipa_directory,
             '-exportOptionsPlist', export_options_plist,
-            'COMPILER_INDEX_STORE_ENABLE=NO'
-        )
+        ]
+        if custom_flags:
+            cmd.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
+        if xcargs:
+            cmd.extend(shlex.split(xcargs))
 
         process = None
         try:
