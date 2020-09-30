@@ -138,6 +138,17 @@ class XcodeProjectArgument(cli.Argument):
         description='Remove generated xcarchive container while building ipa',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    ARCHIVE_FLAGS = cli.ArgumentProperties(
+        key='archive_flags',
+        flags=('--archive-flags',),
+        type=bool,
+        description=(
+            # TODO
+            'Command line options for xcodebuild archive action. '
+            'For example "-derivedDataPath=$HOME/derivedData" or "-quiet".'
+        ),
+        argparse_kwargs={'required': False, 'default': '--color'},
+    )
 
 
 class XcprettyArguments(cli.Argument):
@@ -281,6 +292,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.IPA_DIRECTORY,
                 XcodeProjectArgument.EXPORT_OPTIONS_PATH,
                 XcodeProjectArgument.REMOVE_XCARCHIVE,
+                XcodeProjectArgument.ARCHIVE_FLAGS,
                 XcprettyArguments.DISABLE,
                 XcprettyArguments.OPTIONS)
     def build_ipa(self,
