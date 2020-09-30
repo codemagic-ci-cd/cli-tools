@@ -11,6 +11,7 @@ from typing import IO
 from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Union
 
 from codemagic.cli import CliProcess
 from codemagic.utilities import log
@@ -215,7 +216,7 @@ class Xcodebuild:
                        custom_flags: Optional[str] = None,
                        cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         ipa_directory.mkdir(parents=True, exist_ok=True)
-        cmd = [
+        cmd: List[Union[str, pathlib.Path]] = [
             'xcodebuild', '-exportArchive',
             '-archivePath', archive_path,
             '-exportPath', ipa_directory,
