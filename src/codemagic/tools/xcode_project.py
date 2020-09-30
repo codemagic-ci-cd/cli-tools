@@ -144,7 +144,7 @@ class XcodeProjectArgument(cli.Argument):
         type=str,
         description=(
             'Pass additional arguments to xcodebuild for the archive phase. '
-            'For example \'COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++\'.'
+            'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
         ),
         argparse_kwargs={'required': False, 'default': 'COMPILER_INDEX_STORE_ENABLE=NO'},
     )
@@ -154,7 +154,7 @@ class XcodeProjectArgument(cli.Argument):
         type=str,
         description=(
             'Pass additional command line options to xcodebuild for the archive phase. '
-            'For example "-derivedDataPath=$HOME/myDerivedData -quiet".'
+            'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
         ),
         argparse_kwargs={'required': False, 'default': ''},
     )
@@ -164,7 +164,7 @@ class XcodeProjectArgument(cli.Argument):
         type=str,
         description=(
             'Pass additional arguments to xcodebuild for the exportArchive phase. '
-            'For example "COMPILER_INDEX_STORE_ENABLE=NO".'
+            'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
         ),
         argparse_kwargs={'required': False, 'default': 'COMPILER_INDEX_STORE_ENABLE=NO'},
     )
@@ -174,7 +174,7 @@ class XcodeProjectArgument(cli.Argument):
         type=str,
         description=(
             'Pass additional command line options to xcodebuild for the exportArchive phase. '
-            'For example "-derivedDataPath=$HOME/myDerivedData -quiet".'
+            'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
         ),
         argparse_kwargs={'required': False, 'default': ''},
     )
