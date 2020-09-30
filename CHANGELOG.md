@@ -1,3 +1,10 @@
+Version 0.2.13
+-------------
+
+**Improvements**
+
+- Improvement: Due to invalid CoreSimulatorService state `xcodebuild` build commands can fail with error `Failed to find newest available Simulator runtime`. To overcome this, make sure that when Xcode project or workspace is archived with `xcode-project build-ipa`, then CoreSimulatorService is in a clean state.
+
 Version 0.2.12
 -------------
 
