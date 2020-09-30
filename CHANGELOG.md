@@ -1,3 +1,10 @@
+Version 0.3.0
+-------------
+
+**Improvements**
+
+- Feature: Add option to specify custom `xcodebuild` arguments and flags for `archive` and `-exportArchive` actions with `xcode-project build-ipa` using `--archive-flags`, `--archive-xcargs`, `--export-flags` and `--export-xcargs` modifiers.
+
 Version 0.2.13
 -------------
 

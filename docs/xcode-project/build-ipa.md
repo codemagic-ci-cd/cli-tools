@@ -13,8 +13,12 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
     [--archive-directory ARCHIVE_DIRECTORY]
+    [--archive-flags ARCHIVE_FLAGS]
+    [--archive-xcargs ARCHIVE_XCARGS]
     [--ipa-directory IPA_DIRECTORY]
     [--export-options-plist EXPORT_OPTIONS_PATH]
+    [--export-flags EXPORT_FLAGS]
+    [--export-xcargs EXPORT_XCARGS]
     [--remove-xcarchive]
     [--disable-xcpretty]
     [--xcpretty-options OPTIONS]
@@ -45,6 +49,14 @@ Name of the Xcode Scheme
 
 
 Directory where the created archive is stored. Default:&nbsp;`build/ios/xcarchive`
+##### `--archive-flags=ARCHIVE_FLAGS`
+
+
+Pass additional command line options to xcodebuild for the archive phase. For example "-derivedDataPath=$HOME/myDerivedData -quiet".
+##### `--archive-xcargs=ARCHIVE_XCARGS`
+
+
+Pass additional arguments to xcodebuild for the archive phase. For example 'COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++'. Default:&nbsp;`COMPILER_INDEX_STORE_ENABLE=NO`
 ##### `--ipa-directory=IPA_DIRECTORY`
 
 
@@ -53,6 +65,14 @@ Directory where the built ipa is stored. Default:&nbsp;`build/ios/ipa`
 
 
 Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
+##### `--export-flags=EXPORT_FLAGS`
+
+
+Pass additional command line options to xcodebuild for the exportArchive phase. For example "-derivedDataPath=$HOME/myDerivedData -quiet".
+##### `--export-xcargs=EXPORT_XCARGS`
+
+
+Pass additional arguments to xcodebuild for the exportArchive phase. For example "COMPILER_INDEX_STORE_ENABLE=NO". Default:&nbsp;`COMPILER_INDEX_STORE_ENABLE=NO`
 ##### `--remove-xcarchive`
 
 
