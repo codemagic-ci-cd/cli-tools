@@ -100,13 +100,8 @@ class Xcodebuild:
     def _detect_schemes(cls, project: pathlib.Path) -> List[str]:
         return [scheme.stem for scheme in project.glob('**/*.xcscheme')]
 
-    def _construct_archive_command(self,
-                                   archive_path: pathlib.Path,
-                                   export_options: ExportOptions,
-                                   xcargs: Optional[str],
-                                   custom_flags: Optional[str]) -> List[str]:
+    def _construct_base_command(self, custom_flags: Optional[str]) -> List[str]:
         command = ['xcodebuild']
-
         if self.workspace:
             command.extend(['-workspace', str(self.workspace)])
         if self.project:
@@ -119,21 +114,56 @@ class Xcodebuild:
             command.extend(['-config', self.configuration])
         if custom_flags:
             command.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
+        return command
 
-        command.extend([
-            '-archivePath', str(archive_path),
-            'archive'
-        ])
-        if xcargs:
-            command.extend(shlex.split(xcargs))
-
+    def _construct_archive_command(self,
+                                   archive_path: pathlib.Path,
+                                   export_options: ExportOptions,
+                                   xcargs: Optional[str],
+                                   custom_flags: Optional[str]) -> List[str]:
+        code_signing_options = []
         if not export_options.has_xcode_managed_profiles():
             if export_options.teamID:
-                command.append(f'DEVELOPMENT_TEAM={export_options.teamID}')
+                code_signing_options.append(f'DEVELOPMENT_TEAM={export_options.teamID}')
             if export_options.signingCertificate:
-                command.append(f'CODE_SIGN_IDENTITY={export_options.signingCertificate}')
+                code_signing_options.append(f'CODE_SIGN_IDENTITY={export_options.signingCertificate}')
 
-        return command
+        return [
+            *self._construct_base_command(custom_flags),
+            '-archivePath', str(archive_path),
+            'archive',
+            *shlex.split(xcargs or ''),
+            *code_signing_options,
+        ]
+
+    def _construct_export_archive_command(self,
+                                          archive_path: pathlib.Path,
+                                          ipa_directory: pathlib.Path,
+                                          export_options_plist: pathlib.Path,
+                                          xcargs: Optional[str],
+                                          custom_flags: Optional[str]) -> List[str]:
+        return [
+            'xcodebuild', '-exportArchive',
+            '-archivePath', str(archive_path),
+            '-exportPath', str(ipa_directory),
+            '-exportOptionsPlist', str(export_options_plist),
+            *[os.path.expandvars(part) for part in shlex.split(custom_flags or '')],
+            *shlex.split(xcargs or ''),
+        ]
+
+    def _construct_test_command(self,
+                                sdk: str,
+                                destinations: List[str],
+                                xcargs: Optional[str],
+                                custom_flags: Optional[str]) -> List[str]:
+        destination = ['-destination', ','.join(destinations)] if destinations else []
+        return [
+            *self._construct_base_command(custom_flags),
+            '-sdk', sdk,
+            *destination,
+            'test',
+            *shlex.split(xcargs or '')
+        ]
 
     def _kill_core_simulator_service(self, cli_app: Optional['CliApp'] = None):
         cmd = ('killall', '-9', 'com.apple.CoreSimulator.CoreSimulatorService')
@@ -182,6 +212,8 @@ class Xcodebuild:
                 xcargs: Optional[str] = None,
                 custom_flags: Optional[str] = None,
                 cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+        self._ensure_clean_core_simulator_service(cli_app)
+
         archive_directory.mkdir(parents=True, exist_ok=True)
         temp_dir = tempfile.mkdtemp(
             prefix=f'{self.xcode_project.stem}_',
@@ -189,22 +221,10 @@ class Xcodebuild:
             dir=archive_directory,
         )
         xcarchive = pathlib.Path(temp_dir)
+
         cmd = self._construct_archive_command(xcarchive, export_options, xcargs, custom_flags)
+        self._run_command(cmd, cli_app, f'Failed to archive {self.workspace or self.project}')
 
-        self._ensure_clean_core_simulator_service(cli_app)
-
-        process = None
-        try:
-            if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
-                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
-                process.execute().raise_for_returncode()
-            else:
-                subprocess.check_output(cmd)
-        except subprocess.CalledProcessError:
-            raise IOError(f'Failed to archive {self.workspace or self.project}', process)
-        finally:
-            self._log_process(process)
         return xcarchive
 
     def export_archive(self,
@@ -216,34 +236,41 @@ class Xcodebuild:
                        custom_flags: Optional[str] = None,
                        cli_app: Optional['CliApp'] = None) -> pathlib.Path:
         ipa_directory.mkdir(parents=True, exist_ok=True)
-        cmd: List[Union[str, pathlib.Path]] = [
-            'xcodebuild', '-exportArchive',
-            '-archivePath', archive_path,
-            '-exportPath', ipa_directory,
-            '-exportOptionsPlist', export_options_plist,
-        ]
-        if custom_flags:
-            cmd.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
-        if xcargs:
-            cmd.extend(shlex.split(xcargs))
 
-        process = None
-        try:
-            if cli_app:
-                process = XcodebuildCliProcess(cmd, xcpretty=self.xcpretty)
-                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
-                process.execute().raise_for_returncode()
-            else:
-                subprocess.check_output(cmd)
-        except subprocess.CalledProcessError:
-            raise IOError(f'Failed to export archive {archive_path}', process)
-        finally:
-            self._log_process(process)
+        cmd = self._construct_export_archive_command(
+            archive_path, ipa_directory, export_options_plist, xcargs, custom_flags)
+        self._run_command(cmd, cli_app, f'Failed to export archive {archive_path}')
 
         try:
             return next(ipa_directory.glob('*.ipa'))
         except StopIteration:
             raise IOError(f'Ipa not found from {ipa_directory}')
+
+    def test(self,
+             sdk: str,
+             devices: List[str],
+             *,
+             xcargs: Optional[str] = None,
+             custom_flags: Optional[str] = None,
+             cli_app: Optional['CliApp'] = None):
+        self._ensure_clean_core_simulator_service(cli_app)
+
+        cmd = self._construct_test_command(sdk, devices, xcargs, custom_flags)
+        self._run_command(cmd, cli_app, f'Failed to test {self.workspace or self.project}')
+
+    def _run_command(self, command, cli_app: Optional['CliApp'], error_message):
+        process = None
+        try:
+            if cli_app:
+                process = XcodebuildCliProcess(command, xcpretty=self.xcpretty)
+                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                process.execute().raise_for_returncode()
+            else:
+                subprocess.check_output(command)
+        except subprocess.CalledProcessError:
+            raise IOError(error_message, process)
+        finally:
+            self._log_process(process)
 
 
 class XcodebuildCliProcess(CliProcess):

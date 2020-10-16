@@ -1,0 +1,9 @@
+{
+    "dataPath": "/path/to/simulator/data",
+    "logPath": "/path/to/simulator/logs",
+    "udid": "7D9D6930-90D9-453A-BF11-63C5CA9CDA15",
+    "isAvailable": true,
+    "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air--3rd-generation-",
+    "state": "Shutdown",
+    "name": "iPad Air (3rd generation)"
+}

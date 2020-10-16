@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import pathlib
 import shutil
 from collections import defaultdict
@@ -22,6 +23,8 @@ from codemagic.models import ExportOptions
 from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
+from codemagic.models.simulator import Runtime
+from codemagic.models.simulator import Simulator
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -178,6 +181,26 @@ class XcodeProjectArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False, 'default': ''},
     )
+    TEST_XCARGS = cli.ArgumentProperties(
+        key='test_xcargs',
+        flags=('--test-xcargs',),
+        type=str,
+        description=(
+            'Pass additional arguments to xcodebuild for the test phase. '
+            'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
+        ),
+        argparse_kwargs={'required': False, 'default': ''},
+    )
+    TEST_FLAGS = cli.ArgumentProperties(
+        key='test_flags',
+        flags=('--test-flags',),
+        type=str,
+        description=(
+            'Pass additional command line options to xcodebuild for the test phase. '
+            'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
+        ),
+        argparse_kwargs={'required': False, 'default': ''},
+    )
 
 
 class XcprettyArguments(cli.Argument):
@@ -311,6 +334,55 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         return Keychain() \
             .list_code_signing_certificates(should_print=False)
 
+    @cli.action('run-tests',
+                XcodeProjectArgument.XCODE_PROJECT_PATH,
+                XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+                XcodeProjectArgument.TARGET_NAME,
+                XcodeProjectArgument.CONFIGURATION_NAME,
+                XcodeProjectArgument.SCHEME_NAME,
+                XcodeProjectArgument.TEST_FLAGS,
+                XcodeProjectArgument.TEST_XCARGS,
+                XcprettyArguments.DISABLE,
+                XcprettyArguments.OPTIONS)
+    def run_test(self,
+                 xcode_project_path: Optional[pathlib.Path] = None,
+                 xcode_workspace_path: Optional[pathlib.Path] = None,
+                 target_name: Optional[str] = None,
+                 configuration_name: Optional[str] = None,
+                 scheme_name: Optional[str] = None,
+                 test_xcargs: Optional[str] = XcodeProjectArgument.TEST_XCARGS.get_default(),
+                 test_flags: Optional[str] = XcodeProjectArgument.TEST_FLAGS.get_default(),
+                 disable_xcpretty: bool = False,
+                 xcpretty_options: str = XcprettyArguments.OPTIONS.get_default()):
+        """
+        Run unit or UI tests for given Xcode project or workspace
+        """
+
+        if xcode_project_path is None and xcode_workspace_path is None:
+            error = 'Workspace or project argument needs to be specified'
+            XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
+
+        try:
+            xcodebuild = Xcodebuild(
+                xcode_workspace=xcode_workspace_path,
+                xcode_project=xcode_project_path,
+                scheme_name=scheme_name,
+                target_name=target_name,
+                configuration_name=configuration_name,
+                xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None,
+            )
+
+            self.logger.info(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+            xcodebuild.test(
+                'iphonesimulator',
+                [],
+                xcargs=test_xcargs,
+                custom_flags=test_flags,
+                cli_app=self)
+            self.logger.info(Colors.GREEN(f'Test run completed successfully\n'))
+        except (ValueError, IOError) as error:
+            raise XcodeProjectException(*error.args)
+
     @cli.action('build-ipa',
                 XcodeProjectArgument.XCODE_PROJECT_PATH,
                 XcodeProjectArgument.XCODE_WORKSPACE_PATH,
@@ -396,6 +468,27 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
+
+    @cli.action('list-test-destinations')
+    def list_test_destinations(self):
+        """
+        List available destinations for test runs
+        """
+
+        cmd_args = ('xcrun', 'simctl', 'list', 'devices', '--json')
+        self.logger.info(f'List available test devices')
+        process = self.execute(cmd_args, show_output=False)
+        if process.returncode != 0:
+            raise XcodeProjectException('Failed to list available test devices')
+
+        runtime_simulators: Dict[Runtime, List[Simulator]] = {}
+        output = json.loads(process.stdout).get('devices', {})
+        for runtime, devices in output.items():
+            simulators = (Simulator.create(**device) for device in devices)
+            runtime_simulators[Runtime(runtime)] = [s for s in simulators if s.is_available]
+
+        for runtime in sorted(runtime_simulators.keys()):
+            self.echo(f'Runtime: %s', runtime)
 
     def _update_export_options(
             self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):
