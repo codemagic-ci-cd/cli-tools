@@ -3,7 +3,6 @@ from distutils.version import LooseVersion
 import pytest
 
 from codemagic.models.simulator import Runtime
-from codemagic.models.simulator import RuntimeName
 
 
 @pytest.mark.parametrize('raw_runtime_name, expected_runtime_version', [
@@ -32,7 +31,7 @@ def test_get_runtime_version(raw_runtime_name, expected_runtime_version):
 ])
 def test_get_runtime_name(raw_runtime_name, expected_runtime_name):
     runtime_name = Runtime(raw_runtime_name).runtime_name
-    assert runtime_name is RuntimeName(expected_runtime_name)
+    assert runtime_name is Runtime.Name(expected_runtime_name)
 
 
 def test_get_invalid_runtime_name():

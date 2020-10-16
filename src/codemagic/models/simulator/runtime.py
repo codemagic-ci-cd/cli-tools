@@ -1,12 +1,18 @@
+import enum
 import re
 from distutils.version import LooseVersion
 from functools import total_ordering
 
-from .runtime_name import RuntimeName
-
 
 @total_ordering
 class Runtime:
+    class Name(enum.Enum):
+        I_OS = 'iOS'
+        TV_OS = 'tvOS'
+        WATCH_OS = 'watchOS'
+
+        def __str__(self):
+            return str(self.value)
 
     def __init__(self, runtime_name):
         self._raw_name = runtime_name
@@ -26,8 +32,8 @@ class Runtime:
         return LooseVersion(version.replace('-', '.'))
 
     @property
-    def runtime_name(self) -> RuntimeName:
-        for runtime_name in RuntimeName:
+    def runtime_name(self) -> Name:
+        for runtime_name in Runtime.Name:
             if runtime_name.value.lower() in self._raw_name.lower():
                 return runtime_name
         raise ValueError(f'Invalid runtime {self._raw_name!r}')

@@ -6,6 +6,7 @@ import json
 import pathlib
 import shutil
 from collections import defaultdict
+from distutils.version import LooseVersion
 from typing import Counter
 from typing import Dict
 from typing import List
@@ -200,6 +201,17 @@ class XcodeProjectArgument(cli.Argument):
             'For example `-derivedDataPath=$HOME/myDerivedData -quiet`.'
         ),
         argparse_kwargs={'required': False, 'default': ''},
+    )
+    RUNTIMES = cli.ArgumentProperties(
+        key='runtimes',
+        flags=('--runtimes',),
+        type=Runtime,
+        description='Runtime name. For example "iOS 14.1", "tvOS 14", "watchOS 7".',
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+            'metavar': 'runtime',
+        },
     )
 
 
@@ -469,11 +481,15 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
-    @cli.action('list-test-destinations')
-    def list_test_destinations(self):
+    @cli.action('list-test-destinations', XcodeProjectArgument.RUNTIMES)
+    def list_test_destinations(self, runtimes: Optional[Sequence[Runtime]] = None):
         """
         List available destinations for test runs
         """
+
+        # TODO: add feature flags:
+        # TODO: - include_unavailable
+        # TODO: - output type - text / json
 
         cmd_args = ('xcrun', 'simctl', 'list', 'devices', '--json')
         self.logger.info(f'List available test devices')
@@ -483,12 +499,27 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         runtime_simulators: Dict[Runtime, List[Simulator]] = {}
         output = json.loads(process.stdout).get('devices', {})
-        for runtime, devices in output.items():
+        for runtime_name, devices in output.items():
+            runtime = Runtime(runtime_name)
+            if runtimes and runtime not in runtimes:
+                # Omit this runtime since it was not in the constraints
+                continue
+
             simulators = (Simulator.create(**device) for device in devices)
-            runtime_simulators[Runtime(runtime)] = [s for s in simulators if s.is_available]
+            available_simulators = [s for s in simulators if s.is_available]
+
+            if not available_simulators:
+                # Omit this runtime since it has no available devices
+                continue
+            runtime_simulators[runtime] = available_simulators
+
+        if not runtime_simulators:
+            raise XcodeProjectException('No simulator runtimes are available')
 
         for runtime in sorted(runtime_simulators.keys()):
             self.echo(f'Runtime: %s', runtime)
+
+        # TODO: output available runtime simulators
 
     def _update_export_options(
             self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):
