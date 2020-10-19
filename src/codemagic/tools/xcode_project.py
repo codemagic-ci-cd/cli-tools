@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import re
 import shutil
 from collections import defaultdict
 from distutils.version import LooseVersion
@@ -22,6 +23,7 @@ from codemagic.models import CodeSignEntitlements
 from codemagic.models import CodeSigningSettingsManager
 from codemagic.models import ExportOptions
 from codemagic.models import ProvisioningProfile
+from codemagic.models import Xcode
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
 from codemagic.models.simulator import Runtime
@@ -212,6 +214,27 @@ class XcodeProjectArgument(cli.Argument):
             'nargs': '+',
             'metavar': 'runtime',
         },
+    )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key='json_output',
+        flags=('--json',),
+        type=bool,
+        description='Whether to show the resource in JSON format',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    INCLUDE_UNAVAILABLE = cli.ArgumentProperties(
+        key='include_unavailable',
+        flags=('--unavailable', '--include-unavailable'),
+        type=bool,
+        description='Whether to include unavailable devices in output',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    SIMULATOR_NAME = cli.ArgumentProperties(
+        key='simulator_name',
+        flags=('--name',),
+        type=re.compile,
+        description='Regex pattern to filter simulators by name',
+        argparse_kwargs={'required': False, 'default': None},
     )
 
 
@@ -481,45 +504,67 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
-    @cli.action('list-test-destinations', XcodeProjectArgument.RUNTIMES)
-    def list_test_destinations(self, runtimes: Optional[Sequence[Runtime]] = None):
+    @cli.action('list-test-destinations',
+                XcodeProjectArgument.RUNTIMES,
+                XcodeProjectArgument.SIMULATOR_NAME,
+                XcodeProjectArgument.INCLUDE_UNAVAILABLE,
+                XcodeProjectArgument.JSON_OUTPUT)
+    def list_test_destinations(self,
+                               runtimes: Optional[Sequence[Runtime]] = None,
+                               simulator_name: Optional[re.Pattern] = None,
+                               include_unavailable: bool = False,
+                               json_output: bool = False) -> Dict[Runtime, List[Simulator]]:
         """
         List available destinations for test runs
         """
-
-        # TODO: add feature flags:
-        # TODO: - include_unavailable
-        # TODO: - output type - text / json
-
-        cmd_args = ('xcrun', 'simctl', 'list', 'devices', '--json')
         self.logger.info(f'List available test devices')
-        process = self.execute(cmd_args, show_output=False)
-        if process.returncode != 0:
-            raise XcodeProjectException('Failed to list available test devices')
-
-        runtime_simulators: Dict[Runtime, List[Simulator]] = {}
-        output = json.loads(process.stdout).get('devices', {})
-        for runtime_name, devices in output.items():
-            runtime = Runtime(runtime_name)
-            if runtimes and runtime not in runtimes:
-                # Omit this runtime since it was not in the constraints
-                continue
-
-            simulators = (Simulator.create(**device) for device in devices)
-            available_simulators = [s for s in simulators if s.is_available]
-
-            if not available_simulators:
-                # Omit this runtime since it has no available devices
-                continue
-            runtime_simulators[runtime] = available_simulators
-
+        try:
+            runtime_simulators = Simulator.list(runtimes, simulator_name, include_unavailable, cli_app=self)
+        except IOError as e:
+            raise XcodeProjectException(str(e)) from e
         if not runtime_simulators:
             raise XcodeProjectException('No simulator runtimes are available')
 
-        for runtime in sorted(runtime_simulators.keys()):
-            self.echo(f'Runtime: %s', runtime)
+        runtimes = sorted(runtime_simulators.keys())
+        if json_output:
+            to_dump = {str(r): [s.dict() for s in runtime_simulators[r]] for r in runtimes}
+            self.echo(json.dumps(to_dump, indent=4))
+        else:
+            for runtime in runtimes:
+                self.echo(Colors.GREEN('Runtime: %s'), runtime)
+                for simulator in runtime_simulators[runtime]:
+                    self.echo(f'- {simulator.name}')
+        return runtime_simulators
 
-        # TODO: output available runtime simulators
+    @cli.action('default-test-destination', XcodeProjectArgument.JSON_OUTPUT)
+    def get_default_test_destination(self, json_output: bool = False) -> Simulator:
+        """
+        Show default test destination for the chosen Xcode version
+        """
+        xcode = Xcode.get_selected(cli_app=self)
+        self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
+        simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'), cli_app=self)
+
+        try:
+            ios_runtimes = (r for r in simulators.keys() if r.runtime_name is Runtime.Name.I_OS)
+            runtime = sorted(ios_runtimes, key=lambda r: r.runtime_version, reverse=True)[0]
+        except IndexError:
+            raise XcodeProjectException(f'No iOS simulators available for Xcode {xcode.version}')
+
+        ipads = [s for s in simulators[runtime] if 'iPad' in s.name]
+        iphones = [s for s in simulators[runtime] if 'iPhone' in s.name]
+        if iphones:
+            # Choose 2nd gen SE if available
+            iphone_se = next((s for s in iphones if s.name == 'iPhone SE (2nd generation)'), None)
+            simulator = iphone_se or sorted(iphones, key=lambda s: s.name)[-1]
+        else:
+            simulator = sorted(ipads, key=lambda s: s.name)[-1]
+
+        if json_output:
+            self.echo(json.dumps(simulator.dict(), indent=4))
+        else:
+            self.echo(Colors.GREEN(f'{runtime} {simulator.name}'))
+        return simulator
 
     def _update_export_options(
             self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):
