@@ -14,7 +14,9 @@ def mock_developer_dir():
 
 
 def test_get_selected(mock_developer_dir):
-    with mock.patch('codemagic.models.xcode.subprocess') as mock_subprocess:
+    with mock.patch('codemagic.models.xcode.subprocess') as mock_subprocess, \
+            mock.patch('codemagic.models.xcode.shutil') as mock_shutil:
+        mock_shutil.which = lambda *args: args
         mock_subprocess.check_output.return_value = str(mock_developer_dir).encode()
         xcode = Xcode.get_selected()
 
