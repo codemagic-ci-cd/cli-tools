@@ -430,7 +430,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
 
         if not devices:
-            simulators = [self.get_default_test_destination()]
+            simulators = [self.get_default_test_destination(should_print=False)]
         else:
             try:
                 simulators = Simulator.find_simulators(devices, cli_app=self)
@@ -439,7 +439,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.logger.info(Colors.GREEN('Running tests on simulators:'))
         for s in simulators:
-            self.logger.info('%s (%s)', s.name, s.udid)
+            self.logger.info('%s %s (%s)', s.runtime, s.name, s.udid)
 
         try:
             xcodebuild = Xcodebuild(
@@ -582,21 +582,26 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         return simulators
 
     @cli.action('default-test-destination', XcodeProjectArgument.JSON_OUTPUT)
-    def get_default_test_destination(self, json_output: bool = False) -> Simulator:
+    def get_default_test_destination(self,
+                                     json_output: bool = False,
+                                     should_print: bool = True) -> Simulator:
         """
         Show default test destination for the chosen Xcode version
         """
         xcode = Xcode.get_selected(cli_app=self)
-        self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
+        if should_print:
+            self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
+
         try:
             simulator = Simulator.get_default(cli_app=self)
         except ValueError as ve:
             raise XcodeProjectException(str(ve)) from ve
 
-        if json_output:
-            self.echo(json.dumps(simulator.dict(), indent=4))
-        else:
-            self.echo(Colors.GREEN(f'{simulator.runtime} {simulator.name}'))
+        if should_print:
+            if json_output:
+                self.echo(json.dumps(simulator.dict(), indent=4))
+            else:
+                self.echo(Colors.GREEN(f'{simulator.runtime} {simulator.name}'))
         return simulator
 
     def _update_export_options(
