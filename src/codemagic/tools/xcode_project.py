@@ -184,6 +184,27 @@ class XcodeProjectArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False, 'default': ''},
     )
+    TEST_DEVICES = cli.ArgumentProperties(
+        key='devices',
+        flags=('-d', '--devices'),
+        type=str,
+        description=(
+            'Test destination description. Either a UDID value of the device, or device name and '
+            'runtime combination. If runtime is not specified, the latest available runtime for '
+            'given device name will be chosen. For example '
+            '"iOS 14.0 iPhone SE (2nd generation)", '
+            '"iPad Pro (9.7-inch)", '
+            '"tvOS 14.1 Apple TV 4K (at 1080p)", '
+            '"Apple TV 4K". '
+            'If no devices are specified, then the default destination will be chosen (see '
+            '`xcode-project default-test-destination` for more information about default destination).'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+            'metavar': 'devices',
+        },
+    )
     TEST_XCARGS = cli.ArgumentProperties(
         key='test_xcargs',
         flags=('--test-xcargs',),
@@ -193,6 +214,13 @@ class XcodeProjectArgument(cli.Argument):
             'For example `COMPILER_INDEX_STORE_ENABLE=NO OTHER_LDFLAGS="-ObjC -lstdc++`.'
         ),
         argparse_kwargs={'required': False, 'default': ''},
+    )
+    TEST_SDK = cli.ArgumentProperties(
+        key='test_sdk',
+        flags=('--sdk',),
+        type=str,
+        description='Name of the SDK that should be used for building the application for testing.',
+        argparse_kwargs={'required': False, 'default': 'iphonesimulator'},
     )
     TEST_FLAGS = cli.ArgumentProperties(
         key='test_flags',
@@ -375,6 +403,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.TARGET_NAME,
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
+                XcodeProjectArgument.TEST_DEVICES,
+                XcodeProjectArgument.TEST_SDK,
                 XcodeProjectArgument.TEST_FLAGS,
                 XcodeProjectArgument.TEST_XCARGS,
                 XcprettyArguments.DISABLE,
@@ -385,6 +415,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
+                 devices: Optional[List[str]] = None,
+                 test_sdk: str = XcodeProjectArgument.TEST_SDK.get_default(),
                  test_xcargs: Optional[str] = XcodeProjectArgument.TEST_XCARGS.get_default(),
                  test_flags: Optional[str] = XcodeProjectArgument.TEST_FLAGS.get_default(),
                  disable_xcpretty: bool = False,
@@ -396,6 +428,18 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if xcode_project_path is None and xcode_workspace_path is None:
             error = 'Workspace or project argument needs to be specified'
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(error)
+
+        if not devices:
+            simulators = [self.get_default_test_destination()]
+        else:
+            try:
+                simulators = Simulator.find_simulators(devices, cli_app=self)
+            except ValueError as ve:
+                raise XcodeProjectArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
+
+        self.logger.info(Colors.GREEN('Running tests on simulators:'))
+        for s in simulators:
+            self.logger.info('%s (%s)', s.name, s.udid)
 
         try:
             xcodebuild = Xcodebuild(
@@ -409,8 +453,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
             self.logger.info(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
             xcodebuild.test(
-                'iphonesimulator',
-                [],
+                test_sdk,
+                simulators,
                 xcargs=test_xcargs,
                 custom_flags=test_flags,
                 cli_app=self)
@@ -513,28 +557,29 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                                runtimes: Optional[Sequence[Runtime]] = None,
                                simulator_name: Optional[re.Pattern] = None,
                                include_unavailable: bool = False,
-                               json_output: bool = False) -> Dict[Runtime, List[Simulator]]:
+                               json_output: bool = False) -> List[Simulator]:
         """
         List available destinations for test runs
         """
         self.logger.info(f'List available test devices')
         try:
-            runtime_simulators = Simulator.list(runtimes, simulator_name, include_unavailable, cli_app=self)
+            simulators = Simulator.list(runtimes, simulator_name, include_unavailable, cli_app=self)
         except IOError as e:
             raise XcodeProjectException(str(e)) from e
-        if not runtime_simulators:
+        if not simulators:
             raise XcodeProjectException('No simulator runtimes are available')
 
-        runtimes = sorted(runtime_simulators.keys())
         if json_output:
-            to_dump = {str(r): [s.dict() for s in runtime_simulators[r]] for r in runtimes}
-            self.echo(json.dumps(to_dump, indent=4))
+            self.echo(json.dumps([s.dict() for s in simulators], indent=4))
         else:
-            for runtime in runtimes:
+            runtime_simulators = defaultdict(list)
+            for s in simulators:
+                runtime_simulators[s.runtime].append(s)
+            for runtime in sorted(runtime_simulators.keys()):
                 self.echo(Colors.GREEN('Runtime: %s'), runtime)
                 for simulator in runtime_simulators[runtime]:
                     self.echo(f'- {simulator.name}')
-        return runtime_simulators
+        return simulators
 
     @cli.action('default-test-destination', XcodeProjectArgument.JSON_OUTPUT)
     def get_default_test_destination(self, json_output: bool = False) -> Simulator:
@@ -543,27 +588,15 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         xcode = Xcode.get_selected(cli_app=self)
         self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
-        simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'), cli_app=self)
-
         try:
-            ios_runtimes = (r for r in simulators.keys() if r.runtime_name is Runtime.Name.I_OS)
-            runtime = sorted(ios_runtimes, key=lambda r: r.runtime_version, reverse=True)[0]
-        except IndexError:
-            raise XcodeProjectException(f'No iOS simulators available for Xcode {xcode.version}')
-
-        ipads = [s for s in simulators[runtime] if 'iPad' in s.name]
-        iphones = [s for s in simulators[runtime] if 'iPhone' in s.name]
-        if iphones:
-            # Choose 2nd gen SE if available
-            iphone_se = next((s for s in iphones if s.name == 'iPhone SE (2nd generation)'), None)
-            simulator = iphone_se or sorted(iphones, key=lambda s: s.name)[-1]
-        else:
-            simulator = sorted(ipads, key=lambda s: s.name)[-1]
+            simulator = Simulator.get_default(cli_app=self)
+        except ValueError as ve:
+            raise XcodeProjectException(str(ve)) from ve
 
         if json_output:
             self.echo(json.dumps(simulator.dict(), indent=4))
         else:
-            self.echo(Colors.GREEN(f'{runtime} {simulator.name}'))
+            self.echo(Colors.GREEN(f'{simulator.runtime} {simulator.name}'))
         return simulator
 
     def _update_export_options(

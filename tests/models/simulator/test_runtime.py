@@ -13,6 +13,8 @@ from codemagic.models.simulator import Runtime
     ('com.apple.CoreSimulator.SimRuntime.iOS-13-2', '13.2'),
     ('com.apple.CoreSimulator.SimRuntime.iOS 10.2.3', '10.2.3'),
     ('iOS 14.2.1', '14.2.1'),
+    ('iPhone Xr Max iOS 14.2.1', '14.2.1'),
+    ('iOS 14.2.1 iPhone Xr Max ', '14.2.1'),
 ])
 def test_get_runtime_version(raw_runtime_name, expected_runtime_version):
     runtime_version = Runtime(raw_runtime_name).runtime_version
@@ -26,8 +28,7 @@ def test_get_runtime_version(raw_runtime_name, expected_runtime_version):
     ('com.apple.CoreSimulator.SimRuntime.watchOS-7-0-1-1', 'watchOS'),
     ('com.apple.CoreSimulator.SimRuntime.iOS-13-2', 'iOS'),
     ('iOS 13.2', 'iOS'),
-    ('iOS', 'iOS'),
-    ('com.example.Something.watchOS x.y.z', 'watchOS'),
+    ('com.example.Something.watchOS 1.2.3', 'watchOS'),
 ])
 def test_get_runtime_name(raw_runtime_name, expected_runtime_name):
     runtime_name = Runtime(raw_runtime_name).runtime_name

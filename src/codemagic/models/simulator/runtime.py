@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import enum
 import re
 from distutils.version import LooseVersion
 from functools import total_ordering
+from typing import Optional
 
 
 @total_ordering
@@ -14,11 +17,14 @@ class Runtime:
         def __str__(self):
             return str(self.value)
 
+    _PATTERN = re.compile(
+        r'((?P<name>iOS|tvOS|watchOS)[. -]?)(?P<version>(\d+[.-]?)+)')
+
     def __init__(self, runtime_name):
-        self._raw_name = runtime_name
+        self.raw_name = runtime_name
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self._raw_name!r})'
+        return f'{self.__class__.__name__}({self.raw_name!r})'
 
     def __str__(self):
         return f'{self.runtime_name.value} {self.runtime_version}'
@@ -26,17 +32,26 @@ class Runtime:
     def __hash__(self):
         return hash(str(self))
 
+    @classmethod
+    def parse(cls, string: str) -> Optional[Runtime]:
+        match = cls._PATTERN.search(string)
+        if match:
+            return Runtime(match.group())
+        return None
+
     @property
     def runtime_version(self) -> LooseVersion:
-        version = re.search(r'(\d+[.-]?)+', self._raw_name).group()
-        return LooseVersion(version.replace('-', '.'))
+        match = self._PATTERN.search(self.raw_name)
+        if not match:
+            raise ValueError(f'Invalid runtime {self.raw_name!r}')
+        return LooseVersion(match.groupdict()['version'].replace('-', '.'))
 
     @property
     def runtime_name(self) -> Name:
-        for runtime_name in Runtime.Name:
-            if runtime_name.value.lower() in self._raw_name.lower():
-                return runtime_name
-        raise ValueError(f'Invalid runtime {self._raw_name!r}')
+        match = self._PATTERN.search(self.raw_name)
+        if not match:
+            raise ValueError(f'Invalid runtime {self.raw_name!r}')
+        return Runtime.Name(match.groupdict()['name'])
 
     def __eq__(self, other):
         if isinstance(other, str):
