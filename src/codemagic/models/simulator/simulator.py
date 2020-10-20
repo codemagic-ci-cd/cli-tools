@@ -7,6 +7,7 @@ import subprocess
 from collections import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
+from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -128,7 +129,8 @@ class Simulator:
             simulator = next(choices, None)
         else:
             # Search matching devices by name and choose one with the most recent runtime
-            simulator = max((s for s in simulators if s.name == description), key=lambda s: s.runtime, default=None)
+            choices = (s for s in simulators if s.name == description)
+            simulator = max(choices, key=lambda s: s.runtime if s else None, default=None)
 
         if simulator is None:
             raise ValueError(f'Simulator for destination {description!r} is not available')
