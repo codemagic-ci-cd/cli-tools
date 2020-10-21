@@ -168,6 +168,10 @@ class Xcodebuild:
             *shlex.split(xcargs or '')
         ]
 
+    def clean(self, *, cli_app: Optional['CliApp'] = None):
+        cmd = [*self._construct_base_command(None), 'clean']
+        self._run_command(cmd, cli_app, f'Failed to clean {self.workspace or self.project}')
+
     def archive(self,
                 export_options: ExportOptions,
                 archive_directory: pathlib.Path,

@@ -36,6 +36,17 @@ class Simulator:
         if isinstance(self.log_path, str):
             self.log_path = pathlib.Path(self.log_path)
 
+    def __repr__(self):
+        return f'<Simulator: {self.name!r}>'
+
+    def dict(self) -> Dict[str, Union[str, bool]]:
+        return {
+            **self.__dict__,
+            'data_path': str(self.data_path),
+            'log_path': str(self.log_path),
+            'runtime': str(self.runtime),
+        }
+
     @classmethod
     def create(cls, **kwargs) -> Simulator:
         @lru_cache()
@@ -46,17 +57,6 @@ class Simulator:
             camel_to_snake(name): value for name, value in kwargs.items()
             if camel_to_snake(name) in cls.__dataclass_fields__  # type: ignore
         })
-
-    def dict(self) -> Dict[str, Union[str, bool]]:
-        return {
-            **self.__dict__,
-            'data_path': str(self.data_path),
-            'log_path': str(self.log_path),
-            'runtime': str(self.runtime),
-        }
-
-    def __repr__(self):
-        return f'<Simulator: {self.name!r}>'
 
     @classmethod
     def _list_devices(cls, cli_app: Optional[CliApp]) -> Dict[str, List[Dict]]:
@@ -97,6 +97,10 @@ class Simulator:
 
     @classmethod
     def get_default(cls, *, cli_app: Optional[CliApp] = None) -> Simulator:
+        """
+        Get default iOS simulator for currently selected Xcode version.
+        If available, chooses iPhone SE (2nd generation), otherwise an iPhone or iPad device.
+        """
         simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'), cli_app=cli_app)
 
         ios_simulators = [s for s in simulators if s.runtime.runtime_name is Runtime.Name.I_OS]
@@ -115,8 +119,8 @@ class Simulator:
         return simulator
 
     @classmethod
-    def choose_simulator(cls, description: str, simulators: List[Simulator]) -> Simulator:
-        description = description.strip()
+    def choose_simulator(cls, simulator_description: str, simulators: List[Simulator]) -> Simulator:
+        description = simulator_description.strip()
         requested_runtime = Runtime.parse(description)
 
         if re.match(r'[A-Z0-9-]{36}', description):
