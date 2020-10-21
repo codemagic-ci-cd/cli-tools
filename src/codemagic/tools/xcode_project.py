@@ -93,7 +93,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcode_projects = self.find_paths(*xcode_project_patterns)
 
         try:
-            profiles = [ProvisioningProfile.from_path(p, cli_app=self) for p in profile_paths]
+            profiles = [ProvisioningProfile.from_path(p) for p in profile_paths]
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
@@ -102,7 +102,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         try:
             for xcode_project in xcode_projects:
-                code_signing_settings_manager.use_profiles(xcode_project, cli_app=self)
+                code_signing_settings_manager.use_profiles(xcode_project)
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
@@ -185,7 +185,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         try:
             xcarchive = xcodebuild.archive(
                 export_options, archive_directory,
-                xcargs=archive_xcargs, custom_flags=archive_flags, cli_app=self)
+                xcargs=archive_xcargs, custom_flags=archive_flags)
         except IOError as error:
             raise XcodeProjectException(*error.args)
         self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
@@ -196,7 +196,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         try:
             ipa = xcodebuild.export_archive(
                 xcarchive, export_options_plist, ipa_directory,
-                xcargs=export_xcargs, custom_flags=export_flags, cli_app=self)
+                xcargs=export_xcargs, custom_flags=export_flags)
         except IOError as error:
             raise XcodeProjectException(*error.args)
         else:
@@ -226,7 +226,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.logger.info(f'List available test devices')
         try:
-            simulators = Simulator.list(runtimes, simulator_name, include_unavailable, cli_app=self)
+            simulators = Simulator.list(runtimes, simulator_name, include_unavailable)
         except IOError as e:
             raise XcodeProjectException(str(e)) from e
         if not simulators:
@@ -252,12 +252,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         Show default test destination for the chosen Xcode version
         """
-        xcode = Xcode.get_selected(cli_app=self)
+        xcode = Xcode.get_selected()
         if should_print:
             self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
 
         try:
-            simulator = Simulator.get_default(cli_app=self)
+            simulator = Simulator.get_default()
         except ValueError as error:
             raise XcodeProjectException(str(error)) from error
 
@@ -304,18 +304,18 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.logger.info(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
-            xcodebuild.test(test_sdk, simulators, xcargs=test_xcargs, custom_flags=test_flags, cli_app=self)
+            xcodebuild.test(test_sdk, simulators, xcargs=test_xcargs, custom_flags=test_flags)
         except IOError as error:
             raise XcodeProjectException(*error.args)
         self.logger.info(Colors.GREEN(f'Test run completed successfully\n'))
 
     def _clean(self, xcodebuild: Xcodebuild):
-        self.logger.info(Colors.BLUE(f'Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.GREEN(f'Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
-            xcodebuild.clean(cli_app=self)
+            xcodebuild.clean()
         except IOError as error:
             raise XcodeProjectException(*error.args)
-        self.logger.info(Colors.BLUE(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
 
     def _detect_project_bundle_ids(self,
                                    xcode_project: pathlib.Path,
@@ -336,7 +336,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         detector = BundleIdDetector(xcode_project, target_name, config_name)
         detector.notify()
         try:
-            detected_bundle_ids = detector.detect(cli_app=self)
+            detected_bundle_ids = detector.detect()
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
 
@@ -358,7 +358,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             simulators = [self.get_default_test_destination(should_print=False)]
         else:
             try:
-                simulators = Simulator.find_simulators(requested_devices, cli_app=self)
+                simulators = Simulator.find_simulators(requested_devices)
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
 
@@ -400,7 +400,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if export_options.is_app_store_export() or export_options.iCloudContainerEnvironment:
             return
 
-        archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive, cli_app=self)
+        archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive)
         icloud_services = archive_entitlements.get_icloud_services()
         if not {'CloudKit', 'CloudDocuments'}.intersection(icloud_services):
             return

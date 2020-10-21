@@ -7,21 +7,17 @@ import subprocess
 from collections import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Union
 
+from codemagic.mixins import RunningCliAppMixin
 from .runtime import Runtime
-
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
 
 @dataclass
-class Simulator:
+class Simulator(RunningCliAppMixin):
     udid: str
     is_available: bool
     state: str
@@ -59,9 +55,10 @@ class Simulator:
         })
 
     @classmethod
-    def _list_devices(cls, cli_app: Optional[CliApp]) -> Dict[str, List[Dict]]:
+    def _list_devices(cls) -> Dict[str, List[Dict]]:
         cmd_args = ('xcrun', 'simctl', 'list', 'devices', '--json')
         stdout: Union[bytes, str]
+        cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(cmd_args, suppress_output=True)
@@ -77,10 +74,9 @@ class Simulator:
     def list(cls,
              runtimes: Optional[Sequence[Runtime]] = None,
              simulator_name: Optional[re.Pattern] = None,
-             include_unavailable: bool = False,
-             cli_app: Optional[CliApp] = None) -> List[Simulator]:
+             include_unavailable: bool = False) -> List[Simulator]:
         simulators: List[Simulator] = []
-        for runtime_name, devices in cls._list_devices(cli_app).items():
+        for runtime_name, devices in cls._list_devices().items():
             runtime = Runtime(runtime_name)
             if runtimes and runtime not in runtimes:
                 continue  # Omit this runtime since it was not in the constraints
@@ -96,12 +92,12 @@ class Simulator:
         return simulators
 
     @classmethod
-    def get_default(cls, *, cli_app: Optional[CliApp] = None) -> Simulator:
+    def get_default(cls) -> Simulator:
         """
         Get default iOS simulator for currently selected Xcode version.
         If available, chooses iPhone SE (2nd generation), otherwise an iPhone or iPad device.
         """
-        simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'), cli_app=cli_app)
+        simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'))
 
         ios_simulators = [s for s in simulators if s.runtime.runtime_name is Runtime.Name.I_OS]
         if not ios_simulators:
@@ -141,8 +137,6 @@ class Simulator:
         return simulator
 
     @classmethod
-    def find_simulators(cls,
-                        simulator_descriptions: Sequence[str],
-                        *, cli_app: Optional[CliApp] = None) -> List[Simulator]:
-        simulators = cls.list(cli_app=cli_app)
+    def find_simulators(cls, simulator_descriptions: Sequence[str]) -> List[Simulator]:
+        simulators = cls.list()
         return [cls.choose_simulator(desc, simulators) for desc in simulator_descriptions]

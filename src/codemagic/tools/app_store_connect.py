@@ -630,8 +630,7 @@ class AppStoreConnect(cli.CliApp):
             p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
                 private_key,
                 p12_container_password,
-                export_path=certificate_path,
-                cli_app=self)
+                export_path=certificate_path)
         except (ValueError, IOError) as error:
             raise AppStoreConnectError(*error.args)
         self.printer.log_saved(certificate, p12_path)

@@ -7,7 +7,6 @@ from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Union
 
 from OpenSSL import crypto
@@ -17,17 +16,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import PrivateKey
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class Certificate(JsonSerializable, StringConverterMixin):
+class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, x509_certificate: X509):
@@ -133,14 +130,12 @@ class Certificate(JsonSerializable, StringConverterMixin):
     def export_p12(self,
                    private_key: PrivateKey,
                    container_password: str,
-                   export_path: Optional[pathlib.Path] = None,
-                   *,
-                   cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+                   export_path: Optional[pathlib.Path] = None) -> pathlib.Path:
         """
         :raises: IOError, ValueError
         """
         exporter = P12Exporter(self, private_key, container_password)
-        return exporter.export(export_path, cli_app=cli_app)
+        return exporter.export(export_path)
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()

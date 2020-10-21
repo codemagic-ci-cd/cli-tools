@@ -10,17 +10,14 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 from .pbx_project import PbxProject
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class BundleIdDetector(StringConverterMixin):
+class BundleIdDetector(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, xcode_project: pathlib.Path, target_name: Optional[str], config_name: Optional[str]):
         self.xcode_project = xcode_project.expanduser()
@@ -43,15 +40,15 @@ class BundleIdDetector(StringConverterMixin):
         else:
             self.logger.info(prefix)
 
-    def detect(self, *, cli_app: Optional['CliApp'] = None) -> List[str]:
+    def detect(self) -> List[str]:
         """
         :raises: IOError, ValueError
         """
         bundle_ids = None
         if self._can_use_xcodebuild():
-            bundle_ids = self._detect_with_xcodebuild(cli_app)
+            bundle_ids = self._detect_with_xcodebuild()
         if not bundle_ids:
-            bundle_ids = self._detect_from_project(cli_app)
+            bundle_ids = self._detect_from_project()
         return list(bundle_ids)
 
     def _get_xcodebuild_command(self) -> List[str]:
@@ -63,9 +60,10 @@ class BundleIdDetector(StringConverterMixin):
         cmd.extend(['-showBuildSettings', '-json'])
         return cmd
 
-    def _detect_with_xcodebuild(self, cli_app) -> Iterator[str]:
+    def _detect_with_xcodebuild(self) -> Iterator[str]:
         cmd = self._get_xcodebuild_command()
         process = None
+        cli_app = self.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(cmd, show_output=False)
@@ -93,8 +91,8 @@ class BundleIdDetector(StringConverterMixin):
             return [pbx_project.get_target(self.target)]
         return pbx_project.get_targets()
 
-    def _detect_from_project(self, cli_app) -> Iterator[str]:
-        project = PbxProject.from_path(self.xcode_project / 'project.pbxproj', cli_app=cli_app)
+    def _detect_from_project(self) -> Iterator[str]:
+        project = PbxProject.from_path(self.xcode_project / 'project.pbxproj')
         return (
             project.get_bundle_id(target['name'], config['name'])
             for target in self._get_project_targets(project)

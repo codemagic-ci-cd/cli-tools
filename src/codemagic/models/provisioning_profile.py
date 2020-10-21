@@ -12,18 +12,15 @@ from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import TYPE_CHECKING
 from typing import Union
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.models.certificate import Certificate
 from codemagic.models.json_serializable import JsonSerializable
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class ProvisioningProfile(JsonSerializable, StringConverterMixin):
+class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Provisioning Profiles')
 
     def __init__(self, plist: Dict[str, Any]):
@@ -35,10 +32,10 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
         return ProvisioningProfile(plist)
 
     @classmethod
-    def from_path(cls, profile_path: Path, *, cli_app: Optional['CliApp'] = None) -> ProvisioningProfile:
+    def from_path(cls, profile_path: Path) -> ProvisioningProfile:
         if not profile_path.exists():
             raise ValueError(f'Profile {profile_path} does not exist')
-        profile_data = cls._read_profile(profile_path, cli_app)
+        profile_data = cls._read_profile(profile_path)
         plist: Dict[str, Any] = plistlib.loads(profile_data)
         return ProvisioningProfile(plist)
 
@@ -48,9 +45,10 @@ class ProvisioningProfile(JsonSerializable, StringConverterMixin):
             raise IOError('OpenSSL executable not present on system')
 
     @classmethod
-    def _read_profile(cls, profile_path: Union[str, Path], cli_app: Optional['CliApp']) -> bytes:
+    def _read_profile(cls, profile_path: Union[str, Path]) -> bytes:
         cls._ensure_openssl()
         cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path))
+        cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(cmd, show_output=False)

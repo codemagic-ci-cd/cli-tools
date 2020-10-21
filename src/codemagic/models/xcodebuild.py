@@ -12,21 +12,18 @@ from operator import add
 from typing import IO
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
 from codemagic.cli import CliProcess
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
 from .export_options import ExportOptions
-from .simulator import Simulator
 from .simulator import CoreSimulatorService
+from .simulator import Simulator
 from .xcpretty import Xcpretty
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class Xcodebuild:
+class Xcodebuild(RunningCliAppMixin):
 
     def __init__(self,
                  xcode_workspace: Optional[pathlib.Path] = None,
@@ -168,18 +165,17 @@ class Xcodebuild:
             *shlex.split(xcargs or '')
         ]
 
-    def clean(self, *, cli_app: Optional['CliApp'] = None):
+    def clean(self):
         cmd = [*self._construct_base_command(None), 'clean']
-        self._run_command(cmd, cli_app, f'Failed to clean {self.workspace or self.project}')
+        self._run_command(cmd, f'Failed to clean {self.workspace or self.project}')
 
     def archive(self,
                 export_options: ExportOptions,
                 archive_directory: pathlib.Path,
                 *,
                 xcargs: Optional[str] = None,
-                custom_flags: Optional[str] = None,
-                cli_app: Optional['CliApp'] = None) -> pathlib.Path:
-        CoreSimulatorService().ensure_clean_state(cli_app)
+                custom_flags: Optional[str] = None) -> pathlib.Path:
+        CoreSimulatorService().ensure_clean_state()
 
         archive_directory.mkdir(parents=True, exist_ok=True)
         temp_dir = tempfile.mkdtemp(
@@ -190,7 +186,7 @@ class Xcodebuild:
         xcarchive = pathlib.Path(temp_dir)
 
         cmd = self._construct_archive_command(xcarchive, export_options, xcargs, custom_flags)
-        self._run_command(cmd, cli_app, f'Failed to archive {self.workspace or self.project}')
+        self._run_command(cmd, f'Failed to archive {self.workspace or self.project}')
 
         return xcarchive
 
@@ -200,13 +196,12 @@ class Xcodebuild:
                        ipa_directory: pathlib.Path,
                        *,
                        xcargs: Optional[str] = None,
-                       custom_flags: Optional[str] = None,
-                       cli_app: Optional['CliApp'] = None) -> pathlib.Path:
+                       custom_flags: Optional[str] = None) -> pathlib.Path:
         ipa_directory.mkdir(parents=True, exist_ok=True)
 
         cmd = self._construct_export_archive_command(
             archive_path, ipa_directory, export_options_plist, xcargs, custom_flags)
-        self._run_command(cmd, cli_app, f'Failed to export archive {archive_path}')
+        self._run_command(cmd, f'Failed to export archive {archive_path}')
 
         try:
             return next(ipa_directory.glob('*.ipa'))
@@ -218,14 +213,18 @@ class Xcodebuild:
              simulators: List[Simulator],
              *,
              xcargs: Optional[str] = None,
-             custom_flags: Optional[str] = None,
-             cli_app: Optional['CliApp'] = None):
-        CoreSimulatorService().ensure_clean_state(cli_app)
+             custom_flags: Optional[str] = None):
+        CoreSimulatorService().ensure_clean_state()
         cmd = self._construct_test_command(sdk, simulators, xcargs, custom_flags)
-        self._run_command(cmd, cli_app, f'Failed to test {self.workspace or self.project}')
+        error_message = f'Failed to test {self.workspace or self.project}'
+        self._run_command(cmd, error_message, ignore_error_code=65)
 
-    def _run_command(self, command, cli_app: Optional['CliApp'], error_message):
+    def _run_command(self,
+                     command: List[str],
+                     error_message: str,
+                     ignore_error_code: Optional[int] = None):
         process = None
+        cli_app = self.get_current_cli_app()
         try:
             if cli_app:
                 process = XcodebuildCliProcess(command, xcpretty=self.xcpretty)
@@ -233,7 +232,9 @@ class Xcodebuild:
                 process.execute().raise_for_returncode()
             else:
                 subprocess.check_output(command)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as cpe:
+            if ignore_error_code and ignore_error_code == cpe.returncode:
+                return
             raise IOError(error_message, process)
         finally:
             self._log_process(process)

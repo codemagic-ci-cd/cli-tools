@@ -11,9 +11,9 @@ from typing import Counter
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
 from codemagic.cli import Colors
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 from .certificate import Certificate
@@ -21,11 +21,8 @@ from .export_options import ExportOptions
 from .matched_profile import MatchedProfile
 from .provisioning_profile import ProvisioningProfile
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class CodeSigningSettingsManager(StringConverterMixin):
+class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, profiles: List[ProvisioningProfile], keychain_certificates: List[Certificate]):
         self.profiles: Dict[str, ProvisioningProfile] = {profile.uuid: profile for profile in profiles}
@@ -83,20 +80,20 @@ class CodeSigningSettingsManager(StringConverterMixin):
         for info in sorted(self._matched_profiles, key=lambda i: i.sort_key()):
             self.logger.info(Colors.BLUE(info.format()))
 
-    def _apply(self, xcode_project, result_file_name, cli_app):
+    def _apply(self, xcode_project, result_file_name):
         cmd = [
             self._code_signing_manager,
             '--xcode-project', xcode_project,
             '--used-profiles', result_file_name,
             '--profiles', self._get_json_serialized_profiles(),
         ]
-        if cli_app and cli_app.verbose:
+        if self.cli_app and self.cli_app.verbose:
             cmd.append('--verbose')
 
         process = None
         try:
-            if cli_app:
-                process = cli_app.execute(cmd)
+            if self.cli_app:
+                process = self.cli_app.execute(cmd)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)
@@ -104,9 +101,9 @@ class CodeSigningSettingsManager(StringConverterMixin):
             xcode_project = shlex.quote(str(xcode_project))
             raise IOError(f'Failed to set code signing settings for {xcode_project}', process)
 
-    def use_profiles(self, xcode_project: pathlib.Path, *, cli_app: Optional['CliApp'] = None):
+    def use_profiles(self, xcode_project: pathlib.Path):
         with NamedTemporaryFile(mode='r', prefix='used_profiles_', suffix='.json') as used_profiles:
-            self._apply(xcode_project, used_profiles.name, cli_app)
+            self._apply(xcode_project, used_profiles.name)
             try:
                 used_profiles_info = json.load(used_profiles)
             except ValueError:

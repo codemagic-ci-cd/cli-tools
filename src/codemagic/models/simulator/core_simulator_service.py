@@ -1,32 +1,28 @@
 from __future__ import annotations
 
 import subprocess
-from typing import Optional
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
-
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
 
 
-class CoreSimulatorService:
+class CoreSimulatorService(RunningCliAppMixin):
 
     def __init__(self):
         self.logger = log.get_logger(self.__class__)
 
-    def _kill_service(self, cli_app: Optional['CliApp'] = None):
+    def _kill_service(self):
         cmd = ('killall', '-9', 'com.apple.CoreSimulator.CoreSimulatorService')
         try:
-            if cli_app:
-                process = cli_app.execute(cmd, show_output=False)
+            if self.cli_app:
+                process = self.cli_app.execute(cmd, show_output=False)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE).decode()
         except subprocess.CalledProcessError as cpe:
             self.logger.debug('Failed to kill com.apple.CoreSimulator.CoreSimulatorService: %s', cpe)
 
-    def ensure_clean_state(self, cli_app: Optional['CliApp'] = None):
+    def ensure_clean_state(self):
         """
         With Xcode 12 sometimes the builds fail with error "Failed to find newest available Simulator runtime"
         Indication for that to happen is when some of the simulators are unavailable with state
@@ -39,18 +35,18 @@ class CoreSimulatorService:
 
         self.logger.debug('Check for CoreSimulatorService health')
         try:
-            if cli_app:
-                process = cli_app.execute(cmd, suppress_output=True)
+            if self.cli_app:
+                process = self.cli_app.execute(cmd, suppress_output=True)
                 process.raise_for_returncode()
                 devices_output = process.stdout
             else:
                 devices_output = subprocess.check_output(cmd, stderr=subprocess.PIPE).decode()
         except subprocess.CalledProcessError as cpe:
             self.logger.debug('Failed to obtain simulators listing: %s', cpe)
-            self._kill_service(cli_app)
+            self._kill_service()
         else:
             if invalid_simulator_state in devices_output:
                 self.logger.debug('CoreSimulatorService is potentially poisoned, kill it')
-                self._kill_service(cli_app)
+                self._kill_service()
             else:
                 self.logger.debug('CoreSimulatorService seems to be alright')

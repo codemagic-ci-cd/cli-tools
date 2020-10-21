@@ -10,16 +10,13 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class PbxProject(StringConverterMixin):
+class PbxProject(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, project_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = project_data
@@ -27,11 +24,9 @@ class PbxProject(StringConverterMixin):
         self.logger = log.get_logger(self.__class__)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path, *, cli_app: Optional['CliApp'] = None) -> PbxProject:
+    def from_path(cls, path: pathlib.Path) -> PbxProject:
         """
         :param path: Path to project.pbxproj
-        :param cli_app: CliApp to invoke underlying shell commands.
-                        If not provided, subprocess module will be used instead.
         :raises: ValueError, IOError
         :return: PbxProject
         """
@@ -43,7 +38,7 @@ class PbxProject(StringConverterMixin):
         try:
             parsed: Dict[str, Any] = plistlib.loads(path.read_bytes())
         except ValueError:
-            xml = cls._convert_to_xml(path, cli_app)
+            xml = cls._convert_to_xml(path)
             parsed = plistlib.loads(xml)
 
         return PbxProject(parsed)
@@ -54,10 +49,11 @@ class PbxProject(StringConverterMixin):
             raise IOError('Missing executable "plutil"')
 
     @classmethod
-    def _convert_to_xml(cls, path: pathlib.Path, cli_app: Optional['CliApp']) -> bytes:
+    def _convert_to_xml(cls, path: pathlib.Path) -> bytes:
         cls._ensure_plutil()
         with tempfile.NamedTemporaryFile(suffix='xml') as tf:
             cmd = ('plutil', '-convert', 'xml1', '-o', tf.name, str(path))
+            cli_app = cls.get_current_cli_app()
             try:
                 if cli_app:
                     process = cli_app.execute(cmd)

@@ -57,6 +57,7 @@ class CliApp(metaclass=abc.ABCMeta):
     REGISTERED_CLASS_ARGUMENTS: Dict[Type[CliApp], Tuple[Argument, ...]] = {}
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
     _printer = None
+    _running_app = None
 
     def __init__(self, dry=False, verbose=False, **cli_options):
         self.dry_run = dry
@@ -64,6 +65,10 @@ class CliApp(metaclass=abc.ABCMeta):
         self.obfuscation = 8 * '*'
         self.verbose = verbose
         self.logger = log.get_logger(self.__class__)
+
+    @classmethod
+    def get_running_app(cls) -> Optional[CliApp]:
+        return cls._running_app
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -159,8 +164,8 @@ class CliApp(metaclass=abc.ABCMeta):
             if args.show_version:
                 cls.show_version()
             elif args.action:
-                app = cls._create_instance(parser, args)
-                app._invoke_action(args)
+                cls._running_app = cls._create_instance(parser, args)
+                cls._running_app._invoke_action(args)
             else:
                 raise argparse.ArgumentError(args.action, 'the following argument is required: action')
         except argparse.ArgumentError as argument_error:

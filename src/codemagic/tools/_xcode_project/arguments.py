@@ -189,7 +189,7 @@ class TestArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'nargs': '+',
-            'metavar': 'devices',
+            'metavar': 'device_description',
         },
     )
     TEST_SDK = cli.ArgumentProperties(

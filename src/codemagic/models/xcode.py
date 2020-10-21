@@ -8,13 +8,11 @@ from distutils.version import LooseVersion
 from functools import lru_cache
 from typing import Dict
 from typing import Optional
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
+from codemagic.mixins import RunningCliAppMixin
 
 
-class Xcode:
+class Xcode(RunningCliAppMixin):
 
     def __init__(self, developer_dir: pathlib.Path):
         self.developer_dir = developer_dir
@@ -39,10 +37,11 @@ class Xcode:
         return version_info['ProductBuildVersion']
 
     @classmethod
-    def get_selected(cls, *, cli_app: Optional[CliApp] = None) -> Xcode:
+    def get_selected(cls) -> Xcode:
         if not shutil.which('xcode-select'):
             raise IOError('xcode-select executable not present on system')
         cmd_args = ('xcode-select', '--print-path')
+        cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(cmd_args, show_output=False)
