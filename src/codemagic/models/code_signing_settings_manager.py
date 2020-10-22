@@ -87,13 +87,15 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             '--used-profiles', result_file_name,
             '--profiles', self._get_json_serialized_profiles(),
         ]
-        if self.cli_app and self.cli_app.verbose:
+
+        cli_app = self.get_current_cli_app()
+        if cli_app and cli_app.verbose:
             cmd.append('--verbose')
 
         process = None
         try:
-            if self.cli_app:
-                process = self.cli_app.execute(cmd)
+            if cli_app:
+                process = cli_app.execute(cmd)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)

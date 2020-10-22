@@ -13,9 +13,10 @@ class CoreSimulatorService(RunningCliAppMixin):
 
     def _kill_service(self):
         cmd = ('killall', '-9', 'com.apple.CoreSimulator.CoreSimulatorService')
+        cli_app = self.get_current_cli_app()
         try:
-            if self.cli_app:
-                process = self.cli_app.execute(cmd, show_output=False)
+            if cli_app:
+                process = cli_app.execute(cmd, show_output=False)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE).decode()
@@ -34,9 +35,10 @@ class CoreSimulatorService(RunningCliAppMixin):
         invalid_simulator_state = 'unavailable, failed to open liblaunch_sim.dylib'
 
         self.logger.debug('Check for CoreSimulatorService health')
+        cli_app = self.get_current_cli_app()
         try:
-            if self.cli_app:
-                process = self.cli_app.execute(cmd, suppress_output=True)
+            if cli_app:
+                process = cli_app.execute(cmd, suppress_output=True)
                 process.raise_for_returncode()
                 devices_output = process.stdout
             else:
