@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABCMeta
-from functools import reduce
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -26,8 +25,9 @@ class ResultBase(metaclass=ABCMeta):
 class ActionTestPlanRunSummaries(ResultBase):
     def __init__(self, data: Dict):
         super().__init__(data)
+        summaries: List[Dict] = self._values('summaries')
         self.summaries: List[ActionTestPlanRunSummary] = [
-            ActionTestPlanRunSummary(summary_data) for summary_data in self._values('summaries')]
+            ActionTestPlanRunSummary(summary_data) for summary_data in summaries]
 
 
 class ActionAbstractTestSummary(ResultBase, metaclass=ABCMeta):
@@ -39,8 +39,9 @@ class ActionAbstractTestSummary(ResultBase, metaclass=ABCMeta):
 class ActionTestPlanRunSummary(ActionAbstractTestSummary):
     def __init__(self, data: Dict):
         super().__init__(data)
+        testable_summaries: List[Dict] = self._values('testableSummaries')
         self.testable_summaries: List[ActionTestableSummary] = [
-            ActionTestableSummary(summary_data) for summary_data in self._values('testableSummaries')]
+            ActionTestableSummary(summary_data) for summary_data in testable_summaries]
 
 
 class ActionTestableSummary(ActionAbstractTestSummary):
@@ -49,18 +50,21 @@ class ActionTestableSummary(ActionAbstractTestSummary):
         self._project_relative_path: Optional[str] = self._value('projectRelativePath')
         self.target_name: Optional[str] = self._value('targetName')
         self.test_kind: Optional[str] = self._value('testKind')
+        tests: List[Dict] = self._values('tests')
         self.tests: List[ActionTestSummaryIdentifiableObject] = [
-            ActionTestSummaryIdentifiableObject.create(test_data, self) for test_data in self._values('tests')]
+            ActionTestSummaryIdentifiableObject.create(test_data, self) for test_data in tests]
 
 
 class ActionTestSummaryIdentifiableObject(ActionAbstractTestSummary):
-    def __init__(self, data: Dict, parent: ActionTestableSummary):
+    def __init__(self, data: Dict, parent: Union[ActionTestableSummary, ActionTestSummaryGroup]):
         super().__init__(data)
         self.identifier: Optional[str] = self._value('identifier')
-        self.parent: ActionTestableSummary = parent
+        self.parent = parent
 
     @classmethod
-    def create(cls, data: Dict, parent: ActionTestableSummary) -> Union[ActionTestSummaryGroup, ActionTestMetadata]:
+    def create(cls,
+               data: Dict,
+               parent: Union[ActionTestableSummary, ActionTestSummaryGroup]) -> ActionTestSummaryIdentifiableObject:
         object_type = data['_type']['_name']
         if object_type == 'ActionTestSummaryGroup':
             return ActionTestSummaryGroup(data, parent)
@@ -71,16 +75,18 @@ class ActionTestSummaryIdentifiableObject(ActionAbstractTestSummary):
 
 
 class ActionTestSummaryGroup(ActionTestSummaryIdentifiableObject):
-    def __init__(self, data: Dict, parent: ActionTestableSummary):
+    def __init__(self, data: Dict, parent: Union[ActionTestableSummary, ActionTestSummaryGroup]):
         super().__init__(data, parent)
         self.duration: float = self._value('duration')
+        subtests: List[Dict] = self._values('subtests')
         self.subtests: List[ActionTestSummaryIdentifiableObject] = [
             ActionTestSummaryIdentifiableObject.create(subtests_data, self)
-            for subtests_data in self._values('subtests')]
+            for subtests_data in subtests
+        ]
 
 
 class ActionTestMetadata(ActionTestSummaryIdentifiableObject):
-    def __init__(self, data: Dict, parent: ActionTestableSummary):
+    def __init__(self, data: Dict, parent: Union[ActionTestableSummary, ActionTestSummaryGroup]):
         super().__init__(data, parent)
         self.test_status: str = self._value('testStatus')
         self.duration: Optional[float] = self._value('duration')
@@ -146,26 +152,27 @@ class IssueSummary(ResultBase):
 class ResultIssueSummaries(ResultBase):
     def __init__(self, data: Dict):
         super().__init__(data)
-        self.analyzer_warning_summaries = [
-            IssueSummary(summary_data) for summary_data in self._values('analyzerWarningSummaries')]
-        self.error_summaries = [
-            IssueSummary(summary_data) for summary_data in self._values('errorSummaries')]
-        self.test_failure_summaries = [
-            TestFailureIssueSummary(summary_data) for summary_data in self._values('testFailureSummaries')]
-        self.warning_summaries = [
-            IssueSummary(summary_data) for summary_data in self._values('warningSummaries')]
+        analyzer_warning_summaries: List[Dict] = self._values('analyzerWarningSummaries')
+        error_summaries: List[Dict] = self._values('errorSummaries')
+        test_failure_summaries: List[Dict] = self._values('testFailureSummaries')
+        warning_summaries: List[Dict] = self._values('warningSummaries')
+        self.analyzer_warning_summaries = [IssueSummary(summary_data) for summary_data in analyzer_warning_summaries]
+        self.error_summaries = [IssueSummary(summary_data) for summary_data in error_summaries]
+        self.test_failure_summaries = [TestFailureIssueSummary(summary_data) for summary_data in test_failure_summaries]
+        self.warning_summaries = [IssueSummary(summary_data) for summary_data in warning_summaries]
 
 
 class TestFailureIssueSummary(IssueSummary):
     def __init__(self, data: Dict):
         super().__init__(data)
-        self.test_case_name = self._value('testCaseName')
+        self.test_case_name: str = self._value('testCaseName')
 
 
 class ActionsInvocationRecord(ResultBase):
     def __init__(self, data: Dict):
         super().__init__(data)
-        self.actions = [ActionRecord(action_data) for action_data in self._values('actions')]
+        actions: List[Dict] = self._values('actions')
+        self.actions = [ActionRecord(action_data) for action_data in actions]
         self.issues = ResultIssueSummaries(data['issues'])
 
     @property
