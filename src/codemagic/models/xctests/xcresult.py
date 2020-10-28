@@ -6,18 +6,26 @@ is created according to the description from
 """
 from __future__ import annotations
 
+import pathlib
 from abc import ABCMeta
 from datetime import datetime
+from functools import lru_cache
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Type
 from typing import TypeVar
+from typing import Union
+
+from .xcresulttool import XcResultTool
 
 
 class _BaseAbstractRecord(metaclass=ABCMeta):
-    def __init__(self, data: Dict):
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
         self._data = data
+        self._cache: Dict[str, Any] = {}
+        self._xcresult = xcresult
         self.type = data['_type']['_name']
 
 
@@ -79,7 +87,7 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
             return self._str_value(key)
         return None
 
-    def _array_values(self, key: str, member_type: Type[R]) -> List[R]:
+    def _array_values(self, key: str, *member_types: Type[R]) -> List[R]:
         try:
             values_container = self._data[key]
         except KeyError:
@@ -88,15 +96,22 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
         values: List[Dict] = values_container['_values']
         typed_values: List[R] = []
         for value in values:
-            assert value['_type']['_name'] == member_type.__name__
-            member: R = member_type(value)
-            typed_values.append(member)
+            given_type = value['_type']['_name']
+            for member_type in member_types:
+                if given_type == member_type.__name__:
+                    member: R = member_type(value, self._xcresult)
+                    typed_values.append(member)
+                    break
+            else:
+                expected_types = ', '.join(t.__name__ for t in member_types)
+                raise AssertionError(f'Expected types {expected_types}, but was {given_type}')
+
         return typed_values
 
     def _object_value(self, key: str, object_type: Type[R]) -> R:
         value = self._data[key]
         assert value['_type']['_name'] == object_type.__name__
-        return object_type(value)
+        return object_type(value, self._xcresult)
 
     def _optional_object_value(self, key: str, object_type: Type[R]) -> Optional[R]:
         if key in self._data:
@@ -112,8 +127,8 @@ class _ActionAbstractTestSummary(_AbstractRecord, metaclass=ABCMeta):
         + name: String?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.name: Optional[str] = self._optional_str_value('name')
 
 
@@ -142,8 +157,8 @@ class ActionDeviceRecord(_AbstractRecord):
         + platformRecord: ActionPlatformRecord
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.name: str = self._str_value('name')
         self.is_concrete_device: bool = self._bool_value('isConcreteDevice')
         self.operating_system_version: str = self._str_value('operatingSystemVersion')
@@ -173,8 +188,8 @@ class ActionPlatformRecord(_AbstractRecord):
         + userDescription: String
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.identifier: str = self._str_value('identifier')
         self.user_description: str = self._str_value('userDescription')
 
@@ -194,8 +209,8 @@ class ActionRecord(_AbstractRecord):
         + actionResult: ActionResult
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.scheme_command_name: str = self._str_value('schemeCommandName')
         self.scheme_task_name: str = self._str_value('schemeTaskName')
         self.title: Optional[str] = self._optional_str_value('title')
@@ -223,8 +238,8 @@ class ActionResult(_AbstractRecord):
         + diagnosticsRef: Reference?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.result_name: str = self._str_value('resultName')
         self.status: str = self._str_value('status')
         self.metrics: ResultMetrics = self._object_value('metrics', ResultMetrics)
@@ -234,6 +249,24 @@ class ActionResult(_AbstractRecord):
         self.log_ref: Optional[Reference] = self._optional_object_value('logRef', Reference)
         self.tests_ref: Optional[Reference] = self._optional_object_value('testsRef', Reference)
         self.diagnostics_ref: Optional[Reference] = self._optional_object_value('diagnosticsRef', Reference)
+
+    @lru_cache()
+    def get_timeline(self):
+        raise NotImplemented()
+
+    @lru_cache()
+    def get_log(self):
+        raise NotImplemented()
+
+    def get_diagnostics(self):
+        raise NotImplemented()
+
+    @lru_cache()
+    def get_action_test_plan_run_summaries(self) -> Optional[ActionTestPlanRunSummaries]:
+        if self.tests_ref is None:
+            return None
+        raw_summaries = XcResultTool.get_object(self._xcresult, self.tests_ref.id)
+        return ActionTestPlanRunSummaries(raw_summaries, self._xcresult)
 
 
 class ActionRunDestinationRecord(_AbstractRecord):
@@ -248,8 +281,8 @@ class ActionRunDestinationRecord(_AbstractRecord):
         + targetSDKRecord: ActionSDKRecord
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.display_name: str = self._str_value('displayName')
         self.target_architecture: str = self._str_value('targetArchitecture')
         self.target_device_record: ActionDeviceRecord = self._object_value('targetDeviceRecord', ActionDeviceRecord)
@@ -268,8 +301,8 @@ class ActionSDKRecord(_AbstractRecord):
         + isInternal: Bool
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.name: str = self._str_value('name')
         self.identifier: str = self._str_value('identifier')
         self.operating_system_version: str = self._str_value('operatingSystemVersion')
@@ -292,8 +325,8 @@ class ActionTestAttachment(_AbstractRecord):
         + payloadSize: Int
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.uniform_type_identifier: str = self._str_value('uniformTypeIdentifier')
         self.name: Optional[str] = self._optional_str_value('name')
         self.timestamp: Optional[datetime] = self._optional_date_value('timestamp')
@@ -303,6 +336,10 @@ class ActionTestAttachment(_AbstractRecord):
         self.filename: Optional[str] = self._optional_str_value('filename')
         self.payload_ref: Optional[Reference] = self._optional_object_value('payloadRef', Reference)
         self.payload_size: int = self._int_value('payloadSize')
+
+    @lru_cache()
+    def get_payload(self):
+        raise NotImplemented()
 
 
 class ActionTestFailureSummary(_AbstractRecord):
@@ -324,8 +361,8 @@ class ActionTestFailureSummary(_AbstractRecord):
         + isTopLevelFailure: Bool
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.message: Optional[str] = self._optional_str_value('message')
         self.file_name: str = self._str_value('fileName')
         self.line_number: int = self._int_value('lineNumber')
@@ -342,6 +379,38 @@ class ActionTestFailureSummary(_AbstractRecord):
         self.is_top_level_failure: bool = self._bool_value('isTopLevelFailure')
 
 
+class ActionTestMetadata(_AbstractRecord):
+    """
+    - ActionTestMetadata
+      * Supertype: ActionTestSummaryIdentifiableObject
+      * Kind: object
+      * Properties:
+        + testStatus: String
+        + duration: Double?
+        + summaryRef: Reference?
+        + performanceMetricsCount: Int
+        + failureSummariesCount: Int
+        + activitySummariesCount: Int
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.test_status: str = self._str_value('testStatus')
+        self.duration: Optional[float] = self._optional_float_value('duration')
+        self.summary_ref: Optional[Reference] = self._optional_object_value('summaryRef', Reference)
+        self.performance_metrics_count: int = self._int_value('performanceMetricsCount')
+        self.failure_summaries_count: int = self._int_value('failureSummariesCount')
+        self.activity_summaries_count: int = self._int_value('activitySummariesCount')
+
+    @property
+    def subtests(self) -> List[ActionTestMetadata]:
+        return [self]
+
+    @lru_cache()
+    def get_summary(self):
+        ...
+
+
 class ActionTestPlanRunSummaries(_AbstractRecord):
     """
     - ActionTestPlanRunSummaries
@@ -350,8 +419,8 @@ class ActionTestPlanRunSummaries(_AbstractRecord):
         + summaries: [ActionTestPlanRunSummary]
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.summaries: List[ActionTestPlanRunSummary] = self._array_values('summaries', ActionTestPlanRunSummary)
 
 
@@ -364,8 +433,8 @@ class ActionTestPlanRunSummary(_ActionAbstractTestSummary):
         + testableSummaries: [ActionTestableSummary]
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.testable_summaries: List[ActionTestableSummary] = \
             self._array_values('testableSummaries', ActionTestableSummary)
 
@@ -379,9 +448,33 @@ class ActionTestSummaryIdentifiableObject(_ActionAbstractTestSummary):
         + identifier: String?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.identifier: Optional[str] = self._optional_str_value('identifier')
+
+
+class ActionTestSummaryGroup(_AbstractRecord):
+    """
+    - ActionTestSummaryGroup
+      * Supertype: ActionTestSummaryIdentifiableObject
+      * Kind: object
+      * Properties:
+        + duration: Double
+        + subtests: [ActionTestSummaryIdentifiableObject]
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.duration: float = self._float_value('duration')
+        self._subtests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
+            self._array_values('subtests', ActionTestSummaryGroup, ActionTestMetadata)
+
+    @property
+    def subtests(self) -> List[ActionTestMetadata]:
+        tests: List[ActionTestMetadata] = []
+        for subtest in self._subtests:
+            tests.extend(subtest.subtests)
+        return tests
 
 
 class ActionTestableSummary(_ActionAbstractTestSummary):
@@ -400,18 +493,45 @@ class ActionTestableSummary(_ActionAbstractTestSummary):
         + testRegion: String?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.project_relative_path: Optional[str] = self._optional_str_value('projectRelativePath')
         self.target_name: Optional[str] = self._optional_str_value('targetName')
         self.test_kind: Optional[str] = self._optional_str_value('testKind')
-        self.tests: List[ActionTestSummaryIdentifiableObject] = \
-            self._array_values('tests', ActionTestSummaryIdentifiableObject)
+        self._tests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
+            self._array_values('tests', ActionTestSummaryGroup, ActionTestMetadata)
         self.diagnostics_directory_name: Optional[str] = self._optional_str_value('diagnosticsDirectoryName')
         self.failure_summaries: List[ActionTestFailureSummary] = \
             self._array_values('failureSummaries', ActionTestFailureSummary)
         self.test_language: Optional[str] = self._optional_str_value('testLanguage')
         self.test_region: Optional[str] = self._optional_str_value('testRegion')
+
+    @property
+    def tests(self) -> List[ActionTestMetadata]:
+        try:
+            all_tests: List[ActionTestMetadata] = self._cache['_all_tests']
+        except KeyError:
+            all_tests = [subtest for test in self._tests for subtest in test.subtests]
+            self._cache['_all_tests'] = all_tests
+        return all_tests
+
+
+class ActionsInvocationMetadata(_AbstractRecord):
+    """
+    - ActionsInvocationMetadata
+      * Kind: object
+      * Properties:
+        + creatingWorkspaceFilePath: String
+        + uniqueIdentifier: String
+        + schemeIdentifier: EntityIdentifier?
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.creating_workspace_file_path: str = self._str_value('creatingWorkspaceFilePath')
+        self.unique_identifier: str = self._str_value('uniqueIdentifier')
+        self.scheme_identifier: Optional[EntityIdentifier] = \
+            self._optional_object_value('schemeIdentifier', EntityIdentifier)
 
 
 class ActionsInvocationRecord(_AbstractRecord):
@@ -426,18 +546,25 @@ class ActionsInvocationRecord(_AbstractRecord):
         + archive: ArchiveInfo?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.metadata_ref: Optional[Reference] = self._optional_object_value('metadataRef', Reference)
         self.metrics: ResultMetrics = self._object_value('metrics', ResultMetrics)
         self.issues: ResultIssueSummaries = self._object_value('issues', ResultIssueSummaries)
         self.actions: List[ActionRecord] = self._array_values('actions', ActionRecord)
         self.archive: Optional[ArchiveInfo] = self._optional_object_value('archive', ArchiveInfo)
 
-    @property
-    def tests_refs(self) -> List[Reference]:
-        tests_refs = (a.action_result.tests_ref for a in self.actions)
-        return [tests_ref for tests_ref in tests_refs if tests_ref]
+    @classmethod
+    def from_xcresult(cls, xcresult: pathlib.Path):
+        raw_actions_invocation_record = XcResultTool.get_bundle(xcresult)
+        return ActionsInvocationRecord(raw_actions_invocation_record, xcresult)
+
+    @lru_cache()
+    def get_metadata(self) -> Optional[ActionsInvocationMetadata]:
+        if self.metadata_ref is None:
+            return None
+        raw_metadata = XcResultTool.get_object(self._xcresult, self.metadata_ref.id)
+        return ActionsInvocationMetadata(raw_metadata, self._xcresult)
 
 
 class ArchiveInfo(_AbstractRecord):
@@ -448,8 +575,8 @@ class ArchiveInfo(_AbstractRecord):
         + path: String?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.path: Optional[str] = self._optional_str_value('path')
 
 
@@ -463,11 +590,19 @@ class CodeCoverageInfo(_AbstractRecord):
         + archiveRef: Reference?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.has_coverage_data: bool = self._bool_value('hasCoverageData')
         self.report_ref: Optional[Reference] = self._optional_object_value('reportRef', Reference)
         self.archive_ref: Optional[Reference] = self._optional_object_value('archiveRef', Reference)
+
+    @lru_cache()
+    def get_report(self):
+        raise NotImplemented()
+
+    @lru_cache()
+    def get_archive(self):
+        raise NotImplemented()
 
 
 class DocumentLocation(_AbstractRecord):
@@ -479,10 +614,29 @@ class DocumentLocation(_AbstractRecord):
         + concreteTypeName: String
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.url: str = self._str_value('url')
         self.concrete_type_name: str = self._str_value('concreteTypeName')
+
+
+class EntityIdentifier(_AbstractRecord):
+    """
+    - EntityIdentifier
+        * Kind: object
+        * Properties:
+          + entityName: String
+          + containerName: String
+          + entityType: String
+          + sharedState: String
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.entity_name: str = self._str_value('entityName')
+        self.container_name: str = self._str_value('containerName')
+        self.entity_type: str = self._str_value('entityType')
+        self.shared_state: str = self._str_value('sharedState')
 
 
 class IssueSummary(_AbstractRecord):
@@ -496,8 +650,8 @@ class IssueSummary(_AbstractRecord):
         + documentLocationInCreatingWorkspace: DocumentLocation?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.issue_type: str = self._str_value('issueType')
         self.message: str = self._str_value('message')
         self.producing_target: Optional[str] = self._optional_str_value('producingTarget')
@@ -514,8 +668,8 @@ class Reference(_AbstractRecord):
         + targetType: TypeDefinition?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.id: str = self._str_value('id')
         self.target_type: Optional[TypeDefinition] = self._optional_object_value('targetType', TypeDefinition)
 
@@ -531,8 +685,8 @@ class ResultIssueSummaries(_AbstractRecord):
         + warningSummaries: [IssueSummary]
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.analyzer_warning_summaries: List[IssueSummary] = \
             self._array_values('analyzerWarningSummaries', IssueSummary)
         self.error_summaries: List[IssueSummary] = self._array_values('errorSummaries', IssueSummary)
@@ -554,8 +708,8 @@ class ResultMetrics(_AbstractRecord):
         + warningCount: Int
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.analyzer_warning_count: int = self._int_value('analyzerWarningCount')
         self.error_count: int = self._int_value('errorCount')
         self.tests_count: int = self._int_value('testsCount')
@@ -565,8 +719,8 @@ class ResultMetrics(_AbstractRecord):
 
 
 class SchemaSerializable(_AbstractRecord):
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         # TODO: What to do with this?
 
 
@@ -578,8 +732,8 @@ class SortedKeyValueArray(_AbstractRecord):
         + storage: [SortedKeyValueArrayPair]
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.storage: List[SortedKeyValueArrayPair] = self._array_values('storage', SortedKeyValueArrayPair)
 
 
@@ -592,8 +746,8 @@ class SortedKeyValueArrayPair(_AbstractRecord):
         + value: SchemaSerializable
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.key: str = self._str_value('key')
         self.value: SchemaSerializable = self._object_value('value', SchemaSerializable)
 
@@ -607,8 +761,8 @@ class SourceCodeContext(_AbstractRecord):
         + callStack: [SourceCodeFrame]
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.location: Optional[SourceCodeLocation] = self._optional_object_value('location', SourceCodeLocation)
         self.callStack: List[SourceCodeFrame] = self._array_values('callStack', SourceCodeFrame)
 
@@ -622,8 +776,8 @@ class SourceCodeFrame(_AbstractRecord):
         + symbolInfo: SourceCodeSymbolInfo?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.addressString: Optional[str] = self._optional_str_value('addressString')
         self.symbolInfo: Optional[SourceCodeSymbolInfo] = \
             self._optional_object_value('symbolInfo', SourceCodeSymbolInfo)
@@ -638,8 +792,8 @@ class SourceCodeLocation(_AbstractRecord):
         + lineNumber: Int?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.file_path: Optional[str] = self._str_value('filePath')
         self.line_number: Optional[int] = self._int_value('lineNumber')
 
@@ -654,8 +808,8 @@ class SourceCodeSymbolInfo(_AbstractRecord):
         + location: SourceCodeLocation?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.imageName: Optional[str] = self._optional_str_value('imageName')
         self.symbolName: Optional[str] = self._optional_str_value('symbolName')
         self.location: Optional[SourceCodeLocation] = self._optional_object_value('location', SourceCodeLocation)
@@ -671,8 +825,8 @@ class TestAssociatedError(_AbstractRecord):
         + userInfo: SortedKeyValueArray?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.domain: Optional[str] = self._optional_str_value('domain')
         self.code: Optional[int] = self._optional_int_value('code')
         self.user_info: Optional[SortedKeyValueArray] = self._optional_object_value('userInfo', SortedKeyValueArray)
@@ -687,8 +841,8 @@ class TestFailureIssueSummary(IssueSummary):
         + testCaseName: String
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.test_case_name: str = self._str_value('testCaseName')
 
 
@@ -701,7 +855,7 @@ class TypeDefinition(_AbstractRecord):
         + supertype: TypeDefinition?
     """
 
-    def __init__(self, data: Dict):
-        super().__init__(data)
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
         self.name: str = self._str_value('name')
         self.supertype: Optional[TypeDefinition] = self._optional_object_value('supertype', TypeDefinition)

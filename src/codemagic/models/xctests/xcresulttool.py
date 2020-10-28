@@ -4,31 +4,46 @@ import json
 import pathlib
 import subprocess
 from collections import Sequence
-from typing import Optional
-from typing import Union
+from tempfile import NamedTemporaryFile
+from typing import Any
+from typing import Dict
+from typing import List
 
+from codemagic.cli.cli_types import CommandArg
 from codemagic.mixins import RunningCliAppMixin
 
 
 class XcResultTool(RunningCliAppMixin):
 
     @classmethod
-    def get(cls, xcresult: pathlib.Path, object_id: Optional[str] = None):
-        id_args = ['--id', object_id] if object_id else []
-        # cmd_args = ['xcrun', 'xcresulttool', 'get', '--format', 'json', '--path', xcresult]
-        # stdout = cls._run_command(cmd_args)
-        # return json.loads(stdout)
+    def get_bundle(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
+        cmd_args: List[CommandArg] = \
+            ['xcrun', 'xcresulttool', 'get', '--format', 'json', '--path', xcresult]
+        stdout = cls._run_command(cmd_args, f'Failed to get result bundle object from {xcresult}')
+        return json.loads(stdout)
+
+    @classmethod
+    def get_object(cls, xcresult: pathlib.Path, object_id: str) -> Dict[str, Any]:
+        cmd_args: List[CommandArg] = [
+            'xcrun', 'xcresulttool', 'get',
+            '--format', 'json',
+            '--path', xcresult,
+            '--id', object_id
+        ]
+        stdout = cls._run_command(cmd_args, f'Failed to get result bundle object {object_id} from {xcresult}')
+        return json.loads(stdout)
 
     @classmethod
     def merge(cls, *xcresults: pathlib.Path) -> pathlib.Path:
-        # TODO
-        output_path = pathlib.Path()
-        # cmd_args = ['xcrun', 'xcresulttool', 'merge', *xcresults, '--output-path', output_path]
-        # _ = cls._run_command(cmd_args)
+        assert len(xcresults) > 1, 'At least two xcresults are required for merging'
+        with NamedTemporaryFile(prefix='Test-', suffix='.xcresult') as tf:
+            output_path = pathlib.Path(tf.name)
+        cmd_args: List[CommandArg] = ['xcrun', 'xcresulttool', 'merge', *xcresults, '--output-path', output_path]
+        _ = cls._run_command(cmd_args, f'Failed to merge xcresult bundles')
         return output_path
 
     @classmethod
-    def _run_command(cls, command_args: Sequence[Union[str, pathlib.Path]]) -> str:
+    def _run_command(cls, command_args: Sequence[CommandArg], error_message: str) -> str:
         cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
@@ -38,4 +53,4 @@ class XcResultTool(RunningCliAppMixin):
             else:
                 return subprocess.check_output(command_args).decode()
         except subprocess.CalledProcessError:
-            raise IOError('Failed to list available test devices')
+            raise IOError(error_message)

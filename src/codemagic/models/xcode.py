@@ -7,7 +7,6 @@ import subprocess
 from distutils.version import LooseVersion
 from functools import lru_cache
 from typing import Dict
-from typing import Optional
 
 from codemagic.mixins import RunningCliAppMixin
 
