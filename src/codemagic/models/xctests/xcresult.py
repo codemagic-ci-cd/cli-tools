@@ -11,6 +11,7 @@ from abc import ABCMeta
 from datetime import datetime
 from functools import lru_cache
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -18,19 +19,26 @@ from typing import Type
 from typing import TypeVar
 from typing import Union
 
-from .xcresulttool import XcResultTool
-
 
 class _BaseAbstractRecord(metaclass=ABCMeta):
     def __init__(self, data: Dict, xcresult: pathlib.Path):
         self._data = data
-        self._cache: Dict[str, Any] = {}
         self._xcresult = xcresult
         self.type = data['_type']['_name']
 
 
 T = TypeVar('T', bool, float, int, str)
 R = TypeVar('R', bound=_BaseAbstractRecord)
+SchemaSerializable = Union[bool, float, int, str]
+
+
+@lru_cache()
+def _get_cached_object_from_bundle(xcresult: pathlib.Path, object_id: Optional[str] = None) -> Dict[str, Any]:
+    from .xcresulttool import XcResultTool
+    if object_id is None:
+        return XcResultTool.get_bundle(xcresult)
+    else:
+        return XcResultTool.get_object(xcresult, object_id)
 
 
 class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
@@ -40,9 +48,27 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
             value_container = self._data[key]
         except KeyError:
             return default
-        assert value_container['_type']['_name'] == type_name
-        value: T = value_container['_value']
+        given_type = value_container['_type']['_name']
+        assert given_type == type_name, f'Expected type {type_name}, but was {given_type}'
+        value: T = default.__class__(value_container['_value'])
         return value
+
+    def _schema_serializable_value(self, key: str) -> SchemaSerializable:
+        getters: Dict[Type[SchemaSerializable], Callable[[str], SchemaSerializable]] = {
+            bool: self._bool_value,
+            float: self._float_value,
+            int: self._int_value,
+            str: self._str_value
+        }
+        for _type, getter in getters.items():
+            try:
+                return getter(key)
+            except AssertionError:
+                continue
+
+        value_container = self._data[key]
+        given_type = value_container['_type']['_name']
+        raise AssertionError(f'Expected types Bool, Double, Int, String, but was {given_type}')
 
     def _bool_value(self, key: str, *, default: bool = False) -> bool:
         return self._get_primitive_value(key, 'Bool', default)
@@ -87,6 +113,29 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
             return self._str_value(key)
         return None
 
+    def _get_primitive_array_values(self, key: str, type_name: str, _type: Type[T]) -> List[T]:
+        try:
+            values_container = self._data[key]
+        except KeyError:
+            return []
+
+        assert values_container['_type']['_name'] == 'Array'
+        values: List[Dict] = values_container['_values']
+        typed_values: List[T] = []
+        for value_container in values:
+            given_type = value_container['_type']['_name']
+            assert given_type == type_name, f'Expected type {type_name}, but was {given_type}'
+            value: T = value_container['_value']
+            typed_values.append(value)
+
+        return typed_values
+
+    def _array_str_values(self, key: str) -> List[str]:
+        return self._get_primitive_array_values(key, 'String', str)
+
+    def _array_float_values(self, key: str) -> List[float]:
+        return self._get_primitive_array_values(key, 'Double', float)
+
     def _array_values(self, key: str, *member_types: Type[R]) -> List[R]:
         try:
             values_container = self._data[key]
@@ -110,13 +159,23 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
 
     def _object_value(self, key: str, object_type: Type[R]) -> R:
         value = self._data[key]
-        assert value['_type']['_name'] == object_type.__name__
+        given_type = value['_type']['_name']
+        assert given_type == object_type.__name__, f'Expected type {object_type.__name__}, but was {given_type}'
         return object_type(value, self._xcresult)
 
     def _optional_object_value(self, key: str, object_type: Type[R]) -> Optional[R]:
         if key in self._data:
             return self._object_value(key, object_type)
         return None
+
+    def _get_referenced_object(self, reference: Optional[Reference], object_type: Type[R]) -> Optional[R]:
+        if reference is None:
+            return None
+
+        value = _get_cached_object_from_bundle(self._xcresult, object_id=reference.id)
+        given_type = value['_type']['_name']
+        assert given_type == object_type.__name__, f'Expected type {object_type.__name__}, but was {given_type}'
+        return object_type(value, self._xcresult)
 
 
 class _ActionAbstractTestSummary(_AbstractRecord, metaclass=ABCMeta):
@@ -250,23 +309,24 @@ class ActionResult(_AbstractRecord):
         self.tests_ref: Optional[Reference] = self._optional_object_value('testsRef', Reference)
         self.diagnostics_ref: Optional[Reference] = self._optional_object_value('diagnosticsRef', Reference)
 
-    @lru_cache()
-    def get_timeline(self):
-        raise NotImplemented()
+    @property
+    def timeline(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.timeline_ref, _AbstractRecord)
 
-    @lru_cache()
-    def get_log(self):
-        raise NotImplemented()
+    @property
+    def log(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.log_ref, _AbstractRecord)
 
-    def get_diagnostics(self):
-        raise NotImplemented()
+    @property
+    def diagnostics(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.log_ref, _AbstractRecord)
 
-    @lru_cache()
-    def get_action_test_plan_run_summaries(self) -> Optional[ActionTestPlanRunSummaries]:
-        if self.tests_ref is None:
-            return None
-        raw_summaries = XcResultTool.get_object(self._xcresult, self.tests_ref.id)
-        return ActionTestPlanRunSummaries(raw_summaries, self._xcresult)
+    @property
+    def action_test_plan_run_summaries(self) -> Optional[ActionTestPlanRunSummaries]:
+        return self._get_referenced_object(self.tests_ref, ActionTestPlanRunSummaries)
 
 
 class ActionRunDestinationRecord(_AbstractRecord):
@@ -309,6 +369,44 @@ class ActionSDKRecord(_AbstractRecord):
         self.is_internal: bool = self._bool_value('isInternal')
 
 
+class ActionTestActivitySummary(_AbstractRecord):
+    """
+    - ActionTestActivitySummary
+      * Kind: object
+      * Properties:
+        + title: String
+        + activityType: String
+        + uuid: String
+        + start: Date?
+        + finish: Date?
+        + attachments: [ActionTestAttachment]
+        + subactivities: [ActionTestActivitySummary]
+        + failureSummaryIDs: [String]
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.title: str = self._str_value('title')
+        self.activity_type: str = self._str_value('activityType')
+        self.uuid: str = self._str_value('uuid')
+        self.start: Optional[datetime] = self._optional_date_value('start')
+        self.finish: Optional[datetime] = self._optional_date_value('finish')
+        self.attachments: List[ActionTestAttachment] = self._array_values('attachments', ActionTestAttachment)
+        self.subactivities: List[ActionTestActivitySummary] = \
+            self._array_values('subactivities', ActionTestActivitySummary)
+        self.failure_summary_ids: List[str] = self._array_str_values('failureSummaryIDs')
+
+    def get_description(self) -> str:
+        lines = []
+        if self.title:
+            lines.append(self.title)
+        for subactivity in self.subactivities:
+            description = subactivity.get_description()
+            if description:
+                lines.extend(f'    {line}' for line in description.splitlines())
+        return '\n'.join(lines)
+
+
 class ActionTestAttachment(_AbstractRecord):
     """
     - ActionTestAttachment
@@ -337,9 +435,10 @@ class ActionTestAttachment(_AbstractRecord):
         self.payload_ref: Optional[Reference] = self._optional_object_value('payloadRef', Reference)
         self.payload_size: int = self._int_value('payloadSize')
 
-    @lru_cache()
-    def get_payload(self):
-        raise NotImplemented()
+    @property
+    def payload(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.payload_ref, _AbstractRecord)
 
 
 class ActionTestFailureSummary(_AbstractRecord):
@@ -378,37 +477,78 @@ class ActionTestFailureSummary(_AbstractRecord):
         self.timestamp: Optional[datetime] = self._optional_date_value('timestamp')
         self.is_top_level_failure: bool = self._bool_value('isTopLevelFailure')
 
+    def get_description(self) -> str:
+        line_number = self.line_number
+        file_name = self.file_name
+        if self.source_code_context and self.source_code_context.location:
+            if self.source_code_context.location.line_number:
+                line_number = self.source_code_context.location.line_number
+            if self.source_code_context.location.file_path:
+                file_name = self.source_code_context.location.file_path
 
-class ActionTestMetadata(_AbstractRecord):
+        if file_name and line_number:
+            prefix = f'{self.file_name}:{self.line_number} '
+        else:
+            prefix = ''
+
+        message = self.detailed_description or self.message or self.issue_type or ''
+
+        return f'{prefix}{message}'
+
+
+class ActionTestNoticeSummary(_AbstractRecord):
     """
-    - ActionTestMetadata
-      * Supertype: ActionTestSummaryIdentifiableObject
+    - ActionTestNoticeSummary
       * Kind: object
       * Properties:
-        + testStatus: String
-        + duration: Double?
-        + summaryRef: Reference?
-        + performanceMetricsCount: Int
-        + failureSummariesCount: Int
-        + activitySummariesCount: Int
+        + message: String?
+        + fileName: String
+        + lineNumber: Int
     """
 
     def __init__(self, data: Dict, xcresult: pathlib.Path):
         super().__init__(data, xcresult)
-        self.test_status: str = self._str_value('testStatus')
-        self.duration: Optional[float] = self._optional_float_value('duration')
-        self.summary_ref: Optional[Reference] = self._optional_object_value('summaryRef', Reference)
-        self.performance_metrics_count: int = self._int_value('performanceMetricsCount')
-        self.failure_summaries_count: int = self._int_value('failureSummariesCount')
-        self.activity_summaries_count: int = self._int_value('activitySummariesCount')
+        self.message: Optional[str] = self._optional_str_value('message')
+        self.file_name: str = self._str_value('fileName')
+        self.line_number: int = self._int_value('lineNumber')
 
-    @property
-    def subtests(self) -> List[ActionTestMetadata]:
-        return [self]
+    def get_full_message(self) -> str:
+        prefix = ''
+        if self.file_name and self.line_number:
+            prefix = f'{self.file_name}:{self.line_number} '
+        return f'{prefix}{self.message}'
 
-    @lru_cache()
-    def get_summary(self):
-        ...
+
+class ActionTestPerformanceMetricSummary(_AbstractRecord):
+    """
+    - ActionTestPerformanceMetricSummary
+      * Kind: object
+      * Properties:
+        + displayName: String
+        + unitOfMeasurement: String
+        + measurements: [Double]
+        + identifier: String?
+        + baselineName: String?
+        + baselineAverage: Double?
+        + maxPercentRegression: Double?
+        + maxPercentRelativeStandardDeviation: Double?
+        + maxRegression: Double?
+        + maxStandardDeviation: Double?
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.display_name: str = self._str_value('displayName')
+        self.unit_of_measurement: str = self._str_value('unitOfMeasurement')
+        self.measurements: List[float] = self._array_float_values('measurements')
+        self.identifier: Optional[str] = self._optional_str_value('identifier')
+        self.baseline_name: Optional[str] = self._optional_str_value('baselineName')
+        self.baseline_average: Optional[float] = self._optional_float_value('baselineAverage')
+        self.max_percent_regression: Optional[float] = self._optional_float_value('maxPercentRegression')
+        self.max_percent_relative_standard_deviation: Optional[float] = \
+            self._optional_float_value('maxPercentRelativeStandardDeviation')
+        self.max_regression: Optional[float] = self._optional_float_value('maxRegression')
+        self.max_standard_deviation: Optional[float] = self._optional_float_value('maxStandardDeviation')
 
 
 class ActionTestPlanRunSummaries(_AbstractRecord):
@@ -439,6 +579,34 @@ class ActionTestPlanRunSummary(_ActionAbstractTestSummary):
             self._array_values('testableSummaries', ActionTestableSummary)
 
 
+class ActionTestSummary(_AbstractRecord):
+    """
+    - ActionTestSummary
+      * Supertype: ActionTestSummaryIdentifiableObject
+      * Kind: object
+      * Properties:
+        + testStatus: String
+        + duration: Double
+        + performanceMetrics: [ActionTestPerformanceMetricSummary
+        + failureSummaries: [ActionTestFailureSummary]
+        + skipNoticeSummary: ActionTestNoticeSummary?
+        + activitySummaries: [ActionTestActivitySummary]
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path):
+        super().__init__(data, xcresult)
+        self.test_status: str = self._str_value('testStatus')
+        self.duration: float = self._float_value('duration')
+        self.performance_metrics: List[ActionTestPerformanceMetricSummary] = \
+            self._array_values('performanceMetrics', ActionTestPerformanceMetricSummary)
+        self.failure_summaries: List[ActionTestFailureSummary] = \
+            self._array_values('failureSummaries', ActionTestFailureSummary)
+        self.skip_notice_summary: Optional[ActionTestNoticeSummary] = \
+            self._optional_object_value('skipNoticeSummary', ActionTestNoticeSummary)
+        self.activity_summaries: List[ActionTestActivitySummary] = \
+            self._array_values('activitySummaries', ActionTestActivitySummary)
+
+
 class ActionTestSummaryIdentifiableObject(_ActionAbstractTestSummary):
     """
     - ActionTestSummaryIdentifiableObject
@@ -448,12 +616,158 @@ class ActionTestSummaryIdentifiableObject(_ActionAbstractTestSummary):
         + identifier: String?
     """
 
-    def __init__(self, data: Dict, xcresult: pathlib.Path):
+    def __init__(self, data: Dict, xcresult: pathlib.Path,
+                 parent: Optional[Union[ActionTestSummaryGroup, ActionTestableSummary]] = None):
         super().__init__(data, xcresult)
+        self.parent = parent
         self.identifier: Optional[str] = self._optional_str_value('identifier')
 
+    def get_full_name(self) -> str:
+        if self.parent is None:
+            parent_name: Optional[str] = ''
+        elif isinstance(self.parent, ActionTestSummaryGroup):
+            parent_name = self.parent.get_full_name()
+        elif isinstance(self.parent, ActionTestableSummary):
+            parent_name = self.parent.name
+        else:
+            raise ValueError('Unknown parent type', self.parent)
 
-class ActionTestSummaryGroup(_AbstractRecord):
+        return '.'.join([p for p in [parent_name, self.name] if p])
+
+
+class ActionTestMetadata(ActionTestSummaryIdentifiableObject):
+    """
+    - ActionTestMetadata
+      * Supertype: ActionTestSummaryIdentifiableObject
+      * Kind: object
+      * Properties:
+        + testStatus: String
+        + duration: Double?
+        + summaryRef: Reference?
+        + performanceMetricsCount: Int
+        + failureSummariesCount: Int
+        + activitySummariesCount: Int
+    """
+
+    def __init__(self, data: Dict, xcresult: pathlib.Path,
+                 parent: Optional[Union[ActionTestSummaryGroup, ActionTestableSummary]] = None):
+        super().__init__(data, xcresult, parent)
+        self.test_status: str = self._str_value('testStatus')
+        self.duration: Optional[float] = self._optional_float_value('duration')
+        self.summary_ref: Optional[Reference] = self._optional_object_value('summaryRef', Reference)
+        self.performance_metrics_count: int = self._int_value('performanceMetricsCount')
+        self.failure_summaries_count: int = self._int_value('failureSummariesCount')
+        self.activity_summaries_count: int = self._int_value('activitySummariesCount')
+
+    @property
+    def summary(self) -> Optional[ActionTestSummary]:
+        return self._get_referenced_object(self.summary_ref, ActionTestSummary)
+
+    def _is_failure_status(self):
+        return self.test_status == 'Failure'
+
+    def _get_activity_summaries(self) -> List[ActionTestActivitySummary]:
+        return self.summary.activity_summaries if self.summary else []
+
+    def _get_failure_summaries(self) -> List[ActionTestFailureSummary]:
+        return self.summary.failure_summaries if self.summary else []
+
+    def _get_error_summaries(self) -> List[ActionTestFailureSummary]:
+        return [fs for fs in self._get_failure_summaries() if fs.associated_error]
+
+    def is_error(self) -> bool:
+        if not self._is_failure_status():
+            return False
+        return len(self._get_error_summaries()) > 0
+
+    def is_failure(self) -> bool:
+        if not self._is_failure_status():
+            return False
+        return len(self._get_error_summaries()) == 0
+
+    def is_disabled(self) -> bool:
+        # Disabled tests are completely excluded from reports
+        return False
+
+    def is_skipped(self) -> bool:
+        return self.test_status == 'Skipped'
+
+    def get_error_message(self) -> str:
+        if not self.is_error():
+            raise ValueError('Test did not fail with error', self)
+        return '\n'.join([s.message for s in self._get_error_summaries() if s.message])
+
+    def get_failure_message(self) -> str:
+        if not self.is_failure():
+            raise ValueError('Test did not fail with failure', self)
+        return '\n'.join([s.message for s in self._get_failure_summaries() if s.message])
+
+    def get_skipped_message(self) -> str:
+        if not self.is_skipped():
+            raise ValueError('Test was not skipped', self)
+        skip_summary = self.summary.skip_notice_summary if self.summary else None
+        if skip_summary and skip_summary.message:
+            return skip_summary.get_full_message()
+        for activity_summary in self._get_activity_summaries():
+            if activity_summary.title:
+                return activity_summary.title
+        return ''
+
+    def get_error_type(self) -> str:
+        if not self.is_error():
+            raise ValueError('Test did not fail with error', self)
+        for error_summary in self._get_error_summaries():
+            # Make mypy happy
+            if error_summary.associated_error and error_summary.associated_error.domain:
+                return error_summary.associated_error.domain
+        return ''
+
+    def get_failure_type(self) -> str:
+        if not self.is_failure():
+            raise ValueError('Test did not fail with failure', self)
+        for failure_summary in self._get_failure_summaries():
+            if failure_summary.issue_type:
+                return failure_summary.issue_type
+        return ''
+
+    def get_failure_description(self) -> Optional[str]:
+        if not self._is_failure_status():
+            raise ValueError('Test did not fail', self)
+        message = []
+        for failure_summary in self._get_failure_summaries():
+            description = failure_summary.get_description()
+            if description:
+                message.append(description)
+
+        for activity_summary in self._get_activity_summaries():
+            description = activity_summary.get_description()
+            if description:
+                message.append(description)
+
+        return '\n'.join(message)
+
+    def get_classname(self) -> str:
+        classname = ''
+        if not self.parent:
+            if self.identifier:
+                classname = self.identifier.rsplit('/', 1)[0]
+        else:
+            if self.parent.name:
+                classname = self.parent.name
+            elif isinstance(self.parent, ActionTestSummaryGroup) and self.parent.identifier:
+                classname = self.parent.identifier.split('/')[-1]
+        return classname
+
+    def get_method_name(self) -> str:
+        if self.name:
+            return self.name
+        elif self.identifier:
+            return self.identifier.split('/')[-1]
+        else:
+            return ''
+
+
+class ActionTestSummaryGroup(ActionTestSummaryIdentifiableObject):
     """
     - ActionTestSummaryGroup
       * Supertype: ActionTestSummaryIdentifiableObject
@@ -463,17 +777,24 @@ class ActionTestSummaryGroup(_AbstractRecord):
         + subtests: [ActionTestSummaryIdentifiableObject]
     """
 
-    def __init__(self, data: Dict, xcresult: pathlib.Path):
-        super().__init__(data, xcresult)
+    def __init__(self, data: Dict, xcresult: pathlib.Path,
+                 parent: Optional[Union[ActionTestSummaryGroup, ActionTestableSummary]] = None):
+        super().__init__(data, xcresult, parent)
         self.duration: float = self._float_value('duration')
-        self._subtests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
+        self.subtests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
             self._array_values('subtests', ActionTestSummaryGroup, ActionTestMetadata)
+        for subtest in self.subtests:
+            subtest.parent = self
 
-    @property
-    def subtests(self) -> List[ActionTestMetadata]:
+    def get_subtests(self) -> List[ActionTestMetadata]:
         tests: List[ActionTestMetadata] = []
-        for subtest in self._subtests:
-            tests.extend(subtest.subtests)
+        for subtest in self.subtests:
+            if isinstance(subtest, ActionTestMetadata):
+                tests.append(subtest)
+            elif isinstance(subtest, ActionTestSummaryGroup):
+                tests.extend(subtest.get_subtests())
+            else:
+                raise ValueError('Unknown subtests type', subtest)
         return tests
 
 
@@ -498,22 +819,26 @@ class ActionTestableSummary(_ActionAbstractTestSummary):
         self.project_relative_path: Optional[str] = self._optional_str_value('projectRelativePath')
         self.target_name: Optional[str] = self._optional_str_value('targetName')
         self.test_kind: Optional[str] = self._optional_str_value('testKind')
-        self._tests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
+        self.tests: List[Union[ActionTestSummaryGroup, ActionTestMetadata]] = \
             self._array_values('tests', ActionTestSummaryGroup, ActionTestMetadata)
         self.diagnostics_directory_name: Optional[str] = self._optional_str_value('diagnosticsDirectoryName')
         self.failure_summaries: List[ActionTestFailureSummary] = \
             self._array_values('failureSummaries', ActionTestFailureSummary)
         self.test_language: Optional[str] = self._optional_str_value('testLanguage')
         self.test_region: Optional[str] = self._optional_str_value('testRegion')
+        for test in self.tests:
+            test.parent = self
 
-    @property
-    def tests(self) -> List[ActionTestMetadata]:
-        try:
-            all_tests: List[ActionTestMetadata] = self._cache['_all_tests']
-        except KeyError:
-            all_tests = [subtest for test in self._tests for subtest in test.subtests]
-            self._cache['_all_tests'] = all_tests
-        return all_tests
+    def get_tests(self) -> List[ActionTestMetadata]:
+        tests: List[ActionTestMetadata] = []
+        for test in self.tests:
+            if isinstance(test, ActionTestMetadata):
+                tests.append(test)
+            elif isinstance(test, ActionTestSummaryGroup):
+                tests.extend(test.get_subtests())
+            else:
+                raise ValueError('Unknown test type', test)
+        return tests
 
 
 class ActionsInvocationMetadata(_AbstractRecord):
@@ -556,15 +881,12 @@ class ActionsInvocationRecord(_AbstractRecord):
 
     @classmethod
     def from_xcresult(cls, xcresult: pathlib.Path):
-        raw_actions_invocation_record = XcResultTool.get_bundle(xcresult)
+        raw_actions_invocation_record = _get_cached_object_from_bundle(xcresult)
         return ActionsInvocationRecord(raw_actions_invocation_record, xcresult)
 
-    @lru_cache()
-    def get_metadata(self) -> Optional[ActionsInvocationMetadata]:
-        if self.metadata_ref is None:
-            return None
-        raw_metadata = XcResultTool.get_object(self._xcresult, self.metadata_ref.id)
-        return ActionsInvocationMetadata(raw_metadata, self._xcresult)
+    @property
+    def metadata(self) -> Optional[ActionsInvocationMetadata]:
+        return self._get_referenced_object(self.metadata_ref, ActionsInvocationMetadata)
 
 
 class ArchiveInfo(_AbstractRecord):
@@ -596,13 +918,15 @@ class CodeCoverageInfo(_AbstractRecord):
         self.report_ref: Optional[Reference] = self._optional_object_value('reportRef', Reference)
         self.archive_ref: Optional[Reference] = self._optional_object_value('archiveRef', Reference)
 
-    @lru_cache()
-    def get_report(self):
-        raise NotImplemented()
+    @property
+    def report(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.report_ref, _AbstractRecord)
 
-    @lru_cache()
-    def get_archive(self):
-        raise NotImplemented()
+    @property
+    def archive(self) -> Optional[_AbstractRecord]:
+        # TODO: Get the types right
+        return self._get_referenced_object(self.archive_ref, _AbstractRecord)
 
 
 class DocumentLocation(_AbstractRecord):
@@ -718,12 +1042,6 @@ class ResultMetrics(_AbstractRecord):
         self.warning_count: int = self._int_value('warningCount')
 
 
-class SchemaSerializable(_AbstractRecord):
-    def __init__(self, data: Dict, xcresult: pathlib.Path):
-        super().__init__(data, xcresult)
-        # TODO: What to do with this?
-
-
 class SortedKeyValueArray(_AbstractRecord):
     """
     - SortedKeyValueArray
@@ -749,7 +1067,7 @@ class SortedKeyValueArrayPair(_AbstractRecord):
     def __init__(self, data: Dict, xcresult: pathlib.Path):
         super().__init__(data, xcresult)
         self.key: str = self._str_value('key')
-        self.value: SchemaSerializable = self._object_value('value', SchemaSerializable)
+        self.value: SchemaSerializable = self._schema_serializable_value('value')
 
 
 class SourceCodeContext(_AbstractRecord):
