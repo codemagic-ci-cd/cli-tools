@@ -168,14 +168,19 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
             return self._object_value(key, object_type)
         return None
 
-    def _get_referenced_object(self, reference: Optional[Reference], object_type: Type[R]) -> Optional[R]:
+    def _get_referenced_object(self, reference: Optional[Reference], *object_types: Type[R]) -> Optional[R]:
         if reference is None:
             return None
 
         value = _get_cached_object_from_bundle(self._xcresult, object_id=reference.id)
         given_type = value['_type']['_name']
-        assert given_type == object_type.__name__, f'Expected type {object_type.__name__}, but was {given_type}'
-        return object_type(value, self._xcresult)
+
+        for object_type in object_types:
+            if given_type == object_type.__name__:
+                return object_type(value, self._xcresult)
+
+        expected_types = ', '.join(t.__name__ for t in object_types)
+        raise AssertionError(f'Expected types {expected_types}, but was {given_type}')
 
 
 class _ActionAbstractTestSummary(_AbstractRecord, metaclass=ABCMeta):
@@ -310,21 +315,6 @@ class ActionResult(_AbstractRecord):
         self.diagnostics_ref: Optional[Reference] = self._optional_object_value('diagnosticsRef', Reference)
 
     @property
-    def timeline(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.timeline_ref, _AbstractRecord)
-
-    @property
-    def log(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.log_ref, _AbstractRecord)
-
-    @property
-    def diagnostics(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.log_ref, _AbstractRecord)
-
-    @property
     def action_test_plan_run_summaries(self) -> Optional[ActionTestPlanRunSummaries]:
         return self._get_referenced_object(self.tests_ref, ActionTestPlanRunSummaries)
 
@@ -434,11 +424,6 @@ class ActionTestAttachment(_AbstractRecord):
         self.filename: Optional[str] = self._optional_str_value('filename')
         self.payload_ref: Optional[Reference] = self._optional_object_value('payloadRef', Reference)
         self.payload_size: int = self._int_value('payloadSize')
-
-    @property
-    def payload(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.payload_ref, _AbstractRecord)
 
 
 class ActionTestFailureSummary(_AbstractRecord):
@@ -917,16 +902,6 @@ class CodeCoverageInfo(_AbstractRecord):
         self.has_coverage_data: bool = self._bool_value('hasCoverageData')
         self.report_ref: Optional[Reference] = self._optional_object_value('reportRef', Reference)
         self.archive_ref: Optional[Reference] = self._optional_object_value('archiveRef', Reference)
-
-    @property
-    def report(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.report_ref, _AbstractRecord)
-
-    @property
-    def archive(self) -> Optional[_AbstractRecord]:
-        # TODO: Get the types right
-        return self._get_referenced_object(self.archive_ref, _AbstractRecord)
 
 
 class DocumentLocation(_AbstractRecord):
