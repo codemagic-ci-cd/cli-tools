@@ -201,6 +201,57 @@ class TestArgument(cli.Argument):
     )
 
 
+class TestResultArgument(cli.Argument):
+    XCRESULT_PATTERNS = cli.ArgumentProperties(
+        key='xcresult_patterns',
+        flags=('-p', '--xcresults',),
+        type=cli.CommonArgumentTypes.existing_dir,
+        description=(
+            'Path to Xcode Test result (*.xcresult) to be be converted. '
+            'Can be either a path literal, or a glob pattern to match xcresults '
+            'in working directory.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'default': None,
+            'nargs': '+',
+            'metavar': 'xcresult-pattern',
+        },
+    )
+    XCRESULT_DIRS = cli.ArgumentProperties(
+        key='xcresult_dirs',
+        flags=('-d', '--dirs',),
+        type=cli.CommonArgumentTypes.existing_dir,
+        description='Directory where Xcode Test results (*.xcresult) should be converted.',
+        argparse_kwargs={
+            'required': False,
+            'default': [pathlib.Path('.')],
+            'nargs': '+',
+            'metavar': 'xcresult-dir',
+        },
+    )
+    OUTPUT_DIRECTORY = cli.ArgumentProperties(
+        key='output_dir',
+        flags=('-o', '--output-dir',),
+        type=cli.CommonArgumentTypes.existing_dir,
+        description='Directory where the Junit XML results will be saved.',
+        argparse_kwargs={
+            'required': False,
+            'default': pathlib.Path('.'),
+        },
+    )
+    OUTPUT_EXTENSION = cli.ArgumentProperties(
+        key='output_extension',
+        flags=('-e', '--output-extension',),
+        type=str,
+        description='Extension for the created Junit XML file. For example `xml` or `junit`.',
+        argparse_kwargs={
+            'required': False,
+            'default': 'xml',
+        },
+    )
+
+
 class XcprettyArgument(cli.Argument):
     DISABLE = cli.ArgumentProperties(
         key='disable_xcpretty',

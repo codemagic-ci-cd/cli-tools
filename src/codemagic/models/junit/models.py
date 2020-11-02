@@ -5,10 +5,13 @@ https://llg.cubic.org/docs/junit/
 
 from __future__ import annotations
 
+import pathlib
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
 from typing import Optional
+from xml.dom import minidom
+from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 from xml.etree.ElementTree import SubElement
 
@@ -39,6 +42,11 @@ class TestSuites:
         return sum(suite.tests for suite in self.test_suites)
 
     @property
+    def skipped(self) -> int:
+        """ Total number of tests from all testsuites. """
+        return sum((suite.skipped or 0) for suite in self.test_suites)
+
+    @property
     def time(self) -> float:
         """ Time in seconds to execute all test suites. """
         return sum(suite.time for suite in self.test_suites if suite.time)
@@ -58,6 +66,11 @@ class TestSuites:
         root.extend([test_suite.as_xml() for test_suite in self.test_suites])
         return root
 
+    def save_xml(self, xml_path: pathlib.Path):
+        xml_str = ElementTree.tostring(self.as_xml())
+        pretty_xml = minidom.parseString(xml_str).toprettyxml()
+        xml_path.write_text(pretty_xml)
+
 
 @dataclass
 class TestSuite:
@@ -72,6 +85,15 @@ class TestSuite:
     timestamp: Optional[str] = None  # When the test was executed in ISO 8601 format (2014-01-21T16:17:18).
     properties: List[Property] = field(default_factory=lambda: [])
     testcases: List[TestCase] = field(default_factory=lambda: [])
+
+    def get_errored_test_cases(self) -> List[TestCase]:
+        return [tc for tc in self.testcases if tc.error]
+
+    def get_failed_test_cases(self) -> List[TestCase]:
+        return [tc for tc in self.testcases if tc.failure]
+
+    def get_skipped_test_cases(self) -> List[TestCase]:
+        return [tc for tc in self.testcases if tc.skipped]
 
     def as_xml(self) -> Element:
         extras = {

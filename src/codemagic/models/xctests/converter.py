@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pathlib
 from datetime import datetime
 from typing import Iterator
 from typing import List
@@ -108,8 +109,13 @@ class XcResultConverter:
                 yield cls._get_test_suite(action, testable_summary)
 
     @classmethod
-    def xcresult_to_junit(cls, actions_invocation_record: ActionsInvocationRecord) -> TestSuites:
+    def actions_invocation_record_to_junit(cls, actions_invocation_record: ActionsInvocationRecord) -> TestSuites:
         test_suites: List[TestSuite] = []
         for action in actions_invocation_record.actions:
             test_suites.extend(cls._get_action_test_suites(action))
         return TestSuites(name='', test_suites=test_suites)
+
+    @classmethod
+    def xcresult_to_junit(cls, xcresult: pathlib.Path) -> TestSuites:
+        actions_invocation_record = ActionsInvocationRecord.from_xcresult(xcresult)
+        return cls.actions_invocation_record_to_junit(actions_invocation_record)

@@ -12,6 +12,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from xml.dom import minidom
+from xml.etree import ElementTree
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -24,10 +26,15 @@ from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcode
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
+from codemagic.models.junit import TestSuitePrinter
+from codemagic.models.junit import TestSuites
 from codemagic.models.simulator import Runtime
 from codemagic.models.simulator import Simulator
+from codemagic.models.xctests import XcResultCollector
+from codemagic.models.xctests import XcResultConverter
 from ._xcode_project.arguments import ExportIpaArgument
 from ._xcode_project.arguments import TestArgument
+from ._xcode_project.arguments import TestResultArgument
 from ._xcode_project.arguments import XcodeArgument
 from ._xcode_project.arguments import XcodeProjectArgument
 from ._xcode_project.arguments import XcprettyArgument
@@ -277,6 +284,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.CLEAN,
                 TestArgument.TEST_DEVICES,
                 TestArgument.TEST_SDK,
+                TestResultArgument.OUTPUT_DIRECTORY,
+                TestResultArgument.OUTPUT_EXTENSION,
                 XcodeArgument.TEST_FLAGS,
                 XcodeArgument.TEST_XCARGS,
                 XcprettyArgument.DISABLE,
@@ -293,7 +302,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  test_xcargs: Optional[str] = XcodeArgument.TEST_XCARGS.get_default(),
                  test_flags: Optional[str] = XcodeArgument.TEST_FLAGS.get_default(),
                  disable_xcpretty: bool = False,
-                 xcpretty_options: str = XcprettyArgument.OPTIONS.get_default()):
+                 xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
+                 output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
+                 output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default()):
         """
         Run unit or UI tests for given Xcode project or workspace
         """
@@ -302,15 +313,64 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
-        self.logger.info(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.echo(Colors.BLUE(f'\nRun tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+        xcresult_collector = XcResultCollector()
+        xcresult_collector.ignore_results_from(Xcode.DERIVED_DATA_PATH)
         try:
             xcodebuild.test(test_sdk, simulators, xcargs=test_xcargs, custom_flags=test_flags)
         except IOError as error:
-            raise XcodeProjectException(*error.args)
-        self.logger.info(Colors.GREEN(f'Test run completed successfully\n'))
+            self.echo(Colors.RED(f'\nTest run failed\n'))
+        else:
+            self.echo(Colors.GREEN(f'\nTest run completed successfully\n'))
+        xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
+
+        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+
+        self.echo(Colors.BLUE(
+            f'Executed {test_suites.tests} tests with '
+            f'{test_suites.failures} failures and '
+            f'{test_suites.errors} errors in '
+            f'{test_suites.time:.2f} seconds.\n'
+        ))
+        TestSuitePrinter(self.echo).print_test_suites(test_suites)
+        self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
+
+    @cli.action('junit-test-results',
+                TestResultArgument.XCRESULT_PATTERNS,
+                TestResultArgument.XCRESULT_DIRS,
+                TestResultArgument.OUTPUT_DIRECTORY,
+                TestResultArgument.OUTPUT_EXTENSION)
+    def convert_xcresults_to_junit(
+            self,
+            xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
+            xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default(),
+            output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
+            output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default()):
+        """
+        Convert Xcode Test Result Bundles (*.xcresult) to
+        JUnit XML format (https://llg.cubic.org/docs/junit/).
+        """
+        glob_patterns: List[pathlib.Path] = []
+        for xcresult_pattern in (xcresult_patterns or []):
+            if xcresult_pattern.suffix != '.xcresult':
+                raise TestResultArgument.XCRESULT_PATTERNS.raise_argument_error('Not a Xcode Test Result pattern')
+            glob_patterns.append(xcresult_pattern)
+        for xcresult_dir in xcresult_dirs:
+            glob_patterns.append(xcresult_dir / '**/*.xcresult')
+
+        xcresults = list(self.find_paths(*glob_patterns))
+        if not xcresults:
+            raise XcodeProjectException('Did not find any Xcode test results for given patterns')
+
+        xcresult_collector = XcResultCollector()
+        for xcresult in xcresults:
+            xcresult_collector.gather_results(xcresult)
+
+        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
     def _clean(self, xcodebuild: Xcodebuild):
-        self.logger.info(Colors.GREEN(f'Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.BLUE(f'Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
             xcodebuild.clean()
         except IOError as error:
@@ -362,9 +422,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
 
-        self.logger.info(Colors.GREEN('Running tests on simulators:'))
+        self.echo(Colors.BLUE('Running tests on simulators:'))
         for s in simulators:
-            self.logger.info('%s %s (%s)', s.runtime, s.name, s.udid)
+            self.echo('- %s %s (%s)', s.runtime, s.name, s.udid)
+        self.echo('')
         return simulators
 
     @classmethod
@@ -388,6 +449,27 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
         except ValueError as error:
             raise XcodeProjectException(*error.args) from error
+
+    def _get_test_suites(self, xcresult_collector: XcResultCollector, show_found_result: bool = False):
+        if show_found_result:
+            self.echo(Colors.GREEN('Found test results at'))
+            for xcresult in xcresult_collector.get_collected_results():
+                self.echo(f'- %s', xcresult)
+            self.echo('')
+
+        xcresult = xcresult_collector.get_merged_xcresult()
+        test_suites = XcResultConverter.xcresult_to_junit(xcresult)
+        xcresult_collector.forget_merged_result()
+        return test_suites, xcresult
+
+    def _save_test_suite(self,
+                         xcresult: pathlib.Path,
+                         test_suites: TestSuites,
+                         output_dir: pathlib.Path,
+                         output_extension: str):
+        result_path = output_dir / f'{xcresult.stem}.{output_extension}'
+        test_suites.save_xml(result_path)
+        self.echo(Colors.GREEN('Saved JUnit XML report to %s'), result_path)
 
     def _update_export_options(
             self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):

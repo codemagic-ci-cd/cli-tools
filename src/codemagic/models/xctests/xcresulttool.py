@@ -8,6 +8,7 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 
 from codemagic.cli.cli_types import CommandArg
 from codemagic.mixins import RunningCliAppMixin
@@ -34,9 +35,9 @@ class XcResultTool(RunningCliAppMixin):
         return json.loads(stdout)
 
     @classmethod
-    def merge(cls, *xcresults: pathlib.Path) -> pathlib.Path:
+    def merge(cls, *xcresults: pathlib.Path, result_prefix: Optional[str] = None) -> pathlib.Path:
         assert len(xcresults) > 1, 'At least two xcresults are required for merging'
-        with NamedTemporaryFile(prefix='Test-', suffix='.xcresult') as tf:
+        with NamedTemporaryFile(prefix=result_prefix or 'Test', suffix='-merged.xcresult') as tf:
             output_path = pathlib.Path(tf.name)
         cmd_args: List[CommandArg] = ['xcrun', 'xcresulttool', 'merge', *xcresults, '--output-path', output_path]
         _ = cls._run_command(cmd_args, f'Failed to merge xcresult bundles')

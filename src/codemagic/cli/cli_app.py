@@ -68,7 +68,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_running_app(cls) -> Optional[CliApp]:
-        return cls._running_app
+        return CliApp._running_app
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -164,8 +164,8 @@ class CliApp(metaclass=abc.ABCMeta):
             if args.show_version:
                 cls.show_version()
             elif args.action:
-                cls._running_app = cls._create_instance(parser, args)
-                cls._running_app._invoke_action(args)
+                CliApp._running_app = cls._create_instance(parser, args)
+                CliApp._running_app._invoke_action(args)
             else:
                 raise argparse.ArgumentError(args.action, 'the following argument is required: action')
         except argparse.ArgumentError as argument_error:

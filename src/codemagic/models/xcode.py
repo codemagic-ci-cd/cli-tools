@@ -12,6 +12,7 @@ from codemagic.mixins import RunningCliAppMixin
 
 
 class Xcode(RunningCliAppMixin):
+    DERIVED_DATA_PATH = pathlib.Path('~/Library/Developer/Xcode/DerivedData/').expanduser()
 
     def __init__(self, developer_dir: pathlib.Path):
         self.developer_dir = developer_dir
