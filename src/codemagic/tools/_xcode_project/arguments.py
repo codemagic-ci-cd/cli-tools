@@ -192,6 +192,13 @@ class TestArgument(cli.Argument):
             'metavar': 'device_description',
         },
     )
+    TEST_ONLY = cli.ArgumentProperties(
+        key='test_only',
+        flags=('--test-only',),
+        type=str,
+        description='Limit test run to execute only specified tests, and exclude all other tests',
+        argparse_kwargs={'required': False, 'default': None},
+    )
     TEST_SDK = cli.ArgumentProperties(
         key='test_sdk',
         flags=('--sdk',),

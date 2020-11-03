@@ -154,11 +154,14 @@ class Xcodebuild(RunningCliAppMixin):
     def _construct_test_command(self,
                                 sdk: str,
                                 simulators: List[Simulator],
+                                only_testing: Optional[str],
                                 xcargs: Optional[str],
                                 custom_flags: Optional[str]) -> List[str]:
         destinations = [['-destination', f'id={s.udid}'] for s in simulators]
+        only_testing = [['-only-testing', only_testing]] if only_testing else []
         return [
             *self._construct_base_command(custom_flags),
+            *reduce(add, only_testing, []),
             '-sdk', sdk,
             *reduce(add, destinations, []),
             'test',
@@ -212,12 +215,13 @@ class Xcodebuild(RunningCliAppMixin):
              sdk: str,
              simulators: List[Simulator],
              *,
+             only_testing: Optional[str] = None,
              xcargs: Optional[str] = None,
              custom_flags: Optional[str] = None):
         CoreSimulatorService().ensure_clean_state()
-        cmd = self._construct_test_command(sdk, simulators, xcargs, custom_flags)
+        cmd = self._construct_test_command(sdk, simulators, only_testing, xcargs, custom_flags)
         error_message = f'Failed to test {self.workspace or self.project}'
-        self._run_command(cmd, error_message, ignore_error_code=65)
+        self._run_command(cmd, error_message)
 
     def _run_command(self,
                      command: List[str],

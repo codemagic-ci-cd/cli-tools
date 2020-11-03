@@ -288,6 +288,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.CLEAN,
                 TestArgument.TEST_DEVICES,
+                TestArgument.TEST_ONLY,
                 TestArgument.TEST_SDK,
                 TestResultArgument.OUTPUT_DIRECTORY,
                 TestResultArgument.OUTPUT_EXTENSION,
@@ -303,6 +304,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  scheme_name: Optional[str] = None,
                  clean: bool = False,
                  devices: Optional[List[str]] = None,
+                 test_only: Optional[str] = TestArgument.TEST_ONLY.get_default(),
                  test_sdk: str = TestArgument.TEST_SDK.get_default(),
                  test_xcargs: Optional[str] = XcodeArgument.TEST_XCARGS.get_default(),
                  test_flags: Optional[str] = XcodeArgument.TEST_FLAGS.get_default(),
@@ -322,12 +324,15 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcresult_collector = XcResultCollector()
         xcresult_collector.ignore_results(Xcode.DERIVED_DATA_PATH)
         try:
-            xcodebuild.test(test_sdk, simulators, xcargs=test_xcargs, custom_flags=test_flags)
+            xcodebuild.test(test_sdk, simulators, only_testing=test_only, xcargs=test_xcargs, custom_flags=test_flags)
         except IOError as error:
             self.echo(Colors.RED(f'\nTest run failed\n'))
         else:
             self.echo(Colors.GREEN(f'\nTest run completed successfully\n'))
         xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
+
+        if not xcresult_collector.get_collected_results():
+            raise XcodeProjectException('Did not find any test results')
 
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
 

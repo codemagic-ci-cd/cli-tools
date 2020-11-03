@@ -14,6 +14,7 @@ xcode-project run-tests [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--scheme SCHEME_NAME]
     [--clean]
     [-d TEST_DEVICES]
+    [--test-only TEST_ONLY]
     [--sdk TEST_SDK]
     [-o OUTPUT_DIRECTORY]
     [-e OUTPUT_EXTENSION]
@@ -52,6 +53,10 @@ Whether to clean the project before building it
 
 
 Test destination description. Either a UDID value of the device, or device name and runtime combination. If runtime is not specified, the latest available runtime for given device name will be chosen. For example "iOS 14.0 iPhone SE (2nd generation)", "iPad Pro (9.7-inch)", "tvOS 14.1 Apple TV 4K (at 1080p)", "Apple TV 4K". If no devices are specified, then the default destination will be chosen (see `xcode-project default-test-destination` for more information about default destination). Multiple arguments
+##### `--test-only=TEST_ONLY`
+
+
+Limit test run to execute only specified tests, and exclude all other tests
 ##### `--sdk=TEST_SDK`
 
 
