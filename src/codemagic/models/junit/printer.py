@@ -67,7 +67,7 @@ class _Table:
                  lines: List[_Line],
                  vertical_separator: str = '│',
                  horizontal_separator: str = '─',
-                 horizontal_hinges: Tuple[str, str, str, str] = ('┼', '┴', '┬'),
+                 horizontal_hinges: Tuple[str, str, str] = ('┼', '┴', '┬'),
                  vertical_hinges: Tuple[str, str] = ('├', '┤'),
                  corners: Tuple[str, str, str, str] = ('┌', '┐', '└', '┘'),
                  left_padding: str = '  ',
@@ -128,7 +128,7 @@ class _Table:
         return f'{self.vertical_separator}{key}{self.vertical_separator}{value}{self.vertical_separator}'
 
     def _adjust_corners(self, result: List[str]):
-        tl, tr, bl, br, *_rest = self.corners
+        tl, tr, bl, br = self.corners
         result[0] = f'{tl}{result[0][1:-1]}{tr}'
         result[-1] = f'{bl}{result[-1][1:-1]}{br}'
 
@@ -172,9 +172,8 @@ class _Table:
         previous_lines = [None, *lines[:-1]]
         current_lines = lines
         next_lines = [*lines[1:], None]
-        for lines in zip(previous_lines, current_lines, next_lines):
-            lines: Tuple[Optional[_Line], _Line, Optional[_Line]]
-            yield lines
+        for _lines in zip(previous_lines, current_lines, next_lines):
+            yield _lines
 
 
 class TestSuitePrinter:
