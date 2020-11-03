@@ -12,11 +12,12 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--target TARGET_NAME]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
+    [--clean]
     [--archive-directory ARCHIVE_DIRECTORY]
     [--archive-flags ARCHIVE_FLAGS]
     [--archive-xcargs ARCHIVE_XCARGS]
     [--ipa-directory IPA_DIRECTORY]
-    [--export-options-plist EXPORT_OPTIONS_PATH]
+    [--export-options-plist EXPORT_OPTIONS_PATH_EXISTING]
     [--export-flags EXPORT_FLAGS]
     [--export-xcargs EXPORT_XCARGS]
     [--remove-xcarchive]
@@ -45,6 +46,10 @@ Name of the Xcode build configuration
 
 
 Name of the Xcode Scheme
+##### `--clean`
+
+
+Whether to clean the project before building it
 ##### `--archive-directory=ARCHIVE_DIRECTORY`
 
 
@@ -61,7 +66,7 @@ Pass additional arguments to xcodebuild for the archive phase. For example `COMP
 
 
 Directory where the built ipa is stored. Default:&nbsp;`build/ios/ipa`
-##### `--export-options-plist=EXPORT_OPTIONS_PATH`
+##### `--export-options-plist=EXPORT_OPTIONS_PATH_EXISTING`
 
 
 Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
