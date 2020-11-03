@@ -1,3 +1,4 @@
+from collections import Iterator
 from typing import Any
 from typing import Callable
 from typing import List
@@ -20,6 +21,9 @@ class _Line:
         self._value = value
         self._key_color = key_color
         self._value_color = value_color
+
+    def is_content_line(self) -> bool:
+        return self.__class__ is _Line
 
     @property
     def key_length(self) -> int:
@@ -61,9 +65,11 @@ class _Table:
 
     def __init__(self,
                  lines: List[_Line],
-                 vertical_separator: str = '|',
-                 horizontal_separator: str = '-',
-                 corner_separator: str = '+',
+                 vertical_separator: str = '│',
+                 horizontal_separator: str = '─',
+                 horizontal_hinges: Tuple[str, str, str, str] = ('┼', '┴', '┬'),
+                 vertical_hinges: Tuple[str, str] = ('├', '┤'),
+                 corners: Tuple[str, str, str, str] = ('┌', '┐', '└', '┘'),
                  left_padding: str = '  ',
                  right_padding: str = '  ',
                  align_keys_left: bool = True,
@@ -72,7 +78,9 @@ class _Table:
         self.lines = lines or []
         self.vertical_separator = vertical_separator
         self.horizontal_separator = horizontal_separator
-        self.corner_separator = corner_separator
+        self.horizontal_hinges = horizontal_hinges
+        self.vertical_hinges = vertical_hinges
+        self.corners = corners
         self.left_padding = left_padding
         self.right_padding = right_padding
         self.align_keys_left = align_keys_left
@@ -91,8 +99,38 @@ class _Table:
         right_padding = ' ' * max(0, width - len(left_padding) - len(header))
         return left_padding, right_padding
 
-    def get_spacer(self, width: int) -> str:
-        return f'{self.corner_separator}{width * self.horizontal_separator}{self.corner_separator}'
+    def _get_spacer(self, prev_line: Optional[_Line], next_line: Optional[_Line], keys_width: int,
+                    total_width: int) -> str:
+        if all([prev_line and prev_line.is_content_line(), next_line and next_line.is_content_line()]):
+            hinge = self.horizontal_hinges[0]
+        elif prev_line and prev_line.is_content_line():
+            hinge = self.horizontal_hinges[1]
+        elif next_line and next_line.is_content_line():
+            hinge = self.horizontal_hinges[2]
+        else:
+            hinge = self.horizontal_separator
+
+        lh, rh = self.vertical_hinges
+        default_spacer = f'{lh}{total_width * self.horizontal_separator}{rh}'
+        left = len(self.left_padding) + keys_width + len(self.right_padding)
+        return f'{default_spacer[:left + 1]}{hinge}{default_spacer[left + 2:]}'
+
+    def _get_header(self, line: _HeaderLine, total_width: int):
+        header = line.get_header()
+        lp, rp = self.get_header_paddings(header, total_width)
+        return f'{self.vertical_separator}{lp}{Colors.BOLD(header)}{rp}{self.vertical_separator}'
+
+    def _get_line(self, line: _Line, keys_width: int, values_width: int):
+        key = line.get_key(keys_width, align_left=self.align_keys_left)
+        value = line.get_value(values_width, align_left=self.align_values_left)
+        key = f'{self.left_padding}{key}{self.right_padding}'
+        value = f'{self.left_padding}{value}{self.right_padding}'
+        return f'{self.vertical_separator}{key}{self.vertical_separator}{value}{self.vertical_separator}'
+
+    def _adjust_corners(self, result: List[str]):
+        tl, tr, bl, br, *_rest = self.corners
+        result[0] = f'{tl}{result[0][1:-1]}{tr}'
+        result[-1] = f'{bl}{result[-1][1:-1]}{br}'
 
     def construct(self) -> str:
         keys_width = self.get_max_key_width()
@@ -104,31 +142,39 @@ class _Table:
             2 * len(self.right_padding),
             1,  # spacer in the middle
         ])
-        spacer = self.get_spacer(total_width)
-        l = self.vertical_separator
-        result: List[str] = []
-        for line in self.lines:
-            if isinstance(line, _SpacerLine):
-                result.append(spacer)
-            elif isinstance(line, _HeaderLine):
-                header = line.get_header()
-                lp, rp = self.get_header_paddings(header, total_width)
-                formatted_header = f'{l}{lp}{Colors.BOLD(header)}{rp}{l}'
-                result.extend([spacer, formatted_header, spacer])
-            else:
-                key = line.get_key(keys_width, align_left=self.align_keys_left)
-                value = line.get_value(values_width, align_left=self.align_values_left)
-                key = f'{self.left_padding}{key}{self.right_padding}'
-                value = f'{self.left_padding}{value}{self.right_padding}'
-                result.append(f'{l}{key}{l}{value}{l}')
 
-        if result[0] != spacer:
-            result.insert(0, spacer)
-        if result[-1] != spacer:
-            result.append(spacer)
+        result: List[str] = []
+        for prev_line, line, next_line in self._iter_lines():
+            if isinstance(line, _SpacerLine):
+                result.append(self._get_spacer(prev_line, next_line, keys_width, total_width))
+            elif isinstance(line, _HeaderLine):
+                result.append(self._get_header(line, total_width))
+            else:
+                result.append(self._get_line(line, keys_width, values_width))
+
+        self._adjust_corners(result)
         result.append('')
 
         return '\n'.join(result)
+
+    def _iter_lines(self) -> Iterator:
+        lines: List[_Line] = []
+        for line in self.lines:
+            if isinstance(line, _HeaderLine):
+                lines.extend([_SpacerLine(), line, _SpacerLine()])
+            else:
+                lines.append(line)
+        if not isinstance(lines[0], _SpacerLine):
+            lines.insert(0, _SpacerLine())
+        if not isinstance(lines[-1], _SpacerLine):
+            lines.append(_SpacerLine())
+
+        previous_lines = [None, *lines[:-1]]
+        current_lines = lines
+        next_lines = [*lines[1:], None]
+        for lines in zip(previous_lines, current_lines, next_lines):
+            lines: Tuple[Optional[_Line], _Line, Optional[_Line]]
+            yield lines
 
 
 class TestSuitePrinter:
@@ -204,4 +250,3 @@ class TestSuitePrinter:
             self._print_test_suite(test_suite)
 
         self._print_test_suites_summary(test_suites)
-
