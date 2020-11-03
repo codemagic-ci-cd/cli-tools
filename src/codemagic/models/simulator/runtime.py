@@ -20,8 +20,11 @@ class Runtime:
     _PATTERN = re.compile(
         r'((?P<name>iOS|tvOS|watchOS)[. -]?)(?P<version>(\d+[.-]?)+)')
 
-    def __init__(self, runtime_name):
-        self.raw_name = runtime_name
+    _VALIDATION_PATTERN = re.compile(
+        r'((?P<name>iOS|tvOS|watchOS)[. -]?)?(?P<version>(\d+[.-]?)+)?')
+
+    def __init__(self, raw_runtime_name: str):
+        self.raw_name = raw_runtime_name
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.raw_name!r})'
@@ -31,6 +34,15 @@ class Runtime:
 
     def __hash__(self):
         return hash(str(self))
+
+    def validate(self):
+        match = self._VALIDATION_PATTERN.search(self.raw_name)
+        if not match:
+            raise ValueError(f'Invalid runtime {self.raw_name!r}')
+        elif not match.groupdict()['version']:
+            raise ValueError(f'Invalid runtime {self.raw_name!r}, missing runtime version')
+        elif not match.groupdict()['name']:
+            raise ValueError(f'Invalid runtime {self.raw_name!r}, missing runtime name')
 
     @classmethod
     def parse(cls, string: str) -> Optional[Runtime]:

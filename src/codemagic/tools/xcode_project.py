@@ -231,6 +231,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         List available destinations for test runs
         """
 
+        try:
+            all(r.validate() for r in runtimes)
+        except ValueError as ve:
+            TestArgument.RUNTIMES.raise_argument_error(str(ve))
+
         self.logger.info(f'List available test devices')
         try:
             simulators = Simulator.list(runtimes, simulator_name, include_unavailable)
