@@ -12,8 +12,6 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from xml.dom import minidom
-from xml.etree import ElementTree
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -94,7 +92,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         from .keychain import Keychain
 
-        self.logger.info('Configure code signing settings')
+        self.logger.info(Colors.BLUE('Configure code signing settings'))
 
         profile_paths = self.find_paths(*profile_path_patterns)
         xcode_projects = self.find_paths(*xcode_project_patterns)
@@ -232,11 +230,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
 
         try:
-            all(r.validate() for r in runtimes)
+            all(r.validate() for r in (runtimes or []))
         except ValueError as ve:
             TestArgument.RUNTIMES.raise_argument_error(str(ve))
 
-        self.logger.info(f'List available test devices')
+        self.logger.info(Colors.BLUE(f'List available test devices'))
         try:
             simulators = Simulator.list(runtimes, simulator_name, include_unavailable)
         except IOError as e:
@@ -266,7 +264,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         xcode = Xcode.get_selected()
         if should_print:
-            self.logger.info('Show default test destination for Xcode %s (%s)', xcode.version, xcode.build_version)
+            msg_template = 'Show default test destination for Xcode %s (%s)'
+            self.logger.info(Colors.BLUE(msg_template), xcode.version, xcode.build_version)
 
         try:
             simulator = Simulator.get_default()
