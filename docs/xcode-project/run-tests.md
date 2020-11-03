@@ -13,6 +13,8 @@ xcode-project run-tests [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
     [--clean]
+    [--max-concurrent-devices MAX_CONCURRENT_DEVICES]
+    [--max-concurrent-simulators MAX_CONCURRENT_SIMULATORS]
     [-d TEST_DEVICES]
     [--test-only TEST_ONLY]
     [--sdk TEST_SDK]
@@ -49,6 +51,14 @@ Name of the Xcode Scheme
 
 
 Whether to clean the project before building it
+##### `--max-concurrent-devices=MAX_CONCURRENT_DEVICES`
+
+
+The maximum number of device destinations to test on concurrently.
+##### `--max-concurrent-simulators=MAX_CONCURRENT_SIMULATORS`
+
+
+The maximum number of simulator destinations to test on concurrently.
 ##### `-d, --device=TEST_DEVICES`
 
 

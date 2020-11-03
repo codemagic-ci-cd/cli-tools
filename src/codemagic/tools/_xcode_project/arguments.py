@@ -153,6 +153,20 @@ class TestArgument(cli.Argument):
         description='Whether to include unavailable devices in output',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    MAX_CONCURRENT_DEVICES = cli.ArgumentProperties(
+        key='max_concurrent_devices',
+        flags=('--max-concurrent-devices',),
+        type=int,
+        description='The maximum number of device destinations to test on concurrently.',
+        argparse_kwargs={'required': False, 'default': None},
+    )
+    MAX_CONCURRENT_SIMULATORS = cli.ArgumentProperties(
+        key='max_concurrent_simulators',
+        flags=('--max-concurrent-simulators',),
+        type=int,
+        description='The maximum number of simulator destinations to test on concurrently.',
+        argparse_kwargs={'required': False, 'default': None},
+    )
     RUNTIMES = cli.ArgumentProperties(
         key='runtimes',
         flags=('-r', '--runtime'),

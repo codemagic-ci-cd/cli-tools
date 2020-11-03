@@ -287,6 +287,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.CLEAN,
+                TestArgument.MAX_CONCURRENT_DEVICES,
+                TestArgument.MAX_CONCURRENT_SIMULATORS,
                 TestArgument.TEST_DEVICES,
                 TestArgument.TEST_ONLY,
                 TestArgument.TEST_SDK,
@@ -304,6 +306,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  scheme_name: Optional[str] = None,
                  clean: bool = False,
                  devices: Optional[List[str]] = None,
+                 max_concurrent_devices: Optional[int] = TestArgument.MAX_CONCURRENT_DEVICES.get_default(),
+                 max_concurrent_simulators: Optional[int] = TestArgument.MAX_CONCURRENT_SIMULATORS.get_default(),
                  test_only: Optional[str] = TestArgument.TEST_ONLY.get_default(),
                  test_sdk: str = TestArgument.TEST_SDK.get_default(),
                  test_xcargs: Optional[str] = XcodeArgument.TEST_XCARGS.get_default(),
@@ -320,11 +324,19 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
-        self.echo(Colors.BLUE(f'\nRun tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+        self.echo(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
         xcresult_collector = XcResultCollector()
         xcresult_collector.ignore_results(Xcode.DERIVED_DATA_PATH)
         try:
-            xcodebuild.test(test_sdk, simulators, only_testing=test_only, xcargs=test_xcargs, custom_flags=test_flags)
+            xcodebuild.test(
+                test_sdk,
+                simulators,
+                only_testing=test_only,
+                xcargs=test_xcargs,
+                custom_flags=test_flags,
+                max_concurrent_devices=max_concurrent_devices,
+                max_concurrent_simulators=max_concurrent_simulators,
+            )
         except IOError as error:
             self.echo(Colors.RED(f'\nTest run failed\n'))
         else:
@@ -384,7 +396,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             xcodebuild.clean()
         except IOError as error:
             raise XcodeProjectException(*error.args)
-        self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
 
     def _detect_project_bundle_ids(self,
                                    xcode_project: pathlib.Path,

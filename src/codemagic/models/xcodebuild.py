@@ -155,15 +155,25 @@ class Xcodebuild(RunningCliAppMixin):
                                 sdk: str,
                                 simulators: List[Simulator],
                                 only_testing: Optional[str],
+                                max_devices: Optional[int],
+                                max_simulators: Optional[int],
                                 xcargs: Optional[str],
                                 custom_flags: Optional[str]) -> List[str]:
-        destinations = [['-destination', f'id={s.udid}'] for s in simulators]
-        only_testing = [['-only-testing', only_testing]] if only_testing else []
+        max_devices_flag = '-maximum-concurrent-test-device-destinations'
+        max_sims_flag = '-maximum-concurrent-test-simulator-destinations'
+
+        destinations_args = [['-destination', f'id={s.udid}'] for s in simulators]
+        only_testing_args = ['-only-testing', only_testing] if only_testing else []
+        max_devices_args = [max_devices_flag, str(max_devices)] if max_devices else []
+        max_simulators_args = [max_sims_flag, str(max_simulators)] if max_simulators else []
+
         return [
             *self._construct_base_command(custom_flags),
-            *reduce(add, only_testing, []),
+            *only_testing_args,
             '-sdk', sdk,
-            *reduce(add, destinations, []),
+            *reduce(add, destinations_args, []),
+            *max_devices_args,
+            *max_simulators_args,
             'test',
             *shlex.split(xcargs or '')
         ]
@@ -216,10 +226,13 @@ class Xcodebuild(RunningCliAppMixin):
              simulators: List[Simulator],
              *,
              only_testing: Optional[str] = None,
+             max_concurrent_devices: Optional[int] = None,
+             max_concurrent_simulators: Optional[int] = None,
              xcargs: Optional[str] = None,
              custom_flags: Optional[str] = None):
         CoreSimulatorService().ensure_clean_state()
-        cmd = self._construct_test_command(sdk, simulators, only_testing, xcargs, custom_flags)
+        cmd = self._construct_test_command(
+            sdk, simulators, only_testing, max_concurrent_devices, max_concurrent_simulators, xcargs, custom_flags)
         error_message = f'Failed to test {self.workspace or self.project}'
         self._run_command(cmd, error_message)
 
