@@ -155,7 +155,7 @@ class TestArgument(cli.Argument):
     )
     RUNTIMES = cli.ArgumentProperties(
         key='runtimes',
-        flags=('-r', '--runtimes'),
+        flags=('-r', '--runtime'),
         type=Runtime,
         description='Runtime name. For example "iOS 14.1", "tvOS 14", "watchOS 7".',
         argparse_kwargs={
@@ -168,12 +168,12 @@ class TestArgument(cli.Argument):
         key='simulator_name',
         flags=('-n', '--name'),
         type=re.compile,
-        description='Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11.*".',
+        description='Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11".',
         argparse_kwargs={'required': False, 'default': None},
     )
     TEST_DEVICES = cli.ArgumentProperties(
         key='devices',
-        flags=('-d', '--devices'),
+        flags=('-d', '--device'),
         type=str,
         description=(
             'Test destination description. Either a UDID value of the device, or device name and '
@@ -204,12 +204,13 @@ class TestArgument(cli.Argument):
 class TestResultArgument(cli.Argument):
     XCRESULT_PATTERNS = cli.ArgumentProperties(
         key='xcresult_patterns',
-        flags=('-p', '--xcresults',),
+        flags=('-p', '--xcresult',),
         type=cli.CommonArgumentTypes.existing_dir,
         description=(
             'Path to Xcode Test result (*.xcresult) to be be converted. '
             'Can be either a path literal, or a glob pattern to match xcresults '
-            'in working directory.'
+            'in working directory. '
+            'If no search paths are provided, look for *.xcresults from current directory.'
         ),
         argparse_kwargs={
             'required': False,
@@ -220,12 +221,15 @@ class TestResultArgument(cli.Argument):
     )
     XCRESULT_DIRS = cli.ArgumentProperties(
         key='xcresult_dirs',
-        flags=('-d', '--dirs',),
+        flags=('-d', '--dir',),
         type=cli.CommonArgumentTypes.existing_dir,
-        description='Directory where Xcode Test results (*.xcresult) should be converted.',
+        description=(
+            'Directory where Xcode Test results (*.xcresult) should be converted. '
+            'If no search paths are provided, look for *.xcresults from current directory.'
+        ),
         argparse_kwargs={
             'required': False,
-            'default': [pathlib.Path('.')],
+            'default': [],
             'nargs': '+',
             'metavar': 'xcresult-dir',
         },

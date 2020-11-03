@@ -14,14 +14,14 @@ xcode-project test-destinations [-h] [--log-stream STREAM] [--no-color] [--versi
 ```
 ### Optional arguments for action `test-destinations`
 
-##### `-r, --runtimes=RUNTIMES`
+##### `-r, --runtime=RUNTIMES`
 
 
 Runtime name. For example "iOS 14.1", "tvOS 14", "watchOS 7". Multiple arguments
 ##### `-n, --name=SIMULATOR_NAME`
 
 
-Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11.\*".
+Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11".
 ##### `-u, --include-unavailable`
 
 

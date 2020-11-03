@@ -48,7 +48,7 @@ Name of the Xcode Scheme
 
 
 Whether to clean the project before building it
-##### `-d, --devices=TEST_DEVICES`
+##### `-d, --device=TEST_DEVICES`
 
 
 Test destination description. Either a UDID value of the device, or device name and runtime combination. If runtime is not specified, the latest available runtime for given device name will be chosen. For example "iOS 14.0 iPhone SE (2nd generation)", "iPad Pro (9.7-inch)", "tvOS 14.1 Apple TV 4K (at 1080p)", "Apple TV 4K". If no devices are specified, then the default destination will be chosen (see `xcode-project default-test-destination` for more information about default destination). Multiple arguments

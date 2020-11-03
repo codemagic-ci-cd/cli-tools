@@ -14,14 +14,14 @@ xcode-project junit-test-results [-h] [--log-stream STREAM] [--no-color] [--vers
 ```
 ### Optional arguments for action `junit-test-results`
 
-##### `-p, --xcresults=XCRESULT_PATTERNS`
+##### `-p, --xcresult=XCRESULT_PATTERNS`
 
 
-Path to Xcode Test result (\*.xcresult) to be be converted. Can be either a path literal, or a glob pattern to match xcresults in working directory. Multiple arguments
-##### `-d, --dirs=XCRESULT_DIRS`
+Path to Xcode Test result (\*.xcresult) to be be converted. Can be either a path literal, or a glob pattern to match xcresults in working directory. If no search paths are provided, look for \*.xcresults from current directory. Multiple arguments
+##### `-d, --dir=XCRESULT_DIRS`
 
 
-Directory where Xcode Test results (\*.xcresult) should be converted. Multiple arguments. Default:&nbsp;`[PosixPath('.')]`
+Directory where Xcode Test results (\*.xcresult) should be converted. If no search paths are provided, look for \*.xcresults from current directory. Multiple arguments
 ##### `-o, --output-dir=OUTPUT_DIRECTORY`
 
 
