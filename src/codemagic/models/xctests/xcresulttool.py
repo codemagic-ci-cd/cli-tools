@@ -10,7 +10,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from codemagic.cli.cli_types import CommandArg
+from codemagic.cli import CommandArg
 from codemagic.mixins import RunningCliAppMixin
 
 
@@ -19,7 +19,7 @@ class XcResultTool(RunningCliAppMixin):
     @classmethod
     def get_bundle(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
         cmd_args: List[CommandArg] = \
-            ['xcrun', 'xcresulttool', 'get', '--format', 'json', '--path', xcresult]
+            ['xcrun', 'xcresulttool', 'get', '--format', 'json', '--path', xcresult.expanduser()]
         stdout = cls._run_command(cmd_args, f'Failed to get result bundle object from {xcresult}')
         return json.loads(stdout)
 
@@ -28,7 +28,7 @@ class XcResultTool(RunningCliAppMixin):
         cmd_args: List[CommandArg] = [
             'xcrun', 'xcresulttool', 'get',
             '--format', 'json',
-            '--path', xcresult,
+            '--path', xcresult.expanduser(),
             '--id', object_id
         ]
         stdout = cls._run_command(cmd_args, f'Failed to get result bundle object {object_id} from {xcresult}')
@@ -37,7 +37,7 @@ class XcResultTool(RunningCliAppMixin):
     @classmethod
     def merge(cls, *xcresults: pathlib.Path, result_prefix: Optional[str] = None) -> pathlib.Path:
         assert len(xcresults) > 1, 'At least two xcresults are required for merging'
-        with NamedTemporaryFile(prefix=result_prefix or 'Test', suffix='-merged.xcresult') as tf:
+        with NamedTemporaryFile(prefix=result_prefix or 'Test-', suffix='-merged.xcresult') as tf:
             output_path = pathlib.Path(tf.name)
         cmd_args: List[CommandArg] = ['xcrun', 'xcresulttool', 'merge', *xcresults, '--output-path', output_path]
         _ = cls._run_command(cmd_args, f'Failed to merge xcresult bundles')

@@ -6,8 +6,8 @@ from typing import Tuple
 
 from codemagic.cli import Colors
 from codemagic.utilities import log
-from .models import TestSuite
-from .models import TestSuites
+from .definitions import TestSuite
+from .definitions import TestSuites
 
 
 class _Line:
@@ -70,14 +70,14 @@ class _Table:
                  align_values_left: bool = True,
                  header_color: Colors = Colors.BOLD):
         self.lines = lines or []
-        self._vertical_separator = vertical_separator
-        self._horizontal_separator = horizontal_separator
-        self._corner_separator = corner_separator
-        self._left_padding = left_padding
-        self._right_padding = right_padding
-        self._align_keys_left = align_keys_left
-        self._align_values_left = align_values_left
-        self._header_color = header_color
+        self.vertical_separator = vertical_separator
+        self.horizontal_separator = horizontal_separator
+        self.corner_separator = corner_separator
+        self.left_padding = left_padding
+        self.right_padding = right_padding
+        self.align_keys_left = align_keys_left
+        self.align_values_left = align_values_left
+        self.header_color = header_color
 
     def get_max_key_width(self) -> int:
         return max(line.key_length for line in self.lines)
@@ -92,7 +92,7 @@ class _Table:
         return left_padding, right_padding
 
     def get_spacer(self, width: int) -> str:
-        return f'{self._corner_separator}{width * self._horizontal_separator}{self._corner_separator}'
+        return f'{self.corner_separator}{width * self.horizontal_separator}{self.corner_separator}'
 
     def construct(self) -> str:
         keys_width = self.get_max_key_width()
@@ -100,12 +100,12 @@ class _Table:
         total_width = sum([
             keys_width,
             values_width,
-            2 * len(self._left_padding),
-            2 * len(self._right_padding),
+            2 * len(self.left_padding),
+            2 * len(self.right_padding),
             1,  # spacer in the middle
         ])
         spacer = self.get_spacer(total_width)
-        l = self._vertical_separator
+        l = self.vertical_separator
         result: List[str] = []
         for line in self.lines:
             if isinstance(line, _SpacerLine):
@@ -116,10 +116,10 @@ class _Table:
                 formatted_header = f'{l}{lp}{Colors.BOLD(header)}{rp}{l}'
                 result.extend([spacer, formatted_header, spacer])
             else:
-                key = line.get_key(keys_width, align_left=self._align_keys_left)
-                value = line.get_value(values_width, align_left=self._align_values_left)
-                key = f'{self._left_padding}{key}{self._right_padding}'
-                value = f'{self._left_padding}{value}{self._right_padding}'
+                key = line.get_key(keys_width, align_left=self.align_keys_left)
+                value = line.get_value(values_width, align_left=self.align_values_left)
+                key = f'{self.left_padding}{key}{self.right_padding}'
+                value = f'{self.left_padding}{value}{self.right_padding}'
                 result.append(f'{l}{key}{l}{value}{l}')
 
         if result[0] != spacer:

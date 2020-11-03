@@ -319,7 +319,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.echo(Colors.BLUE(f'\nRun tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
         xcresult_collector = XcResultCollector()
-        xcresult_collector.ignore_results_from(Xcode.DERIVED_DATA_PATH)
+        xcresult_collector.ignore_results(Xcode.DERIVED_DATA_PATH)
         try:
             xcodebuild.test(test_sdk, simulators, xcargs=test_xcargs, custom_flags=test_flags)
         except IOError as error:

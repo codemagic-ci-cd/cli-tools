@@ -40,7 +40,7 @@ class XcResultCollector:
         else:
             return set(tests_directory.rglob('*.xcresult'))
 
-    def ignore_results_from(self, tests_directory: pathlib.Path) -> XcResultCollector:
+    def ignore_results(self, tests_directory: pathlib.Path) -> XcResultCollector:
         xcresults = self._find_results(tests_directory)
         self._ignore_xcresults.update(xcresults)
         return self

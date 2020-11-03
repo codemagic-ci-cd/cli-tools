@@ -1,24 +1,11 @@
-import json
-import pathlib
-
-import pytest
-
-from codemagic.models.xctests.xcresult import ActionsInvocationRecord
-from codemagic.models.xctests.xcresult import ActionTestPlanRunSummary
-
-
-@pytest.mark.skip(reason='Test is not ready')
-def test_actions_invocation_record():
-    test_result = json.load(open('/tmp/test-result.json'))
-    xcresult = pathlib.Path('~/xcode_test_results/Test-banaan-iPhone-merged.xcresult').expanduser()
-    air = ActionsInvocationRecord(test_result, xcresult)
-    tests_refs = [action.action_result.tests_ref for action in air.actions]
-    assert len([ref.id for ref in tests_refs if tests_refs]) == 2
-
-
-@pytest.mark.skip(reason='Test is not ready')
-def test_action_test_plan_run_summary():
-    test_run_summary = json.load(open('/tmp/test-reference-1.json'))
-    xcresult = pathlib.Path('~/xcode_test_results/Test-banaan-iPhone-merged.xcresult').expanduser()
-    trs = ActionTestPlanRunSummary(test_run_summary, xcresult)
-    print(trs)
+def test_actions_invocation_record(action_invocations_record):
+    assert len(action_invocations_record.actions) == 3
+    assert action_invocations_record.archive is None
+    assert action_invocations_record.metadata_ref.id == \
+           '0~ziatpASSEiHdFpnwJuwZP5XrK5fND5RfMKOsfgAMd9kZrY7yLZfJQpqju3vazMV35oYDxSKotOIkTQvyUvaFLg=='
+    assert action_invocations_record.metrics.analyzer_warning_count == 0
+    assert action_invocations_record.metrics.error_count == 0
+    assert action_invocations_record.metrics.tests_count == 14
+    assert action_invocations_record.metrics.tests_failed_count == 6
+    assert action_invocations_record.metrics.tests_skipped_count == 2
+    assert action_invocations_record.metrics.warning_count == 0
