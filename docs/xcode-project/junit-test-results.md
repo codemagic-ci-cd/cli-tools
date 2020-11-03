@@ -3,7 +3,7 @@ junit-test-results
 ==================
 
 
-**Convert Xcode Test Result Bundles (*.xcresult) to         JUnit XML format (https://llg.cubic.org/docs/junit/).**
+**Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format**
 ### Usage
 ```bash
 xcode-project junit-test-results [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

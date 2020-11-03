@@ -41,7 +41,7 @@ Enable verbose logging for commands
 | :--- | :--- |
 |[`build-ipa`](build-ipa.md)|Build ipa by archiving the Xcode project and then exporting it|
 |[`clean`](clean.md)|Clean Xcode project|
-|[`junit-test-results`](junit-test-results.md)|Convert Xcode Test Result Bundles (*.xcresult) to         JUnit XML format (https://llg.cubic.org/docs/junit/).|
+|[`junit-test-results`](junit-test-results.md)|Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format|
 |[`detect-bundle-id`](detect-bundle-id.md)|Try to deduce the Bundle ID from specified Xcode project|
 |[`default-test-destination`](default-test-destination.md)|Show default test destination for the chosen Xcode version|
 |[`test-destinations`](test-destinations.md)|List available destinations for test runs|

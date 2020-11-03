@@ -351,8 +351,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
             output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default()):
         """
-        Convert Xcode Test Result Bundles (*.xcresult) to
-        JUnit XML format (https://llg.cubic.org/docs/junit/).
+        Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format
         """
         glob_patterns: List[pathlib.Path] = []
         for xcresult_pattern in (xcresult_patterns or []):

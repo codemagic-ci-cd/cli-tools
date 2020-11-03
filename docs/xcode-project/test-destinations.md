@@ -7,22 +7,22 @@ test-destinations
 ### Usage
 ```bash
 xcode-project test-destinations [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [--runtimes RUNTIMES]
-    [--name SIMULATOR_NAME]
-    [--unavailable]
+    [-r RUNTIMES]
+    [-n SIMULATOR_NAME]
+    [-u]
     [--json]
 ```
 ### Optional arguments for action `test-destinations`
 
-##### `--runtimes=RUNTIMES`
+##### `-r, --runtimes=RUNTIMES`
 
 
 Runtime name. For example "iOS 14.1", "tvOS 14", "watchOS 7". Multiple arguments
-##### `--name=SIMULATOR_NAME`
+##### `-n, --name=SIMULATOR_NAME`
 
 
-Regex pattern to filter simulators by name
-##### `--unavailable, --include-unavailable`
+Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11.\*".
+##### `-u, --include-unavailable`
 
 
 Whether to include unavailable devices in output

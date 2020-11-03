@@ -148,14 +148,14 @@ class ExportIpaArgument(cli.Argument):
 class TestArgument(cli.Argument):
     INCLUDE_UNAVAILABLE = cli.ArgumentProperties(
         key='include_unavailable',
-        flags=('--unavailable', '--include-unavailable'),
+        flags=('-u', '--include-unavailable',),
         type=bool,
         description='Whether to include unavailable devices in output',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     RUNTIMES = cli.ArgumentProperties(
         key='runtimes',
-        flags=('--runtimes',),
+        flags=('-r', '--runtimes'),
         type=Runtime,
         description='Runtime name. For example "iOS 14.1", "tvOS 14", "watchOS 7".',
         argparse_kwargs={
@@ -166,9 +166,9 @@ class TestArgument(cli.Argument):
     )
     SIMULATOR_NAME = cli.ArgumentProperties(
         key='simulator_name',
-        flags=('--name',),
+        flags=('-n', '--name'),
         type=re.compile,
-        description='Regex pattern to filter simulators by name',
+        description='Regex pattern to filter simulators by name. For example "iPad Air 2", "iPhone 11.*".',
         argparse_kwargs={'required': False, 'default': None},
     )
     TEST_DEVICES = cli.ArgumentProperties(
