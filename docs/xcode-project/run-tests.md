@@ -14,6 +14,7 @@ xcode-project run-tests [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--scheme SCHEME_NAME]
     [--clean]
     [--disable-coverage]
+    [--graceful-exit]
     [--max-concurrent-devices MAX_CONCURRENT_DEVICES]
     [--max-concurrent-simulators MAX_CONCURRENT_SIMULATORS]
     [-d TEST_DEVICES]
@@ -56,6 +57,10 @@ Whether to clean the project before building it
 
 
 Turn code coverage off when testing
+##### `--graceful-exit`
+
+
+In case of failed tests or unsuccessful test run exit the program with status code 0
 ##### `--max-concurrent-devices=MAX_CONCURRENT_DEVICES`
 
 
