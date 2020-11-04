@@ -153,6 +153,16 @@ class TestArgument(cli.Argument):
         description='Turn code coverage off when testing',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    GRACEFUL_EXIT = cli.ArgumentProperties(
+        key='graceful_exit',
+        flags=('--graceful-exit',),
+        type=bool,
+        description=(
+            'In case of failed tests or unsuccessful test run exit '
+            'the program with status code 0'
+        ),
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
     INCLUDE_UNAVAILABLE = cli.ArgumentProperties(
         key='include_unavailable',
         flags=('-u', '--include-unavailable',),

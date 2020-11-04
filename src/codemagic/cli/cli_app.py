@@ -112,8 +112,10 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
-        logger = log.get_logger(cls)
-        logger.error(f'{Colors.RED(cli_exception.message)}')
+        if cli_exception.message:
+            logger = log.get_logger(cls)
+            logger.error(f'{Colors.RED(cli_exception.message)}')
+
         if cli_exception.cli_process:
             return cli_exception.cli_process.returncode
         else:

@@ -288,6 +288,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.CLEAN,
                 TestArgument.DISABLE_CODE_COVERAGE,
+                TestArgument.GRACEFUL_EXIT,
                 TestArgument.MAX_CONCURRENT_DEVICES,
                 TestArgument.MAX_CONCURRENT_SIMULATORS,
                 TestArgument.TEST_DEVICES,
@@ -317,7 +318,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  disable_xcpretty: bool = False,
                  xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
                  output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
-                 output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default()):
+                 output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default(),
+                 graceful_exit: bool = False):
         """
         Run unit or UI tests for given Xcode project or workspace
         """
@@ -341,8 +343,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 max_concurrent_simulators=max_concurrent_simulators,
             )
         except IOError as error:
+            testing_failed = True
             self.echo(Colors.RED(f'\nTest run failed\n'))
         else:
+            testing_failed = False
             self.echo(Colors.GREEN(f'\nTest run completed successfully\n'))
         xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
 
@@ -359,6 +363,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         ))
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
+
+        if not graceful_exit:
+            has_failing_tests = test_suites and (test_suites.failures or test_suites.errors)
+            if testing_failed or has_failing_tests:
+                raise XcodeProjectException('Tests failed')
 
     @cli.action('junit-test-results',
                 TestResultArgument.XCRESULT_PATTERNS,
