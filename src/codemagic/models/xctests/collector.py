@@ -33,9 +33,9 @@ class XcResultCollector:
     @classmethod
     def _find_results(cls, tests_directory: pathlib.Path) -> Set[pathlib.Path]:
         tests_directory = tests_directory.expanduser()
-        assert tests_directory.is_dir(), 'Not a directory, cannot gather results'
-
-        if tests_directory.suffix == '.xcresult':
+        if not tests_directory.is_dir():
+            return set()  # Not a directory, cannot gather results
+        elif tests_directory.suffix == '.xcresult':
             return {tests_directory}
         else:
             return set(tests_directory.rglob('*.xcresult'))

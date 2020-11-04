@@ -13,6 +13,7 @@ xcode-project run-tests [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
     [--clean]
+    [--disable-coverage]
     [--max-concurrent-devices MAX_CONCURRENT_DEVICES]
     [--max-concurrent-simulators MAX_CONCURRENT_SIMULATORS]
     [-d TEST_DEVICES]
@@ -51,6 +52,10 @@ Name of the Xcode Scheme
 
 
 Whether to clean the project before building it
+##### `--disable-coverage`
+
+
+Turn code coverage off when testing
 ##### `--max-concurrent-devices=MAX_CONCURRENT_DEVICES`
 
 

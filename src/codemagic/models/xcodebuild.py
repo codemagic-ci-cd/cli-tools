@@ -155,6 +155,7 @@ class Xcodebuild(RunningCliAppMixin):
                                 sdk: str,
                                 simulators: List[Simulator],
                                 only_testing: Optional[str],
+                                enable_code_coverage: bool,
                                 max_devices: Optional[int],
                                 max_simulators: Optional[int],
                                 xcargs: Optional[str],
@@ -166,11 +167,13 @@ class Xcodebuild(RunningCliAppMixin):
         only_testing_args = ['-only-testing', only_testing] if only_testing else []
         max_devices_args = [max_devices_flag, str(max_devices)] if max_devices else []
         max_simulators_args = [max_sims_flag, str(max_simulators)] if max_simulators else []
+        coverage_args = ['-enableCodeCoverage', 'YES' if enable_code_coverage else 'NO']
 
         return [
             *self._construct_base_command(custom_flags),
             *only_testing_args,
             '-sdk', sdk,
+            *coverage_args,
             *reduce(add, destinations_args, []),
             *max_devices_args,
             *max_simulators_args,
@@ -225,6 +228,7 @@ class Xcodebuild(RunningCliAppMixin):
              sdk: str,
              simulators: List[Simulator],
              *,
+             enable_code_coverage: bool = False,
              only_testing: Optional[str] = None,
              max_concurrent_devices: Optional[int] = None,
              max_concurrent_simulators: Optional[int] = None,
@@ -232,7 +236,9 @@ class Xcodebuild(RunningCliAppMixin):
              custom_flags: Optional[str] = None):
         CoreSimulatorService().ensure_clean_state()
         cmd = self._construct_test_command(
-            sdk, simulators, only_testing, max_concurrent_devices, max_concurrent_simulators, xcargs, custom_flags)
+            sdk, simulators, only_testing, enable_code_coverage,
+            max_concurrent_devices, max_concurrent_simulators,
+            xcargs, custom_flags)
         error_message = f'Failed to test {self.workspace or self.project}'
         self._run_command(cmd, error_message)
 

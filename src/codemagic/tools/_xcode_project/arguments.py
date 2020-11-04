@@ -146,6 +146,13 @@ class ExportIpaArgument(cli.Argument):
 
 
 class TestArgument(cli.Argument):
+    DISABLE_CODE_COVERAGE = cli.ArgumentProperties(
+        key='disable_code_coverage',
+        flags=('--disable-coverage',),
+        type=bool,
+        description='Turn code coverage off when testing',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
     INCLUDE_UNAVAILABLE = cli.ArgumentProperties(
         key='include_unavailable',
         flags=('-u', '--include-unavailable',),

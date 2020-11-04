@@ -287,6 +287,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.CONFIGURATION_NAME,
                 XcodeProjectArgument.SCHEME_NAME,
                 XcodeProjectArgument.CLEAN,
+                TestArgument.DISABLE_CODE_COVERAGE,
                 TestArgument.MAX_CONCURRENT_DEVICES,
                 TestArgument.MAX_CONCURRENT_SIMULATORS,
                 TestArgument.TEST_DEVICES,
@@ -306,6 +307,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                  scheme_name: Optional[str] = None,
                  clean: bool = False,
                  devices: Optional[List[str]] = None,
+                 disable_code_coverage: bool = False,
                  max_concurrent_devices: Optional[int] = TestArgument.MAX_CONCURRENT_DEVICES.get_default(),
                  max_concurrent_simulators: Optional[int] = TestArgument.MAX_CONCURRENT_SIMULATORS.get_default(),
                  test_only: Optional[str] = TestArgument.TEST_ONLY.get_default(),
@@ -331,6 +333,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             xcodebuild.test(
                 test_sdk,
                 simulators,
+                enable_code_coverage=not disable_code_coverage,
                 only_testing=test_only,
                 xcargs=test_xcargs,
                 custom_flags=test_flags,
