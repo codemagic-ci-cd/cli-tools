@@ -125,12 +125,14 @@ class Simulator(RunningCliAppMixin):
         elif requested_runtime:
             # Runtime constraint was provided, narrow down search domain
             device_name = description.replace(requested_runtime.raw_name, '').strip()
-            choices = (s for s in simulators if s.runtime == requested_runtime and s.name == device_name)
-            simulator = next(choices, None)
+            runtime_choices = (s for s in simulators if s.runtime == requested_runtime and s.name == device_name)
+            simulator = next(runtime_choices, None)
         else:
             # Search matching devices by name and choose one with the most recent runtime
-            choices = (s for s in simulators if s.name == description)
-            simulator = max(choices, key=lambda s: s.runtime if s else None, default=None)
+            simulator = None
+            choices = [s for s in simulators if s.name == description]
+            if choices:
+                simulator = max(choices, key=lambda s: s.runtime)
 
         if simulator is None:
             raise ValueError(f'Simulator for destination {description!r} is not available')
