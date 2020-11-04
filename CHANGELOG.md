@@ -1,3 +1,8 @@
+Version 0.3.1
+-------------
+
+- Update [cryptography](https://github.com/pyca/cryptography) Python dependency to version ~=3.2.
+
 Version 0.3.0
 -------------
 
