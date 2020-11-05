@@ -46,4 +46,5 @@ Enable verbose logging for commands
 |[`default-test-destination`](default-test-destination.md)|Show default test destination for the chosen Xcode version|
 |[`test-destinations`](test-destinations.md)|List available destinations for test runs|
 |[`run-tests`](run-tests.md)|Run unit or UI tests for given Xcode project or workspace|
+|[`test-summary`](test-summary.md)|Show summary of Xcode Test Result|
 |[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|

@@ -3,11 +3,12 @@ Version 0.4.0
 
 **Improvements**
 
-- Feature: Acc action `clean` to `xcode-project` to clean Xcode project.
-- Feature: Acc action `default-test-destination` to `xcode-project` to show default test destination for the chosen Xcode version.
-- Feature: Acc action `test-destinations` to `xcode-project` to list available destinations for test runs.
-- Feature: Acc action `junit-test-results` to `xcode-project` to convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format.
-- Feature: Acc action `run-tests` to `xcode-project` to run unit or UI tests for given Xcode project or workspace.
+- Feature: Add action `clean` to `xcode-project` to clean Xcode project.
+- Feature: Add action `default-test-destination` to `xcode-project` to show default test destination for the chosen Xcode version.
+- Feature: Add action `test-destinations` to `xcode-project` to list available destinations for test runs.
+- Feature: Add action `junit-test-results` to `xcode-project` to convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format.
+- Feature: Add action `run-tests` to `xcode-project` to run unit or UI tests for given Xcode project or workspace.
+- Feature: Add action `test-summary` to `xcode-project` to show test result summary from given Xcode Test Result Bundles (*.xcresult).
 - Refactoring: Create `RunningCliAppMixin` to avoid passing around currently invoked app instance.
 
 - Update [cryptography](https://github.com/pyca/cryptography) Python dependency to version ~=3.2.

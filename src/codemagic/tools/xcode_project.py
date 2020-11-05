@@ -369,6 +369,24 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             if testing_failed or has_failing_tests:
                 raise XcodeProjectException('Tests failed')
 
+    @cli.action('test-summary',
+                TestResultArgument.XCRESULT_PATTERNS,
+                TestResultArgument.XCRESULT_DIRS)
+    def show_test_report_summary(
+            self,
+            xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
+            xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default()):
+        """
+        Show summary of Xcode Test Result
+        """
+        xcresult_collector = self._collect_xcresults(xcresult_patterns, xcresult_dirs)
+        xcresults = xcresult_collector.get_collected_results()
+        if not xcresults:
+            raise XcodeProjectException('Did not find any Xcode test results for given patterns')
+
+        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        TestSuitePrinter(self.echo).print_test_suites(test_suites)
+
     @cli.action('junit-test-results',
                 TestResultArgument.XCRESULT_PATTERNS,
                 TestResultArgument.XCRESULT_DIRS,
@@ -383,21 +401,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format
         """
-        glob_patterns: List[pathlib.Path] = []
-        for xcresult_pattern in (xcresult_patterns or []):
-            if xcresult_pattern.suffix != '.xcresult':
-                raise TestResultArgument.XCRESULT_PATTERNS.raise_argument_error('Not a Xcode Test Result pattern')
-            glob_patterns.append(xcresult_pattern)
-        for xcresult_dir in xcresult_dirs:
-            glob_patterns.append(xcresult_dir / '**/*.xcresult')
-
-        xcresults = list(self.find_paths(*glob_patterns))
+        xcresult_collector = self._collect_xcresults(xcresult_patterns, xcresult_dirs)
+        xcresults = xcresult_collector.get_collected_results()
         if not xcresults:
             raise XcodeProjectException('Did not find any Xcode test results for given patterns')
-
-        xcresult_collector = XcResultCollector()
-        for xcresult in xcresults:
-            xcresult_collector.gather_results(xcresult)
 
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
@@ -409,6 +416,25 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except IOError as error:
             raise XcodeProjectException(*error.args)
         self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+
+    def _collect_xcresults(self,
+                           xcresult_patterns: Optional[Sequence[pathlib.Path]],
+                           xcresult_dirs: Sequence[pathlib.Path]) -> XcResultCollector:
+        glob_patterns: List[pathlib.Path] = []
+
+        for xcresult_pattern in (xcresult_patterns or []):
+            if xcresult_pattern.suffix != '.xcresult':
+                raise TestResultArgument.XCRESULT_PATTERNS.raise_argument_error('Not a Xcode Test Result pattern')
+            glob_patterns.append(xcresult_pattern)
+
+        for xcresult_dir in xcresult_dirs:
+            glob_patterns.append(xcresult_dir / '**/*.xcresult')
+
+        xcresult_collector = XcResultCollector()
+        for xcresult in self.find_paths(*glob_patterns):
+            xcresult_collector.gather_results(xcresult)
+
+        return xcresult_collector
 
     def _detect_project_bundle_ids(self,
                                    xcode_project: pathlib.Path,
@@ -485,14 +511,16 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
     def _get_test_suites(self, xcresult_collector: XcResultCollector, show_found_result: bool = False):
         if show_found_result:
-            self.echo(Colors.GREEN('Found test results at'))
+            self.logger.info(Colors.GREEN('Found test results at'))
             for xcresult in xcresult_collector.get_collected_results():
-                self.echo(f'- %s', xcresult)
-            self.echo('')
+                self.logger.info(f'- %s', xcresult)
+            self.logger.info('')
 
         xcresult = xcresult_collector.get_merged_xcresult()
-        test_suites = XcResultConverter.xcresult_to_junit(xcresult)
-        xcresult_collector.forget_merged_result()
+        try:
+            test_suites = XcResultConverter.xcresult_to_junit(xcresult)
+        finally:
+            xcresult_collector.forget_merged_result()
         return test_suites, xcresult
 
     def _save_test_suite(self,
