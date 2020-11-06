@@ -142,3 +142,6 @@ class Simulator(RunningCliAppMixin):
     def find_simulators(cls, simulator_descriptions: Sequence[str]) -> List[Simulator]:
         simulators = cls.list()
         return [cls.choose_simulator(desc, simulators) for desc in simulator_descriptions]
+
+    def get_logs_path(self) -> pathlib.Path:
+        return pathlib.Path(f'~/Library/Logs/CoreSimulator/{self.udid}/system.log').expanduser()

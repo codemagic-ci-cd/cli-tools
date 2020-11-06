@@ -350,10 +350,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             self.echo(Colors.GREEN(f'\nTest run completed successfully\n'))
         xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
 
+        output_dir.mkdir(parents=True, exist_ok=True)
+        self._copy_simulator_logs(simulators, output_dir)
+
         if not xcresult_collector.get_collected_results():
             raise XcodeProjectException('Did not find any test results')
 
-        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        test_suites, xcresult = self._get_test_suites(
+            xcresult_collector, show_found_result=True, save_xcresult_dir=output_dir)
 
         self.echo(Colors.BLUE(
             f'Executed {test_suites.tests} tests with '
@@ -436,6 +440,24 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         return xcresult_collector
 
+    def _copy_simulator_logs(self, simulators: List[Simulator], target_directory: pathlib.Path):
+        for simulator in simulators:
+            simulator_description = f'{simulator.runtime}_{simulator.name}'
+            log_path = simulator.get_logs_path()
+            if not log_path.exists():
+                self.logger.debug('No logs found for simulator %s', simulator)
+                continue
+
+            unsafe_destination_name = f'{simulator_description}{log_path.suffix}'
+            destination_path = target_directory / re.sub(r'[^\w.]', '_', unsafe_destination_name)
+
+            try:
+                shutil.copy(log_path, destination_path)
+            except OSError:
+                self.logger.exception('Saving simulator %s logs to %s failed', simulator_description, destination_path)
+            else:
+                self.logger.debug('Saved simulator %s logs to %s', simulator_description, destination_path)
+
     def _detect_project_bundle_ids(self,
                                    xcode_project: pathlib.Path,
                                    target_name: Optional[str],
@@ -509,7 +531,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except ValueError as error:
             raise XcodeProjectException(*error.args) from error
 
-    def _get_test_suites(self, xcresult_collector: XcResultCollector, show_found_result: bool = False):
+    def _get_test_suites(self,
+                         xcresult_collector: XcResultCollector,
+                         show_found_result: bool = False,
+                         save_xcresult_dir: Optional[pathlib.Path] = None):
         if show_found_result:
             self.logger.info(Colors.GREEN('Found test results at'))
             for xcresult in xcresult_collector.get_collected_results():
@@ -520,6 +545,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         try:
             test_suites = XcResultConverter.xcresult_to_junit(xcresult)
         finally:
+            if save_xcresult_dir:
+                shutil.copytree(xcresult, save_xcresult_dir / xcresult.name)
             xcresult_collector.forget_merged_result()
         return test_suites, xcresult
 

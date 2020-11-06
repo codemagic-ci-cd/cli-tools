@@ -279,7 +279,7 @@ class TestResultArgument(cli.Argument):
         description='Directory where the Junit XML results will be saved.',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('.'),
+            'default': pathlib.Path('build/ios/test')
         },
     )
     OUTPUT_EXTENSION = cli.ArgumentProperties(
