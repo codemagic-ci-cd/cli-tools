@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import re
 from datetime import datetime
 from typing import Iterator
 from typing import List
@@ -65,15 +66,22 @@ class XcResultConverter:
         )
 
     @classmethod
-    def _get_testsuite_properties(cls, action: ActionRecord) -> List[Property]:
+    def _get_test_suite_run_destination(cls, action: ActionRecord) -> Optional[ActionDeviceRecord]:
+        if action.run_destination and action.run_destination.target_device_record:
+            return action.run_destination.target_device_record
+        return None
+
+    @classmethod
+    def _get_test_suite_properties(cls, action: ActionRecord) -> List[Property]:
         properties: List[Property] = [
             Property(name='started_time', value=cls._timestamp(action.started_time)),
             Property(name='ended_time', value=cls._timestamp(action.ended_time)),
         ]
         if action.title:
             properties.append(Property(name='title', value=action.title))
-        if action.run_destination and action.run_destination.target_device_record:
-            device: ActionDeviceRecord = action.run_destination.target_device_record
+
+        device = cls._get_test_suite_run_destination(action)
+        if device:
             properties.extend([
                 Property(name='device_name', value=device.model_name),
                 Property(name='device_architecture', value=device.native_architecture),
@@ -84,10 +92,25 @@ class XcResultConverter:
         return sorted(properties, key=lambda p: p.name)
 
     @classmethod
+    def _get_test_suite_name(cls, action: ActionRecord, testable_summary: ActionTestableSummary):
+        name = testable_summary.name or ''
+        device_info = ''
+
+        device = cls._get_test_suite_run_destination(action)
+        if device:
+            platform_name = device.platform_record.user_description
+            platform = re.sub('simulator', '', platform_name, flags=re.IGNORECASE).strip()
+            device_info = f'{platform} {device.operating_system_version} {device.model_name}'
+
+        if name and device_info:
+            return f'{name} [{device_info}]'
+        return name or device_info
+
+    @classmethod
     def _get_test_suite(cls, action: ActionRecord, testable_summary: ActionTestableSummary) -> TestSuite:
         tests = testable_summary.get_tests()
         return TestSuite(
-            name=testable_summary.name or '',
+            name=cls._get_test_suite_name(action, testable_summary),
             tests=len(tests),
             disabled=sum(t.is_disabled() for t in tests),
             errors=sum(t.is_error() for t in tests),
@@ -97,7 +120,7 @@ class XcResultConverter:
             time=sum(test.duration for test in tests),
             timestamp=cls._timestamp(action.ended_time),
             testcases=[cls._get_test_case(test) for test in tests],
-            properties=cls._get_testsuite_properties(action),
+            properties=cls._get_test_suite_properties(action),
         )
 
     @classmethod
