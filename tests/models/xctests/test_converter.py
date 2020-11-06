@@ -89,7 +89,7 @@ def test_converter(action_invocations_record, expected_ui_testcases, expected_un
     assert ts.disabled == 0
     assert ts.errors == 1
     assert ts.failures == 1
-    assert ts.name == 'banaanTests'
+    assert ts.name == 'banaanTests [iOS 13.2.2 iPhone 8]'
     assert ts.package == 'banaanTests'
     assert ts.skipped == 1
     assert ts.tests == 5
@@ -102,7 +102,7 @@ def test_converter(action_invocations_record, expected_ui_testcases, expected_un
     assert ts.disabled == 0
     assert ts.errors == 0
     assert ts.failures == 1
-    assert ts.name == 'banaanUITests'
+    assert ts.name == 'banaanUITests [iOS 13.2.2 iPhone 8]'
     assert ts.package == 'banaanUITests'
     assert ts.skipped == 0
     assert ts.tests == 2
