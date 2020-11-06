@@ -25,7 +25,7 @@ Directory where Xcode Test results (\*.xcresult) should be converted. If no sear
 ##### `-o, --output-dir=OUTPUT_DIRECTORY`
 
 
-Directory where the Junit XML results will be saved. Default:&nbsp;`.`
+Directory where the Junit XML results will be saved. Default:&nbsp;`build/ios/test`
 ##### `-e, --output-extension=OUTPUT_EXTENSION`
 
 

@@ -84,7 +84,7 @@ Name of the SDK that should be used for building the application for testing. De
 ##### `-o, --output-dir=OUTPUT_DIRECTORY`
 
 
-Directory where the Junit XML results will be saved. Default:&nbsp;`.`
+Directory where the Junit XML results will be saved. Default:&nbsp;`build/ios/test`
 ##### `-e, --output-extension=OUTPUT_EXTENSION`
 
 
