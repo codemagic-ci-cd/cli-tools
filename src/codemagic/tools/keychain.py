@@ -280,8 +280,12 @@ class Keychain(cli.CliApp, PathFinderMixin):
             '-T', shutil.which('codesign'),
             '-P', certificate_password.value,
         ], obfuscate_patterns=obfuscate_patterns)
+
         if process.returncode != 0:
-            raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)
+            if 'The specified item already exists in the keychain' in process.stderr:
+                pass  # It is fine that the certificate is already in keychain
+            else:
+                raise KeychainError(f'Unable to add certificate {certificate_path} to keychain {self.path}', process)
 
     def _find_certificates(self):
         process = self.execute(('security', 'find-certificate', '-a', '-p', self.path), show_output=False)

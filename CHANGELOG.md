@@ -1,3 +1,10 @@
+Version 0.3.2
+-------------
+
+**Improvements**
+
+- Bugfix: Do not fail `keychain add-certificate` action in case the added certificate already exists in keychain.
+
 Version 0.3.1
 -------------
 
