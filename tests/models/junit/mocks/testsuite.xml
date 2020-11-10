@@ -1,0 +1,103 @@
+<?xml version="1.0" ?>
+<testsuites errors="2" failures="4" name="" tests="14" time="10.096374988555908">
+	<testsuite errors="1" failures="1" name="banaanTests" package="banaanTests" skipped="1" tests="5" time="0.31836485862731934" timestamp="2020-10-29T15:35:53">
+		<properties>
+			<property name="device_architecture" value="x86_64"/>
+			<property name="device_identifier" value="7C2AC071-3FAE-4370-81D8-079BC87CC391"/>
+			<property name="device_name" value="iPhone 8"/>
+			<property name="device_operating_system" value="13.2.2 (17B102)"/>
+			<property name="device_platform" value="iOS Simulator"/>
+			<property name="ended_time" value="2020-10-29T15:35:53"/>
+			<property name="started_time" value="2020-10-29T15:33:18"/>
+			<property name="title" value="Testing project banaan with scheme banaan"/>
+		</properties>
+		<testcase classname="banaanTests" name="testExample()" status="Success" time="0.002252936363220215"/>
+		<testcase classname="banaanTests" name="testExceptionExample()" status="Failure" time="0.02912592887878418">
+			<error message="failed: caught error: &quot;The operation couldn’t be completed. (banaanTests.MyErrors error 0.)&quot;" type="banaanTests.MyErrors">failed: caught error: &quot;The operation couldn’t be completed. (banaanTests.MyErrors error 0.)&quot;
+Thrown Error: failed: caught error: &quot;The operation couldn’t be completed. (banaanTests.MyErrors error 0.)&quot;</error>
+		</testcase>
+		<testcase classname="banaanTests" name="testFailExample()" status="Failure" time="0.03098905086517334">
+			<failure message="failed - This won't make the cut" type="Assertion Failure">/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2Tests/banaanTests.swift:44 failed - This won't make the cut
+Assertion Failure at banaanTests.swift:44: failed - This won't make the cut</failure>
+		</testcase>
+		<testcase classname="banaanTests" name="testPerformanceExample()" status="Success" time="0.2531629800796509"/>
+		<testcase classname="banaanTests" name="testSkippedExample()" status="Skipped" time="0.0028339624404907227">
+			<skipped message="/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2Tests/banaanTests.swift:34 Test skipped - This test is skipped"/>
+		</testcase>
+	</testsuite>
+	<testsuite failures="1" name="banaanUITests" package="banaanUITests" tests="2" time="4.375350117683411" timestamp="2020-10-29T15:35:53">
+		<properties>
+			<property name="device_architecture" value="x86_64"/>
+			<property name="device_identifier" value="7C2AC071-3FAE-4370-81D8-079BC87CC391"/>
+			<property name="device_name" value="iPhone 8"/>
+			<property name="device_operating_system" value="13.2.2 (17B102)"/>
+			<property name="device_platform" value="iOS Simulator"/>
+			<property name="ended_time" value="2020-10-29T15:35:53"/>
+			<property name="started_time" value="2020-10-29T15:33:18"/>
+			<property name="title" value="Testing project banaan with scheme banaan"/>
+		</properties>
+		<testcase classname="banaanUITests" name="testUIExample()" status="Success" time="1.7065880298614502"/>
+		<testcase classname="banaanUITests" name="testUIFailExample()" status="Failure" time="2.6687620878219604">
+			<failure message="failed - Bad UI" type="Assertion Failure">/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2UITests/banaanUITests.swift:40 failed - Bad UI
+Start Test at 2020-10-29 15:34:26.057
+Set Up
+    Open io.codemagic.banaan
+        Launch io.codemagic.banaan
+            Terminate io.codemagic.banaan:57014
+            Setting up automation session
+            Wait for io.codemagic.banaan to idle
+Assertion Failure at banaanUITests.swift:40: failed - Bad UI
+Tear Down</failure>
+		</testcase>
+	</testsuite>
+	<testsuite errors="1" failures="1" name="banaanTests" package="banaanTests" skipped="1" tests="5" time="0.35574495792388916" timestamp="2020-10-29T15:35:57">
+		<properties>
+			<property name="device_architecture" value="x86_64"/>
+			<property name="device_identifier" value="87895091-1524-455B-A549-12ADED0AD7F0"/>
+			<property name="device_name" value="iPhone 8"/>
+			<property name="device_operating_system" value="14.0 (18A372)"/>
+			<property name="device_platform" value="iOS Simulator"/>
+			<property name="ended_time" value="2020-10-29T15:35:57"/>
+			<property name="started_time" value="2020-10-29T15:33:18"/>
+			<property name="title" value="Testing project banaan with scheme banaan"/>
+		</properties>
+		<testcase classname="banaanTests" name="testExample()" status="Success" time="0.009827971458435059"/>
+		<testcase classname="banaanTests" name="testExceptionExample()" status="Failure" time="0.08241903781890869">
+			<error message="failed: caught error: &quot;badInput&quot;" type="banaanTests.MyErrors">/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2Tests/banaanTests.swift:50 failed: caught error: &quot;badInput&quot;
+Thrown Error at banaanTests.swift:50: failed: caught error: &quot;badInput&quot;</error>
+		</testcase>
+		<testcase classname="banaanTests" name="testFailExample()" status="Failure" time="0.0036939382553100586">
+			<failure message="failed - This won't make the cut" type="Assertion Failure">/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2Tests/banaanTests.swift:44 failed - This won't make the cut
+Assertion Failure at banaanTests.swift:44: failed - This won't make the cut</failure>
+		</testcase>
+		<testcase classname="banaanTests" name="testPerformanceExample()" status="Success" time="0.2537109851837158"/>
+		<testcase classname="banaanTests" name="testSkippedExample()" status="Skipped" time="0.006093025207519531">
+			<skipped message="/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2Tests/banaanTests.swift:34 Test skipped - This test is skipped"/>
+		</testcase>
+	</testsuite>
+	<testsuite failures="1" name="banaanUITests" package="banaanUITests" tests="2" time="5.046915054321289" timestamp="2020-10-29T15:35:57">
+		<properties>
+			<property name="device_architecture" value="x86_64"/>
+			<property name="device_identifier" value="87895091-1524-455B-A549-12ADED0AD7F0"/>
+			<property name="device_name" value="iPhone 8"/>
+			<property name="device_operating_system" value="14.0 (18A372)"/>
+			<property name="device_platform" value="iOS Simulator"/>
+			<property name="ended_time" value="2020-10-29T15:35:57"/>
+			<property name="started_time" value="2020-10-29T15:33:18"/>
+			<property name="title" value="Testing project banaan with scheme banaan"/>
+		</properties>
+		<testcase classname="banaanUITests" name="testUIExample()" status="Success" time="1.7833280563354492"/>
+		<testcase classname="banaanUITests" name="testUIFailExample()" status="Failure" time="3.26358699798584">
+			<failure message="failed - Bad UI" type="Assertion Failure">/Users/priit/nevercode/banaan-ios/ios-test2/ios-test2UITests/banaanUITests.swift:40 failed - Bad UI
+Start Test at 2020-10-29 15:34:42.837
+Set Up
+    Open io.codemagic.banaan
+        Launch io.codemagic.banaan
+            Terminate io.codemagic.banaan:57051
+            Setting up automation session
+            Wait for io.codemagic.banaan to idle
+Assertion Failure at banaanUITests.swift:40: failed - Bad UI
+Tear Down</failure>
+		</testcase>
+	</testsuite>
+</testsuites>

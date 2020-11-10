@@ -11,16 +11,13 @@ from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
-if TYPE_CHECKING:
-    from codemagic.cli import CliApp
 
-
-class CodeSignEntitlements(StringConverterMixin):
+class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, entitlement_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = entitlement_data
@@ -37,9 +34,10 @@ class CodeSignEntitlements(StringConverterMixin):
         return CodeSignEntitlements(parsed_plist)
 
     @classmethod
-    def from_app(cls, app_path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> CodeSignEntitlements:
+    def from_app(cls, app_path: pathlib.Path) -> CodeSignEntitlements:
         cls._ensure_codesign()
         cmd = ('codesign', '-d', '--entitlements', ':-', str(app_path))
+        cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(cmd, show_output=False)
@@ -53,7 +51,7 @@ class CodeSignEntitlements(StringConverterMixin):
         return cls.from_plist(output)
 
     @classmethod
-    def from_ipa(cls, ipa_path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> CodeSignEntitlements:
+    def from_ipa(cls, ipa_path: pathlib.Path) -> CodeSignEntitlements:
         with zipfile.ZipFile(ipa_path) as zf, tempfile.TemporaryDirectory() as td:
             for zi in zf.filelist:
                 path = pathlib.Path(zi.filename)
@@ -67,14 +65,14 @@ class CodeSignEntitlements(StringConverterMixin):
             app_path = next((pathlib.Path(td).glob('Payload/*.app')), None)
             if not app_path:
                 raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
-            return cls.from_app(app_path, cli_app=cli_app)
+            return cls.from_app(app_path)
 
     @classmethod
-    def from_xcarchive(cls, xcarchive_path: pathlib.Path, cli_app: Optional['CliApp'] = None) -> CodeSignEntitlements:
+    def from_xcarchive(cls, xcarchive_path: pathlib.Path) -> CodeSignEntitlements:
         app_path = next((xcarchive_path.glob('Products/Applications/*.app')), None)
         if not app_path:
             raise IOError(f'Failed to obtain entitlements from {xcarchive_path}, .app not found')
-        return cls.from_app(app_path, cli_app=cli_app)
+        return cls.from_app(app_path)
 
     def get_icloud_container_environments(self) -> List[str]:
         environment = self.plist.get('com.apple.developer.icloud-container-environment')

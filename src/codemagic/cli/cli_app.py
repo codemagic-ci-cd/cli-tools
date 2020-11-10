@@ -57,6 +57,7 @@ class CliApp(metaclass=abc.ABCMeta):
     REGISTERED_CLASS_ARGUMENTS: Dict[Type[CliApp], Tuple[Argument, ...]] = {}
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
     _printer = None
+    _running_app = None
 
     def __init__(self, dry=False, verbose=False, **cli_options):
         self.dry_run = dry
@@ -64,6 +65,10 @@ class CliApp(metaclass=abc.ABCMeta):
         self.obfuscation = 8 * '*'
         self.verbose = verbose
         self.logger = log.get_logger(self.__class__)
+
+    @classmethod
+    def get_running_app(cls) -> Optional[CliApp]:
+        return CliApp._running_app
 
     @classmethod
     def get_executable_name(cls) -> str:
@@ -107,8 +112,10 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
-        logger = log.get_logger(cls)
-        logger.error(f'{Colors.RED(cli_exception.message)}')
+        if cli_exception.message:
+            logger = log.get_logger(cls)
+            logger.error(f'{Colors.RED(cli_exception.message)}')
+
         if cli_exception.cli_process:
             return cli_exception.cli_process.returncode
         else:
@@ -159,8 +166,8 @@ class CliApp(metaclass=abc.ABCMeta):
             if args.show_version:
                 cls.show_version()
             elif args.action:
-                app = cls._create_instance(parser, args)
-                app._invoke_action(args)
+                CliApp._running_app = cls._create_instance(parser, args)
+                CliApp._running_app._invoke_action(args)
             else:
                 raise argparse.ArgumentError(args.action, 'the following argument is required: action')
         except argparse.ArgumentError as argument_error:
@@ -317,12 +324,18 @@ class CliApp(metaclass=abc.ABCMeta):
 
     def execute(self, command_args: Sequence[CommandArg],
                 obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
-                show_output: bool = True) -> CliProcess:
+                show_output: bool = True,
+                suppress_output: bool = False) -> CliProcess:
+        if suppress_output:
+            print_streams = False
+        else:
+            print_streams = show_output or self.verbose
+
         return CliProcess(
             command_args,
             self._obfuscate_command(command_args, obfuscate_patterns),
             dry=self.dry_run,
-            print_streams=show_output or self.verbose
+            print_streams=print_streams,
         ).execute()
 
 

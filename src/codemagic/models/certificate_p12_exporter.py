@@ -10,15 +10,15 @@ from typing import Sequence
 from typing import TYPE_CHECKING
 from typing import Union
 
+from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
     from .certificate import Certificate
     from .private_key import PrivateKey
-    from codemagic.cli import CliApp
 
 
-class P12Exporter(StringConverterMixin):
+class P12Exporter(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, certificate: Certificate, private_key: PrivateKey, container_password: str):
         self.container_password = container_password
@@ -48,8 +48,9 @@ class P12Exporter(StringConverterMixin):
         if shutil.which('openssl') is None:
             raise IOError('OpenSSL executable not present on system')
 
-    def _run_openssl_command(self, command: Sequence[Union[str, pathlib.Path]], cli_app: Optional[CliApp]):
+    def _run_openssl_command(self, command: Sequence[Union[str, pathlib.Path]]):
         process = None
+        cli_app = self.get_current_cli_app()
         try:
             if cli_app:
                 process = cli_app.execute(command, [command[-1]])
@@ -63,7 +64,7 @@ class P12Exporter(StringConverterMixin):
                 error = 'Unable to export certificate: Failed to create PKCS12 container'
             raise IOError(error, process)
 
-    def _create_pkcs12_container(self, pkcs12: pathlib.Path, password: str, cli_app: Optional[CliApp]):
+    def _create_pkcs12_container(self, pkcs12: pathlib.Path, password: str):
         if not password:
             raise ValueError('Cannot export PKCS12 container without password')
 
@@ -74,9 +75,9 @@ class P12Exporter(StringConverterMixin):
             '-inkey', self._temp_private_key_path,
             '-passout', f'pass:{password}'
         )
-        self._run_openssl_command(export_args, cli_app)
+        self._run_openssl_command(export_args)
 
-    def _decrypt_pkcs12_container(self, pkcs12: pathlib.Path, password: str, cli_app: Optional[CliApp]):
+    def _decrypt_pkcs12_container(self, pkcs12: pathlib.Path, password: str):
         if not password:
             raise ValueError('Cannot decrypt PKCS12 container without password')
 
@@ -87,17 +88,17 @@ class P12Exporter(StringConverterMixin):
             '-in', pkcs12,
             '-out', decrypted_pkcs12,
         )
-        self._run_openssl_command(decrypt_args, cli_app)
+        self._run_openssl_command(decrypt_args)
         decrypted_pkcs12.rename(pkcs12)
 
-    def export(self, export_path: Optional[pathlib.Path] = None, *, cli_app: Optional[CliApp] = None) -> pathlib.Path:
+    def export(self, export_path: Optional[pathlib.Path] = None) -> pathlib.Path:
         self._ensure_openssl()
         p12_path = self._get_export_path(export_path)
         password = self.container_password or 'temporary-password'
         try:
-            self._create_pkcs12_container(p12_path, password, cli_app)
+            self._create_pkcs12_container(p12_path, password)
             if not self.container_password:
-                self._decrypt_pkcs12_container(p12_path, password, cli_app)
+                self._decrypt_pkcs12_container(p12_path, password)
         finally:
             self._cleanup()
         return p12_path

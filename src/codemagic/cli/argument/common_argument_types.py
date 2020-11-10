@@ -7,6 +7,13 @@ from typing import Dict
 class CommonArgumentTypes:
 
     @staticmethod
+    def existing_dir(path_str: str) -> pathlib.Path:
+        path = pathlib.Path(path_str).expanduser()
+        if path.is_dir():
+            return path
+        raise argparse.ArgumentTypeError(f'Path "{path}" is not a directory')
+
+    @staticmethod
     def existing_path(path_str: str) -> pathlib.Path:
         path = pathlib.Path(path_str).expanduser()
         if path.exists():

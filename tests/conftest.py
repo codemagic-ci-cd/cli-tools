@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import pathlib
+import shutil
 import sys
 from functools import lru_cache
 from typing import NamedTuple
@@ -144,3 +145,11 @@ def cli_argument_group():
     action_parsers = parser.add_subparsers()
     action_parser = action_parsers.add_parser('action parser')
     return action_parser.add_argument_group()
+
+
+@pytest.fixture()
+def temp_dir(tmpdir) -> pathlib.Path:
+    yield pathlib.Path(tmpdir)
+    if not os.environ.get('CI'):
+        # Cleanup generated dirs if not running on CI
+        shutil.rmtree(tmpdir)
