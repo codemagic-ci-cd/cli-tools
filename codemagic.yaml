@@ -23,7 +23,7 @@ workflows:
           head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.txt
           python3 -c "import json; json.dump({'tag_name': '$TAG_NAME', 'name': '$TAG_NAME', 'body': open('release_notes.txt').read().strip(), 'draft': True, 'prerelease': True}, open('release_payload.json', 'w'))"
       - name: Draft a release
-      - script: |
+        script: |
           set -e
 
           curl -u "$GH_USER":"$GH_PAT" --silent --fail -H 'Content-Type: application/json' -X POST --data "@release_payload.json" "https://api.github.com/repos/${REPOSITORY}/releases" > release_response.json
