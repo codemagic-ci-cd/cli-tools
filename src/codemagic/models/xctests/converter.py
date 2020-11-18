@@ -117,7 +117,7 @@ class XcResultConverter:
             failures=sum(t.is_failure() for t in tests),
             package=testable_summary.name,
             skipped=sum(t.is_skipped() for t in tests),
-            time=sum(test.duration for test in tests),
+            time=sum((test.duration or 0) for test in tests),
             timestamp=cls._timestamp(action.ended_time),
             testcases=[cls._get_test_case(test) for test in tests],
             properties=cls._get_test_suite_properties(action),

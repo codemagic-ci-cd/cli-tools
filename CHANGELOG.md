@@ -1,3 +1,10 @@
+Version 0.4.1
+-------------
+
+**Improvements**
+
+- Bugfix: Fix converting Xcresults to Junit if testsuite duration is missing from Xcresult's ActionTestMetadata
+
 Version 0.4.0
 -------------
 
