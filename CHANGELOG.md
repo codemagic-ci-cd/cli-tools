@@ -3,7 +3,7 @@ Version 0.4.2
 
 **Improvements**
 
-- Bugdix: [PyJWT](https://pypi.org/project/PyJWT/) Python dependency to version 1.x since 2.0.0 has breaking API changes.
+- Bugfix: [PyJWT](https://pypi.org/project/PyJWT/) Python dependency to version 1.x since 2.0.0 has breaking API changes.
 
 Version 0.4.1
 -------------
