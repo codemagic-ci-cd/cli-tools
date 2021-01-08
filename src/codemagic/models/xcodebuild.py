@@ -298,3 +298,5 @@ class XcodebuildCliProcess(CliProcess):
             if self._buffer:
                 self._buffer.close()
                 self._buffer = None
+            if self.xcpretty:
+                self.xcpretty.flush()

@@ -13,28 +13,40 @@ _IO = Union[int, IO]
 
 class Xcpretty(StringConverterMixin):
 
-    def __init__(self, custom_options: str = ''):
+    def __init__(self, custom_options: str = '', stdout: _IO = sys.stdout, stderr: _IO = sys.stderr):
         self._ensure_xcpretty()
         self._command = ['xcpretty'] + shlex.split(custom_options)
+        self._process = None
+        self._stdout = stdout
+        self._stderr = stderr
 
     @classmethod
     def _ensure_xcpretty(cls):
         if shutil.which('xcpretty') is None:
             raise IOError('xcpretty executable not present on the system')
 
-    def format(self, chunk: AnyStr, stdout: _IO = sys.stdout, stderr: _IO = sys.stderr, timeout: int = 2):
+    def format(self, chunk: AnyStr):
         if not chunk:
             return
-        process = subprocess.Popen(
-            self._command,
-            stdin=subprocess.PIPE,
-            stdout=stdout,
-            stderr=stderr,
-        )
+
+        if self._process is None:
+            self._process = subprocess.Popen(
+                self._command,
+                stdin=subprocess.PIPE,
+                stdout=self._stdout,
+                stderr=self._stderr,
+            )
+
+        self._process.stdin.write(self._bytes(chunk))
+
+    def flush(self):
+        if self._process is None:
+            return
+
         try:
-            process.communicate(input=self._bytes(chunk), timeout=timeout)
+            self._process.communicate(b'', timeout=5)
         except subprocess.TimeoutExpired:
             pass
-        except KeyboardInterrupt:
-            process.terminate()
-            raise
+        finally:
+            self._process.terminate()
+            self._process = None

@@ -1,3 +1,10 @@
+Version 0.4.3
+-------------
+
+**Improvements**
+
+- Improvement: Use a single `xcpretty` process throughout `xcodebuild` invocation for log formatting instead of forking new processes for each log chunk.
+
 Version 0.4.2
 -------------
 
