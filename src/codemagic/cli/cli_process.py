@@ -35,8 +35,16 @@ class CliProcess:
         if safe_form is None:
             full_command = ' '.join(shlex.quote(str(arg)) for arg in command_args)
             self.safe_form = ObfuscatedCommand(full_command)
-        self.stdout = ""
-        self.stderr = ""
+        self._stdout = ""
+        self._stderr = ""
+
+    @property
+    def stdout(self) -> str:
+        return self._stdout
+
+    @property
+    def stderr(self) -> str:
+        return self._stderr
 
     @property
     def returncode(self) -> int:
@@ -78,9 +86,9 @@ class CliProcess:
         if self._process is None:
             return
         if self._process.stdout:
-            self.stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
+            self._stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
         if self._process.stderr:
-            self.stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
+            self._stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
 
     def execute(self,
                 stdout: Union[int, IO] = subprocess.PIPE,
@@ -100,8 +108,13 @@ class CliProcess:
             self._log_exec_completed()
         return self
 
-    def raise_for_returncode(self, success_code: int = 0):
+    def raise_for_returncode(self, success_code: int = 0, include_logs: bool = True):
         if self.returncode == success_code:
             return
-        raise subprocess.CalledProcessError(
-            self.returncode, self._command_args, self.stdout, self.stderr)
+        if include_logs:
+            stdout = self.stdout
+            stderr = self.stderr
+        else:
+            stdout = ''
+            stderr = ''
+        raise subprocess.CalledProcessError(self.returncode, self._command_args, stdout, stderr)
