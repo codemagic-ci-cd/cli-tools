@@ -252,7 +252,7 @@ class Xcodebuild(RunningCliAppMixin):
             if cli_app:
                 process = XcodebuildCliProcess(command, xcpretty=self.xcpretty)
                 cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
-                process.execute().raise_for_returncode()
+                process.execute().raise_for_returncode(include_logs=False)
             else:
                 subprocess.check_output(command)
         except subprocess.CalledProcessError as cpe:
@@ -272,6 +272,14 @@ class XcodebuildCliProcess(CliProcess):
         self._buffer: Optional[IO] = None
         self.xcpretty = xcpretty
 
+    @property
+    def stdout(self) -> str:
+        return self.log_path.read_text()
+
+    @property
+    def stderr(self) -> str:
+        return ''
+
     def _print_stream(self, chunk: str):
         if not self._print_streams:
             return
@@ -286,7 +294,6 @@ class XcodebuildCliProcess(CliProcess):
         lines = self._buffer.readlines(buffer_size or -1)
         chunk = ''.join(lines)
         self._print_stream(chunk)
-        self.stdout += chunk
 
     def execute(self, *args, **kwargs) -> XcodebuildCliProcess:
         try:

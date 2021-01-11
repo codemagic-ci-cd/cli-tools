@@ -1,3 +1,10 @@
+Version 0.4.4
+-------------
+
+**Improvements**
+
+- Improvement: Reduce memory footprint for `xcode-process` by not storing xcodebuild logs in memory. Read them from file if need be.
+
 Version 0.4.3
 -------------
 
