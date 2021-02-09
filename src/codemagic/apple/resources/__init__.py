@@ -1,7 +1,9 @@
+from .build import Build
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
 from .device import Device
+from .enums import BuildProcessingState
 from .enums import BundleIdPlatform
 from .enums import CapabilityOptionKey
 from .enums import CapabilitySettingAllowedInstance
@@ -14,6 +16,7 @@ from .enums import ProfileState
 from .enums import ProfileType
 from .enums import ResourceType
 from .error_response import ErrorResponse
+from .image_asset import ImageAsset
 from .profile import Profile
 from .resource import LinkedResourceData
 from .resource import Resource

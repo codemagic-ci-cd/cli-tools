@@ -18,6 +18,7 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -33,6 +34,7 @@ from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 from ._app_store_connect.arguments import AppStoreConnectArgument
+from ._app_store_connect.arguments import BuildArgument
 from ._app_store_connect.arguments import BundleIdArgument
 from ._app_store_connect.arguments import CertificateArgument
 from ._app_store_connect.arguments import CommonArgument
@@ -147,6 +149,35 @@ class AppStoreConnect(cli.CliApp):
                 self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
             else:
                 raise AppStoreConnectError(str(api_error))
+
+    @cli.action('list-testflight-builds',
+                BuildArgument.APPLICATION_ID_OPTIONAL,
+                BuildArgument.EXPIRED,
+                BuildArgument.BUILD_ID,
+                BuildArgument.BUILD_PRE_RELEASE_VERSION,
+                BuildArgument.PROCESSING_STATE,
+                BuildArgument.BUILD_VERSION)
+    def list_testflight_builds(self,
+                              application_id: Optional[str, ResourceId] = None,
+                              expired: Optional[bool] = None,
+                              build_id: Optional[str, ResourceId] = None,
+                              build_pre_release_version: Optional[str] = None,
+                              processing_state: Optional[BuildProcessingState] = None,
+                              build_version: Optional[str] = None,
+                              should_print: bool = True) -> List[Build]:
+        """
+        List Testflight builds.
+        """
+
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
+            expired=expired,
+            id=build_id,
+            pre_release_version=build_pre_release_version,
+            processing_state=processing_state,
+            version=build_version,
+        )
+        return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,

@@ -4,6 +4,7 @@ from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
@@ -93,6 +94,57 @@ class AppStoreConnectArgument(cli.Argument):
         type=pathlib.Path,
         description='Directory where the provisioning profiles will be saved',
         argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
+    )
+
+
+class BuildArgument(cli.Argument):
+    APPLICATION_ID = cli.ArgumentProperties(
+        key='application_id',
+        description='Application Apple ID',
+    )
+    APPLICATION_ID_OPTIONAL = cli.ArgumentProperties(
+        key='application_id',
+        flags=('--application-id',),
+        description='Application Apple ID',
+        argparse_kwargs={'required': False},
+    )
+    EXPIRED = cli.ArgumentProperties(
+        key='expired',
+        flags=('--expired',),
+        type=bool,
+        description='List only expired or only not expired builds',
+        argparse_kwargs={
+            'required': False,
+            'choices': [True, False],
+        },
+    )
+    BUILD_ID = cli.ArgumentProperties(
+        key='build_id',
+        flags=('--build_id',),
+        description='Build id',
+        argparse_kwargs={'required': False},
+    )
+    BUILD_PRE_RELEASE_VERSION= cli.ArgumentProperties(
+        key='build_pre_release_version',
+        flags=('--build-pre-release-version',),
+        description='Build Pre-release version',
+        argparse_kwargs={'required': False},
+    )
+    PROCESSING_STATE = cli.ArgumentProperties(
+        key='processing_state',
+        flags=('--processing-state',),
+        type=BuildProcessingState,
+        description='Build processing state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BuildProcessingState),
+        },
+    )
+    BUILD_VERSION = cli.ArgumentProperties(
+        key='build_version',
+        flags=('--build-version',),
+        description='Builds version',
+        argparse_kwargs={'required': False},
     )
 
 

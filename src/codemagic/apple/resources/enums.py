@@ -10,6 +10,13 @@ class _ResourceEnum(enum.Enum):
         return str(self.value)
 
 
+class BuildProcessingState(_ResourceEnum):
+    PROCESSING = 'PROCESSING'
+    FAILED = 'FAILED'
+    INVALID = 'INVALID'
+    VALID = 'VALID'
+
+
 class BundleIdPlatform(_ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'

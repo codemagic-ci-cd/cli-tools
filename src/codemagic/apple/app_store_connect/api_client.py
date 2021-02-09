@@ -11,6 +11,7 @@ import jwt
 
 from codemagic.utilities import log
 from .api_session import AppStoreConnectApiSession
+from .builds import Builds
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
 from .provisioning import Devices
@@ -101,6 +102,10 @@ class AppStoreConnectApiClient:
             response = self.session.get(response['links']['next'], params=step_params).json()
             results.extend(response['data'])
         return results
+
+    @property
+    def builds(self) -> Builds:
+        return Builds(self)
 
     @property
     def bundle_ids(self) -> BundleIds:
