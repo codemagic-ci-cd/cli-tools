@@ -18,6 +18,7 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import BuildOrdering
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import BundleIdPlatform
@@ -155,20 +156,20 @@ class AppStoreConnect(cli.CliApp):
                 BuildArgument.EXPIRED,
                 BuildArgument.NOT_EXPIRED,
                 BuildArgument.BUILD_ID,
-                BuildArgument.BUILD_PRE_RELEASE_VERSION,
+                BuildArgument.PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
                 BuildArgument.BUILD_VERSION,
                 BuildArgument.ORDERING,
                 BuildArgument.REVERSE)
     def list_testflight_builds(self,
-                              application_id: Optional[str, ResourceId] = None,
+                              application_id: Optional[Union[str, ResourceId]] = None,
                               expired: Optional[bool] = None,
                               not_expired: Optional[bool] = None,
-                              build_id: Optional[str, ResourceId] = None,
-                              build_pre_release_version: Optional[str] = None,
+                              build_id: Optional[Union[str, ResourceId]] = None,
+                              pre_release_version: Optional[str] = None,
                               processing_state: Optional[BuildProcessingState] = None,
                               build_version: Optional[str] = None,
-                              ordering: Optional[str] = None,
+                              ordering: Optional[BuildOrdering] = None,
                               reverse: Optional[bool] = False,
                               should_print: bool = True) -> List[Build]:
         """
@@ -182,15 +183,26 @@ class AppStoreConnect(cli.CliApp):
             app=application_id,
             expired=None if not expired and not not_expired else str(expired or not not_expired),
             id=build_id,
-            pre_release_version=build_pre_release_version,
             processing_state=processing_state,
             version=build_version,
+            pre_release_version__dot__version=pre_release_version,
         )
-        kwargs = {
-            'ordering': self.api_client.builds.Ordering.get_from_value(ordering),
-            'reverse': reverse,
-        }
+        kwargs = {'ordering': ordering, 'reverse': reverse}
         return self._list_resources(builds_filter, self.api_client.builds, should_print, **kwargs)
+
+    @cli.action('get-latest-testflight-build-number',
+        BuildArgument.APPLICATION_ID,
+        BuildArgument.PRE_RELEASE_VERSION)
+    def get_latest_testflight_build_number(self,
+                                           application_id: Union[str, ResourceId],
+                                           pre_release_version: Optional[str] = None,
+                                           should_print: bool = False):
+        """
+        Get latest Testflight build number for the given application
+        """
+        builds_filter = self.api_client.builds.Filter(app=application_id, pre_release_version__dot__version=prerelease_version)
+        builds = self._list_resources(builds_filter, self.api_client.builds, should_print)
+        self.echo(max([str(build.attributes.version) for build in builds]))
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,

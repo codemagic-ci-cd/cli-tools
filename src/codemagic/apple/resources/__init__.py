@@ -3,6 +3,7 @@ from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
 from .device import Device
+from .enums import BuildOrdering
 from .enums import BuildProcessingState
 from .enums import BundleIdPlatform
 from .enums import CapabilityOptionKey

@@ -10,6 +10,11 @@ class _ResourceEnum(enum.Enum):
         return str(self.value)
 
 
+class BuildOrdering(_ResourceEnum):
+    PRE_RELEASE_VERSION = 'PRE_RELEASE_VERSION'
+    UPLOADED_DATE = 'UPLOADED_DATE'
+    VERSION = 'VERSION'
+
 class BuildProcessingState(_ResourceEnum):
     PROCESSING = 'PROCESSING'
     FAILED = 'FAILED'

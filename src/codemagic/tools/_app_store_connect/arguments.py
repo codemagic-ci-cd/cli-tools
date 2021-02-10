@@ -5,6 +5,7 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.app_store_connect.builds import Builds
+from codemagic.apple.resources import BuildOrdering
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -135,10 +136,10 @@ class BuildArgument(cli.Argument):
         description='Build id',
         argparse_kwargs={'required': False},
     )
-    BUILD_PRE_RELEASE_VERSION= cli.ArgumentProperties(
-        key='build_pre_release_version',
-        flags=('--build-pre-release-version',),
-        description='Build Pre-release version',
+    PRE_RELEASE_VERSION= cli.ArgumentProperties(
+        key='pre_release_version',
+        flags=('--pre-release-version',),
+        description='Pre-release version of your application',
         argparse_kwargs={'required': False},
     )
     PROCESSING_STATE = cli.ArgumentProperties(
@@ -160,11 +161,11 @@ class BuildArgument(cli.Argument):
     ORDERING = cli.ArgumentProperties(
         key='ordering',
         flags=('--ordering',),
-        type=Builds.Ordering,
+        type=BuildOrdering,
         description='Order builds by attribute',
         argparse_kwargs={
             'required': False,
-            'choices': list(Builds.Ordering)
+            'choices': list(BuildOrdering),
         }
     )
     REVERSE = cli.ArgumentProperties(
