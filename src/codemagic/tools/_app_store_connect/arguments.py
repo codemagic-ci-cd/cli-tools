@@ -4,6 +4,7 @@ from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -112,10 +113,20 @@ class BuildArgument(cli.Argument):
         key='expired',
         flags=('--expired',),
         type=bool,
-        description='List only expired or only not expired builds',
+        description='List only expired builds',
         argparse_kwargs={
             'required': False,
-            'choices': [True, False],
+            'action': 'store_true',
+        },
+    )
+    NOT_EXPIRED = cli.ArgumentProperties(
+        key='not_expired',
+        flags=('--not-expired',),
+        type=bool,
+        description='List only not expired builds',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
         },
     )
     BUILD_ID = cli.ArgumentProperties(
@@ -145,6 +156,26 @@ class BuildArgument(cli.Argument):
         flags=('--build-version',),
         description='Builds version',
         argparse_kwargs={'required': False},
+    )
+    ORDERING = cli.ArgumentProperties(
+        key='ordering',
+        flags=('--ordering',),
+        type=Builds.Ordering,
+        description='Order builds by attribute',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Builds.Ordering)
+        }
+    )
+    REVERSE = cli.ArgumentProperties(
+        key='reverse',
+        flags=('--reverse',),
+        type=bool,
+        description='Reverse the ordering (Apply only when ordering is specified)',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
     )
 
 

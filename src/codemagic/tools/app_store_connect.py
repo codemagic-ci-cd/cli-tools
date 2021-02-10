@@ -129,9 +129,9 @@ class AppStoreConnect(cli.CliApp):
         self.printer.print_resource(resource, should_print)
         return resource
 
-    def _list_resources(self, resource_filter, resource_manager, should_print):
+    def _list_resources(self, resource_filter, resource_manager, should_print, **kwargs):
         try:
-            resources = resource_manager.list(resource_filter=resource_filter)
+            resources = resource_manager.list(resource_filter=resource_filter, **kwargs)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
@@ -153,32 +153,44 @@ class AppStoreConnect(cli.CliApp):
     @cli.action('list-testflight-builds',
                 BuildArgument.APPLICATION_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
+                BuildArgument.NOT_EXPIRED,
                 BuildArgument.BUILD_ID,
                 BuildArgument.BUILD_PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
-                BuildArgument.BUILD_VERSION)
-                # TODO add ordering
+                BuildArgument.BUILD_VERSION,
+                BuildArgument.ORDERING,
+                BuildArgument.REVERSE)
     def list_testflight_builds(self,
                               application_id: Optional[str, ResourceId] = None,
                               expired: Optional[bool] = None,
+                              not_expired: Optional[bool] = None,
                               build_id: Optional[str, ResourceId] = None,
                               build_pre_release_version: Optional[str] = None,
                               processing_state: Optional[BuildProcessingState] = None,
                               build_version: Optional[str] = None,
+                              ordering: Optional[str] = None,
+                              reverse: Optional[bool] = False,
                               should_print: bool = True) -> List[Build]:
         """
         List Testflight builds.
         """
+        if expired and not_expired:
+            raise BuildArgument.NOT_EXPIRED.raise_argument_error('Using mutually exclusive flags "--expired" and "--not-expired"')
+
 
         builds_filter = self.api_client.builds.Filter(
             app=application_id,
-            expired=expired,
+            expired=None if not expired and not not_expired else str(expired or not not_expired),
             id=build_id,
             pre_release_version=build_pre_release_version,
             processing_state=processing_state,
             version=build_version,
         )
-        return self._list_resources(builds_filter, self.api_client.builds, should_print)
+        kwargs = {
+            'ordering': self.api_client.builds.Ordering.get_from_value(ordering),
+            'reverse': reverse,
+        }
+        return self._list_resources(builds_filter, self.api_client.builds, should_print, **kwargs)
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,

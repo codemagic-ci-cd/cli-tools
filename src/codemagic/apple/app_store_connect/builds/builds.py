@@ -37,8 +37,8 @@ class Builds(ResourceManager[Build]):
 
     def list(self,
              resource_filter: Filter = Filter(),
-             ordering: Optional[Ordering] = None,
-             reverse: bool = True) -> List[Build]:
+             ordering: Optional[str] = None,
+             reverse: bool = False) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
@@ -55,5 +55,5 @@ class Builds(ResourceManager[Build]):
         https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
         """
         build_id = self._get_resource_id(build)
-        response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
+        response = self.client.session.get(f'{self.client.API_URL}/builds/{device_id}').json()
         return Build(response['data'])

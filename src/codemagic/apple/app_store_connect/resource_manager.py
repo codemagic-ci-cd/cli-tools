@@ -62,6 +62,10 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
+        @classmethod
+        def get_from_value(cls, value=None) -> Ordering:
+            return cls._value2member_map_.get(value)
+
         def as_param(self, reverse=False) -> str:
             return f'{"-" if reverse else ""}{self.value}'
 
