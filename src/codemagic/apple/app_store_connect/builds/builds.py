@@ -7,15 +7,8 @@ from typing import Union
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
-from codemagic.apple.resources import ImageAsset
-
-
-from codemagic.apple.resources import BundleIdPlatform
-from codemagic.apple.resources import Device
-from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
-from codemagic.apple.resources import ResourceType
 
 
 class Builds(ResourceManager[Build]):
@@ -44,12 +37,16 @@ class Builds(ResourceManager[Build]):
 
     def list(self,
              resource_filter: Filter = Filter(),
-             ordering=Ordering.VERSION,
-             reverse=True) -> List[Build]:
+             ordering: Optional[Ordering] = None,
+             reverse: bool = True) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
-        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
+
+        params = resource_filter.as_query_params()
+        if ordering:
+            params['sort'] = ordering.as_param(reverse)
+
         builds = self.client.paginate(f'{self.client.API_URL}/builds', params=params)
         return [Build(build) for build in builds]
 
@@ -58,5 +55,5 @@ class Builds(ResourceManager[Build]):
         https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
         """
         build_id = self._get_resource_id(build)
-        response = self.client.session.get(f'{self.client.API_URL}/builds/{device_id}').json()
+        response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
         return Build(response['data'])

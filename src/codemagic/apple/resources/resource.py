@@ -72,7 +72,7 @@ class PagingInformation(DictSerializable):
 class Links(DictSerializable):
     _OMIT_IF_NONE_KEYS = ('related',)
 
-    def __init__(_self, self: str, related: Optional[str] = None):
+    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):
         _self.self = self
         _self.related = related
 
@@ -202,7 +202,10 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
         if iso_8601_timestamp is None:
             return None
-        return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+        try:
+            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+        except ValueError:
+            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S%z')
 
     @classmethod
     @overload

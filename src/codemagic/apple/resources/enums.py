@@ -139,6 +139,7 @@ class ProfileType(_ResourceEnum):
 
 
 class ResourceType(_ResourceEnum):
+    BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
     CERTIFICATES = 'certificates'

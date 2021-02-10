@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from .image_asset import ImageAsset
 from .enums import BuildProcessingState
 from .resource import Resource
+from .resource import DictSerializable
 
 
 class Build(Resource):
@@ -43,3 +43,17 @@ class Build(Resource):
         betaAppReviewSubmission: Relationship
         appStoreVersion: Relationship
         icons: Relationship
+
+        betaGroups: Relationship
+        perfPowerMetrics: Relationship
+        diagnosticSignatures: Relationship
+
+@dataclass
+class ImageAsset(DictSerializable):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/imageasset
+    """
+
+    templateUrl: str
+    height: int
+    width: int

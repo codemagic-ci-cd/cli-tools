@@ -157,6 +157,7 @@ class AppStoreConnect(cli.CliApp):
                 BuildArgument.BUILD_PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
                 BuildArgument.BUILD_VERSION)
+                # TODO add ordering
     def list_testflight_builds(self,
                               application_id: Optional[str, ResourceId] = None,
                               expired: Optional[bool] = None,
