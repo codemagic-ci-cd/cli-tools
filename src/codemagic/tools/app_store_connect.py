@@ -158,10 +158,10 @@ class AppStoreConnect(cli.CliApp):
                 BuildArgument.APPLICATION_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
                 BuildArgument.NOT_EXPIRED,
-                BuildArgument.BUILD_ID,
+                BuildArgument.BUILD_ID_OPTIONAL,
                 BuildArgument.PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
-                BuildArgument.BUILD_VERSION,
+                BuildArgument.BUILD_NUMBER,
                 BuildArgument.ORDERING,
                 BuildArgument.REVERSE)
     def list_testflight_builds(self,
@@ -171,7 +171,7 @@ class AppStoreConnect(cli.CliApp):
                               build_id: Optional[Union[str, ResourceId]] = None,
                               pre_release_version: Optional[str] = None,
                               processing_state: Optional[BuildProcessingState] = None,
-                              build_version: Optional[str] = None,
+                              build_number: Optional[str] = None,
                               ordering: Optional[BuildOrdering] = None,
                               reverse: Optional[bool] = False,
                               should_print: bool = True) -> List[Build]:
@@ -188,7 +188,7 @@ class AppStoreConnect(cli.CliApp):
             expired=expired_value,
             id=build_id,
             processing_state=processing_state,
-            version=build_version,
+            version=build_number,
             pre_release_version__dot__version=pre_release_version,
         )
         kwargs = {'ordering': ordering, 'reverse': reverse}
@@ -210,7 +210,8 @@ class AppStoreConnect(cli.CliApp):
         self.echo(str(latest_build_number))
         return latest_build_number
 
-    @cli.action('get-testflight-build', BuildArgument.BUILD_ID)
+    @cli.action('get-testflight-build',
+        BuildArgument.BUILD_ID)
     def get_testflight_build(self,
                              build_id: Union[str, ResourceId],
                              should_print: bool = True) -> Build:

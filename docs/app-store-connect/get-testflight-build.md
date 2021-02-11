@@ -14,14 +14,14 @@ app-store-connect get-testflight-build [-h] [--log-stream STREAM] [--no-color] [
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--build-id BUILD_ID]
+    BUILD_ID
 ```
-### Optional arguments for action `get-testflight-build`
+### Required arguments for action `get-testflight-build`
 
-##### `--build-id=BUILD_ID`
+##### `BUILD_ID`
 
 
-Build id
+Specific build ID
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

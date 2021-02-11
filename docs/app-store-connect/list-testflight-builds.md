@@ -17,10 +17,10 @@ app-store-connect list-testflight-builds [-h] [--log-stream STREAM] [--no-color]
     [--application-id APPLICATION_ID_OPTIONAL]
     [--expired]
     [--not-expired]
-    [--build-id BUILD_ID]
+    [--build-id BUILD_ID_OPTIONAL]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
-    [--build-version BUILD_VERSION]
+    [--build-number BUILD_NUMBER]
     [--ordering ORDERING]
     [--reverse]
 ```
@@ -38,10 +38,10 @@ List only expired builds
 
 
 List only not expired builds
-##### `--build-id=BUILD_ID`
+##### `--build-id=BUILD_ID_OPTIONAL`
 
 
-Build id
+Specific build ID
 ##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 
@@ -50,10 +50,10 @@ Pre-release version of your application
 
 
 Build processing state
-##### `--build-version=BUILD_VERSION`
+##### `--build-number=BUILD_NUMBER`
 
 
-Builds version
+Build number
 ##### `--ordering=PRE_RELEASE_VERSION | UPLOADED_DATE | VERSION`
 
 

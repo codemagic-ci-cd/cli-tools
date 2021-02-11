@@ -132,8 +132,12 @@ class BuildArgument(cli.Argument):
     )
     BUILD_ID = cli.ArgumentProperties(
         key='build_id',
+        description='Specific build ID',
+    )
+    BUILD_ID_OPTIONAL = cli.ArgumentProperties(
+        key='build_id',
         flags=('--build-id',),
-        description='Build id',
+        description='Specific build ID',
         argparse_kwargs={'required': False},
     )
     PRE_RELEASE_VERSION= cli.ArgumentProperties(
@@ -152,10 +156,10 @@ class BuildArgument(cli.Argument):
             'choices': list(BuildProcessingState),
         },
     )
-    BUILD_VERSION = cli.ArgumentProperties(
-        key='build_version',
-        flags=('--build-version',),
-        description='Builds version',
+    BUILD_NUMBER = cli.ArgumentProperties(
+        key='build_number',
+        flags=('--build-number',),
+        description='Build number',
         argparse_kwargs={'required': False},
     )
     ORDERING = cli.ArgumentProperties(

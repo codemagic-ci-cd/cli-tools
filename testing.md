@@ -13,7 +13,7 @@ pipenv install -d
 Tests are invoked using [`pytest`](https://docs.pytest.org/en/latest/) framework:
 
 ```bash
-python -m pytest
+pytest
 ```
 
 Note that for the tests to run successfully, you'd have to define the following environment variables:
