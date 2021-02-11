@@ -1,12 +1,12 @@
 
-list-profiles
-=============
+list-testflight-builds
+======================
 
 
-**List Profiles from Apple Developer portal matching given constraints**
+**List Testflight builds**
 ### Usage
 ```bash
-app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list-testflight-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,29 +14,54 @@ app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
+    [--application-id APPLICATION_ID_OPTIONAL]
+    [--expired]
+    [--not-expired]
+    [--build-id BUILD_ID]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    [--processing-state PROCESSING_STATE]
+    [--build-version BUILD_VERSION]
+    [--ordering ORDERING]
+    [--reverse]
 ```
-### Optional arguments for action `list-profiles`
+### Optional arguments for action `list-testflight-builds`
 
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
-
-
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID | EXPIRED`
+##### `--application-id=APPLICATION_ID_OPTIONAL`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
+Application Apple ID
+##### `--expired`
 
 
-Name of the provisioning profile
-##### `--save`
+List only expired builds
+##### `--not-expired`
 
 
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+List only not expired builds
+##### `--build-id=BUILD_ID`
+
+
+Build id
+##### `--pre-release-version=PRE_RELEASE_VERSION`
+
+
+Pre-release version of your application
+##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
+
+
+Build processing state
+##### `--build-version=BUILD_VERSION`
+
+
+Builds version
+##### `--ordering=PRE_RELEASE_VERSION | UPLOADED_DATE | VERSION`
+
+
+Order builds by attribute
+##### `--reverse`
+
+
+Reverse the ordering (Apply only when ordering is specified)
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

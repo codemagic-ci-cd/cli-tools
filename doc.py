@@ -240,7 +240,7 @@ class Writer:
         self._write_command_usage(CommandUsageGenerator(documentation_generator).get_action_command_usage(action))
 
     def _write_command_usage(self, lines):
-        self.file.new_header(level=3, title='Usage')
+        self.file.new_header(level=3, title='Usage', add_table_of_contents='n')
         self.file.write('```bash\n')
         self.file.write(f'{lines[0]}\n')
         for line in lines[1:]:
@@ -269,7 +269,7 @@ class Writer:
         self.write_table(content, ['Tool name', 'Description'])
 
     def write_actions_table(self, actions: List[Action]):
-        self.file.new_header(level=3, title='Actions')
+        self.file.new_header(level=3, title='Actions', add_table_of_contents='n')
         content = [
             [
                 f"[`{action.action_name}`]({action.action_name}.md)",
@@ -301,11 +301,11 @@ class Writer:
         if not args:
             return
 
-        self.file.new_header(level=3, title=title)
+        self.file.new_header(level=3, title=title, add_table_of_contents='n')
         for arg in args:
             flag = f'`{_process_flag(arg)}`'
             description = _process_description(arg).replace('..', '.')
-            self.file.new_header(level=5, title=flag)
+            self.file.new_header(level=5, title=flag, add_table_of_contents='n')
             self.file.new_paragraph(description)
 
 

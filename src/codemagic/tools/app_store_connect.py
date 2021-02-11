@@ -68,7 +68,7 @@ def _get_certificate_key(
 class AppStoreConnect(cli.CliApp):
     """
     Utility to download code signing certificates and provisioning profiles
-    from Apple Developer Portal using App Store Connect API to perform iOS code signing.
+    from Apple Developer Portal using App Store Connect API to perform iOS code signing
     """
 
     def __init__(self,
@@ -176,7 +176,7 @@ class AppStoreConnect(cli.CliApp):
                               reverse: Optional[bool] = False,
                               should_print: bool = True) -> List[Build]:
         """
-        List Testflight builds.
+        List Testflight builds
         """
         try:
             expired_value = get_binary_arguments_value(expired, not_expired)
@@ -229,7 +229,7 @@ class AppStoreConnect(cli.CliApp):
                      device_status: Optional[DeviceStatus] = None,
                      should_print: bool = True) -> List[Device]:
         """
-        List Devices from Apple Developer portal matching given constraints.
+        List Devices from Apple Developer portal matching given constraints
         """
 
         device_filter = self.api_client.devices.Filter(
@@ -246,7 +246,7 @@ class AppStoreConnect(cli.CliApp):
                          platform: BundleIdPlatform = BundleIdPlatform.IOS,
                          should_print: bool = True) -> BundleId:
         """
-        Create Bundle ID in Apple Developer portal for specifier identifier.
+        Create Bundle ID in Apple Developer portal for specifier identifier
         """
 
         if bundle_id_name is None:
@@ -265,7 +265,7 @@ class AppStoreConnect(cli.CliApp):
                         platform: Optional[BundleIdPlatform] = None,
                         should_print: bool = True) -> List[BundleId]:
         """
-        List Bundle IDs from Apple Developer portal matching given constraints.
+        List Bundle IDs from Apple Developer portal matching given constraints
         """
 
         bundle_id_filter = self.api_client.bundle_ids.Filter(
@@ -279,7 +279,7 @@ class AppStoreConnect(cli.CliApp):
                       bundle_id_resource_id: ResourceId,
                       should_print: bool = True) -> BundleId:
         """
-        Get specified Bundle ID from Apple Developer portal.
+        Get specified Bundle ID from Apple Developer portal
         """
 
         return self._get_resource(bundle_id_resource_id, self.api_client.bundle_ids, should_print)
@@ -291,7 +291,7 @@ class AppStoreConnect(cli.CliApp):
                          bundle_id_resource_id: ResourceId,
                          ignore_not_found: bool = False) -> None:
         """
-        Delete specified Bundle ID from Apple Developer portal.
+        Delete specified Bundle ID from Apple Developer portal
         """
 
         self._delete_resource(self.api_client.bundle_ids, bundle_id_resource_id, ignore_not_found)
@@ -341,7 +341,7 @@ class AppStoreConnect(cli.CliApp):
                         save: bool = False,
                         should_print: bool = True) -> SigningCertificate:
         """
-        Get specified Signing Certificate from Apple Developer portal.
+        Get specified Signing Certificate from Apple Developer portal
         """
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
@@ -363,7 +363,7 @@ class AppStoreConnect(cli.CliApp):
                            certificate_resource_id: ResourceId,
                            ignore_not_found: bool = False) -> None:
         """
-        Delete specified Signing Certificate from Apple Developer portal.
+        Delete specified Signing Certificate from Apple Developer portal
         """
 
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
@@ -386,7 +386,7 @@ class AppStoreConnect(cli.CliApp):
                           save: bool = False,
                           should_print: bool = True) -> List[SigningCertificate]:
         """
-        List Signing Certificates from Apple Developer Portal matching given constraints.
+        List Signing Certificates from Apple Developer Portal matching given constraints
         """
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
@@ -460,7 +460,7 @@ class AppStoreConnect(cli.CliApp):
     @cli.action('get-profile', ProfileArgument.PROFILE_RESOURCE_ID)
     def get_profile(self, profile_resource_id: ResourceId, should_print: bool = True) -> Profile:
         """
-        Get specified Profile from Apple Developer portal.
+        Get specified Profile from Apple Developer portal
         """
 
         return self._get_resource(profile_resource_id, self.api_client.profiles, should_print)
@@ -472,7 +472,7 @@ class AppStoreConnect(cli.CliApp):
                        profile_resource_id: ResourceId,
                        ignore_not_found: bool = False) -> None:
         """
-        Delete specified Profile from Apple Developer portal.
+        Delete specified Profile from Apple Developer portal
         """
 
         self._delete_resource(self.api_client.profiles, profile_resource_id, ignore_not_found)
@@ -489,7 +489,7 @@ class AppStoreConnect(cli.CliApp):
                       save: bool = False,
                       should_print: bool = True) -> List[Profile]:
         """
-        List Profiles from Apple Developer portal matching given constraints.
+        List Profiles from Apple Developer portal matching given constraints
         """
         profile_filter = self.api_client.profiles.Filter(
             profile_type=profile_type,
@@ -526,7 +526,7 @@ class AppStoreConnect(cli.CliApp):
                                 save: bool = False,
                                 should_print: bool = True) -> List[Profile]:
         """
-        List provisioning profiles from Apple Developer Portal for specified Bundle IDs.
+        List provisioning profiles from Apple Developer Portal for specified Bundle IDs
         """
 
         profiles_filter = self.api_client.profiles.Filter(
@@ -561,7 +561,7 @@ class AppStoreConnect(cli.CliApp):
                             create_resource: bool = False) -> Tuple[List[Profile], List[SigningCertificate]]:
         """
         Fetch provisioning profiles and code signing certificates
-        for Bundle ID with given identifier.
+        for Bundle ID with given identifier
         """
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)

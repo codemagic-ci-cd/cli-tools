@@ -78,7 +78,7 @@ class CliApp(metaclass=abc.ABCMeta):
     def echo(cls, message: str, *args, **kwargs):
         """
         Log given message to the STDOUT without any extra logging formatting
-        and log the message to the the logfile with proper formatting.
+        and log the message to the the logfile with proper formatting
         """
         if cls._printer is None:
             cls._printer = log.get_printer(cls)

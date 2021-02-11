@@ -3,7 +3,7 @@ dump
 ====
 
 
-**Get files list or extract values from the bundle in a human-readable form.**
+**Get files list or extract values from the bundle in a human-readable form**
 ### Usage
 ```bash
 android-app-bundle dump [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

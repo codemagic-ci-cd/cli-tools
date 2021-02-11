@@ -3,7 +3,7 @@ get-bundle-id
 =============
 
 
-**Get specified Bundle ID from Apple Developer portal.**
+**Get specified Bundle ID from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

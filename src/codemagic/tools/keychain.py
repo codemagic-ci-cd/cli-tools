@@ -98,7 +98,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('create', KeychainArgument.PASSWORD)
     def create(self, password: Password = Password('')) -> pathlib.Path:
         """
-        Create a macOS keychain, add it to the search list.
+        Create a macOS keychain, add it to the search list
         """
 
         self.logger.info(f'Create keychain {self.path}')
@@ -118,7 +118,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('delete')
     def delete(self):
         """
-        Delete keychains and remove them from the search list.
+        Delete keychains and remove them from the search list
         """
 
         self.logger.info(f'Delete keychain {self.path}')
@@ -129,7 +129,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('show-info')
     def show_info(self):
         """
-        Show all settings for the keychain.
+        Show all settings for the keychain
         """
 
         self.logger.info(f'Keychain {self.path} settings:')
@@ -141,7 +141,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     def set_timeout(self, timeout: Optional[Seconds] = None):
         """
         Set timeout settings for the keychain.
-        If seconds are not provided, then no-timeout will be set.
+        If seconds are not provided, then no-timeout will be set
         """
 
         cmd_args = ['security', 'set-keychain-settings', str(self.path)]
@@ -157,7 +157,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('lock')
     def lock(self):
         """
-        Lock the specified keychain.
+        Lock the specified keychain
         """
 
         self.logger.info(f'Lock keychain {self.path}')
@@ -168,7 +168,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('unlock', KeychainArgument.PASSWORD)
     def unlock(self, password: Password = Password('')):
         """
-        Unlock the specified keychain.
+        Unlock the specified keychain
         """
 
         self.logger.info(f'Unlock keychain {self.path}')
@@ -181,7 +181,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('get-default')
     def get_default(self) -> pathlib.Path:
         """
-        Show the system default keychain.
+        Show the system default keychain
         """
 
         self.logger.info(f'Get system default keychain')
@@ -199,7 +199,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('make-default')
     def make_default(self):
         """
-        Set the keychain as the system default keychain.
+        Set the keychain as the system default keychain
         """
 
         self.logger.info(f'Set keychain {self.path} to system default keychain')
@@ -212,7 +212,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
-        Make it default and unlock it for upcoming use.
+        Make it default and unlock it for upcoming use
         """
 
         if not self._path:
@@ -229,7 +229,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     @cli.action('list-certificates')
     def list_code_signing_certificates(self, should_print: bool = True) -> List[Certificate]:
         """
-        List available code signing certificates in specified keychain.
+        List available code signing certificates in specified keychain
         """
 
         self.logger.info(f'List available code signing certificates in keychain {self.path}')
@@ -250,7 +250,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
                          certificate_path_patterns: Sequence[pathlib.Path],
                          certificate_password: Password = Password('')):
         """
-        Add p12 certificate to specified keychain.
+        Add p12 certificate to specified keychain
         """
 
         self.logger.info(f'Add certificates to keychain {self.path}')

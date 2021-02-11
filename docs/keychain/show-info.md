@@ -3,7 +3,7 @@ show-info
 =========
 
 
-**Show all settings for the keychain.**
+**Show all settings for the keychain**
 ### Usage
 ```bash
 keychain show-info [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

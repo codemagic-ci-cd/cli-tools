@@ -3,7 +3,7 @@ make-default
 ============
 
 
-**Set the keychain as the system default keychain.**
+**Set the keychain as the system default keychain**
 ### Usage
 ```bash
 keychain make-default [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

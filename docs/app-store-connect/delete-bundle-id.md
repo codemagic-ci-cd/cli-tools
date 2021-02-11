@@ -3,7 +3,7 @@ delete-bundle-id
 ================
 
 
-**Delete specified Bundle ID from Apple Developer portal.**
+**Delete specified Bundle ID from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -257,7 +257,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         """
         Generates an APK Set archive containing either all possible split APKs and
         standalone APKs or APKs optimized for the connected device (see connected-
-        device flag). Returns list of generated APK set archives.
+        device flag). Returns list of generated APK set archives
         """
         signing_info = self._convert_cli_args_to_signing_info(
             keystore_path, keystore_password, key_alias, key_password)
@@ -284,7 +284,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             key_alias: Optional[KeyAlias] = None,
             key_password: Optional[KeyPassword] = None) -> List[pathlib.Path]:
         """
-        Shortcut for `build-apks` to build universal APKs from bundles.
+        Shortcut for `build-apks` to build universal APKs from bundles
         """
 
         apks_paths = self.build_apks(
@@ -312,7 +312,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
                 AndroidAppBundleArgument.DUMP_XPATH)
     def dump(self, target: str, aab_path: pathlib.Path, xpath: Optional[str] = None) -> str:
         """
-        Get files list or extract values from the bundle in a human-readable form.
+        Get files list or extract values from the bundle in a human-readable form
         """
         if xpath:
             self.logger.info(f'Dump attribute "{xpath}" from target "{target}" from {aab_path}')
@@ -378,10 +378,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
     @cli.action('validate', AndroidAppBundleArgument.BUNDLE_PATH)
     def validate(self, aab_path: pathlib.Path) -> str:
-        """
-        Verify that given Android App Bundle is valid and print
-        out information about it.
-        """
+        """ Verify that given Android App Bundle is valid and print out information about it """
         self.logger.info(f'Validate {aab_path}')
         command = [
             'java', '-jar', str(self._bundletool_jar),

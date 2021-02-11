@@ -3,7 +3,7 @@ delete-certificate
 ==================
 
 
-**Delete specified Signing Certificate from Apple Developer portal.**
+**Delete specified Signing Certificate from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect delete-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

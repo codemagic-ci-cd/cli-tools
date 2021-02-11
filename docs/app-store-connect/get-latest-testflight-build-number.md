@@ -1,12 +1,12 @@
 
-list-profiles
-=============
+get-latest-testflight-build-number
+==================================
 
 
-**List Profiles from Apple Developer portal matching given constraints**
+**Get latest Testflight build number for the given application**
 ### Usage
 ```bash
-app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,29 +14,21 @@ app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    APPLICATION_ID
 ```
-### Optional arguments for action `list-profiles`
+### Required arguments for action `get-latest-testflight-build-number`
 
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
-
-
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID | EXPIRED`
+##### `APPLICATION_ID`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
+Application Apple ID
+### Optional arguments for action `get-latest-testflight-build-number`
+
+##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 
-Name of the provisioning profile
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Pre-release version of your application
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

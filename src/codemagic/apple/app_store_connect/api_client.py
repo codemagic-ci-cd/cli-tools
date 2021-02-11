@@ -39,7 +39,7 @@ class AppStoreConnectApiClient:
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
         :param issuer_id: Your issuer ID from the API Keys page in
                           App Store Connect (Ex: 57246542-96fe-1a63-e053-0824d011072a)
-        :param private_key: Private key associated with the key_identifier you specified.
+        :param private_key: Private key associated with the key_identifier you specified
         """
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id

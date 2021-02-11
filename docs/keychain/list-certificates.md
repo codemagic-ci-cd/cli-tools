@@ -3,7 +3,7 @@ list-certificates
 =================
 
 
-**List available code signing certificates in specified keychain.**
+**List available code signing certificates in specified keychain**
 ### Usage
 ```bash
 keychain list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

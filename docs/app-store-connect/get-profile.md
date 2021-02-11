@@ -3,7 +3,7 @@ get-profile
 ===========
 
 
-**Get specified Profile from Apple Developer portal.**
+**Get specified Profile from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

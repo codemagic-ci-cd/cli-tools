@@ -3,7 +3,7 @@ list-bundle-id-profiles
 =======================
 
 
-**List provisioning profiles from Apple Developer Portal for specified Bundle IDs.**
+**List provisioning profiles from Apple Developer Portal for specified Bundle IDs**
 ### Usage
 ```bash
 app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

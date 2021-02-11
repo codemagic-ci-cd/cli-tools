@@ -3,7 +3,7 @@ add-certificates
 ================
 
 
-**Add p12 certificate to specified keychain.**
+**Add p12 certificate to specified keychain**
 ### Usage
 ```bash
 keychain add-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
