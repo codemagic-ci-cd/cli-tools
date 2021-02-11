@@ -4,6 +4,10 @@ from typing import Dict
 
 import pytest
 
+@pytest.fixture
+def api_build() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / 'mocks' / 'build.json'
+    return json.loads(mock_path.read_text())
 
 @pytest.fixture
 def api_bundle_id() -> Dict:

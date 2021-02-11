@@ -4,6 +4,7 @@ import enum
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -73,8 +74,10 @@ class Links(DictSerializable):
     _OMIT_IF_NONE_KEYS = ('related',)
 
     def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):
-        _self.self = self
-        _self.related = related
+        if self:
+            _self.self = self
+        if related:
+            _self.related = related
 
 
 class ResourceLinks(DictSerializable):
@@ -221,7 +224,9 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     def to_iso_8601(cls, dt: Optional[datetime]):
         if dt is None:
             return None
-        return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+        if dt.tzinfo == timezone.utc:
+            return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+        return dt.isoformat()
 
     def _format_attribute_name(self, name: str) -> str:
         type_prefix = self.type.value.rstrip('s')
