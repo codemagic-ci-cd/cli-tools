@@ -5,7 +5,7 @@ dependencies. This can be done with
 [`pipenv`](https://pipenv.kennethreitz.org/en/latest/):
 
 ```bash
-pipenv install --development
+pipenv install -d
 ```
 
 ## Tests
@@ -13,7 +13,7 @@ pipenv install --development
 Tests are invoked using [`pytest`](https://docs.pytest.org/en/latest/) framework:
 
 ```bash
-pytest
+python -m pytest
 ```
 
 Note that for the tests to run successfully, you'd have to define the following environment variables:

@@ -31,7 +31,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             return patt.sub(lambda m: m.group(1).upper(), field_name)
 
         @classmethod
-        def handle_dots(cls, field_name: str) -> str:
+        def _handle_dots(cls, field_name: str) -> str:
             return field_name.replace('__dot__', '.')
 
         @classmethod
@@ -42,7 +42,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
         def _get_restrictions(self):
             return {
-                self._snake_to_camel(self.handle_dots(field_name)): self._get_param_value(value)
+                self._snake_to_camel(self._handle_dots(field_name)): self._get_param_value(value)
                 for field_name, value in self.__dict__.items()
                 if value is not None
             }
