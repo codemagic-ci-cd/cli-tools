@@ -6,6 +6,7 @@ from datetime import datetime
 from .enums import BuildProcessingState
 from .resource import Resource
 from .resource import DictSerializable
+from .resource import Relationship
 
 
 class Build(Resource):

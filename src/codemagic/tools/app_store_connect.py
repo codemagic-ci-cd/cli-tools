@@ -12,12 +12,14 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildOrdering
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -200,7 +202,7 @@ class AppStoreConnect(cli.CliApp):
         """
         Get latest Testflight build number for the given application
         """
-        builds_filter = self.api_client.builds.Filter(app=application_id, pre_release_version__dot__version=prerelease_version)
+        builds_filter = self.api_client.builds.Filter(app=application_id, pre_release_version__dot__version=pre_release_version)
         builds = self._list_resources(builds_filter, self.api_client.builds, should_print)
         self.echo(max([str(build.attributes.version) for build in builds]))
 

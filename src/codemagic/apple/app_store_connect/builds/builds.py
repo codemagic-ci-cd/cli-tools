@@ -56,5 +56,5 @@ class Builds(ResourceManager[Build]):
         https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
         """
         build_id = self._get_resource_id(build)
-        response = self.client.session.get(f'{self.client.API_URL}/builds/{device_id}').json()
+        response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
         return Build(response['data'])
