@@ -44,7 +44,6 @@ class Build(Resource):
         betaAppReviewSubmission: Relationship
         appStoreVersion: Relationship
         icons: Relationship
-
         betaGroups: Relationship
         perfPowerMetrics: Relationship
         diagnosticSignatures: Relationship

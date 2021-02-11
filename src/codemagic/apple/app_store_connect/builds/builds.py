@@ -33,7 +33,7 @@ class Builds(ResourceManager[Build]):
 
     class Ordering(ResourceManager.Ordering):
         PRE_RELEASE_VERSION = 'preReleaseVersion'
-        UPLOADED_DATE = 'uploadDate'
+        UPLOADED_DATE = 'uploadedDate'
         VERSION = 'version'
 
     def list(self,

@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from codemagic.apple.resources import CertificateType
@@ -9,7 +10,7 @@ from codemagic.models import PrivateKey
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
-@pytest.mark.skip(reason='Live App Store Connect API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 @pytest.mark.usefixtures('class_unencrypted_pem')
 class CertificatesTest(ResourceManagerTestsBase):
 

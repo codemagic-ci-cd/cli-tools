@@ -132,7 +132,7 @@ class BuildArgument(cli.Argument):
     )
     BUILD_ID = cli.ArgumentProperties(
         key='build_id',
-        flags=('--build_id',),
+        flags=('--build-id',),
         description='Build id',
         argparse_kwargs={'required': False},
     )

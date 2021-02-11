@@ -36,6 +36,7 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+from codemagic.utilities.argument_utils import get_binary_arguments_value
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import BuildArgument
 from ._app_store_connect.arguments import BundleIdArgument
@@ -177,13 +178,14 @@ class AppStoreConnect(cli.CliApp):
         """
         List Testflight builds.
         """
-        if expired and not_expired:
+        try:
+            expired_value = get_binary_arguments_value(expired, not_expired)
+        except:
             raise BuildArgument.NOT_EXPIRED.raise_argument_error('Using mutually exclusive flags "--expired" and "--not-expired"')
-
 
         builds_filter = self.api_client.builds.Filter(
             app=application_id,
-            expired=None if not expired and not not_expired else str(expired or not not_expired),
+            expired=expired_value,
             id=build_id,
             processing_state=processing_state,
             version=build_version,
@@ -198,13 +200,24 @@ class AppStoreConnect(cli.CliApp):
     def get_latest_testflight_build_number(self,
                                            application_id: Union[str, ResourceId],
                                            pre_release_version: Optional[str] = None,
-                                           should_print: bool = False):
+                                           should_print: bool = False) -> int:
         """
         Get latest Testflight build number for the given application
         """
         builds_filter = self.api_client.builds.Filter(app=application_id, pre_release_version__dot__version=pre_release_version)
         builds = self._list_resources(builds_filter, self.api_client.builds, should_print)
-        self.echo(max([str(build.attributes.version) for build in builds]))
+        latest_build_number = max([int(build.attributes.version) for build in builds])
+        self.echo(str(latest_build_number))
+        return latest_build_number
+
+    @cli.action('get-testflight-build', BuildArgument.BUILD_ID)
+    def get_testflight_build(self,
+                             build_id: Union[str, ResourceId],
+                             should_print: bool = True) -> Build:
+        """
+        Get specified Build from Apple Developer portal
+        """
+        return self._get_resource(build_id, self.api_client.builds, should_print)
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,

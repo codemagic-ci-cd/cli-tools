@@ -1,5 +1,5 @@
+import os
 import uuid
-
 import pytest
 
 from codemagic.apple.resources import BundleId
@@ -14,7 +14,7 @@ from tests.apple.app_store_connect.resource_manager_test_base import ResourceMan
 CAPYBARA_ID = ResourceId('F88J43FA9J')
 
 
-@pytest.mark.skip(reason='Live App Store Connect API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class BundleIdsTest(ResourceManagerTestsBase):
 
     def test_create(self):
