@@ -206,9 +206,13 @@ class AppStoreConnect(cli.CliApp):
         """
         builds_filter = self.api_client.builds.Filter(app=application_id, pre_release_version__dot__version=pre_release_version)
         builds = self._list_resources(builds_filter, self.api_client.builds, should_print)
-        latest_build_number = max([int(build.attributes.version) for build in builds])
-        self.echo(str(latest_build_number))
-        return latest_build_number
+        try:
+            latest_build_number = max([int(build.attributes.version) for build in builds])
+        except ValueError:
+            return None
+        else:
+            self.echo(str(latest_build_number))
+            return latest_build_number
 
     @cli.action('get-testflight-build',
         BuildArgument.BUILD_ID)
