@@ -200,7 +200,7 @@ class AppStoreConnect(cli.CliApp):
     def get_latest_testflight_build_number(self,
                                            application_id: Union[str, ResourceId],
                                            pre_release_version: Optional[str] = None,
-                                           should_print: bool = False) -> int:
+                                           should_print: bool = False) -> Union[None, int]:
         """
         Get latest Testflight build number for the given application
         """
