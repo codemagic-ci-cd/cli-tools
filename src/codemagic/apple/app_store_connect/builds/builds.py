@@ -7,7 +7,6 @@ from typing import Union
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
-from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
 
 
@@ -23,9 +22,9 @@ class Builds(ResourceManager[Build]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
-        app: Optional[Union[str, ResourceId]] = None
+        app: Optional[ResourceId] = None
         expired: Optional[bool] = None
-        id: Optional[Union[str, ResourceId]] = None
+        id: Optional[ResourceId] = None
         processing_state: Optional[BuildProcessingState] = None
         version: Optional[str] = None
         pre_release_version_version: Optional[str] = None

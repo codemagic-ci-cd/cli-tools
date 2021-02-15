@@ -10,6 +10,26 @@ class _ResourceEnum(enum.Enum):
         return str(self.value)
 
 
+class AppStoreState(_ResourceEnum):
+    DEVELOPER_REMOVED_FROM_SALE = 'DEVELOPER_REMOVED_FROM_SALE'
+    DEVELOPER_REJECTED = 'DEVELOPER_REJECTED'
+    IN_REVIEW = 'IN_REVIEW'
+    INVALID_BINARY = 'INVALID_BINARY'
+    METADATA_REJECTED = 'METADATA_REJECTED'
+    PENDING_APPLE_RELEASE = 'PENDING_APPLE_RELEASE'
+    PENDING_CONTRACT = 'PENDING_CONTRACT'
+    PENDING_DEVELOPER_RELEASE = 'PENDING_DEVELOPER_RELEASE'
+    PREPARE_FOR_SUBMISSION = 'PREPARE_FOR_SUBMISSION'
+    PREORDER_READY_FOR_SALE = 'PREORDER_READY_FOR_SALE'
+    PROCESSING_FOR_APP_STORE = 'PROCESSING_FOR_APP_STORE'
+    READY_FOR_SALE = 'READY_FOR_SALE'
+    REJECTED = 'REJECTED'
+    REMOVED_FROM_SALE = 'REMOVED_FROM_SALE'
+    WAITING_FOR_EXPORT_COMPLIANCE = 'WAITING_FOR_EXPORT_COMPLIANCE'
+    WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
+    REPLACED_WITH_NEW_VERSION = 'REPLACED_WITH_NEW_VERSION'
+
+
 class BuildProcessingState(_ResourceEnum):
     PROCESSING = 'PROCESSING'
     FAILED = 'FAILED'
@@ -109,6 +129,12 @@ class DeviceStatus(_ResourceEnum):
     ENABLED = 'ENABLED'
 
 
+class Platform(_ResourceEnum):
+    IOS = 'IOS'
+    MAC_OS = 'MAC_OS'
+    TV_OS = 'TV_OS'
+
+
 class ProfileState(_ResourceEnum):
     ACTIVE = 'ACTIVE'
     INVALID = 'INVALID'
@@ -138,10 +164,18 @@ class ProfileType(_ResourceEnum):
         return not self.devices_not_allowed()
 
 
+class ReleaseType(_ResourceEnum):
+    MANUAL = 'MANUAL'
+    AFTER_APPROVAL = 'AFTER_APPROVAL'
+    SCHEDULED = 'SCHEDULED'
+
+
 class ResourceType(_ResourceEnum):
+    APP_STORER_VERSIONS = 'appStoreVersions'
     BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
     CERTIFICATES = 'certificates'
     DEVICES = 'devices'
+    PRE_RELEASE_VERSIONS = 'preReleaseVersions'
     PROFILES = 'profiles'
