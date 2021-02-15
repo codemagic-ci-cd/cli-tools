@@ -36,7 +36,6 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
-from codemagic.utilities.argument_utils import get_binary_arguments_value
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import BuildArgument
 from ._app_store_connect.arguments import BundleIdArgument
@@ -205,7 +204,7 @@ class AppStoreConnect(cli.CliApp):
         )
         builds = self._list_resources(builds_filter, self.api_client.builds, should_print)
         try:
-            latest_build_number = max([int(build.attributes.version) for build in builds])
+            latest_build_number = max((build.attributes.version for build in builds), key=int)
         except ValueError:
             return None
         else:
