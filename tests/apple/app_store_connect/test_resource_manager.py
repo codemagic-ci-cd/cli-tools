@@ -29,7 +29,6 @@ class StubFilter(ResourceManager.Filter):
     ({'field_two': StubEnum.B, 'field_one': None}, {'filter[fieldTwo]': 'b'}),
     ({'field_three_four': CustomString('34'), 'field_one': None, 'field_two': None}, {'filter[fieldThreeFour]': '34'}),
     ({'field_one': '1', 'field_two': StubEnum.A}, {'filter[fieldOne]': '1', 'filter[fieldTwo]': 'a'}),
-    ({'field_with__dot__dots': 'value'}, {'filter[fieldWith.dots]': 'value'}),
 ])
 def test_resource_manager_filter_to_params_conversion(filter_params, expected_query_params):
     test_filter = StubFilter(**filter_params)
@@ -48,14 +47,3 @@ def test_resource_manager_filter_to_params_conversion(filter_params, expected_qu
 def test_resource_manager_filter_camel_case_converter(snake_case_input, expected_camel_case_output):
     converted_input = ResourceManager.Filter._snake_to_camel(snake_case_input)
     assert converted_input == expected_camel_case_output
-
-
-@pytest.mark.parametrize('dot_input, expected_dot_output', [
-    ('', ''),
-    ('no_dots', 'no_dots'),
-    ('my_resource__dot__field', 'my_resource.field'),
-    ('two__dot__dots__dot__field', 'two.dots.field'),
-])
-def test_resource_manager_filter_dots(dot_input, expected_dot_output):
-    converted_input = ResourceManager.Filter._handle_dots(dot_input)
-    assert converted_input == expected_dot_output

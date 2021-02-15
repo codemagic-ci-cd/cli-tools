@@ -6,7 +6,6 @@ from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
-from codemagic.apple.resources import BuildOrdering
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
@@ -25,11 +24,17 @@ class Builds(ResourceManager[Build]):
     @dataclass
     class Filter(ResourceManager.Filter):
         app: Optional[Union[str, ResourceId]] = None
-        expired: Optional[str] = None
+        expired: Optional[bool] = None
         id: Optional[Union[str, ResourceId]] = None
         processing_state: Optional[BuildProcessingState] = None
         version: Optional[str] = None
-        pre_release_version__dot__version: Optional[str] = None
+        pre_release_version_version: Optional[str] = None
+
+        @classmethod
+        def _get_field_name(cls, field_name) -> str:
+            if field_name == 'pre_release_version_version':
+                field_name = 'pre_release_version.version'
+            return super()._get_field_name(field_name)
 
     class Ordering(ResourceManager.Ordering):
         PRE_RELEASE_VERSION = 'preReleaseVersion'
@@ -38,23 +43,12 @@ class Builds(ResourceManager[Build]):
 
     def list(self,
              resource_filter: Filter = Filter(),
-             ordering: Optional[BuildOrdering] = None,
-             reverse: bool = False) -> List[Build]:
+             ordering = Ordering.UPLOADED_DATE,
+             reverse = False) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
 
-        params = resource_filter.as_query_params()
-        if ordering:
-            params['sort'] = self.Ordering[ordering.value].as_param(reverse)
-
+        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         builds = self.client.paginate(f'{self.client.API_URL}/builds', params=params)
         return [Build(build) for build in builds]
-
-    def read(self, build: Union[LinkedResourceData, ResourceId]) -> Build:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
-        """
-        build_id = self._get_resource_id(build)
-        response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
-        return Build(response['data'])

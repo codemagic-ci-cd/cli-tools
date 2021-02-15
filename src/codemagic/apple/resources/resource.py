@@ -71,13 +71,11 @@ class PagingInformation(DictSerializable):
 
 
 class Links(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('related',)
+    _OMIT_IF_NONE_KEYS = ('self', 'related')
 
     def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):
-        if self:
-            _self.self = self
-        if related:
-            _self.related = related
+        _self.self = self
+        _self.related = related
 
 
 class ResourceLinks(DictSerializable):
@@ -203,6 +201,11 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
+        """
+        while most of API responses contain timestamp as '2020-08-04T11:44:12.000+0000'
+        /builds endpoint returns timestamps with timedelta and without milliseconds
+        as '2021-01-28T06:01:32-08:00'
+        """
         if iso_8601_timestamp is None:
             return None
         try:
@@ -222,6 +225,13 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     def to_iso_8601(cls, dt: Optional[datetime]):
+        """
+        while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
+        resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
+        /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'
+        resolved to datetime.datetime(2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))).
+        So need to convert it to the initial form based on the presense of the explicit utc timezone
+        """
         if dt is None:
             return None
         if dt.tzinfo == timezone.utc:

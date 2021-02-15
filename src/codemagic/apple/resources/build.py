@@ -2,11 +2,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 from .enums import BuildProcessingState
-from .resource import Resource
 from .resource import DictSerializable
 from .resource import Relationship
+from .resource import Resource
+
+
+@dataclass
+class ImageAsset(DictSerializable):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/imageasset
+    """
+
+    templateUrl: str
+    height: int
+    width: int
 
 
 class Build(Resource):
@@ -32,6 +44,8 @@ class Build(Resource):
                 self.uploadedDate = Resource.from_iso_8601(self.uploadedDate)
             if isinstance(self.expirationDate, str):
                 self.expirationDate = Resource.from_iso_8601(self.expirationDate)
+            if isinstance(self.iconAssetToken, dict):
+                self.iconAssetToken = ImageAsset(**self.iconAssetToken)
 
     @dataclass
     class Relationships(Resource.Relationships):
@@ -44,16 +58,7 @@ class Build(Resource):
         betaAppReviewSubmission: Relationship
         appStoreVersion: Relationship
         icons: Relationship
-        betaGroups: Relationship
-        perfPowerMetrics: Relationship
-        diagnosticSignatures: Relationship
 
-@dataclass
-class ImageAsset(DictSerializable):
-    """
-    https://developer.apple.com/documentation/appstoreconnectapi/imageasset
-    """
-
-    templateUrl: str
-    height: int
-    width: int
+        betaGroups: Optional[Relationship] = None
+        perfPowerMetrics: Optional[Relationship] = None
+        diagnosticSignatures: Optional[Relationship] = None

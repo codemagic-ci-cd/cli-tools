@@ -26,13 +26,13 @@ R = TypeVar('R', bound=Resource)
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     class Filter:
         @classmethod
+        def _get_field_name(cls, field_name) -> str:
+            return cls._snake_to_camel(field_name)
+
+        @classmethod
         def _snake_to_camel(cls, field_name: str) -> str:
             patt = re.compile(r'_(\w)')
             return patt.sub(lambda m: m.group(1).upper(), field_name)
-
-        @classmethod
-        def _handle_dots(cls, field_name: str) -> str:
-            return field_name.replace('__dot__', '.')
 
         @classmethod
         def _get_param_value(cls, filed_value) -> str:
@@ -42,7 +42,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
         def _get_restrictions(self):
             return {
-                self._snake_to_camel(self._handle_dots(field_name)): self._get_param_value(value)
+                self._get_field_name(field_name): self._get_param_value(value)
                 for field_name, value in self.__dict__.items()
                 if value is not None
             }

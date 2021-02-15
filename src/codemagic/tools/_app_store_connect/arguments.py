@@ -5,7 +5,6 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.app_store_connect.builds import Builds
-from codemagic.apple.resources import BuildOrdering
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -100,14 +99,16 @@ class AppStoreConnectArgument(cli.Argument):
 
 
 class BuildArgument(cli.Argument):
-    APPLICATION_ID = cli.ArgumentProperties(
+    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
         key='application_id',
-        description='Application Apple ID',
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
     )
-    APPLICATION_ID_OPTIONAL = cli.ArgumentProperties(
+    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
         key='application_id',
         flags=('--application-id',),
-        description='Application Apple ID',
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
         argparse_kwargs={'required': False},
     )
     EXPIRED = cli.ArgumentProperties(
@@ -130,20 +131,22 @@ class BuildArgument(cli.Argument):
             'action': 'store_true',
         },
     )
-    BUILD_ID = cli.ArgumentProperties(
-        key='build_id',
-        description='Specific build ID',
-    )
-    BUILD_ID_OPTIONAL = cli.ArgumentProperties(
+    BUILD_ID_RESOURCE_ID = cli.ArgumentProperties(
         key='build_id',
         flags=('--build-id',),
-        description='Specific build ID',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
     )
-    PRE_RELEASE_VERSION= cli.ArgumentProperties(
+    PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
         flags=('--pre-release-version',),
-        description='Pre-release version of your application',
+        description=(
+            'Version of the build published to Testflight '
+            'that identifies an iteration of the bundle. '
+            'The string can only contain numeric characters (0-9) and periods '
+            'in the format [Major].[Minor].[Patch]'
+        ),
         argparse_kwargs={'required': False},
     )
     PROCESSING_STATE = cli.ArgumentProperties(
@@ -156,31 +159,11 @@ class BuildArgument(cli.Argument):
             'choices': list(BuildProcessingState),
         },
     )
-    BUILD_NUMBER = cli.ArgumentProperties(
-        key='build_number',
-        flags=('--build-number',),
-        description='Build number',
+    BUILD_VERSION_NUMBER = cli.ArgumentProperties(
+        key='build_version_number',
+        flags=('--build-version-number',),
+        description='Build version number is the version number of the uploaded build',
         argparse_kwargs={'required': False},
-    )
-    ORDERING = cli.ArgumentProperties(
-        key='ordering',
-        flags=('--ordering',),
-        type=BuildOrdering,
-        description='Order builds by attribute',
-        argparse_kwargs={
-            'required': False,
-            'choices': list(BuildOrdering),
-        }
-    )
-    REVERSE = cli.ArgumentProperties(
-        key='reverse',
-        flags=('--reverse',),
-        type=bool,
-        description='Reverse the ordering (Apply only when ordering is specified)',
-        argparse_kwargs={
-            'required': False,
-            'action': 'store_true',
-        },
     )
 
 
