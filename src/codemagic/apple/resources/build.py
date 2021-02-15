@@ -49,6 +49,8 @@ class Build(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
+        _OMIT_IF_NONE_KEYS = ('betaGroups', 'perfPowerMetrics', 'diagnosticSignatures')
+
         app: Relationship
         appEncryptionDeclaration: Relationship
         individualTesters: Relationship

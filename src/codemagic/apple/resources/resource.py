@@ -166,7 +166,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         def __post_init__(self):
             for field in self.__dict__:
                 value = getattr(self, field)
-                if not isinstance(value, Relationship):
+                if not isinstance(value, (Relationship, type(None))):
                     setattr(self, field, Relationship(**value))
 
     @classmethod
