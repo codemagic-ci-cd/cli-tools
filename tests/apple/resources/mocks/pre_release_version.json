@@ -1,0 +1,37 @@
+{
+    "type": "preReleaseVersions",
+    "id": "b3a730b8-fad1-4cf6-a163-6f393ed444f1",
+    "attributes": {
+      "version": "2.0.44",
+      "platform": "IOS"
+    },
+    "relationships": {
+      "builds": {
+        "meta": {
+          "paging": {
+            "total": 1,
+            "limit": 10
+          }
+        },
+        "data": [
+          {
+            "type": "builds",
+            "id": "33e405a4-e58c-422a-860c-3bfb860d7ff6"
+          }
+        ],
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/preReleaseVersions/b3a730b8-fad1-4cf6-a163-6f393ed444f1/relationships/builds",
+          "related": "https://api.appstoreconnect.apple.com/v1/preReleaseVersions/b3a730b8-fad1-4cf6-a163-6f393ed444f1/builds"
+        }
+      },
+      "app": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/preReleaseVersions/b3a730b8-fad1-4cf6-a163-6f393ed444f1/relationships/app",
+          "related": "https://api.appstoreconnect.apple.com/v1/preReleaseVersions/b3a730b8-fad1-4cf6-a163-6f393ed444f1/app"
+        }
+      }
+    },
+    "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/preReleaseVersions/b3a730b8-fad1-4cf6-a163-6f393ed444f1"
+    }
+}
