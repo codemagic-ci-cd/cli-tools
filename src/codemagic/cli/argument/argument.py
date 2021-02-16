@@ -21,12 +21,11 @@ class Argument(ArgumentProperties, enum.Enum):
                                         is_switched_off: Optional[bool]) -> Optional[bool]:
         if {is_switched_on, is_switched_off} in ({True}, {False}):
             raise ValueError('Neither of the switches, or exactly one can be truthy at the time')
-        elif is_switched_on is True:
+        if is_switched_on is True:
             return True
-        elif is_switched_off is True:
+        if is_switched_off is True:
             return False
-        else:
-            return None
+        return None
 
     def register(self, argument_group: argparse._ArgumentGroup):
         kwargs = self.value.argparse_kwargs or {}

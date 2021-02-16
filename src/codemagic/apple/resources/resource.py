@@ -30,11 +30,11 @@ class DictSerializable:
     def _serialize(cls, obj):
         if isinstance(obj, enum.Enum):
             return obj.value
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return Resource.to_iso_8601(obj)
-        elif isinstance(obj, DictSerializable):
+        if isinstance(obj, DictSerializable):
             return obj.dict()
-        elif isinstance(obj, (list, tuple)):
+        if isinstance(obj, (list, tuple)):
             return [cls._serialize(item) for item in obj]
         return obj
 
