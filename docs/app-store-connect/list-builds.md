@@ -1,12 +1,12 @@
 
-app-store-connect
-=================
+list-builds
+===========
 
 
-**Utility to download code signing certificates and provisioning profiles     from Apple Developer Portal using App Store Connect API to perform iOS code signing**
+**List Builds from Apple Developer Portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,44 @@ app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--application-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--expired]
+    [--not-expired]
+    [--build-id BUILD_ID_RESOURCE_ID]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    [--processing-state PROCESSING_STATE]
+    [--build-version-number BUILD_VERSION_NUMBER]
 ```
+### Optional arguments for action `list-builds`
+
+##### `--application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
+
+
+Application Apple ID. An automatically generated ID assigned to your app
+##### `--expired`
+
+
+List only expired builds
+##### `--not-expired`
+
+
+List only not expired builds
+##### `--build-id=BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
+##### `--pre-release-version=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]
+##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
+
+
+Build processing state
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,25 +108,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create-bundle-id`](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
-|[`create-certificate`](create-certificate.md)|Create code signing certificates of given type|
-|[`create-profile`](create-profile.md)|Create provisioning profile of given type|
-|[`delete-bundle-id`](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal|
-|[`delete-certificate`](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal|
-|[`delete-profile`](delete-profile.md)|Delete specified Profile from Apple Developer portal|
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
-|[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal|
-|[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal|
-|[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get latest App Store build number for the given application|
-|[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get latest Testflight build number for the given application|
-|[`get-profile`](get-profile.md)|Get specified Profile from Apple Developer portal|
-|[`list-builds`](list-builds.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`list-bundle-id-profiles`](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
-|[`list-bundle-ids`](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints|
-|[`list-certificates`](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints|
-|[`list-devices`](list-devices.md)|List Devices from Apple Developer portal matching given constraints|
-|[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints|

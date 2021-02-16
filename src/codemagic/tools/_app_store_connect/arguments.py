@@ -103,10 +103,10 @@ class AppStoreVersionArgument(cli.Argument):
         key='app_store_version',
         flags=('--app-store-version',),
         description=(
-            'Version of the build published to App Store (release)'
+            'Version of the build published to App Store '
             'that identifies an iteration of the bundle. '
-            'The string can only contain numeric characters (0-9) and periods '
-            'in the format [Major].[Minor].[Patch]'
+            'The string can only contain one to three groups of numeric characters (0-9) '
+            'separated by period in the format [Major].[Minor].[Patch]'
         ),
         argparse_kwargs={'required': False},
     )
@@ -156,10 +156,10 @@ class BuildArgument(cli.Argument):
         key='pre_release_version',
         flags=('--pre-release-version',),
         description=(
-            'Version of the build published to Testflight (prerelease)'
+            'Version of the build published to Testflight '
             'that identifies an iteration of the bundle. '
-            'The string can only contain numeric characters (0-9) and periods '
-            'in the format [Major].[Minor].[Patch]'
+            'The string can only contain one to three groups of numeric characters (0-9) '
+            'separated by period in the format [Major].[Minor].[Patch]'
         ),
         argparse_kwargs={'required': False},
     )

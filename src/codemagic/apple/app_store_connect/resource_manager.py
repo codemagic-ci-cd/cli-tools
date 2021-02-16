@@ -63,7 +63,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             restrictions = self._get_restrictions()
             if not restrictions:
                 return '*'
-            return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
+            return ', '.join(f'{param}={shlex.quote(str(value))}' for param, value in restrictions.items())
 
 
     class Ordering(enum.Enum):
