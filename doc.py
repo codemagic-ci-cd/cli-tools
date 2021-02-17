@@ -88,6 +88,8 @@ class ArgumentsSerializer:
         def _process_default(default):
             if not default:
                 return ''
+            if isinstance(default, tuple) and len(default) > 1 and isinstance(default[0], Path):
+                default = ', '.join(str(p).replace(str(Path.home()), '$HOME') for p in default)
             if isinstance(default, tuple) and isinstance(default[0], Path):
                 default = default[0]
             if isinstance(default, Path):
