@@ -1,3 +1,5 @@
+from typing import Any
+from typing import Dict
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -29,7 +31,7 @@ class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/enable_a_capability
         """
-        attributes = {'capabilityType': capability_type.value}
+        attributes: Dict[str, Any] = {'capabilityType': capability_type.value}
         if capability_settings is not None:
             attributes['settings'] = capability_settings.dict()
         relationships = {
@@ -55,7 +57,7 @@ class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_capability_configuration
         """
         bundle_id_capability_id = self._get_resource_id(bundle_id_capability)
-        attributes = {'capabilityType': capability_type.value}
+        attributes: Dict[str, Any] = {'capabilityType': capability_type.value}
         if settings:
             attributes['settings'] = settings.dict()
         payload = self._get_update_payload(
