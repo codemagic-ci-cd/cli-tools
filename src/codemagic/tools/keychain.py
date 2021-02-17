@@ -6,6 +6,7 @@ import os
 import pathlib
 import shutil
 from tempfile import NamedTemporaryFile
+from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -81,10 +82,10 @@ class KeychainArgument(cli.Argument):
         flags=('-a', '--allow-app'),
         key='allowed_applications',
         description='Specify an application which may access the imported key without warning',
-        type=cli.CommonArgumentTypes.existing_path,
+        type=pathlib.Path,
         argparse_kwargs={
             'required': False,
-            'default': tuple(filter(None, map(shutil.which, ('codesign', 'productsign')))),
+            'default': (pathlib.Path('codesign'), pathlib.Path('productsign')),
             'nargs': '+',
             'metavar': 'allowed-app',
         },
@@ -269,6 +270,19 @@ class Keychain(cli.CliApp, PathFinderMixin):
         with NamedTemporaryFile(prefix='build_', suffix='.keychain') as tf:
             self._path = pathlib.Path(tf.name)
 
+    @classmethod
+    def _get_certificate_allowed_applications(
+            cls, given_allowed_applications: Sequence[pathlib.Path]) -> Iterable[str]:
+        for application in given_allowed_applications:
+            resolved_path = shutil.which(application)
+            if resolved_path is None:
+                # Only raise exception if user-specified path is not present
+                if application not in KeychainArgument.ALLOWED_APPLICATIONS.get_default():
+                    raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
+                        f'Application "{application}" does not exist or is not in PATH')
+            else:
+                yield resolved_path
+
     @cli.action('add-certificates',
                 KeychainArgument.CERTIFICATE_PATHS,
                 KeychainArgument.CERTIFICATE_PASSWORD,
@@ -280,14 +294,14 @@ class Keychain(cli.CliApp, PathFinderMixin):
             certificate_path_patterns: Sequence[pathlib.Path],
             certificate_password: Password = Password(''),
             allowed_applications: Sequence[pathlib.Path] = KeychainArgument.ALLOWED_APPLICATIONS.get_default(),
-            allow_all_applications: bool = KeychainArgument.ALLOW_ALL_APPLICATIONS.get_default(),
-            disallow_all_applications: bool = KeychainArgument.DISALLOW_ALL_APPLICATIONS.get_default()):
+            allow_all_applications: Optional[bool] = KeychainArgument.ALLOW_ALL_APPLICATIONS.get_default(),
+            disallow_all_applications: Optional[bool] = KeychainArgument.DISALLOW_ALL_APPLICATIONS.get_default()):
         """
         Add p12 certificate to specified keychain.
         """
 
         add_for_all_apps = False
-        add_for_apps: Sequence[pathlib.Path] = []
+        add_for_apps: List[str] = []
         if allow_all_applications and disallow_all_applications:
             raise KeychainArgument.ALLOW_ALL_APPLICATIONS.raise_argument_error(
                 f'Using mutually exclusive options '
@@ -296,7 +310,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         elif allow_all_applications:
             add_for_all_apps = True
         elif not disallow_all_applications:
-            add_for_apps = allowed_applications
+            add_for_apps = list(self._get_certificate_allowed_applications(allowed_applications))
 
         self.logger.info('Add certificates to keychain %s', self.path)
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
@@ -309,7 +323,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
                          certificate_path: pathlib.Path,
                          certificate_password: Optional[Password] = None,
                          allow_for_all_apps: bool = False,
-                         allowed_applications: Sequence[pathlib.Path] = tuple()):
+                         allowed_applications: Sequence[str] = tuple()):
         self.logger.info(f'Add certificate {certificate_path} to keychain {self.path}')
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
@@ -329,7 +343,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         if allow_for_all_apps:
             import_cmd.append('-A')
         for allowed_application in allowed_applications:
-            import_cmd.extend(['-T', str(allowed_application)])
+            import_cmd.extend(['-T', allowed_application])
 
         process = self.execute(import_cmd, obfuscate_patterns=obfuscate_patterns)
 
