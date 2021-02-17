@@ -27,7 +27,7 @@ Encrypted p12 certificate password. Alternatively to entering CERTIFICATE_PASSWO
 ##### `-a, --allow-app=ALLOWED_APPLICATIONS`
 
 
-Specify an application which may access the imported key without warning. Multiple arguments. Default:&nbsp;`('/usr/bin/codesign', '/usr/bin/productsign')`
+Specify an application which may access the imported key without warning. Multiple arguments. Default:&nbsp;`codesign, productsign`
 ##### `-A, --allow-all-applications`
 
 
