@@ -1,3 +1,10 @@
+Version 0.4.5
+-------------
+
+**Improvements**
+
+- Improvement: Add options to `keychain add-certificates` to specify which applications have access to the imported certificate without warning.
+
 Version 0.4.4
 -------------
 
