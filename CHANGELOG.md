@@ -3,6 +3,7 @@ Version 0.4.5
 
 **Improvements**
 
+- Dependency update: Bump cryptography from ~3.2 to ~3.3
 - Improvement: Add options to `keychain add-certificates` to specify which applications have access to the imported certificate without warning.
 
 Version 0.4.4

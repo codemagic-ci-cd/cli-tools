@@ -4,6 +4,7 @@ import abc
 import enum
 import re
 import shlex
+from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
@@ -88,8 +89,8 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     def _get_create_payload(cls,
                             resource_type: ResourceType, *,
                             attributes: Optional[Dict] = None,
-                            relationships: Optional[Dict] = None) -> Dict:
-        data = {'type': resource_type.value}
+                            relationships: Optional[Dict] = None) -> Dict[str, Dict[str, Any]]:
+        data: Dict[str, Any] = {'type': resource_type.value}
         if attributes is not None:
             data['attributes'] = attributes
         if relationships is not None:

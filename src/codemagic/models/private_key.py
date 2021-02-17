@@ -8,6 +8,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
 
 from codemagic.mixins import StringConverterMixin
@@ -42,7 +43,7 @@ class PrivateKey(StringConverterMixin):
 
     @classmethod
     def from_openssh_key(cls, buffer: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
-        rsa_key = serialization.load_ssh_private_key(  # type: ignore
+        rsa_key: RSAPrivateKey = serialization.load_ssh_private_key(  # type: ignore
             cls._bytes(buffer), cls._bytes(password) if password else b'', default_backend())
         return PrivateKey(rsa_key)
 
