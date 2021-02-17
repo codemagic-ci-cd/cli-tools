@@ -28,8 +28,7 @@ jobs:
 
     - name: Pipenv checks
       run: |
-        # Disable until https://github.com/pypa/pipenv/issues/4188 is resolved
-        # pipenv check
+        pipenv check
 
     - name: Static type checks with mypy
       env:
