@@ -10,6 +10,9 @@ keychain add-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [-p PATH]
     [-c CERTIFICATE_PATHS]
     [--certificate-password CERTIFICATE_PASSWORD]
+    [-a ALLOWED_APPLICATIONS]
+    [-A]
+    [-D]
 ```
 ### Optional arguments for action `add-certificates`
 
@@ -21,6 +24,18 @@ Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to m
 
 
 Encrypted p12 certificate password. Alternatively to entering CERTIFICATE_PASSWORD in plaintext, it may also be specified using a "@env:" prefix followed by a environment variable name, or "@file:" prefix followed by a path to the file containing the value. Example: "@env:<variable>" uses the value in the environment variable named "<variable>", and "@file:<file_path>" uses the value from file at "<file_path>". [Default: '']
+##### `-a, --allow-app=ALLOWED_APPLICATIONS`
+
+
+Specify an application which may access the imported key without warning. Multiple arguments. Default:&nbsp;`codesign, productsign`
+##### `-A, --allow-all-applications`
+
+
+Allow any application to access the imported key without warning
+##### `-D, --disallow-all-applications`
+
+
+Do not allow any applications to access the imported key without warning
 ### Optional arguments for command `keychain`
 
 ##### `-p, --path=PATH`

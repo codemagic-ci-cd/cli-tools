@@ -26,6 +26,9 @@ class Argument(ArgumentProperties, enum.Enum):
         if is_switched_off is True:
             return False
         return None
+    @property
+    def flag(self) -> str:
+        return sorted(self.value.flags, key=len, reverse=True)[0]
 
     def register(self, argument_group: argparse._ArgumentGroup):
         kwargs = self.value.argparse_kwargs or {}

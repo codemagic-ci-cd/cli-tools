@@ -6,6 +6,7 @@ import os
 import pathlib
 import shutil
 from tempfile import NamedTemporaryFile
+from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -76,6 +77,32 @@ class KeychainArgument(cli.Argument):
         type=Password,
         description='Encrypted p12 certificate password',
         argparse_kwargs={'required': False, 'default': ''},
+    )
+    ALLOWED_APPLICATIONS = cli.ArgumentProperties(
+        flags=('-a', '--allow-app'),
+        key='allowed_applications',
+        description='Specify an application which may access the imported key without warning',
+        type=pathlib.Path,
+        argparse_kwargs={
+            'required': False,
+            'default': (pathlib.Path('codesign'), pathlib.Path('productsign')),
+            'nargs': '+',
+            'metavar': 'allowed-app',
+        },
+    )
+    ALLOW_ALL_APPLICATIONS = cli.ArgumentProperties(
+        flags=('-A', '--allow-all-applications'),
+        key='allow_all_applications',
+        type=bool,
+        description='Allow any application to access the imported key without warning',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    DISALLOW_ALL_APPLICATIONS = cli.ArgumentProperties(
+        flags=('-D', '--disallow-all-applications'),
+        key='disallow_all_applications',
+        type=bool,
+        description='Do not allow any applications to access the imported key without warning',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
 
 
@@ -245,24 +272,58 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
     @cli.action('add-certificates',
                 KeychainArgument.CERTIFICATE_PATHS,
-                KeychainArgument.CERTIFICATE_PASSWORD)
-    def add_certificates(self,
-                         certificate_path_patterns: Sequence[pathlib.Path],
-                         certificate_password: Password = Password('')):
+                KeychainArgument.CERTIFICATE_PASSWORD,
+                KeychainArgument.ALLOWED_APPLICATIONS,
+                KeychainArgument.ALLOW_ALL_APPLICATIONS,
+                KeychainArgument.DISALLOW_ALL_APPLICATIONS)
+    def add_certificates(
+            self,
+            certificate_path_patterns: Sequence[pathlib.Path],
+            certificate_password: Password = Password(''),
+            allowed_applications: Sequence[pathlib.Path] = KeychainArgument.ALLOWED_APPLICATIONS.get_default(),
+            allow_all_applications: Optional[bool] = KeychainArgument.ALLOW_ALL_APPLICATIONS.get_default(),
+            disallow_all_applications: Optional[bool] = KeychainArgument.DISALLOW_ALL_APPLICATIONS.get_default()):
         """
         Add p12 certificate to specified keychain
         """
 
-        self.logger.info(f'Add certificates to keychain {self.path}')
+        add_for_all_apps = False
+        add_for_apps: List[str] = []
+        if allow_all_applications and disallow_all_applications:
+            raise KeychainArgument.ALLOW_ALL_APPLICATIONS.raise_argument_error(
+                f'Using mutually exclusive options '
+                f'{KeychainArgument.ALLOWED_APPLICATIONS.flag!r} and '
+                f'{KeychainArgument.DISALLOW_ALL_APPLICATIONS.flag!r}')
+        elif allow_all_applications:
+            add_for_all_apps = True
+        elif not disallow_all_applications:
+            add_for_apps = list(self._get_certificate_allowed_applications(allowed_applications))
+
+        self.logger.info('Add certificates to keychain %s', self.path)
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
         if not certificate_paths:
             raise KeychainError('Did not find any certificates from specified locations')
         for certificate_path in certificate_paths:
-            self._add_certificate(certificate_path, certificate_password)
+            self._add_certificate(certificate_path, certificate_password, add_for_all_apps, add_for_apps)
+
+    @classmethod
+    def _get_certificate_allowed_applications(
+            cls, given_allowed_applications: Sequence[pathlib.Path]) -> Iterable[str]:
+        for application in given_allowed_applications:
+            resolved_path = shutil.which(application)
+            if resolved_path is None:
+                # Only raise exception if user-specified path is not present
+                if application not in KeychainArgument.ALLOWED_APPLICATIONS.get_default():
+                    raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
+                        f'Application "{application}" does not exist or is not in PATH')
+            else:
+                yield resolved_path
 
     def _add_certificate(self,
                          certificate_path: pathlib.Path,
-                         certificate_password: Optional[Password] = None):
+                         certificate_password: Optional[Password] = None,
+                         allow_for_all_apps: bool = False,
+                         allowed_applications: Sequence[str] = tuple()):
         self.logger.info(f'Add certificate {certificate_path} to keychain {self.path}')
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
@@ -273,13 +334,18 @@ class Keychain(cli.CliApp, PathFinderMixin):
             certificate_password = Password('')
             obfuscate_patterns = []
 
-        process = self.execute([
+        import_cmd = [
             'security', 'import', certificate_path,
             '-f', "pkcs12",
             '-k', self.path,
-            '-T', shutil.which('codesign'),
             '-P', certificate_password.value,
-        ], obfuscate_patterns=obfuscate_patterns)
+        ]
+        if allow_for_all_apps:
+            import_cmd.append('-A')
+        for allowed_application in allowed_applications:
+            import_cmd.extend(['-T', allowed_application])
+
+        process = self.execute(import_cmd, obfuscate_patterns=obfuscate_patterns)
 
         if process.returncode != 0:
             if 'The specified item already exists in the keychain' in process.stderr:
