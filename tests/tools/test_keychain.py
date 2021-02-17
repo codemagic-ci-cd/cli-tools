@@ -39,7 +39,7 @@ def test_add_certificates_allowed_applications(allowed_apps, allow_all, disallow
 
 
 @mock.patch.object(Keychain, 'find_paths', mock_find_paths)
-def test_add_certificates_all_apps_allowed_and_disallowed(cli_argument_group, keychain):
+def test_add_certificates_all_apps_allowed_and_disallowed(cli_argument_group):
     KeychainArgument.ALLOW_ALL_APPLICATIONS.register(cli_argument_group)
     KeychainArgument.DISALLOW_ALL_APPLICATIONS.register(cli_argument_group)
     with pytest.raises(argparse.ArgumentError) as argument_error:
