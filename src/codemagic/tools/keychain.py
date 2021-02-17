@@ -270,19 +270,6 @@ class Keychain(cli.CliApp, PathFinderMixin):
         with NamedTemporaryFile(prefix='build_', suffix='.keychain') as tf:
             self._path = pathlib.Path(tf.name)
 
-    @classmethod
-    def _get_certificate_allowed_applications(
-            cls, given_allowed_applications: Sequence[pathlib.Path]) -> Iterable[str]:
-        for application in given_allowed_applications:
-            resolved_path = shutil.which(application)
-            if resolved_path is None:
-                # Only raise exception if user-specified path is not present
-                if application not in KeychainArgument.ALLOWED_APPLICATIONS.get_default():
-                    raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
-                        f'Application "{application}" does not exist or is not in PATH')
-            else:
-                yield resolved_path
-
     @cli.action('add-certificates',
                 KeychainArgument.CERTIFICATE_PATHS,
                 KeychainArgument.CERTIFICATE_PASSWORD,
@@ -318,6 +305,19 @@ class Keychain(cli.CliApp, PathFinderMixin):
             raise KeychainError('Did not find any certificates from specified locations')
         for certificate_path in certificate_paths:
             self._add_certificate(certificate_path, certificate_password, add_for_all_apps, add_for_apps)
+
+    @classmethod
+    def _get_certificate_allowed_applications(
+            cls, given_allowed_applications: Sequence[pathlib.Path]) -> Iterable[str]:
+        for application in given_allowed_applications:
+            resolved_path = shutil.which(application)
+            if resolved_path is None:
+                # Only raise exception if user-specified path is not present
+                if application not in KeychainArgument.ALLOWED_APPLICATIONS.get_default():
+                    raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
+                        f'Application "{application}" does not exist or is not in PATH')
+            else:
+                yield resolved_path
 
     def _add_certificate(self,
                          certificate_path: pathlib.Path,
