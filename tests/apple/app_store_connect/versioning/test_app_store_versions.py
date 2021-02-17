@@ -7,12 +7,10 @@ from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
-APPLICATION_ID = '1453997552'
-
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class BuildsTest(ResourceManagerTestsBase):
     def test_list(self):
-        app_store_versions, builds = self.api_client.app_store_versions.list(application_id=APPLICATION_ID)
+        app_store_versions, builds = self.api_client.app_store_versions.list(application_id='1453997552')
         builds = self.api_client.builds.list()
         assert len(builds) > 0
         for build in builds:
