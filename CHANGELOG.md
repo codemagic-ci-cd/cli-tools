@@ -1,3 +1,10 @@
+Version 0.4.5
+-------------
+
+**Changes**
+
+- Dependency update: Bump cryptography from ~3.2 to ~3.3
+
 Version 0.4.4
 -------------
 

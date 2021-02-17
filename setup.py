@@ -25,7 +25,7 @@ setup(
     scripts=['bin/code_signing_manager.rb'],
     python_requires=">=3.7",
     install_requires=[
-        'cryptography>=3.2',
+        'cryptography>=3.3',
         'PyJWT>=1.7.1,<2',
         'pyopenssl>=19.0',
         'requests>=2.22.0',
