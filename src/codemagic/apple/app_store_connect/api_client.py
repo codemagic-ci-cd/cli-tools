@@ -98,8 +98,7 @@ class AppStoreConnectApiClient:
             response = self.session.get(url, params=params).json()
         else:
             response = self.session.get(url, params={'limit': page_size, **params}).json()
-        data = response.get('data', [])
-        included = response.get('included', [])
+        result = PaginateResult(response.get('data', []), response.get('included', []))
         while 'next' in response['links']:
             # Query params from previous pagination call can be included in the next URL
             # and duplicate parameters are not allowed, so we need to filter those out.
@@ -107,9 +106,9 @@ class AppStoreConnectApiClient:
             included_params = parse.parse_qs(parsed_url.query)
             step_params = {k: v for k, v in params.items() if k not in included_params}
             response = self.session.get(response['links']['next'], params=step_params).json()
-            data.extend(response['data'])
-            included.extend(response.get('included', []))
-        return PaginateResult(data=data, included=included)
+            result.data.extend(response['data'])
+            result.included.extend(response.get('included', []))
+        return result
 
     def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
         return self._paginate(url, params, page_size).data
