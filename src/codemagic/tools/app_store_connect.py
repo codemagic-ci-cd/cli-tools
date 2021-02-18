@@ -29,6 +29,7 @@ from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
@@ -133,20 +134,13 @@ class AppStoreConnect(cli.CliApp):
         self.printer.print_resource(resource, should_print)
         return resource
 
-    def _list_resources(self, resource_filter, resource_manager, should_print, application_id=None):
+    def _list_resources(self, resource_filter, resource_manager, should_print):
         try:
-            if isinstance(resource_manager, type(self.api_client.app_store_versions)):
-                resources = resource_manager.list(application_id, resource_filter)
-            else:
-                resources = resource_manager.list(resource_filter=resource_filter)
+            resources = resource_manager.list(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
-        self.printer.log_found(
-            resource_manager.resource_type,
-            resources if isinstance(resources, List) else resources[0],
-            resource_filter
-        )
+        self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
         self.printer.print_resources(resources, should_print)
         return resources
 
@@ -176,15 +170,15 @@ class AppStoreConnect(cli.CliApp):
                     build_id: Optional[ResourceId] = None,
                     pre_release_version: Optional[str] = None,
                     processing_state: Optional[BuildProcessingState] = None,
-                    build_version_number: Optional[str] = None,
+                    build_version_number: Optional[int] = None,
                     should_print: bool = True) -> List[Build]:
         """
         List Builds from Apple Developer Portal matching given constraints
         """
         try:
             expired_value = Argument.resolve_optional_two_way_switch(expired, not_expired)
-        except ValueError as ve:
-            flags = f'{BuildArgument.EXPIRED.flags[0]!r} and {BuildArgument.NOT_EXPIRED.flags[0]!r}'
+        except ValueError:
+            flags = f'{BuildArgument.EXPIRED.flags!r} and {BuildArgument.NOT_EXPIRED.flags!r}'
             raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
 
         builds_filter = self.api_client.builds.Filter(
@@ -197,29 +191,34 @@ class AppStoreConnect(cli.CliApp):
         )
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
-    def get_latest_build_number(self, builds: List[Build]) -> Optional[int]:
+    @classmethod
+    def _get_latest_build_number(cls, builds: List[Resource]) -> Optional[int]:
         try:
             latest_build_number = max((build.attributes.version for build in builds), key=int)
         except ValueError:
             return None
-        else:
-            self.echo(str(latest_build_number))
-            return latest_build_number
+        cls.echo(str(latest_build_number))
+        return latest_build_number
 
     @cli.action('get-latest-app-store-build-number',
                 BuildArgument.APPLICATION_ID_RESOURCE_ID,
                 AppStoreVersionArgument.APP_STORE_VERSION)
     def get_latest_app_store_build_number(self,
-                                           application_id: ResourceId,
-                                           app_store_version: Optional[str] = None,
-                                           should_print: bool = False) -> Optional[int]:
+                                          application_id: ResourceId,
+                                          app_store_version: Optional[str] = None,
+                                          should_print: bool = False) -> Optional[int]:
         """
         Get latest App Store build number for the given application
         """
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=app_store_version)
-        _, builds = self._list_resources(versions_filter, versions_client, should_print, application_id=application_id)
-        return self.get_latest_build_number(builds)
+        try:
+            _versions, builds = versions_client.list(application_id, resource_filter=versions_filter)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+        self.printer.log_found(versions_client.resource_type, builds, versions_filter)
+        self.printer.print_resources(builds, should_print)
+        return self._get_latest_build_number(builds)
 
     @cli.action('get-latest-testflight-build-number',
                 BuildArgument.APPLICATION_ID_RESOURCE_ID,
@@ -227,14 +226,14 @@ class AppStoreConnect(cli.CliApp):
     def get_latest_testflight_build_number(self,
                                            application_id: ResourceId,
                                            pre_release_version: Optional[str] = None,
-                                           should_print: bool = False) -> Union[None, int]:
+                                           should_print: bool = False) -> Optional[int]:
         """
         Get latest Testflight build number for the given application
         """
         versions_client = self.api_client.pre_release_versions
         versions_filter = versions_client.Filter(app=application_id, version=pre_release_version)
         _, builds = self._list_resources(versions_filter, versions_client, should_print)
-        return self.get_latest_build_number(builds)
+        return self._get_latest_build_number(builds)
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,

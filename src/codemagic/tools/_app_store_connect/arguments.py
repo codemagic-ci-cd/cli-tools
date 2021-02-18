@@ -105,7 +105,8 @@ class AppStoreVersionArgument(cli.Argument):
             'Version of the build published to App Store '
             'that identifies an iteration of the bundle. '
             'The string can only contain one to three groups of numeric characters (0-9) '
-            'separated by period in the format [Major].[Minor].[Patch]'
+            'separated by period in the format [Major].[Minor].[Patch]. '
+            'For example `3.2.46`'
         ),
         argparse_kwargs={'required': False},
     )
@@ -158,7 +159,8 @@ class BuildArgument(cli.Argument):
             'Version of the build published to Testflight '
             'that identifies an iteration of the bundle. '
             'The string can only contain one to three groups of numeric characters (0-9) '
-            'separated by period in the format [Major].[Minor].[Patch]'
+            'separated by period in the format [Major].[Minor].[Patch]. '
+            'For example `3.2.46`'
         ),
         argparse_kwargs={'required': False},
     )
@@ -175,7 +177,11 @@ class BuildArgument(cli.Argument):
     BUILD_VERSION_NUMBER = cli.ArgumentProperties(
         key='build_version_number',
         flags=('--build-version-number',),
-        description='Build version number is the version number of the uploaded build',
+        type=int,
+        description=(
+            'Build version number is the version number of the uploaded build. '
+            'For example `46`'
+        ),
         argparse_kwargs={'required': False},
     )
 
