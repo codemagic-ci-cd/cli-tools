@@ -41,8 +41,8 @@ class Builds(ResourceManager[Build]):
 
     def list(self,
              resource_filter: Filter = Filter(),
-             ordering = Ordering.UPLOADED_DATE,
-             reverse = False) -> List[Build]:
+             ordering=Ordering.UPLOADED_DATE,
+             reverse=False) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """

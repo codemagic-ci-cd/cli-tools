@@ -8,6 +8,7 @@ from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
+from typing import Tuple
 from typing import TYPE_CHECKING
 from typing import Type
 from typing import TypeVar
@@ -38,10 +39,10 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
         @classmethod
         def _get_param_value(cls, filed_value) -> str:
             if isinstance(filed_value, enum.Enum):
-                return filed_value.value
-            return filed_value
+                return str(filed_value.value)
+            return str(filed_value)
 
-        def _get_restrictions(self):
+        def _get_restrictions(self) -> Dict[str, str]:
             return {
                 self._get_field_name(field_name): self._get_param_value(value)
                 for field_name, value in self.__dict__.items()
@@ -64,15 +65,19 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             restrictions = self._get_restrictions()
             if not restrictions:
                 return '*'
-            return ', '.join(f'{param}={shlex.quote(str(value))}' for param, value in restrictions.items())
-
+            return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
         def as_param(self, reverse=False) -> str:
             return f'{"-" if reverse else ""}{self.value}'
 
-    class Include(enum.Enum):
-        pass
+    class Include(Tuple[str, Type[Resource]], enum.Enum):
+        @property
+        def include_name(self) -> str:
+            return self.value[0]
+        @property
+        def resource_type(self) -> Type[Resource]:
+            return self.value[1]
 
     def __init__(self, client: AppStoreConnectApiClient):
         self.client = client

@@ -18,7 +18,6 @@ class StubFilter(ResourceManager.Filter):
     field_one: Optional[str] = None
     field_two: Optional[StubEnum] = None
     field_three_four: Optional[CustomString] = None
-    field_with__dot__dots: Optional[str] = None
 
 
 @pytest.mark.parametrize('filter_params, expected_query_params', [
