@@ -212,7 +212,7 @@ class AppStoreConnect(cli.CliApp):
     def get_latest_app_store_build_number(self,
                                            application_id: ResourceId,
                                            app_store_version: Optional[str] = None,
-                                           should_print: bool = False) -> Union[None, int]:
+                                           should_print: bool = False) -> Optional[int]:
         """
         Get latest App Store build number for the given application
         """
