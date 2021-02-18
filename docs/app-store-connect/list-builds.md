@@ -43,7 +43,7 @@ Alphanumeric ID value of the Build
 ##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
 
 
@@ -51,7 +51,7 @@ Build processing state
 ##### `--build-version-number=BUILD_VERSION_NUMBER`
 
 
-Build version number is the version number of the uploaded build
+Build version number is the version number of the uploaded build. For example `46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
