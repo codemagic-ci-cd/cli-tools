@@ -75,6 +75,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
         @property
         def include_name(self) -> str:
             return self.value[0]
+
         @property
         def resource_type(self) -> Type[Resource]:
             return self.value[1]
