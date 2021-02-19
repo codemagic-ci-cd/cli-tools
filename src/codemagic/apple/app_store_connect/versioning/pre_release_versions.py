@@ -11,7 +11,6 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 
-
 IncludedResource = TypeVar('IncludedResource', bound=Resource)
 
 
@@ -37,9 +36,9 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         raise ValueError(f'Unknown include type {include_type}')
 
     def list_with_include(
-        self,
-        include_type: Type[IncludedResource],
-        resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
+            self,
+            include_type: Type[IncludedResource],
+            resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """

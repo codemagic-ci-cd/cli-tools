@@ -12,7 +12,6 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -29,7 +28,6 @@ from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
-from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
@@ -194,7 +192,7 @@ class AppStoreConnect(cli.CliApp):
     @classmethod
     def _get_latest_build_number(cls, builds: List[Build]) -> Optional[int]:
         try:
-            latest_build_number = max((build.attributes.version for build in builds), key=int)
+            latest_build_number = max(int(build.attributes.version) for build in builds)
         except ValueError:
             return None
         cls.echo(str(latest_build_number))
@@ -213,7 +211,8 @@ class AppStoreConnect(cli.CliApp):
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=app_store_version)
         try:
-            _versions, builds = versions_client.list_with_include(application_id, Build, resource_filter=versions_filter)
+            _versions, builds = versions_client.list_with_include(
+                application_id, Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Build, builds, versions_filter)

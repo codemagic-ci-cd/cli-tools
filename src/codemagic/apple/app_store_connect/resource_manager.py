@@ -80,7 +80,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[R]) -> str:
-        raise NotImplementedError()
+        raise NotImplemented
 
     @classmethod
     def _get_update_payload(

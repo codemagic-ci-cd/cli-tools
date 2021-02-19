@@ -378,7 +378,9 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
     @cli.action('validate', AndroidAppBundleArgument.BUNDLE_PATH)
     def validate(self, aab_path: pathlib.Path) -> str:
-        """ Verify that given Android App Bundle is valid and print out information about it """
+        """
+        Verify that given Android App Bundle is valid and print out information about it
+        """
         self.logger.info(f'Validate {aab_path}')
         command = [
             'java', '-jar', str(self._bundletool_jar),

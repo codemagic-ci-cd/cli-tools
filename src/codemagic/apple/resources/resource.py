@@ -251,6 +251,9 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
             return '"..."'
         if isinstance(value, enum.Enum):
             return value.value
+        if isinstance(value, DictSerializable):
+            lines = '\n'.join(f'\t{self._format_attribute_name(k)}: {v}' for k, v in value.dict().items())
+            return f'\n{lines}'
         return value
 
     def __str__(self) -> str:
