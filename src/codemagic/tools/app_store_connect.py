@@ -213,7 +213,7 @@ class AppStoreConnect(cli.CliApp):
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=app_store_version)
         try:
-            _versions, builds = versions_client.list(application_id, Build, resource_filter=versions_filter)
+            _versions, builds = versions_client.list_with_include(application_id, Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Build, builds, versions_filter)
@@ -233,7 +233,7 @@ class AppStoreConnect(cli.CliApp):
         versions_client = self.api_client.pre_release_versions
         versions_filter = versions_client.Filter(app=application_id, version=pre_release_version)
         try:
-            _versions, builds = versions_client.list(Build, resource_filter=versions_filter)
+            _versions, builds = versions_client.list_with_include(Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Build, builds, versions_filter)
