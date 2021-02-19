@@ -38,7 +38,7 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
 
     def list_with_include(self,
              include_type: Type[IncludedResource],
-             resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[Resource]]:
+             resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """

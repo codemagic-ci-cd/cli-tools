@@ -192,7 +192,7 @@ class AppStoreConnect(cli.CliApp):
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @classmethod
-    def _get_latest_build_number(cls, builds: List[Resource]) -> Optional[int]:
+    def _get_latest_build_number(cls, builds: List[Build]) -> Optional[int]:
         try:
             latest_build_number = max((build.attributes.version for build in builds), key=int)
         except ValueError:
