@@ -4,12 +4,12 @@ import json
 import pathlib
 import re
 import subprocess
-from collections import Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin
