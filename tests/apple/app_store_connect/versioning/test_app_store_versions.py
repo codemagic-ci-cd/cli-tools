@@ -1,8 +1,10 @@
 import os
+
 import pytest
 
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
@@ -10,8 +12,8 @@ from tests.apple.app_store_connect.resource_manager_test_base import ResourceMan
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class BuildsTest(ResourceManagerTestsBase):
     def test_list(self):
-        app_store_versions, builds = self.api_client.app_store_versions.list(application_id='1453997552')
-        builds = self.api_client.builds.list()
+        app_store_versions, builds = self.api_client.app_store_versions.list_with_include(
+            ResourceId('1453997552'), Build)
         assert len(builds) > 0
         for build in builds:
             assert isinstance(build, Build)

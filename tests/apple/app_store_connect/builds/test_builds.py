@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from codemagic.apple.resources import Build
@@ -16,4 +17,5 @@ class BuildsTest(ResourceManagerTestsBase):
             assert build.type is ResourceType.BUILDS
 
     def test_filter(self):
-        assert self.api_client.builds.Filter._get_field_name('pre_release_version_version') == 'preReleaseVersion.version'
+        assert self.api_client.builds.Filter._get_field_name(
+            'pre_release_version_version') == 'preReleaseVersion.version'

@@ -1,5 +1,6 @@
 import os
 import uuid
+
 import pytest
 
 from codemagic.apple.resources import BundleIdPlatform
