@@ -36,9 +36,10 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
             return 'builds'
         raise ValueError(f'Unknown include type {include_type}')
 
-    def list_with_include(self,
-             include_type: Type[IncludedResource],
-             resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
+    def list_with_include(
+        self,
+        include_type: Type[IncludedResource],
+        resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """

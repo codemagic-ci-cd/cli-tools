@@ -35,10 +35,11 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             return 'build'
         raise ValueError(f'Unknown include type {include_type}')
 
-    def list_with_include(self,
-             application_id: ResourceId,
-             include_type: Type[IncludedResource],
-             resource_filter: Filter = Filter()) -> Tuple[List[AppStoreVersion], List[IncludedResource]]:
+    def list_with_include(
+        self,
+        application_id: ResourceId,
+        include_type: Type[IncludedResource],
+        resource_filter: Filter = Filter()) -> Tuple[List[AppStoreVersion], List[IncludedResource]]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
