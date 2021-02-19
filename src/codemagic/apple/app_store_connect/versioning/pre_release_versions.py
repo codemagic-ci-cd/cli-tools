@@ -3,12 +3,16 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Type
+from typing import TypeVar
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+
+
+IncludedResource = TypeVar('IncludedResource', bound=Resource)
 
 
 class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
@@ -26,22 +30,25 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         app: Optional[ResourceId] = None
         version: Optional[str] = None
 
-    class Include(ResourceManager.Include):
-        BUILDS = ('builds', Build)
+    @classmethod
+    def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
+        if include_type is Build:
+            return 'builds'
+        raise ValueError(f'Unknown include type {include_type}')
 
     def list(self,
-             resource_filter: Filter = Filter(),
-             include: Include = Include.BUILDS) -> Tuple[List[PreReleaseVersion], List[Resource]]:
+             include_type: Type[IncludedResource],
+             resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[Resource]]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """
 
         params = {
-            'include': include.include_name,
+            'include': self._get_include_field_name(include_type),
             **resource_filter.as_query_params(),
         }
         results = self.client.paginate_with_included(f'{self.client.API_URL}/preReleaseVersions', params=params)
         return (
             [PreReleaseVersion(prerelease_version) for prerelease_version in results.data],
-            [include.resource_type(included) for included in results.included]
+            [include_type(included) for included in results.included]
         )

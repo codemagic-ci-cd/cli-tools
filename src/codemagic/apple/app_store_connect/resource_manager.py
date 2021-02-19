@@ -8,7 +8,6 @@ from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
-from typing import Tuple
 from typing import TYPE_CHECKING
 from typing import Type
 from typing import TypeVar
@@ -71,15 +70,6 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
         def as_param(self, reverse=False) -> str:
             return f'{"-" if reverse else ""}{self.value}'
 
-    class Include(Tuple[str, Type[Resource]], enum.Enum):
-        @property
-        def include_name(self) -> str:
-            return self.value[0]
-
-        @property
-        def resource_type(self) -> Type[Resource]:
-            return self.value[1]
-
     def __init__(self, client: AppStoreConnectApiClient):
         self.client = client
 
@@ -87,6 +77,10 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def resource_type(self) -> Type[R]:
         raise NotImplemented
+
+    @classmethod
+    def _get_include_field_name(cls, include_type: Type[R]) -> str:
+        raise NotImplementedError()
 
     @classmethod
     def _get_update_payload(

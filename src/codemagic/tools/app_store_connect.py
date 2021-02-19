@@ -213,10 +213,10 @@ class AppStoreConnect(cli.CliApp):
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=app_store_version)
         try:
-            _versions, builds = versions_client.list(application_id, resource_filter=versions_filter)
+            _versions, builds = versions_client.list(application_id, Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
-        self.printer.log_found(versions_client.resource_type, builds, versions_filter)
+        self.printer.log_found(Build, builds, versions_filter)
         self.printer.print_resources(builds, should_print)
         return self._get_latest_build_number(builds)
 
@@ -232,7 +232,12 @@ class AppStoreConnect(cli.CliApp):
         """
         versions_client = self.api_client.pre_release_versions
         versions_filter = versions_client.Filter(app=application_id, version=pre_release_version)
-        _, builds = self._list_resources(versions_filter, versions_client, should_print)
+        try:
+            _versions, builds = versions_client.list(Build, resource_filter=versions_filter)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+        self.printer.log_found(Build, builds, versions_filter)
+        self.printer.print_resources(builds, should_print)
         return self._get_latest_build_number(builds)
 
     @cli.action('list-devices',
