@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import pathlib
 import subprocess
-from collections import Sequence
 from tempfile import NamedTemporaryFile
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 
 from codemagic.cli import CommandArg
 from codemagic.mixins import RunningCliAppMixin
