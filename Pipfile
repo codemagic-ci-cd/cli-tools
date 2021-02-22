@@ -15,6 +15,9 @@ mdutils = "*"
 pipenv = "*"
 isort = "*"
 flake8 = "*"
+flake8-commas = "*"
+flake8-quotes = "*"
+pep8-naming = "*"
 
 [packages]
 pyopenssl = "~=19.0"
