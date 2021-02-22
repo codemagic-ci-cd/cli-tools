@@ -21,7 +21,7 @@ class DevicesTest(ResourceManagerTestsBase):
         device = self.api_client.devices.create(
             f'test device from {self.__class__.__name__}',
             BundleIdPlatform.IOS,
-            DEVICE_UDID
+            DEVICE_UDID,
         )
         assert isinstance(device, Device)
 

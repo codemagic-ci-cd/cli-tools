@@ -35,7 +35,7 @@ def export_options_dict() -> Dict[str, Union[bool, str, Dict[str, str]]]:
     return {
         'method': 'development',
         'provisioningProfiles': {
-            'io.codemagic.capybara': 'io codemagic capybara development 1555086834'
+            'io.codemagic.capybara': 'io codemagic capybara development 1555086834',
         },
         'signingCertificate': 'iPhone Developer',
         'signingStyle': 'manual',

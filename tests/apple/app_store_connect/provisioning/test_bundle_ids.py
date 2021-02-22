@@ -22,7 +22,7 @@ class BundleIdsTest(ResourceManagerTestsBase):
         bundle_id = self.api_client.bundle_ids.create(
             'com.example.test-app',
             'com example test app',
-            BundleIdPlatform.IOS
+            BundleIdPlatform.IOS,
         )
         assert isinstance(bundle_id, BundleId)
 

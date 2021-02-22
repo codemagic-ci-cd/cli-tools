@@ -151,7 +151,7 @@ def test_raise_argument_error(argument: cli.Argument, cli_argument_group):
     assert error_msg.startswith(f'argument {key}: ')
     assert any([
         f'Value {key.upper()} not provided' in error_msg,
-        f'Missing value {key.upper()}' in error_msg
+        f'Missing value {key.upper()}' in error_msg,
     ])
 
 

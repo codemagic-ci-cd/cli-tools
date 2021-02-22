@@ -1,9 +1,7 @@
 import json
 import pathlib
-from typing import Dict
 
 import pytest
-
 
 _RESOURCE_MOCKS_DIR = pathlib.Path(__file__).parent.parent.parent / 'resources' / 'mocks'
 
