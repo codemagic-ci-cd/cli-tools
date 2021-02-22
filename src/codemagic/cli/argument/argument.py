@@ -15,6 +15,18 @@ from .argument_properties import ArgumentProperties
 
 class Argument(ArgumentProperties, enum.Enum):
 
+    @classmethod
+    def resolve_optional_two_way_switch(cls,
+                                        is_switched_on: Optional[bool],
+                                        is_switched_off: Optional[bool]) -> Optional[bool]:
+        if {is_switched_on, is_switched_off} in ({True}, {False}):
+            raise ValueError('Neither of the switches, or exactly one can be truthy at the time')
+        if is_switched_on is True:
+            return True
+        if is_switched_off is True:
+            return False
+        return None
+
     @property
     def flag(self) -> str:
         return sorted(self.value.flags, key=len, reverse=True)[0]

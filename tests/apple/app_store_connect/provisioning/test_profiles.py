@@ -1,15 +1,16 @@
+import os
 from unittest import mock
 
 import pytest
 
 from codemagic.apple.resources import BundleId
-from codemagic.apple.resources import SigningCertificate
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
+from codemagic.apple.resources import SigningCertificate
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
@@ -38,7 +39,7 @@ def test_create_profile_success_with_devices(profile_type, profile_response, api
     api_client.session.post.assert_called_once()
 
 
-@pytest.mark.skip(reason='Live App Store Connect API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class ProfilesTest(ResourceManagerTestsBase):
 
     def test_create(self):

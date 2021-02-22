@@ -3,7 +3,7 @@ create-bundle-id
 ================
 
 
-**Create Bundle ID in Apple Developer portal for specifier identifier.**
+**Create Bundle ID in Apple Developer portal for specifier identifier**
 ### Usage
 ```bash
 app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

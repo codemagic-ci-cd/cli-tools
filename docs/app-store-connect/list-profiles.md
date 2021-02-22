@@ -3,7 +3,7 @@ list-profiles
 =============
 
 
-**List Profiles from Apple Developer portal matching given constraints.**
+**List Profiles from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
 app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

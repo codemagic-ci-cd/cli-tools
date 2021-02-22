@@ -3,7 +3,7 @@ list-devices
 ============
 
 
-**List Devices from Apple Developer portal matching given constraints.**
+**List Devices from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
 app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

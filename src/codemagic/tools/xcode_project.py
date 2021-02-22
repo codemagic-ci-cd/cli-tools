@@ -45,7 +45,7 @@ class XcodeProjectException(cli.CliAppException):
 class XcodeProject(cli.CliApp, PathFinderMixin):
     """
     Utility to work with Xcode projects. Use it to manage iOS application
-    code signing properties for builds, create IPAs and run tests.
+    code signing properties for builds, create IPAs and run tests
     """
 
     @cli.action('detect-bundle-id',

@@ -3,7 +3,7 @@ build-apks
 ==========
 
 
-**Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives.**
+**Generates an APK Set archive containing either all possible split APKs and         standalone APKs or APKs optimized for the connected device (see connected-         device flag). Returns list of generated APK set archives**
 ### Usage
 ```bash
 android-app-bundle build-apks [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

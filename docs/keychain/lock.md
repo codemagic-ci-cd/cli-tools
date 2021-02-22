@@ -3,7 +3,7 @@ lock
 ====
 
 
-**Lock the specified keychain.**
+**Lock the specified keychain**
 ### Usage
 ```bash
 keychain lock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

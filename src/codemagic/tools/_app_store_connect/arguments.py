@@ -4,6 +4,7 @@ from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
@@ -93,6 +94,95 @@ class AppStoreConnectArgument(cli.Argument):
         type=pathlib.Path,
         description='Directory where the provisioning profiles will be saved',
         argparse_kwargs={'required': False, 'default': ProvisioningProfile.DEFAULT_LOCATION},
+    )
+
+
+class AppStoreVersionArgument(cli.Argument):
+    APP_STORE_VERSION = cli.ArgumentProperties(
+        key='app_store_version',
+        flags=('--app-store-version',),
+        description=(
+            'Version of the build published to App Store '
+            'that identifies an iteration of the bundle. '
+            'The string can only contain one to three groups of numeric characters (0-9) '
+            'separated by period in the format [Major].[Minor].[Patch]. '
+            'For example `3.2.46`'
+        ),
+        argparse_kwargs={'required': False},
+    )
+
+
+class BuildArgument(cli.Argument):
+    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='application_id',
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+    )
+    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
+        key='application_id',
+        flags=('--application-id',),
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+        argparse_kwargs={'required': False},
+    )
+    EXPIRED = cli.ArgumentProperties(
+        key='expired',
+        flags=('--expired',),
+        type=bool,
+        description='List only expired builds',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    NOT_EXPIRED = cli.ArgumentProperties(
+        key='not_expired',
+        flags=('--not-expired',),
+        type=bool,
+        description='List only not expired builds',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    BUILD_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='build_id',
+        flags=('--build-id',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build',
+        argparse_kwargs={'required': False},
+    )
+    PRE_RELEASE_VERSION = cli.ArgumentProperties(
+        key='pre_release_version',
+        flags=('--pre-release-version',),
+        description=(
+            'Version of the build published to Testflight '
+            'that identifies an iteration of the bundle. '
+            'The string can only contain one to three groups of numeric characters (0-9) '
+            'separated by period in the format [Major].[Minor].[Patch]. '
+            'For example `3.2.46`'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    PROCESSING_STATE = cli.ArgumentProperties(
+        key='processing_state',
+        flags=('--processing-state',),
+        type=BuildProcessingState,
+        description='Build processing state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BuildProcessingState),
+        },
+    )
+    BUILD_VERSION_NUMBER = cli.ArgumentProperties(
+        key='build_version_number',
+        flags=('--build-version-number',),
+        type=int,
+        description=(
+            'Build version number is the version number of the uploaded build. '
+            'For example `46`'
+        ),
+        argparse_kwargs={'required': False},
     )
 
 

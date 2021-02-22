@@ -6,6 +6,18 @@ import pytest
 
 
 @pytest.fixture
+def api_app_store_version() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / 'mocks' / 'app_store_version.json'
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
+def api_build() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / 'mocks' / 'build.json'
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
 def api_bundle_id() -> Dict:
     mock_path = pathlib.Path(__file__).parent / 'mocks' / 'bundle_id.json'
     return json.loads(mock_path.read_text())
@@ -32,6 +44,12 @@ def api_device() -> Dict:
 @pytest.fixture
 def api_error_response() -> Dict:
     mock_path = pathlib.Path(__file__).parent / 'mocks' / 'error_response.json'
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
+def api_pre_release_version() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / 'mocks' / 'pre_release_version.json'
     return json.loads(mock_path.read_text())
 
 

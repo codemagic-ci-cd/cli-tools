@@ -3,7 +3,7 @@ validate
 ========
 
 
-**Verify that given Android App Bundle is valid and print         out information about it.**
+**Verify that given Android App Bundle is valid and print out information about it**
 ### Usage
 ```bash
 android-app-bundle validate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

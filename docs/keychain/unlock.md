@@ -3,7 +3,7 @@ unlock
 ======
 
 
-**Unlock the specified keychain.**
+**Unlock the specified keychain**
 ### Usage
 ```bash
 keychain unlock [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

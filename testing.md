@@ -5,7 +5,7 @@ dependencies. This can be done with
 [`pipenv`](https://pipenv.kennethreitz.org/en/latest/):
 
 ```bash
-pipenv install --development
+pipenv install -d
 ```
 
 ## Tests

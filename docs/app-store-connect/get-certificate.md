@@ -3,7 +3,7 @@ get-certificate
 ===============
 
 
-**Get specified Signing Certificate from Apple Developer portal.**
+**Get specified Signing Certificate from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect get-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

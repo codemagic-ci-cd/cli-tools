@@ -59,7 +59,7 @@ class UniversalApkGeneratorArgument(cli.Argument):
 class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     """
     Generate universal APK files from Android App Bundles.
-    DEPRECATED! Use `android-app-bundle` instead.
+    DEPRECATED! Use `android-app-bundle` instead
     """
 
     def __init__(self,
@@ -99,7 +99,7 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     def generate(self) -> List[pathlib.Path]:
         """
         Generate universal APK files from Android App Bundles.
-        DEPRECATED! Use `android-app-bundle build-universal-apk` instead.
+        DEPRECATED! Use `android-app-bundle build-universal-apk` instead
         """
         from .android_app_bundle import AndroidAppBundle
         from .android_app_bundle import AndroidAppBundleTypes

@@ -1,0 +1,72 @@
+{
+    "type": "appStoreVersions",
+    "id": "33c63053-09a9-4112-86cf-bb1539379896",
+    "attributes": {
+      "platform": "IOS",
+      "versionString": "1.0",
+      "appStoreState": "REJECTED",
+      "copyright": "Nevercode Ltd",
+      "releaseType": "AFTER_APPROVAL",
+      "earliestReleaseDate": null,
+      "usesIdfa": false,
+      "downloadable": true,
+      "createdDate": "2019-02-22T06:05:41-08:00"
+    },
+    "relationships": {
+      "ageRatingDeclaration": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/ageRatingDeclaration",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/ageRatingDeclaration"
+        }
+      },
+      "appStoreVersionLocalizations": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appStoreVersionLocalizations",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appStoreVersionLocalizations"
+        }
+      },
+      "build": {
+        "data": {
+          "type": "builds",
+          "id": "be235c1c-abe7-4884-a4f5-d67d97e41aa6"
+        },
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/build",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/build"
+        }
+      },
+      "appStoreVersionPhasedRelease": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appStoreVersionPhasedRelease",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appStoreVersionPhasedRelease"
+        }
+      },
+      "routingAppCoverage": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/routingAppCoverage",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/routingAppCoverage"
+        }
+      },
+      "appStoreReviewDetail": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appStoreReviewDetail",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appStoreReviewDetail"
+        }
+      },
+      "appStoreVersionSubmission": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appStoreVersionSubmission",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appStoreVersionSubmission"
+        }
+      },
+      "idfaDeclaration": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/idfaDeclaration",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/idfaDeclaration"
+        }
+      }
+    },
+    "links": {
+      "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896"
+    }
+}
