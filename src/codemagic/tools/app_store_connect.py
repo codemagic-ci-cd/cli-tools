@@ -35,6 +35,7 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
 from ._app_store_connect.arguments import BuildArgument

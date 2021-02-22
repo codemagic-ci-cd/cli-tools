@@ -17,6 +17,7 @@ from codemagic.cli import CliProcess
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
+
 from .export_options import ExportOptions
 from .simulator import CoreSimulatorService
 from .simulator import Simulator

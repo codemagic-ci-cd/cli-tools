@@ -7,6 +7,7 @@ from codemagic.models.table import Line
 from codemagic.models.table import Spacer
 from codemagic.models.table import Table
 from codemagic.utilities import log
+
 from .definitions import TestSuite
 from .definitions import TestSuites
 

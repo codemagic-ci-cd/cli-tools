@@ -14,11 +14,12 @@ from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
 from codemagic.models.junit import TestSuite
 from codemagic.models.junit import TestSuites
+
 from .xcresult import ActionDeviceRecord
 from .xcresult import ActionRecord
-from .xcresult import ActionTestMetadata
-from .xcresult import ActionTestableSummary
 from .xcresult import ActionsInvocationRecord
+from .xcresult import ActionTestableSummary
+from .xcresult import ActionTestMetadata
 
 
 class XcResultConverter:

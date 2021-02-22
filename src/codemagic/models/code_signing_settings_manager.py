@@ -16,6 +16,7 @@ from codemagic.cli import Colors
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
+
 from .certificate import Certificate
 from .export_options import ExportOptions
 from .matched_profile import MatchedProfile

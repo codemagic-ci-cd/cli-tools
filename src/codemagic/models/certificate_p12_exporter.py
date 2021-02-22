@@ -5,9 +5,9 @@ import pathlib
 import shutil
 import subprocess
 import tempfile
+from typing import TYPE_CHECKING
 from typing import Optional
 from typing import Sequence
-from typing import TYPE_CHECKING
 from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin

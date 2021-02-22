@@ -11,6 +11,7 @@ from urllib import parse
 import jwt
 
 from codemagic.utilities import log
+
 from .api_session import AppStoreConnectApiSession
 from .builds import Builds
 from .provisioning import BundleIdCapabilities

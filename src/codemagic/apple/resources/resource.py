@@ -15,6 +15,7 @@ from typing import overload
 
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
+
 from .enums import ResourceType
 
 

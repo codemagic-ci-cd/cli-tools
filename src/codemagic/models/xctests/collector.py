@@ -8,6 +8,7 @@ from typing import Optional
 from typing import Set
 
 from codemagic.utilities import log
+
 from .xcresulttool import XcResultTool
 
 

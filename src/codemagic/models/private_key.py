@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import AnyStr
 from typing import Optional
 
-from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
+from OpenSSL import crypto
 
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log

@@ -26,6 +26,7 @@ from typing import Type
 
 from codemagic import __version__
 from codemagic.utilities import log
+
 from .argument import ActionCallable
 from .argument import Argument
 from .argument import ArgumentFormatter

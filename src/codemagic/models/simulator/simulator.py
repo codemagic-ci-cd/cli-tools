@@ -13,6 +13,7 @@ from typing import Sequence
 from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin
+
 from .runtime import Runtime
 
 

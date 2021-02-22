@@ -14,6 +14,7 @@ from typing import Sequence
 from typing import Union
 
 from codemagic.utilities import log
+
 from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 

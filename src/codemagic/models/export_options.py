@@ -17,6 +17,7 @@ from typing import overload
 
 from codemagic.cli import Colors
 from codemagic.utilities import log
+
 from .matched_profile import MatchedProfile
 from .provisioning_profile import ProvisioningProfile
 

@@ -30,6 +30,7 @@ from codemagic.models.simulator import Runtime
 from codemagic.models.simulator import Simulator
 from codemagic.models.xctests import XcResultCollector
 from codemagic.models.xctests import XcResultConverter
+
 from ._xcode_project.arguments import ExportIpaArgument
 from ._xcode_project.arguments import TestArgument
 from ._xcode_project.arguments import TestResultArgument

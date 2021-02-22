@@ -4,11 +4,11 @@ import abc
 import enum
 import re
 import shlex
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Type
 from typing import TypeVar
 from typing import Union
