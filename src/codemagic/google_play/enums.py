@@ -1,3 +1,6 @@
+import enum
+
+
 class _ResourceEnum(enum.Enum):
     def __str__(self):
         return str(self.value)

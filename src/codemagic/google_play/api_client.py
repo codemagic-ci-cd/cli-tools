@@ -1,25 +1,20 @@
 import json
 from itertools import chain
 from typing import NoReturn
+from typing import Sequence
 
 import httplib2
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient import discovery
 from googleapiclient import errors
 
-from codemagic.google_play import Track
+from codemagic.google_play.enums import Track
+from codemagic.google_play.types import Credentials
+from codemagic.google_play.types import PackageName
 from codemagic.google_play.api_error import AuthorizationError
 from codemagic.google_play.api_error import CredentialsError
 from codemagic.google_play.api_error import EditError
 from codemagic.google_play.api_error import VersionCodeFromTrackError
-
-
-class Credentials(str):
-    pass
-
-
-class PackageName(str):
-    pass
 
 
 class GooglePlayDeveloperAPIClient:
@@ -38,7 +33,7 @@ class GooglePlayDeveloperAPIClient:
         self.package_name = package_name
 
     @property
-    def _service(self) -> discovery.Resource:
+    def service(self) -> discovery.Resource:
         if self._service_instance is None:
             try:
                 json_credentials = json.loads(self._credentials)
@@ -59,23 +54,24 @@ class GooglePlayDeveloperAPIClient:
 
     def create_edit(self) -> dict:
         try:
-            return self._service.edits().insert(body={}, packageName=self.package_name).execute()
+            return self.service.edits().insert(body={}, packageName=self.package_name).execute()
         except errors.HttpError as e:
             raise EditError('create', self.package_name, e._get_reason() or 'Http Error')
         except errors.Error as e:
             raise EditError('create', self.package_name, str(e))
 
-    def delete_edit(self, edit_id: str) -> NoReturn:
+    def delete_edit(self, edit_id: str) -> None:
         try:
-            self._service.edits().delete(packageName=self.package_name, editId=edit_id).execute()
+            self.service.edits().delete(packageName=self.package_name, editId=edit_id).execute()
+            self._service_instance = None
         except errors.HttpError as e:
             raise EditError('delete', self.package_name, e._get_reason() or 'Http Error')
         except errors.Error as e:
             raise EditError('delete', self.package_name, str(e))
 
-    def _get_track_latest_version_code(self, edit_id: str, track: ):
+    def _get_track_latest_version_code(self, edit_id: str, track: Sequence[Track]):
         try:
-            track_response = self._service.edits().tracks().get(packageName=self.package_name, editId=edit_id, track=track).execute()
+            track_response = self.service.edits().tracks().get(packageName=self.package_name, editId=edit_id, track=track).execute()
         except errors.HttpError as e:
             raise VersionCodeFromTrackError(self.package_name, track, e._get_reason() or 'Http Error')
         except errors.Error as e:

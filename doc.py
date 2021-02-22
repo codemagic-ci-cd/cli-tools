@@ -124,12 +124,14 @@ class ToolDocumentationGenerator:
         self.tool_command = tool.get_executable_name()
         self.tool_prefix = f'{main_dir}/{self.tool_command}'
         self.tool_optional_args = None
+        self.tool_required_args = None
         self.tool_serialized_actions = None
         self.tool_options = None
 
     def generate(self):
         class_args_serializer = ArgumentsSerializer(self.tool.CLASS_ARGUMENTS).serialize()
         self.tool_optional_args = class_args_serializer.optional_args
+        self.tool_required_args = class_args_serializer.required_args
         self.tool_serialized_actions = self._serialize_actions()
         self.tool_options = self._serialize_default_options()
 
@@ -139,7 +141,7 @@ class ToolDocumentationGenerator:
         writer = Writer(md)
         writer.write_description(self.tool.__doc__)
         writer.write_tool_command_usage(self)
-        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, [])
+        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args)
         writer.write_options(self.tool_options)
         writer.write_actions_table(self.tool_serialized_actions)
         md.create_md_file()
@@ -151,7 +153,7 @@ class ToolDocumentationGenerator:
             writer.write_description(action.description)
             writer.write_action_command_usage(self, action)
             writer.write_arguments(f'action `{action.action_name}`', action.optional_args, action.required_args)
-            writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, [])
+            writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args)
             writer.write_options(self.tool_options)
             md.create_md_file()
 
@@ -187,7 +189,7 @@ class ToolDocumentationGenerator:
             formatter_class=cli.cli_help_formatter.CliHelpFormatter
         )
         self.tool.get_default_cli_options(parser)
-        return [_serialize_option(arg) for arg in parser._actions]
+        return list(map(_serialize_option, parser._actions))
 
 
 class CommandUsageGenerator:
@@ -196,22 +198,27 @@ class CommandUsageGenerator:
 
     def get_tool_command_usage(self) -> List[str]:
         lines = [f'{self.doc_generator.tool_command} {self._get_optional_common_flags()}']
+        lines.extend(self._get_tool_arguments())
         lines.extend(self._get_tool_flags())
         lines.append('ACTION')
         return lines
 
     def get_action_command_usage(self, action: Action) -> List[str]:
         lines = [f'{self.doc_generator.tool_command} {action.action_name} {self._get_optional_common_flags()}']
+        lines.extend(self._get_tool_arguments())
         lines.extend(self._get_tool_flags())
-        lines.extend(self._prepare_arguments(action.optional_args))
-        lines.extend(self._prepare_arguments(action.required_args))
+        lines.extend(map(self._get_formatted_flag, action.optional_args))
+        lines.extend(map(self._get_formatted_flag, action.required_args))
         return lines
 
     def _get_optional_common_flags(self):
-        return ' '.join(self._prepare_arguments(self.doc_generator.tool_options))
+        return ' '.join(map(self._get_formatted_flag, self.doc_generator.tool_options))
 
     def _get_tool_flags(self):
-        return self._prepare_arguments(self.doc_generator.tool_optional_args)
+        return map(self._get_formatted_flag, self.doc_generator.tool_optional_args)
+
+    def _get_tool_arguments(self):
+        return map(self._get_formatted_flag, self.doc_generator.tool_required_args)
 
     def _get_formatted_flag(self, arg):
         flag = f'{arg.flags.split(",")[0]}'
@@ -222,9 +229,6 @@ class CommandUsageGenerator:
         elif arg.name:
             flag = f'{flag} {arg.name}'
         return flag if arg.required else f'[{flag}]'
-
-    def _prepare_arguments(self, args):
-        return [self._get_formatted_flag(arg) for arg in args]
 
 
 class Writer:

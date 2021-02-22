@@ -3,42 +3,34 @@
 from __future__ import annotations
 
 import argparse
-import enum
 import json
 from typing import Optional
+from typing import Sequence
 
 from codemagic import cli
 from codemagic.google_play import GooglePlayDeveloperAPIClient
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
-
-
-class Types:
-    class ServiceAccountCredentials(cli.EnvironmentArgumentValue[str]):
-        environment_variable_key = 'GCLOUD_SERVICE_ACCOUNT_CREDENTIALS'
-
-        @classmethod
-        def _is_valid(cls, value: str) -> bool:
-            try:
-                json_content = json.loads(value)
-            except json.decoder.JSONDecodeError:
-                return False
-            else:
-                return json_content.get('type') == 'service_account'
+from codemagic.google_play.enums import Track
+from codemagic.google_play.types import Credentials
+from codemagic.google_play.types import CredentialsArgument
+from codemagic.google_play.types import PackageName
 
 
 class GooglePlayArgument(cli.Argument):
     GCLOUD_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key='credentials',
-        type=Types.ServiceAccountCredentials,
+        flags=('--credentials',),
+        type=CredentialsArgument,
         description=(
             'Gcloud service account creedentials with `JSON` key type '
             'to access Google Play Developer API'
         ),
-        argparse_kwargs={'required': True}
+        argparse_kwargs={'required': False}
     )
     PACKAGE_NAME = cli.ArgumentProperties(
         key='package_name',
-        type=str,
+        flags=('--package-name',),
+        type=PackageName,
         description='Package name of the app in Google Play Console (Ex: com.google.example)',
         argparse_kwargs={'required': True}
     )
@@ -47,6 +39,7 @@ class GooglePlayArgument(cli.Argument):
 class BuildNumberArgument(cli.Argument):
     TRACK = cli.ArgumentProperties(
         key='track',
+        flags=('--track',),
         type=Track,
         description=(
             'Get the build number from the specified track. '
@@ -54,6 +47,7 @@ class BuildNumberArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
+            'nargs': '+',
             'choices': list(Track),
         }
     )
@@ -70,8 +64,8 @@ class GooglePlay(cli.CliApp):
     """
 
     def  __init__(self,
-                  credentials: Types.ServiceAccountCredentials,
-                  package_name: str,
+                  credentials: Credentials,
+                  package_name: PackageName,
                   **kwargs):
         super().__init__(**kwargs)
         self.credentials = credentials
@@ -94,12 +88,16 @@ class GooglePlay(cli.CliApp):
             **cls._parent_class_kwargs(cli_args)
         )
 
-@cli.action('get-latest-build-number', BuildNumberArgument.TRACK)
-def get_latest_build_number(self, track: Optional[Track] = None) -> Optional[int]:
-    try:
-        edit = self.api_client.create_edit()
-    except GooglePlayDeveloperAPIClientError as api_error:
-        raise GooglePlayError(str(api_error))
+    @cli.action('get-latest-build-number', BuildNumberArgument.TRACK)
+    def get_latest_build_number(self, track: Sequence[Track] = None) -> Optional[int]:
+        """
+        Get latest build number from Google Play Developer API matching given constraints
+        """
+        try:
+            edit = self.api_client.create_edit()
+            return 0
+        except GooglePlayDeveloperAPIClientError as api_error:
+            raise GooglePlayError(str(api_error))
 
 
 
