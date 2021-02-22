@@ -86,7 +86,7 @@ class AppStoreConnectApiClient:
         return {
             'iss': self._issuer_id,
             'exp': self._get_timestamp(),
-            'aud': AppStoreConnectApiClient.JWT_AUDIENCE
+            'aud': AppStoreConnectApiClient.JWT_AUDIENCE,
         }
 
     def generate_auth_headers(self) -> Dict[str, str]:

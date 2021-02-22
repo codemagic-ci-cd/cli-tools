@@ -195,7 +195,7 @@ class BundleIdArgument(cli.Argument):
         key='bundle_id_identifier',
         flags=('--bundle-id-identifier',),
         description='Identifier of the Bundle ID',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     BUNDLE_ID_NAME = cli.ArgumentProperties(
         key='bundle_id_name',
@@ -219,8 +219,8 @@ class BundleIdArgument(cli.Argument):
         argparse_kwargs={
             'required': True,
             'nargs': '+',
-            'metavar': 'bundle-identifier-id'
-        }
+            'metavar': 'bundle-identifier-id',
+        },
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -254,14 +254,14 @@ class DeviceArgument(cli.Argument):
         argparse_kwargs={
             'required': True,
             'nargs': '+',
-            'metavar': 'device-id'
-        }
+            'metavar': 'device-id',
+        },
     )
     DEVICE_NAME = cli.ArgumentProperties(
         key='device_name',
         flags=('--name',),
         description='Name of the Device',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     DEVICE_STATUS = cli.ArgumentProperties(
         key='device_status',
@@ -271,7 +271,7 @@ class DeviceArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(DeviceStatus),
-        }
+        },
     )
 
 
@@ -289,8 +289,8 @@ class CertificateArgument(cli.Argument):
         argparse_kwargs={
             'required': True,
             'nargs': '+',
-            'metavar': 'certificate-id'
-        }
+            'metavar': 'certificate-id',
+        },
     )
     CERTIFICATE_TYPE = cli.ArgumentProperties(
         key='certificate_type',
@@ -301,7 +301,7 @@ class CertificateArgument(cli.Argument):
             'required': False,
             'choices': list(CertificateType),
             'default': CertificateType.IOS_DEVELOPMENT,
-        }
+        },
     )
     CERTIFICATE_TYPE_OPTIONAL = cli.ArgumentProperties(
         key='certificate_type',
@@ -311,7 +311,7 @@ class CertificateArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(CertificateType),
-        }
+        },
     )
     PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
         key='profile_type',
@@ -321,13 +321,13 @@ class CertificateArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(ProfileType),
-        }
+        },
     )
     DISPLAY_NAME = cli.ArgumentProperties(
         key='display_name',
         flags=('--display-name',),
         description='Code signing certificate display name',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     PRIVATE_KEY = cli.ArgumentProperties(
         key='certificate_key',
@@ -377,8 +377,8 @@ class ProfileArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(ProfileType),
-            'default': ProfileType.IOS_APP_DEVELOPMENT
-        }
+            'default': ProfileType.IOS_APP_DEVELOPMENT,
+        },
     )
     PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
         key='profile_type',
@@ -388,7 +388,7 @@ class ProfileArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(ProfileType),
-        }
+        },
     )
     PROFILE_STATE_OPTIONAL = cli.ArgumentProperties(
         key='profile_state',
@@ -398,13 +398,13 @@ class ProfileArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(ProfileState),
-        }
+        },
     )
     PROFILE_NAME = cli.ArgumentProperties(
         key='profile_name',
         flags=('--name',),
         description='Name of the provisioning profile',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
 
 

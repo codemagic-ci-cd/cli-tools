@@ -66,7 +66,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         config = build_config_info['build_configuration']
         return Colors.BLUE(
             f' - Using profile "{profile.name}" [{profile.uuid}] '
-            f'for target "{target}" [{config}] from project "{project}"'
+            f'for target "{target}" [{config}] from project "{project}"',
         )
 
     def notify_profile_usage(self):

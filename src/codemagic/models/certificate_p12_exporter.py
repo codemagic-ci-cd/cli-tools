@@ -73,7 +73,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
             '-out', pkcs12.expanduser(),
             '-in', self._temp_pem_certificate_path,
             '-inkey', self._temp_private_key_path,
-            '-passout', f'pass:{password}'
+            '-passout', f'pass:{password}',
         )
         self._run_openssl_command(export_args)
 

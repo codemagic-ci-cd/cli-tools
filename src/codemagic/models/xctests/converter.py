@@ -34,7 +34,7 @@ class XcResultConverter:
         return Error(
             message=test.get_error_message(),
             type=test.get_error_type(),
-            error_description=test.get_failure_description()
+            error_description=test.get_failure_description(),
         )
 
     @classmethod

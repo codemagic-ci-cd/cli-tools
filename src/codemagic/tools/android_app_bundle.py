@@ -101,21 +101,21 @@ class AndroidAppBundleArgument(cli.Argument):
         key='mode',
         description=(
             'Set the mode to universal if you want bundletool to build only a single APK '
-            'that includes all of your app\'s code and resources such that the APK is '
+            "that includes all of your app's code and resources such that the APK is "
             'compatible with all device configurations your app supports.'
         ),
         argparse_kwargs={
             'default': None,
             'required': False,
             'choices': ['universal'],
-        }
+        },
     )
     DUMP_TARGET = cli.ArgumentProperties(
         key='target',
         description='Target of the dump',
         argparse_kwargs={
-            'choices': ['manifest', 'resources', 'config']
-        }
+            'choices': ['manifest', 'resources', 'config'],
+        },
     )
     DUMP_XPATH = cli.ArgumentProperties(
         flags=('--xpath',),
@@ -127,7 +127,7 @@ class AndroidAppBundleArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
-        }
+        },
     )
 
 
@@ -321,7 +321,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
         command = [
             'java', '-jar', str(self._bundletool_jar),
-            'dump', target, '--bundle', aab_path
+            'dump', target, '--bundle', aab_path,
         ]
         if xpath:
             command.extend(['--xpath', xpath])
@@ -359,7 +359,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             '-storepass', signing_info.store_pass,
             '-keypass', signing_info.key_pass,
             str(aab_path),
-            signing_info.key_alias
+            signing_info.key_alias,
         ]
         obfuscate_patterns = [signing_info.store_pass, signing_info.key_pass]
         process = self.execute(command, obfuscate_patterns=obfuscate_patterns, show_output=False)
@@ -384,7 +384,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         self.logger.info(f'Validate {aab_path}')
         command = [
             'java', '-jar', str(self._bundletool_jar),
-            'validate', '--bundle', aab_path
+            'validate', '--bundle', aab_path,
         ]
         process = self.execute(command)
         if process.returncode != 0:
@@ -394,7 +394,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     @cli.action('bundletool-version')
     def bundletool_version(self) -> str:
         """ Get Bundletool version """
-        self.logger.info(f'Get Bundletool version')
+        self.logger.info('Get Bundletool version')
         process = self.execute(('java', '-jar', str(self._bundletool_jar), 'version'), show_output=False)
         if process.returncode != 0:
             raise AndroidAppBundleError('Unable to get Bundletool version', process)

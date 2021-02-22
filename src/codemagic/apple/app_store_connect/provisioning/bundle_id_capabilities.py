@@ -35,7 +35,7 @@ class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
         if capability_settings is not None:
             attributes['settings'] = capability_settings.dict()
         relationships = {
-            'bundleId': {'data': self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID)}
+            'bundleId': {'data': self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID)},
         }
         payload = self._get_create_payload(
             ResourceType.BUNDLE_ID_CAPABILITIES, attributes=attributes, relationships=relationships)

@@ -29,7 +29,7 @@ class XcResultTool(RunningCliAppMixin):
             'xcrun', 'xcresulttool', 'get',
             '--format', 'json',
             '--path', xcresult.expanduser(),
-            '--id', object_id
+            '--id', object_id,
         ]
         stdout = cls._run_command(cmd_args, f'Failed to get result bundle object {object_id} from {xcresult}')
         return json.loads(stdout)
@@ -40,7 +40,7 @@ class XcResultTool(RunningCliAppMixin):
         with NamedTemporaryFile(prefix=result_prefix or 'Test-', suffix='-merged.xcresult') as tf:
             output_path = pathlib.Path(tf.name)
         cmd_args: List[CommandArg] = ['xcrun', 'xcresulttool', 'merge', *xcresults, '--output-path', output_path]
-        _ = cls._run_command(cmd_args, f'Failed to merge xcresult bundles')
+        _ = cls._run_command(cmd_args, 'Failed to merge xcresult bundles')
         return output_path
 
     @classmethod

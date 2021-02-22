@@ -201,7 +201,7 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _log_cli_invoke_completed(cls, action_name: str, started_at: float, exit_status: int):
         seconds = int(time.time() - started_at)
-        duration = time.strftime("%M:%S", time.gmtime(seconds))
+        duration = time.strftime('%M:%S', time.gmtime(seconds))
         msg = f'Completed {cls.__name__} {action_name} in {duration} with status code {exit_status}'
         file_logger = log.get_file_logger(cls)
         file_logger.debug(Colors.MAGENTA('-' * len(msg)))
@@ -224,7 +224,7 @@ class CliApp(metaclass=abc.ABCMeta):
         log.initialize_logging(
             stream={'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream],
             verbose=cli_args.verbose,
-            enable_logging=cli_args.enable_logging
+            enable_logging=cli_args.enable_logging,
         )
 
     @classmethod

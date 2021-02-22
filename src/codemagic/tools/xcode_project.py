@@ -69,7 +69,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         )
 
         if not bundle_ids:
-            raise XcodeProjectException(f'Unable to detect Bundle ID')
+            raise XcodeProjectException('Unable to detect Bundle ID')
         bundle_id = bundle_ids.most_common(1)[0][0]
 
         self.logger.info(Colors.GREEN(f'Chose Bundle ID {bundle_id}'))
@@ -235,7 +235,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except ValueError as ve:
             TestArgument.RUNTIMES.raise_argument_error(str(ve))
 
-        self.logger.info(Colors.BLUE(f'List available test devices'))
+        self.logger.info(Colors.BLUE('List available test devices'))
         try:
             simulators = Simulator.list(runtimes, simulator_name, include_unavailable)
         except IOError as e:
@@ -342,12 +342,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 max_concurrent_devices=max_concurrent_devices,
                 max_concurrent_simulators=max_concurrent_simulators,
             )
-        except IOError as error:
+        except IOError:
             testing_failed = True
-            self.echo(Colors.RED(f'\nTest run failed\n'))
+            self.echo(Colors.RED('\nTest run failed\n'))
         else:
             testing_failed = False
-            self.echo(Colors.GREEN(f'\nTest run completed successfully\n'))
+            self.echo(Colors.GREEN('\nTest run completed successfully\n'))
         xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
 
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -359,12 +359,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         test_suites, xcresult = self._get_test_suites(
             xcresult_collector, show_found_result=True, save_xcresult_dir=output_dir)
 
-        self.echo(Colors.BLUE(
+        message = (
             f'Executed {test_suites.tests} tests with '
             f'{test_suites.failures} failures and '
             f'{test_suites.errors} errors in '
             f'{test_suites.time:.2f} seconds.\n'
-        ))
+        )
+        self.echo(Colors.BLUE(message))
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
@@ -538,7 +539,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if show_found_result:
             self.logger.info(Colors.GREEN('Found test results at'))
             for xcresult in xcresult_collector.get_collected_results():
-                self.logger.info(f'- %s', xcresult)
+                self.logger.info('- %s', xcresult)
             self.logger.info('')
 
         xcresult = xcresult_collector.get_merged_xcresult()

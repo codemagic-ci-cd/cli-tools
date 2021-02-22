@@ -84,7 +84,7 @@ if __name__ == '__main__':
         Colors.BOLD,
         Colors.ITALIC,
         Colors.STRIKE,
-        Colors.BRIGHT_BLACK_BG
+        Colors.BRIGHT_BLACK_BG,
     ]
     print(Colors.apply(' '.join(s.name for s in styles), *styles))
     for c in Colors:

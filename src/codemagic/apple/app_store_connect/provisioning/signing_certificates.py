@@ -44,7 +44,7 @@ class SigningCertificates(ResourceManager[SigningCertificate]):
         }
         response = self.client.session.post(
             f'{self.client.API_URL}/certificates',
-            json=self._get_create_payload(ResourceType.CERTIFICATES, attributes=attributes)
+            json=self._get_create_payload(ResourceType.CERTIFICATES, attributes=attributes),
         ).json()
         return SigningCertificate(response['data'], created=True)
 

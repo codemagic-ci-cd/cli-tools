@@ -27,10 +27,10 @@ class Destination(enum.Enum):
 
 
 class ArchiveMethod(enum.Enum):
-    AD_HOC = "ad-hoc"
-    DEVELOPMENT = "development"
-    APP_STORE = "app-store"
-    ENTERPRISE = "enterprise"
+    AD_HOC = 'ad-hoc'
+    DEVELOPMENT = 'development'
+    APP_STORE = 'app-store'
+    ENTERPRISE = 'enterprise'
 
     @classmethod
     def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> ArchiveMethod:
@@ -227,7 +227,7 @@ class ExportOptions:
 
         for key in sorted(options.keys()):
             value = options[key]
-            option = re.sub(f'([A-Z])', r' \1', key.replace('ID', 'Id')).lstrip(' ').title()
+            option = re.sub(r'([A-Z])', r' \1', key.replace('ID', 'Id')).lstrip(' ').title()
             if isinstance(value, dict):
                 logger.info(Colors.BLUE(f' - {option}:'))
                 for k, v in value.items():

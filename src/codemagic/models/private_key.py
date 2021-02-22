@@ -61,7 +61,7 @@ class PrivateKey(StringConverterMixin):
         pem = self.rsa_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=key_format,
-            encryption_algorithm=algorithm
+            encryption_algorithm=algorithm,
         )
         return self._str(pem)
 
@@ -72,5 +72,5 @@ class PrivateKey(StringConverterMixin):
     def get_public_key(self) -> bytes:
         return self.public_key.public_bytes(
             serialization.Encoding.OpenSSH,
-            serialization.PublicFormat.OpenSSH
+            serialization.PublicFormat.OpenSSH,
         )
