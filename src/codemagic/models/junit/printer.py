@@ -7,6 +7,7 @@ from codemagic.models.table import Line
 from codemagic.models.table import Spacer
 from codemagic.models.table import Table
 from codemagic.utilities import log
+
 from .definitions import TestSuite
 from .definitions import TestSuites
 
@@ -27,7 +28,7 @@ class TestSuitePrinter:
             Line('Total tests ran', test_suites.tests, value_color=tests_color),
             Line('Total tests failed', test_suites.failures, value_color=fails_color),
             Line('Total tests errored', test_suites.errors, value_color=errors_color),
-            Line('Total tests skipped', test_suites.skipped)
+            Line('Total tests skipped', test_suites.skipped),
         ], align_values_left=False)
         self.print(table.construct())
 
@@ -68,7 +69,7 @@ class TestSuitePrinter:
             Line('Total tests skipped', test_suite.skipped or 0),
             *self._get_test_suite_errored_lines(test_suite),
             *self._get_test_suite_failed_lines(test_suite),
-            *self._get_test_suite_skipped_lines(test_suite)
+            *self._get_test_suite_skipped_lines(test_suite),
         ])
 
         self.print(table.construct())

@@ -38,7 +38,7 @@ class BundleIdCapabilitiesTest(ResourceManagerTestsBase):
         capability = self.api_client.bundle_id_capabilities.modify_configuration(
             ResourceId('F88J43FA9J_GAME_CENTER_IOS'),
             CapabilityType.GAME_CENTER,
-            None
+            None,
         )
         assert isinstance(capability, BundleIdCapability)
         assert capability.type is ResourceType.BUNDLE_ID_CAPABILITIES

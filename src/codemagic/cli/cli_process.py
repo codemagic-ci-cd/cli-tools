@@ -14,6 +14,7 @@ from typing import Sequence
 from typing import Union
 
 from codemagic.utilities import log
+
 from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 
@@ -35,8 +36,8 @@ class CliProcess:
         if safe_form is None:
             full_command = ' '.join(shlex.quote(str(arg)) for arg in command_args)
             self.safe_form = ObfuscatedCommand(full_command)
-        self._stdout = ""
-        self._stderr = ""
+        self._stdout = ''
+        self._stderr = ''
 
     @property
     def stdout(self) -> str:
@@ -57,7 +58,7 @@ class CliProcess:
             self.logger.debug(f'Execute "{self.safe_form}"')
 
     def _log_exec_completed(self):
-        duration = time.strftime("%M:%S", time.gmtime(self.duration))
+        duration = time.strftime('%M:%S', time.gmtime(self.duration))
         file_logger = log.get_file_logger(self.__class__)
         file_logger.debug('STDOUT: %s', self.stdout)
         file_logger.debug('STDERR: %s', self.stderr)

@@ -82,7 +82,7 @@ def test_equality_to_invalid_type(compare_to):
     with pytest.raises(ValueError) as exception_info:
         _ = Runtime('iOS 1') == compare_to
     error = exception_info.value
-    assert str(error) == f"Cannot compare {Runtime.__name__} with {compare_to.__class__.__name__}"
+    assert str(error) == f'Cannot compare {Runtime.__name__} with {compare_to.__class__.__name__}'
 
 
 def test_total_ordering():
@@ -110,6 +110,6 @@ def test_total_ordering():
         'tvOS 7.2.1',
         'tvOS 4.1',
         'watchOS 7.2',
-        'iOS 2.10'
+        'iOS 2.10',
     ], key=Runtime)
     assert ordered == expected_ordering

@@ -10,7 +10,6 @@ from typing import Any
 from typing import AnyStr
 from typing import Dict
 from typing import List
-from typing import Optional
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin

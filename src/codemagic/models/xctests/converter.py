@@ -14,11 +14,12 @@ from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
 from codemagic.models.junit import TestSuite
 from codemagic.models.junit import TestSuites
+
 from .xcresult import ActionDeviceRecord
 from .xcresult import ActionRecord
-from .xcresult import ActionTestMetadata
-from .xcresult import ActionTestableSummary
 from .xcresult import ActionsInvocationRecord
+from .xcresult import ActionTestableSummary
+from .xcresult import ActionTestMetadata
 
 
 class XcResultConverter:
@@ -34,7 +35,7 @@ class XcResultConverter:
         return Error(
             message=test.get_error_message(),
             type=test.get_error_type(),
-            error_description=test.get_failure_description()
+            error_description=test.get_failure_description(),
         )
 
     @classmethod

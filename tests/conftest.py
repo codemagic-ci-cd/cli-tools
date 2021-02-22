@@ -14,15 +14,15 @@ import pytest
 
 sys.path.append('src')
 
-from codemagic.utilities import log
-from codemagic.apple.app_store_connect import AppStoreConnectApiClient
-from codemagic.apple.app_store_connect import IssuerId
-from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: E402
+from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
+from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
+from codemagic.utilities import log  # noqa: E402
 
 log.initialize_logging(
     stream=open(os.devnull, 'w'),
     verbose=False,
-    enable_logging=False
+    enable_logging=False,
 )
 
 
@@ -65,7 +65,7 @@ def _api_client() -> AppStoreConnectApiClient:
     return AppStoreConnectApiClient(
         KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
         IssuerId(os.environ['TEST_APPLE_ISSUER_ID']),
-        private_key
+        private_key,
     )
 
 

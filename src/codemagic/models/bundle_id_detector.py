@@ -14,6 +14,7 @@ from typing import Optional
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
+
 from .pbx_project import PbxProject
 
 

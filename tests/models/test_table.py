@@ -1,9 +1,9 @@
-from codemagic.models.table import Table
+from codemagic.models.table import Header
 from codemagic.models.table import Line
 from codemagic.models.table import Spacer
-from codemagic.models.table import Header
+from codemagic.models.table import Table
 
-_EXPECTED_DEFAULT_RENDER = '''\
+_EXPECTED_DEFAULT_RENDER = """\
 ┌───────────────────────┐
 │        Header         │
 ├─────────────┬─────────┤
@@ -16,17 +16,17 @@ _EXPECTED_DEFAULT_RENDER = '''\
 ├─────────────┬─────────┤
 │  row_4      │  key_4  │
 └─────────────┴─────────┘
-'''
+"""
 
-_EXPECTED_HEADERLESS_TABLE = '''\
+_EXPECTED_HEADERLESS_TABLE = """\
 ┌─────────┬─────────┐
 │  row_1  │  key_1  │
 │  row_2  │  key_2  │
 └─────────┴─────────┘
-'''
+"""
 
 
-_EXPECTED_CUSTOM_TABLE_1 = '''\
+_EXPECTED_CUSTOM_TABLE_1 = """\
 +---------------------------+
 |          Header           |
 +---------------+-----------+
@@ -39,9 +39,9 @@ _EXPECTED_CUSTOM_TABLE_1 = '''\
 +---------------+-----------+
 | < row_4     > | < key_4 > |
 +---------------+-----------+
-'''
+"""
 
-_EXPECTED_CUSTOM_TABLE_2 = '''\
+_EXPECTED_CUSTOM_TABLE_2 = """\
 ooooooooooooooooooooooooo
 o        Header         o
 ooooooooooooooooooooooooo
@@ -52,7 +52,7 @@ o  row_3      o  key_3  o
 ooooooooooooooooooooooooo
 o       Subheader       o
 ooooooooooooooooooooooooo
-'''
+"""
 
 
 def test_default_table():

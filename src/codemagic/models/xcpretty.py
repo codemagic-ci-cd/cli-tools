@@ -2,8 +2,8 @@ import shlex
 import shutil
 import subprocess
 import sys
-from typing import AnyStr
 from typing import IO
+from typing import AnyStr
 from typing import Optional
 from typing import Union
 

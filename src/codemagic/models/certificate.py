@@ -9,16 +9,17 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from OpenSSL import crypto
-from OpenSSL.crypto import X509
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
+from OpenSSL import crypto
+from OpenSSL.crypto import X509
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
+
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import PrivateKey

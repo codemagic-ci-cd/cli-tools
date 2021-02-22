@@ -4,7 +4,6 @@ from unittest import mock
 
 import pytest
 
-
 from codemagic.models import Xcode
 
 

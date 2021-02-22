@@ -4,11 +4,11 @@ import abc
 import enum
 import re
 import shlex
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -76,11 +76,11 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def resource_type(self) -> Type[R]:
-        raise NotImplemented
+        raise NotImplementedError()
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[R]) -> str:
-        raise NotImplemented
+        raise NotImplemented  # noqa: F901
 
     @classmethod
     def _get_update_payload(
@@ -89,8 +89,8 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             'data': {
                 'id': resource_id,
                 'type': resource_type.value,
-                'attributes': attributes
-            }
+                'attributes': attributes,
+            },
         }
 
     @classmethod
@@ -118,5 +118,5 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
                             resource_type: ResourceType) -> Dict[str, str]:
         return {
             'id': cls._get_resource_id(resource),
-            'type': resource_type.value
+            'type': resource_type.value,
         }

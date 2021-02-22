@@ -50,5 +50,5 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         results = self.client.paginate_with_included(f'{self.client.API_URL}/preReleaseVersions', params=params)
         return (
             [PreReleaseVersion(prerelease_version) for prerelease_version in results.data],
-            [include_type(included) for included in results.included]
+            [include_type(included) for included in results.included],
         )

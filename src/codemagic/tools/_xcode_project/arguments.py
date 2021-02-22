@@ -33,7 +33,7 @@ class XcodeProjectArgument(cli.Argument):
             'required': False,
             'default': (pathlib.Path('**/*.xcodeproj'),),
             'nargs': '+',
-            'metavar': 'project-path'
+            'metavar': 'project-path',
         },
     )
     XCODE_PROJECT_PATH = cli.ArgumentProperties(
@@ -41,14 +41,14 @@ class XcodeProjectArgument(cli.Argument):
         flags=('--project',),
         type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode project (*.xcodeproj)',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     XCODE_WORKSPACE_PATH = cli.ArgumentProperties(
         key='xcode_workspace_path',
         flags=('--workspace',),
         type=cli.CommonArgumentTypes.existing_path,
         description='Path to Xcode workspace (*.xcworkspace)',
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     SCHEME_NAME = cli.ArgumentProperties(
         key='scheme_name',
@@ -81,7 +81,7 @@ class XcodeProjectArgument(cli.Argument):
             'nargs': '+',
             'metavar': 'profile-path',
             'default': (ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',),
-        }
+        },
     )
 
 
@@ -93,8 +93,8 @@ class ExportIpaArgument(cli.Argument):
         description='Directory where the created archive is stored',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('build/ios/xcarchive')
-        }
+            'default': pathlib.Path('build/ios/xcarchive'),
+        },
     )
     CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
         key='custom_export_options',
@@ -104,7 +104,7 @@ class ExportIpaArgument(cli.Argument):
             'Custom options for generated export options as JSON string. '
             'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
         ),
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     EXPORT_OPTIONS_PATH = cli.ArgumentProperties(
         key='export_options_plist',
@@ -113,8 +113,8 @@ class ExportIpaArgument(cli.Argument):
         description='Path to the generated export options plist',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('~/export_options.plist').expanduser()
-        }
+            'default': pathlib.Path('~/export_options.plist').expanduser(),
+        },
     )
     EXPORT_OPTIONS_PATH_EXISTING = cli.ArgumentProperties(
         key='export_options_plist',
@@ -123,8 +123,8 @@ class ExportIpaArgument(cli.Argument):
         description='Path to the generated export options plist',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('~/export_options.plist').expanduser()
-        }
+            'default': pathlib.Path('~/export_options.plist').expanduser(),
+        },
     )
     IPA_DIRECTORY = cli.ArgumentProperties(
         key='ipa_directory',
@@ -133,8 +133,8 @@ class ExportIpaArgument(cli.Argument):
         description='Directory where the built ipa is stored',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('build/ios/ipa')
-        }
+            'default': pathlib.Path('build/ios/ipa'),
+        },
     )
     REMOVE_XCARCHIVE = cli.ArgumentProperties(
         key='remove_xcarchive',
@@ -165,7 +165,7 @@ class TestArgument(cli.Argument):
     )
     INCLUDE_UNAVAILABLE = cli.ArgumentProperties(
         key='include_unavailable',
-        flags=('-u', '--include-unavailable',),
+        flags=('-u', '--include-unavailable'),
         type=bool,
         description='Whether to include unavailable devices in output',
         argparse_kwargs={'required': False, 'action': 'store_true'},
@@ -242,7 +242,7 @@ class TestArgument(cli.Argument):
 class TestResultArgument(cli.Argument):
     XCRESULT_PATTERNS = cli.ArgumentProperties(
         key='xcresult_patterns',
-        flags=('-p', '--xcresult',),
+        flags=('-p', '--xcresult'),
         type=cli.CommonArgumentTypes.existing_dir,
         description=(
             'Path to Xcode Test result (*.xcresult) to be be converted. '
@@ -259,7 +259,7 @@ class TestResultArgument(cli.Argument):
     )
     XCRESULT_DIRS = cli.ArgumentProperties(
         key='xcresult_dirs',
-        flags=('-d', '--dir',),
+        flags=('-d', '--dir'),
         type=cli.CommonArgumentTypes.existing_dir,
         description=(
             'Directory where Xcode Test results (*.xcresult) should be converted. '
@@ -274,17 +274,17 @@ class TestResultArgument(cli.Argument):
     )
     OUTPUT_DIRECTORY = cli.ArgumentProperties(
         key='output_dir',
-        flags=('-o', '--output-dir',),
+        flags=('-o', '--output-dir'),
         type=cli.CommonArgumentTypes.existing_dir,
         description='Directory where the Junit XML results will be saved.',
         argparse_kwargs={
             'required': False,
-            'default': pathlib.Path('build/ios/test')
+            'default': pathlib.Path('build/ios/test'),
         },
     )
     OUTPUT_EXTENSION = cli.ArgumentProperties(
         key='output_extension',
-        flags=('-e', '--output-extension',),
+        flags=('-e', '--output-extension'),
         type=str,
         description='Extension for the created Junit XML file. For example `xml` or `junit`.',
         argparse_kwargs={

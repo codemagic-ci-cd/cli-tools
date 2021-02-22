@@ -92,7 +92,7 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         return UniversalApkGenerator(
             pattern=pattern,
             android_signing_info=signing_info,
-            **cls._parent_class_kwargs(cli_args)
+            **cls._parent_class_kwargs(cli_args),
         )
 
     @cli.action('generate')

@@ -6,6 +6,7 @@ from typing import Dict
 import requests
 
 from codemagic.utilities import log
+
 from .api_error import AppStoreConnectApiError
 
 
