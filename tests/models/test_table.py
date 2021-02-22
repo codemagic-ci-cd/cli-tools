@@ -1,7 +1,7 @@
-from codemagic.models.table import Table
+from codemagic.models.table import Header
 from codemagic.models.table import Line
 from codemagic.models.table import Spacer
-from codemagic.models.table import Header
+from codemagic.models.table import Table
 
 _EXPECTED_DEFAULT_RENDER = """\
 ┌───────────────────────┐

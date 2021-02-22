@@ -14,10 +14,10 @@ import pytest
 
 sys.path.append('src')
 
-from codemagic.utilities import log  # noqa: E402
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: E402
 from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
 from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
+from codemagic.utilities import log  # noqa: E402
 
 log.initialize_logging(
     stream=open(os.devnull, 'w'),
