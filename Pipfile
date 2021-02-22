@@ -13,6 +13,8 @@ pytest = "*"
 pytest-cov = "*"
 mdutils = "*"
 pipenv = "*"
+isort = "*"
+flake8 = "*"
 
 [packages]
 pyopenssl = "~=19.0"
