@@ -3,7 +3,7 @@ delete-profile
 ==============
 
 
-**Delete specified Profile from Apple Developer portal.**
+**Delete specified Profile from Apple Developer portal**
 ### Usage
 ```bash
 app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

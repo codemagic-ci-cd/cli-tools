@@ -4,6 +4,7 @@ import enum
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from typing import Dict
 from typing import List
@@ -29,11 +30,11 @@ class DictSerializable:
     def _serialize(cls, obj):
         if isinstance(obj, enum.Enum):
             return obj.value
-        elif isinstance(obj, datetime):
+        if isinstance(obj, datetime):
             return Resource.to_iso_8601(obj)
-        elif isinstance(obj, DictSerializable):
+        if isinstance(obj, DictSerializable):
             return obj.dict()
-        elif isinstance(obj, (list, tuple)):
+        if isinstance(obj, (list, tuple)):
             return [cls._serialize(item) for item in obj]
         return obj
 
@@ -70,9 +71,9 @@ class PagingInformation(DictSerializable):
 
 
 class Links(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('related',)
+    _OMIT_IF_NONE_KEYS = ('self', 'related')
 
-    def __init__(_self, self: str, related: Optional[str] = None):
+    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):
         _self.self = self
         _self.related = related
 
@@ -165,7 +166,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         def __post_init__(self):
             for field in self.__dict__:
                 value = getattr(self, field)
-                if not isinstance(value, Relationship):
+                if not isinstance(value, (Relationship, type(None))):
                     setattr(self, field, Relationship(**value))
 
     @classmethod
@@ -202,7 +203,13 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
         if iso_8601_timestamp is None:
             return None
-        return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+        try:
+            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+        except ValueError:
+            # while most of API responses contain timestamp as '2020-08-04T11:44:12.000+0000'
+            # /builds endpoint returns timestamps with timedelta and without milliseconds
+            # as '2021-01-28T06:01:32-08:00'
+            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S%z')
 
     @classmethod
     @overload
@@ -218,7 +225,14 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     def to_iso_8601(cls, dt: Optional[datetime]):
         if dt is None:
             return None
-        return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+        if dt.tzinfo == timezone.utc:
+            # while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
+            # resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
+            # /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'
+            # resolved to datetime.datetime(2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))).
+            # So need to convert it to the initial form based on the presense of the explicit utc timezone
+            return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+        return dt.isoformat()
 
     def _format_attribute_name(self, name: str) -> str:
         type_prefix = self.type.value.rstrip('s')
@@ -237,6 +251,9 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
             return '"..."'
         if isinstance(value, enum.Enum):
             return value.value
+        if isinstance(value, DictSerializable):
+            lines = '\n'.join(f'\t{self._format_attribute_name(k)}: {v}' for k, v in value.dict().items())
+            return f'\n{lines}'
         return value
 
     def __str__(self) -> str:

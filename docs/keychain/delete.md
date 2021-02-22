@@ -3,7 +3,7 @@ delete
 ======
 
 
-**Delete keychains and remove them from the search list.**
+**Delete keychains and remove them from the search list**
 ### Usage
 ```bash
 keychain delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

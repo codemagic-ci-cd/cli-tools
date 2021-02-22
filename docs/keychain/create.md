@@ -3,7 +3,7 @@ create
 ======
 
 
-**Create a macOS keychain, add it to the search list.**
+**Create a macOS keychain, add it to the search list**
 ### Usage
 ```bash
 keychain create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

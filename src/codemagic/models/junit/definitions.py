@@ -21,6 +21,8 @@ class TestSuites:
     name: str
     test_suites: List[TestSuite] = field(default_factory=lambda: [])
 
+    __test__ = False  # Tell Pytest not to collect this class as test
+
     @property
     def disabled(self) -> int:
         """ Total number of disabled tests from all testsuites. """
@@ -86,6 +88,8 @@ class TestSuite:
     properties: List[Property] = field(default_factory=lambda: [])
     testcases: List[TestCase] = field(default_factory=lambda: [])
 
+    __test__ = False  # Tell Pytest not to collect this class as test
+
     def get_errored_test_cases(self) -> List[TestCase]:
         return [tc for tc in self.testcases if tc.error]
 
@@ -136,6 +140,8 @@ class TestCase:
     error: Optional[Error] = None
     failure: Optional[Failure] = None
     skipped: Optional[Skipped] = None
+
+    __test__ = False  # Tell Pytest not to collect this class as test
 
     def as_xml(self) -> Element:
         extras = {

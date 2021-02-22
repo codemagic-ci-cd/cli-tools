@@ -3,7 +3,7 @@ list-certificates
 =================
 
 
-**List Signing Certificates from Apple Developer Portal matching given constraints.**
+**List Signing Certificates from Apple Developer Portal matching given constraints**
 ### Usage
 ```bash
 app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

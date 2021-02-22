@@ -1,3 +1,13 @@
+Version 0.4.6
+-------------
+
+**Improvements**
+
+- Feature: Add action `list-builds` to `app-store-connect` to list Builds from Apple Developer Portal matching given constraints.
+- Feature: Add action `get-latest-testflight-build-number` to `app-store-connect` to get latest Testflight build number for the given application.
+- Feature: Add action `get-latest-app-store-build-number` to `app-store-connect` to get latest App Store build number for the given application.
+- Improvement: handle datetime in a format containing timezone timedelta
+
 Version 0.4.5
 -------------
 

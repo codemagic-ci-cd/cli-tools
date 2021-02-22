@@ -3,7 +3,7 @@ list-bundle-ids
 ===============
 
 
-**List Bundle IDs from Apple Developer portal matching given constraints.**
+**List Bundle IDs from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
 app-store-connect list-bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

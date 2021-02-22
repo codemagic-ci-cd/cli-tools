@@ -27,6 +27,10 @@ R = TypeVar('R', bound=Resource)
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     class Filter:
         @classmethod
+        def _get_field_name(cls, field_name) -> str:
+            return cls._snake_to_camel(field_name)
+
+        @classmethod
         def _snake_to_camel(cls, field_name: str) -> str:
             patt = re.compile(r'_(\w)')
             return patt.sub(lambda m: m.group(1).upper(), field_name)
@@ -34,12 +38,12 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
         @classmethod
         def _get_param_value(cls, filed_value) -> str:
             if isinstance(filed_value, enum.Enum):
-                return filed_value.value
-            return filed_value
+                return str(filed_value.value)
+            return str(filed_value)
 
-        def _get_restrictions(self):
+        def _get_restrictions(self) -> Dict[str, str]:
             return {
-                self._snake_to_camel(field_name): self._get_param_value(value)
+                self._get_field_name(field_name): self._get_param_value(value)
                 for field_name, value in self.__dict__.items()
                 if value is not None
             }
@@ -72,6 +76,10 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def resource_type(self) -> Type[R]:
+        raise NotImplemented
+
+    @classmethod
+    def _get_include_field_name(cls, include_type: Type[R]) -> str:
         raise NotImplemented
 
     @classmethod

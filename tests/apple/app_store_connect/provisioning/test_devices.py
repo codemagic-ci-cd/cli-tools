@@ -1,3 +1,4 @@
+import os
 import uuid
 
 import pytest
@@ -13,7 +14,7 @@ DEVICE_ID = ResourceId('D9PW3SW6K2')
 DEVICE_UDID = '5d0d1e9e3e4c8323756ec0038564006dafe15c21'
 
 
-@pytest.mark.skip(reason='Live App Store Connect API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class DevicesTest(ResourceManagerTestsBase):
 
     def test_register(self):

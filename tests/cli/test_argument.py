@@ -9,6 +9,7 @@ from typing import Union
 import pytest
 
 from codemagic import cli
+from codemagic.cli import Argument
 from codemagic.cli import Colors
 from codemagic.cli.argument import EnvironmentArgumentValue
 from codemagic.cli.argument import TypedCliArgument
@@ -162,3 +163,25 @@ def test_raise_argument_error_custom_message(argument: cli.Argument, cli_argumen
 
     error_msg = Colors.remove(str(error_info.value))
     assert error_msg == f'argument {argument.key}: Custom error'
+
+
+@pytest.mark.parametrize('is_switched_on, is_switched_off', [
+    (True, True),
+    (False, False),
+])
+def test_exclusive_optional_arguments_exception(is_switched_on, is_switched_off):
+    with pytest.raises(ValueError):
+        Argument.resolve_optional_two_way_switch(is_switched_on, is_switched_off)
+
+
+@pytest.mark.parametrize('is_switched_on, is_switched_off, expected_value', [
+    (None, None, None),
+    (None, False, None),
+    (False, None, None),
+    (True, None, True),
+    (True, False, True),
+    (False, True, False),
+    (None, True, False),
+])
+def test_binary_arguments_value(is_switched_on, is_switched_off, expected_value):
+    assert Argument.resolve_optional_two_way_switch(is_switched_on, is_switched_off) == expected_value

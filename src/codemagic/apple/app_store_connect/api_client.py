@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
 from typing import Dict
@@ -11,11 +12,20 @@ import jwt
 
 from codemagic.utilities import log
 from .api_session import AppStoreConnectApiSession
+from .builds import Builds
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
 from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
+from .versioning import AppStoreVersions
+from .versioning import PreReleaseVersions
+
+
+@dataclass
+class PaginateResult:
+    data: List[Dict]
+    included: List[Dict]
 
 
 class KeyIdentifier(str):
@@ -38,7 +48,7 @@ class AppStoreConnectApiClient:
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
         :param issuer_id: Your issuer ID from the API Keys page in
                           App Store Connect (Ex: 57246542-96fe-1a63-e053-0824d011072a)
-        :param private_key: Private key associated with the key_identifier you specified.
+        :param private_key: Private key associated with the key_identifier you specified
         """
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id
@@ -82,16 +92,13 @@ class AppStoreConnectApiClient:
     def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
-    def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
+    def _paginate(self, url, params, page_size) -> PaginateResult:
         params = {k: v for k, v in (params or {}).items() if v is not None}
         if page_size is None:
             response = self.session.get(url, params=params).json()
         else:
             response = self.session.get(url, params={'limit': page_size, **params}).json()
-        try:
-            results = response['data']
-        except KeyError:
-            results = []
+        result = PaginateResult(response.get('data', []), response.get('included', []))
         while 'next' in response['links']:
             # Query params from previous pagination call can be included in the next URL
             # and duplicate parameters are not allowed, so we need to filter those out.
@@ -99,8 +106,23 @@ class AppStoreConnectApiClient:
             included_params = parse.parse_qs(parsed_url.query)
             step_params = {k: v for k, v in params.items() if k not in included_params}
             response = self.session.get(response['links']['next'], params=step_params).json()
-            results.extend(response['data'])
-        return results
+            result.data.extend(response['data'])
+            result.included.extend(response.get('included', []))
+        return result
+
+    def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
+        return self._paginate(url, params, page_size).data
+
+    def paginate_with_included(self, url, params=None, page_size: Optional[int] = 100) -> PaginateResult:
+        return self._paginate(url, params, page_size)
+
+    @property
+    def app_store_versions(self) -> AppStoreVersions:
+        return AppStoreVersions(self)
+
+    @property
+    def builds(self) -> Builds:
+        return Builds(self)
 
     @property
     def bundle_ids(self) -> BundleIds:
@@ -113,6 +135,10 @@ class AppStoreConnectApiClient:
     @property
     def devices(self) -> Devices:
         return Devices(self)
+
+    @property
+    def pre_release_versions(self) -> PreReleaseVersions:
+        return PreReleaseVersions(self)
 
     @property
     def profiles(self) -> Profiles:
