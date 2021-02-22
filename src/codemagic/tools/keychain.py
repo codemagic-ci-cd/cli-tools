@@ -40,7 +40,7 @@ class KeychainArgument(cli.Argument):
             'Keychain path. If not provided, the system default '
             'keychain will be used instead'
         ),
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     PASSWORD = cli.ArgumentProperties(
         flags=('-pw', '--password'),
@@ -69,7 +69,7 @@ class KeychainArgument(cli.Argument):
             'nargs': '+',
             'metavar': 'certificate-path',
             'default': (Certificate.DEFAULT_LOCATION / '*.p12',),
-        }
+        },
     )
     CERTIFICATE_PASSWORD = cli.ArgumentProperties(
         flags=('--certificate-password',),
@@ -211,7 +211,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         Show the system default keychain
         """
 
-        self.logger.info(f'Get system default keychain')
+        self.logger.info('Get system default keychain')
         default = self._get_default()
         self.echo(default)
         return default
@@ -219,7 +219,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
     def _get_default(self):
         process = self.execute(('security', 'default-keychain'), show_output=False)
         if process.returncode != 0:
-            raise KeychainError(f'Unable to get default keychain', process)
+            raise KeychainError('Unable to get default keychain', process)
         cleaned = process.stdout.strip().strip('"').strip("'")
         return pathlib.Path(cleaned)
 
@@ -336,7 +336,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
         import_cmd = [
             'security', 'import', certificate_path,
-            '-f', "pkcs12",
+            '-f', 'pkcs12',
             '-k', self.path,
             '-P', certificate_password.value,
         ]

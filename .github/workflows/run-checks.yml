@@ -30,6 +30,14 @@ jobs:
       run: |
         pipenv check
 
+    - name: Check code formatting
+      run: |
+        pipenv run flake8 src/codemagic tests
+
+    - name: Check imports sort order
+      run: |
+        pipenv run isort src/codemagic tests --check-only
+
     - name: Static type checks with mypy
       env:
         MYPYPATH: stubs

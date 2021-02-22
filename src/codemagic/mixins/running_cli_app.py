@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import Optional
 from typing import TYPE_CHECKING
+from typing import Optional
 
 if TYPE_CHECKING:
     from codemagic.cli import CliApp

@@ -5,15 +5,16 @@ import abc
 import argparse
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Generic
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Type
 from typing import TypeVar
 from typing import Union
 
 from codemagic.cli.colors import Colors
+
 from .argument_formatter import ArgumentFormatter
 
 if TYPE_CHECKING:

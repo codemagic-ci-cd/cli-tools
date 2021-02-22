@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from codemagic.apple.resources import CertificateType

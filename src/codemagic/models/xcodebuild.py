@@ -17,6 +17,7 @@ from codemagic.cli import CliProcess
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
+
 from .export_options import ExportOptions
 from .simulator import CoreSimulatorService
 from .simulator import Simulator
@@ -67,7 +68,7 @@ class Xcodebuild(RunningCliAppMixin):
             fd.write(process_logs.read())
 
             fd.write('\n\n')
-            duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
+            duration = time.strftime('%M:%S', time.gmtime(xcodebuild_cli_process.duration))
             fd.write(f'<<< Process completed with status code {xcodebuild_cli_process.returncode} in {duration}')
             fd.write('\n\n')
 
@@ -178,7 +179,7 @@ class Xcodebuild(RunningCliAppMixin):
             *max_devices_args,
             *max_simulators_args,
             'test',
-            *shlex.split(xcargs or '')
+            *shlex.split(xcargs or ''),
         ]
 
     def clean(self):
@@ -251,7 +252,7 @@ class Xcodebuild(RunningCliAppMixin):
         try:
             if cli_app:
                 process = XcodebuildCliProcess(command, xcpretty=self.xcpretty)
-                cli_app.logger.info(f'Execute "%s"\n', process.safe_form)
+                cli_app.logger.info('Execute "%s"\n', process.safe_form)
                 process.execute().raise_for_returncode(include_logs=False)
             else:
                 subprocess.check_output(command)

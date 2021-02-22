@@ -15,6 +15,7 @@ from typing import overload
 
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
+
 from .enums import ResourceType
 
 
@@ -73,7 +74,7 @@ class PagingInformation(DictSerializable):
 class Links(DictSerializable):
     _OMIT_IF_NONE_KEYS = ('self', 'related')
 
-    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):
+    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):  # noqa: N805
         _self.self = self
         _self.related = related
 
@@ -83,7 +84,7 @@ class ResourceLinks(DictSerializable):
     https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
     """
 
-    def __init__(_self, self):
+    def __init__(_self, self):  # noqa: N805
         _self.self = self
 
 
@@ -127,22 +128,22 @@ class LinkedResourceData(DictSerializable, JsonSerializable):
     def __str__(self):
         return '\n'.join([
             f'Id: {self.id}',
-            f'Type: {self.type.value}'
+            f'Type: {self.type.value}',
         ])
 
 
 class PrettyNameMeta(JsonSerializableMeta):
-    def __str__(cls):
+    def __str__(cls):  # noqa: N805
         class_name = cls.__name__
-        name = re.sub(f'([A-Z])', r' \1', class_name).lstrip(' ')
+        name = re.sub(r'([A-Z])', r' \1', class_name).lstrip(' ')
         return re.sub('Id', 'ID', name)
 
     @property
-    def s(cls) -> str:
+    def s(cls) -> str:  # noqa: N805
         """ Plural name of the object """
         return cls.plural()
 
-    def plural(cls, count: Optional[int] = None) -> str:
+    def plural(cls, count: Optional[int] = None) -> str:  # noqa: N805
         """ Optional plural name of the object depending on the count """
         singular = str(cls)
         if count == 1:
@@ -229,7 +230,9 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
             # while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
             # resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
             # /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'
-            # resolved to datetime.datetime(2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))).
+            # resolved to datetime.datetime(
+            #   2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))
+            # ).
             # So need to convert it to the initial form based on the presense of the explicit utc timezone
             return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
         return dt.isoformat()

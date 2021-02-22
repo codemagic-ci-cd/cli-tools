@@ -10,7 +10,6 @@ from typing import AnyStr
 from typing import Dict
 from typing import Generator
 from typing import List
-from typing import Optional
 from typing import Sequence
 from typing import Union
 
@@ -84,19 +83,19 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
 
     @property
     def provisioned_devices(self) -> List[str]:
-        return self._plist.get("ProvisionedDevices", [])
+        return self._plist.get('ProvisionedDevices', [])
 
     @property
     def provisions_all_devices(self) -> bool:
-        return self._plist.get("ProvisionsAllDevices", False)
+        return self._plist.get('ProvisionsAllDevices', False)
 
     @property
     def application_identifier(self) -> str:
-        return self._plist.get('Entitlements', dict()).get("application-identifier", '')
+        return self._plist.get('Entitlements', dict()).get('application-identifier', '')
 
     @property
     def is_wildcard(self) -> bool:
-        return self.application_identifier.endswith("*")
+        return self.application_identifier.endswith('*')
 
     @property
     def bundle_id(self) -> str:

@@ -61,18 +61,18 @@ class Profiles(ResourceManager[Profile]):
             devices = []
         attributes = {
             'name': name,
-            'profileType': profile_type.value
+            'profileType': profile_type.value,
         }
         relationships = {
             'bundleId': {
-                'data': self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID)
+                'data': self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID),
             },
             'certificates': {
-                'data': [self._get_attribute_data(c, ResourceType.CERTIFICATES) for c in certificates]
+                'data': [self._get_attribute_data(c, ResourceType.CERTIFICATES) for c in certificates],
             },
             'devices': {
-                'data': [self._get_attribute_data(d, ResourceType.DEVICES) for d in devices]
-            }
+                'data': [self._get_attribute_data(d, ResourceType.DEVICES) for d in devices],
+            },
         }
         payload = self._get_create_payload(
             ResourceType.PROFILES, attributes=attributes, relationships=relationships)

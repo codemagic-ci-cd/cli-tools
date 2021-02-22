@@ -12,7 +12,7 @@ from codemagic.mixins import StringConverterMixin
     ('🤩', b'\xf0\x9f\xa4\xa9'),
     (b'\xf0\x9f\xa4\xa9', b'\xf0\x9f\xa4\xa9'),
     (b'', b''),
-    (b'test', b'test')
+    (b'test', b'test'),
 ])
 def test_to_bytes(bytes_or_str, expected_result):
     assert StringConverterMixin._bytes(bytes_or_str) == expected_result
@@ -27,7 +27,7 @@ def test_to_bytes(bytes_or_str, expected_result):
     (b'\xf0\x9f\xa4\xa9', '🤩'),
     ('🤩', '🤩'),
     (b'', ''),
-    (b'test', 'test')
+    (b'test', 'test'),
 ])
 def test_to_str(bytes_or_str, expected_result):
     assert StringConverterMixin._str(bytes_or_str) == expected_result

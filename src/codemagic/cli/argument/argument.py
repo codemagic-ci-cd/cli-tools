@@ -9,6 +9,7 @@ from typing import NoReturn
 from typing import Optional
 
 from codemagic.cli.colors import Colors
+
 from .argument_formatter import ArgumentFormatter
 from .argument_properties import ArgumentProperties
 

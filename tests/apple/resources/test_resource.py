@@ -48,11 +48,12 @@ def test_resource_tabular_formatting(api_profile):
 @pytest.mark.parametrize('class_name, pretty_name', [
     ('BundleId', 'Bundle ID'),
     ('RandomNameWithIdInIt', 'Random Name With ID In It'),
-    ('Resource', 'Resource')
+    ('Resource', 'Resource'),
 ])
 def test_pretty_name_meta(class_name, pretty_name):
     class K(metaclass=PrettyNameMeta):
-        dict = lambda self: {}
+        def dict(self):
+            return {}
 
     K.__name__ = class_name
     assert str(K) == pretty_name

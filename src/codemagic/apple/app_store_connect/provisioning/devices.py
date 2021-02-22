@@ -49,7 +49,7 @@ class Devices(ResourceManager[Device]):
         }
         response = self.client.session.post(
             f'{self.client.API_URL}/devices',
-            json=self._get_create_payload(ResourceType.DEVICES, attributes=attributes)
+            json=self._get_create_payload(ResourceType.DEVICES, attributes=attributes),
         ).json()
         return Device(response['data'], created=True)
 

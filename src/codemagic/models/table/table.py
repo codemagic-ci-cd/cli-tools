@@ -4,6 +4,7 @@ from typing import Optional
 from typing import Tuple
 
 from codemagic.cli import Colors
+
 from .line import Header
 from .line import Line
 from .line import Spacer

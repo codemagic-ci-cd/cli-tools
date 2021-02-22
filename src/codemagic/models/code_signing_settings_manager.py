@@ -16,6 +16,7 @@ from codemagic.cli import Colors
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
+
 from .certificate import Certificate
 from .export_options import ExportOptions
 from .matched_profile import MatchedProfile
@@ -66,7 +67,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         config = build_config_info['build_configuration']
         return Colors.BLUE(
             f' - Using profile "{profile.name}" [{profile.uuid}] '
-            f'for target "{target}" [{config}] from project "{project}"'
+            f'for target "{target}" [{config}] from project "{project}"',
         )
 
     def notify_profile_usage(self):

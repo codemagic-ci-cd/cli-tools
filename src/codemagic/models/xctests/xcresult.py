@@ -58,7 +58,7 @@ class _AbstractRecord(_BaseAbstractRecord, metaclass=ABCMeta):
             bool: self._bool_value,
             float: self._float_value,
             int: self._int_value,
-            str: self._str_value
+            str: self._str_value,
         }
         for _type, getter in getters.items():
             try:

@@ -72,7 +72,7 @@ def test_build_apks_signing_info_args(android_app_bundle, cli_argument_group):
     with mock.patch.object(AndroidAppBundle, '_build_apk_set_archive', mock_build_apk_set_archive):
         built_apks = android_app_bundle.build_apks(
             pathlib.Path('android_app_bundle.aab'),
-            **signing_info_kwargs
+            **signing_info_kwargs,
         )
     assert built_apks == [pathlib.Path('android_app_bundle-signed.apks')]
 

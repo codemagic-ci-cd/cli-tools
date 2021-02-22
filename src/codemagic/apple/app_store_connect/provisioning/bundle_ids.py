@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import Type
 from typing import Union
 
@@ -61,7 +61,7 @@ class BundleIds(ResourceManager[BundleId]):
             attributes['seedId'] = seed_id
         response = self.client.session.post(
             f'{self.client.API_URL}/bundleIds',
-            json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes=attributes)
+            json=self._get_create_payload(ResourceType.BUNDLE_ID, attributes=attributes),
         ).json()
         return BundleId(response['data'], created=True)
 

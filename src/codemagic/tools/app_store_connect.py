@@ -35,6 +35,7 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
 from ._app_store_connect.arguments import BuildArgument
@@ -105,14 +106,14 @@ class AppStoreConnect(cli.CliApp):
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,
             certificates_directory=cli_args.certificates_directory,
-            **cls._parent_class_kwargs(cli_args)
+            **cls._parent_class_kwargs(cli_args),
         )
 
     def _create_resource(self, resource_manager, should_print, **create_params):
         omit_keys = create_params.pop('omit_keys', tuple())
         self.printer.log_creating(
             resource_manager.resource_type,
-            **{k: v for k, v in create_params.items() if k not in omit_keys}
+            **{k: v for k, v in create_params.items() if k not in omit_keys},
         )
         try:
             resource = resource_manager.create(**create_params)
@@ -467,7 +468,7 @@ class AppStoreConnect(cli.CliApp):
             bundle_id=bundle_id_resource_id,
             certificates=certificate_resource_ids,
             devices=[],
-            omit_keys=['devices']
+            omit_keys=['devices'],
         )
         if profile_type.devices_allowed():
             create_params['devices'] = device_resource_ids
@@ -645,7 +646,7 @@ class AppStoreConnect(cli.CliApp):
                 [certificate.id for certificate in certificates],
                 [device.id for device in devices],
                 profile_type=profile_type,
-                should_print=False
+                should_print=False,
             )
 
     def _get_or_create_profiles(self,
@@ -687,7 +688,7 @@ class AppStoreConnect(cli.CliApp):
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
         if bundle_ids_without_profiles and not create_resource:
-            missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
+            missing = ', '.join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
             raise AppStoreConnectError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
 
         created_profiles = self._create_missing_profiles(

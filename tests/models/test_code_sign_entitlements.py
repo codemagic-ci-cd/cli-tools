@@ -5,12 +5,12 @@ import pytest
 from codemagic.models import CodeSignEntitlements
 
 _expected_entitlements = {
-    "application-identifier": "X8NNQ9CYL2.io.codemagic.capybara",
-    "com.apple.developer.team-identifier": "X8NNQ9CYL2",
-    "get-task-allow": True,
-    "keychain-access-groups": [
-        "X8NNQ9CYL2.io.codemagic.capybara"
-    ]
+    'application-identifier': 'X8NNQ9CYL2.io.codemagic.capybara',
+    'com.apple.developer.team-identifier': 'X8NNQ9CYL2',
+    'get-task-allow': True,
+    'keychain-access-groups': [
+        'X8NNQ9CYL2.io.codemagic.capybara',
+    ],
 }
 
 
