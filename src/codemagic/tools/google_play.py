@@ -8,11 +8,11 @@ from typing import Optional
 from typing import Sequence
 
 from codemagic import cli
-from codemagic.google_play import GooglePlayDeveloperAPIClient
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
 from codemagic.google_play import GooglePlayTypes
 from codemagic.google_play import Track
 from codemagic.google_play import VersionCodeFromTrackError
+from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
 
 
 class GooglePlayArgument(cli.Argument):

@@ -6,12 +6,12 @@ from googleapiclient import discovery  # type: ignore
 from googleapiclient import errors  # type: ignore
 from oauth2client.service_account import ServiceAccountCredentials  # type: ignore
 
-from codemagic.google_play import AuthorizationError
-from codemagic.google_play import CredentialsError
-from codemagic.google_play import EditError
-from codemagic.google_play import GooglePlayTypes
-from codemagic.google_play import Track
-from codemagic.google_play import VersionCodeFromTrackError
+from .api_error import AuthorizationError
+from .api_error import CredentialsError
+from .api_error import EditError
+from .api_error import VersionCodeFromTrackError
+from .enums import Track
+from .types import GooglePlayTypes
 
 
 class GooglePlayDeveloperAPIClient:
