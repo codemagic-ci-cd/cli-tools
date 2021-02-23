@@ -1,4 +1,4 @@
 from .api_error import GooglePlayDeveloperAPIClientError
 from .api_error import VersionCodeFromTrackError
-from .enums import Track
+from .resources import TrackName
 from .types import GooglePlayTypes

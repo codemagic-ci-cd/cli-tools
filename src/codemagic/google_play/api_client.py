@@ -1,5 +1,4 @@
 import json
-from typing import Dict
 
 import httplib2  # type: ignore
 from googleapiclient import discovery  # type: ignore
@@ -10,7 +9,9 @@ from .api_error import AuthorizationError
 from .api_error import CredentialsError
 from .api_error import EditError
 from .api_error import VersionCodeFromTrackError
-from .enums import Track
+from .resources import Edit
+from .resources import Track
+from .resources import TrackName
 from .types import GooglePlayTypes
 
 
@@ -49,9 +50,10 @@ class GooglePlayDeveloperAPIClient:
                 raise AuthorizationError(str(e))
         return self._service_instance
 
-    def create_edit(self) -> Dict:
+    def create_edit(self) -> Edit:
         try:
-            return self.service.edits().insert(body={}, packageName=self.package_name).execute()
+            edit_response = self.service.edits().insert(body={}, packageName=self.package_name).execute()
+            return Edit(**edit_response)
         except errors.HttpError as e:
             raise EditError('create', self.package_name, e._get_reason() or 'Http Error')
         except errors.Error as e:
@@ -66,12 +68,13 @@ class GooglePlayDeveloperAPIClient:
         except errors.Error as e:
             raise EditError('delete', self.package_name, str(e))
 
-    def get_track_information(self, edit_id: str, track: Track) -> Dict:
+    def get_track_information(self, edit_id: str, track_name: TrackName) -> Track:
         try:
-            return self.service.edits().tracks().get(
-                packageName=self.package_name, editId=edit_id, track=track.value,
-            ).execute()
+            track_response = self.service.edits().tracks().get(
+                packageName=self.package_name, editId=edit_id, track=track_name.value).execute()
+            print(track_response)
+            return Track(**track_response)
         except errors.HttpError as e:
-            raise VersionCodeFromTrackError(self.package_name, track.value, e._get_reason() or 'Http Error')
+            raise VersionCodeFromTrackError(track_name.value, e._get_reason() or 'Http Error')
         except errors.Error as e:
-            raise VersionCodeFromTrackError(self.package_name, track.value, str(e))
+            raise VersionCodeFromTrackError(track_name.value, str(e))

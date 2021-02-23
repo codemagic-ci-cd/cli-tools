@@ -18,6 +18,6 @@ class EditError(GooglePlayDeveloperAPIClientError):
 
 
 class VersionCodeFromTrackError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, package_name: str, track: str, reason: str):
+    def __init__(self, track: str, reason: str):
         super().__init__(
-            f'Failed to get version code from Google Play for package {package_name} from {track} track. {reason}')
+            f'Failed to get version code from Google Play from {track} track. {reason}')
