@@ -1,30 +1,27 @@
 import json
-from itertools import chain
-from typing import NoReturn
-from typing import Sequence
+from typing import Dict
 
-import httplib2
-from oauth2client.service_account import ServiceAccountCredentials
-from googleapiclient import discovery
-from googleapiclient import errors
+import httplib2  # type: ignore
+from googleapiclient import discovery  # type: ignore
+from googleapiclient import errors  # type: ignore
+from oauth2client.service_account import ServiceAccountCredentials  # type: ignore
 
-from codemagic.google_play.enums import Track
-from codemagic.google_play.types import Credentials
-from codemagic.google_play.types import PackageName
-from codemagic.google_play.api_error import AuthorizationError
-from codemagic.google_play.api_error import CredentialsError
-from codemagic.google_play.api_error import EditError
-from codemagic.google_play.api_error import VersionCodeFromTrackError
+from codemagic.google_play import AuthorizationError
+from codemagic.google_play import CredentialsError
+from codemagic.google_play import EditError
+from codemagic.google_play import GooglePlayTypes
+from codemagic.google_play import Track
+from codemagic.google_play import VersionCodeFromTrackError
 
 
 class GooglePlayDeveloperAPIClient:
-    SCOPE = "androidpublisher"
+    SCOPE = 'androidpublisher'
     SCOPE_URI = f'https://www.googleapis.com/auth/{SCOPE}'
-    API_VERSION = "v3"
+    API_VERSION = 'v3'
 
-    _service_instance = None
+    _service_instance: discovery.Resource = None
 
-    def __init__(self, credentials: Credentials, package_name: PackageName):
+    def __init__(self, credentials: GooglePlayTypes.Credentials, package_name: GooglePlayTypes.PackageName):
         """
         :param credentials: Your Gloud Service account credentials with JSON key type
         :param package_name of the app in Google Play Console (Ex: com.google.example)
@@ -36,7 +33,7 @@ class GooglePlayDeveloperAPIClient:
     def service(self) -> discovery.Resource:
         if self._service_instance is None:
             try:
-                json_credentials = json.loads(self._credentials)
+                json_credentials = json.loads(str(self._credentials))
             except json.decoder.JSONDecodeError:
                 raise CredentialsError()
 
@@ -52,7 +49,7 @@ class GooglePlayDeveloperAPIClient:
                 raise AuthorizationError(str(e))
         return self._service_instance
 
-    def create_edit(self) -> dict:
+    def create_edit(self) -> Dict:
         try:
             return self.service.edits().insert(body={}, packageName=self.package_name).execute()
         except errors.HttpError as e:
@@ -69,18 +66,12 @@ class GooglePlayDeveloperAPIClient:
         except errors.Error as e:
             raise EditError('delete', self.package_name, str(e))
 
-    def _get_track_latest_version_code(self, edit_id: str, track: Sequence[Track]):
+    def get_track_information(self, edit_id: str, track: Track) -> Dict:
         try:
-            track_response = self.service.edits().tracks().get(packageName=self.package_name, editId=edit_id, track=track).execute()
+            return self.service.edits().tracks().get(
+                packageName=self.package_name, editId=edit_id, track=track.value,
+            ).execute()
         except errors.HttpError as e:
-            raise VersionCodeFromTrackError(self.package_name, track, e._get_reason() or 'Http Error')
+            raise VersionCodeFromTrackError(self.package_name, track.value, e._get_reason() or 'Http Error')
         except errors.Error as e:
-            raise VersionCodeFromTrackError(self.package_name, track, str(e))
-
-        releases = track_response.get('releases', [])
-        if not releases:
-            raise VersionCodeFromTrackError(self.package_name, track, 'No release information')
-        version_codes = [release['versionCodes'] for release in releases if release.get('versionCodes')]
-        if not version_codes:
-            raise VersionCodeFromTrackError(self.package_name, track, 'No releases with uploaded App bundles or APKs')
-        return str(max(map(int, chain(*version_codes))))
+            raise VersionCodeFromTrackError(self.package_name, track.value, str(e))

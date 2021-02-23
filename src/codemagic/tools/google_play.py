@@ -3,53 +3,53 @@
 from __future__ import annotations
 
 import argparse
-import json
+from itertools import chain
 from typing import Optional
 from typing import Sequence
 
 from codemagic import cli
 from codemagic.google_play import GooglePlayDeveloperAPIClient
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
-from codemagic.google_play.enums import Track
-from codemagic.google_play.types import Credentials
-from codemagic.google_play.types import CredentialsArgument
-from codemagic.google_play.types import PackageName
+from codemagic.google_play import GooglePlayTypes
+from codemagic.google_play import Track
+from codemagic.google_play import VersionCodeFromTrackError
 
 
 class GooglePlayArgument(cli.Argument):
     GCLOUD_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key='credentials',
         flags=('--credentials',),
-        type=CredentialsArgument,
+        type=GooglePlayTypes.CredentialsArgument,
         description=(
             'Gcloud service account creedentials with `JSON` key type '
             'to access Google Play Developer API'
         ),
-        argparse_kwargs={'required': False}
+        argparse_kwargs={'required': False},
     )
     PACKAGE_NAME = cli.ArgumentProperties(
         key='package_name',
         flags=('--package-name',),
-        type=PackageName,
+        type=GooglePlayTypes.PackageName,
         description='Package name of the app in Google Play Console (Ex: com.google.example)',
-        argparse_kwargs={'required': True}
+        argparse_kwargs={'required': True},
     )
 
 
 class BuildNumberArgument(cli.Argument):
-    TRACK = cli.ArgumentProperties(
-        key='track',
-        flags=('--track',),
+    TRACKS = cli.ArgumentProperties(
+        key='tracks',
+        flags=('--tracks',),
         type=Track,
         description=(
-            'Get the build number from the specified track. '
-            'If not specified, the maximum number across all tracks is returned'
+            'Get the build number from the specified track(s). '
+            'If not specified, the highest build number across all tracks is returned'
         ),
         argparse_kwargs={
             'required': False,
             'nargs': '+',
             'choices': list(Track),
-        }
+            'default': ' '.join(list(map(str, Track))),
+        },
     )
 
 
@@ -63,10 +63,10 @@ class GooglePlay(cli.CliApp):
     Utility to get the latest build numbers from Google Play using Google Play Developer API
     """
 
-    def  __init__(self,
-                  credentials: Credentials,
-                  package_name: PackageName,
-                  **kwargs):
+    def __init__(self,
+                 credentials: GooglePlayTypes.Credentials,
+                 package_name: GooglePlayTypes.PackageName,
+                 **kwargs):
         super().__init__(**kwargs)
         self.credentials = credentials
         self.package_name = package_name
@@ -83,22 +83,52 @@ class GooglePlay(cli.CliApp):
             raise GooglePlayArgument.PACKAGE_NAME.raise_argument_error()
 
         return GooglePlay(
-            credentials=credentials_argument.value,
-            package_name=package_name_argument.value,
-            **cls._parent_class_kwargs(cli_args)
+            credentials=credentials_argument,
+            package_name=package_name_argument,
+            **cls._parent_class_kwargs(cli_args),
         )
 
-    @cli.action('get-latest-build-number', BuildNumberArgument.TRACK)
-    def get_latest_build_number(self, track: Sequence[Track] = None) -> Optional[int]:
+    @cli.action('get-latest-build-number', BuildNumberArgument.TRACKS)
+    def get_latest_build_number(self, tracks: Sequence[Track] = None) -> Optional[int]:
         """
         Get latest build number from Google Play Developer API matching given constraints
         """
+
         try:
             edit = self.api_client.create_edit()
-            return 0
         except GooglePlayDeveloperAPIClientError as api_error:
             raise GooglePlayError(str(api_error))
 
+        track_version_codes = []
+        if not tracks:
+            tracks = list(Track)
+        for track in tracks:
+            try:
+                track_response = self.api_client.get_track_information(edit['id'], track)
+                releases = track_response.get('releases', [])
+                if not releases:
+                    raise VersionCodeFromTrackError(self.package_name, track.value, 'No release information')
+                version_codes = [release['versionCodes'] for release in releases if release.get('versionCodes')]
+                if not version_codes:
+                    raise VersionCodeFromTrackError(
+                        self.package_name, track.value, 'No releases with uploaded App bundles or APKs')
+                version_code = max(map(int, chain(*version_codes)))
+            except GooglePlayDeveloperAPIClientError as api_error:
+                self.logger.warning(api_error)
+            else:
+                self.logger.info(f'Latest version code for {track.value} track: {version_code}')
+                track_version_codes.append(version_code)
+        try:
+            self.api_client.delete_edit(edit['id'])
+        except GooglePlayDeveloperAPIClientError as api_error:
+            self.logger.warning(api_error)
+
+        try:
+            latest_build_number = max(track_version_codes)
+        except ValueError:
+            raise GooglePlayError('Version code info is missing from all tracks')
+        self.echo(str(latest_build_number))
+        return latest_build_number
 
 
 if __name__ == '__main__':

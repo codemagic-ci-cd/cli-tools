@@ -9,14 +9,14 @@ get-latest-build-number
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     --package-name PACKAGE_NAME
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
-    [--track TRACK]
+    [--tracks TRACKS]
 ```
 ### Optional arguments for action `get-latest-build-number`
 
-##### `--track=internal | alpha | beta | production`
+##### `--tracks=internal | alpha | beta | production`
 
 
-Get the build number from the specified track. If not specified, the maximum number across all tracks is returned. Multiple arguments
+Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments. Default:&nbsp;`internal alpha beta production`
 ### Required arguments for command `google-play`
 
 ##### `--package-name=PACKAGE_NAME`

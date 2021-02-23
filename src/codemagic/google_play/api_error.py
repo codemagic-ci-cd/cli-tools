@@ -8,15 +8,16 @@ class CredentialsError(GooglePlayDeveloperAPIClientError):
 
 
 class AuthorizationError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, reason):
+    def __init__(self, reason: str):
         super().__init__(f'Unable to authorize with provided credentials. {reason}')
 
 
 class EditError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, action, package_name, reason):
+    def __init__(self, action: str, package_name: str, reason: str):
         super().__init__(f'Unable to {action} an edit for package "{package_name}". {reason}')
 
 
 class VersionCodeFromTrackError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, package_name, track, reason):
-        super().__init__(f'Failed to get version code from Google Play for package {package_name} from {track} track. {reason}')
+    def __init__(self, package_name: str, track: str, reason: str):
+        super().__init__(
+            f'Failed to get version code from Google Play for package {package_name} from {track} track. {reason}')

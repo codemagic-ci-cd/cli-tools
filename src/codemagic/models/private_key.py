@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
-from OpenSSL import crypto
+from OpenSSL import crypto  # type: ignore
 
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
