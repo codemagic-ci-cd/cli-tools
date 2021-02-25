@@ -53,8 +53,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return Certificate(x509_certificate)
 
     @classmethod
-    def from_p12(cls, p12_path: Union[str, Path], password: Optional[str] = None) -> Certificate:
-        p12 = crypto.load_pkcs12(str(p12_path), password)
+    def from_p12(cls, p12: AnyStr, password: Optional[AnyStr] = None) -> Certificate:
+        p12 = crypto.load_pkcs12(p12, password)
         x509_certificate = p12.get_certificate()
         return Certificate(x509_certificate)
 
