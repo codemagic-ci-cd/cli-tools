@@ -22,7 +22,7 @@ public_bytes = \
     b'B6TOwQ+xSyp1ZMFenb75fp6hzZmoPY+OMvVbO49YJuv3AHioZ3d1Cg==\n' \
     b'-----END CERTIFICATE REQUEST-----\n'
 
-certificate_bytes = \
+certificate_pem = \
     '-----BEGIN CERTIFICATE-----\n' \
     'MIIC4DCCAcgCCQD4HAXNZV3lvTANBgkqhkiG9w0BAQsFADAyMQswCQYDVQQGEwJV\n' \
     'SzEPMA0GA1UEBwwGTG9uZG9uMRIwEAYDVQQKDAlOZXZlcmNvZGUwHhcNMjEwMjIz\n' \
@@ -42,7 +42,7 @@ certificate_bytes = \
     '5DlU4cIG1Rtk9jAEDPceRFfBZP4=\n' \
     '-----END CERTIFICATE-----\n'
 
-signing_certificate = \
+private_key = \
     '-----BEGIN RSA PRIVATE KEY-----\n' \
     'MIIEowIBAAKCAQEAraDhOPFLzblMaIQIr0GnX7HmwPbWrqxKo6xFFhb6J8rLNfMp\n' \
     'mueGNIuHntDw0b828WjFDRCAuW49rZTIWdjQPgPt17NFuWj7RHkKDQJH/akziFq3\n' \
@@ -97,8 +97,8 @@ def test_p12_to_certificate(mock_certificate_p12):
 
     certificate = Certificate.from_p12(p12_bytes, '123456')
 
-    certificate.is_signed_with(PrivateKey.from_pem(signing_certificate))
-    assert certificate.as_pem() == certificate_bytes
+    assert certificate.is_signed_with(PrivateKey.from_pem(private_key))
+    assert certificate.as_pem() == certificate_pem
     assert certificate.serial == 17878171000481113533
     assert certificate.issuer == {'C': 'UK', 'L': 'London', 'O': 'Nevercode'}
 
