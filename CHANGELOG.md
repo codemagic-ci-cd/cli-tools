@@ -1,3 +1,9 @@
+Version 0.4.7
+-------------
+**Improvements**
+
+- Feature: Add an option to extract a certificate from PKCS12 archive.
+
 Version 0.4.6
 -------------
 
