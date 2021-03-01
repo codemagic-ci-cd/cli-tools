@@ -5,11 +5,9 @@ import re
 from dataclasses import dataclass
 from typing import Any
 from typing import Dict
-from typing import Optional
 from typing import Tuple
 
 from codemagic.models import JsonSerializable
-from codemagic.models import JsonSerializableMeta
 
 
 class DictSerializable:
@@ -20,8 +18,6 @@ class DictSerializable:
     def _serialize(cls, obj):
         if isinstance(obj, enum.Enum):
             return obj.value
-        if isinstance(obj, DictSerializable):
-            return obj.dict()
         if isinstance(obj, (list, tuple)):
             return [cls._serialize(item) for item in obj]
         return obj
@@ -40,48 +36,41 @@ class DictSerializable:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
-class PrettyNameMeta(JsonSerializableMeta):
-    def __str__(cls):  # noqa: N805
-        class_name = cls.__name__
-        name = re.sub(r'([A-Z])', r' \1', class_name).lstrip(' ')
-        return re.sub('Id', 'ID', name)
-
-    @property
-    def s(cls) -> str:  # noqa: N805
-        """ Plural name of the object """
-        return cls.plural()
-
-    def plural(cls, count: Optional[int] = None) -> str:  # noqa: N805
-        """ Optional plural name of the object depending on the count """
-        singular = str(cls)
-        if count == 1:
-            return singular
-        if singular.endswith('y'):
-            return f'{singular[:-1]}ies'
-        return f'{singular}s'
-
-
 @dataclass
-class Resource(DictSerializable, JsonSerializable, metaclass=PrettyNameMeta):
+class Resource(DictSerializable, JsonSerializable):
     def _format_attribute_name(self, name: str) -> str:
         name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
         return name.lower().capitalize()
 
-    def _format_attribute_value(self, value: Any) -> Any:
+    def _format_attribute_value(self, value: Any, tabs_count: int = 0) -> Any:
+        def _is_special_type(value):
+            return isinstance(value, (DictSerializable, list))
+
+        if isinstance(value, DictSerializable):
+            identation = '\t' * tabs_count
+            new_tabs_count = tabs_count if _is_special_type(value) else tabs_count + 1
+            return ''.join([
+                f'\n{identation}'
+                f'{self._format_attribute_name(k)}: '
+                f'{self._format_attribute_value(v, new_tabs_count)}'
+                for k, v in value.dict().items()
+            ])
+        if isinstance(value, list):
+            identation = '\t' * (tabs_count + 1)
+            previous_identation = '\t' * tabs_count
+            items = []
+            for item in value:
+                formatted_item = self._format_attribute_value(item, tabs_count + 1)
+                prefix = '' if _is_special_type(item) else f'\n{identation}'
+                items.append(f'{prefix}{formatted_item}')
+            str_items = '\n'.join(items)
+            return f'[{str_items}\n{previous_identation}]'
         if isinstance(value, enum.Enum):
             return value.value
-        if isinstance(value, DictSerializable):
-            lines = '\n'.join(
-                f'\t{self._format_attribute_name(k)}: {v}' for k, v in value.dict().items())
-            return f'\n{lines}'
         return value
 
     def __str__(self) -> str:
-        s = super().__str__()
-        for attribute_name, value in self.__dict__.items():
-            if value is None:
-                continue
-            name = self._format_attribute_name(attribute_name)
-            value = self._format_attribute_value(value)
-            s += f'\n{name}: {value}'
-        return s
+        return ''.join([
+            f'\n{self._format_attribute_name(k)}: {self._format_attribute_value(v)}'
+            for k, v in self.__dict__.items() if v is not None
+        ])

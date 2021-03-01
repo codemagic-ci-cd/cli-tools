@@ -8,12 +8,11 @@ from typing import Optional
 from codemagic.google_play import VersionCodeFromTrackError
 
 from .enums import ReleaseStatus
-from .resource import DictSerializable
 from .resource import Resource
 
 
 @dataclass
-class LocalizedText(DictSerializable):
+class LocalizedText(Resource):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#localizedtext
     """
@@ -23,7 +22,7 @@ class LocalizedText(DictSerializable):
 
 
 @dataclass
-class CountryTargeting(DictSerializable):
+class CountryTargeting(Resource):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#countrytargeting
     """
@@ -33,7 +32,7 @@ class CountryTargeting(DictSerializable):
 
 
 @dataclass
-class Release(DictSerializable):
+class Release(Resource):
     _OMIT_IF_NONE_KEYS = ('userFraction', 'countryTargeting', 'inAppUpdatePriority', 'versionCodes', 'releaseNotes')
 
     name: str

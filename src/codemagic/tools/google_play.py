@@ -11,6 +11,7 @@ from codemagic import cli
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
 from codemagic.google_play import GooglePlayTypes
 from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
+from codemagic.google_play.api_client import ResourcePrinter
 from codemagic.google_play.resources import Edit
 from codemagic.google_play.resources import Track
 from codemagic.google_play.resources import TrackName
@@ -33,6 +34,20 @@ class GooglePlayArgument(cli.Argument):
         type=GooglePlayTypes.PackageName,
         description='Package name of the app in Google Play Console (Ex: com.google.example)',
         argparse_kwargs={'required': True},
+    )
+    LOG_REQUESTS = cli.ArgumentProperties(
+        key='log_requests',
+        flags=('--log-api-calls',),
+        type=bool,
+        description='Turn on logging for Google Play Developer API requests',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key='json_output',
+        flags=('--json',),
+        type=bool,
+        description='Whether to show the request response in JSON format',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
 
 
@@ -67,11 +82,14 @@ class GooglePlay(cli.CliApp):
     def __init__(self,
                  credentials: GooglePlayTypes.Credentials,
                  package_name: GooglePlayTypes.PackageName,
+                 log_requests: bool = False,
+                 json_output: bool = False,
                  **kwargs):
         super().__init__(**kwargs)
         self.credentials = credentials
         self.package_name = package_name
-        self.api_client = GooglePlayDeveloperAPIClient(credentials, package_name)
+        printer = ResourcePrinter(self.echo, bool(log_requests), bool(json_output))
+        self.api_client = GooglePlayDeveloperAPIClient(credentials, package_name, printer)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> GooglePlay:
@@ -86,6 +104,8 @@ class GooglePlay(cli.CliApp):
         return GooglePlay(
             credentials=credentials_argument,
             package_name=package_name_argument,
+            log_requests=cli_args.log_requests,
+            json_output=cli_args.json_output,
             **cls._parent_class_kwargs(cli_args),
         )
 
