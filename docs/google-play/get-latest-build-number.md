@@ -9,6 +9,8 @@ get-latest-build-number
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     --package-name PACKAGE_NAME
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
+    [--log-api-calls]
+    [--json]
     [--tracks TRACKS]
 ```
 ### Optional arguments for action `get-latest-build-number`
@@ -29,6 +31,14 @@ Package name of the app in Google Play Console (Ex: com.google.example)
 
 
 Gcloud service account creedentials with `JSON` key type to access Google Play Developer API. If not given, the value will be checked from environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--log-api-calls`
+
+
+Turn on logging for Google Play Developer API requests
+##### `--json`
+
+
+Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`

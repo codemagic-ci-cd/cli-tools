@@ -18,6 +18,8 @@ class DictSerializable:
     def _serialize(cls, obj):
         if isinstance(obj, enum.Enum):
             return obj.value
+        if isinstance(obj, DictSerializable):
+            return obj.dict()
         if isinstance(obj, (list, tuple)):
             return [cls._serialize(item) for item in obj]
         return obj
@@ -44,16 +46,18 @@ class Resource(DictSerializable, JsonSerializable):
 
     def _format_attribute_value(self, value: Any, tabs_count: int = 0) -> Any:
         def _is_special_type(value):
-            return isinstance(value, (DictSerializable, list))
+            return isinstance(value, (DictSerializable, dict, list))
 
-        if isinstance(value, DictSerializable):
+        if isinstance(value, (DictSerializable, dict)):
+            if isinstance(value, DictSerializable):
+                value = value.dict()
             identation = '\t' * tabs_count
             new_tabs_count = tabs_count if _is_special_type(value) else tabs_count + 1
             return ''.join([
                 f'\n{identation}'
                 f'{self._format_attribute_name(k)}: '
                 f'{self._format_attribute_value(v, new_tabs_count)}'
-                for k, v in value.dict().items()
+                for k, v in value.items()
             ])
         if isinstance(value, list):
             identation = '\t' * (tabs_count + 1)
