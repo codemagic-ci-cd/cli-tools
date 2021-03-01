@@ -15,6 +15,16 @@ def mock_ipa_path():
 
 
 @pytest.fixture
+def mock_certificate_p12():
+    return pathlib.Path(__file__).parent / 'mocks' / 'certificate.p12'
+
+
+@pytest.fixture
+def mock_certificate_p12_no_password():
+    return pathlib.Path(__file__).parent / 'mocks' / 'certificate-no-password.p12'
+
+
+@pytest.fixture
 def mock_xcarchive_path():
     return pathlib.Path(__file__).parent / 'mocks' / 'mock.xcarchive'
 

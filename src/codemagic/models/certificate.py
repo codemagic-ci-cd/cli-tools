@@ -52,6 +52,13 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         x509_certificate = cls._get_x509_certificate(asn1, crypto.FILETYPE_ASN1)
         return Certificate(x509_certificate)
 
+    @classmethod
+    def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> Certificate:
+        password_encoded = None if password is None else cls._bytes(password)
+        p12_archive = crypto.load_pkcs12(p12, password_encoded)
+        x509_certificate = p12_archive.get_certificate()
+        return Certificate(x509_certificate)
+
     @property
     def subject(self) -> Dict[str, str]:
         subject = self.x509.get_subject()
