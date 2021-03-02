@@ -38,11 +38,6 @@ class BundleIds(ResourceManager[BundleId]):
         platform: Optional[BundleIdPlatform] = None
         seed_id: Optional[str] = None
 
-        def matches(self, bundle_id: BundleId) -> bool:
-            # Double check that platform matches since this filter does not work on Apple's
-            # side as of 02.03.2021 and API 1.2. All other filters are applied as expected.
-            return self._field_matches(self.platform, bundle_id.attributes.platform)
-
     class Ordering(ResourceManager.Ordering):
         ID = 'id'
         NAME = 'name'
@@ -95,9 +90,8 @@ class BundleIds(ResourceManager[BundleId]):
         https://developer.apple.com/documentation/appstoreconnectapi/list_bundle_ids
         """
         params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
-        url = f'{self.client.API_URL}/bundleIds'
-        bundle_ids = (BundleId(bundle_id) for bundle_id in self.client.paginate(url, params=params))
-        return [bundle_id for bundle_id in bundle_ids if resource_filter.matches(bundle_id)]
+        bundle_ids = self.client.paginate(f'{self.client.API_URL}/bundleIds', params=params)
+        return [BundleId(bundle_id) for bundle_id in bundle_ids]
 
     def read(self, bundle_id: Union[LinkedResourceData, ResourceId]) -> BundleId:
         """
