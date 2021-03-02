@@ -45,7 +45,7 @@ class Resource(DictSerializable, JsonSerializable):
         return name.lower().capitalize()
 
     def _format_attribute_value(self, value: Any, tabs_count: int = 0) -> Any:
-        def _is_special_type(value):
+        def _is_special_type(value: Any) -> bool:
             return isinstance(value, (DictSerializable, dict, list))
 
         if isinstance(value, (DictSerializable, dict)):
