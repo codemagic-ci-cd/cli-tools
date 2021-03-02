@@ -1,3 +1,9 @@
+Version 0.4.8
+-------------
+**Improvements**
+
+- Improvement: add support for tvOS distribution certificates.
+
 Version 0.4.7
 -------------
 **Improvements**
