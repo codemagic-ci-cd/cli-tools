@@ -39,7 +39,7 @@ class BundleIdsTest(ResourceManagerTestsBase):
         expected_platform = BundleIdPlatform.IOS
         bundle_id_filter = self.api_client.bundle_ids.Filter(
             platform=expected_platform,
-            identifier='io.codemagic.banaan'
+            identifier='io.codemagic.banaan',
         )
         bundle_ids = self.api_client.bundle_ids.list(resource_filter=bundle_id_filter)
         assert len(bundle_ids) == 1
