@@ -58,7 +58,8 @@ class BuildNumberArgument(cli.Argument):
         type=TrackName,
         description=(
             'Get the build number from the specified track(s). '
-            f'If not specified, the highest build number across all tracks ({", ".join(list(map(str, TrackName)))}) is returned'
+            'If not specified, the highest build number across all tracks '
+            f'({", ".join(list(map(str, TrackName)))}) is returned'
         ),
         argparse_kwargs={
             'required': False,
