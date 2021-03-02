@@ -111,6 +111,12 @@ class CertificateType(_ResourceEnum):
             return CertificateType.MAC_APP_DEVELOPMENT
         elif profile_type is profile_type.MAC_APP_STORE:
             return CertificateType.MAC_APP_DISTRIBUTION
+        elif profile_type is profile_type.TVOS_APP_DEVELOPMENT:
+            return CertificateType.DEVELOPMENT
+        elif profile_type is profile_type.TVOS_APP_STORE:
+            return CertificateType.DISTRIBUTION
+        elif profile_type is profile_type.TVOS_APP_ADHOC:
+            return CertificateType.DISTRIBUTION
         else:
             raise ValueError(f'Certificate type for profile type {profile_type} is unknown')
 
