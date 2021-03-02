@@ -2,7 +2,13 @@ Version 0.4.8
 -------------
 **Improvements**
 
-- Improvement: add support for tvOS distribution certificates.
+- Bugfix: Fix platform filter for listing bundle identifiers using App Store Connect API.
+
+Version 0.4.8
+-------------
+**Improvements**
+
+- Improvement: Add support for tvOS distribution certificates.
 
 Version 0.4.7
 -------------
