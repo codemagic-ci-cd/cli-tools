@@ -18,7 +18,7 @@ google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--v
 ##### `--tracks=internal | alpha | beta | production`
 
 
-Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments. Default:&nbsp;`internal alpha beta production`
+Get the build number from the specified track(s). If not specified, the highest build number across all tracks (internal, alpha, beta, production) is returned. Multiple arguments
 ### Required arguments for command `google-play`
 
 ##### `--package-name=PACKAGE_NAME`

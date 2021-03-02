@@ -58,13 +58,12 @@ class BuildNumberArgument(cli.Argument):
         type=TrackName,
         description=(
             'Get the build number from the specified track(s). '
-            'If not specified, the highest build number across all tracks is returned'
+            f'If not specified, the highest build number across all tracks ({", ".join(list(map(str, TrackName)))}) is returned'
         ),
         argparse_kwargs={
             'required': False,
             'nargs': '+',
             'choices': list(TrackName),
-            'default': ' '.join(list(map(str, TrackName))),
         },
     )
 
@@ -88,7 +87,8 @@ class GooglePlay(cli.CliApp):
         super().__init__(**kwargs)
         self.credentials = credentials
         self.package_name = package_name
-        printer = ResourcePrinter(bool(log_requests), bool(json_output), self.echo)
+        print_command = self.echo if kwargs['enable_logging'] else None
+        printer = ResourcePrinter(bool(log_requests), bool(json_output), print_command)
         self.api_client = GooglePlayDeveloperAPIClient(credentials, package_name, printer)
 
     @classmethod

@@ -80,8 +80,7 @@ class GooglePlayDeveloperAPIClient:
     def get_track_information(self, edit_id: str, track_name: TrackName) -> Track:
         self.resource_printer.log_request(
             f'Get information about the track "{track_name.value}"'
-            f'for the package "{self.package_name}"'
-            f'from the edit "{edit_id}"',
+            f'for the package "{self.package_name}"',
         )
         try:
             track_response = self.service.edits().tracks().get(
