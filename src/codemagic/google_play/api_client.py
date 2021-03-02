@@ -24,7 +24,7 @@ class GooglePlayDeveloperAPIClient:
     _service_instance: discovery.Resource = None
 
     def __init__(self,
-                 credentials: GooglePlayTypes.Credentials,
+                 credentials: str,
                  package_name: GooglePlayTypes.PackageName,
                  resource_printer: ResourcePrinter):
         """

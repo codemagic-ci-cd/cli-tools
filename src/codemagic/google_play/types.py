@@ -6,17 +6,15 @@ from codemagic import cli
 
 
 class GooglePlayTypes:
-    class Credentials(str):
-        pass
 
     class PackageName(str):
         pass
 
-    class CredentialsArgument(cli.EnvironmentArgumentValue[Credentials]):
+    class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
         environment_variable_key = 'GCLOUD_SERVICE_ACCOUNT_CREDENTIALS'
 
         @classmethod
-        def _is_valid(cls, value: GooglePlayTypes.Credentials) -> bool:
+        def _is_valid(cls, value: str) -> bool:
             try:
                 json_content = json.loads(value)
             except json.decoder.JSONDecodeError:

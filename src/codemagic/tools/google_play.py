@@ -80,7 +80,7 @@ class GooglePlay(cli.CliApp):
     """
 
     def __init__(self,
-                 credentials: GooglePlayTypes.Credentials,
+                 credentials: str,
                  package_name: GooglePlayTypes.PackageName,
                  log_requests: bool = False,
                  json_output: bool = False,
@@ -88,7 +88,7 @@ class GooglePlay(cli.CliApp):
         super().__init__(**kwargs)
         self.credentials = credentials
         self.package_name = package_name
-        printer = ResourcePrinter(self.echo, bool(log_requests), bool(json_output))
+        printer = ResourcePrinter(bool(log_requests), bool(json_output), self.echo)
         self.api_client = GooglePlayDeveloperAPIClient(credentials, package_name, printer)
 
     @classmethod
@@ -102,7 +102,7 @@ class GooglePlay(cli.CliApp):
             raise GooglePlayArgument.PACKAGE_NAME.raise_argument_error()
 
         return GooglePlay(
-            credentials=credentials_argument,
+            credentials=credentials_argument.value,
             package_name=package_name_argument,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,

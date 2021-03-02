@@ -15,9 +15,9 @@ from tests.apple.app_store_connect.resource_manager_test_base import ResourceMan
 
 
 @pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE])
-def test_create_profile_failure_with_devices(profile_type, api_client):
+def test_create_profile_failure_with_devices(profile_type, app_store_api_client):
     with pytest.raises(ValueError):
-        api_client.profiles.create(
+        app_store_api_client.profiles.create(
             name='test profile',
             profile_type=profile_type,
             bundle_id=ResourceId('bundle_id_resource_id'),
@@ -27,16 +27,16 @@ def test_create_profile_failure_with_devices(profile_type, api_client):
 
 
 @pytest.mark.parametrize('profile_type', [ProfileType.IOS_APP_DEVELOPMENT, ProfileType.IOS_APP_ADHOC])
-def test_create_profile_success_with_devices(profile_type, profile_response, api_client):
-    api_client.session.post = mock.Mock(return_value=profile_response)
-    api_client.profiles.create(
+def test_create_profile_success_with_devices(profile_type, profile_response, app_store_api_client):
+    app_store_api_client.session.post = mock.Mock(return_value=profile_response)
+    app_store_api_client.profiles.create(
         name='test profile',
         profile_type=profile_type,
         bundle_id=ResourceId('bundle_id_resource_id'),
         certificates=[ResourceId('certificate_resource_id')],
         devices=[ResourceId('device_resource_id')],
     )
-    api_client.session.post.assert_called_once()
+    app_store_api_client.session.post.assert_called_once()
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')

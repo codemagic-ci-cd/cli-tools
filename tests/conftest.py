@@ -17,6 +17,8 @@ sys.path.append('src')
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: E402
 from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
 from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
+from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient  # noqa: E402
+from codemagic.google_play.api_client import ResourcePrinter  # noqa: E402
 from codemagic.utilities import log  # noqa: E402
 
 log.initialize_logging(
@@ -54,7 +56,7 @@ def _unencrypted_pem() -> PEM:
 
 
 @lru_cache()
-def _api_client() -> AppStoreConnectApiClient:
+def _appstore_api_client() -> AppStoreConnectApiClient:
     if 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
         key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
         private_key = key_path.expanduser().read_text()
@@ -66,6 +68,25 @@ def _api_client() -> AppStoreConnectApiClient:
         KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
         IssuerId(os.environ['TEST_APPLE_ISSUER_ID']),
         private_key,
+    )
+
+
+@lru_cache()
+def _google_play_api_client() -> GooglePlayDeveloperAPIClient:
+    if 'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
+        credentials_path = pathlib.Path(os.environ['TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
+        credentials = credentials_path.expanduser().read_text()
+    elif 'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT' in os.environ:
+        credentials = os.environ['TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT']
+    else:
+        raise KeyError(
+            'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH',
+            'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT',
+        )
+    return GooglePlayDeveloperAPIClient(
+        credentials,
+        os.environ['TEST_GCLOUD_PACKAGE_NAME'],
+        ResourcePrinter(False, False),
     )
 
 
@@ -86,13 +107,23 @@ def _logger():
 
 
 @pytest.fixture
-def api_client() -> AppStoreConnectApiClient:
-    return _api_client()
+def app_store_api_client() -> AppStoreConnectApiClient:
+    return _appstore_api_client()
+
+
+@pytest.fixture
+def google_play_api_client() -> GooglePlayDeveloperAPIClient:
+    return _google_play_api_client()
 
 
 @pytest.fixture(scope='class')
-def class_api_client(request):
-    request.cls.api_client = _api_client()
+def class_appstore_api_client(request):
+    request.cls.api_client = _appstore_api_client()
+
+
+@pytest.fixture(scope='class')
+def class_google_play_api_client(request):
+    request.cls.api_client = _google_play_api_client()
 
 
 @pytest.fixture
