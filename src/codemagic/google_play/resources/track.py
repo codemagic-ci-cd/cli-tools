@@ -45,7 +45,7 @@ class Release(Resource):
 
     def __post_init__(self):
         if isinstance(self.releaseNotes, list):
-            self.releaseNotes = [LocalizedText(**note) for note in self.releaseNotes if isinstance(note, dict)]
+            self.releaseNotes = [LocalizedText(**note) for note in self.releaseNotes]
         if isinstance(self.status, str):
             self.status = ReleaseStatus(self.status)
         if isinstance(self.countryTargeting, dict):
@@ -64,7 +64,7 @@ class Track(Resource):
 
     def __post_init__(self):
         if isinstance(self.releases, list):
-            self.releases = [Release(**release) for release in self.releases if isinstance(release, dict)]
+            self.releases = [Release(**release) for release in self.releases]
 
     @property
     def max_version_code(self) -> int:

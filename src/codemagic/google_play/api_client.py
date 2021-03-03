@@ -13,7 +13,6 @@ from .resource_printer import ResourcePrinter
 from .resources import Edit
 from .resources import Track
 from .resources import TrackName
-from .types import GooglePlayTypes
 
 
 class GooglePlayDeveloperAPIClient:
@@ -25,11 +24,12 @@ class GooglePlayDeveloperAPIClient:
 
     def __init__(self,
                  credentials: str,
-                 package_name: GooglePlayTypes.PackageName,
+                 package_name: str,
                  resource_printer: ResourcePrinter):
         """
         :param credentials: Your Gloud Service account credentials with JSON key type
-        :param package_name of the app in Google Play Console (Ex: com.google.example)
+        :param package_name: package name of the app in Google Play Console (Ex: com.google.example)
+        :param resource_printer: printer initialized in google-play tool
         """
         self._credentials = credentials
         self.package_name = package_name

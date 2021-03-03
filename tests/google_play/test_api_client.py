@@ -7,7 +7,7 @@ from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
 from codemagic.google_play.resources import TrackName
 
 
-@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Google Play Developer API access')
+# @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Google Play Developer API access')
 @pytest.mark.usefixtures('class_google_play_api_client')
 class ApiTests(unittest.TestCase):
     api_client: GooglePlayDeveloperAPIClient

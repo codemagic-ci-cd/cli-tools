@@ -1,6 +1,11 @@
 from typing import Callable
+from typing import TypeVar
 
 from codemagic.cli import Colors
+
+from .resources.resource import Resource
+
+ResourceToPrint = TypeVar('ResourceToPrint', bound=Resource)
 
 
 class ResourcePrinter:
@@ -13,17 +18,16 @@ class ResourcePrinter:
         self.should_print = should_print
         self.print_json = print_json
 
-    def log_request(self, header):
+    def log_request(self, header: str) -> None:
         if not self.print:
             return
         self.print(Colors.BLUE(header))
 
-    def print_resource(self, result):
+    def print_resource(self, resource: ResourceToPrint) -> None:
         if not self.print:
             return
         if self.should_print:
             if self.print_json:
-                self.print(result.json())
+                self.print(resource.json())
             else:
-                self.print(str(result))
-        return result
+                self.print(str(resource))

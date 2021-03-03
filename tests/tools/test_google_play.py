@@ -7,9 +7,9 @@ from unittest import mock
 
 import pytest
 
-from codemagic.google_play.types import GooglePlayTypes
 from codemagic.tools.google_play import GooglePlay
 from codemagic.tools.google_play import GooglePlayArgument
+from codemagic.tools.google_play import Types
 
 credentials_argument = GooglePlayArgument.GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
 
@@ -23,8 +23,8 @@ def register_args(cli_argument_group):
 @pytest.fixture()
 def namespace_kwargs():
     ns_kwargs = {
-        credentials_argument.key: GooglePlayTypes.CredentialsArgument('{"type":"service_account"}'),
-        GooglePlayArgument.PACKAGE_NAME.key: GooglePlayTypes.PackageName('package.name'),
+        credentials_argument.key: Types.CredentialsArgument('{"type":"service_account"}'),
+        GooglePlayArgument.PACKAGE_NAME.key: Types.PackageName('package.name'),
         GooglePlayArgument.LOG_REQUESTS.key: False,
         GooglePlayArgument.JSON_OUTPUT.key: False,
     }
@@ -61,7 +61,7 @@ def test_missing_creedentials_arg(namespace_kwargs):
 
 
 def test_invalid_credentials_from_env(namespace_kwargs):
-    os.environ[GooglePlayTypes.CredentialsArgument.environment_variable_key] = 'invalid credentials'
+    os.environ[Types.CredentialsArgument.environment_variable_key] = 'invalid credentials'
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
     with pytest.raises(argparse.ArgumentError) as exception_info:
@@ -70,7 +70,7 @@ def test_invalid_credentials_from_env(namespace_kwargs):
 
 
 def test_credentials_invalid_path(namespace_kwargs):
-    os.environ[GooglePlayTypes.CredentialsArgument.environment_variable_key] = '@file:this-is-not-a-file'
+    os.environ[Types.CredentialsArgument.environment_variable_key] = '@file:this-is-not-a-file'
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
     with pytest.raises(argparse.ArgumentTypeError) as exception_info:
@@ -81,8 +81,7 @@ def test_credentials_invalid_path(namespace_kwargs):
 @mock.patch('codemagic.tools.google_play.GooglePlayDeveloperAPIClient')
 def test_read_private_key(mock_google_play_api_client, namespace_kwargs):
     credentials = '{"type":"service_account"}'
-    namespace_kwargs[credentials_argument.key] = \
-        GooglePlayTypes.CredentialsArgument(credentials)
+    namespace_kwargs[credentials_argument.key] = Types.CredentialsArgument(credentials)
     _do_credentials_assertions(credentials, mock_google_play_api_client, namespace_kwargs)
 
 
@@ -90,7 +89,7 @@ def test_read_private_key(mock_google_play_api_client, namespace_kwargs):
     lambda filename, ns_kwargs: os.environ.update(
         {credentials_argument.type.environment_variable_key: f'@file:{filename}'}),
     lambda filename, ns_kwargs: ns_kwargs.update(
-        {credentials_argument.key: GooglePlayTypes.CredentialsArgument(f'@file:{filename}')}),
+        {credentials_argument.key: Types.CredentialsArgument(f'@file:{filename}')}),
 ])
 @mock.patch('codemagic.tools.google_play.GooglePlayDeveloperAPIClient')
 def test_private_key_path_arg(mock_google_play_api_client, configure_variable, namespace_kwargs):
@@ -107,7 +106,7 @@ def test_private_key_path_arg(mock_google_play_api_client, configure_variable, n
     lambda ns_kwargs: os.environ.update(
         {credentials_argument.type.environment_variable_key: '@env:CREDENTIALS'}),
     lambda ns_kwargs: ns_kwargs.update(
-        {credentials_argument.key: GooglePlayTypes.CredentialsArgument('@env:CREDENTIALS')}),
+        {credentials_argument.key: Types.CredentialsArgument('@env:CREDENTIALS')}),
 ])
 @mock.patch('codemagic.tools.google_play.GooglePlayDeveloperAPIClient')
 def test_private_key_env_arg(mock_google_play_api_client, configure_variable, namespace_kwargs):

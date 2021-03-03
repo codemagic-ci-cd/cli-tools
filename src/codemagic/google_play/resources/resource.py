@@ -40,23 +40,25 @@ class DictSerializable:
 
 @dataclass
 class Resource(DictSerializable, JsonSerializable):
-    def _format_attribute_name(self, name: str) -> str:
+    @classmethod
+    def _format_attribute_name(cls, name: str) -> str:
         name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
         return name.lower().capitalize()
 
-    def _format_attribute_value(self, value: Any, tabs_count: int = 0) -> Any:
-        def _is_special_type(value: Any) -> bool:
+    @classmethod
+    def _format_attribute_value(cls, value: Any, tabs_count: int = 0) -> Any:
+        def _no_extra_identation(value: Any) -> bool:
             return isinstance(value, (DictSerializable, dict, list))
 
         if isinstance(value, (DictSerializable, dict)):
             if isinstance(value, DictSerializable):
                 value = value.dict()
             identation = '\t' * tabs_count
-            new_tabs_count = tabs_count if _is_special_type(value) else tabs_count + 1
+            new_tabs_count = tabs_count if _no_extra_identation(value) else tabs_count + 1
             return ''.join([
                 f'\n{identation}'
-                f'{self._format_attribute_name(k)}: '
-                f'{self._format_attribute_value(v, new_tabs_count)}'
+                f'{cls._format_attribute_name(k)}: '
+                f'{cls._format_attribute_value(v, new_tabs_count)}'
                 for k, v in value.items()
             ])
         if isinstance(value, list):
@@ -64,8 +66,8 @@ class Resource(DictSerializable, JsonSerializable):
             previous_identation = '\t' * tabs_count
             items = []
             for item in value:
-                formatted_item = self._format_attribute_value(item, tabs_count + 1)
-                prefix = '' if _is_special_type(item) else f'\n{identation}'
+                formatted_item = cls._format_attribute_value(item, tabs_count + 1)
+                prefix = '' if _no_extra_identation(item) else f'\n{identation}'
                 items.append(f'{prefix}{formatted_item}')
             str_items = '\n'.join(items)
             return f'[{str_items}\n{previous_identation}]'

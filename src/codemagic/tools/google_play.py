@@ -3,25 +3,40 @@
 from __future__ import annotations
 
 import argparse
+import json
 from typing import List
 from typing import Optional
 from typing import Sequence
 
 from codemagic import cli
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
-from codemagic.google_play import GooglePlayTypes
+from codemagic.google_play import ResourcePrinter
 from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
-from codemagic.google_play.api_client import ResourcePrinter
-from codemagic.google_play.resources import Edit
-from codemagic.google_play.resources import Track
 from codemagic.google_play.resources import TrackName
+
+
+class Types:
+    class PackageName(str):
+        pass
+
+    class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
+        environment_variable_key = 'GCLOUD_SERVICE_ACCOUNT_CREDENTIALS'
+
+        @classmethod
+        def _is_valid(cls, value: str) -> bool:
+            try:
+                json_content = json.loads(value)
+            except json.decoder.JSONDecodeError:
+                return False
+            else:
+                return json_content.get('type') == 'service_account'
 
 
 class GooglePlayArgument(cli.Argument):
     GCLOUD_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key='credentials',
         flags=('--credentials',),
-        type=GooglePlayTypes.CredentialsArgument,
+        type=Types.CredentialsArgument,
         description=(
             'Gcloud service account creedentials with `JSON` key type '
             'to access Google Play Developer API'
@@ -31,7 +46,7 @@ class GooglePlayArgument(cli.Argument):
     PACKAGE_NAME = cli.ArgumentProperties(
         key='package_name',
         flags=('--package-name',),
-        type=GooglePlayTypes.PackageName,
+        type=Types.PackageName,
         description='Package name of the app in Google Play Console (Ex: com.google.example)',
         argparse_kwargs={'required': True},
     )
@@ -81,7 +96,7 @@ class GooglePlay(cli.CliApp):
 
     def __init__(self,
                  credentials: str,
-                 package_name: GooglePlayTypes.PackageName,
+                 package_name: Types.PackageName,
                  log_requests: bool = False,
                  json_output: bool = False,
                  **kwargs):
@@ -117,7 +132,7 @@ class GooglePlay(cli.CliApp):
         """
 
         try:
-            edit: Edit = self.api_client.create_edit()
+            edit = self.api_client.create_edit()
         except GooglePlayDeveloperAPIClientError as api_error:
             raise GooglePlayError(str(api_error))
 
@@ -125,7 +140,7 @@ class GooglePlay(cli.CliApp):
         track_names: Sequence[TrackName] = tracks or list(TrackName)
         for track_name in track_names:
             try:
-                track: Track = self.api_client.get_track_information(edit.id, track_name)
+                track = self.api_client.get_track_information(edit.id, track_name)
                 version_code: int = track.max_version_code
             except GooglePlayDeveloperAPIClientError as api_error:
                 self.logger.warning(api_error)
