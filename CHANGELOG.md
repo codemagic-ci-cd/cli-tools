@@ -1,3 +1,9 @@
+Version 0.4.10
+-------------
+**Improvements**
+
+- Bugfix: Fix regression introduced in 0.4.9 that excluded bundle identifiers with platform type `UNIVERSAL` from list bundle identifiers result in case platform filter (`IOS` or `MAC_OS`) was specified.    
+
 Version 0.4.9
 -------------
 **Improvements**
