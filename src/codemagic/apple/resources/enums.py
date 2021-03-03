@@ -163,11 +163,19 @@ class ProfileType(_ResourceEnum):
     TVOS_APP_INHOUSE = 'TVOS_APP_INHOUSE'
     TVOS_APP_STORE = 'TVOS_APP_STORE'
 
+    @property
+    def is_ad_hoc_type(self) -> bool:
+        return self.value.endswith('_ADHOC')
+
+    @property
+    def is_development_type(self) -> bool:
+        return self.value.endswith('_DEVELOPMENT')
+
     def devices_not_allowed(self) -> bool:
-        return self in (ProfileType.IOS_APP_STORE, ProfileType.IOS_APP_INHOUSE)
+        return not self.devices_allowed()
 
     def devices_allowed(self) -> bool:
-        return not self.devices_not_allowed()
+        return self.is_development_type or self.is_ad_hoc_type
 
 
 class ReleaseType(_ResourceEnum):

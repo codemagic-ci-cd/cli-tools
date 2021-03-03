@@ -1,23 +1,28 @@
 Version 0.4.10
 -------------
+
 **Improvements**
 
 - Bugfix: Fix regression introduced in 0.4.9 that excluded bundle identifiers with platform type `UNIVERSAL` from list bundle identifiers result in case platform filter (`IOS` or `MAC_OS`) was specified.    
+- Bugfix: Fix check for profiles types that have devices allowed. Allow specifying devices only for ad hoc and development provisioning profiles.
 
 Version 0.4.9
 -------------
+
 **Improvements**
 
 - Bugfix: Fix platform filter for listing bundle identifiers using App Store Connect API.
 
 Version 0.4.8
 -------------
+
 **Improvements**
 
 - Improvement: Add support for tvOS distribution certificates.
 
 Version 0.4.7
 -------------
+
 **Improvements**
 
 - Feature: Add an option to extract a certificate from PKCS12 archive.
