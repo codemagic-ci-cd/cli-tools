@@ -35,29 +35,20 @@ class BundleIdsTest(ResourceManagerTestsBase):
     def test_delete(self):
         self.api_client.bundle_ids.delete(ResourceId('US2AH335HU'))
 
-    def test_list_platform_constraint(self):
+    def test_list_identifier_and_platform_constraint(self):
+        expected_identifier = 'io.codemagic.banaan'
         expected_platform = BundleIdPlatform.IOS
         bundle_id_filter = self.api_client.bundle_ids.Filter(
+            identifier=expected_identifier,
             platform=expected_platform,
-            identifier='io.codemagic.banaan',
         )
-        bundle_ids = self.api_client.bundle_ids.list(resource_filter=bundle_id_filter)
-        assert len(bundle_ids) == 1
-        bundle_id = bundle_ids[0]
-        assert isinstance(bundle_id, BundleId)
-        assert bundle_id.id == ResourceId('NLRN94JD59')
-        assert bundle_id.attributes.platform is expected_platform
-        assert bundle_id.type is ResourceType.BUNDLE_ID
-
-    def test_list_identifier_constraint(self):
-        expected_identifier = 'io.codemagic.banaan'
-        bundle_id_filter = self.api_client.bundle_ids.Filter(identifier=expected_identifier)
         bundle_ids = self.api_client.bundle_ids.list(resource_filter=bundle_id_filter)
         assert len(bundle_ids) == 2
         for bundle_id in bundle_ids:
             assert isinstance(bundle_id, BundleId)
             assert bundle_id.type is ResourceType.BUNDLE_ID
             assert expected_identifier in bundle_id.attributes.identifier
+            assert bundle_id.attributes.platform in (expected_platform, BundleIdPlatform.UNIVERSAL)
 
     def test_list(self):
         bundle_ids = self.api_client.bundle_ids.list()
