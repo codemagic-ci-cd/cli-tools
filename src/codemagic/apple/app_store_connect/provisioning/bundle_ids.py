@@ -41,7 +41,11 @@ class BundleIds(ResourceManager[BundleId]):
         def matches(self, bundle_id: BundleId) -> bool:
             # Double check that platform matches since this filter does not work on Apple's
             # side as of 02.03.2021 and API 1.2. All other filters are applied as expected.
-            return self._field_matches(self.platform, bundle_id.attributes.platform)
+            # In case either platform 'IOS' or 'MAC_OS' is specified, then we need to also
+            # accept bundle ids with platform 'UNIVERSAL' since it covers both.
+            if not self.platform:
+                return True
+            return bundle_id.attributes.platform in (self.platform, BundleIdPlatform.UNIVERSAL)
 
     class Ordering(ResourceManager.Ordering):
         ID = 'id'
