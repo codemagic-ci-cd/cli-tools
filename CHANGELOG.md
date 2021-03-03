@@ -1,3 +1,9 @@
+Version 0.4.9
+-------------
+**Improvements**
+
+- Bugfix: Fix check for profiles types that have devices allowed. Allow specifying devices only for ad hoc and development provisioning profiles.
+
 Version 0.4.8
 -------------
 **Improvements**
