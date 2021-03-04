@@ -1,9 +1,10 @@
 import json
+from typing import Optional
 
-import httplib2  # type: ignore
-from googleapiclient import discovery  # type: ignore
-from googleapiclient import errors  # type: ignore
-from oauth2client.service_account import ServiceAccountCredentials  # type: ignore
+import httplib2
+from googleapiclient import discovery
+from googleapiclient import errors
+from oauth2client.service_account import ServiceAccountCredentials
 
 from .api_error import AuthorizationError
 from .api_error import CredentialsError
@@ -20,7 +21,7 @@ class GooglePlayDeveloperAPIClient:
     SCOPE_URI = f'https://www.googleapis.com/auth/{SCOPE}'
     API_VERSION = 'v3'
 
-    _service_instance: discovery.Resource = None
+    _service_instance: Optional[discovery.Resource] = None
 
     def __init__(self,
                  credentials: str,
@@ -34,6 +35,9 @@ class GooglePlayDeveloperAPIClient:
         self._credentials = credentials
         self.package_name = package_name
         self.resource_printer = resource_printer
+
+    def get_edit_resource(self):
+        return self.service.edits()  # type: ignore
 
     @property
     def service(self) -> discovery.Resource:
@@ -58,7 +62,7 @@ class GooglePlayDeveloperAPIClient:
     def create_edit(self) -> Edit:
         self.resource_printer.log_request(f'Create an edit for the package "{self.package_name}"')
         try:
-            edit_response = self.service.edits().insert(body={}, packageName=self.package_name).execute()
+            edit_response = self.get_edit_resource().insert(body={}, packageName=self.package_name).execute()
             resource = Edit(**edit_response)
             self.resource_printer.print_resource(resource)
             return resource
@@ -70,7 +74,7 @@ class GooglePlayDeveloperAPIClient:
     def delete_edit(self, edit_id: str) -> None:
         self.resource_printer.log_request(f'Delete the edit "{edit_id}" for the package "{self.package_name}"')
         try:
-            self.service.edits().delete(packageName=self.package_name, editId=edit_id).execute()
+            self.get_edit_resource().delete(packageName=self.package_name, editId=edit_id).execute()
             self._service_instance = None
         except errors.HttpError as e:
             raise EditError('delete', self.package_name, e._get_reason() or 'Http Error')
@@ -83,7 +87,7 @@ class GooglePlayDeveloperAPIClient:
             f'for the package "{self.package_name}"',
         )
         try:
-            track_response = self.service.edits().tracks().get(
+            track_response = self.get_edit_resource().tracks().get(
                 packageName=self.package_name, editId=edit_id, track=track_name.value).execute()
             resource = Track(**track_response)
             self.resource_printer.print_resource(resource)
