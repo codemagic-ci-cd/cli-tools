@@ -103,7 +103,7 @@ class GooglePlay(cli.CliApp):
         super().__init__(**kwargs)
         self.credentials = credentials
         self.package_name = package_name
-        print_command = self.echo if kwargs.get('enable_logging') else None
+        print_command = self.logger.info if kwargs.get('enable_logging') else None
         printer = ResourcePrinter(bool(log_requests), bool(json_output), print_command)
         self.api_client = GooglePlayDeveloperAPIClient(credentials, package_name, printer)
 
