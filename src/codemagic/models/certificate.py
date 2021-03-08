@@ -13,8 +13,8 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
-from OpenSSL import crypto  # type: ignore
-from OpenSSL.crypto import X509  # type: ignore
+from OpenSSL import crypto
+from OpenSSL.crypto import X509
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin

@@ -38,7 +38,7 @@ class GooglePlayArgument(cli.Argument):
         flags=('--credentials',),
         type=Types.CredentialsArgument,
         description=(
-            'Gcloud service account creedentials with `JSON` key type '
+            'Gcloud service account credentials with `JSON` key type '
             'to access Google Play Developer API'
         ),
         argparse_kwargs={'required': False},
