@@ -1,9 +1,16 @@
+Version 0.5.0
+-------------
+
+**Improvements**
+
+- Feature: add tool `google-play` with action `get-latest-build-number`
+
 Version 0.4.10
 -------------
 
 **Improvements**
 
-- Bugfix: Fix regression introduced in 0.4.9 that excluded bundle identifiers with platform type `UNIVERSAL` from list bundle identifiers result in case platform filter (`IOS` or `MAC_OS`) was specified.    
+- Bugfix: Fix regression introduced in 0.4.9 that excluded bundle identifiers with platform type `UNIVERSAL` from list bundle identifiers result in case platform filter (`IOS` or `MAC_OS`) was specified.
 - Bugfix: Fix check for profiles types that have devices allowed. Allow specifying devices only for ad hoc and development provisioning profiles.
 
 Version 0.4.9
@@ -165,7 +172,7 @@ Version 0.2.6
 **Improvements**
 
 - Feature: Support OpenSSH private key format for certificate private key (`--certificate-key` option for `app-store-connect`).
-- Bugfix: For `app-store-connect fetch-signing-files` use given platform type for listing devices on creating new provisioning profiles instead of detecting it from bundle identifier. 
+- Bugfix: For `app-store-connect fetch-signing-files` use given platform type for listing devices on creating new provisioning profiles instead of detecting it from bundle identifier.
 
 Version 0.2.5
 -------------
@@ -209,7 +216,7 @@ Version 0.2.0
 
 - Feature: Add new command `android-app-bundle`
 - Feature: Include [Bundletool](https://developer.android.com/studio/command-line/bundletool) jar in the distribution
-- Bugfix: Gracefully handle Xcodeproj exceptions on saving React Native iOS project code signing settings 
+- Bugfix: Gracefully handle Xcodeproj exceptions on saving React Native iOS project code signing settings
 
 **Deprecations**
 

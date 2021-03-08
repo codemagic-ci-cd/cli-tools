@@ -31,10 +31,10 @@ def freeze_now():
     (False, NOW + timedelta(hours=20)),
     (False, NOW + timedelta(days=5)),
 ])
-def test_is_token_expired(jwt_expires, is_expired, api_client, freeze_now):
-    api_client._jwt_expires = jwt_expires
-    assert api_client._is_token_expired() is is_expired
+def test_is_token_expired(jwt_expires, is_expired, app_store_api_client, freeze_now):
+    app_store_api_client._jwt_expires = jwt_expires
+    assert app_store_api_client._is_token_expired() is is_expired
 
 
-def test_auth_headers(api_client):
-    assert api_client.jwt in api_client.generate_auth_headers()['Authorization']
+def test_auth_headers(app_store_api_client):
+    assert app_store_api_client.jwt in app_store_api_client.generate_auth_headers()['Authorization']

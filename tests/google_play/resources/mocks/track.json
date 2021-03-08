@@ -1,0 +1,25 @@
+{
+   "track":"internal",
+   "releases":[
+      {
+         "name":"29 (1.0.29)",
+         "versionCodes":[
+            "29"
+         ],
+         "status":"draft"
+      },
+      {
+         "name":"trying2",
+         "versionCodes":[
+            "26"
+         ],
+         "releaseNotes":[
+            {
+               "language":"en-US",
+               "text":"trying2"
+            }
+         ],
+         "status":"completed"
+      }
+   ]
+}
