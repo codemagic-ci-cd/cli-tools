@@ -83,6 +83,16 @@ class XcodeProjectArgument(cli.Argument):
             'default': (ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',),
         },
     )
+    WARN_ONLY = cli.ArgumentProperties(
+        key='warn_only',
+        flags=('--warn-only',),
+        type=bool,
+        description=(
+            'Show warning when profiles can not be applied to an Xcode project(s) '
+            'instead of failing the action'
+        ),
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
 
 
 class ExportIpaArgument(cli.Argument):
