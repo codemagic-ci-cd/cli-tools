@@ -4,7 +4,10 @@ from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
+from functools import lru_cache
 from typing import Optional
+
+from OpenSSL import crypto
 
 from .bundle_id import BundleIdPlatform
 from .enums import CertificateType
@@ -41,3 +44,19 @@ class SigningCertificate(Resource):
     @property
     def asn1_content(self) -> bytes:
         return b64decode(self.attributes.certificateContent)
+
+    @property
+    def _certificate(self) -> crypto.X509:
+        return crypto.load_certificate(crypto.FILETYPE_ASN1, self.asn1_content)
+
+    @property
+    @lru_cache(1)
+    def common_name(self) -> str:
+        subject = self._certificate.get_subject()
+        for key, value in subject.get_components():
+            if key == b'CN':
+                return value.decode()
+        return 'N/A'
+
+    def __str__(self):
+        return f'{super().__str__()}\nCommon name: {self.common_name}'
