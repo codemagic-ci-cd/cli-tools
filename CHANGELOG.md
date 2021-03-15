@@ -1,3 +1,10 @@
+Version 0.5.2
+-------------
+
+**Improvements**
+
+- Enhancement: Include the certificate common name in `SigningCertificate` string representation when showing certificates with `app-store-connect` actions.
+
 Version 0.5.1
 -------------
 
