@@ -82,12 +82,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeProjectArgument.XCODE_PROJECT_PATTERN,
                 XcodeProjectArgument.PROFILE_PATHS,
                 ExportIpaArgument.EXPORT_OPTIONS_PATH,
-                ExportIpaArgument.CUSTOM_EXPORT_OPTIONS)
+                ExportIpaArgument.CUSTOM_EXPORT_OPTIONS,
+                XcodeProjectArgument.WARN_ONLY)
     def use_profiles(self,
                      xcode_project_patterns: Sequence[pathlib.Path],
                      profile_path_patterns: Sequence[pathlib.Path],
                      export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
-                     custom_export_options: Optional[Dict] = None):
+                     custom_export_options: Optional[Dict] = None,
+                     warn_only: bool = False):
         """
         Set up code signing settings on specified Xcode projects
         to use given provisioning profiles
@@ -107,11 +109,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         available_certs = Keychain().list_code_signing_certificates(should_print=False)
         code_signing_settings_manager = CodeSigningSettingsManager(profiles, available_certs)
 
-        try:
-            for xcode_project in xcode_projects:
+        for xcode_project in xcode_projects:
+            try:
                 code_signing_settings_manager.use_profiles(xcode_project)
-        except (ValueError, IOError) as error:
-            raise XcodeProjectException(*error.args)
+            except (ValueError, IOError) as error:
+                if warn_only:
+                    self.logger.warning(Colors.YELLOW(f'Using profiles on {xcode_project} failed'))
+                else:
+                    raise XcodeProjectException(*error.args)
 
         code_signing_settings_manager.notify_profile_usage()
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)

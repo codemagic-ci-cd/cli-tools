@@ -1,3 +1,10 @@
+Version 0.5.1
+-------------
+
+**Improvements**
+
+- Feature: add the `warn-only` flag to `xcode-project use-profiles` not to fail the action when profiles can't be applied to any of the Xcode projects
+
 Version 0.5.0
 -------------
 

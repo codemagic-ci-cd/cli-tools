@@ -11,6 +11,7 @@ xcode-project use-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [
     [--profile PROFILE_PATHS]
     [--export-options-plist EXPORT_OPTIONS_PATH]
     [--custom-export-options CUSTOM_EXPORT_OPTIONS]
+    [--warn-only]
 ```
 ### Optional arguments for action `use-profiles`
 
@@ -30,6 +31,10 @@ Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.
 
 
 Custom options for generated export options as JSON string. For example '{"uploadBitcode": false, "uploadSymbols": false}'.
+##### `--warn-only`
+
+
+Show warning when profiles can not be applied to an Xcode project(s) instead of failing the action
 ### Common options
 
 ##### `-h, --help`
