@@ -4,7 +4,6 @@ from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
-from functools import lru_cache
 from typing import Optional
 
 from OpenSSL import crypto
@@ -50,12 +49,11 @@ class SigningCertificate(Resource):
         return crypto.load_certificate(crypto.FILETYPE_ASN1, self.asn1_content)
 
     @property
-    @lru_cache(1)
     def common_name(self) -> str:
         subject = self._certificate.get_subject()
         for key, value in subject.get_components():
-            if key == b'CN':
-                return value.decode()
+            if key in (b'CN', 'CN'):
+                return value.decode() if isinstance(value, bytes) else value
         return 'N/A'
 
     def __str__(self):
