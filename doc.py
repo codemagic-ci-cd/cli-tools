@@ -167,7 +167,7 @@ class ToolDocumentationGenerator:
                 optional_args=action_args_serializer.optional_args,
             )
 
-        return list(map(_serialize_action, tool.get_class_cli_actions()))
+        return list(map(_serialize_action, tool.iter_class_cli_actions()))
 
     @classmethod
     def _serialize_default_options(cls, tool: cli.CliApp) -> List[SerializedArgument]:
@@ -187,7 +187,7 @@ class ToolDocumentationGenerator:
             description=tool.__doc__,
             formatter_class=cli.cli_help_formatter.CliHelpFormatter,
         )
-        tool.get_default_cli_options(parser)
+        tool.set_default_cli_options(parser)
         return list(map(_serialize_option, parser._actions))
 
 
