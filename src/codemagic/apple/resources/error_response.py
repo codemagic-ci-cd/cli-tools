@@ -33,6 +33,8 @@ class ErrorMeta(DictSerializable):
 
 @dataclass
 class Error(DictSerializable):
+    _OMIT_IF_NONE_KEYS = ('meta',)
+
     code: str
     status: str
     title: str
