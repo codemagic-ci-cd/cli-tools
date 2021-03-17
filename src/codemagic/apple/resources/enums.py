@@ -185,7 +185,8 @@ class ReleaseType(_ResourceEnum):
 
 
 class ResourceType(_ResourceEnum):
-    APP_STORER_VERSIONS = 'appStoreVersions'
+    APP_STORE_VERSIONS = 'appStoreVersions'
+    APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'

@@ -21,4 +21,4 @@ class BuildsTest(ResourceManagerTestsBase):
         assert len(app_store_versions) > 0
         for app_store_version in app_store_versions:
             assert isinstance(app_store_version, AppStoreVersion)
-            assert app_store_version.type is ResourceType.APP_STORER_VERSIONS
+            assert app_store_version.type is ResourceType.APP_STORE_VERSIONS

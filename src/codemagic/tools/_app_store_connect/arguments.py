@@ -110,6 +110,16 @@ class AppStoreVersionArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False},
     )
+    APP_STORE_VERSION_ID = cli.ArgumentProperties(
+        key='app_store_version_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+    )
+    APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
+        key='app_store_version_submission_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version Submission',
+    )
 
 
 class BuildArgument(cli.Argument):
