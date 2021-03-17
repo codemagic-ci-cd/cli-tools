@@ -229,7 +229,7 @@ class CliApp(metaclass=abc.ABCMeta):
             attr = getattr(cls, attr_name)
             if not callable(attr) or not getattr(attr, 'is_cli_action', False):
                 continue
-            if include_all or getattr(attr, 'action_group', None) is action_group:
+            if include_all or getattr(attr, 'action_group') is action_group:
                 yield attr
 
     def iter_cli_actions(self, action_group: Optional[ActionGroup] = None) -> Iterable[ActionCallable]:
