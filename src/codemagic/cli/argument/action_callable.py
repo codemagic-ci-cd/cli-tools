@@ -16,6 +16,5 @@ class ActionCallable:
     action_name: str
     arguments: Sequence[Argument]
     is_cli_action: bool
-    is_deprecated: bool
     __name__: str
     __call__: Callable
