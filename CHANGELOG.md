@@ -1,3 +1,11 @@
+Version 0.6.0
+-------------
+
+**Improvements**
+
+- Feature: Add action to submit App Store Version to review using `app-store-connect app-store-version-submissions create`.
+- Feature: Add action to remove App Store Version from review using `app-store-connect app-store-version-submissions delete`.
+
 Version 0.5.2
 -------------
 
