@@ -19,6 +19,7 @@ app-store-connect fetch-signing-files [-h] [--log-stream STREAM] [--no-color] [-
     [--certificate-key-password PRIVATE_KEY_PASSWORD]
     [--p12-password P12_CONTAINER_PASSWORD]
     [--type PROFILE_TYPE]
+    [--strict-match-identifier]
     [--create]
     BUNDLE_ID_IDENTIFIER
 ```
@@ -50,6 +51,10 @@ If provided, the saved p12 container will be encrypted using this password. Used
 
 
 Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
+##### `--strict-match-identifier`
+
+
+Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.com.extension`
 ##### `--create`
 
 
