@@ -7,6 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
+from typing import Callable
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -28,6 +29,7 @@ from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
@@ -133,11 +135,18 @@ class AppStoreConnect(cli.CliApp):
         self.printer.print_resource(resource, should_print)
         return resource
 
-    def _list_resources(self, resource_filter, resource_manager, should_print):
+    def _list_resources(self,
+                        resource_filter,
+                        resource_manager,
+                        should_print: bool,
+                        filter_predicate: Optional[Callable[[Resource], bool]] = None):
         try:
             resources = resource_manager.list(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
+
+        if filter_predicate is not None:
+            resources = list(filter(filter_predicate, resources))
 
         self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
         self.printer.print_resources(resources, should_print)
@@ -291,14 +300,20 @@ class AppStoreConnect(cli.CliApp):
         List Bundle IDs from Apple Developer portal matching given constraints
         """
 
+        def predicate(bundle_id):
+            return bundle_id.attributes.identifier == bundle_id_identifier
+
         bundle_id_filter = self.api_client.bundle_ids.Filter(
             identifier=bundle_id_identifier,
             name=bundle_id_name,
             platform=platform,
         )
-        bundle_ids = self._list_resources(bundle_id_filter, self.api_client.bundle_ids, should_print)
-        if bundle_id_identifier_strict_match:
-            bundle_ids = [bid for bid in bundle_ids if bid.attributes.identifier == bundle_id_identifier]
+        bundle_ids = self._list_resources(
+            bundle_id_filter,
+            self.api_client.bundle_ids,
+            should_print,
+            filter_predicate=predicate if bundle_id_identifier_strict_match else None,
+        )
 
         return bundle_ids
 
