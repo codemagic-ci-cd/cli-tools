@@ -26,6 +26,7 @@ from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -210,16 +211,18 @@ class AppStoreConnect(cli.CliApp):
 
     @cli.action('get-latest-app-store-build-number',
                 BuildArgument.APPLICATION_ID_RESOURCE_ID,
-                AppStoreVersionArgument.APP_STORE_VERSION)
+                AppStoreVersionArgument.APP_STORE_VERSION,
+                CommonArgument.PLATFORM)
     def get_latest_app_store_build_number(self,
                                           application_id: ResourceId,
                                           app_store_version: Optional[str] = None,
+                                          platform: Optional[Platform] = None,
                                           should_print: bool = False) -> Optional[int]:
         """
         Get latest App Store build number for the given application
         """
         versions_client = self.api_client.app_store_versions
-        versions_filter = versions_client.Filter(version_string=app_store_version)
+        versions_filter = versions_client.Filter(version_string=app_store_version, platform=platform)
         try:
             _versions, builds = versions_client.list_with_include(
                 application_id, Build, resource_filter=versions_filter)
@@ -231,16 +234,18 @@ class AppStoreConnect(cli.CliApp):
 
     @cli.action('get-latest-testflight-build-number',
                 BuildArgument.APPLICATION_ID_RESOURCE_ID,
-                BuildArgument.PRE_RELEASE_VERSION)
+                BuildArgument.PRE_RELEASE_VERSION,
+                CommonArgument.PLATFORM)
     def get_latest_testflight_build_number(self,
                                            application_id: ResourceId,
                                            pre_release_version: Optional[str] = None,
+                                           platform: Optional[Platform] = None,
                                            should_print: bool = False) -> Optional[int]:
         """
         Get latest Testflight build number for the given application
         """
         versions_client = self.api_client.pre_release_versions
-        versions_filter = versions_client.Filter(app=application_id, version=pre_release_version)
+        versions_filter = versions_client.Filter(app=application_id, platform=platform, version=pre_release_version)
         try:
             _versions, builds = versions_client.list_with_include(Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:

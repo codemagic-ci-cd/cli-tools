@@ -8,6 +8,7 @@ from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
@@ -445,4 +446,14 @@ class CommonArgument(cli.Argument):
             f'for more information.'
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    PLATFORM = cli.ArgumentProperties(
+        key='platform',
+        flags=('--platform',),
+        type=Platform,
+        description='Apple operating systems',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
     )
