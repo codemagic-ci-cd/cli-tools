@@ -15,6 +15,7 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--pre-release-version PRE_RELEASE_VERSION]
+    [--platform PLATFORM]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-testflight-build-number`
@@ -29,6 +30,10 @@ Application Apple ID. An automatically generated ID assigned to your app
 
 
 Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--platform=IOS | MAC_OS | TV_OS`
+
+
+Apple operating systems
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

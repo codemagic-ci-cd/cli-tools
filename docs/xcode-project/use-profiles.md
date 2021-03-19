@@ -34,7 +34,7 @@ Custom options for generated export options as JSON string. For example '{"uploa
 ##### `--warn-only`
 
 
-Show warning when profiles can not be applied to an Xcode project(s) instead of failing the action
+Show warning when profiles cannot be applied to any of the Xcode projects instead of fully failing the action
 ### Common options
 
 ##### `-h, --help`

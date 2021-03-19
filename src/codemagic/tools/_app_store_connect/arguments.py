@@ -8,6 +8,7 @@ from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
@@ -253,6 +254,17 @@ class BundleIdArgument(cli.Argument):
             'choices': list(BundleIdPlatform),
         },
     )
+    IDENTIFIER_STRICT_MATCH = cli.ArgumentProperties(
+        key='bundle_id_identifier_strict_match',
+        flags=('--strict-match-identifier',),
+        type=bool,
+        description=(
+            'Only match Bundle IDs that have exactly the same identifier specified by '
+            '`BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches '
+            'Bundle IDs with identifier such as `com.example.app.extension`'
+        ),
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
 
 
 class DeviceArgument(cli.Argument):
@@ -444,4 +456,14 @@ class CommonArgument(cli.Argument):
             f'for more information.'
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    PLATFORM = cli.ArgumentProperties(
+        key='platform',
+        flags=('--platform',),
+        type=Platform,
+        description='Apple operating systems',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
     )

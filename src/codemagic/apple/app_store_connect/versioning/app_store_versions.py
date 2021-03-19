@@ -8,6 +8,7 @@ from typing import TypeVar
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 
@@ -26,6 +27,7 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
+        platform: Optional[Platform] = None
         version_string: Optional[str] = None
 
     @classmethod

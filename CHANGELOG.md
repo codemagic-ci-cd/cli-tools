@@ -1,10 +1,26 @@
 Version 0.6.0
 -------------
 
+- Feature: Add action `app-store-connect app-store-version-submissions create` to submit App Store Version to review.
+- Feature: Add action `app-store-connect app-store-version-submissions delete` to remove App Store Version from review.
+
+Version 0.5.4
+-------------
+
 **Improvements**
 
-- Feature: Add action to submit App Store Version to review using `app-store-connect app-store-version-submissions create`.
-- Feature: Add action to remove App Store Version from review using `app-store-connect app-store-version-submissions delete`.
+- Feature: Add option `--platform` to specify the platform for `app-store-connect` actions `get-latest-app-store-build-number` and `get-latest-testflight-build-number`.
+
+Version 0.5.3
+-------------
+
+**Improvements**
+
+- Feature: Add option to strictly match bundle IDs by the identifier for `app-store-connect` actions `fetch-signing-files` and `list-bundle-ids` using flag `--strict-match-identifier`.
+
+**Dependencies**
+
+- Update [PyJWT](https://pyjwt.readthedocs.io/en/stable/) Python dependency to version ~=2.0.
 
 Version 0.5.2
 -------------

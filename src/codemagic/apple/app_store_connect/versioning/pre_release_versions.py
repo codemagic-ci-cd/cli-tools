@@ -7,6 +7,7 @@ from typing import TypeVar
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
@@ -27,6 +28,7 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
     @dataclass
     class Filter(ResourceManager.Filter):
         app: Optional[ResourceId] = None
+        platform: Optional[Platform] = None
         version: Optional[str] = None
 
     @classmethod
