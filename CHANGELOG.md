@@ -1,3 +1,10 @@
+Version 0.5.3
+-------------
+
+**Dependencies**
+
+- Update [PyJWT](https://pyjwt.readthedocs.io/en/stable/) Python dependency to version ~=2.0.
+
 Version 0.5.2
 -------------
 

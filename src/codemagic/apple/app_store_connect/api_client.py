@@ -10,6 +10,7 @@ from urllib import parse
 
 import jwt
 
+from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .api_session import AppStoreConnectApiSession
@@ -37,7 +38,7 @@ class IssuerId(str):
     pass
 
 
-class AppStoreConnectApiClient:
+class AppStoreConnectApiClient(StringConverterMixin):
     JWT_AUDIENCE = 'appstoreconnect-v1'
     JWT_ALGORITHM = 'ES256'
     API_URL = 'https://api.appstoreconnect.apple.com/v1'
@@ -69,7 +70,7 @@ class AppStoreConnectApiClient:
             self._private_key,
             algorithm=AppStoreConnectApiClient.JWT_ALGORITHM,
             headers={'kid': self._key_identifier})
-        self._jwt = token.decode()
+        self._jwt = self._str(token)
         return self._jwt
 
     def _is_token_expired(self) -> bool:
