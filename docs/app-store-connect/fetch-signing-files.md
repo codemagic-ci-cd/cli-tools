@@ -54,7 +54,7 @@ Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
 ##### `--strict-match-identifier`
 
 
-Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.com.extension`
+Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.app.extension`
 ##### `--create`
 
 
