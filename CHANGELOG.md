@@ -1,3 +1,10 @@
+Version 0.5.4
+-------------
+
+**Improvements**
+
+- Feature: Add option `--platform` to specify the platform for `app-store-connect` actions `get-latest-app-store-build-number` and `get-latest-testflight-build-number`.
+
 Version 0.5.3
 -------------
 
