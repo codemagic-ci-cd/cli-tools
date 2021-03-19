@@ -250,7 +250,7 @@ class BundleIdArgument(cli.Argument):
         description=(
             'Only match Bundle IDs that have exactly the same identifier specified by '
             '`BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches '
-            'Bundle IDs with identifier such as `com.example.com.extension`'
+            'Bundle IDs with identifier such as `com.example.app.extension`'
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
