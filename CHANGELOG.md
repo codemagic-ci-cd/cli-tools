@@ -1,6 +1,10 @@
 Version 0.5.3
 -------------
 
+**Improvements**
+
+- Feature: Add option to strictly match bundle IDs by the identifier for `app-store-connect` actions `fetch-signing-files` and `list-bundle-ids` using flag `--strict-match-identifier`.
+
 **Dependencies**
 
 - Update [PyJWT](https://pyjwt.readthedocs.io/en/stable/) Python dependency to version ~=2.0.

@@ -243,6 +243,17 @@ class BundleIdArgument(cli.Argument):
             'choices': list(BundleIdPlatform),
         },
     )
+    IDENTIFIER_STRICT_MATCH = cli.ArgumentProperties(
+        key='bundle_id_identifier_strict_match',
+        flags=('--strict-match-identifier',),
+        type=bool,
+        description=(
+            'Only match Bundle IDs that have exactly the same identifier specified by '
+            '`BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches '
+            'Bundle IDs with identifier such as `com.example.app.extension`'
+        ),
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
 
 
 class DeviceArgument(cli.Argument):

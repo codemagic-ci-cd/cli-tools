@@ -7,6 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
+from typing import Callable
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -28,6 +29,7 @@ from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
@@ -133,11 +135,18 @@ class AppStoreConnect(cli.CliApp):
         self.printer.print_resource(resource, should_print)
         return resource
 
-    def _list_resources(self, resource_filter, resource_manager, should_print):
+    def _list_resources(self,
+                        resource_filter,
+                        resource_manager,
+                        should_print: bool,
+                        filter_predicate: Optional[Callable[[Resource], bool]] = None):
         try:
             resources = resource_manager.list(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
+
+        if filter_predicate is not None:
+            resources = list(filter(filter_predicate, resources))
 
         self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
         self.printer.print_resources(resources, should_print)
@@ -279,19 +288,32 @@ class AppStoreConnect(cli.CliApp):
     @cli.action('list-bundle-ids',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
                 BundleIdArgument.BUNDLE_ID_NAME,
-                BundleIdArgument.PLATFORM_OPTIONAL)
+                BundleIdArgument.PLATFORM_OPTIONAL,
+                BundleIdArgument.IDENTIFIER_STRICT_MATCH)
     def list_bundle_ids(self,
                         bundle_id_identifier: Optional[str] = None,
                         bundle_id_name: Optional[str] = None,
                         platform: Optional[BundleIdPlatform] = None,
+                        bundle_id_identifier_strict_match: bool = False,
                         should_print: bool = True) -> List[BundleId]:
         """
         List Bundle IDs from Apple Developer portal matching given constraints
         """
 
+        def predicate(bundle_id):
+            return bundle_id.attributes.identifier == bundle_id_identifier
+
         bundle_id_filter = self.api_client.bundle_ids.Filter(
-            identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
-        bundle_ids = self._list_resources(bundle_id_filter, self.api_client.bundle_ids, should_print)
+            identifier=bundle_id_identifier,
+            name=bundle_id_name,
+            platform=platform,
+        )
+        bundle_ids = self._list_resources(
+            bundle_id_filter,
+            self.api_client.bundle_ids,
+            should_print,
+            filter_predicate=predicate if bundle_id_identifier_strict_match else None,
+        )
 
         return bundle_ids
 
@@ -571,6 +593,7 @@ class AppStoreConnect(cli.CliApp):
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 ProfileArgument.PROFILE_TYPE,
+                BundleIdArgument.IDENTIFIER_STRICT_MATCH,
                 CommonArgument.CREATE_RESOURCE)
     def fetch_signing_files(self,
                             bundle_id_identifier: str,
@@ -579,6 +602,7 @@ class AppStoreConnect(cli.CliApp):
                             p12_container_password: str = '',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
                             profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
+                            bundle_id_identifier_strict_match: bool = False,
                             create_resource: bool = False) -> Tuple[List[Profile], List[SigningCertificate]]:
         """
         Fetch provisioning profiles and code signing certificates
@@ -589,7 +613,12 @@ class AppStoreConnect(cli.CliApp):
         if private_key is None:
             raise AppStoreConnectError(f'Cannot save {SigningCertificate.s} without private key')
 
-        bundle_ids = self._get_or_create_bundle_ids(bundle_id_identifier, platform, create_resource)
+        bundle_ids = self._get_or_create_bundle_ids(
+            bundle_id_identifier,
+            platform,
+            create_resource,
+            bundle_id_identifier_strict_match,
+        )
         certificates = self._get_or_create_certificates(
             profile_type, certificate_key, certificate_key_password, create_resource)
         profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource, platform)
@@ -598,9 +627,17 @@ class AppStoreConnect(cli.CliApp):
         self._save_profiles(profiles)
         return profiles, certificates
 
-    def _get_or_create_bundle_ids(
-            self, bundle_id_identifier: str, platform: BundleIdPlatform, create_resource: bool) -> List[BundleId]:
-        bundle_ids = self.list_bundle_ids(bundle_id_identifier, platform=platform, should_print=False)
+    def _get_or_create_bundle_ids(self,
+                                  bundle_id_identifier: str,
+                                  platform: BundleIdPlatform,
+                                  create_resource: bool,
+                                  strict_match: bool) -> List[BundleId]:
+        bundle_ids = self.list_bundle_ids(
+            bundle_id_identifier,
+            platform=platform,
+            bundle_id_identifier_strict_match=strict_match,
+            should_print=False,
+        )
         if not bundle_ids:
             if not create_resource:
                 raise AppStoreConnectError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
