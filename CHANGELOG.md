@@ -1,3 +1,10 @@
+Version 0.5.6
+-------------
+
+**Improvements**
+
+- Bugfix: list MacOS application's codesigning certificates as well.
+
 Version 0.5.5
 -------------
 
