@@ -1,3 +1,10 @@
+Version 0.5.5
+-------------
+
+**Improvements**
+
+- Bugfix: export MacOS application's provisioning profiles with `.provisionprofile` extension instead of `.mobileprovision`.
+
 Version 0.5.4
 -------------
 
