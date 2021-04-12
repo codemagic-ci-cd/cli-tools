@@ -177,6 +177,9 @@ class ProfileType(_ResourceEnum):
     def devices_allowed(self) -> bool:
         return self.is_development_type or self.is_ad_hoc_type
 
+    def is_macos_profile(self) -> bool:
+        return self.value.startswith('MAC_')
+
 
 class ReleaseType(_ResourceEnum):
     MANUAL = 'MANUAL'

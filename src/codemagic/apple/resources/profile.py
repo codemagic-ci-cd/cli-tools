@@ -52,14 +52,7 @@ class Profile(Resource):
 
     @property
     def profile_extension(self) -> str:
-        if self.attributes.profileType in [
-            ProfileType.MAC_APP_DEVELOPMENT,
-            ProfileType.MAC_APP_DIRECT,
-            ProfileType.MAC_APP_STORE,
-            ProfileType.MAC_CATALYST_APP_DEVELOPMENT,
-            ProfileType.MAC_CATALYST_APP_DIRECT,
-            ProfileType.MAC_CATALYST_APP_STORE,
-        ]:
+        if self.attributes.profileType.is_macos_profile:
             return '.provisionprofile'
         return '.mobileprovision'
 
