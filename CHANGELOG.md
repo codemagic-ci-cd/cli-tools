@@ -3,7 +3,7 @@ Version 0.5.6
 
 **Improvements**
 
-- Bugfix: list MacOS application's codesigning certificates as well.
+- Bugfix: list MacOS application's codesigning certificates as well in `keychain list-certificates`.
 
 Version 0.5.5
 -------------
