@@ -20,21 +20,21 @@ workflows:
               --notes-file release_notes.md \
               --draft \
               dist/codemagic*.whl
-#       - name: Upload wheel
-#         script: |
-#           set -e
+      - name: Upload wheel
+        script: |
+          set -e
 
-#           echo $GOOGLE_CLIENT_SECRET | base64 --decode --output $HOME/client-secret.json
-#           gcloud auth activate-service-account --key-file $HOME/client-secret.json
-#           SRC_PATH=$(find dist -name "*.whl" | tail -n1)
-#           DST_URL="gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
-#           gsutil -h "Content-Type:application/x-wheel+zip" \
-#                  -h "Cache-Control:no-cache,max-age=0" \
-#                  cp -a public-read "$SRC_PATH" "$DST_URL"
-#       - name: Publish release to PyPI codemagic-cli-tools
-#         script: |
-#           python3 -m pip install --user --upgrade twine
-#           python3 -m twine upload dist/* --username $PYPI_USER --password $PYPI_TOKEN
+          echo $GOOGLE_CLIENT_SECRET | base64 --decode --output $HOME/client-secret.json
+          gcloud auth activate-service-account --key-file $HOME/client-secret.json
+          SRC_PATH=$(find dist -name "*.whl" | tail -n1)
+          DST_URL="gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
+          gsutil -h "Content-Type:application/x-wheel+zip" \
+                 -h "Cache-Control:no-cache,max-age=0" \
+                 cp -a public-read "$SRC_PATH" "$DST_URL"
+      - name: Publish release to PyPI codemagic-cli-tools
+        script: |
+          python3 -m pip install --user --upgrade twine
+          python3 -m twine upload dist/* --username $PYPI_USER --password $PYPI_TOKEN
     artifacts:
       - dist/codemagic*.whl
       - dist/codemagic*.tar.gz
