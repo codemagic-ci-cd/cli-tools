@@ -1,4 +1,4 @@
-Version 0.5.6
+Version 0.5.7
 -------------
 
 **Improvements**
@@ -7,6 +7,13 @@ Version 0.5.6
 - Bugfix: in `xcode-project use-profiles` search for provision profiles with `.provisionprofile` extension as well.
 - Bugfix: handle provisioning profiles entitlements keys with prefixes e.g. `com.apple.application-identifier`
 - Bugfix: do not default to iphoneos sdk when setting code signing information
+
+Version 0.5.6
+-------------
+
+**Improvements**
+
+- CI pipeline: Use GitHub CLI tools for releases
 
 Version 0.5.5
 -------------
