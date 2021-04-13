@@ -80,7 +80,10 @@ class XcodeProjectArgument(cli.Argument):
             'required': False,
             'nargs': '+',
             'metavar': 'profile-path',
-            'default': (ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',),
+            'default': (
+                ProvisioningProfile.DEFAULT_LOCATION / '*.mobileprovision',
+                ProvisioningProfile.DEFAULT_LOCATION / '*.provisionprofile',
+            ),
         },
     )
     WARN_ONLY = cli.ArgumentProperties(
