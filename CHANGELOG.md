@@ -1,3 +1,10 @@
+Version 0.5.6
+-------------
+
+**Improvements**
+
+- CI pipeline: Use GitHub CLI tools for releases
+
 Version 0.5.5
 -------------
 
