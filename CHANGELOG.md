@@ -3,10 +3,10 @@ Version 0.5.7
 
 **Improvements**
 
-- Bugfix: list MacOS application's codesigning certificates as well in `keychain list-certificates`.
-- Bugfix: in `xcode-project use-profiles` search for provision profiles with `.provisionprofile` extension as well.
-- Bugfix: handle provisioning profiles entitlements keys with prefixes e.g. `com.apple.application-identifier`
-- Bugfix: do not default to iphoneos sdk when setting code signing information
+- Bugfix: Include MacOS application's codesigning certificates in `keychain list-certificates` output.
+- Bugfix: Include provisioning profiles with `.provisionprofile` extension in in `xcode-project use-profiles` search.
+- Bugfix: handle provisioning profiles entitlements keys with prefixes e.g. `com.apple.application-identifier`.
+- Bugfix: Improve SDK detection when setting code signing infortmation on Xcode projects instead of always defaulting to `iphoneos` .
 
 Version 0.5.6
 -------------
