@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from unittest import mock
+
+import pytest
 from cryptography.hazmat.primitives import serialization
 
 from codemagic.models import Certificate
@@ -108,3 +111,22 @@ def test_p12_to_certificate_no_password(mock_certificate_p12_no_password):
 
     certificate = Certificate.from_p12(p12_bytes)
     assert certificate.serial == 17878171000481113533
+
+
+@pytest.mark.parametrize('cert_common_name, is_code_signing_certificate', [
+    ('Apple Development: Some name (FXZPHT7PIC)', True),
+    ('Apple Distribution: Some name (FXZPHT7PIC)', True),
+    ('iPhone Developer: Some name (FXZPHT7PIC)', True),
+    ('iPhone Distribution: Some name (FXZPHT7PIC)', True),
+    ('Developer ID Application: Some name (FXZPHT7PIC)', True),
+    ('Mac Developer: Some name (FXZPHT7PIC)', True),
+    ('3rd Party Mac Developer Application: Some name (FXZPHT7PIC)', True),
+    ('3rd Party Mac Developer Installer: Some name (FXZPHT7PIC)', True),
+    ('iPhone Development: Some name (FXZPHT7PIC)', False),
+    ('Apple Worldwide Developer Relations Certification Authority', False),
+])
+def test_is_code_signing_certificate(cert_common_name, is_code_signing_certificate, certificate_asn1):
+    patched_common_name = mock.PropertyMock(return_value=cert_common_name)
+    with mock.patch.object(Certificate, 'common_name', new_callable=patched_common_name):
+        certificate = Certificate.from_ans1(certificate_asn1)
+        assert certificate.is_code_signing_certificate() is is_code_signing_certificate

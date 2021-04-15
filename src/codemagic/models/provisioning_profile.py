@@ -79,7 +79,11 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
 
     @property
     def has_beta_entitlements(self) -> bool:
-        return self._plist.get('Entitlements', dict()).get('beta-reports-active', False)
+        entitlements = self._plist.get('Entitlements', dict())
+        for key, value in entitlements.items():
+            if 'beta-reports-active' in key:
+                return value
+        return False
 
     @property
     def provisioned_devices(self) -> List[str]:
@@ -91,7 +95,11 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
 
     @property
     def application_identifier(self) -> str:
-        return self._plist.get('Entitlements', dict()).get('application-identifier', '')
+        entitlements = self._plist.get('Entitlements', dict())
+        for key, value in entitlements.items():
+            if 'application-identifier' in key:
+                return value
+        return ''
 
     @property
     def is_wildcard(self) -> bool:
