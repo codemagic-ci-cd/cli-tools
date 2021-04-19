@@ -9,7 +9,9 @@ workflows:
         TEST_APPLE_PRIVATE_KEY_CONTENT: Encrypted(Z0FBQUFBQmdmWUFBcExqYWdiN3RwMGZHZlFNLWNaRmg5SHdyNEdwVlR1Q3IxWkRlajllcEwxemRfcnpyUzBQTlRzN2EyX09vRGJWQzE1YTZKVmpOeC1FS1I1a0swRFZ1VUdGQ0RmRXVoVDltcUJ1ZEV1ZTZvMEFzY0pqcHQ5VDVUdEhaTWstUWRDWTQzRE53YWswci1UNVpOTWJTejZqT1VVWFBUdVVXTFBlR1RFd3dVZjVSR2lTODdpSzRKRm80eGpyWHhoSm5aVERLMTQ5TEhVQ2JiaDc5eXVZNTZ3R2JBY2FibDVLYUhib2ZLVklNcnFWRDNiUTEyRGxsNTFLUjdSV19LVU5USUZKRGV6TlZlOTF4NkZYVUE2Q0otXzdpMUtHY3ZTMzRkdF9MbTkwQ2tUTGN3TVdnUjNoNTQxOVFFb2xUZzlJQTJ0eXpaNGFUeGFqSW1EaF9EQ2RjeW9HVFNCNHc0dzB0bUF4YVBBM2dqb2o4S2wwYmdXbFdwUmtkYTdzeVVpYzJlUTNQV0lGUTVjMU9nZ2JvSEJoRy1iOEpMcWwwYjhRR2RBeXctNHg4Ump5RlNtRT0=)
     scripts:
       - name: Install pyenv
-        script: brew install pyenv
+        script: |
+          export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
+          brew install pyenv
       - name: Install dependencies
         script: |
           python3 -m pip install --upgrade pip pipenv
