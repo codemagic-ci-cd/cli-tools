@@ -1,4 +1,26 @@
 workflows:
+  tests:
+    environment:
+      vars:
+        MYPYPATH: stubs
+        TEST_APPLE_ISSUER_ID: Encrypted(Z0FBQUFBQmdmWF9lRkdUSjh0TkYxdkJsWExzZGdVbkpkWGY3eHBsU2Z3bGZ6aVpRVElFdklCYnFPWHc4RzI4bC13cUhaRF9GYnlUMDRVc2dGV3ZDNkFjR2ZHLVpUa2o5N3Y2TkhSRWhXY3I2S1l5dUdxRjRQaEQ3a0RXNWpHVHJxOGZyRlcwLXphN3Q=)
+        TEST_APPLE_KEY_IDENTIFIER: Encrypted(Z0FBQUFBQmdmWF9GaElkcWFRMTIzMUJfLU5WeDBZWVBCWWsydlhTS19lZ1Nkb1BZaTZiZG10V1IzWXVWaGxfWVhoWmNYMF9CdGtIdl9uaW9HUlZjY3FDYVYzV3VnUHVfc1E9PQ==)
+        TEST_APPLE_PRIVATE_KEY_CONTENT: Encrypted(Z0FBQUFBQmdmWUFBcExqYWdiN3RwMGZHZlFNLWNaRmg5SHdyNEdwVlR1Q3IxWkRlajllcEwxemRfcnpyUzBQTlRzN2EyX09vRGJWQzE1YTZKVmpOeC1FS1I1a0swRFZ1VUdGQ0RmRXVoVDltcUJ1ZEV1ZTZvMEFzY0pqcHQ5VDVUdEhaTWstUWRDWTQzRE53YWswci1UNVpOTWJTejZqT1VVWFBUdVVXTFBlR1RFd3dVZjVSR2lTODdpSzRKRm80eGpyWHhoSm5aVERLMTQ5TEhVQ2JiaDc5eXVZNTZ3R2JBY2FibDVLYUhib2ZLVklNcnFWRDNiUTEyRGxsNTFLUjdSV19LVU5USUZKRGV6TlZlOTF4NkZYVUE2Q0otXzdpMUtHY3ZTMzRkdF9MbTkwQ2tUTGN3TVdnUjNoNTQxOVFFb2xUZzlJQTJ0eXpaNGFUeGFqSW1EaF9EQ2RjeW9HVFNCNHc0dzB0bUF4YVBBM2dqb2o4S2wwYmdXbFdwUmtkYTdzeVVpYzJlUTNQV0lGUTVjMU9nZ2JvSEJoRy1iOEpMcWwwYjhRR2RBeXctNHg4Ump5RlNtRT0=)
+    scripts:
+      - name: Install dependencies
+        script: |
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev
+      - name: Pipenv checks
+        script: pipenv check
+      - name: Check code formatting
+        script: pipenv run flake8 src/codemagic tests
+      - name: Check imports sort order
+        script: pipenv run isort src/codemagic tests --check-only
+      - name: Static type checks with mypy
+        script: pipenv run mypy src/codemagic
+      - name: Test with pytest
+        script: pipenv run pytest
   release:
     environment:
       vars:
