@@ -9,7 +9,7 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          python -m pip install --upgrade pip pipenv
+          python3 -m pip install --upgrade pip pipenv
           pipenv install --dev
       - name: Pipenv checks
         script: pipenv check
