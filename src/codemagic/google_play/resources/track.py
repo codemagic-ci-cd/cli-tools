@@ -43,7 +43,7 @@ class Release(Resource):
     )
 
     status: ReleaseStatus
-    name: str = None
+    name: Optional[str] = None
     userFraction: Optional[float] = None
     countryTargeting: Optional[CountryTargeting] = None
     inAppUpdatePriority: Optional[int] = None
