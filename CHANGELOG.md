@@ -1,3 +1,10 @@
+Version 0.5.8
+-------------
+
+**Improvements**
+
+- Bugfix: Allow Google Play releases with no name provided in `google-play` tool.
+
 Version 0.5.7
 -------------
 
