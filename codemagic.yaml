@@ -36,7 +36,9 @@ workflows:
     name: Generate binary distribution wheel
     scripts:
       - name: Build wheel
-        script: python3 setup.py sdist bdist_wheel
+        script: |
+          python3 -m pip install wheel
+          python3 setup.py sdist bdist_wheel
       - name: Draft GitHub release
         script: |
           TAG_NAME=v$(python3 setup.py --version)
