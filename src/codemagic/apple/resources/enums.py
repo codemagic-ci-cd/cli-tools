@@ -41,6 +41,7 @@ class BundleIdPlatform(_ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
     UNIVERSAL = 'UNIVERSAL'
+    SERVICES = 'SERVICES'
 
 
 class CapabilityOptionKey(_ResourceEnum):

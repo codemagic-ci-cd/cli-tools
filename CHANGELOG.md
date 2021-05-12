@@ -1,3 +1,10 @@
+Version 0.5.9
+-------------
+
+**Improvements**
+
+- Bugfix: Accept `SERVICES` as a valid [Bundle Identifier platform](https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform).
+
 Version 0.5.8
 -------------
 
