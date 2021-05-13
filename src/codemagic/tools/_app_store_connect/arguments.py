@@ -123,6 +123,24 @@ class AppStoreVersionArgument(cli.Argument):
     )
 
 
+class AppStoreArgument(cli.Argument):
+    ARTIFACT_PATTERNS = cli.ArgumentProperties(
+        key='artifact_patterns',
+        flags=('--path',),
+        type=pathlib.Path,
+        description=(
+            'Path to artifact (*.ipa or *.pkg). Can be either a path literal, or '
+            'a glob pattern to match projects in working directory.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'default': (pathlib.Path('**/*.ipa'), pathlib.Path('**/*.pkg')),
+            'nargs': '+',
+            'metavar': 'artifact-path',
+        },
+    )
+
+
 class BuildArgument(cli.Argument):
     APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
         key='application_id',

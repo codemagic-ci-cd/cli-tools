@@ -7,6 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
+from functools import lru_cache
 from typing import Callable
 from typing import Iterator
 from typing import List
@@ -36,11 +37,14 @@ from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
 from codemagic.cli import Colors
+from codemagic.mixins import PathFinderMixin
+from codemagic.models import Altool
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
+from ._app_store_connect.arguments import AppStoreArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
 from ._app_store_connect.arguments import BuildArgument
@@ -70,7 +74,7 @@ def _get_certificate_key(
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
-class AppStoreConnect(cli.CliApp):
+class AppStoreConnect(cli.CliApp, PathFinderMixin):
     """
     Utility to download code signing certificates and provisioning profiles
     from Apple Developer Portal using App Store Connect API to perform iOS code signing
@@ -89,7 +93,10 @@ class AppStoreConnect(cli.CliApp):
         self.profiles_directory = profiles_directory
         self.certificates_directory = certificates_directory
         self.printer = ResourcePrinter(bool(json_output), self.echo)
-        self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
+        self._key_identifier = key_identifier
+        self._issuer_id = issuer_id
+        self._private_key = private_key
+        self._log_api_requests = log_requests
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
@@ -113,6 +120,28 @@ class AppStoreConnect(cli.CliApp):
             certificates_directory=cli_args.certificates_directory,
             **cls._parent_class_kwargs(cli_args),
         )
+
+    @property
+    @lru_cache(1)
+    def api_client(self) -> AppStoreConnectApiClient:
+        return AppStoreConnectApiClient(
+            self._key_identifier,
+            self._issuer_id,
+            self._private_key,
+            log_requests=self._log_api_requests,
+        )
+
+    @property
+    @lru_cache(1)
+    def altool(self) -> Altool:
+        try:
+            return Altool(
+                key_identifier=self._key_identifier,
+                issuer_id=self._issuer_id,
+                private_key=self._private_key,
+            )
+        except ValueError as ve:
+            raise AppStoreConnectError(str(ve))
 
     def _create_resource(self, resource_manager, should_print, **create_params):
         omit_keys = create_params.pop('omit_keys', tuple())
@@ -494,6 +523,39 @@ class AppStoreConnect(cli.CliApp):
             app_store_version_submission_id,
             ignore_not_found=ignore_not_found,
         )
+
+    @cli.action('publish',
+                AppStoreArgument.ARTIFACT_PATTERNS,
+                action_group=AppStoreConnectActionGroup.APP_STORE)
+    def publish(self, artifact_patterns: Sequence[pathlib.Path]) -> None:
+        """
+        Publish artifacts to App Store
+        """
+        artifact_paths = list(self.find_paths(*artifact_patterns))
+
+        for artifact_path in artifact_paths:
+            self._validate_artifact_with_altool(artifact_path)
+            self._upload_artifact_with_altool(artifact_path)
+
+    def _validate_artifact_with_altool(self, artifact_path: pathlib.Path):
+        self.echo(f'\nValidate archive at "{artifact_path}" for App Store')
+        try:
+            result = self.altool.validate_app(artifact_path)
+        except IOError as error:
+            raise AppStoreConnectError(error.args[0])
+        else:
+            message = result.success_message or f'No errors validating archive at "{artifact_path}".'
+            self.echo(Colors.GREEN(message))
+
+    def _upload_artifact_with_altool(self, artifact_path: pathlib.Path):
+        self.echo(f'\nUpload archive at "{artifact_path}" to App Store')
+        try:
+            result = self.altool.upload_app(artifact_path)
+        except IOError as error:
+            raise AppStoreConnectError(error.args[0])
+        else:
+            message = result.success_message or f'No errors uploading "{artifact_path}".'
+            self.echo(Colors.GREEN(message))
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,

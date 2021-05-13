@@ -6,3 +6,7 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name='app-store-version-submissions',
         description="Manage your application's App Store version review process",
     )
+    APP_STORE = cli.ActionGroupProperties(
+        name='app-store',
+        description='',  # TODO: Come up with a proper description
+    )

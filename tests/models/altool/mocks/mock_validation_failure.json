@@ -1,0 +1,16 @@
+{
+    "tool-version": "4.050.1210",
+    "tool-path": "/Applications/Xcode.app/Contents/.../AppStoreService.framework",
+    "os-version": "11.2.3",
+    "product-errors": [
+        {
+            "message": "Unable to process application at this time due to the following error: Invalid Provisioning Profile. The provisioning profile included in the bundle io.codemagic.banaan [Payload/banaan.app] is invalid. [Missing code-signing certificate]. A Distribution Provisioning profile should be used when submitting apps to the App Store. For more information, visit the iOS Developer Portal..",
+            "userInfo": {
+                "NSLocalizedFailureReason": "App Store operation failed.",
+                "NSLocalizedRecoverySuggestion": "Unable to process application at this time due to the following error: Invalid Provisioning Profile. The provisioning profile included in the bundle io.codemagic.banaan [Payload/banaan.app] is invalid. [Missing code-signing certificate]. A Distribution Provisioning profile should be used when submitting apps to the App Store. For more information, visit the iOS Developer Portal..",
+                "NSLocalizedDescription": "Unable to process application at this time due to the following error: Invalid Provisioning Profile. The provisioning profile included in the bundle io.codemagic.banaan [Payload/banaan.app] is invalid. [Missing code-signing certificate]. A Distribution Provisioning profile should be used when submitting apps to the App Store. For more information, visit the iOS Developer Portal.."
+            },
+            "code": 1176
+        }
+    ]
+}
