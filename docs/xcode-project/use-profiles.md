@@ -22,7 +22,7 @@ Path to Xcode project (\*.xcodeproj). Can be either a path literal, or a glob pa
 ##### `--profile=PROFILE_PATHS`
 
 
-Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision`
+Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision, $HOME/Library/MobileDevice/Provisioning Profiles/*.provisionprofile`
 ##### `--export-options-plist=EXPORT_OPTIONS_PATH`
 
 
