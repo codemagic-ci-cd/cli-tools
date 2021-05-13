@@ -1,8 +1,48 @@
 Version 0.6.0
 -------------
 
-- Feature: Add action `app-store-connect app-store-version-submissions create` to submit App Store Version to review.
-- Feature: Add action `app-store-connect app-store-version-submissions delete` to remove App Store Version from review.
+**New features**
+
+- Add action `app-store-connect app-store-version-submissions create` to submit App Store Version to review.
+- Add action `app-store-connect app-store-version-submissions delete` to remove App Store Version from review.
+
+Version 0.5.9
+-------------
+
+**Improvements**
+
+- Bugfix: Accept `SERVICES` as a valid [Bundle Identifier platform](https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform).
+
+Version 0.5.8
+-------------
+
+**Improvements**
+
+- Bugfix: Allow Google Play releases with no name provided in `google-play` tool.
+
+Version 0.5.7
+-------------
+
+**Improvements**
+
+- Bugfix: Include MacOS application's codesigning certificates in `keychain list-certificates` output.
+- Bugfix: Include provisioning profiles with `.provisionprofile` extension in in `xcode-project use-profiles` search.
+- Bugfix: handle provisioning profiles entitlements keys with prefixes e.g. `com.apple.application-identifier`.
+- Bugfix: Improve SDK detection when setting code signing infortmation on Xcode projects instead of always defaulting to `iphoneos` .
+
+Version 0.5.6
+-------------
+
+**Improvements**
+
+- CI pipeline: Use GitHub CLI tools for releases
+
+Version 0.5.5
+-------------
+
+**Improvements**
+
+- Bugfix: export MacOS application's provisioning profiles with `.provisionprofile` extension instead of `.mobileprovision`.
 
 Version 0.5.4
 -------------

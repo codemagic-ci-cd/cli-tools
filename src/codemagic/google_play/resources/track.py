@@ -33,10 +33,17 @@ class CountryTargeting(Resource):
 
 @dataclass
 class Release(Resource):
-    _OMIT_IF_NONE_KEYS = ('userFraction', 'countryTargeting', 'inAppUpdatePriority', 'versionCodes', 'releaseNotes')
+    _OMIT_IF_NONE_KEYS = (
+        'name',
+        'userFraction',
+        'countryTargeting',
+        'inAppUpdatePriority',
+        'versionCodes',
+        'releaseNotes',
+    )
 
-    name: str
     status: ReleaseStatus
+    name: Optional[str] = None
     userFraction: Optional[float] = None
     countryTargeting: Optional[CountryTargeting] = None
     inAppUpdatePriority: Optional[int] = None

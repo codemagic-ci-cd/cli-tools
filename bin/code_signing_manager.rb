@@ -424,15 +424,11 @@ class CodeSigningManager
     build_configuration.build_settings["CODE_SIGN_STYLE"] = "Manual"
     build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
 
-    is_code_signing_identity_set = false
+    build_configuration.build_settings["CODE_SIGN_IDENTITY"] = profile["certificate_common_name"]
     build_configuration.build_settings.each do |build_setting, _value|
       if build_setting.start_with? "CODE_SIGN_IDENTITY[sdk="
         build_configuration.build_settings[build_setting] = profile["certificate_common_name"]
-        is_code_signing_identity_set = true
       end
-    end
-    unless is_code_signing_identity_set
-      build_configuration.build_settings["CODE_SIGN_IDENTITY[sdk=iphoneos*]"] = profile["certificate_common_name"]
     end
   end
 

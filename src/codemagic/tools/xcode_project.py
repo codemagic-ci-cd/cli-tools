@@ -120,7 +120,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         code_signing_settings_manager.notify_profile_usage()
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
-        export_options.notify(Colors.GREEN('Generated options for exporting IPA'))
+        export_options.notify(Colors.GREEN('Generated options for exporting the project'))
         export_options.save(export_options_plist)
 
         self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))
