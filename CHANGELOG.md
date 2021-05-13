@@ -1,9 +1,22 @@
+Version 0.6.0
+-------------
+
+**New features**
+
+- Add action `get-profile` to `app-store-connect` to show provisioning profile based on resource identifier.
+
+**Development / Docs**
+
+- Add documentation for new action `app-store-connect get-profile`.
+- Add `SERVICES` as valid value to `--platform` option in `app-store-connect` actions. 
+- Update `--profile` option default values for action `xcode-project use-profiles`.
+
 Version 0.5.9
 -------------
 
-**Improvements**
+**Fixes**
 
-- Bugfix: Accept `SERVICES` as a valid [Bundle Identifier platform](https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform).
+- Accept `SERVICES` as a valid [Bundle Identifier platform](https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform).
 
 Version 0.5.8
 -------------
