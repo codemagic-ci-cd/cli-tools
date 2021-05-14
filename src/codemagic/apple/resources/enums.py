@@ -41,6 +41,7 @@ class BundleIdPlatform(_ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
     UNIVERSAL = 'UNIVERSAL'
+    SERVICES = 'SERVICES'
 
 
 class CapabilityOptionKey(_ResourceEnum):
@@ -170,6 +171,10 @@ class ProfileType(_ResourceEnum):
     @property
     def is_development_type(self) -> bool:
         return self.value.endswith('_DEVELOPMENT')
+
+    @property
+    def is_macos_profile(self) -> bool:
+        return self.value.startswith('MAC_')
 
     def devices_not_allowed(self) -> bool:
         return not self.devices_allowed()

@@ -17,6 +17,7 @@ app-store-connect list-bundle-ids [-h] [--log-stream STREAM] [--no-color] [--ver
     [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
     [--name BUNDLE_ID_NAME]
     [--platform PLATFORM_OPTIONAL]
+    [--strict-match-identifier]
 ```
 ### Optional arguments for action `list-bundle-ids`
 
@@ -28,10 +29,14 @@ Identifier of the Bundle ID
 
 
 Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
-##### `--platform=IOS | MAC_OS | UNIVERSAL`
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
 Bundle ID platform
+##### `--strict-match-identifier`
+
+
+Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.app.extension`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

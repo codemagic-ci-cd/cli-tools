@@ -51,5 +51,11 @@ class Profile(Resource):
         return f'{self.attributes.profileType} profile {self.attributes.uuid}'
 
     @property
+    def profile_extension(self) -> str:
+        if self.attributes.profileType.is_macos_profile:
+            return '.provisionprofile'
+        return '.mobileprovision'
+
+    @property
     def profile_content(self) -> bytes:
         return b64decode(self.attributes.profileContent)

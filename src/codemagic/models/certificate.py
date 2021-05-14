@@ -101,9 +101,14 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return development_certificate_pattern.match(self.common_name) is not None
 
     def is_code_signing_certificate(self) -> bool:
-        code_signing_certificate_pattern = re.compile(
-            r'^((Apple (Development|Distribution))|(iPhone (Developer|Distribution))):.*$')
-        return code_signing_certificate_pattern.match(self.common_name) is not None
+        code_signing_certificate_patterns = (
+            re.compile(r'^Apple (Development|Distribution):.*$'),
+            re.compile(r'^iPhone (Developer|Distribution):.*$'),
+            re.compile(r'^Developer ID Application:.*$'),
+            re.compile(r'^Mac Developer:.*$'),
+            re.compile(r'^3rd Party Mac Developer (Application|Installer):.*$'),
+        )
+        return any(p.match(self.common_name) is not None for p in code_signing_certificate_patterns)
 
     def dict(self) -> Dict[str, Union[str, int, Dict[str, str], List[str]]]:
         return {

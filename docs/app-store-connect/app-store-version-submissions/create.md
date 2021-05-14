@@ -1,12 +1,12 @@
 
-app-store-connect
-=================
+create
+======
 
 
-**Utility to download code signing certificates and provisioning profiles     from Apple Developer Portal using App Store Connect API to perform iOS code signing**
+**Submit an App Store Version to App Review**
 ### Usage
 ```bash
-app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-version-submissions create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,14 @@ app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    APP_STORE_VERSION_ID
 ```
+### Required arguments for action `create`
+
+##### `APP_STORE_VERSION_ID`
+
+
+UUID value of the App Store Version
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,31 +78,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create-bundle-id`](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
-|[`create-certificate`](create-certificate.md)|Create code signing certificates of given type|
-|[`create-profile`](create-profile.md)|Create provisioning profile of given type|
-|[`delete-bundle-id`](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal|
-|[`delete-certificate`](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal|
-|[`delete-profile`](delete-profile.md)|Delete specified Profile from Apple Developer portal|
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
-|[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal|
-|[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal|
-|[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get latest App Store build number for the given application|
-|[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get latest Testflight build number for the given application|
-|[`get-profile`](get-profile.md)|Get specified Profile from Apple Developer portal|
-|[`list-builds`](list-builds.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`list-bundle-id-profiles`](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
-|[`list-bundle-ids`](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints|
-|[`list-certificates`](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints|
-|[`list-devices`](list-devices.md)|List Devices from Apple Developer portal matching given constraints|
-|[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints|
-
-### Action groups
-
-|Action group|Description|
-| :--- | :--- |
-|[`app-store-version-submissions`](app-store-version-submissions.md)|Manage your application's App Store version review process|

@@ -22,7 +22,7 @@ Path to Xcode project (\*.xcodeproj). Can be either a path literal, or a glob pa
 ##### `--profile=PROFILE_PATHS`
 
 
-Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision`
+Path to provisioning profile. Can be either a path literal, or a glob pattern to match provisioning profiles. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision, $HOME/Library/MobileDevice/Provisioning Profiles/*.provisionprofile`
 ##### `--export-options-plist=EXPORT_OPTIONS_PATH`
 
 
@@ -34,7 +34,7 @@ Custom options for generated export options as JSON string. For example '{"uploa
 ##### `--warn-only`
 
 
-Show warning when profiles can not be applied to an Xcode project(s) instead of failing the action
+Show warning when profiles cannot be applied to any of the Xcode projects instead of fully failing the action
 ### Common options
 
 ##### `-h, --help`
