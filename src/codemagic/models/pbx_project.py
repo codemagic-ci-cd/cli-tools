@@ -7,9 +7,11 @@ import subprocess
 import tempfile
 from itertools import chain
 from typing import Any
+from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -24,21 +26,24 @@ class PbxProject(RunningCliAppMixin, StringConverterMixin):
         self.logger = log.get_logger(self.__class__)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path) -> PbxProject:
+    def from_path(cls, project_path: Union[pathlib.Path, AnyStr]) -> PbxProject:
         """
-        :param path: Path to project.pbxproj
+        :param project_path: Path to project.pbxproj
         :raises: ValueError, IOError
         :return: PbxProject
         """
-        if not path.exists():
-            raise ValueError(f'Cannot initialize PBX Project from {path}, no such file.')
-        elif not path.is_file():
-            raise ValueError(f'Cannot initialize PBX Project from {path}, not a file.')
+        if isinstance(project_path, (bytes, str)):
+            project_path = pathlib.Path(cls._str(project_path))
+
+        if not project_path.exists():
+            raise ValueError(f'Cannot initialize PBX Project from {project_path}, no such file.')
+        elif not project_path.is_file():
+            raise ValueError(f'Cannot initialize PBX Project from {project_path}, not a file.')
 
         try:
-            parsed: Dict[str, Any] = plistlib.loads(path.read_bytes())
+            parsed: Dict[str, Any] = plistlib.loads(project_path.read_bytes())
         except ValueError:
-            xml = cls._convert_to_xml(path)
+            xml = cls._convert_to_xml(project_path)
             parsed = plistlib.loads(xml)
 
         return PbxProject(parsed)

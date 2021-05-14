@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import pathlib
 import plistlib
 import re
 import shutil
 import subprocess
-from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 from typing import AnyStr
 from typing import Dict
@@ -20,20 +21,28 @@ from codemagic.models.json_serializable import JsonSerializable
 
 
 class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
-    DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Provisioning Profiles')
+    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), 'Library', 'MobileDevice', 'Provisioning Profiles')
 
     def __init__(self, plist: Dict[str, Any]):
         self._plist = plist
 
     @classmethod
     def from_content(cls, content: AnyStr) -> ProvisioningProfile:
-        plist: Dict[str, Any] = plistlib.loads(cls._bytes(content))
+        with NamedTemporaryFile(mode='wb') as tf:
+            tf.write(cls._bytes(content))
+            tf.flush()
+            profile_data = cls._read_profile(tf.name)
+        plist: Dict[str, Any] = plistlib.loads(profile_data)
         return ProvisioningProfile(plist)
 
     @classmethod
-    def from_path(cls, profile_path: Path) -> ProvisioningProfile:
+    def from_path(cls, profile_path: Union[pathlib.Path, AnyStr]) -> ProvisioningProfile:
+        if isinstance(profile_path, (bytes, str)):
+            profile_path = pathlib.Path(cls._str(profile_path))
+
         if not profile_path.exists():
             raise ValueError(f'Profile {profile_path} does not exist')
+
         profile_data = cls._read_profile(profile_path)
         plist: Dict[str, Any] = plistlib.loads(profile_data)
         return ProvisioningProfile(plist)
@@ -44,9 +53,14 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
             raise IOError('OpenSSL executable not present on system')
 
     @classmethod
-    def _read_profile(cls, profile_path: Union[str, Path]) -> bytes:
+    def _read_profile(cls, profile_path: Union[pathlib.Path, AnyStr]) -> bytes:
+        if isinstance(profile_path, pathlib.Path):
+            profile_path_arg = str(profile_path)
+        else:
+            profile_path_arg = cls._str(profile_path)
+
         cls._ensure_openssl()
-        cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', str(profile_path))
+        cmd = ('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', profile_path_arg)
         cli_app = cls.get_current_cli_app()
         try:
             if cli_app:

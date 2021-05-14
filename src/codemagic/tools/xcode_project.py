@@ -20,6 +20,7 @@ from codemagic.models import BundleIdDetector
 from codemagic.models import CodeSignEntitlements
 from codemagic.models import CodeSigningSettingsManager
 from codemagic.models import ExportOptions
+from codemagic.models import Ipa
 from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcode
 from codemagic.models import Xcodebuild
@@ -219,6 +220,39 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             if xcarchive is not None and remove_xcarchive:
                 self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
                 shutil.rmtree(xcarchive, ignore_errors=True)
+        return ipa
+
+    @cli.action('ipa-info',
+                XcodeProjectArgument.IPA_PATH,
+                XcodeProjectArgument.JSON_OUTPUT)
+    def get_ipa_info(self,
+                     ipa_path: pathlib.Path,
+                     json_output: bool = False,
+                     should_print: bool = True) -> Ipa:
+        """
+        Show information about iOS App Store Package file
+        """
+
+        if should_print:
+            self.logger.info(Colors.BLUE('Show %s information'), ipa_path)
+        ipa = Ipa(ipa_path)
+
+        for property_name, property_value in ipa.get_summary().items():
+            name = property_name.replace('_', ' ').title()
+            if isinstance(property_value, bool):
+                value = 'Yes' if property_value else 'No'
+            elif isinstance(property_value, list):
+                if not property_value:
+                    value = None
+                elif len(property_value) == 1:
+                    value = property_value[0]
+                else:
+                    lines = '\n'.join(f'\t{v}' for v in property_value)
+                    value = f'\n{lines}'
+            else:
+                value = str(property_value)
+            self.logger.info('%s: %s', name, value if value else 'N/A')
+
         return ipa
 
     @cli.action('test-destinations',

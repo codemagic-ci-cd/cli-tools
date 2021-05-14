@@ -96,6 +96,11 @@ class XcodeProjectArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
+    IPA_PATH = cli.ArgumentProperties(
+        key='ipa_path',
+        type=cli.CommonArgumentTypes.existing_path,
+        description='Path to iOS App Store Package file (.ipa)',
+    )
 
 
 class ExportIpaArgument(cli.Argument):

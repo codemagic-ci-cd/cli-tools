@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import enum
 import pathlib
+from typing import AnyStr
+from typing import Union
+
+from codemagic.mixins import StringConverterMixin
 
 
 class AuthenticationMethod(enum.Enum):
@@ -10,13 +14,16 @@ class AuthenticationMethod(enum.Enum):
     NONE = 'none'
 
 
-class PlatformType(enum.Enum):
+class PlatformType(StringConverterMixin, str, enum.Enum):
     APPLE_TV_OS = 'appletvos'
     MAC_OS = 'osx'
     IOS = 'ios'
 
     @classmethod
-    def from_path(cls, artifact_path: pathlib.Path) -> PlatformType:
+    def from_path(cls, artifact_path: Union[pathlib.Path, AnyStr]) -> PlatformType:
+        if isinstance(artifact_path, (bytes, str)):
+            artifact_path = pathlib.Path(cls._str(artifact_path))
+
         if artifact_path.suffix == '.pkg':
             return PlatformType.MAC_OS
         elif artifact_path.suffix == '.ipa':
