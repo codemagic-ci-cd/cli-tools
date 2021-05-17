@@ -110,7 +110,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         if private_key_argument is None:
             raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
-        return AppStoreConnect(
+        app_store_connect = AppStoreConnect(
             key_identifier=key_identifier_argument.value,
             issuer_id=issuer_id_argument.value,
             private_key=private_key_argument.value,
@@ -120,6 +120,9 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             certificates_directory=cli_args.certificates_directory,
             **cls._parent_class_kwargs(cli_args),
         )
+        # Validate that App Store Connect credentials are fine
+        _ = app_store_connect.api_client
+        return app_store_connect
 
     @lru_cache(1)
     def _get_api_client(self) -> AppStoreConnectApiClient:

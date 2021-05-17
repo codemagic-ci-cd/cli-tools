@@ -5,7 +5,7 @@ from typing import Dict
 
 import pytest
 
-from codemagic.models.altool.altool_result import AltoolResult
+from codemagic.models.altool import AltoolResult
 
 
 @pytest.fixture
