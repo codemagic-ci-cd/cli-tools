@@ -20,11 +20,12 @@ from codemagic.models import BundleIdDetector
 from codemagic.models import CodeSignEntitlements
 from codemagic.models import CodeSigningSettingsManager
 from codemagic.models import ExportOptions
-from codemagic.models import Ipa
 from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcode
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
+from codemagic.models.application_package import Ipa
+from codemagic.models.application_package import MacOsPackage
 from codemagic.models.junit import TestSuitePrinter
 from codemagic.models.junit import TestSuites
 from codemagic.models.simulator import Runtime
@@ -222,6 +223,29 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
+    @cli.action('pkg-info',
+                XcodeProjectArgument.PKG_PATH,
+                XcodeProjectArgument.JSON_OUTPUT)
+    def get_pkg_info(self,
+                     pkg_path: pathlib.Path,
+                     json_output: bool = False,
+                     should_print: bool = True) -> MacOsPackage:
+        """
+        Show information about macOS Application Package file
+        """
+
+        self.logger.info(Colors.BLUE('Show %s information'), pkg_path)
+        package = MacOsPackage(pkg_path)
+
+        if should_print:
+            if json_output:
+                summary = json.dumps(package.get_summary(), indent=4)
+            else:
+                summary = package.get_text_summary()
+            self.echo(summary)
+
+        return package
+
     @cli.action('ipa-info',
                 XcodeProjectArgument.IPA_PATH,
                 XcodeProjectArgument.JSON_OUTPUT)
@@ -233,26 +257,15 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         Show information about iOS App Store Package file
         """
 
-        if should_print:
-            self.logger.info(Colors.BLUE('Show %s information'), ipa_path)
+        self.logger.info(Colors.BLUE('Show %s information'), ipa_path)
         ipa = Ipa(ipa_path)
 
-        for property_name, property_value in ipa.get_summary().items():
-            name = property_name.replace('_', ' ').title()
-            value: Optional[str] = None
-            if isinstance(property_value, bool):
-                value = 'Yes' if property_value else 'No'
-            elif isinstance(property_value, list):
-                if not property_value:
-                    pass
-                elif len(property_value) == 1:
-                    value = property_value[0]
-                else:
-                    lines = '\n'.join(f'\t{v}' for v in property_value)
-                    value = f'\n{lines}'
+        if should_print:
+            if json_output:
+                summary = json.dumps(ipa.get_summary(), indent=4)
             else:
-                value = str(property_value)
-            self.logger.info('%s: %s', name, value if value else 'N/A')
+                summary = ipa.get_text_summary()
+            self.echo(summary)
 
         return ipa
 

@@ -5,7 +5,6 @@ from .certificate import Certificate
 from .code_sign_entitlements import CodeSignEntitlements
 from .code_signing_settings_manager import CodeSigningSettingsManager
 from .export_options import ExportOptions
-from .ipa import Ipa
 from .json_serializable import JsonSerializable
 from .json_serializable import JsonSerializableMeta
 from .pbx_project import PbxProject

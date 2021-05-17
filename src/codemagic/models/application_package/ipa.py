@@ -4,27 +4,20 @@ import tempfile
 import zipfile
 from functools import lru_cache
 from typing import Any
-from typing import AnyStr
 from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
-from codemagic.mixins import StringConverterMixin
+from codemagic.models.certificate import Certificate
 from codemagic.models.export_options import ArchiveMethod
+from codemagic.models.provisioning_profile import ProvisioningProfile
 
-from .certificate import Certificate
-from .provisioning_profile import ProvisioningProfile
+from .abstract_package import AbstractPackage
 
 
-class Ipa(StringConverterMixin):
-    def __init__(self, ipa_path: Union[pathlib.Path, AnyStr]):
-        if isinstance(ipa_path, (bytes, str)):
-            self._path = pathlib.Path(self._str(ipa_path))
-        else:
-            self._path = ipa_path
-
+class Ipa(AbstractPackage):
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
         with zipfile.ZipFile(self._path) as zf:
             try:
@@ -155,13 +148,13 @@ class Ipa(StringConverterMixin):
             certificate_expires = self.certificate.expires_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
         return {
             'app_name': self.app_name,
-            'version': self.version,
-            'version_code': self.version_code,
-            'min_os_version': self.minimum_os_version,
             'bundle_identifier': self.bundle_identifier,
-            'supported_platforms': self.supported_platforms,
             'certificate_expires': certificate_expires,
             'distribution_type': self.archive_method.value.replace('-', ' ').title(),
+            'min_os_version': self.minimum_os_version,
             'provisioned_devices': self.provisioned_devices,
             'provisions_all_devices': self.provisions_all_devices,
+            'supported_platforms': self.supported_platforms,
+            'version': self.version,
+            'version_code': self.version_code,
         }

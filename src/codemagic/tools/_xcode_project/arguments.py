@@ -101,6 +101,11 @@ class XcodeProjectArgument(cli.Argument):
         type=cli.CommonArgumentTypes.existing_path,
         description='Path to iOS App Store Package file (.ipa)',
     )
+    PKG_PATH = cli.ArgumentProperties(
+        key='pkg_path',
+        type=cli.CommonArgumentTypes.existing_path,
+        description='Path to MacOs Application Package file (.pkg)',
+    )
 
 
 class ExportIpaArgument(cli.Argument):

@@ -13,7 +13,7 @@ from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
-from .ipa import Ipa
+from .application_package import Ipa
 
 
 class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
