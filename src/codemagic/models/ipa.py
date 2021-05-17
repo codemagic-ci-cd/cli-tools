@@ -57,19 +57,22 @@ class Ipa(StringConverterMixin):
                     zf.extract(zi, path=td)
 
             try:
-                return next((pathlib.Path(td).glob('Payload/*.app')), None)
+                return next(pathlib.Path(td).glob('Payload/*.app'))
             except StopIteration:
                 raise IOError(f'Failed to extract Payload/*.app from {self._path}')
 
-    @property
     @lru_cache(1)
-    def info_plist(self) -> Dict[str, Any]:
+    def _get_info_plist(self) -> Dict[str, Any]:
         info_plist_contents = self._get_app_file_contents('Info.plist')
         return plistlib.loads(info_plist_contents)
 
     @property
+    def info_plist(self) -> Dict[str, Any]:
+        # Mypy does not support decorated properties. Use cached getter to load the properties.
+        return self._get_info_plist()
+
     @lru_cache(1)
-    def embedded_provisioning_profile(self) -> Optional[ProvisioningProfile]:
+    def _get_embedded_provisioning_profile(self) -> Optional[ProvisioningProfile]:
         try:
             embedded_mobileprovision_contents = self._get_app_file_contents('embedded.mobileprovision')
         except FileNotFoundError:
@@ -77,11 +80,20 @@ class Ipa(StringConverterMixin):
         return ProvisioningProfile.from_content(embedded_mobileprovision_contents)
 
     @property
+    def embedded_provisioning_profile(self) -> Optional[ProvisioningProfile]:
+        # Mypy does not support decorated properties. Use cached getter to load the profile.
+        return self._get_embedded_provisioning_profile()
+
     @lru_cache(1)
-    def certificate(self) -> Optional[Certificate]:
+    def _get_certificate(self) -> Optional[Certificate]:
         if self.embedded_provisioning_profile is None:
             return None
-        return next(iter(self.embedded_provisioning_profile.certificates))
+        return next(iter(self.embedded_provisioning_profile.certificates), None)
+
+    @property
+    def certificate(self) -> Optional[Certificate]:
+        # Mypy does not support decorated properties. Use cached getter to load the certificate.
+        return self._get_certificate()
 
     @property
     def bundle_identifier(self) -> str:
@@ -95,7 +107,7 @@ class Ipa(StringConverterMixin):
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundledisplayname
         """
-        return self.info_plist.get('CFBundleDisplayName') or self.info_plist.get('CFBundleName', '')
+        return self.info_plist.get('CFBundleDisplayName') or self.info_plist.get('CFBundleName') or ''
 
     @property
     def version(self) -> str:
@@ -123,7 +135,7 @@ class Ipa(StringConverterMixin):
         return self.info_plist.get('CFBundleSupportedPlatforms', [])
 
     @property
-    def archive_method(self) -> Optional[ArchiveMethod]:
+    def archive_method(self) -> ArchiveMethod:
         profiles = [self.embedded_provisioning_profile] if self.embedded_provisioning_profile else []
         return ArchiveMethod.from_profiles(profiles)
 
@@ -137,7 +149,7 @@ class Ipa(StringConverterMixin):
     def provisions_all_devices(self) -> bool:
         return bool(self.embedded_provisioning_profile and self.embedded_provisioning_profile.provisions_all_devices)
 
-    def get_summary(self) -> Dict[str, Union[bool, str, List[str]]]:
+    def get_summary(self) -> Dict[str, Union[bool, Optional[str], List[str]]]:
         certificate_expires = None
         if self.certificate:
             certificate_expires = self.certificate.expires_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'

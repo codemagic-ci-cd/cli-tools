@@ -239,11 +239,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         for property_name, property_value in ipa.get_summary().items():
             name = property_name.replace('_', ' ').title()
+            value: Optional[str] = None
             if isinstance(property_value, bool):
                 value = 'Yes' if property_value else 'No'
             elif isinstance(property_value, list):
                 if not property_value:
-                    value = None
+                    pass
                 elif len(property_value) == 1:
                     value = property_value[0]
                 else:

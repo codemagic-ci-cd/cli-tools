@@ -72,7 +72,7 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
                 converted = cls._bytes(stdout)
         except subprocess.CalledProcessError as cpe:
             raise ValueError(
-                f'Invalid provisioning profile {profile_path}:\n{cls._str(cpe.stderr)}')
+                f'Invalid provisioning profile {profile_path_arg}:\n{cls._str(cpe.stderr)}')
         return converted
 
     @property

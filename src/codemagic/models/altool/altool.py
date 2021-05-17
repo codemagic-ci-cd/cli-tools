@@ -13,6 +13,7 @@ from typing import Sequence
 from typing import Tuple
 
 from codemagic.mixins import RunningCliAppMixin
+from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .altool_result import AltoolResult
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
     from codemagic.cli import CliApp
 
 
-class Altool(RunningCliAppMixin):
+class Altool(RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self,
                  key_identifier: Optional[KeyIdentifier] = None,
@@ -136,25 +137,32 @@ class Altool(RunningCliAppMixin):
         finally:
             self._log_process_output(stdout, cli_app)
 
-        return self._get_action_result(stdout)
+        action_result = self._get_action_result(stdout)
+        assert action_result  # Make Mypy happy
+        return action_result
 
     @classmethod
-    def _get_action_result(cls, action_stdout: AnyStr, raise_error: bool = True) -> AltoolResult:
+    def _get_action_result(cls, action_stdout: AnyStr, raise_error: bool = True) -> Optional[AltoolResult]:
         try:
             parsed_result = json.loads(action_stdout)
             return AltoolResult.create(**parsed_result)
         except (TypeError, ValueError) as e:
             if raise_error:
                 raise IOError('Failed to load Altool result from process stdout') from e
+            return None
 
     @classmethod
     def _log_process_output(cls, output: Optional[AnyStr], cli_app: Optional[CliApp]):
         if output is None:
             return
 
-        write_output = cli_app.echo if cli_app else print
         try:
             result = json.loads(output)
-            write_output(json.dumps(result, indent=4))
+            prettified_result = json.dumps(result, indent=4)
         except ValueError:
-            write_output(output)
+            prettified_result = cls._str(output)
+
+        if cli_app:
+            cli_app.echo(prettified_result)
+        else:
+            print(prettified_result)

@@ -149,15 +149,17 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def export_p12(self,
                    private_key: PrivateKey,
                    container_password: str,
-                   export_path: Optional[pathlib.Path, AnyStr] = None) -> pathlib.Path:
+                   export_path: Optional[Union[pathlib.Path, AnyStr]] = None) -> pathlib.Path:
         """
         :raises: IOError, ValueError
         """
         if isinstance(export_path, (str, bytes)):
-            export_path = pathlib.Path(self._str(export_path))
+            _export_path: Optional[pathlib.Path] = pathlib.Path(self._str(export_path))
+        else:
+            _export_path = export_path
 
         exporter = P12Exporter(self, private_key, container_password)
-        return exporter.export(export_path)
+        return exporter.export(_export_path)
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()

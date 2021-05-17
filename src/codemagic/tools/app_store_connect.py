@@ -121,9 +121,8 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             **cls._parent_class_kwargs(cli_args),
         )
 
-    @property
     @lru_cache(1)
-    def api_client(self) -> AppStoreConnectApiClient:
+    def _get_api_client(self) -> AppStoreConnectApiClient:
         return AppStoreConnectApiClient(
             self._key_identifier,
             self._issuer_id,
@@ -132,8 +131,11 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         )
 
     @property
+    def api_client(self) -> AppStoreConnectApiClient:
+        return self._get_api_client()
+
     @lru_cache(1)
-    def altool(self) -> Altool:
+    def _get_altool(self) -> Altool:
         try:
             return Altool(
                 key_identifier=self._key_identifier,
@@ -142,6 +144,10 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             )
         except ValueError as ve:
             raise AppStoreConnectError(str(ve))
+
+    @property
+    def altool(self) -> Altool:
+        return self._get_altool()
 
     def _create_resource(self, resource_manager, should_print, **create_params):
         omit_keys = create_params.pop('omit_keys', tuple())
