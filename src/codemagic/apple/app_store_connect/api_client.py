@@ -21,6 +21,7 @@ from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
 from .versioning import AppStoreVersions
+from .versioning import AppStoreVersionSubmissions
 from .versioning import PreReleaseVersions
 
 
@@ -121,6 +122,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
     @property
     def app_store_versions(self) -> AppStoreVersions:
         return AppStoreVersions(self)
+
+    @property
+    def app_store_version_submissions(self) -> AppStoreVersionSubmissions:
+        return AppStoreVersionSubmissions(self)
 
     @property
     def builds(self) -> Builds:

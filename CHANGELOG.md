@@ -3,13 +3,18 @@ Version 0.6.0
 
 **New features**
 
+- Add action group support for tools.
 - Add action `get-profile` to `app-store-connect` to show provisioning profile based on resource identifier.
+- Add action `app-store-connect app-store-version-submissions create` to submit App Store Version to review.
+- Add action `app-store-connect app-store-version-submissions delete` to remove App Store Version from review.
 
 **Development / Docs**
 
-- Add documentation for new action `app-store-connect get-profile`.
-- Add `SERVICES` as valid value to `--platform` option in `app-store-connect` actions. 
-- Update `--profile` option default values for action `xcode-project use-profiles`.
+- Update `--profile` option default value in action `xcode-project use-profiles` docs.
+- Generate documentation for action groups and list groups under tool documentation pages.
+- Add documentation for action `app-store-connect get-profile`.
+- Add documentation for action `app-store-connect app-store-version-submissions create`.
+- Add documentation for action `app-store-connect app-store-version-submissions delete`.
 
 Version 0.5.9
 -------------

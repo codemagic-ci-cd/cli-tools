@@ -11,6 +11,7 @@ from typing import Callable
 from typing import Iterable
 from typing import List
 from typing import NamedTuple
+from typing import Optional
 
 from mdutils.mdutils import MdUtils
 from mdutils.tools.Table import Table
@@ -38,6 +39,12 @@ class Action(NamedTuple):
     description: str
     required_args: List[SerializedArgument]
     optional_args: List[SerializedArgument]
+
+
+class ActionGroup(NamedTuple):
+    name: str
+    description: str
+    actions: List[Action]
 
 
 class ArgumentKwargs(NamedTuple):
@@ -129,34 +136,68 @@ class ToolDocumentationGenerator:
         self.tool_required_args = class_args_serializer.required_args
         self.tool_options = self._serialize_default_options(self.tool)
         self.tool_serialized_actions = self._serialize_actions(self.tool)
+        self.tool_serialized_action_groups = self._serialize_action_groups(self.tool)
 
     def generate(self):
-        def _write_tool_command_arguments_and_options():
-            writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args)
-            writer.write_options(self.tool_options)
+        self._write_tool_page()
 
-        # docs/<tool-name>/README.md
+        for action in self.tool_serialized_actions:
+            self._write_action_page(action)
+
+        for group in self.tool_serialized_action_groups:
+            self._write_action_group_page(group)
+
+    def _write_tool_command_arguments_and_options(self, writer):
+        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args)
+        writer.write_options(self.tool_options)
+
+    def _write_tool_page(self):
         os.makedirs(self.tool_prefix, exist_ok=True)
         md = MdUtils(file_name=f'{self.tool_prefix}/README', title=self.tool_command)
         writer = Writer(md)
         writer.write_description(self.tool.__doc__)
-        writer.write_tool_command_usage(self)
-        _write_tool_command_arguments_and_options()
+        writer.write_command_usage(self)
+        self._write_tool_command_arguments_and_options(writer)
         writer.write_actions_table(self.tool_serialized_actions)
+        writer.write_action_groups_table(self.tool_serialized_action_groups)
         md.create_md_file()
 
-        for action in self.tool_serialized_actions:
-            # docs/<tool-name>/<action-name>.md
-            md = MdUtils(file_name=f'{self.tool_prefix}/{action.action_name}', title=action.action_name)
-            writer = Writer(md)
-            writer.write_description(action.description)
-            writer.write_action_command_usage(self, action)
-            writer.write_arguments(f'action `{action.action_name}`', action.optional_args, action.required_args)
-            _write_tool_command_arguments_and_options()
-            md.create_md_file()
+    def _write_action_group_page(self, action_group: ActionGroup):
+        group_path = f'{self.tool_prefix}/{action_group.name}'
+        md = MdUtils(file_name=group_path, title=action_group.name)
+        writer = Writer(md)
+        writer.write_description(action_group.description)
+        writer.write_command_usage(self, action_group=action_group)
+        self._write_tool_command_arguments_and_options(writer)
+        writer.write_actions_table(action_group.actions, action_group=action_group)
+        md.create_md_file()
+        os.makedirs(group_path, exist_ok=True)
+        for action in action_group.actions:
+            self._write_action_page(action, action_group=action_group)
+
+    def _write_action_page(self, action: Action, action_group: Optional[ActionGroup] = None):
+        group_str = f'{action_group.name}/' if action_group else ''
+        md = MdUtils(file_name=f'{self.tool_prefix}/{group_str}{action.action_name}', title=action.action_name)
+        writer = Writer(md)
+        writer.write_description(action.description)
+        writer.write_command_usage(self, action_group=action_group, action=action)
+        writer.write_arguments(f'action `{action.action_name}`', action.optional_args, action.required_args)
+        self._write_tool_command_arguments_and_options(writer)
+        md.create_md_file()
 
     @classmethod
-    def _serialize_actions(cls, tool: cli.CliApp) -> List[Action]:
+    def _serialize_action_groups(cls, tool: cli.CliApp) -> List[ActionGroup]:
+        def _serialize_action_group(group) -> ActionGroup:
+            return ActionGroup(
+                name=group.name,
+                description=group.description,
+                actions=cls._serialize_actions(tool, action_group=group),
+            )
+
+        return list(map(_serialize_action_group, tool.list_class_action_groups()))
+
+    @classmethod
+    def _serialize_actions(cls, tool: cli.CliApp, action_group=None) -> List[Action]:
         def _serialize_action(action: Callable) -> Action:
             action_args_serializer = ArgumentsSerializer(action.arguments).serialize()
             return Action(
@@ -167,7 +208,7 @@ class ToolDocumentationGenerator:
                 optional_args=action_args_serializer.optional_args,
             )
 
-        return list(map(_serialize_action, tool.iter_class_cli_actions()))
+        return list(map(_serialize_action, tool.iter_class_cli_actions(action_group=action_group)))
 
     @classmethod
     def _serialize_default_options(cls, tool: cli.CliApp) -> List[SerializedArgument]:
@@ -195,19 +236,21 @@ class CommandUsageGenerator:
     def __init__(self, doc_generator: ToolDocumentationGenerator):
         self.doc_generator = doc_generator
 
-    def get_tool_command_usage(self) -> List[str]:
-        return [
-            f'{self.doc_generator.tool_command} {self._get_opt_common_flags()}',
-            *self._get_tool_arguments_and_flags(),
-            'ACTION',
-        ]
+    def get_command_usage(self,
+                          action_group: Optional[ActionGroup] = None,
+                          action: Optional[Action] = None) -> List[str]:
+        action_group_str = f' {action_group.name}' if action_group else ''
+        action_str = f' {action.action_name}' if action else ''
 
-    def get_action_command_usage(self, action: Action) -> List[str]:
-        return [
-            f'{self.doc_generator.tool_command} {action.action_name} {self._get_opt_common_flags()}',
-            *self._get_tool_arguments_and_flags(),
+        action_args = [
             *map(self._get_formatted_flag, action.optional_args),
             *map(self._get_formatted_flag, action.required_args),
+        ] if action else ['ACTION']
+
+        return [
+            f'{self.doc_generator.tool_command}{action_group_str}{action_str} {self._get_opt_common_flags()}',
+            *self._get_tool_arguments_and_flags(),
+            *action_args,
         ]
 
     def _get_opt_common_flags(self) -> str:
@@ -239,11 +282,12 @@ class Writer:
         content = str_plain(content)
         self.file.new_paragraph(f'**{content}**')
 
-    def write_tool_command_usage(self, generator: ToolDocumentationGenerator):
-        self._write_command_usage(self.file, CommandUsageGenerator(generator).get_tool_command_usage())
-
-    def write_action_command_usage(self, generator: ToolDocumentationGenerator, action: Action):
-        self._write_command_usage(self.file, CommandUsageGenerator(generator).get_action_command_usage(action))
+    def write_command_usage(self,
+                            generator: ToolDocumentationGenerator,
+                            action_group: Optional[ActionGroup] = None,
+                            action: Optional[Action] = None):
+        lines = CommandUsageGenerator(generator).get_command_usage(action_group=action_group, action=action)
+        self._write_command_usage(self.file, lines)
 
     def write_table(self, content: List[List[str]], header: List[str]):
         flat_content: List[str] = sum(content, [])
@@ -264,12 +308,27 @@ class Writer:
 
         self.write_table(list(map(_get_tool_doc, tools)), ['Tool name', 'Description'])
 
-    def write_actions_table(self, actions: List[Action]):
+    def write_actions_table(self, actions: List[Action], action_group: Optional[ActionGroup] = None):
+        if not actions:
+            return
+
         def _get_action_doc(action: Action) -> List[str]:
-            return [f'[`{action.action_name}`]({action.action_name}.md)', str_plain(action.description)]
+            action_group_str = f'{action_group.name}/' if action_group else ''
+            action_link = f'{action_group_str}{action.action_name}.md'
+            return [f'[`{action.action_name}`]({action_link})', str_plain(action.description)]
 
         self.file.new_header(level=3, title='Actions', add_table_of_contents='n')
         self.write_table(list(map(_get_action_doc, actions)), ['Action', 'Description'])
+
+    def write_action_groups_table(self, groups: List[ActionGroup]):
+        if not groups:
+            return
+
+        def _get_group_doc(group: ActionGroup) -> List[str]:
+            return [f'[`{group.name}`]({group.name}.md)', str_plain(group.description)]
+
+        self.file.new_header(level=3, title='Action groups', add_table_of_contents='n')
+        self.write_table(list(map(_get_group_doc, groups)), ['Action group', 'Description'])
 
     def write_arguments(self, obj: str, optional: List[SerializedArgument], required: List[SerializedArgument]):
         self._write_arguments(self.file, f'Required arguments for {obj}', required)

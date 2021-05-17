@@ -1,4 +1,5 @@
 from .app_store_version import AppStoreVersion
+from .app_store_version_submission import AppStoreVersionSubmission
 from .build import Build
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
