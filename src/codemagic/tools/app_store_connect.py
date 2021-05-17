@@ -42,6 +42,8 @@ from codemagic.models import Altool
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+from codemagic.models.application_package import Ipa
+from codemagic.models.application_package import MacOsPackage
 
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.arguments import AppStoreArgument
@@ -543,28 +545,38 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         artifact_paths = list(self.find_paths(*artifact_patterns))
 
         for artifact_path in artifact_paths:
+            if artifact_path.suffix == '.ipa':
+                application_package = Ipa(artifact_path)
+            elif artifact_path.suffix == '.pkg':
+                application_package = MacOsPackage(artifact_path)
+            else:
+                raise AppStoreConnectError(f'Invalid package for App Store Connect publishing: {artifact_path}')
+
+            self.logger.info(Colors.BLUE('Publish %s to App Store Connect'), artifact_path)
+            self.logger.info(application_package.get_text_summary())
+
             self._validate_artifact_with_altool(artifact_path)
             self._upload_artifact_with_altool(artifact_path)
 
     def _validate_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.echo(f'\nValidate archive at "{artifact_path}" for App Store')
+        self.logger.info(Colors.BLUE('\nValidate archive at "%s" for App Store'), artifact_path)
         try:
             result = self.altool.validate_app(artifact_path)
         except IOError as error:
             raise AppStoreConnectError(error.args[0])
         else:
             message = result.success_message or f'No errors validating archive at "{artifact_path}".'
-            self.echo(Colors.GREEN(message))
+            self.logger.info(Colors.GREEN(message))
 
     def _upload_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.echo(f'\nUpload archive at "{artifact_path}" to App Store')
+        self.logger.info(Colors.BLUE('\nUpload archive at "%s" to App Store'), artifact_path)
         try:
             result = self.altool.upload_app(artifact_path)
         except IOError as error:
             raise AppStoreConnectError(error.args[0])
         else:
             message = result.success_message or f'No errors uploading "{artifact_path}".'
-            self.echo(Colors.GREEN(message))
+            self.logger.info(Colors.GREEN(message))
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
