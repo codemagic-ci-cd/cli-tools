@@ -14,6 +14,7 @@ app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--save]
     PROFILE_RESOURCE_ID
 ```
 ### Required arguments for action `get-profile`
@@ -22,6 +23,12 @@ app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version
 
 
 Alphanumeric ID value of the Profile
+### Optional arguments for action `get-profile`
+
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
