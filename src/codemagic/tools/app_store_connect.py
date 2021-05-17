@@ -600,13 +600,21 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             self._save_profile(profile)
         return profile
 
-    @cli.action('get-profile', ProfileArgument.PROFILE_RESOURCE_ID)
-    def get_profile(self, profile_resource_id: ResourceId, should_print: bool = True) -> Profile:
+    @cli.action('get-profile',
+                ProfileArgument.PROFILE_RESOURCE_ID,
+                CommonArgument.SAVE)
+    def get_profile(self,
+                    profile_resource_id: ResourceId,
+                    save: bool = False,
+                    should_print: bool = True) -> Profile:
         """
         Get specified Profile from Apple Developer portal
         """
 
-        return self._get_resource(profile_resource_id, self.api_client.profiles, should_print)
+        profile = self._get_resource(profile_resource_id, self.api_client.profiles, should_print)
+        if save:
+            self._save_profile(profile)
+        return profile
 
     @cli.action('delete-profile',
                 ProfileArgument.PROFILE_RESOURCE_ID,

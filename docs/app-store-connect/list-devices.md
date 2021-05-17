@@ -20,7 +20,7 @@ app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--versio
 ```
 ### Optional arguments for action `list-devices`
 
-##### `--platform=IOS | MAC_OS | UNIVERSAL`
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
 Bundle ID platform
