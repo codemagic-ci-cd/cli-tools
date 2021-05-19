@@ -122,6 +122,11 @@ class CertificateType(_ResourceEnum):
             raise ValueError(f'Certificate type for profile type {profile_type} is unknown')
 
 
+class ContentRightsDeclaration(_ResourceEnum):
+    DOES_NOT_USE_THIRD_PARTY_CONTENT = 'DOES_NOT_USE_THIRD_PARTY_CONTENT'
+    USES_THIRD_PARTY_CONTENT = 'USES_THIRD_PARTY_CONTENT'
+
+
 class DeviceClass(_ResourceEnum):
     APPLE_TV = 'APPLE_TV'
     APPLE_WATCH = 'APPLE_WATCH'
@@ -190,6 +195,7 @@ class ReleaseType(_ResourceEnum):
 
 
 class ResourceType(_ResourceEnum):
+    APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BUILDS = 'builds'

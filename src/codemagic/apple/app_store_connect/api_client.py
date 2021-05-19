@@ -14,6 +14,7 @@ from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .api_session import AppStoreConnectApiSession
+from .apps import Apps
 from .builds import Builds
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
@@ -118,6 +119,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
 
     def paginate_with_included(self, url, params=None, page_size: Optional[int] = 100) -> PaginateResult:
         return self._paginate(url, params, page_size)
+
+    @property
+    def apps(self) -> Apps:
+        return Apps(self)
 
     @property
     def app_store_versions(self) -> AppStoreVersions:

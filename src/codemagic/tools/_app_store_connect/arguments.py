@@ -4,6 +4,7 @@ from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -41,6 +42,33 @@ class Types:
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
+
+
+class AppArgument(cli.Argument):
+    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='application_id',
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+    )
+    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
+        key='application_id',
+        flags=('--app-id', '--application-id'),
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+        argparse_kwargs={'required': False},
+    )
+    APPLICATION_NAME = cli.ArgumentProperties(
+        key='application_name',
+        flags=('--app-name', '--application-name'),
+        description='The name of your app as it will appear in the App Store',
+        argparse_kwargs={'required': False},
+    )
+    APPLICATION_SKU = cli.ArgumentProperties(
+        key='application_sku',
+        flags=('--app-sku', '--application-sku'),
+        description='A unique ID for your app that is not visible on the App Store.',
+        argparse_kwargs={'required': False},
+    )
 
 
 class AppStoreConnectArgument(cli.Argument):
@@ -121,6 +149,26 @@ class AppStoreVersionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the App Store Version Submission',
     )
+    PLATFORM = cli.ArgumentProperties(
+        key='app_store_version_platform',
+        flags=('--app-store-version-platform',),
+        type=Platform,
+        description='App Store Version platform',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
+    )
+    VERSION_STATE = cli.ArgumentProperties(
+        key='app_store_version_app_store_state',
+        flags=('--app-store-version-state',),
+        type=Platform,
+        description='State of App Store Version',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(AppStoreState),
+        },
+    )
 
 
 class AppStoreArgument(cli.Argument):
@@ -142,18 +190,6 @@ class AppStoreArgument(cli.Argument):
 
 
 class BuildArgument(cli.Argument):
-    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
-        key='application_id',
-        type=ResourceId,
-        description='Application Apple ID. An automatically generated ID assigned to your app',
-    )
-    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
-        key='application_id',
-        flags=('--application-id',),
-        type=ResourceId,
-        description='Application Apple ID. An automatically generated ID assigned to your app',
-        argparse_kwargs={'required': False},
-    )
     EXPIRED = cli.ArgumentProperties(
         key='expired',
         flags=('--expired',),
@@ -218,12 +254,12 @@ class BuildArgument(cli.Argument):
 class BundleIdArgument(cli.Argument):
     BUNDLE_ID_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_id_identifier',
-        description='Identifier of the Bundle ID',
+        description='Identifier of the Bundle ID. For example `com.example.app`',
     )
     BUNDLE_ID_IDENTIFIER_OPTIONAL = cli.ArgumentProperties(
         key='bundle_id_identifier',
         flags=('--bundle-id-identifier',),
-        description='Identifier of the Bundle ID',
+        description='Identifier of the Bundle ID. For example `com.example.app`',
         argparse_kwargs={'required': False},
     )
     BUNDLE_ID_NAME = cli.ArgumentProperties(

@@ -21,6 +21,8 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import App
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
@@ -47,6 +49,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
+from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
@@ -207,8 +210,41 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             else:
                 raise AppStoreConnectError(str(api_error))
 
+    @cli.action('list',
+                BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
+                AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
+                AppArgument.APPLICATION_NAME,
+                AppArgument.APPLICATION_SKU,
+                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppStoreVersionArgument.PLATFORM,
+                AppStoreVersionArgument.VERSION_STATE,
+                action_group=AppStoreConnectActionGroup.APPS)
+    def list_apps(self,
+                  bundle_id_identifier: Optional[str] = None,
+                  application_id: Optional[ResourceId] = None,
+                  application_name: Optional[str] = None,
+                  application_sku: Optional[str] = None,
+                  app_store_version: Optional[str] = None,
+                  app_store_version_platform: Optional[Platform] = None,
+                  app_store_version_app_store_state: Optional[AppStoreState] = None,
+                  should_print: bool = True) -> List[App]:
+        """
+        Find and list apps added in App Store Connect
+        """
+
+        apps_filter = self.api_client.apps.Filter(
+            bundle_id=bundle_id_identifier,
+            id=application_id,
+            name=application_name,
+            sku=application_sku,
+            app_store_versions=app_store_version,
+            app_store_versions_platform=app_store_version_platform,
+            app_store_versions_app_store_state=app_store_version_app_store_state,
+        )
+        return self._list_resources(apps_filter, self.api_client.apps, should_print)
+
     @cli.action('list-builds',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
+                AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
                 BuildArgument.NOT_EXPIRED,
                 BuildArgument.BUILD_ID_RESOURCE_ID,
@@ -253,7 +289,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         return latest_build_number
 
     @cli.action('get-latest-app-store-build-number',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID,
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
                 AppStoreVersionArgument.APP_STORE_VERSION,
                 CommonArgument.PLATFORM)
     def get_latest_app_store_build_number(self,
@@ -276,7 +312,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         return self._get_latest_build_number(builds)
 
     @cli.action('get-latest-testflight-build-number',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID,
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
                 BuildArgument.PRE_RELEASE_VERSION,
                 CommonArgument.PLATFORM)
     def get_latest_testflight_build_number(self,
@@ -562,6 +598,9 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         self._validate_artifact_with_altool(application_package.path)
         self._upload_artifact_with_altool(application_package.path)
+
+        # TODO: Find corresponding App and Build from App Store Connect that correspond to this upload.
+        # TODO: Once found, submit for Build to TestFlight if need be.
 
     def _get_publishing_application_packages(
             self, artifact_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:

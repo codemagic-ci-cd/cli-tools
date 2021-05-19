@@ -1,3 +1,4 @@
+from .app import App
 from .app_store_version import AppStoreVersion
 from .app_store_version_submission import AppStoreVersionSubmission
 from .build import Build
@@ -13,6 +14,7 @@ from .enums import CapabilitySettingAllowedInstance
 from .enums import CapabilitySettingKey
 from .enums import CapabilityType
 from .enums import CertificateType
+from .enums import ContentRightsDeclaration
 from .enums import DeviceClass
 from .enums import DeviceStatus
 from .enums import Platform
