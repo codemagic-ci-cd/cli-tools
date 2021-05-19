@@ -20,7 +20,7 @@ class MacOsPackage(RunningCliAppMixin, AbstractPackage):
     @classmethod
     def _ensure_pkgutil(cls):
         if shutil.which('pkgutil') is None:
-            raise IOError('pkgutil executable not present on system')
+            raise IOError('pkgutil executable is not present on system')
 
     def _run_pkgutil_command(self, command: Sequence[Union[str, pathlib.Path]]):
         process = None
@@ -38,13 +38,13 @@ class MacOsPackage(RunningCliAppMixin, AbstractPackage):
         self._ensure_pkgutil()
         with tempfile.TemporaryDirectory() as td:
             expanded_package_path = pathlib.Path(td, 'pkg')
-            extract_args = ('pkgutil', '--expand', self._path, expanded_package_path)
+            extract_args = ('pkgutil', '--expand', self.path, expanded_package_path)
             self._run_pkgutil_command(extract_args)
 
             try:
                 file_path = next(expanded_package_path.glob(filename_pattern))
             except StopIteration:
-                raise FileNotFoundError(f'File not found for {filename_pattern}', self._path)
+                raise FileNotFoundError(filename_pattern, self.path)
             return file_path.read_bytes()
 
     @lru_cache(1)
@@ -53,11 +53,11 @@ class MacOsPackage(RunningCliAppMixin, AbstractPackage):
         return ElementTree.fromstring(package_info_contents)
 
     @lru_cache()
-    def _get_package_info_node(self, node_name) -> Element:
+    def _get_package_info_node(self, node_name: str) -> Element:
         for child_element in self.package_info:
             if child_element.tag == node_name:
                 return child_element
-        raise ValueError('Element not found from PackageInfo', node_name)
+        raise ValueError(f'Element {node_name!r} not found from PackageInfo')
 
     @property
     def package_info(self) -> Element:

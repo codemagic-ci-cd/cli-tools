@@ -6,6 +6,7 @@ import pathlib
 import re
 import subprocess
 from contextlib import contextmanager
+from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Optional
@@ -43,6 +44,14 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         self._password = password  # App Specific Password
         self._validate_authentication_info()
         self.logger = log.get_logger(self.__class__)
+
+    @classmethod
+    @lru_cache(1)
+    def _ensure_altool(cls) -> None:
+        try:
+            subprocess.check_output(['xcrun', 'altool', '--version'])
+        except subprocess.CalledProcessError:
+            raise IOError('altool executable is not present on system')
 
     def _validate_authentication_info(self):
         if self._authentication_method is AuthenticationMethod.NONE:
@@ -106,11 +115,13 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         )
 
     def validate_app(self, artifact_path: pathlib.Path) -> AltoolResult:
+        self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--validate-app', artifact_path, auth_flags)
             return self._run_command(cmd, f'Failed to validate archive at "{artifact_path}"')
 
     def upload_app(self, artifact_path) -> AltoolResult:
+        self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--upload-app', artifact_path, auth_flags)
             return self._run_command(cmd, f'Failed to upload archive at "{artifact_path}"')

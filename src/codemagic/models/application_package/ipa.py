@@ -19,11 +19,11 @@ from .abstract_package import AbstractPackage
 
 class Ipa(AbstractPackage):
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
-        with zipfile.ZipFile(self._path) as zf:
+        with zipfile.ZipFile(self.path) as zf:
             try:
                 found_file_name = next(filter(filename_filter, zf.namelist()))
             except StopIteration:
-                raise FileNotFoundError(f'File not found for {filename_filter.__name__}', self._path)
+                raise FileNotFoundError(filename_filter.__name__, self.path)
             with zf.open(found_file_name, 'r') as fd:
                 return fd.read()
 
@@ -35,11 +35,11 @@ class Ipa(AbstractPackage):
         def filename_filter(path_name):
             return pathlib.Path(path_name).match(f'Payload/*.app/{filename}')
 
-        filename_filter.__name__ = f'app file {filename!r} filter'
+        filename_filter.__name__ = f'Payload/*.app/{filename}'
         return self._extract_file(filename_filter)
 
     def extract_app(self) -> pathlib.Path:
-        with zipfile.ZipFile(self._path) as zf, tempfile.TemporaryDirectory() as td:
+        with zipfile.ZipFile(self.path) as zf, tempfile.TemporaryDirectory() as td:
             for zi in zf.filelist:
                 path = pathlib.Path(zi.filename)
                 try:
@@ -52,7 +52,7 @@ class Ipa(AbstractPackage):
             try:
                 return next(pathlib.Path(td).glob('Payload/*.app'))
             except StopIteration:
-                raise IOError(f'Failed to extract Payload/*.app from {self._path}')
+                raise IOError(f'Failed to extract Payload/*.app from {self.path}')
 
     @lru_cache(1)
     def _get_info_plist(self) -> Dict[str, Any]:

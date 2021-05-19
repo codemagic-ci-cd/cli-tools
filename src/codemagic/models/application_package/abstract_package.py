@@ -13,9 +13,9 @@ from codemagic.mixins import StringConverterMixin
 class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def __init__(self, path: Union[pathlib.Path, AnyStr]):
         if isinstance(path, (bytes, str)):
-            self._path = pathlib.Path(self._str(path))
+            self.path = pathlib.Path(self._str(path))
         else:
-            self._path = path
+            self.path = path
 
     @abc.abstractmethod
     def get_summary(self) -> Dict[str, Any]:
@@ -24,7 +24,7 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def get_text_summary(self) -> str:
         summary: List[str] = []
         for property_name, property_value in self.get_summary().items():
-            name = property_name.replace('_', ' ').title()
+            name = property_name.replace('_', ' ').title().replace(' Os ', ' OS ')
             value: Optional[str] = None
 
             if isinstance(property_value, bool):

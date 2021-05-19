@@ -50,7 +50,7 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
     @classmethod
     def _ensure_openssl(cls):
         if shutil.which('openssl') is None:
-            raise IOError('OpenSSL executable not present on system')
+            raise IOError('OpenSSL executable is not present on system')
 
     @classmethod
     def _read_profile(cls, profile_path: Union[pathlib.Path, AnyStr]) -> bytes:

@@ -14,6 +14,7 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -542,21 +543,43 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         """
         Publish artifacts to App Store
         """
-        artifact_paths = list(self.find_paths(*artifact_patterns))
+        for application_package in self._get_publishing_application_packages(artifact_patterns):
+            self._publish_application_package(application_package)
 
-        for artifact_path in artifact_paths:
-            if artifact_path.suffix == '.ipa':
-                application_package = Ipa(artifact_path)
-            elif artifact_path.suffix == '.pkg':
-                application_package = MacOsPackage(artifact_path)
+    def _publish_application_package(self, application_package: Union[Ipa, MacOsPackage]):
+        self.logger.info(Colors.BLUE('Publish %s to App Store Connect'), application_package.path)
+        self.logger.info(application_package.get_text_summary())
+
+        self._validate_artifact_with_altool(application_package.path)
+        self._upload_artifact_with_altool(application_package.path)
+
+    def _get_publishing_application_packages(
+            self, artifact_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
+        found_artifacts = list(self.find_paths(*artifact_patterns))
+        application_packages: List[Union[Ipa, MacOsPackage]] = []
+        for path in found_artifacts:
+            if path.suffix == '.ipa':
+                application_package = Ipa(path)
+            elif path.suffix == '.pkg':
+                application_package = MacOsPackage(path)
             else:
-                raise AppStoreConnectError(f'Invalid package for App Store Connect publishing: {artifact_path}')
+                raise AppStoreConnectError(f'Unsupported package type for App Store Connect publishing: {path}')
 
-            self.logger.info(Colors.BLUE('Publish %s to App Store Connect'), artifact_path)
-            self.logger.info(application_package.get_text_summary())
+            try:
+                application_package.get_summary()
+            except FileNotFoundError as fnf:
+                message = f'Invalid package for App Store Connect publishing: {fnf.args[0]} not found from {path}'
+                self.logger.warning(Colors.YELLOW(message))
+            except (ValueError, IOError) as error:
+                message = f'Unable to process package {path} for App Store Connect publishing: {error.args[0]}'
+                self.logger.warning(Colors.YELLOW(message))
+            else:
+                application_packages.append(application_package)
 
-            self._validate_artifact_with_altool(artifact_path)
-            self._upload_artifact_with_altool(artifact_path)
+        if not application_packages:
+            patterns = ', '.join(f'"{pattern}"' for pattern in artifact_patterns)
+            raise AppStoreConnectError(f'No application packages found for patterns {patterns}')
+        return application_packages
 
     def _validate_artifact_with_altool(self, artifact_path: pathlib.Path):
         self.logger.info(Colors.BLUE('\nValidate archive at "%s" for App Store'), artifact_path)
