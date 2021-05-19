@@ -569,7 +569,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         application_packages: List[Union[Ipa, MacOsPackage]] = []
         for path in found_artifacts:
             if path.suffix == '.ipa':
-                application_package = Ipa(path)
+                application_package: Union[Ipa, MacOsPackage] = Ipa(path)
             elif path.suffix == '.pkg':
                 application_package = MacOsPackage(path)
             else:
