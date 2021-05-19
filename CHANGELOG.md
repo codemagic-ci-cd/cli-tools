@@ -1,3 +1,9 @@
+Version 0.4.9
+-------------
+**Improvements**
+
+- Improvement: add Path objects support for the serialization.
+
 Version 0.4.8
 -------------
 **Improvements**

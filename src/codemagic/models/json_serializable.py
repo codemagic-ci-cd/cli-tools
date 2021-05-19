@@ -1,5 +1,6 @@
 import json
 from abc import abstractmethod
+from pathlib import Path
 from typing import Dict
 
 _json_encoder_default = json.JSONEncoder.default
@@ -11,6 +12,8 @@ class JsonSerializableMeta(type):
     def default(json_encoder, obj) -> Dict:
         if isinstance(obj, JsonSerializable):
             return obj.dict()
+        elif isinstance(obj, Path):
+            return str(obj)
         else:
             return _json_encoder_default(json_encoder, obj)
 
