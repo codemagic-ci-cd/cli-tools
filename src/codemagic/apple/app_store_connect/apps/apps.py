@@ -5,8 +5,10 @@ from typing import Type
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.app_store_connect.versioning import AppStoreVersions
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
@@ -86,3 +88,17 @@ class Apps(ResourceManager[App]):
         else:
             url = f'{self.client.API_URL}/apps/{app}/preReleaseVersions'
         return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
+
+    def list_app_store_versions(self,
+                                app: Union[LinkedResourceData, ResourceId],
+                                resource_filter: Optional[AppStoreVersions.Filter] = None) -> List[AppStoreVersion]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
+        """
+        if isinstance(app, App):
+            url = app.relationships.appStoreVersions.links.related
+        else:
+            url = f'{self.client.API_URL}/apps/{app}/appStoreVersions'
+        params = resource_filter.as_query_params() if resource_filter else None
+        app_store_versions = self.client.paginate(url, params=params, page_size=None)
+        return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]

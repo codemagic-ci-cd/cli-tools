@@ -23,6 +23,7 @@ from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
@@ -290,6 +291,40 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         return self._list_related_resources(
             application_id, App, PreReleaseVersion, self.api_client.apps.list_pre_release_versions, None, should_print)
+
+    @cli.action('app-store-versions',
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
+                AppStoreVersionArgument.APP_STORE_VERSION_ID_OPTIONAL,
+                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppStoreVersionArgument.PLATFORM,
+                AppStoreVersionArgument.VERSION_STATE,
+                action_group=AppStoreConnectActionGroup.APPS)
+    def list_app_store_versions(
+            self,
+            application_id: ResourceId,
+            app_store_version_id: Optional[ResourceId] = None,
+            app_store_version: Optional[str] = None,
+            app_store_version_platform: Optional[Platform] = None,
+            app_store_version_app_store_state: Optional[AppStoreState] = None,
+            should_print: bool = True) -> List[PreReleaseVersion]:
+        """
+        Get a list of prerelease versions associated with a specific app
+        """
+
+        app_store_versions_filter = self.api_client.app_store_versions.Filter(
+            id=app_store_version_id,
+            version_string=app_store_version,
+            platform=app_store_version_platform,
+            app_store_state=app_store_version_app_store_state,
+        )
+        return self._list_related_resources(
+            application_id,
+            App,
+            AppStoreVersion,
+            self.api_client.apps.list_app_store_versions,
+            app_store_versions_filter,
+            should_print,
+        )
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,

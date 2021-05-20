@@ -129,7 +129,7 @@ class AppStoreConnectArgument(cli.Argument):
 class AppStoreVersionArgument(cli.Argument):
     APP_STORE_VERSION = cli.ArgumentProperties(
         key='app_store_version',
-        flags=('--app-store-version',),
+        flags=('--version-string', '--app-store-version'),
         description=(
             'Version of the build published to App Store '
             'that identifies an iteration of the bundle. '
@@ -144,6 +144,13 @@ class AppStoreVersionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the App Store Version',
     )
+    APP_STORE_VERSION_ID_OPTIONAL = cli.ArgumentProperties(
+        key='app_store_version_id',
+        flags=('--version-id', '--app-store-version-id'),
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+        argparse_kwargs={'required': False},
+    )
     APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
         key='app_store_version_submission_id',
         type=ResourceId,
@@ -151,7 +158,7 @@ class AppStoreVersionArgument(cli.Argument):
     )
     PLATFORM = cli.ArgumentProperties(
         key='app_store_version_platform',
-        flags=('--app-store-version-platform',),
+        flags=('--platform', '--app-store-version-platform'),
         type=Platform,
         description='App Store Version platform',
         argparse_kwargs={
@@ -161,8 +168,8 @@ class AppStoreVersionArgument(cli.Argument):
     )
     VERSION_STATE = cli.ArgumentProperties(
         key='app_store_version_app_store_state',
-        flags=('--app-store-version-state',),
-        type=Platform,
+        flags=('--state', '--app-store-version-state'),
+        type=AppStoreState,
         description='State of App Store Version',
         argparse_kwargs={
             'required': False,

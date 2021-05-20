@@ -6,6 +6,7 @@ from typing import Type
 from typing import TypeVar
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
@@ -27,8 +28,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
+        id: Optional[ResourceId] = None
         platform: Optional[Platform] = None
         version_string: Optional[str] = None
+        app_store_state: Optional[AppStoreState] = None
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
@@ -44,6 +47,8 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
+
+        # TODO: Move this method under `Apps.list_app_store_versions`
 
         params = {
             'include': self._get_include_field_name(include_type),
