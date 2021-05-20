@@ -2,10 +2,12 @@ from dataclasses import dataclass
 from typing import List
 from typing import Optional
 from typing import Type
+from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 
@@ -55,8 +57,10 @@ class Apps(ResourceManager[App]):
         apps = self.client.paginate(f'{self.client.API_URL}/apps', params=params)
         return [App(app) for app in apps]
 
-    def read(self, app_id: ResourceId):
+    def read(self, app: Union[LinkedResourceData, ResourceId]) -> App:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_app_information
         """
-        ...  # TODO
+        app_id = self._get_resource_id(app)
+        response = self.client.session.get(f'{self.client.API_URL}/apps/{app_id}').json()
+        return App(response['data'])

@@ -243,6 +243,14 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         )
         return self._list_resources(apps_filter, self.api_client.apps, should_print)
 
+    @cli.action('get', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
+    def get_app(self, application_id: ResourceId, should_print: bool = True) -> Profile:
+        """
+        Get information about a specific app from App Store Connect
+        """
+
+        return self._get_resource(application_id, self.api_client.apps, should_print)
+
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
@@ -598,6 +606,12 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         self._validate_artifact_with_altool(application_package.path)
         self._upload_artifact_with_altool(application_package.path)
+
+        bundle_id = application_package.bundle_identifier
+        apps = self.list_apps(bundle_id_identifier=bundle_id)
+        if not apps:
+            raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
+        # app = apps[0]
 
         # TODO: Find corresponding App and Build from App Store Connect that correspond to this upload.
         # TODO: Once found, submit for Build to TestFlight if need be.
