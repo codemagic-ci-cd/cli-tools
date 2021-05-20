@@ -199,6 +199,24 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         self.printer.print_resources(resources, should_print)
         return resources
 
+    def _list_related_resources(self,
+                                resource_id: ResourceId,
+                                resource_type,
+                                related_resource_type,
+                                list_related_resources_method,
+                                resource_filter,
+                                should_print: bool):
+        self.printer.log_get_related(related_resource_type, resource_type, resource_id)
+        try:
+            kwargs = {'resource_filter': resource_filter} if resource_filter else {}
+            resources = list_related_resources_method(resource_id, **kwargs)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        self.printer.log_found(related_resource_type, resources, resource_filter, resource_type)
+        self.printer.print_resources(resources, should_print)
+        return resources
+
     def _delete_resource(self, resource_manager, resource_id: ResourceId, ignore_not_found: bool):
         self.printer.log_delete(resource_manager.resource_type, resource_id)
         try:
@@ -244,12 +262,21 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         return self._list_resources(apps_filter, self.api_client.apps, should_print)
 
     @cli.action('get', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
-    def get_app(self, application_id: ResourceId, should_print: bool = True) -> Profile:
+    def get_app(self, application_id: ResourceId, should_print: bool = True) -> App:
         """
-        Get information about a specific app from App Store Connect
+        Get information about a specific app
         """
 
         return self._get_resource(application_id, self.api_client.apps, should_print)
+
+    @cli.action('builds', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
+    def list_app_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
+        """
+        Get a list of builds associated with a specific app
+        """
+
+        return self._list_related_resources(
+            application_id, App, Build, self.api_client.apps.list_builds, None, should_print)
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
@@ -612,6 +639,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         if not apps:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
         # app = apps[0]
+        # builds = self.list_app_builds(app.id)
 
         # TODO: Find corresponding App and Build from App Store Connect that correspond to this upload.
         # TODO: Once found, submit for Build to TestFlight if need be.
@@ -751,17 +779,6 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             self._save_profiles(profiles)
         return profiles
 
-    def _find_bundle_id_profiles(self, resource_id: ResourceId, profiles_filter) -> List[Profile]:
-        self.printer.log_get_related(Profile, BundleId, resource_id)
-        try:
-            profiles = self.api_client.bundle_ids.list_profiles(
-                bundle_id=resource_id,
-                resource_filter=profiles_filter)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-        self.printer.log_found(Profile, profiles, profiles_filter, BundleId)
-        return profiles
-
     @cli.action('list-bundle-id-profiles',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_IDS,
                 ProfileArgument.PROFILE_TYPE_OPTIONAL,
@@ -786,9 +803,16 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         profiles = []
         for resource_id in set(bundle_id_resource_ids):
-            profiles.extend(self._find_bundle_id_profiles(resource_id, profiles_filter))
+            bundle_id_profiles = self._list_related_resources(
+                resource_id,
+                BundleId,
+                Profile,
+                self.api_client.bundle_ids.list_profiles,
+                profiles_filter,
+                should_print,
+            )
+            profiles.extend(bundle_id_profiles)
 
-        self.printer.print_resources(profiles, should_print)
         if save:
             self._save_profiles(profiles)
         return profiles

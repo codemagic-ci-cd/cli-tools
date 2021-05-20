@@ -24,7 +24,7 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def get_text_summary(self) -> str:
         summary: List[str] = []
         for property_name, property_value in self.get_summary().items():
-            name = property_name.replace('_', ' ').title().replace(' Os ', ' OS ')
+            name = property_name.replace('_', ' ').capitalize()
             value: Optional[str] = None
 
             if isinstance(property_value, bool):
