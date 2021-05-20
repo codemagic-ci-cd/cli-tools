@@ -32,6 +32,7 @@ from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -277,6 +278,18 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         return self._list_related_resources(
             application_id, App, Build, self.api_client.apps.list_builds, None, should_print)
+
+    @cli.action('pre-release-versions',
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.APPS)
+    def list_app_pre_release_versions(
+            self, application_id: ResourceId, should_print: bool = True) -> List[PreReleaseVersion]:
+        """
+        Get a list of prerelease versions associated with a specific app
+        """
+
+        return self._list_related_resources(
+            application_id, App, PreReleaseVersion, self.api_client.apps.list_pre_release_versions, None, should_print)
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,

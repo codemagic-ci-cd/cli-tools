@@ -10,6 +10,7 @@ from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 
 
@@ -75,3 +76,13 @@ class Apps(ResourceManager[App]):
         else:
             url = f'{self.client.API_URL}/apps/{app}/builds'
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
+
+    def list_pre_release_versions(self, app: Union[LinkedResourceData, ResourceId]) -> List[PreReleaseVersion]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_prerelease_versions_for_an_app
+        """
+        if isinstance(app, App):
+            url = app.relationships.preReleaseVersions.links.related
+        else:
+            url = f'{self.client.API_URL}/apps/{app}/preReleaseVersions'
+        return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
