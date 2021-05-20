@@ -23,6 +23,7 @@ from .provisioning import Profiles
 from .provisioning import SigningCertificates
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
+from .versioning import BetaAppReviewSubmissions
 from .versioning import PreReleaseVersions
 
 
@@ -131,6 +132,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
     @property
     def app_store_version_submissions(self) -> AppStoreVersionSubmissions:
         return AppStoreVersionSubmissions(self)
+
+    @property
+    def beta_app_review_submissions(self) -> BetaAppReviewSubmissions:
+        return BetaAppReviewSubmissions(self)
 
     @property
     def builds(self) -> Builds:

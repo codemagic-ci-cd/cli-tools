@@ -25,6 +25,8 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
+from codemagic.apple.resources import BetaAppReviewSubmission
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -235,18 +237,18 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 AppArgument.APPLICATION_NAME,
                 AppArgument.APPLICATION_SKU,
-                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppStoreVersionArgument.VERSION_STRING,
                 AppStoreVersionArgument.PLATFORM,
-                AppStoreVersionArgument.VERSION_STATE,
+                AppStoreVersionArgument.APP_STORE_STATE,
                 action_group=AppStoreConnectActionGroup.APPS)
     def list_apps(self,
                   bundle_id_identifier: Optional[str] = None,
                   application_id: Optional[ResourceId] = None,
                   application_name: Optional[str] = None,
                   application_sku: Optional[str] = None,
-                  app_store_version: Optional[str] = None,
-                  app_store_version_platform: Optional[Platform] = None,
-                  app_store_version_app_store_state: Optional[AppStoreState] = None,
+                  version_string: Optional[str] = None,
+                  platform: Optional[Platform] = None,
+                  app_store_state: Optional[AppStoreState] = None,
                   should_print: bool = True) -> List[App]:
         """
         Find and list apps added in App Store Connect
@@ -257,9 +259,9 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             id=application_id,
             name=application_name,
             sku=application_sku,
-            app_store_versions=app_store_version,
-            app_store_versions_platform=app_store_version_platform,
-            app_store_versions_app_store_state=app_store_version_app_store_state,
+            app_store_versions=version_string,
+            app_store_versions_platform=platform,
+            app_store_versions_app_store_state=app_store_state,
         )
         return self._list_resources(apps_filter, self.api_client.apps, should_print)
 
@@ -295,17 +297,17 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
     @cli.action('app-store-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
                 AppStoreVersionArgument.APP_STORE_VERSION_ID_OPTIONAL,
-                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppStoreVersionArgument.VERSION_STRING,
                 AppStoreVersionArgument.PLATFORM,
-                AppStoreVersionArgument.VERSION_STATE,
+                AppStoreVersionArgument.APP_STORE_STATE,
                 action_group=AppStoreConnectActionGroup.APPS)
-    def list_app_store_versions(
+    def list_app_store_versions_for_app(
             self,
             application_id: ResourceId,
             app_store_version_id: Optional[ResourceId] = None,
-            app_store_version: Optional[str] = None,
-            app_store_version_platform: Optional[Platform] = None,
-            app_store_version_app_store_state: Optional[AppStoreState] = None,
+            version_string: Optional[str] = None,
+            platform: Optional[Platform] = None,
+            app_store_state: Optional[AppStoreState] = None,
             should_print: bool = True) -> List[PreReleaseVersion]:
         """
         Get a list of prerelease versions associated with a specific app
@@ -313,9 +315,9 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         app_store_versions_filter = self.api_client.app_store_versions.Filter(
             id=app_store_version_id,
-            version_string=app_store_version,
-            platform=app_store_version_platform,
-            app_store_state=app_store_version_app_store_state,
+            version_string=version_string,
+            platform=platform,
+            app_store_state=app_store_state,
         )
         return self._list_related_resources(
             application_id,
@@ -330,7 +332,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
                 BuildArgument.NOT_EXPIRED,
-                BuildArgument.BUILD_ID_RESOURCE_ID,
+                BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
                 BuildArgument.BUILD_VERSION_NUMBER)
@@ -373,18 +375,18 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
     @cli.action('get-latest-app-store-build-number',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
-                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppStoreVersionArgument.VERSION_STRING,
                 CommonArgument.PLATFORM)
     def get_latest_app_store_build_number(self,
                                           application_id: ResourceId,
-                                          app_store_version: Optional[str] = None,
+                                          version_string: Optional[str] = None,
                                           platform: Optional[Platform] = None,
                                           should_print: bool = False) -> Optional[int]:
         """
         Get latest App Store build number for the given application
         """
         versions_client = self.api_client.app_store_versions
-        versions_filter = versions_client.Filter(version_string=app_store_version, platform=platform)
+        versions_filter = versions_client.Filter(version_string=version_string, platform=platform)
         try:
             _versions, builds = versions_client.list_with_include(
                 application_id, Build, resource_filter=versions_filter)
@@ -655,6 +657,40 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             ignore_not_found=ignore_not_found,
         )
 
+    @cli.action('create',
+                BuildArgument.BUILD_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
+    def create_beta_app_review_submission(
+            self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
+        """
+        Submit an app for beta app review to allow external testing
+        """
+        return self._create_resource(
+            self.api_client.beta_app_review_submissions,
+            should_print,
+            build=build_id,
+        )
+
+    @cli.action('list',
+                BuildArgument.BUILD_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
+    def list_beta_app_review_submissions(
+            self,
+            build_id: ResourceId,
+            beta_review_state: Optional[BetaReviewState] = None,
+            should_print: bool = True) -> List[BetaAppReviewSubmission]:
+        """
+        Find and list beta app review submissions for all builds
+        """
+        beta_app_review_submissions_filter = self.api_client.beta_app_review_submissions.Filter(
+            build=build_id,
+            beta_review_state=beta_review_state)
+        return self._list_resources(
+            beta_app_review_submissions_filter,
+            self.api_client.beta_app_review_submissions,
+            should_print,
+        )
+
     @cli.action('publish',
                 AppStoreArgument.ARTIFACT_PATTERNS,
                 action_group=AppStoreConnectActionGroup.APP_STORE)
@@ -675,19 +711,44 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
-    def _publish_application_package(self, application_package: Union[Ipa, MacOsPackage]):
+    def _publish_application_package(self, application_package: Union[Ipa, MacOsPackage]) -> None:
+        """
+        :raises IOError in case any step of publishing fails
+        """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
 
-        self._validate_artifact_with_altool(application_package.path)
-        self._upload_artifact_with_altool(application_package.path)
+        # TODO: restore those
+        # self._validate_artifact_with_altool(application_package.path)
+        # self._upload_artifact_with_altool(application_package.path)
 
         bundle_id = application_package.bundle_identifier
-        apps = self.list_apps(bundle_id_identifier=bundle_id)
-        if not apps:
+
+        self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
+        try:
+            app = self.list_apps(bundle_id_identifier=bundle_id, should_print=True)[0]
+        except IndexError:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
-        # app = apps[0]
-        # builds = self.list_app_builds(app.id)
+
+        self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
+        try:
+            # TODO: Filter builds by binary version code
+            build = self.list_app_builds(app.id)[0]
+        except IndexError:
+            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+
+        # TODO: Submit version to review
+        self.create_beta_app_review_submission(build.id)
+
+        # package_version = application_package.version
+        # self.logger.info(Colors.BLUE('\nGet App Store version submission info for the upload'))
+        # try:
+        #     app_store_version = self.list_app_store_versions_for_app(
+        #         app.id, version_string=package_version, app_store_state=AppStoreState.PREPARE_FOR_SUBMISSION)[0]
+        # except IndexError:
+        #     raise IOError(f'Did not find any App Store versions for application {app.attributes.name}')
+
+        # self.create_app_store_version_submission(app_store_version.id)
 
         # TODO: Find corresponding App and Build from App Store Connect that correspond to this upload.
         # TODO: Once found, submit for Build to TestFlight if need be.

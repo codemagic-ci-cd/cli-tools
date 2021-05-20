@@ -127,17 +127,15 @@ class AppStoreConnectArgument(cli.Argument):
 
 
 class AppStoreVersionArgument(cli.Argument):
-    APP_STORE_VERSION = cli.ArgumentProperties(
-        key='app_store_version',
-        flags=('--version-string', '--app-store-version'),
-        description=(
-            'Version of the build published to App Store '
-            'that identifies an iteration of the bundle. '
-            'The string can only contain one to three groups of numeric characters (0-9) '
-            'separated by period in the format [Major].[Minor].[Patch]. '
-            'For example `3.2.46`'
-        ),
-        argparse_kwargs={'required': False},
+    APP_STORE_STATE = cli.ArgumentProperties(
+        key='app_store_state',
+        flags=('--state', '--app-store-version-state'),
+        type=AppStoreState,
+        description='State of App Store Version',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(AppStoreState),
+        },
     )
     APP_STORE_VERSION_ID = cli.ArgumentProperties(
         key='app_store_version_id',
@@ -157,7 +155,7 @@ class AppStoreVersionArgument(cli.Argument):
         description='UUID value of the App Store Version Submission',
     )
     PLATFORM = cli.ArgumentProperties(
-        key='app_store_version_platform',
+        key='platform',
         flags=('--platform', '--app-store-version-platform'),
         type=Platform,
         description='App Store Version platform',
@@ -166,15 +164,17 @@ class AppStoreVersionArgument(cli.Argument):
             'choices': list(Platform),
         },
     )
-    VERSION_STATE = cli.ArgumentProperties(
-        key='app_store_version_app_store_state',
-        flags=('--state', '--app-store-version-state'),
-        type=AppStoreState,
-        description='State of App Store Version',
-        argparse_kwargs={
-            'required': False,
-            'choices': list(AppStoreState),
-        },
+    VERSION_STRING = cli.ArgumentProperties(
+        key='version_string',
+        flags=('--version-string', '--app-store-version'),
+        description=(
+            'Version of the build published to App Store '
+            'that identifies an iteration of the bundle. '
+            'The string can only contain one to three groups of numeric characters (0-9) '
+            'separated by period in the format [Major].[Minor].[Patch]. '
+            'For example `3.2.46`'
+        ),
+        argparse_kwargs={'required': False},
     )
 
 
@@ -218,6 +218,11 @@ class BuildArgument(cli.Argument):
         },
     )
     BUILD_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='build_id',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build',
+    )
+    BUILD_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
         key='build_id',
         flags=('--build-id',),
         type=ResourceId,

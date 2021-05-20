@@ -30,6 +30,13 @@ class AppStoreState(_ResourceEnum):
     REPLACED_WITH_NEW_VERSION = 'REPLACED_WITH_NEW_VERSION'
 
 
+class BetaReviewState(_ResourceEnum):
+    APPROVED = 'APPROVED'
+    IN_REVIEW = 'IN_REVIEW'
+    REJECTED = 'REJECTED'
+    WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
+
+
 class BuildProcessingState(_ResourceEnum):
     PROCESSING = 'PROCESSING'
     FAILED = 'FAILED'
@@ -198,6 +205,7 @@ class ResourceType(_ResourceEnum):
     APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
+    BETA_APP_REVIEW_SUBMISSIONS = 'betaAppReviewSubmissions'
     BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
