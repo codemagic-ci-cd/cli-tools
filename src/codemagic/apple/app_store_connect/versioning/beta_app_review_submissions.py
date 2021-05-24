@@ -50,10 +50,3 @@ class BetaAppReviewSubmissions(ResourceManager[BetaAppReviewSubmission]):
             params=resource_filter.as_query_params(),
         )
         return [BetaAppReviewSubmission(submission) for submission in beta_review_submissions]
-
-    # def delete(self, app_store_version_submission: Union[LinkedResourceData, ResourceId]):
-    #     """
-    #     https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_submission
-    #     """
-    #     submission_id = self._get_resource_id(app_store_version_submission)
-    #     self.client.session.delete(f'{self.client.API_URL}/appStoreVersionSubmissions/{submission_id}')

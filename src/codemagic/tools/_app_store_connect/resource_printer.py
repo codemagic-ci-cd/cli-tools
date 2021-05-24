@@ -69,7 +69,7 @@ class ResourcePrinter:
         message = f'Creating new {resource_type}'
         if params:
             message = f'{message}: {", ".join(map(fmt, params.items()))}'
-        self.logger.info(message)
+        self.logger.info(Colors.BLUE(message))
 
     def log_created(self, resource: Resource):
         self.logger.info(Colors.GREEN(f'Created {resource.__class__} {resource.id}'))

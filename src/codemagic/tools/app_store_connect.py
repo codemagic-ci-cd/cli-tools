@@ -203,6 +203,20 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         self.printer.print_resources(resources, should_print)
         return resources
 
+    def _get_related_resource(self,
+                              resource_id,
+                              resource_type,
+                              related_resource_type,
+                              read_related_resource_method,
+                              should_print: bool):
+        self.printer.log_get_related(related_resource_type, resource_type, resource_id)
+        try:
+            resource = read_related_resource_method(resource_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+        self.printer.print_resource(resource, should_print)
+        return resource
+
     def _list_related_resources(self,
                                 resource_id: ResourceId,
                                 resource_type,
@@ -281,6 +295,17 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
 
         return self._list_related_resources(
             application_id, App, Build, self.api_client.apps.list_builds, None, should_print)
+
+    @cli.action('pre-release-version',
+                BuildArgument.BUILD_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.BUILDS)
+    def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
+        """
+        Get the prerelease version for a specific build
+        """
+
+        return self._get_related_resource(
+            build_id, Build, PreReleaseVersion, self.api_client.builds.read_pre_release_version, should_print)
 
     @cli.action('pre-release-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
@@ -692,17 +717,28 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         )
 
     @cli.action('publish',
-                AppStoreArgument.ARTIFACT_PATTERNS,
-                action_group=AppStoreConnectActionGroup.APP_STORE)
-    def publish(self, artifact_patterns: Sequence[pathlib.Path]) -> None:
+                AppStoreArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
+                AppStoreArgument.SUBMIT_TO_TESTFLIGHT,
+                AppStoreArgument.SUBMIT_TO_APP_STORE,
+                action_group=AppStoreConnectActionGroup.APP_STORE_CONNECT)
+    def publish(self,
+                application_package_path_patterns: Sequence[pathlib.Path],
+                submit_to_testflight: Optional[bool] = None,
+                submit_to_app_store: Optional[bool] = None) -> None:
         """
         Publish artifacts to App Store
         """
 
         failed_packages: List[str] = []
-        for application_package in self._get_publishing_application_packages(artifact_patterns):
+        for application_package in self._get_publishing_application_packages(application_package_path_patterns):
             try:
-                self._publish_application_package(application_package)
+                build, pre_release_version = self._publish_application_package(application_package)
+                if submit_to_testflight:
+                    self.create_beta_app_review_submission(build.id)
+                # TODO: what to do with those?
+                if submit_to_app_store and False:
+                    app_store_version_id = ResourceId('...')
+                    self.create_app_store_version_submission(app_store_version_id)
             except IOError as error:
                 # TODO: Should we fail the whole action on first publishing failure?
                 failed_packages.append(str(application_package.path))
@@ -711,7 +747,8 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
-    def _publish_application_package(self, application_package: Union[Ipa, MacOsPackage]) -> None:
+    def _publish_application_package(
+            self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         """
         :raises IOError in case any step of publishing fails
         """
@@ -723,41 +760,33 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         # self._upload_artifact_with_altool(application_package.path)
 
         bundle_id = application_package.bundle_identifier
-
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
         try:
-            app = self.list_apps(bundle_id_identifier=bundle_id, should_print=True)[0]
+            app = self.list_apps(bundle_id_identifier=bundle_id, should_print=False)[0]
         except IndexError:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
+        else:
+            self.printer.print_resource(app, True)
 
         self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
-        try:
-            # TODO: Filter builds by binary version code
-            build = self.list_app_builds(app.id)[0]
-        except IndexError:
+        for build in self.list_app_builds(app.id, should_print=False):
+            if build.attributes.version == application_package.version_code:
+                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
+                if pre_release_version.attributes.version == application_package.version:
+                    break
+        else:
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
-        # TODO: Submit version to review
-        self.create_beta_app_review_submission(build.id)
-
-        # package_version = application_package.version
-        # self.logger.info(Colors.BLUE('\nGet App Store version submission info for the upload'))
-        # try:
-        #     app_store_version = self.list_app_store_versions_for_app(
-        #         app.id, version_string=package_version, app_store_state=AppStoreState.PREPARE_FOR_SUBMISSION)[0]
-        # except IndexError:
-        #     raise IOError(f'Did not find any App Store versions for application {app.attributes.name}')
-
-        # self.create_app_store_version_submission(app_store_version.id)
-
-        # TODO: Find corresponding App and Build from App Store Connect that correspond to this upload.
-        # TODO: Once found, submit for Build to TestFlight if need be.
+        self.logger.info(Colors.GREEN('\nPublished build is'))
+        self.printer.print_resource(build, True)
+        self.printer.print_resource(pre_release_version, True)
+        return build, pre_release_version
 
     def _get_publishing_application_packages(
-            self, artifact_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
-        found_artifacts = list(self.find_paths(*artifact_patterns))
+            self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
+        found_application_paths = list(self.find_paths(*path_patterns))
         application_packages: List[Union[Ipa, MacOsPackage]] = []
-        for path in found_artifacts:
+        for path in found_application_paths:
             if path.suffix == '.ipa':
                 application_package: Union[Ipa, MacOsPackage] = Ipa(path)
             elif path.suffix == '.pkg':
@@ -777,18 +806,18 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
                 application_packages.append(application_package)
 
         if not application_packages:
-            patterns = ', '.join(f'"{pattern}"' for pattern in artifact_patterns)
+            patterns = ', '.join(f'"{pattern}"' for pattern in path_patterns)
             raise AppStoreConnectError(f'No application packages found for patterns {patterns}')
         return application_packages
 
     def _validate_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.logger.info(Colors.BLUE('\nValidate archive at "%s" for App Store'), artifact_path)
+        self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
         result = self.altool.validate_app(artifact_path)
         message = result.success_message or f'No errors validating archive at "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
 
     def _upload_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.logger.info(Colors.BLUE('\nUpload archive at "%s" to App Store'), artifact_path)
+        self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
         result = self.altool.upload_app(artifact_path)
         message = result.success_message or f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))

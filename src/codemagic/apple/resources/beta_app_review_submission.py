@@ -13,4 +13,4 @@ class BetaAppReviewSubmission(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
-        betaReviewState: Relationship
+        build: Relationship

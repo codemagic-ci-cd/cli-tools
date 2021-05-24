@@ -179,8 +179,8 @@ class AppStoreVersionArgument(cli.Argument):
 
 
 class AppStoreArgument(cli.Argument):
-    ARTIFACT_PATTERNS = cli.ArgumentProperties(
-        key='artifact_patterns',
+    APPLICATION_PACKAGE_PATH_PATTERNS = cli.ArgumentProperties(
+        key='application_package_path_patterns',
         flags=('--path',),
         type=pathlib.Path,
         description=(
@@ -192,6 +192,26 @@ class AppStoreArgument(cli.Argument):
             'default': (pathlib.Path('**/*.ipa'), pathlib.Path('**/*.pkg')),
             'nargs': '+',
             'metavar': 'artifact-path',
+        },
+    )
+    SUBMIT_TO_TESTFLIGHT = cli.ArgumentProperties(
+        key='submit_to_testflight',
+        flags=('--testflight',),
+        type=bool,
+        description='Submit an app for Testflight beta app review to allow external testing',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
+        key='submit_to_app_store',
+        flags=('--app-store',),
+        type=bool,
+        description='Submit an app for Testflight beta app review to allow external testing',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
         },
     )
 

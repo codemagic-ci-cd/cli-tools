@@ -6,8 +6,8 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name='apps',
         description='Manage your apps in App Store Connect',
     )
-    APP_STORE = cli.ActionGroupProperties(
-        name='app-store',
+    APP_STORE_CONNECT = cli.ActionGroupProperties(
+        name='app-store-connect',
         description='TODO ...',  # TODO: Come up with a proper description
     )
     APP_STORE_VERSION_SUBMISSIONS = cli.ActionGroupProperties(
@@ -17,4 +17,8 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
     BETA_APP_REVIEW_SUBMISSIONS = cli.ActionGroupProperties(
         name='beta-app-review-submissions',
         description="Manage your application's TestFlight submissions",
+    )
+    BUILDS = cli.ActionGroupProperties(
+        name='builds',
+        description='Manage your builds in App Store Connect',
     )
