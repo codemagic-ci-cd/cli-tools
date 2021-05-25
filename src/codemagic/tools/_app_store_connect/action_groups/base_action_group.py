@@ -30,9 +30,12 @@ class BaseActionGroup(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
     _key_identifier: KeyIdentifier
     _issuer_id: IssuerId
     _private_key: Optional[str]
-    api_client: AppStoreConnectApiClient
 
     # Define signatures for self-reference to other action groups
+
+    @property
+    def api_client(self) -> AppStoreConnectApiClient:
+        ...
 
     def create_beta_app_review_submission(
             self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
