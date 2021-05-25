@@ -19,8 +19,6 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreVersionSubmission
-from codemagic.apple.resources import BetaAppReviewSubmission
-from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -29,7 +27,6 @@ from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Platform
-from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -45,6 +42,8 @@ from codemagic.models import ProvisioningProfile
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.action_groups import AppsActionGroup
 from ._app_store_connect.action_groups import AppStoreActionGroup
+from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
+from ._app_store_connect.action_groups import BuildsActionGroup
 from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
@@ -76,6 +75,8 @@ def _get_certificate_key(
 class AppStoreConnect(cli.CliApp,
                       AppsActionGroup,
                       AppStoreActionGroup,
+                      BuildsActionGroup,
+                      BetaAppReviewSubmissionsActionGroup,
                       ResourceManagerMixin,
                       PathFinderMixin):
     """
@@ -123,17 +124,6 @@ class AppStoreConnect(cli.CliApp,
             certificates_directory=cli_args.certificates_directory,
             **cls._parent_class_kwargs(cli_args),
         )
-
-    @cli.action('pre-release-version',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BUILDS)
-    def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
-        """
-        Get the prerelease version for a specific build
-        """
-
-        return self._get_related_resource(
-            build_id, Build, PreReleaseVersion, self.api_client.builds.read_pre_release_version, should_print)
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
@@ -462,40 +452,6 @@ class AppStoreConnect(cli.CliApp,
             self.api_client.app_store_version_submissions,
             app_store_version_submission_id,
             ignore_not_found=ignore_not_found,
-        )
-
-    @cli.action('create',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
-    def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
-        """
-        Submit an app for beta app review to allow external testing
-        """
-        return self._create_resource(
-            self.api_client.beta_app_review_submissions,
-            should_print,
-            build=build_id,
-        )
-
-    @cli.action('list',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
-    def list_beta_app_review_submissions(
-            self,
-            build_id: ResourceId,
-            beta_review_state: Optional[BetaReviewState] = None,
-            should_print: bool = True) -> List[BetaAppReviewSubmission]:
-        """
-        Find and list beta app review submissions for all builds
-        """
-        beta_app_review_submissions_filter = self.api_client.beta_app_review_submissions.Filter(
-            build=build_id,
-            beta_review_state=beta_review_state)
-        return self._list_resources(
-            beta_app_review_submissions_filter,
-            self.api_client.beta_app_review_submissions,
-            should_print,
         )
 
     @cli.action('create-profile',
