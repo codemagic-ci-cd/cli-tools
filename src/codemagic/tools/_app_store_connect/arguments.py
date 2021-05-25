@@ -40,6 +40,9 @@ class Types:
     class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
 
+    class AppSpecificPassword(cli.EnvironmentArgumentValue):
+        environment_variable_key = 'APP_SPECIFIC_PASSWORD'
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -204,15 +207,27 @@ class AppStoreArgument(cli.Argument):
             'action': 'store_true',
         },
     )
-    SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
-        key='submit_to_app_store',
-        flags=('--app-store',),
-        type=bool,
-        description='Submit an app for Testflight beta app review to allow external testing',
-        argparse_kwargs={
-            'required': False,
-            'action': 'store_true',
-        },
+    APPLE_ID = cli.ArgumentProperties(
+        key='apple_id',
+        flags=('-u', '--apple-id'),
+        description=(
+            'App Store Connect username used for application package validation '
+            'and upload if App Store Connect API Key is not specified'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    APP_SPECIFIC_PASSWORD = cli.ArgumentProperties(
+        key='app_specific_password',
+        flags=('-p', '--password'),
+        type=Types.AppSpecificPassword,
+        description=(
+            'App-specific password used for application package validation '
+            'and upload if App Store Connect API Key is not specified. '
+            f'Used together with {Colors.BRIGHT_BLUE("--apple-id")}. '
+            'Create an app-specific password in the Security section of your Apple ID account. '
+            'Learn more from https://support.apple.com/en-us/HT204397'
+        ),
+        argparse_kwargs={'required': False},
     )
 
 

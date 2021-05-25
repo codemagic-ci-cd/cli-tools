@@ -68,10 +68,10 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
 
     @property
     def _authentication_method(self) -> AuthenticationMethod:
-        if self._key_identifier and self._private_key and self._issuer_id:
-            return AuthenticationMethod.JSON_WEB_TOKEN
-        elif self._username and self._password:
+        if self._username and self._password:
             return AuthenticationMethod.USERNAME_AND_EMAIL
+        elif self._key_identifier and self._private_key and self._issuer_id:
+            return AuthenticationMethod.JSON_WEB_TOKEN
         else:
             return AuthenticationMethod.NONE
 

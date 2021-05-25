@@ -7,14 +7,11 @@ import pathlib
 import re
 import tempfile
 import time
-from functools import lru_cache
-from typing import Callable
 from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -39,22 +36,18 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
-from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
 from codemagic.cli import Colors
 from codemagic.mixins import PathFinderMixin
-from codemagic.models import Altool
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
-from codemagic.models.application_package import Ipa
-from codemagic.models.application_package import MacOsPackage
 
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
+from ._app_store_connect.action_groups import AppStoreActionGroup
 from ._app_store_connect.arguments import AppArgument
-from ._app_store_connect.arguments import AppStoreArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
 from ._app_store_connect.arguments import BuildArgument
@@ -64,11 +57,9 @@ from ._app_store_connect.arguments import CommonArgument
 from ._app_store_connect.arguments import DeviceArgument
 from ._app_store_connect.arguments import ProfileArgument
 from ._app_store_connect.arguments import Types
+from ._app_store_connect.errors import AppStoreConnectError
+from ._app_store_connect.resource_manager_mixin import ResourceManagerMixin
 from ._app_store_connect.resource_printer import ResourcePrinter
-
-
-class AppStoreConnectError(cli.CliAppException):
-    pass
 
 
 def _get_certificate_key(
@@ -84,7 +75,10 @@ def _get_certificate_key(
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
-class AppStoreConnect(cli.CliApp, PathFinderMixin):
+class AppStoreConnect(cli.CliApp,
+                      PathFinderMixin,
+                      AppStoreActionGroup,
+                      ResourceManagerMixin):
     """
     Utility to download code signing certificates and provisioning profiles
     from Apple Developer Portal using App Store Connect API to perform iOS code signing
@@ -106,7 +100,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id
         self._private_key = private_key
-        self._log_api_requests = log_requests
+        self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
@@ -120,7 +114,7 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
         if private_key_argument is None:
             raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
-        app_store_connect = AppStoreConnect(
+        return AppStoreConnect(
             key_identifier=key_identifier_argument.value,
             issuer_id=issuer_id_argument.value,
             private_key=private_key_argument.value,
@@ -130,121 +124,6 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             certificates_directory=cli_args.certificates_directory,
             **cls._parent_class_kwargs(cli_args),
         )
-        # Validate that App Store Connect credentials are fine
-        _ = app_store_connect.api_client
-        return app_store_connect
-
-    @lru_cache(1)
-    def _get_api_client(self) -> AppStoreConnectApiClient:
-        return AppStoreConnectApiClient(
-            self._key_identifier,
-            self._issuer_id,
-            self._private_key,
-            log_requests=self._log_api_requests,
-        )
-
-    @property
-    def api_client(self) -> AppStoreConnectApiClient:
-        return self._get_api_client()
-
-    @lru_cache(1)
-    def _get_altool(self) -> Altool:
-        try:
-            return Altool(
-                key_identifier=self._key_identifier,
-                issuer_id=self._issuer_id,
-                private_key=self._private_key,
-            )
-        except ValueError as ve:
-            raise AppStoreConnectError(str(ve))
-
-    @property
-    def altool(self) -> Altool:
-        return self._get_altool()
-
-    def _create_resource(self, resource_manager, should_print, **create_params):
-        omit_keys = create_params.pop('omit_keys', tuple())
-        self.printer.log_creating(
-            resource_manager.resource_type,
-            **{k: v for k, v in create_params.items() if k not in omit_keys},
-        )
-        try:
-            resource = resource_manager.create(**create_params)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-
-        self.printer.print_resource(resource, should_print)
-        self.printer.log_created(resource)
-        return resource
-
-    def _get_resource(self, resource_id, resource_manager, should_print):
-        self.printer.log_get(resource_manager.resource_type, resource_id)
-        try:
-            resource = resource_manager.read(resource_id)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-        self.printer.print_resource(resource, should_print)
-        return resource
-
-    def _list_resources(self,
-                        resource_filter,
-                        resource_manager,
-                        should_print: bool,
-                        filter_predicate: Optional[Callable[[Resource], bool]] = None):
-        try:
-            resources = resource_manager.list(resource_filter=resource_filter)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-
-        if filter_predicate is not None:
-            resources = list(filter(filter_predicate, resources))
-
-        self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
-        self.printer.print_resources(resources, should_print)
-        return resources
-
-    def _get_related_resource(self,
-                              resource_id,
-                              resource_type,
-                              related_resource_type,
-                              read_related_resource_method,
-                              should_print: bool):
-        self.printer.log_get_related(related_resource_type, resource_type, resource_id)
-        try:
-            resource = read_related_resource_method(resource_id)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-        self.printer.print_resource(resource, should_print)
-        return resource
-
-    def _list_related_resources(self,
-                                resource_id: ResourceId,
-                                resource_type,
-                                related_resource_type,
-                                list_related_resources_method,
-                                resource_filter,
-                                should_print: bool):
-        self.printer.log_get_related(related_resource_type, resource_type, resource_id)
-        try:
-            kwargs = {'resource_filter': resource_filter} if resource_filter else {}
-            resources = list_related_resources_method(resource_id, **kwargs)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-
-        self.printer.log_found(related_resource_type, resources, resource_filter, resource_type)
-        self.printer.print_resources(resources, should_print)
-        return resources
-
-    def _delete_resource(self, resource_manager, resource_id: ResourceId, ignore_not_found: bool):
-        self.printer.log_delete(resource_manager.resource_type, resource_id)
-        try:
-            resource_manager.delete(resource_id)
-            self.printer.log_deleted(resource_manager.resource_type, resource_id)
-        except AppStoreConnectApiError as api_error:
-            if ignore_not_found is True and api_error.status_code == 404:
-                self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
-            else:
-                raise AppStoreConnectError(str(api_error))
 
     @cli.action('list',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
@@ -715,112 +594,6 @@ class AppStoreConnect(cli.CliApp, PathFinderMixin):
             self.api_client.beta_app_review_submissions,
             should_print,
         )
-
-    @cli.action('publish',
-                AppStoreArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
-                AppStoreArgument.SUBMIT_TO_TESTFLIGHT,
-                AppStoreArgument.SUBMIT_TO_APP_STORE,
-                action_group=AppStoreConnectActionGroup.APP_STORE_CONNECT)
-    def publish(self,
-                application_package_path_patterns: Sequence[pathlib.Path],
-                submit_to_testflight: Optional[bool] = None,
-                submit_to_app_store: Optional[bool] = None) -> None:
-        """
-        Publish artifacts to App Store
-        """
-
-        failed_packages: List[str] = []
-        for application_package in self._get_publishing_application_packages(application_package_path_patterns):
-            try:
-                build, pre_release_version = self._publish_application_package(application_package)
-                if submit_to_testflight:
-                    self.create_beta_app_review_submission(build.id)
-                # TODO: what to do with those?
-                if submit_to_app_store and False:
-                    app_store_version_id = ResourceId('...')
-                    self.create_app_store_version_submission(app_store_version_id)
-            except IOError as error:
-                # TODO: Should we fail the whole action on first publishing failure?
-                failed_packages.append(str(application_package.path))
-                self.logger.error(Colors.RED(error.args[0]))
-
-        if failed_packages:
-            raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
-
-    def _publish_application_package(
-            self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
-        """
-        :raises IOError in case any step of publishing fails
-        """
-        self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
-        self.logger.info(application_package.get_text_summary())
-
-        # TODO: restore those
-        # self._validate_artifact_with_altool(application_package.path)
-        # self._upload_artifact_with_altool(application_package.path)
-
-        bundle_id = application_package.bundle_identifier
-        self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
-        try:
-            app = self.list_apps(bundle_id_identifier=bundle_id, should_print=False)[0]
-        except IndexError:
-            raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
-        else:
-            self.printer.print_resource(app, True)
-
-        self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
-        for build in self.list_app_builds(app.id, should_print=False):
-            if build.attributes.version == application_package.version_code:
-                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
-                if pre_release_version.attributes.version == application_package.version:
-                    break
-        else:
-            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
-
-        self.logger.info(Colors.GREEN('\nPublished build is'))
-        self.printer.print_resource(build, True)
-        self.printer.print_resource(pre_release_version, True)
-        return build, pre_release_version
-
-    def _get_publishing_application_packages(
-            self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
-        found_application_paths = list(self.find_paths(*path_patterns))
-        application_packages: List[Union[Ipa, MacOsPackage]] = []
-        for path in found_application_paths:
-            if path.suffix == '.ipa':
-                application_package: Union[Ipa, MacOsPackage] = Ipa(path)
-            elif path.suffix == '.pkg':
-                application_package = MacOsPackage(path)
-            else:
-                raise AppStoreConnectError(f'Unsupported package type for App Store Connect publishing: {path}')
-
-            try:
-                application_package.get_summary()
-            except FileNotFoundError as fnf:
-                message = f'Invalid package for App Store Connect publishing: {fnf.args[0]} not found from {path}'
-                self.logger.warning(Colors.YELLOW(message))
-            except (ValueError, IOError) as error:
-                message = f'Unable to process package {path} for App Store Connect publishing: {error.args[0]}'
-                self.logger.warning(Colors.YELLOW(message))
-            else:
-                application_packages.append(application_package)
-
-        if not application_packages:
-            patterns = ', '.join(f'"{pattern}"' for pattern in path_patterns)
-            raise AppStoreConnectError(f'No application packages found for patterns {patterns}')
-        return application_packages
-
-    def _validate_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
-        result = self.altool.validate_app(artifact_path)
-        message = result.success_message or f'No errors validating archive at "{artifact_path}".'
-        self.logger.info(Colors.GREEN(message))
-
-    def _upload_artifact_with_altool(self, artifact_path: pathlib.Path):
-        self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
-        result = self.altool.upload_app(artifact_path)
-        message = result.success_message or f'No errors uploading "{artifact_path}".'
-        self.logger.info(Colors.GREEN(message))
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
