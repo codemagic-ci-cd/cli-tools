@@ -7,6 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
+from functools import lru_cache
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -80,14 +81,13 @@ class AppStoreConnect(cli.CliApp,
                       ResourceManagerMixin,
                       PathFinderMixin):
     """
-    Utility to download code signing certificates and provisioning profiles
-    from Apple Developer Portal using App Store Connect API to perform iOS code signing
+    Interact with Apple services via App Store Connect API
     """
 
     def __init__(self,
                  key_identifier: KeyIdentifier,
                  issuer_id: IssuerId,
-                 private_key: str,
+                 private_key: Optional[str],
                  log_requests: bool = False,
                  json_output: bool = False,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
@@ -100,7 +100,39 @@ class AppStoreConnect(cli.CliApp,
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id
         self._private_key = private_key
-        self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
+        self._log_requests = log_requests
+
+    def _get_private_key(self) -> str:
+        if self._private_key is not None:
+            return self._private_key
+
+        for keys_path in Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS:
+            try:
+                api_key = next(keys_path.glob(f'AuthKey_{self._key_identifier}.p8'))
+            except StopIteration:
+                continue
+
+            try:
+                private_key_argument = Types.PrivateKeyArgument(api_key.read_text())
+            except ValueError:
+                raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(
+                    f'Provided value in {api_key} is not valid')
+            return private_key_argument.value
+
+        raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
+
+    @lru_cache(1)
+    def _get_api_client(self):
+        return AppStoreConnectApiClient(
+            self._key_identifier,
+            self._issuer_id,
+            self._get_private_key(),
+            log_requests=self._log_requests,
+        )
+
+    @property
+    def api_client(self):
+        return self._get_api_client()
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
@@ -111,13 +143,11 @@ class AppStoreConnect(cli.CliApp,
             raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error()
         if key_identifier_argument is None:
             raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error()
-        if private_key_argument is None:
-            raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
         return AppStoreConnect(
             key_identifier=key_identifier_argument.value,
             issuer_id=issuer_id_argument.value,
-            private_key=private_key_argument.value,
+            private_key=private_key_argument.value if private_key_argument else None,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,

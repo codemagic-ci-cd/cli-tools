@@ -28,6 +28,12 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_KEY_IDENTIFIER'
 
     class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
+        PRIVATE_KEY_LOCATIONS = (
+            pathlib.Path('./private_keys').expanduser(),
+            pathlib.Path('~/private_keys').expanduser(),
+            pathlib.Path('~/.private_keys').expanduser(),
+            pathlib.Path('~/.appstoreconnect/private_keys').expanduser(),
+        )
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
 
         @classmethod
@@ -110,7 +116,14 @@ class AppStoreConnectArgument(cli.Argument):
         key='private_key',
         flags=('--private-key',),
         type=Types.PrivateKeyArgument,
-        description=f'App Store Connect API private key. {_API_DOCS_REFERENCE}',
+        description=(
+            f'App Store Connect API private key used for JWT authentication to communicate with Apple services. '
+            f'{_API_DOCS_REFERENCE} '
+            f'If not provided, the key will be searched from the following directories '
+            f'in sequence for a private key file with the name "AuthKey_<key_identifier>.p8": '
+            f'{", ".join(map(str, Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS))}, where '
+            f'<key_identifier> is the value of {Colors.BRIGHT_BLUE("--key-id")}'
+        ),
         argparse_kwargs={'required': False},
     )
     CERTIFICATES_DIRECTORY = cli.ArgumentProperties(

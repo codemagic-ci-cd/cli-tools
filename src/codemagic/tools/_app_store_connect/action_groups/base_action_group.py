@@ -29,7 +29,7 @@ class BaseActionGroup(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
     printer: ResourcePrinter
     _key_identifier: KeyIdentifier
     _issuer_id: IssuerId
-    _private_key: str
+    _private_key: Optional[str]
     api_client: AppStoreConnectApiClient
 
     # Define signatures for self-reference to other action groups
