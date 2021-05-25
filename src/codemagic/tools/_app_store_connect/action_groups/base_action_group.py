@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import logging
 import pathlib
 from abc import ABCMeta
-from typing import Generator
 from typing import List
 from typing import Optional
 
@@ -15,11 +16,13 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
+from codemagic.mixins import PathFinderMixin
 
+from ..resource_manager_mixin import ResourceManagerMixin
 from ..resource_printer import ResourcePrinter
 
 
-class BaseActionGroup(metaclass=ABCMeta):
+class BaseActionGroup(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
     logger: logging.Logger
     profiles_directory: pathlib.Path
     certificates_directory: pathlib.Path
@@ -29,8 +32,7 @@ class BaseActionGroup(metaclass=ABCMeta):
     _private_key: str
     api_client: AppStoreConnectApiClient
 
-    def find_paths(self, *patterns: pathlib.Path) -> Generator[pathlib.Path, None, None]:
-        ...
+    # Define signatures for self-reference to other action groups
 
     def create_beta_app_review_submission(
             self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
