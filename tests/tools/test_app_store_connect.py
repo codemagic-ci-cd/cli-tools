@@ -40,7 +40,7 @@ def namespace_kwargs():
 def _test_missing_argument(argument, _namespace_kwargs):
     cli_args = argparse.Namespace(**{k: v for k, v in _namespace_kwargs.items()})
     with pytest.raises(argparse.ArgumentError) as exception_info:
-        AppStoreConnect.from_cli_args(cli_args)
+        _ = AppStoreConnect.from_cli_args(cli_args).api_client
     message = str(exception_info.value)
     assert argument.key.upper() in message
     assert argument.type.environment_variable_key in message
@@ -73,7 +73,7 @@ def test_missing_arg_from_env(mock_appstore_api_client, namespace_kwargs, argume
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
     os.environ[argument.value.type.environment_variable_key] = 'environment-value'
 
-    _ = AppStoreConnect.from_cli_args(cli_args)
+    _ = AppStoreConnect.from_cli_args(cli_args).api_client
     api_client_args = mock_appstore_api_client.call_args[0]
     client_arg = api_client_args[api_client_arg_index]
     assert isinstance(client_arg, argument.type.argument_type)
@@ -139,7 +139,7 @@ def test_private_key_env_arg(mock_appstore_api_client, configure_variable, names
 
 def _do_private_key_assertions(private_key_value, moc_appstore_api_client, cli_namespace):
     cli_args = argparse.Namespace(**{k: v for k, v in cli_namespace.items()})
-    _ = AppStoreConnect.from_cli_args(cli_args)
+    _ = AppStoreConnect.from_cli_args(cli_args).api_client
     _, _, private_key_arg = moc_appstore_api_client.call_args[0]
     assert isinstance(private_key_arg, str)
     assert private_key_arg == private_key_value

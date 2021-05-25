@@ -122,7 +122,7 @@ class AppStoreConnect(cli.CliApp,
         raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
     @lru_cache(1)
-    def _get_api_client(self):
+    def _get_api_client(self) -> AppStoreConnectApiClient:
         return AppStoreConnectApiClient(
             self._key_identifier,
             self._issuer_id,
@@ -131,7 +131,7 @@ class AppStoreConnect(cli.CliApp,
         )
 
     @property
-    def api_client(self):
+    def api_client(self) -> AppStoreConnectApiClient:
         return self._get_api_client()
 
     @classmethod
