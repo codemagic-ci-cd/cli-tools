@@ -1,12 +1,12 @@
 
-get-latest-app-store-build-number
-=================================
+get
+===
 
 
-**Get latest App Store build number for the given application**
+**Get information about a specific app**
 ### Usage
 ```bash
-app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect apps get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,26 +14,14 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--version-string VERSION_STRING]
-    [--platform PLATFORM]
     APPLICATION_ID_RESOURCE_ID
 ```
-### Required arguments for action `get-latest-app-store-build-number`
+### Required arguments for action `get`
 
 ##### `APPLICATION_ID_RESOURCE_ID`
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-### Optional arguments for action `get-latest-app-store-build-number`
-
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--platform=IOS | MAC_OS | TV_OS`
-
-
-Apple operating systems
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

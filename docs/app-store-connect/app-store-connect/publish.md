@@ -1,12 +1,12 @@
 
-get-latest-app-store-build-number
-=================================
+publish
+=======
 
 
-**Get latest App Store build number for the given application**
+**Publish application packages to App Store and submit them to Testflight**
 ### Usage
 ```bash
-app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,26 +14,29 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--version-string VERSION_STRING]
-    [--platform PLATFORM]
-    APPLICATION_ID_RESOURCE_ID
+    [--path APPLICATION_PACKAGE_PATH_PATTERNS]
+    [-u APPLE_ID]
+    [-p APP_SPECIFIC_PASSWORD]
+    [--testflight]
 ```
-### Required arguments for action `get-latest-app-store-build-number`
+### Optional arguments for action `publish`
 
-##### `APPLICATION_ID_RESOURCE_ID`
-
-
-Application Apple ID. An automatically generated ID assigned to your app
-### Optional arguments for action `get-latest-app-store-build-number`
-
-##### `--version-string, --app-store-version=VERSION_STRING`
+##### `--path=APPLICATION_PACKAGE_PATH_PATTERNS`
 
 
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--platform=IOS | MAC_OS | TV_OS`
+Path to artifact (\*.ipa or \*.pkg). Can be either a path literal, or a glob pattern to match projects in working directory. Multiple arguments. Default:&nbsp;`**/*.ipa, **/*.pkg`
+##### `-u, --apple-id=APPLE_ID`
 
 
-Apple operating systems
+App Store Connect username used for application package validation and upload if App Store Connect API Key is not specified
+##### `-p, --password=APP_SPECIFIC_PASSWORD`
+
+
+App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering` APP_SPECIFIC_PASSWORD `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--testflight`
+
+
+Submit an app for Testflight beta app review to allow external testing
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

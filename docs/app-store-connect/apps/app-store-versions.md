@@ -1,12 +1,12 @@
 
-get-latest-app-store-build-number
-=================================
+app-store-versions
+==================
 
 
-**Get latest App Store build number for the given application**
+**Get a list of prerelease versions associated with a specific app**
 ### Usage
 ```bash
-app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect apps app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,26 +14,36 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--version-id APP_STORE_VERSION_ID_OPTIONAL]
     [--version-string VERSION_STRING]
     [--platform PLATFORM]
+    [--state APP_STORE_STATE]
     APPLICATION_ID_RESOURCE_ID
 ```
-### Required arguments for action `get-latest-app-store-build-number`
+### Required arguments for action `app-store-versions`
 
 ##### `APPLICATION_ID_RESOURCE_ID`
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-### Optional arguments for action `get-latest-app-store-build-number`
+### Optional arguments for action `app-store-versions`
 
+##### `--version-id, --app-store-version-id=APP_STORE_VERSION_ID_OPTIONAL`
+
+
+UUID value of the App Store Version
 ##### `--version-string, --app-store-version=VERSION_STRING`
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--platform=IOS | MAC_OS | TV_OS`
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 
-Apple operating systems
+App Store Version platform
+##### `--state, --app-store-version-state=DEVELOPER_REMOVED_FROM_SALE | DEVELOPER_REJECTED | IN_REVIEW | INVALID_BINARY | METADATA_REJECTED | PENDING_APPLE_RELEASE | PENDING_CONTRACT | PENDING_DEVELOPER_RELEASE | PREPARE_FOR_SUBMISSION | PREORDER_READY_FOR_SALE | PROCESSING_FOR_APP_STORE | READY_FOR_SALE | REJECTED | REMOVED_FROM_SALE | WAITING_FOR_EXPORT_COMPLIANCE | WAITING_FOR_REVIEW | REPLACED_WITH_NEW_VERSION`
+
+
+State of App Store Version
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
