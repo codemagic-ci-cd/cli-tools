@@ -7,7 +7,6 @@ from typing import List
 from typing import Optional
 
 from codemagic.apple import AppStoreConnectApiClient
-
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
