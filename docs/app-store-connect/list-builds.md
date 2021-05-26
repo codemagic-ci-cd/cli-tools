@@ -14,17 +14,17 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--application-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
     [--expired]
     [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
     [--build-version-number BUILD_VERSION_NUMBER]
 ```
 ### Optional arguments for action `list-builds`
 
-##### `--application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
+##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
 
 
 Application Apple ID. An automatically generated ID assigned to your app
@@ -36,7 +36,7 @@ List only expired builds
 
 
 List only not expired builds
-##### `--build-id=BUILD_ID_RESOURCE_ID`
+##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
 
 
 Alphanumeric ID value of the Build
@@ -73,7 +73,7 @@ App Store Connect API Key ID. Learn more at https://developer.apple.com/document
 ##### `--private-key=PRIVATE_KEY`
 
 
-App Store Connect API private key. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_PRIVATE_KEY`. Alternatively to entering` PRIVATE_KEY `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+App Store Connect API private key used for JWT authentication to communicate with Apple services. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api. If not provided, the key will be searched from the following directories in sequence for a private key file with the name `AuthKey_<key_identifier>.p8`: private_keys, ~/private_keys, ~/.private_keys, ~/.appstoreconnect/private_keys, where <key_identifier> is the value of --key-id. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_PRIVATE_KEY`. Alternatively to entering` PRIVATE_KEY `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ##### `--certificates-dir=CERTIFICATES_DIRECTORY`
 
 

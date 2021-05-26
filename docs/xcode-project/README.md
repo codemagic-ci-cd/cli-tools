@@ -44,6 +44,8 @@ Enable verbose logging for commands
 |[`junit-test-results`](junit-test-results.md)|Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format|
 |[`detect-bundle-id`](detect-bundle-id.md)|Try to deduce the Bundle ID from specified Xcode project|
 |[`default-test-destination`](default-test-destination.md)|Show default test destination for the chosen Xcode version|
+|[`ipa-info`](ipa-info.md)|Show information about iOS App Store Package file|
+|[`pkg-info`](pkg-info.md)|Show information about macOS Application Package file|
 |[`test-destinations`](test-destinations.md)|List available destinations for test runs|
 |[`run-tests`](run-tests.md)|Run unit or UI tests for given Xcode project or workspace|
 |[`test-summary`](test-summary.md)|Show summary of Xcode Test Result|

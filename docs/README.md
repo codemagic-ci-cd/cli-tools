@@ -5,7 +5,7 @@ CLI tools
 |Tool name|Description|
 | :--- | :--- |
 |[`android-app-bundle`](android-app-bundle/README.md)|Manage Android App Bundles using     [Bundletool](https://developer.android.com/studio/command-line/bundletool)|
-|[`app-store-connect`](app-store-connect/README.md)|Utility to download code signing certificates and provisioning profiles     from Apple Developer Portal using App Store Connect API to perform iOS code signing|
+|[`app-store-connect`](app-store-connect/README.md)|Interact with Apple services via App Store Connect API|
 |[`git-changelog`](git-changelog/README.md)|Generate a changelog text from git history|
 |[`google-play`](google-play/README.md)|Utility to get the latest build numbers from Google Play using Google Play Developer API|
 |[`keychain`](keychain/README.md)|Utility to manage macOS keychains and certificates|
