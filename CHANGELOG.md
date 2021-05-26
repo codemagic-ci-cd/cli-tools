@@ -1,3 +1,34 @@
+Version 0.7.0
+-------------
+
+**New features**
+
+- Add action group `app-store-connect` to tool `app-store-connect`.
+- Add action `publish` to `app-store-connect app-store-connect`.
+- Add action group `apps` to tool `app-store-connect`.
+- Add action `app-store-versions` to `app-store-connect apps`.
+- Add action `builds` to `app-store-connect apps`.
+- Add action `get` to `app-store-connect apps`.
+- Add action `list` to `app-store-connect apps`.
+- Add action `pre-release-versions` to `app-store-connect apps`.
+- Add action group `beta-app-review-submissions` to tool `app-store-connect`.
+- Add action `create` to `app-store-connect beta-app-review-submissions`.
+- Add action `list` to `app-store-connect beta-app-review-submissions`.
+- Add action group `builds` to tool `app-store-connect`.
+- Add action `pre-release-version` to `app-store-connect builds`.
+- Support loading App Store Connect API key from disk using key identifier by checking predefined locations `./private_keys`, `~/private_keys`, `~/.private_keys`, `~/.appstoreconnect/private_keys` for file `AuthKey_<key_identifier>.p8`.
+- Add action `ipa-info` to `xcode-project`.
+- Add action `pkg-info` to `xcode-project`.
+
+**Fixes**
+
+- Handle missing action for action group on command invocation.
+- ...
+
+**Development / Docs**
+
+- ... 
+
 Version 0.6.0
 -------------
 
