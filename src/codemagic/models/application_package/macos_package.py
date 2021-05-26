@@ -16,6 +16,11 @@ from .abstract_package import AbstractPackage
 
 
 class MacOsPackage(RunningCliAppMixin, AbstractPackage):
+    def _validate_package(self):
+        try:
+            return bool(self.package_info)
+        except (FileNotFoundError, IOError) as package_error:
+            raise IOError(f'Not a valid macOS application package at {self.path}') from package_error
 
     @classmethod
     def _ensure_pkgutil(cls):
@@ -73,9 +78,11 @@ class MacOsPackage(RunningCliAppMixin, AbstractPackage):
 
     @property
     def bundle_identifier(self) -> str:
-        return self._bundle.attrib.get('id') \
-               or self.package_info.attrib.get('identifier') \
-               or 'N/A'
+        return (
+            self._bundle.attrib.get('id')
+            or self.package_info.attrib.get('identifier')
+            or 'N/A'
+        )
 
     @property
     def install_size(self) -> str:
@@ -84,15 +91,19 @@ class MacOsPackage(RunningCliAppMixin, AbstractPackage):
 
     @property
     def version(self) -> str:
-        return self._bundle.attrib.get('CFBundleShortVersionString') \
-               or self.package_info.attrib.get('version') \
-               or self.version_code
+        return (
+            self._bundle.attrib.get('CFBundleShortVersionString')
+            or self.package_info.attrib.get('version')
+            or self.version_code
+        )
 
     @property
     def version_code(self) -> str:
-        return self._bundle.attrib.get('CFBundleVersion') \
-               or self.package_info.attrib.get('format-version') \
-               or ''
+        return (
+            self._bundle.attrib.get('CFBundleVersion')
+            or self.package_info.attrib.get('format-version')
+            or ''
+        )
 
     def get_summary(self) -> Dict[str, Any]:
         return {

@@ -56,7 +56,6 @@ class Apps(ResourceManager[App]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_apps
         """
-
         params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
         apps = self.client.paginate(f'{self.client.API_URL}/apps', params=params)
         return [App(app) for app in apps]

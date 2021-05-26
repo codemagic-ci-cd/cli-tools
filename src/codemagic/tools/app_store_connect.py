@@ -102,7 +102,7 @@ class AppStoreConnect(cli.CliApp,
         self._private_key = private_key
         self._log_requests = log_requests
 
-    def _get_private_key(self) -> str:
+    def _get_app_store_connect_private_key(self, custom_error: Optional[str] = None) -> str:
         if self._private_key is not None:
             return self._private_key
 
@@ -119,14 +119,14 @@ class AppStoreConnect(cli.CliApp,
                     f'Provided value in {api_key} is not valid')
             return private_key_argument.value
 
-        raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
+        raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(custom_error)
 
     @lru_cache(1)
     def _get_api_client(self) -> AppStoreConnectApiClient:
         return AppStoreConnectApiClient(
             self._key_identifier,
             self._issuer_id,
-            self._get_private_key(),
+            self._get_app_store_connect_private_key(),
             log_requests=self._log_requests,
         )
 

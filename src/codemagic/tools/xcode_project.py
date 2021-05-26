@@ -12,6 +12,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Type
+from typing import TypeVar
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -39,6 +41,8 @@ from ._xcode_project.arguments import TestResultArgument
 from ._xcode_project.arguments import XcodeArgument
 from ._xcode_project.arguments import XcodeProjectArgument
 from ._xcode_project.arguments import XcprettyArgument
+
+P = TypeVar('P', Ipa, MacOsPackage)
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -234,17 +238,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         Show information about macOS Application Package file
         """
 
-        self.logger.info(Colors.BLUE('Show %s information'), pkg_path)
-        package = MacOsPackage(pkg_path)
-
-        if should_print:
-            if json_output:
-                summary = json.dumps(package.get_summary(), indent=4)
-            else:
-                summary = package.get_text_summary()
-            self.echo(summary)
-
-        return package
+        return self._show_application_package_info(
+            MacOsPackage,
+            pkg_path,
+            json_output,
+            should_print,
+        )
 
     @cli.action('ipa-info',
                 XcodeProjectArgument.IPA_PATH,
@@ -257,17 +256,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         Show information about iOS App Store Package file
         """
 
-        self.logger.info(Colors.BLUE('Show %s information'), ipa_path)
-        ipa = Ipa(ipa_path)
-
-        if should_print:
-            if json_output:
-                summary = json.dumps(ipa.get_summary(), indent=4)
-            else:
-                summary = ipa.get_text_summary()
-            self.echo(summary)
-
-        return ipa
+        return self._show_application_package_info(
+            Ipa,
+            ipa_path,
+            json_output,
+            should_print,
+        )
 
     @cli.action('test-destinations',
                 TestArgument.RUNTIMES,
@@ -640,6 +634,25 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
         export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
         export_options.save(export_options_path)
+
+    def _show_application_package_info(self,
+                                       application_package_type: Type[P],
+                                       application_package_path: pathlib.Path,
+                                       json_output: bool,
+                                       should_print: bool) -> P:
+        try:
+            application_package = application_package_type(application_package_path)
+        except IOError as error:
+            raise XcodeProjectException(str(error)) from error
+
+        if should_print:
+            if json_output:
+                summary = json.dumps(application_package.get_summary(), indent=4)
+            else:
+                summary = application_package.get_text_summary()
+            self.echo(summary)
+
+        return application_package
 
 
 if __name__ == '__main__':

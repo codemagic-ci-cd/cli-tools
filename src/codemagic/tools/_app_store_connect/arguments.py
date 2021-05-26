@@ -194,7 +194,7 @@ class AppStoreVersionArgument(cli.Argument):
     )
 
 
-class AppStoreArgument(cli.Argument):
+class PublishArgument(cli.Argument):
     APPLICATION_PACKAGE_PATH_PATTERNS = cli.ArgumentProperties(
         key='application_package_path_patterns',
         flags=('--path',),
@@ -212,7 +212,7 @@ class AppStoreArgument(cli.Argument):
     )
     SUBMIT_TO_TESTFLIGHT = cli.ArgumentProperties(
         key='submit_to_testflight',
-        flags=('--testflight',),
+        flags=('-t', '--testflight'),
         type=bool,
         description='Submit an app for Testflight beta app review to allow external testing',
         argparse_kwargs={
@@ -225,7 +225,7 @@ class AppStoreArgument(cli.Argument):
         flags=('-u', '--apple-id'),
         description=(
             'App Store Connect username used for application package validation '
-            'and upload if App Store Connect API Key is not specified'
+            'and upload if App Store Connect API key is not specified'
         ),
         argparse_kwargs={'required': False},
     )

@@ -18,6 +18,12 @@ from .abstract_package import AbstractPackage
 
 
 class Ipa(AbstractPackage):
+    def _validate_package(self):
+        try:
+            return bool(self.info_plist)
+        except zipfile.BadZipFile as bad_zip_file:
+            raise IOError(f'Not a valid iOS application package at {self.path}') from bad_zip_file
+
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
         with zipfile.ZipFile(self.path) as zf:
             try:
@@ -100,14 +106,21 @@ class Ipa(AbstractPackage):
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundledisplayname
         """
-        return self.info_plist.get('CFBundleDisplayName') or self.info_plist.get('CFBundleName') or ''
+        return (
+            self.info_plist.get('CFBundleDisplayName')
+            or self.info_plist.get('CFBundleName')
+            or ''
+        )
 
     @property
     def version(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
         """
-        return self.info_plist.get('CFBundleShortVersionString') or self.version_code
+        return (
+            self.info_plist.get('CFBundleShortVersionString')
+            or self.version_code
+        )
 
     @property
     def version_code(self) -> str:

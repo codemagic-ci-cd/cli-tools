@@ -23,4 +23,9 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._get_related_resource(
-            build_id, Build, PreReleaseVersion, self.api_client.builds.read_pre_release_version, should_print)
+            build_id,
+            Build,
+            PreReleaseVersion,
+            self.api_client.builds.read_pre_release_version,
+            should_print,
+        )
