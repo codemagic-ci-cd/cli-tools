@@ -17,17 +17,17 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
-from ..arguments import AppStoreArgument
+from ..arguments import PublishArgument
 from ..errors import AppStoreConnectError
 
 
 class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('publish',
-                AppStoreArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
-                AppStoreArgument.APPLE_ID,
-                AppStoreArgument.APP_SPECIFIC_PASSWORD,
-                AppStoreArgument.SUBMIT_TO_TESTFLIGHT)
+                PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
+                PublishArgument.APPLE_ID,
+                PublishArgument.APP_SPECIFIC_PASSWORD,
+                PublishArgument.SUBMIT_TO_TESTFLIGHT)
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
                 apple_id: Optional[str] = None,

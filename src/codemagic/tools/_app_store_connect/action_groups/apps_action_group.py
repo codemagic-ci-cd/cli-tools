@@ -70,7 +70,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._list_related_resources(
-            application_id, App, Build, self.api_client.apps.list_builds, None, should_print)
+            application_id,
+            App,
+            Build,
+            self.api_client.apps.list_builds,
+            None,
+            should_print,
+        )
 
     @cli.action('pre-release-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
@@ -82,7 +88,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._list_related_resources(
-            application_id, App, PreReleaseVersion, self.api_client.apps.list_pre_release_versions, None, should_print)
+            application_id,
+            App,
+            PreReleaseVersion,
+            self.api_client.apps.list_pre_release_versions,
+            None,
+            should_print,
+        )
 
     @cli.action('app-store-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
@@ -100,7 +112,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_state: Optional[AppStoreState] = None,
             should_print: bool = True) -> List[PreReleaseVersion]:
         """
-        Get a list of prerelease versions associated with a specific app
+        Get a list of App Store versions associated with a specific app
         """
 
         app_store_versions_filter = self.api_client.app_store_versions.Filter(

@@ -25,6 +25,7 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
         """
         Submit an app for beta app review to allow external testing
         """
+
         return self._create_resource(
             self.api_client.beta_app_review_submissions,
             should_print,
@@ -32,16 +33,17 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
         )
 
     @cli.action('list',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
+                BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
                 action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
     def list_beta_app_review_submissions(
             self,
-            build_id: ResourceId,
+            build_id: Optional[ResourceId],
             beta_review_state: Optional[BetaReviewState] = None,
             should_print: bool = True) -> List[BetaAppReviewSubmission]:
         """
-        Find and list beta app review submissions for all builds
+        Find and list beta app review submissions
         """
+
         beta_app_review_submissions_filter = self.api_client.beta_app_review_submissions.Filter(
             build=build_id,
             beta_review_state=beta_review_state)
