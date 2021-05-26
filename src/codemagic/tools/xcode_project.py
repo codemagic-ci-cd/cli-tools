@@ -263,25 +263,6 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             should_print,
         )
 
-    def _show_application_package_info(self,
-                                       application_package_type: Type[P],
-                                       application_package_path: pathlib.Path,
-                                       json_output: bool,
-                                       should_print: bool) -> P:
-        try:
-            application_package = application_package_type(application_package_path)
-        except IOError as error:
-            raise XcodeProjectException(str(error)) from error
-
-        if should_print:
-            if json_output:
-                summary = json.dumps(application_package.get_summary(), indent=4)
-            else:
-                summary = application_package.get_text_summary()
-            self.echo(summary)
-
-        return application_package
-
     @cli.action('test-destinations',
                 TestArgument.RUNTIMES,
                 TestArgument.SIMULATOR_NAME,
@@ -653,6 +634,25 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
         export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
         export_options.save(export_options_path)
+
+    def _show_application_package_info(self,
+                                       application_package_type: Type[P],
+                                       application_package_path: pathlib.Path,
+                                       json_output: bool,
+                                       should_print: bool) -> P:
+        try:
+            application_package = application_package_type(application_package_path)
+        except IOError as error:
+            raise XcodeProjectException(str(error)) from error
+
+        if should_print:
+            if json_output:
+                summary = json.dumps(application_package.get_summary(), indent=4)
+            else:
+                summary = application_package.get_text_summary()
+            self.echo(summary)
+
+        return application_package
 
 
 if __name__ == '__main__':
