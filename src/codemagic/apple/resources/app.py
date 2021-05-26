@@ -29,7 +29,7 @@ class App(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
-        _OMIT_IF_NONE_KEYS = ('betaTesters',)
+        _OMIT_IF_NONE_KEYS = ('betaTesters', 'perfPowerMetrics')
 
         appInfos: Relationship
         appStoreVersions: Relationship
