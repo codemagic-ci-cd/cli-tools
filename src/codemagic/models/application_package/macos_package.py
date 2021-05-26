@@ -16,6 +16,11 @@ from .abstract_package import AbstractPackage
 
 
 class MacOsPackage(RunningCliAppMixin, AbstractPackage):
+    def _validate_package(self):
+        try:
+            return bool(self.package_info)
+        except (FileNotFoundError, IOError) as package_error:
+            raise IOError(f'Not a valid macOS application package at {self.path}') from package_error
 
     @classmethod
     def _ensure_pkgutil(cls):

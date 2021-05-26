@@ -16,6 +16,11 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
             self.path = pathlib.Path(self._str(path))
         else:
             self.path = path
+        self._validate_package()
+
+    @abc.abstractmethod
+    def _validate_package(self):
+        pass
 
     @abc.abstractmethod
     def get_summary(self) -> Dict[str, Any]:

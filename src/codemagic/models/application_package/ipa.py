@@ -18,6 +18,12 @@ from .abstract_package import AbstractPackage
 
 
 class Ipa(AbstractPackage):
+    def _validate_package(self):
+        try:
+            return bool(self.info_plist)
+        except zipfile.BadZipFile as bad_zip_file:
+            raise IOError(f'Not a valid iOS application package at {self.path}') from bad_zip_file
+
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
         with zipfile.ZipFile(self.path) as zf:
             try:
