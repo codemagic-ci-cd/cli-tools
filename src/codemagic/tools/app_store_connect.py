@@ -108,7 +108,7 @@ class AppStoreConnect(cli.CliApp,
 
         for keys_path in Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS:
             try:
-                api_key = next(keys_path.glob(f'AuthKey_{self._key_identifier}.p8'))
+                api_key = next(keys_path.expanduser().glob(f'AuthKey_{self._key_identifier}.p8'))
             except StopIteration:
                 continue
 

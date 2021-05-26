@@ -7,7 +7,7 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         description='Manage your apps in App Store Connect',
     )
     APP_STORE_CONNECT = cli.ActionGroupProperties(
-        name='app-store-connect',
+        name='app-store-connect',  # TODO: Change this name as it coincides with tool name
         description='TODO ...',  # TODO: Come up with a proper description
     )
     APP_STORE_VERSION_SUBMISSIONS = cli.ActionGroupProperties(

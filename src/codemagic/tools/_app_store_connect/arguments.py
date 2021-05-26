@@ -29,10 +29,10 @@ class Types:
 
     class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
         PRIVATE_KEY_LOCATIONS = (
-            pathlib.Path('./private_keys').expanduser(),
-            pathlib.Path('~/private_keys').expanduser(),
-            pathlib.Path('~/.private_keys').expanduser(),
-            pathlib.Path('~/.appstoreconnect/private_keys').expanduser(),
+            pathlib.Path('./private_keys'),
+            pathlib.Path('~/private_keys'),
+            pathlib.Path('~/.private_keys'),
+            pathlib.Path('~/.appstoreconnect/private_keys'),
         )
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
 
