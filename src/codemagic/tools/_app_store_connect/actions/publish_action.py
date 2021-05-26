@@ -17,6 +17,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import AppStoreConnectArgument
 from ..arguments import PublishArgument
 from ..errors import AppStoreConnectError
 
@@ -36,6 +37,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         """
         Publish application packages to App Store and submit them to Testflight
         """
+
+        if submit_to_testflight:
+            default_message = AppStoreConnectArgument.PRIVATE_KEY.get_missing_value_error_message()
+            error_message = f'{default_message}. It is required for submitting an app to Testflight.'
+            _ = self._get_app_store_connect_private_key(custom_error=error_message)
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
