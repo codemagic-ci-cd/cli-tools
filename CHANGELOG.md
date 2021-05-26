@@ -3,8 +3,7 @@ Version 0.7.0
 
 **New features**
 
-- Add action group `app-store-connect` to tool `app-store-connect`.
-- Add action `publish` to `app-store-connect app-store-connect`.
+- Add action `publish` to `app-store-connect`.
 - Add action group `apps` to tool `app-store-connect`.
 - Add action `app-store-versions` to `app-store-connect apps`.
 - Add action `builds` to `app-store-connect apps`.
