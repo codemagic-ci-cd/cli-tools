@@ -106,14 +106,21 @@ class Ipa(AbstractPackage):
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundledisplayname
         """
-        return self.info_plist.get('CFBundleDisplayName') or self.info_plist.get('CFBundleName') or ''
+        return (
+            self.info_plist.get('CFBundleDisplayName')
+            or self.info_plist.get('CFBundleName')
+            or ''
+        )
 
     @property
     def version(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
         """
-        return self.info_plist.get('CFBundleShortVersionString') or self.version_code
+        return (
+            self.info_plist.get('CFBundleShortVersionString')
+            or self.version_code
+        )
 
     @property
     def version_code(self) -> str:
