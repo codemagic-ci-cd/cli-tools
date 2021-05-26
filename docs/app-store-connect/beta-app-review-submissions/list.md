@@ -3,7 +3,7 @@ list
 ====
 
 
-**Find and list beta app review submissions for all builds**
+**Find and list beta app review submissions of a build**
 ### Usage
 ```bash
 app-store-connect beta-app-review-submissions list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

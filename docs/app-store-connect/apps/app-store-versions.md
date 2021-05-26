@@ -3,7 +3,7 @@ app-store-versions
 ==================
 
 
-**Get a list of prerelease versions associated with a specific app**
+**Get a list of App Store versions associated with a specific app**
 ### Usage
 ```bash
 app-store-connect apps app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

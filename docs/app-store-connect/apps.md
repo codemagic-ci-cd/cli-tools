@@ -79,5 +79,5 @@ Enable verbose logging for commands
 |[`get`](apps/get.md)|Get information about a specific app|
 |[`builds`](apps/builds.md)|Get a list of builds associated with a specific app|
 |[`pre-release-versions`](apps/pre-release-versions.md)|Get a list of prerelease versions associated with a specific app|
-|[`app-store-versions`](apps/app-store-versions.md)|Get a list of prerelease versions associated with a specific app|
+|[`app-store-versions`](apps/app-store-versions.md)|Get a list of App Store versions associated with a specific app|
 |[`list`](apps/list.md)|Find and list apps added in App Store Connect|

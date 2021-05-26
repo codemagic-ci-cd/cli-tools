@@ -17,7 +17,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--path APPLICATION_PACKAGE_PATH_PATTERNS]
     [-u APPLE_ID]
     [-p APP_SPECIFIC_PASSWORD]
-    [--testflight]
+    [-t]
 ```
 ### Optional arguments for action `publish`
 
@@ -28,12 +28,12 @@ Path to artifact (\*.ipa or \*.pkg). Can be either a path literal, or a glob pat
 ##### `-u, --apple-id=APPLE_ID`
 
 
-App Store Connect username used for application package validation and upload if App Store Connect API Key is not specified
+App Store Connect username used for application package validation and upload if App Store Connect API key is not specified
 ##### `-p, --password=APP_SPECIFIC_PASSWORD`
 
 
 App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering` APP_SPECIFIC_PASSWORD `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--testflight`
+##### `-t, --testflight`
 
 
 Submit an app for Testflight beta app review to allow external testing
