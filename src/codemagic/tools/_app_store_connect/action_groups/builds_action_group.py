@@ -7,12 +7,12 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 
-from ..abstract_action_base import AbstractActionBase
+from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
 
 
-class BuildsActionGroup(AbstractActionBase, metaclass=ABCMeta):
+class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('pre-release-version',
                 BuildArgument.BUILD_ID_RESOURCE_ID,

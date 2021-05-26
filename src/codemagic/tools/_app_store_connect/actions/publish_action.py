@@ -16,12 +16,12 @@ from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
-from ..abstract_action_base import AbstractActionBase
+from ..abstract_base_action import AbstractBaseAction
 from ..arguments import AppStoreArgument
 from ..errors import AppStoreConnectError
 
 
-class PublishAction(AbstractActionBase, metaclass=ABCMeta):
+class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('publish',
                 AppStoreArgument.APPLICATION_PACKAGE_PATH_PATTERNS,

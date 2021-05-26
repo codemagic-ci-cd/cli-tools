@@ -22,7 +22,7 @@ from .resource_manager_mixin import ResourceManagerMixin
 from .resource_printer import ResourcePrinter
 
 
-class AbstractActionBase(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
+class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
     logger: logging.Logger
     profiles_directory: pathlib.Path
     certificates_directory: pathlib.Path
