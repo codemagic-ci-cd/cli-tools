@@ -13,14 +13,14 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 
+from ..abstract_action_base import AbstractActionBase
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
 from ..arguments import BundleIdArgument
-from .base_action_group import BaseActionGroup
 
 
-class AppsActionGroup(BaseActionGroup, metaclass=ABCMeta):
+class AppsActionGroup(AbstractActionBase, metaclass=ABCMeta):
 
     @cli.action('get', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
     def get_app(self, application_id: ResourceId, should_print: bool = True) -> App:

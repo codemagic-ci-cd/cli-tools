@@ -10,12 +10,12 @@ from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import ResourceId
 
+from ..abstract_action_base import AbstractActionBase
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
-from .base_action_group import BaseActionGroup
 
 
-class BetaAppReviewSubmissionsActionGroup(BaseActionGroup, metaclass=ABCMeta):
+class BetaAppReviewSubmissionsActionGroup(AbstractActionBase, metaclass=ABCMeta):
 
     @cli.action('create',
                 BuildArgument.BUILD_ID_RESOURCE_ID,

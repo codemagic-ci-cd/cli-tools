@@ -7,6 +7,7 @@ from typing import List
 from typing import Optional
 
 from codemagic.apple import AppStoreConnectApiClient
+
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
@@ -18,11 +19,11 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
-from ..resource_manager_mixin import ResourceManagerMixin
-from ..resource_printer import ResourcePrinter
+from .resource_manager_mixin import ResourceManagerMixin
+from .resource_printer import ResourcePrinter
 
 
-class BaseActionGroup(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
+class AbstractActionBase(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
     logger: logging.Logger
     profiles_directory: pathlib.Path
     certificates_directory: pathlib.Path

@@ -16,20 +16,18 @@ from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
-from ..action_group import AppStoreConnectActionGroup
+from ..abstract_action_base import AbstractActionBase
 from ..arguments import AppStoreArgument
 from ..errors import AppStoreConnectError
-from .base_action_group import BaseActionGroup
 
 
-class AppStoreActionGroup(BaseActionGroup, metaclass=ABCMeta):
+class PublishAction(AbstractActionBase, metaclass=ABCMeta):
 
     @cli.action('publish',
                 AppStoreArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
                 AppStoreArgument.APPLE_ID,
                 AppStoreArgument.APP_SPECIFIC_PASSWORD,
-                AppStoreArgument.SUBMIT_TO_TESTFLIGHT,
-                action_group=AppStoreConnectActionGroup.APP_STORE_CONNECT)
+                AppStoreArgument.SUBMIT_TO_TESTFLIGHT)
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
                 apple_id: Optional[str] = None,
