@@ -135,7 +135,7 @@ class CliApp(metaclass=abc.ABCMeta):
         instance.verbose = cli_args.verbose
         return instance
 
-    def _invoke_action(self, args: argparse.Namespace):
+    def _get_invoked_cli_action(self, args: argparse.Namespace) -> ActionCallable:
         subcommand = getattr(args, 'action_subcommand', None)
         if subcommand is None:
             action_group = None
@@ -144,7 +144,11 @@ class CliApp(metaclass=abc.ABCMeta):
             action_group = next(g for g in self.list_class_action_groups() if g.name == args.action)
             action_key = subcommand
 
-        cli_action = {ac.action_name: ac for ac in self.iter_cli_actions(action_group)}[action_key]
+        cli_actions = {ac.action_name: ac for ac in self.iter_cli_actions(action_group)}
+        return cli_actions[action_key]
+
+    def _invoke_action(self, args: argparse.Namespace):
+        cli_action = self._get_invoked_cli_action(args)
         action_args = {
             arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
@@ -411,12 +415,16 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute()
 
 
-def action(action_name: str, *arguments: Argument, action_group: Optional[ActionGroup] = None):
+def action(action_name: str,
+           *arguments: Argument,
+           action_group: Optional[ActionGroup] = None,
+           action_options: Optional[Dict[str, Any]] = None):
     """
     Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
     :param arguments: CLI arguments that are required for this method to work
     :param action_group: CLI argument group under which this action belongs
+    :param action_options: Meta information about the action to check whether some conditions are met
     """
 
     def decorator(func):
@@ -426,6 +434,7 @@ def action(action_name: str, *arguments: Argument, action_group: Optional[Action
         func.action_name = action_name
         func.arguments = arguments
         func.is_cli_action = True
+        func.action_options = action_options or {}
 
         @wraps(func)
         def wrapper(*args, **kwargs):

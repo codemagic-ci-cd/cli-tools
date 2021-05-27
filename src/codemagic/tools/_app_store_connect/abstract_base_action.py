@@ -37,7 +37,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
-    def _get_app_store_connect_private_key(self, custom_error: Optional[str]) -> str:
+    def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
         ...
 
     def create_beta_app_review_submission(
