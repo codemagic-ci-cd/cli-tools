@@ -1,3 +1,10 @@
+Version 0.6.1
+-------------
+
+**Fixes**
+
+- Allow `passTypeId` relationship for [Certificate](https://developer.apple.com/documentation/appstoreconnectapi/certificate) model.
+
 Version 0.6.0
 -------------
 
