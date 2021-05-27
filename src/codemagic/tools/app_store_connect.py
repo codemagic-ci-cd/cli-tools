@@ -171,6 +171,9 @@ class AppStoreConnect(cli.CliApp,
 
     @lru_cache(1)
     def _get_api_client(self) -> AppStoreConnectApiClient:
+        assert self._key_identifier is not None
+        assert self._issuer_id is not None
+        assert self._private_key is not None
         return AppStoreConnectApiClient(
             self._key_identifier,
             self._issuer_id,
