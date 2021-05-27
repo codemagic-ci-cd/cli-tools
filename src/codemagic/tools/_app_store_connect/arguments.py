@@ -1,4 +1,5 @@
 import pathlib
+import re
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
@@ -48,6 +49,10 @@ class Types:
 
     class AppSpecificPassword(cli.EnvironmentArgumentValue):
         environment_variable_key = 'APP_SPECIFIC_PASSWORD'
+
+        @classmethod
+        def _is_valid(cls, value: str) -> bool:
+            return bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', value))
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
@@ -236,7 +241,8 @@ class PublishArgument(cli.Argument):
         description=(
             'App-specific password used for application package validation '
             'and upload if App Store Connect API Key is not specified. '
-            f'Used together with {Colors.BRIGHT_BLUE("--apple-id")}. '
+            f'Used together with {Colors.BRIGHT_BLUE("--apple-id")} '
+            'and should match pattern "abcd-abcd-abcd-abcd". '
             'Create an app-specific password in the Security section of your Apple ID account. '
             'Learn more from https://support.apple.com/en-us/HT204397'
         ),
