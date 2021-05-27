@@ -89,7 +89,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             if self._authentication_method is AuthenticationMethod.JSON_WEB_TOKEN:
                 private_key_path = self._save_api_key_to_disk()
                 flags = ('--apiKey', self._key_identifier, '--apiIssuer', self._issuer_id)
-            elif self._authentication_method is AuthenticationMethod.BASIC:
+            elif self._authentication_method is AuthenticationMethod.USERNAME_AND_EMAIL:
                 flags = ('--username', self._username, '--password', '@env:APP_STORE_CONNECT_PASSWORD')
                 os.environ['APP_STORE_CONNECT_PASSWORD'] = self._password
             else:

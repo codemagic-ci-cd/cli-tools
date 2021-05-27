@@ -17,8 +17,8 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
-from ..arguments import AppStoreConnectArgument
 from ..arguments import PublishArgument
+from ..arguments import Types
 from ..errors import AppStoreConnectError
 
 
@@ -28,26 +28,28 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
-                PublishArgument.SUBMIT_TO_TESTFLIGHT)
+                PublishArgument.SUBMIT_TO_TESTFLIGHT,
+                action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
                 apple_id: Optional[str] = None,
-                app_specific_password: Optional[str] = None,
+                app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """
 
-        if submit_to_testflight:
-            default_message = AppStoreConnectArgument.PRIVATE_KEY.get_missing_value_error_message()
-            error_message = f'{default_message}. It is required for submitting an app to Testflight.'
-            _ = self._get_app_store_connect_private_key(custom_error=error_message)
+        if not (apple_id and app_specific_password):
+            self._assert_api_client_credentials(
+                'Either Apple ID and app specific password or App Store Connect API key information is required.')
+        elif submit_to_testflight:
+            self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
             altool = Altool(
                 username=apple_id,
-                password=app_specific_password,
+                password=app_specific_password.value if app_specific_password else None,
                 key_identifier=self._key_identifier,
                 issuer_id=self._issuer_id,
                 private_key=self._private_key,

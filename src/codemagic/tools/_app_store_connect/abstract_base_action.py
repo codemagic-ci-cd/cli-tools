@@ -27,8 +27,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     profiles_directory: pathlib.Path
     certificates_directory: pathlib.Path
     printer: ResourcePrinter
-    _key_identifier: KeyIdentifier
-    _issuer_id: IssuerId
+    _key_identifier: Optional[KeyIdentifier]
+    _issuer_id: Optional[IssuerId]
     _private_key: Optional[str]
 
     # Define signatures for self-reference to other action groups
@@ -37,7 +37,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
-    def _get_app_store_connect_private_key(self, custom_error: Optional[str]) -> str:
+    def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
         ...
 
     def create_beta_app_review_submission(
