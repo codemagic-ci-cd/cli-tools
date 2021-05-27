@@ -29,7 +29,17 @@ Version 0.7.0
 - Support strings as path argument for `ExportOptions.from_path` factory method.
 - Support strings as path argument for `PbxProject.from_path` factory method.
 - Extract resource management methods from `AppStoreConnect` to separate mixin class.
-
+- Generate documentation for action `app-store-connect apps get`.
+- Generate documentation for action `app-store-connect apps list`.
+- Generate documentation for action `app-store-connect apps app-store-versions`.
+- Generate documentation for action `app-store-connect apps builds`.
+- Generate documentation for action `app-store-connect apps pre-release-versions`.
+- Generate documentation for action `app-store-connect beta-app-review-submissions create`.
+- Generate documentation for action `app-store-connect beta-app-review-submissions list`.
+- Generate documentation for action `app-store-connect builds pre-release-version`.
+- Generate documentation for action `app-store-connect publish`.
+- Generate documentation for action `xcode-project ipa-info`.
+- Generate documentation for action `xcode-project pkg-info`.
 
 Version 0.6.0
 -------------
