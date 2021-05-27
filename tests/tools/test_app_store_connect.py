@@ -176,17 +176,7 @@ def test_publish_action_without_app_store_connect_key_testflight_submit(missing_
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
-@mock.patch('codemagic.tools._app_store_connect.actions.publish_action.PublishAction.find_paths')
-@mock.patch(
-    'codemagic.tools._app_store_connect.actions.publish_action.PublishAction._get_publishing_application_packages')
-def test_publish_action_with_username_and_password(mock_get_application_packages,
-                                                   mock_find_paths,
-                                                   _mock_altool,
-                                                   namespace_kwargs):
-
-    mock_get_application_packages.return_value = []
-    mock_find_paths.return_value = []
-
+def test_publish_action_with_username_and_password(_mock_altool, namespace_kwargs):
     namespace_kwargs.update({
         AppStoreConnectArgument.ISSUER_ID.key: None,
         AppStoreConnectArgument.KEY_IDENTIFIER.key: None,
@@ -195,8 +185,15 @@ def test_publish_action_with_username_and_password(mock_get_application_packages
     })
 
     cli_args = argparse.Namespace(**namespace_kwargs)
-    AppStoreConnect.from_cli_args(cli_args).publish(
-        application_package_path_patterns=[pathlib.Path('path.pattern')],
-        apple_id='name@example.com',
-        app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
-    )
+    with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
+         mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages:
+        mock_get_packages.return_value = []
+        mock_find_paths.return_value = []
+
+        patterns = [pathlib.Path('path.pattern')]
+        AppStoreConnect.from_cli_args(cli_args).publish(
+            application_package_path_patterns=patterns,
+            apple_id='name@example.com',
+            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
+        )
+        mock_get_packages.assert_called_with(patterns)
