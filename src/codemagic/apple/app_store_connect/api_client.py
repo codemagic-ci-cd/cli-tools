@@ -14,6 +14,7 @@ from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .api_session import AppStoreConnectApiSession
+from .apps import Apps
 from .builds import Builds
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
@@ -22,6 +23,7 @@ from .provisioning import Profiles
 from .provisioning import SigningCertificates
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
+from .versioning import BetaAppReviewSubmissions
 from .versioning import PreReleaseVersions
 
 
@@ -120,12 +122,20 @@ class AppStoreConnectApiClient(StringConverterMixin):
         return self._paginate(url, params, page_size)
 
     @property
+    def apps(self) -> Apps:
+        return Apps(self)
+
+    @property
     def app_store_versions(self) -> AppStoreVersions:
         return AppStoreVersions(self)
 
     @property
     def app_store_version_submissions(self) -> AppStoreVersionSubmissions:
         return AppStoreVersionSubmissions(self)
+
+    @property
+    def beta_app_review_submissions(self) -> BetaAppReviewSubmissions:
+        return BetaAppReviewSubmissions(self)
 
     @property
     def builds(self) -> Builds:

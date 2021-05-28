@@ -7,7 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
-from typing import Callable
+from functools import lru_cache
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -31,16 +31,21 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
-from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Argument
 from codemagic.cli import Colors
+from codemagic.mixins import PathFinderMixin
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
+from ._app_store_connect.action_groups import AppsActionGroup
+from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
+from ._app_store_connect.action_groups import BuildsActionGroup
+from ._app_store_connect.actions import PublishAction
+from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
 from ._app_store_connect.arguments import BuildArgument
@@ -50,11 +55,9 @@ from ._app_store_connect.arguments import CommonArgument
 from ._app_store_connect.arguments import DeviceArgument
 from ._app_store_connect.arguments import ProfileArgument
 from ._app_store_connect.arguments import Types
+from ._app_store_connect.errors import AppStoreConnectError
+from ._app_store_connect.resource_manager_mixin import ResourceManagerMixin
 from ._app_store_connect.resource_printer import ResourcePrinter
-
-
-class AppStoreConnectError(cli.CliAppException):
-    pass
 
 
 def _get_certificate_key(
@@ -70,16 +73,21 @@ def _get_certificate_key(
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
-class AppStoreConnect(cli.CliApp):
+class AppStoreConnect(cli.CliApp,
+                      PublishAction,
+                      AppsActionGroup,
+                      BuildsActionGroup,
+                      BetaAppReviewSubmissionsActionGroup,
+                      ResourceManagerMixin,
+                      PathFinderMixin):
     """
-    Utility to download code signing certificates and provisioning profiles
-    from Apple Developer Portal using App Store Connect API to perform iOS code signing
+    Interact with Apple services via App Store Connect API
     """
 
     def __init__(self,
-                 key_identifier: KeyIdentifier,
-                 issuer_id: IssuerId,
-                 private_key: str,
+                 key_identifier: Optional[KeyIdentifier],
+                 issuer_id: Optional[IssuerId],
+                 private_key: Optional[str],
                  log_requests: bool = False,
                  json_output: bool = False,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
@@ -89,24 +97,21 @@ class AppStoreConnect(cli.CliApp):
         self.profiles_directory = profiles_directory
         self.certificates_directory = certificates_directory
         self.printer = ResourcePrinter(bool(json_output), self.echo)
-        self.api_client = AppStoreConnectApiClient(key_identifier, issuer_id, private_key, log_requests=log_requests)
+        self._key_identifier = key_identifier
+        self._issuer_id = issuer_id
+        self._private_key = private_key
+        self._log_requests = log_requests
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
         key_identifier_argument = AppStoreConnectArgument.KEY_IDENTIFIER.from_args(cli_args)
         issuer_id_argument = AppStoreConnectArgument.ISSUER_ID.from_args(cli_args)
         private_key_argument = AppStoreConnectArgument.PRIVATE_KEY.from_args(cli_args)
-        if issuer_id_argument is None:
-            raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error()
-        if key_identifier_argument is None:
-            raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error()
-        if private_key_argument is None:
-            raise AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
-        return AppStoreConnect(
-            key_identifier=key_identifier_argument.value,
-            issuer_id=issuer_id_argument.value,
-            private_key=private_key_argument.value,
+        app_store_connect = AppStoreConnect(
+            key_identifier=key_identifier_argument.value if key_identifier_argument else None,
+            issuer_id=issuer_id_argument.value if issuer_id_argument else None,
+            private_key=private_key_argument.value if private_key_argument else None,
             log_requests=cli_args.log_requests,
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,
@@ -114,63 +119,77 @@ class AppStoreConnect(cli.CliApp):
             **cls._parent_class_kwargs(cli_args),
         )
 
-    def _create_resource(self, resource_manager, should_print, **create_params):
-        omit_keys = create_params.pop('omit_keys', tuple())
-        self.printer.log_creating(
-            resource_manager.resource_type,
-            **{k: v for k, v in create_params.items() if k not in omit_keys},
-        )
-        try:
-            resource = resource_manager.create(**create_params)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+        cli_action = app_store_connect._get_invoked_cli_action(cli_args)
+        if cli_action.action_options.get('requires_api_client', True):
+            app_store_connect._assert_api_client_credentials()
 
-        self.printer.print_resource(resource, should_print)
-        self.printer.log_created(resource)
-        return resource
+        return app_store_connect
 
-    def _get_resource(self, resource_id, resource_manager, should_print):
-        self.printer.log_get(resource_manager.resource_type, resource_id)
-        try:
-            resource = resource_manager.read(resource_id)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-        self.printer.print_resource(resource, should_print)
-        return resource
-
-    def _list_resources(self,
-                        resource_filter,
-                        resource_manager,
-                        should_print: bool,
-                        filter_predicate: Optional[Callable[[Resource], bool]] = None):
-        try:
-            resources = resource_manager.list(resource_filter=resource_filter)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-
-        if filter_predicate is not None:
-            resources = list(filter(filter_predicate, resources))
-
-        self.printer.log_found(resource_manager.resource_type, resources, resource_filter)
-        self.printer.print_resources(resources, should_print)
-        return resources
-
-    def _delete_resource(self, resource_manager, resource_id: ResourceId, ignore_not_found: bool):
-        self.printer.log_delete(resource_manager.resource_type, resource_id)
-        try:
-            resource_manager.delete(resource_id)
-            self.printer.log_deleted(resource_manager.resource_type, resource_id)
-        except AppStoreConnectApiError as api_error:
-            if ignore_not_found is True and api_error.status_code == 404:
-                self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
+    def _assert_api_client_credentials(self, custom_error: Optional[str] = None):
+        if self._issuer_id is None:
+            if custom_error:
+                default_message = AppStoreConnectArgument.ISSUER_ID.get_missing_value_error_message()
+                raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error(f'{default_message}. {custom_error}')
             else:
-                raise AppStoreConnectError(str(api_error))
+                raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error()
+
+        if self._key_identifier is None:
+            if custom_error:
+                default_message = AppStoreConnectArgument.KEY_IDENTIFIER.get_missing_value_error_message()
+                raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error(f'{default_message}. {custom_error}')
+            else:
+                raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error()
+
+        try:
+            self._resolve_app_store_connect_private_key()
+        except ValueError as ve:
+            custom_error = ve.args[0] if ve.args else custom_error
+            if custom_error:
+                default_message = AppStoreConnectArgument.PRIVATE_KEY.get_missing_value_error_message()
+                AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(f'{default_message}. {custom_error}')
+            else:
+                AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
+
+    def _resolve_app_store_connect_private_key(self):
+        if self._private_key is not None:
+            return
+
+        for keys_path in Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS:
+            try:
+                api_key = next(keys_path.expanduser().glob(f'AuthKey_{self._key_identifier}.p8'))
+            except StopIteration:
+                continue
+
+            try:
+                private_key_argument = Types.PrivateKeyArgument(api_key.read_text())
+            except ValueError:
+                raise ValueError(f'Provided value in {api_key} is not valid')
+            self._private_key = private_key_argument.value
+            break
+        else:
+            raise ValueError()
+
+    @lru_cache(1)
+    def _get_api_client(self) -> AppStoreConnectApiClient:
+        assert self._key_identifier is not None
+        assert self._issuer_id is not None
+        assert self._private_key is not None
+        return AppStoreConnectApiClient(
+            self._key_identifier,
+            self._issuer_id,
+            self._private_key,
+            log_requests=self._log_requests,
+        )
+
+    @property
+    def api_client(self) -> AppStoreConnectApiClient:
+        return self._get_api_client()
 
     @cli.action('list-builds',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
+                AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.EXPIRED,
                 BuildArgument.NOT_EXPIRED,
-                BuildArgument.BUILD_ID_RESOURCE_ID,
+                BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
                 BuildArgument.PRE_RELEASE_VERSION,
                 BuildArgument.PROCESSING_STATE,
                 BuildArgument.BUILD_VERSION_NUMBER)
@@ -212,19 +231,19 @@ class AppStoreConnect(cli.CliApp):
         return latest_build_number
 
     @cli.action('get-latest-app-store-build-number',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID,
-                AppStoreVersionArgument.APP_STORE_VERSION,
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
+                AppStoreVersionArgument.VERSION_STRING,
                 CommonArgument.PLATFORM)
     def get_latest_app_store_build_number(self,
                                           application_id: ResourceId,
-                                          app_store_version: Optional[str] = None,
+                                          version_string: Optional[str] = None,
                                           platform: Optional[Platform] = None,
                                           should_print: bool = False) -> Optional[int]:
         """
         Get latest App Store build number for the given application
         """
         versions_client = self.api_client.app_store_versions
-        versions_filter = versions_client.Filter(version_string=app_store_version, platform=platform)
+        versions_filter = versions_client.Filter(version_string=version_string, platform=platform)
         try:
             _versions, builds = versions_client.list_with_include(
                 application_id, Build, resource_filter=versions_filter)
@@ -235,7 +254,7 @@ class AppStoreConnect(cli.CliApp):
         return self._get_latest_build_number(builds)
 
     @cli.action('get-latest-testflight-build-number',
-                BuildArgument.APPLICATION_ID_RESOURCE_ID,
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
                 BuildArgument.PRE_RELEASE_VERSION,
                 CommonArgument.PLATFORM)
     def get_latest_testflight_build_number(self,
@@ -590,17 +609,6 @@ class AppStoreConnect(cli.CliApp):
             self._save_profiles(profiles)
         return profiles
 
-    def _find_bundle_id_profiles(self, resource_id: ResourceId, profiles_filter) -> List[Profile]:
-        self.printer.log_get_related(Profile, BundleId, resource_id)
-        try:
-            profiles = self.api_client.bundle_ids.list_profiles(
-                bundle_id=resource_id,
-                resource_filter=profiles_filter)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
-        self.printer.log_found(Profile, profiles, profiles_filter, BundleId)
-        return profiles
-
     @cli.action('list-bundle-id-profiles',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_IDS,
                 ProfileArgument.PROFILE_TYPE_OPTIONAL,
@@ -625,9 +633,16 @@ class AppStoreConnect(cli.CliApp):
 
         profiles = []
         for resource_id in set(bundle_id_resource_ids):
-            profiles.extend(self._find_bundle_id_profiles(resource_id, profiles_filter))
+            bundle_id_profiles = self._list_related_resources(
+                resource_id,
+                BundleId,
+                Profile,
+                self.api_client.bundle_ids.list_profiles,
+                profiles_filter,
+                should_print,
+            )
+            profiles.extend(bundle_id_profiles)
 
-        self.printer.print_resources(profiles, should_print)
         if save:
             self._save_profiles(profiles)
         return profiles

@@ -116,6 +116,11 @@ def google_play_api_client() -> GooglePlayDeveloperAPIClient:
     return _google_play_api_client()
 
 
+@pytest.fixture()
+def app_store_connect_api_client() -> AppStoreConnectApiClient:
+    return _appstore_api_client()
+
+
 @pytest.fixture(scope='class')
 def class_appstore_api_client(request):
     request.cls.api_client = _appstore_api_client()

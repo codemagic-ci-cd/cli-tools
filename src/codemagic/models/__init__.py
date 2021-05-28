@@ -1,3 +1,4 @@
+from .altool import Altool
 from .android_signing_info import AndroidSigningInfo
 from .bundle_id_detector import BundleIdDetector
 from .certificate import Certificate

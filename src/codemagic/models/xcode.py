@@ -39,7 +39,7 @@ class Xcode(RunningCliAppMixin):
     @classmethod
     def get_selected(cls) -> Xcode:
         if not shutil.which('xcode-select'):
-            raise IOError('xcode-select executable not present on system')
+            raise IOError('xcode-select executable is not present on system')
         cmd_args = ('xcode-select', '--print-path')
         cli_app = cls.get_current_cli_app()
         try:
