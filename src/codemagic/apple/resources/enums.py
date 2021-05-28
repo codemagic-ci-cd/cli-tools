@@ -3,8 +3,32 @@ from __future__ import annotations
 import enum
 from typing import Optional
 
+from codemagic.utilities import log
 
-class _ResourceEnum(enum.Enum):
+
+class _ResourceEnumMeta(enum.EnumMeta):
+    """
+    Custom metaclass for Resource enumerations to accommodate the cases when
+    App Store Connect API returns such a value that our definitions do not describe.
+    For example, `BundleIdPlatform` should only have values `IOS` and `MAC_OS` as per
+    documentation https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform,
+    but it is known that in reality it `UNIVERSAL` and `SERVICES` are just as valid values.
+    Without this graceful fallback to dynamically generated enumeration the program execution
+    fails unexpectedly.
+    """
+
+    def __call__(cls, value, *args, **kwargs):  # noqa: N805
+        try:
+            return super().__call__(value, *args, **kwargs)
+        except ValueError as ve:
+            logger = log.get_logger(cls, log_to_stream=False)
+            logger.warning('Undefined Resource enumeration: %s', ve)
+            enum_class = enum.Enum(f'Graceful{cls.__name__}', {value: value})
+            enum_class.__str__ = lambda self: str(self.value)
+            return enum_class(value)
+
+
+class _ResourceEnum(enum.Enum, metaclass=_ResourceEnumMeta):
 
     def __str__(self):
         return str(self.value)

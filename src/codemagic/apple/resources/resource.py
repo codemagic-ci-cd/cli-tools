@@ -183,7 +183,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     def _create_relationships(cls, api_response):
-        logger = log.get_logger(cls)
+        logger = log.get_logger(cls, log_to_stream=False)
         known_relationships = cls.Relationships.get_fields()
         relationships = {}
         for relationship_name, relationship in api_response['relationships'].items():
