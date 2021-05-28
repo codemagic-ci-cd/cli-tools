@@ -1,3 +1,15 @@
+Version 0.7.1
+-------------
+
+**Fixes**
+
+- Ignore undefined model relationships in App Store Connect API responses instead of failing with `TypeError`.
+- Dynamically generate enumerations for undefined values from App Store Connect API responses instead of failing with `ValueError`.
+
+**Development / Docs**
+
+- Make `SignignCertificate` model relationship `passTypeId` optional.
+
 Version 0.7.0
 -------------
 
