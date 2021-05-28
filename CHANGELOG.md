@@ -41,6 +41,13 @@ Version 0.7.0
 - Generate documentation for action `xcode-project ipa-info`.
 - Generate documentation for action `xcode-project pkg-info`.
 
+Version 0.6.1
+-------------
+
+**Fixes**
+
+- Allow `passTypeId` relationship for [Certificate](https://developer.apple.com/documentation/appstoreconnectapi/certificate) model.
+
 Version 0.6.0
 -------------
 

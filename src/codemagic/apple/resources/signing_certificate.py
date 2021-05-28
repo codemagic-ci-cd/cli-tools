@@ -10,6 +10,7 @@ from OpenSSL import crypto
 
 from .bundle_id import BundleIdPlatform
 from .enums import CertificateType
+from .resource import Relationship
 from .resource import Resource
 
 
@@ -36,6 +37,12 @@ class SigningCertificate(Resource):
                 self.platform = BundleIdPlatform(self.platform)
             if isinstance(self.certificateType, str):
                 self.certificateType = CertificateType(self.certificateType)
+
+    @dataclass
+    class Relationships(Resource.Relationships):
+        _OMIT_IF_NONE_KEYS = ('passTypeId',)
+
+        passTypeId: Optional[Relationship]
 
     def get_display_info(self) -> str:
         return f'{self.attributes.certificateType} certificate {self.attributes.serialNumber}'
