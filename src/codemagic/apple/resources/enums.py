@@ -12,9 +12,9 @@ class _ResourceEnumMeta(enum.EnumMeta):
     App Store Connect API returns such a value that our definitions do not describe.
     For example, `BundleIdPlatform` should only have values `IOS` and `MAC_OS` as per
     documentation https://developer.apple.com/documentation/appstoreconnectapi/bundleidplatform,
-    but it is known that in reality it `UNIVERSAL` and `SERVICES` are just as valid values.
+    but it is known that in practice `UNIVERSAL` and `SERVICES` are just as valid values.
     Without this graceful fallback to dynamically generated enumeration the program execution
-    fails unexpectedly.
+    fails unexpectedly, which is not desirable.
     """
 
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
