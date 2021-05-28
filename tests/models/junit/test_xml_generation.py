@@ -1,4 +1,6 @@
 import pathlib
+from xml.dom import minidom
+from xml.dom.minidom import Document
 
 import pytest
 
@@ -331,13 +333,13 @@ def _testsuites() -> TestSuites:
 
 
 @pytest.fixture()
-def expected_xml() -> str:
+def expected_xml() -> Document:
     mock_xml_path = pathlib.Path(__file__).parent / 'mocks' / 'testsuite.xml'
-    return mock_xml_path.read_text()
+    return minidom.parse(mock_xml_path.open())
 
 
 def test_xml(temp_dir, _testsuites, expected_xml):
     xml_path = temp_dir / 'testsuite.xml'
     _testsuites.save_xml(xml_path)
-    generated_xml = xml_path.read_text()
-    assert generated_xml == expected_xml
+    generated_xml = minidom.parse(xml_path.open())
+    assert generated_xml.toxml() == expected_xml.toxml()
