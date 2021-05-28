@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import enum
 import re
 from dataclasses import dataclass
@@ -9,12 +10,14 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Tuple
 from typing import Union
 from typing import overload
 
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
+from codemagic.utilities import log
 
 from .enums import ResourceType
 
@@ -170,13 +173,25 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
                 if not isinstance(value, (Relationship, type(None))):
                     setattr(self, field, Relationship(**value))
 
+        @classmethod
+        def get_fields(cls) -> Set[str]:
+            return {f.name for f in dataclasses.fields(cls)}
+
     @classmethod
     def _create_attributes(cls, api_response):
         return cls.Attributes(**api_response['attributes'])
 
     @classmethod
     def _create_relationships(cls, api_response):
-        return cls.Relationships(**api_response['relationships'])
+        logger = log.get_logger(cls)
+        known_relationships = cls.Relationships.get_fields()
+        relationships = {}
+        for relationship_name, relationship in api_response['relationships'].items():
+            if relationship_name in known_relationships:
+                relationships[relationship_name] = relationship
+            else:
+                logger.warning('Unknown relationship %r for resource %r', relationship_name, cls.__name__)
+        return cls.Relationships(**relationships)
 
     def __init__(self, api_response: Dict, created: bool = False):
         super().__init__(api_response)
