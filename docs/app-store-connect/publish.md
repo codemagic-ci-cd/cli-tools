@@ -1,12 +1,12 @@
 
-app-store-connect
-=================
+publish
+=======
 
 
-**Interact with Apple services via App Store Connect API**
+**Publish application packages to App Store and submit them to Testflight**
 ### Usage
 ```bash
-app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,29 @@ app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--path APPLICATION_PACKAGE_PATH_PATTERNS]
+    [-u APPLE_ID]
+    [-p APP_SPECIFIC_PASSWORD]
+    [-t]
 ```
+### Optional arguments for action `publish`
+
+##### `--path=APPLICATION_PACKAGE_PATH_PATTERNS`
+
+
+Path to artifact (\*.ipa or \*.pkg). Can be either a path literal, or a glob pattern to match projects in working directory. Multiple arguments. Default:&nbsp;`**/*.ipa, **/*.pkg`
+##### `-u, --apple-id=APPLE_ID`
+
+
+App Store Connect username used for application package validation and upload if App Store Connect API key is not specified
+##### `-p, --password=APP_SPECIFIC_PASSWORD`
+
+
+App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id and should match pattern `abcd-abcd-abcd-abcd`. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering` APP_SPECIFIC_PASSWORD `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `-t, --testflight`
+
+
+Submit an app for Testflight beta app review to allow external testing
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,35 +93,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create-bundle-id`](create-bundle-id.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
-|[`create-certificate`](create-certificate.md)|Create code signing certificates of given type|
-|[`create-profile`](create-profile.md)|Create provisioning profile of given type|
-|[`delete-bundle-id`](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal|
-|[`delete-certificate`](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal|
-|[`delete-profile`](delete-profile.md)|Delete specified Profile from Apple Developer portal|
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
-|[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal|
-|[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal|
-|[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get latest App Store build number for the given application|
-|[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get latest Testflight build number for the given application|
-|[`get-profile`](get-profile.md)|Get specified Profile from Apple Developer portal|
-|[`list-builds`](list-builds.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`list-bundle-id-profiles`](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
-|[`list-bundle-ids`](list-bundle-ids.md)|List Bundle IDs from Apple Developer portal matching given constraints|
-|[`list-certificates`](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints|
-|[`list-devices`](list-devices.md)|List Devices from Apple Developer portal matching given constraints|
-|[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints|
-|[`publish`](publish.md)|Publish application packages to App Store and submit them to Testflight|
-
-### Action groups
-
-|Action group|Description|
-| :--- | :--- |
-|[`app-store-version-submissions`](app-store-version-submissions.md)|Manage your application's App Store version review process|
-|[`apps`](apps.md)|Manage your apps in App Store Connect|
-|[`beta-app-review-submissions`](beta-app-review-submissions.md)|Manage your application's TestFlight submissions|
-|[`builds`](builds.md)|Manage your builds in App Store Connect|
