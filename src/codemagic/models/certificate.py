@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pathlib
 import re
-from pathlib import Path
+from datetime import datetime
+from datetime import timezone
 from typing import AnyStr
 from typing import Dict
 from typing import List
@@ -26,7 +27,7 @@ from .private_key import PrivateKey
 
 
 class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
-    DEFAULT_LOCATION = Path.home() / Path('Library', 'MobileDevice', 'Certificates')
+    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), 'Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, x509_certificate: X509):
         self.x509 = x509_certificate
@@ -86,6 +87,11 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return self.x509.has_expired()
 
     @property
+    def expires_at(self) -> datetime:
+        naive_dt = datetime.strptime(self.not_after, '%Y%m%d%H%M%SZ')
+        return naive_dt.astimezone(timezone.utc)
+
+    @property
     def serial(self) -> int:
         return self.x509.get_serial_number()
 
@@ -143,12 +149,17 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def export_p12(self,
                    private_key: PrivateKey,
                    container_password: str,
-                   export_path: Optional[pathlib.Path] = None) -> pathlib.Path:
+                   export_path: Optional[Union[pathlib.Path, AnyStr]] = None) -> pathlib.Path:
         """
         :raises: IOError, ValueError
         """
+        if isinstance(export_path, (str, bytes)):
+            _export_path: Optional[pathlib.Path] = pathlib.Path(self._str(export_path))
+        else:
+            _export_path = export_path
+
         exporter = P12Exporter(self, private_key, container_password)
-        return exporter.export(export_path)
+        return exporter.export(_export_path)
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()

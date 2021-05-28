@@ -12,6 +12,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Type
+from typing import TypeVar
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -24,6 +26,8 @@ from codemagic.models import ProvisioningProfile
 from codemagic.models import Xcode
 from codemagic.models import Xcodebuild
 from codemagic.models import Xcpretty
+from codemagic.models.application_package import Ipa
+from codemagic.models.application_package import MacOsPackage
 from codemagic.models.junit import TestSuitePrinter
 from codemagic.models.junit import TestSuites
 from codemagic.models.simulator import Runtime
@@ -37,6 +41,8 @@ from ._xcode_project.arguments import TestResultArgument
 from ._xcode_project.arguments import XcodeArgument
 from ._xcode_project.arguments import XcodeProjectArgument
 from ._xcode_project.arguments import XcprettyArgument
+
+P = TypeVar('P', Ipa, MacOsPackage)
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -220,6 +226,42 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
+
+    @cli.action('pkg-info',
+                XcodeProjectArgument.PKG_PATH,
+                XcodeProjectArgument.JSON_OUTPUT)
+    def get_pkg_info(self,
+                     pkg_path: pathlib.Path,
+                     json_output: bool = False,
+                     should_print: bool = True) -> MacOsPackage:
+        """
+        Show information about macOS Application Package file
+        """
+
+        return self._show_application_package_info(
+            MacOsPackage,
+            pkg_path,
+            json_output,
+            should_print,
+        )
+
+    @cli.action('ipa-info',
+                XcodeProjectArgument.IPA_PATH,
+                XcodeProjectArgument.JSON_OUTPUT)
+    def get_ipa_info(self,
+                     ipa_path: pathlib.Path,
+                     json_output: bool = False,
+                     should_print: bool = True) -> Ipa:
+        """
+        Show information about iOS App Store Package file
+        """
+
+        return self._show_application_package_info(
+            Ipa,
+            ipa_path,
+            json_output,
+            should_print,
+        )
 
     @cli.action('test-destinations',
                 TestArgument.RUNTIMES,
@@ -592,6 +634,25 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
         export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
         export_options.save(export_options_path)
+
+    def _show_application_package_info(self,
+                                       application_package_type: Type[P],
+                                       application_package_path: pathlib.Path,
+                                       json_output: bool,
+                                       should_print: bool) -> P:
+        try:
+            application_package = application_package_type(application_package_path)
+        except IOError as error:
+            raise XcodeProjectException(str(error)) from error
+
+        if should_print:
+            if json_output:
+                summary = json.dumps(application_package.get_summary(), indent=4)
+            else:
+                summary = application_package.get_text_summary()
+            self.echo(summary)
+
+        return application_package
 
 
 if __name__ == '__main__':

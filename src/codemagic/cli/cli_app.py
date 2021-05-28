@@ -23,6 +23,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
+from typing import Union
 
 from codemagic import __version__
 from codemagic.utilities import log
@@ -134,7 +135,7 @@ class CliApp(metaclass=abc.ABCMeta):
         instance.verbose = cli_args.verbose
         return instance
 
-    def _invoke_action(self, args: argparse.Namespace):
+    def _get_invoked_cli_action(self, args: argparse.Namespace) -> ActionCallable:
         subcommand = getattr(args, 'action_subcommand', None)
         if subcommand is None:
             action_group = None
@@ -143,7 +144,11 @@ class CliApp(metaclass=abc.ABCMeta):
             action_group = next(g for g in self.list_class_action_groups() if g.name == args.action)
             action_key = subcommand
 
-        cli_action = {ac.action_name: ac for ac in self.iter_cli_actions(action_group)}[action_key]
+        cli_actions = {ac.action_name: ac for ac in self.iter_cli_actions(action_group)}
+        return cli_actions[action_key]
+
+    def _invoke_action(self, args: argparse.Namespace):
+        cli_action = self._get_invoked_cli_action(args)
         action_args = {
             arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
             for arg_type in cli_action.arguments
@@ -174,11 +179,13 @@ class CliApp(metaclass=abc.ABCMeta):
         try:
             if args.show_version:
                 cls.show_version()
-            elif args.action:
+            elif not args.action:
+                raise argparse.ArgumentError(args.action, 'the following argument is required: action')
+            elif cls._action_requires_subcommand(args.action) and not args.action_subcommand:
+                raise argparse.ArgumentError(args.action_subcommand, 'the following argument is required: subcommand')
+            else:
                 CliApp._running_app = cls._create_instance(parser, args)
                 CliApp._running_app._invoke_action(args)
-            else:
-                raise argparse.ArgumentError(args.action, 'the following argument is required: action')
         except argparse.ArgumentError as argument_error:
             parser.error(str(argument_error))
             status = 2
@@ -193,6 +200,13 @@ class CliApp(metaclass=abc.ABCMeta):
         finally:
             cls._log_cli_invoke_completed(args.action, started_at, status)
         sys.exit(status)
+
+    @classmethod
+    def _action_requires_subcommand(cls, action_name: str) -> bool:
+        for action_group in cls.iter_class_action_groups():
+            if action_group.name == action_name:
+                return True
+        return False
 
     @classmethod
     def _log_cli_invoke_started(cls):
@@ -218,9 +232,20 @@ class CliApp(metaclass=abc.ABCMeta):
         file_logger.debug(Colors.MAGENTA('-' * len(msg)))
 
     @classmethod
+    def iter_class_action_groups(cls) -> Iterable[ActionGroup]:
+        groups = set()
+        for cli_action in cls.iter_class_cli_actions(include_all=True):
+            if not cli_action.action_group:
+                continue
+            elif cli_action.action_group in groups:
+                continue
+            else:
+                groups.add(cli_action.action_group)
+                yield cli_action.action_group
+
+    @classmethod
     def list_class_action_groups(cls) -> List[ActionGroup]:
-        groups = {a.action_group for a in cls.iter_class_cli_actions(include_all=True) if a.action_group}
-        return sorted(groups, key=lambda g: g.name)
+        return sorted(cls.iter_class_action_groups(), key=lambda g: g.name)
 
     @classmethod
     def iter_class_cli_actions(
@@ -322,13 +347,20 @@ class CliApp(metaclass=abc.ABCMeta):
         formatted_title = Colors.BOLD(Colors.UNDERLINE('Available commands'))
         action_parsers = main_parser.add_subparsers(dest='action', title=formatted_title)
 
-        for main_action in cls.iter_class_cli_actions():
-            cls._add_action_parser(main_action, action_parsers)
+        actions_and_groups: List[Union[ActionGroup, ActionCallable]] = sorted(
+            chain(cls.iter_class_cli_actions(), cls.list_class_action_groups()),
+            key=lambda a: a.name if isinstance(a, ActionGroup) else a.action_name,
+        )
 
-        for action_group in cls.list_class_action_groups():
-            group_parsers = cls._add_action_group(action_group, action_parsers)
-            for group_action in cls.iter_class_cli_actions(action_group):
-                cls._add_action_parser(group_action, group_parsers)
+        for action_or_group in actions_and_groups:
+            if isinstance(action_or_group, ActionGroup):
+                action_group: ActionGroup = action_or_group
+                group_parsers = cls._add_action_group(action_group, action_parsers)
+                for group_action in cls.iter_class_cli_actions(action_group):
+                    cls._add_action_parser(group_action, group_parsers)
+            else:
+                main_action: ActionCallable = action_or_group
+                cls._add_action_parser(main_action, action_parsers)
 
         return main_parser
 
@@ -383,12 +415,16 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute()
 
 
-def action(action_name: str, *arguments: Argument, action_group: Optional[ActionGroup] = None):
+def action(action_name: str,
+           *arguments: Argument,
+           action_group: Optional[ActionGroup] = None,
+           action_options: Optional[Dict[str, Any]] = None):
     """
     Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
     :param arguments: CLI arguments that are required for this method to work
     :param action_group: CLI argument group under which this action belongs
+    :param action_options: Meta information about the action to check whether some conditions are met
     """
 
     def decorator(func):
@@ -398,6 +434,7 @@ def action(action_name: str, *arguments: Argument, action_group: Optional[Action
         func.action_name = action_name
         func.arguments = arguments
         func.is_cli_action = True
+        func.action_options = action_options or {}
 
         @wraps(func)
         def wrapper(*args, **kwargs):

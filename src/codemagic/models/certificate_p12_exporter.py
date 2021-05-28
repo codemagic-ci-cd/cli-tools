@@ -46,7 +46,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     def _ensure_openssl(cls):
         if shutil.which('openssl') is None:
-            raise IOError('OpenSSL executable not present on system')
+            raise IOError('OpenSSL executable is not present on system')
 
     def _run_openssl_command(self, command: Sequence[Union[str, pathlib.Path]]):
         process = None

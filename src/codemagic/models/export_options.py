@@ -5,6 +5,7 @@ import pathlib
 import plistlib
 import re
 from dataclasses import dataclass
+from typing import AnyStr
 from typing import Counter
 from typing import Dict
 from typing import List
@@ -16,6 +17,7 @@ from typing import get_type_hints
 from typing import overload
 
 from codemagic.cli import Colors
+from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .matched_profile import MatchedProfile
@@ -83,7 +85,7 @@ class Manifest:
 
 
 @dataclass
-class ExportOptions:
+class ExportOptions(StringConverterMixin):
     compileBitcode: Optional[bool] = None
     destination: Optional[Destination] = None
     embedOnDemandResourcesAssetPacksInBundle: Optional[bool] = None
@@ -180,8 +182,11 @@ class ExportOptions:
             self.set_value(field_name, value)
 
     @classmethod
-    def from_path(cls, path: pathlib.Path) -> ExportOptions:
-        with path.open('rb') as fd:
+    def from_path(cls, plist_path: Union[pathlib.Path, AnyStr]) -> ExportOptions:
+        if isinstance(plist_path, (bytes, str)):
+            plist_path = pathlib.Path(cls._str(plist_path))
+
+        with plist_path.open('rb') as fd:
             data = plistlib.load(fd)  # type: ignore
         return ExportOptions(**data)
 

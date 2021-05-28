@@ -4,8 +4,6 @@ import pathlib
 import plistlib
 import shutil
 import subprocess
-import tempfile
-import zipfile
 from typing import Any
 from typing import AnyStr
 from typing import Dict
@@ -14,6 +12,8 @@ from typing import List
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
+
+from .application_package import Ipa
 
 
 class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
@@ -51,20 +51,11 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
 
     @classmethod
     def from_ipa(cls, ipa_path: pathlib.Path) -> CodeSignEntitlements:
-        with zipfile.ZipFile(ipa_path) as zf, tempfile.TemporaryDirectory() as td:
-            for zi in zf.filelist:
-                path = pathlib.Path(zi.filename)
-                try:
-                    p1, p2, *_rest = path.parts
-                except ValueError:
-                    continue
-                if p1 == 'Payload' and p2.endswith('.app'):
-                    zf.extract(zi, path=td)
-
-            app_path = next((pathlib.Path(td).glob('Payload/*.app')), None)
-            if not app_path:
-                raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
-            return cls.from_app(app_path)
+        try:
+            app_path = Ipa(ipa_path).extract_app()
+        except IOError:
+            raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
+        return cls.from_app(app_path)
 
     @classmethod
     def from_xcarchive(cls, xcarchive_path: pathlib.Path) -> CodeSignEntitlements:

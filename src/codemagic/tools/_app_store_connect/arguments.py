@@ -1,9 +1,11 @@
 import pathlib
+import re
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -27,6 +29,12 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_KEY_IDENTIFIER'
 
     class PrivateKeyArgument(cli.EnvironmentArgumentValue[str]):
+        PRIVATE_KEY_LOCATIONS = (
+            pathlib.Path('./private_keys'),
+            pathlib.Path('~/private_keys'),
+            pathlib.Path('~/.private_keys'),
+            pathlib.Path('~/.appstoreconnect/private_keys'),
+        )
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
 
         @classmethod
@@ -39,8 +47,42 @@ class Types:
     class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
 
+    class AppSpecificPassword(cli.EnvironmentArgumentValue):
+        environment_variable_key = 'APP_SPECIFIC_PASSWORD'
+
+        @classmethod
+        def _is_valid(cls, value: str) -> bool:
+            return bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', value))
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
+
+
+class AppArgument(cli.Argument):
+    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='application_id',
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+    )
+    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
+        key='application_id',
+        flags=('--app-id', '--application-id'),
+        type=ResourceId,
+        description='Application Apple ID. An automatically generated ID assigned to your app',
+        argparse_kwargs={'required': False},
+    )
+    APPLICATION_NAME = cli.ArgumentProperties(
+        key='application_name',
+        flags=('--app-name', '--application-name'),
+        description='The name of your app as it will appear in the App Store',
+        argparse_kwargs={'required': False},
+    )
+    APPLICATION_SKU = cli.ArgumentProperties(
+        key='application_sku',
+        flags=('--app-sku', '--application-sku'),
+        description='A unique ID for your app that is not visible on the App Store.',
+        argparse_kwargs={'required': False},
+    )
 
 
 class AppStoreConnectArgument(cli.Argument):
@@ -79,7 +121,14 @@ class AppStoreConnectArgument(cli.Argument):
         key='private_key',
         flags=('--private-key',),
         type=Types.PrivateKeyArgument,
-        description=f'App Store Connect API private key. {_API_DOCS_REFERENCE}',
+        description=(
+            f'App Store Connect API private key used for JWT authentication to communicate with Apple services. '
+            f'{_API_DOCS_REFERENCE} '
+            f'If not provided, the key will be searched from the following directories '
+            f'in sequence for a private key file with the name "AuthKey_<key_identifier>.p8": '
+            f'{", ".join(map(str, Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS))}, where '
+            f'<key_identifier> is the value of {Colors.BRIGHT_BLUE("--key-id")}'
+        ),
         argparse_kwargs={'required': False},
     )
     CERTIFICATES_DIRECTORY = cli.ArgumentProperties(
@@ -99,9 +148,46 @@ class AppStoreConnectArgument(cli.Argument):
 
 
 class AppStoreVersionArgument(cli.Argument):
-    APP_STORE_VERSION = cli.ArgumentProperties(
-        key='app_store_version',
-        flags=('--app-store-version',),
+    APP_STORE_STATE = cli.ArgumentProperties(
+        key='app_store_state',
+        flags=('--state', '--app-store-version-state'),
+        type=AppStoreState,
+        description='State of App Store Version',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(AppStoreState),
+        },
+    )
+    APP_STORE_VERSION_ID = cli.ArgumentProperties(
+        key='app_store_version_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+    )
+    APP_STORE_VERSION_ID_OPTIONAL = cli.ArgumentProperties(
+        key='app_store_version_id',
+        flags=('--version-id', '--app-store-version-id'),
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+        argparse_kwargs={'required': False},
+    )
+    APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
+        key='app_store_version_submission_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version Submission',
+    )
+    PLATFORM = cli.ArgumentProperties(
+        key='platform',
+        flags=('--platform', '--app-store-version-platform'),
+        type=Platform,
+        description='App Store Version platform',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
+    )
+    VERSION_STRING = cli.ArgumentProperties(
+        key='version_string',
+        flags=('--version-string', '--app-store-version'),
         description=(
             'Version of the build published to App Store '
             'that identifies an iteration of the bundle. '
@@ -111,31 +197,60 @@ class AppStoreVersionArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False},
     )
-    APP_STORE_VERSION_ID = cli.ArgumentProperties(
-        key='app_store_version_id',
-        type=ResourceId,
-        description='UUID value of the App Store Version',
+
+
+class PublishArgument(cli.Argument):
+    APPLICATION_PACKAGE_PATH_PATTERNS = cli.ArgumentProperties(
+        key='application_package_path_patterns',
+        flags=('--path',),
+        type=pathlib.Path,
+        description=(
+            'Path to artifact (*.ipa or *.pkg). Can be either a path literal, or '
+            'a glob pattern to match projects in working directory.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'default': (pathlib.Path('**/*.ipa'), pathlib.Path('**/*.pkg')),
+            'nargs': '+',
+            'metavar': 'artifact-path',
+        },
     )
-    APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
-        key='app_store_version_submission_id',
-        type=ResourceId,
-        description='UUID value of the App Store Version Submission',
+    SUBMIT_TO_TESTFLIGHT = cli.ArgumentProperties(
+        key='submit_to_testflight',
+        flags=('-t', '--testflight'),
+        type=bool,
+        description='Submit an app for Testflight beta app review to allow external testing',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    APPLE_ID = cli.ArgumentProperties(
+        key='apple_id',
+        flags=('-u', '--apple-id'),
+        description=(
+            'App Store Connect username used for application package validation '
+            'and upload if App Store Connect API key is not specified'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    APP_SPECIFIC_PASSWORD = cli.ArgumentProperties(
+        key='app_specific_password',
+        flags=('-p', '--password'),
+        type=Types.AppSpecificPassword,
+        description=(
+            'App-specific password used for application package validation '
+            'and upload if App Store Connect API Key is not specified. '
+            f'Used together with {Colors.BRIGHT_BLUE("--apple-id")} '
+            'and should match pattern "abcd-abcd-abcd-abcd". '
+            'Create an app-specific password in the Security section of your Apple ID account. '
+            'Learn more from https://support.apple.com/en-us/HT204397'
+        ),
+        argparse_kwargs={'required': False},
     )
 
 
 class BuildArgument(cli.Argument):
-    APPLICATION_ID_RESOURCE_ID = cli.ArgumentProperties(
-        key='application_id',
-        type=ResourceId,
-        description='Application Apple ID. An automatically generated ID assigned to your app',
-    )
-    APPLICATION_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
-        key='application_id',
-        flags=('--application-id',),
-        type=ResourceId,
-        description='Application Apple ID. An automatically generated ID assigned to your app',
-        argparse_kwargs={'required': False},
-    )
     EXPIRED = cli.ArgumentProperties(
         key='expired',
         flags=('--expired',),
@@ -157,6 +272,11 @@ class BuildArgument(cli.Argument):
         },
     )
     BUILD_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='build_id',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build',
+    )
+    BUILD_ID_RESOURCE_ID_OPTIONAL = cli.ArgumentProperties(
         key='build_id',
         flags=('--build-id',),
         type=ResourceId,
@@ -200,12 +320,12 @@ class BuildArgument(cli.Argument):
 class BundleIdArgument(cli.Argument):
     BUNDLE_ID_IDENTIFIER = cli.ArgumentProperties(
         key='bundle_id_identifier',
-        description='Identifier of the Bundle ID',
+        description='Identifier of the Bundle ID. For example `com.example.app`',
     )
     BUNDLE_ID_IDENTIFIER_OPTIONAL = cli.ArgumentProperties(
         key='bundle_id_identifier',
         flags=('--bundle-id-identifier',),
-        description='Identifier of the Bundle ID',
+        description='Identifier of the Bundle ID. For example `com.example.app`',
         argparse_kwargs={'required': False},
     )
     BUNDLE_ID_NAME = cli.ArgumentProperties(

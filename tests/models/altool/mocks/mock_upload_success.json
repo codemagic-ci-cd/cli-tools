@@ -1,0 +1,6 @@
+{
+    "tool-version": "4.029.1194",
+    "tool-path": "/Applications/Xcode.app/Contents/.../AppStoreService.framework",
+    "success-message": "No errors uploading 'macos_example.pkg'",
+    "os-version": "11.2.3"
+}

@@ -156,14 +156,10 @@ class PrettyNameMeta(JsonSerializableMeta):
 class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     @dataclass
     class Attributes(DictSerializable):
-        def __init__(self, *args, **kwargs):
-            pass
+        pass
 
     @dataclass
     class Relationships(DictSerializable):
-        def __init__(self, *args, **kwargs):
-            pass
-
         def __post_init__(self):
             for field in self.__dict__:
                 value = getattr(self, field)

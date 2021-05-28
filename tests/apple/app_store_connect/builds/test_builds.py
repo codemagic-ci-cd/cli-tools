@@ -16,6 +16,12 @@ class BuildsTest(ResourceManagerTestsBase):
             assert isinstance(build, Build)
             assert build.type is ResourceType.BUILDS
 
-    def test_filter(self):
-        assert self.api_client.builds.Filter._get_field_name(
-            'pre_release_version_version') == 'preReleaseVersion.version'
+
+@pytest.mark.parametrize('python_field_name, apple_filter_name', [
+    ('processing_state', 'processingState'),
+    ('version', 'version'),
+    ('pre_release_version_version', 'preReleaseVersion.version'),
+])
+def test_builds_filter(app_store_connect_api_client, python_field_name, apple_filter_name):
+    get_apple_filter_name = app_store_connect_api_client.builds.Filter._get_field_name
+    assert get_apple_filter_name(python_field_name) == apple_filter_name

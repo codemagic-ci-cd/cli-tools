@@ -1,3 +1,38 @@
+Version 0.7.0
+-------------
+
+**New features**
+
+- Add action group `apps` to tool `app-store-connect`.
+- Add action group `beta-app-review-submissions` to tool `app-store-connect`.
+- Add action group `builds` to tool `app-store-connect`.
+- Add action `app-store-connect apps get` to ...
+- Add action `app-store-connect apps list` to ...
+- Add action `app-store-connect apps app-store-versions` to ...
+- Add action `app-store-connect apps builds` ...
+- Add action `app-store-connect apps pre-release-versions` ...
+- Add action `app-store-connect beta-app-review-submissions create` ...
+- Add action `app-store-connect beta-app-review-submissions list` ...
+- Add action `app-store-connect builds pre-release-version` to ...
+- Add action `app-store-connect publish` to ...
+- Add action `xcode-project ipa-info` to ...
+- Add action `xcode-project pkg-info` to ...
+- Support loading App Store Connect API key from disk using key identifier by checking predefined locations `./private_keys`, `~/private_keys`, `~/.private_keys`, `~/.appstoreconnect/private_keys` for file `AuthKey_<key_identifier>.p8`.
+- Add Python wrapper to Apple's Application Loader tool and use it to publish application packages to App Store Connect.
+
+**Fixes**
+
+- Handle missing action for action group on command invocation.
+- Fix initializing provisioning profiles from in-memory content.
+
+**Development / Docs**
+
+- Improve modularity by adding support to define tool actions and action groups in separate modules.
+- Support strings as path argument for `Certificate.export_p12`.
+- Support strings as path argument for `ExportOptions.from_path` factory method.
+- Support strings as path argument for `PbxProject.from_path` factory method.
+- Extract resource management methods from `AppStoreConnect` to separate mixin class.
+
 Version 0.6.1
 -------------
 
