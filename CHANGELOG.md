@@ -33,6 +33,12 @@ Version 0.7.0
 - Support strings as path argument for `PbxProject.from_path` factory method.
 - Extract resource management methods from `AppStoreConnect` to separate mixin class.
 
+Version 0.6.1
+-------------
+
+**Fixes**
+
+- Allow `passTypeId` relationship for [Certificate](https://developer.apple.com/documentation/appstoreconnectapi/certificate) model.
 
 Version 0.6.0
 -------------
