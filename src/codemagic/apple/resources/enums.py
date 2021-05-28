@@ -23,8 +23,7 @@ class _ResourceEnumMeta(enum.EnumMeta):
         except ValueError as ve:
             logger = log.get_logger(cls, log_to_stream=False)
             logger.warning('Undefined Resource enumeration: %s', ve)
-            enum_class = enum.Enum(f'Graceful{cls.__name__}', {value: value})
-            enum_class.__str__ = lambda self: str(self.value)
+            enum_class = _ResourceEnum(f'Graceful{cls.__name__}', {value: value})
             return enum_class(value)
 
 
