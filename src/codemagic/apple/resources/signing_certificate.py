@@ -42,7 +42,7 @@ class SigningCertificate(Resource):
     class Relationships(Resource.Relationships):
         _OMIT_IF_NONE_KEYS = ('passTypeId',)
 
-        passTypeId: Optional[Relationship]
+        passTypeId: Optional[Relationship] = None
 
     def get_display_info(self) -> str:
         return f'{self.attributes.certificateType} certificate {self.attributes.serialNumber}'
