@@ -1,3 +1,10 @@
+Version 0.7.2
+-------------
+
+**Fixes**
+
+- Support non-integer (dot-separated versions such as 10.14.1) version codes for `app-store-connect get-latest-app-store-build-number` and `app-store-connect get-latest-testflight-build-number`.
+
 Version 0.7.1
 -------------
 
