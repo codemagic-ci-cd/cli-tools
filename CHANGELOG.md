@@ -1,3 +1,10 @@
+Version 0.7.3
+-------------
+
+**Fixes**
+
+- Do not require App Store Connect API keys for `app-store-connect publish` unless `--testflight` option is specified as binary upload can be done with Apple ID and App Specific password only.
+
 Version 0.7.2
 -------------
 
