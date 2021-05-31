@@ -7,6 +7,7 @@ import pathlib
 import re
 import tempfile
 import time
+from distutils.version import LooseVersion
 from functools import lru_cache
 from typing import Iterator
 from typing import List
@@ -222,13 +223,11 @@ class AppStoreConnect(cli.CliApp,
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @classmethod
-    def _get_latest_build_number(cls, builds: List[Build]) -> Optional[int]:
-        try:
-            latest_build_number = max(int(build.attributes.version) for build in builds)
-        except ValueError:
-            return None
-        cls.echo(str(latest_build_number))
-        return latest_build_number
+    def _get_latest_build_number(cls, builds: List[Build]) -> str:
+        most_recent_build = max(builds, key=lambda b: LooseVersion(b.attributes.version))
+        version = most_recent_build.attributes.version
+        cls.echo(version)
+        return version
 
     @cli.action('get-latest-app-store-build-number',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
@@ -238,7 +237,7 @@ class AppStoreConnect(cli.CliApp,
                                           application_id: ResourceId,
                                           version_string: Optional[str] = None,
                                           platform: Optional[Platform] = None,
-                                          should_print: bool = False) -> Optional[int]:
+                                          should_print: bool = False) -> str:
         """
         Get latest App Store build number for the given application
         """
@@ -261,7 +260,7 @@ class AppStoreConnect(cli.CliApp,
                                            application_id: ResourceId,
                                            pre_release_version: Optional[str] = None,
                                            platform: Optional[Platform] = None,
-                                           should_print: bool = False) -> Optional[int]:
+                                           should_print: bool = False) -> str:
         """
         Get latest Testflight build number for the given application
         """
