@@ -60,30 +60,27 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         failed_packages: List[str] = []
         for application_package in application_packages:
             try:
-                build, pre_release_version = self._publish_application_package(altool, application_package)
+                self._publish_application_package(altool, application_package)
                 if submit_to_testflight:
+                    build, pre_release_version = self._get_uploaded_build(application_package)
                     self.create_beta_app_review_submission(build.id)
             except IOError as error:
-                # TODO: Should we fail the whole action on first publishing failure?
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
-    def _publish_application_package(
-            self,
-            altool: Altool,
-            application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
+    def _publish_application_package(self, altool: Altool, application_package: Union[Ipa, MacOsPackage]):
         """
         :raises IOError in case any step of publishing fails
         """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
-
         self._validate_artifact_with_altool(altool, application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
+    def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
         try:
@@ -108,9 +105,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         return build, pre_release_version
 
     def _get_publishing_application_packages(
-            self,
-            path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
-        found_application_paths = list(self.find_paths(*path_patterns))
+            self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
+        _path_patterns = list(path_patterns)
+        print(_path_patterns)
+        if len(_path_patterns) == 1 and _path_patterns[0].exists():
+            # Add exempt for single path that exists to avoid unnecessary log output
+            found_application_paths = [_path_patterns[0]]
+        else:
+            found_application_paths = list(self.find_paths(*path_patterns))
+
         application_packages: List[Union[Ipa, MacOsPackage]] = []
         for path in found_application_paths:
             if path.suffix == '.ipa':
