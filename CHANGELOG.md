@@ -1,3 +1,10 @@
+Version 0.7.4
+-------------
+
+**Fixes**
+
+- Do not fail actions `app-store-connect get-latest-app-store-build-number` and `app-store-connect get-latest-testflight-build-number` in case no builds were found for specified constraints. 
+
 Version 0.7.3
 -------------
 

@@ -223,7 +223,9 @@ class AppStoreConnect(cli.CliApp,
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @classmethod
-    def _get_latest_build_number(cls, builds: List[Build]) -> str:
+    def _get_latest_build_number(cls, builds: List[Build]) -> Optional[str]:
+        if not builds:
+            return None
         most_recent_build = max(builds, key=lambda b: LooseVersion(b.attributes.version))
         version = most_recent_build.attributes.version
         cls.echo(version)
@@ -237,7 +239,7 @@ class AppStoreConnect(cli.CliApp,
                                           application_id: ResourceId,
                                           version_string: Optional[str] = None,
                                           platform: Optional[Platform] = None,
-                                          should_print: bool = False) -> str:
+                                          should_print: bool = False) -> Optional[str]:
         """
         Get latest App Store build number for the given application
         """
@@ -260,7 +262,7 @@ class AppStoreConnect(cli.CliApp,
                                            application_id: ResourceId,
                                            pre_release_version: Optional[str] = None,
                                            platform: Optional[Platform] = None,
-                                           should_print: bool = False) -> str:
+                                           should_print: bool = False) -> Optional[str]:
         """
         Get latest Testflight build number for the given application
         """
