@@ -229,6 +229,7 @@ class ResourceType(_ResourceEnum):
     APP_STORE_VERSIONS = 'appStoreVersions'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BETA_APP_REVIEW_SUBMISSIONS = 'betaAppReviewSubmissions'
+    BETA_BUILD_LOCALIZATIONS = 'betaBuildLocalizations'
     BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'
