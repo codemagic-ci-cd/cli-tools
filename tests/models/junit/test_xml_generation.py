@@ -1,6 +1,5 @@
 import pathlib
-from xml.dom import minidom
-from xml.dom.minidom import Document
+from xml.etree import ElementTree
 
 import pytest
 
@@ -333,13 +332,22 @@ def _testsuites() -> TestSuites:
 
 
 @pytest.fixture()
-def expected_xml() -> Document:
-    mock_xml_path = pathlib.Path(__file__).parent / 'mocks' / 'testsuite.xml'
-    return minidom.parse(mock_xml_path.open())
+def expected_xml_path() -> pathlib.Path:
+    return pathlib.Path(__file__).parent / 'mocks' / 'testsuite.xml'
 
 
-def test_xml(temp_dir, _testsuites, expected_xml):
+def _assert_elements_are_equal(el_1, el_2):
+    assert el_1.tag == el_2.tag
+    assert el_1.text == el_2.text
+    assert el_1.tail == el_2.tail
+    assert el_1.attrib == el_2.attrib
+    assert len(el_1) == len(el_2)
+    return all(_assert_elements_are_equal(c1, c2) for c1, c2 in zip(el_1, el_2))
+
+
+def test_xml(temp_dir, _testsuites, expected_xml_path):
     xml_path = temp_dir / 'testsuite.xml'
     _testsuites.save_xml(xml_path)
-    generated_xml = minidom.parse(xml_path.open())
-    assert generated_xml.toxml() == expected_xml.toxml()
+    generated_xml = ElementTree.parse(xml_path)
+    expected_xml = ElementTree.parse(expected_xml_path)
+    _assert_elements_are_equal(generated_xml.getroot(), expected_xml.getroot())
