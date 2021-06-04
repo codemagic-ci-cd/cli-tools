@@ -27,14 +27,17 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         build: Optional[ResourceId] = None
         locale: Optional[Locale] = None
 
-    def create(self, build: Union[ResourceId, Build], locale: Locale, whats_new: str) -> BetaBuildLocalization:
+    def create(
+            self, build: Union[ResourceId, Build], locale: Locale, whats_new: Optional[str] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
         attributes = {
             'locale': str(locale),
-            'whatsNew': whats_new,
         }
+
+        if whats_new:
+            attributes['whatsNew'] = whats_new
 
         relationships = {
             'build': {
@@ -47,12 +50,17 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         response = self.client.session.post(f'{self.client.API_URL}/betaBuildLocalizations', json=payload).json()
         return BetaBuildLocalization(response['data'], created=True)
 
-    def modify(self, resource_id: ResourceId, whats_new: str) -> BetaBuildLocalization:
+    def modify(self, resource_id: ResourceId, whats_new: Optional[str] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
         """
+        attributes = {}
+
+        if whats_new:
+            attributes['whatsNew'] = whats_new
+
         payload = self._get_update_payload(
-            resource_id, ResourceType.BETA_BUILD_LOCALIZATIONS, attributes={'whatsNew': whats_new})
+            resource_id, ResourceType.BETA_BUILD_LOCALIZATIONS, attributes=attributes)
 
         response = self.client.session.patch(
             f'{self.client.API_URL}/betaBuildLocalizations/{resource_id}', json=payload).json()

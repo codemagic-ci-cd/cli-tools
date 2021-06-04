@@ -316,6 +316,11 @@ class BuildArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False},
     )
+    BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='localization_id',
+        type=ResourceId,
+        description='Beta build localization ID',
+    )
     LOCALE = cli.ArgumentProperties(
         key='locale',
         flags=('--locale',),
@@ -343,7 +348,7 @@ class BuildArgument(cli.Argument):
         description=('A field that describes changes and additions to a build '
                      'and indicates features you would like your users to test.'),
         argparse_kwargs={
-            'required': True,
+            'required': False,
         },
     )
 

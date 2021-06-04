@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 from .resource import Relationship
 from .resource import Resource
@@ -14,7 +15,7 @@ class BetaBuildLocalization(Resource):
     @dataclass
     class Attributes(Resource.Attributes):
         locale: str
-        whatsNew: str
+        whatsNew: Optional[str]
 
     @dataclass
     class Relationships(Resource.Relationships):
