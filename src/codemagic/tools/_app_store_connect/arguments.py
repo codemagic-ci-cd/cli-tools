@@ -10,6 +10,7 @@ from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -314,6 +315,26 @@ class BuildArgument(cli.Argument):
             'For example `46`'
         ),
         argparse_kwargs={'required': False},
+    )
+    LOCALE = cli.ArgumentProperties(
+        key='locale',
+        flags=('--locale',),
+        type=Locale,
+        description='The specified locale, e.g. de-DE or en-GB',
+        argparse_kwargs={
+            'required': True,
+            'choices': list(Locale),
+        },
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new',),
+        type=str,
+        description=('A field that describes changes and additions to a build '
+                     'and indicates features you would like your users to test.'),
+        argparse_kwargs={
+            'required': True,
+        },
     )
 
 

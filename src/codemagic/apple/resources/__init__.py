@@ -20,6 +20,7 @@ from .enums import CertificateType
 from .enums import ContentRightsDeclaration
 from .enums import DeviceClass
 from .enums import DeviceStatus
+from .enums import Locale
 from .enums import Platform
 from .enums import ProfileState
 from .enums import ProfileType
