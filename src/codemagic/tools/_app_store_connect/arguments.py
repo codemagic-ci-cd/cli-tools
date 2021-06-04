@@ -326,6 +326,16 @@ class BuildArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
+    LOCALE_OPTIONAL = cli.ArgumentProperties(
+        key='locale',
+        flags=('--locale',),
+        type=Locale,
+        description='The specified locale, e.g. de-DE or en-GB',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
         flags=('--whats-new',),

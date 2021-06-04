@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generator
+from typing import List
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -47,32 +47,27 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         response = self.client.session.post(f'{self.client.API_URL}/betaBuildLocalizations', json=payload).json()
         return BetaBuildLocalization(response['data'], created=True)
 
-    def modify(self, build: Union[ResourceId, Build], locale: Locale, whats_new: str) -> BetaBuildLocalization:
+    def modify(self, resource_id: ResourceId, whats_new: str) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
         """
-        resource_id = self._get_resource_id(build)
-        localization = next(self.list(self.Filter(build=resource_id, locale=locale)))
-
         payload = self._get_update_payload(
-            localization.id, ResourceType.BETA_BUILD_LOCALIZATIONS, attributes={'whatsNew': whats_new})
+            resource_id, ResourceType.BETA_BUILD_LOCALIZATIONS, attributes={'whatsNew': whats_new})
 
         response = self.client.session.patch(
-            f'{self.client.API_URL}/betaBuildLocalizations/{localization.id}', json=payload).json()
+            f'{self.client.API_URL}/betaBuildLocalizations/{resource_id}', json=payload).json()
         return BetaBuildLocalization(response['data'])
 
-    def list(self, resource_filter: Filter = Filter()) -> Generator[BetaBuildLocalization, None, None]:
+    def list(self, resource_filter: Filter = Filter()) -> List[BetaBuildLocalization]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_localizations
         """
         beta_build_localizations = self.client.paginate(
             f'{self.client.API_URL}/betaBuildLocalizations', params=resource_filter.as_query_params())
-        return (BetaBuildLocalization(localization) for localization in beta_build_localizations)
+        return [BetaBuildLocalization(localization) for localization in beta_build_localizations]
 
-    def delete(self, build: Union[ResourceId, Build], locale: Locale):
+    def delete(self, resource_id: ResourceId):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_a_beta_build_localization
         """
-        resource_id = self._get_resource_id(build)
-        localization = next(self.list(self.Filter(build=resource_id, locale=locale)))
-        self.client.session.delete(f'{self.client.API_URL}/betaBuildLocalizations/{localization.id}')
+        self.client.session.delete(f'{self.client.API_URL}/betaBuildLocalizations/{resource_id}')
