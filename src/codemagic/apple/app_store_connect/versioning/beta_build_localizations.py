@@ -9,6 +9,7 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources.beta_build_localization import BetaBuildLocalization
+from codemagic.apple.resources.enums import Locale
 
 
 class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
@@ -24,14 +25,14 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
     @dataclass
     class Filter(ResourceManager.Filter):
         build: Optional[ResourceId] = None
-        locale: Optional[str] = None
+        locale: Optional[Locale] = None
 
-    def create(self, build: Union[ResourceId, Build], locale: str, whats_new: str) -> BetaBuildLocalization:
+    def create(self, build: Union[ResourceId, Build], locale: Locale, whats_new: str) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
         attributes = {
-            'locale': locale,
+            'locale': str(locale),
             'whatsNew': whats_new,
         }
 
@@ -46,7 +47,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         response = self.client.session.post(f'{self.client.API_URL}/betaBuildLocalizations', json=payload).json()
         return BetaBuildLocalization(response['data'], created=True)
 
-    def modify(self, build: Union[ResourceId, Build], locale: str, whats_new: str) -> BetaBuildLocalization:
+    def modify(self, build: Union[ResourceId, Build], locale: Locale, whats_new: str) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
         """
@@ -68,7 +69,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
             f'{self.client.API_URL}/betaBuildLocalizations', params=resource_filter.as_query_params())
         return (BetaBuildLocalization(localization) for localization in beta_build_localizations)
 
-    def delete(self, build: Union[ResourceId, Build], locale):
+    def delete(self, build: Union[ResourceId, Build], locale: Locale):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_a_beta_build_localization
         """
