@@ -27,8 +27,10 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         build: Optional[ResourceId] = None
         locale: Optional[Locale] = None
 
-    def create(
-            self, build: Union[ResourceId, Build], locale: Locale, whats_new: Optional[str] = None) -> BetaBuildLocalization:
+    def create(self,
+               build: Union[ResourceId, Build],
+               locale: Locale,
+               whats_new: Optional[str] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
