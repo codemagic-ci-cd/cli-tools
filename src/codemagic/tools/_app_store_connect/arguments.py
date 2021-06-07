@@ -256,7 +256,11 @@ class PublishArgument(cli.Argument):
         key='skip_package_validation',
         flags=('--skip-package-validation',),
         type=Types.AppStoreConnectSkipPackageValidation,
-        description='Skip package validation before uploading it to App Store Connect',
+        description=(
+            'Skip package validation before uploading it to App Store Connect. '
+            'Use this switch to opt out from running `altool --validate-app` before uploading '
+            'package to App Store connect'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
