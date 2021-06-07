@@ -1,3 +1,11 @@
+Version 0.7.6
+-------------
+
+**Features**
+
+- Add option to submit "What's new" information along with Testflight build via `--locale` and `--whats-new` arguments in `app-store-connect publish` command.
+- Add a set of actions for managing "What's new" information for Testflight builds `app-store-connect beta-build-localizations`: `create`, `delete`, `modify`, `list`, and `get`.
+
 Version 0.7.5
 -------------
 
