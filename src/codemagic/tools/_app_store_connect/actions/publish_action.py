@@ -15,6 +15,7 @@ from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
+
 from ..abstract_base_action import AbstractBaseAction
 from ..arguments import PublishArgument
 from ..arguments import Types
