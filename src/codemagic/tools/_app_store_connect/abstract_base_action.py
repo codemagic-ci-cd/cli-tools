@@ -37,6 +37,10 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
+    @classmethod
+    def echo(cls, message: str, *args, **kwargs):
+        ...
+
     def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
         ...
 

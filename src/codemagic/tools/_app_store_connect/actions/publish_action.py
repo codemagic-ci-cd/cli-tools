@@ -15,7 +15,6 @@ from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
-
 from ..abstract_base_action import AbstractBaseAction
 from ..arguments import PublishArgument
 from ..arguments import Types
@@ -29,12 +28,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
+                PublishArgument.SKIP_PACKAGE_VALIDATION,
                 action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
-                submit_to_testflight: Optional[bool] = None) -> None:
+                submit_to_testflight: Optional[bool] = None,
+                skip_package_validation: Optional[bool] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """
@@ -57,10 +58,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         except ValueError as ve:
             raise AppStoreConnectError(str(ve))
 
+        validate_package = not bool(skip_package_validation)
         failed_packages: List[str] = []
         for application_package in application_packages:
             try:
-                self._publish_application_package(altool, application_package)
+                self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
                     build, pre_release_version = self._get_uploaded_build(application_package)
                     self.create_beta_app_review_submission(build.id)
@@ -71,13 +73,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
-    def _publish_application_package(self, altool: Altool, application_package: Union[Ipa, MacOsPackage]):
+    def _publish_application_package(
+            self, altool: Altool, application_package: Union[Ipa, MacOsPackage], validate_package: bool):
         """
         :raises IOError in case any step of publishing fails
         """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
-        self._validate_artifact_with_altool(altool, application_package.path)
+        if validate_package:
+            self._validate_artifact_with_altool(altool, application_package.path)
+        else:
+            self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
     def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:

@@ -54,6 +54,10 @@ class Types:
         def _is_valid(cls, value: str) -> bool:
             return bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', value))
 
+    class AppStoreConnectSkipPackageValidation(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -247,6 +251,16 @@ class PublishArgument(cli.Argument):
             'Learn more from https://support.apple.com/en-us/HT204397'
         ),
         argparse_kwargs={'required': False},
+    )
+    SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
+        key='skip_package_validation',
+        flags=('--skip-package-validation',),
+        type=Types.AppStoreConnectSkipPackageValidation,
+        description='Skip package validation before uploading it to App Store Connect',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
     )
 
 
