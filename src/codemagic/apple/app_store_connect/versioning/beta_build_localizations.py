@@ -27,6 +27,13 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         build: Optional[ResourceId] = None
         locale: Optional[Locale] = None
 
+    def read(self, resource_id: ResourceId):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_beta_build_localization_information
+        """
+        response = self.client.session.get(f'{self.client.API_URL}/betaBuildLocalizations/{resource_id}').json()
+        return BetaBuildLocalization(response['data'])
+
     def create(self,
                build: Union[ResourceId, Build],
                locale: Locale,

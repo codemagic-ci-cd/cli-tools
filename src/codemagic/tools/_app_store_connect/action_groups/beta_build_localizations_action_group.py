@@ -17,6 +17,15 @@ from ..arguments import BuildArgument
 
 class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
+    @cli.action('get',
+                BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
+    def get_beta_build_localization(self, localization_id):
+        """
+        Get beta build localization
+        """
+        return self._get_resource(localization_id, self.api_client.beta_build_localizations, should_print=True)
+
     @cli.action('list',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
                 BuildArgument.LOCALE_OPTIONAL,
