@@ -1,3 +1,14 @@
+Version 0.7.5
+-------------
+
+**Features**
+
+- Add option to skip package validation for action `app-store-connect publish` with `--skip-package-validation` flag. This allows to opt out from running `altool --validate-app` before actual upload.
+
+**Development / Docs**
+
+- Update `app-store-connect publish` action docs to reflect new option `--skip-package-validation`.
+
 Version 0.7.4
 -------------
 
