@@ -10,7 +10,6 @@ from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources.beta_build_localization import BetaBuildLocalization
 from codemagic.apple.resources.enums import Locale
-from codemagic.tools._app_store_connect.arguments import Types  # 3# noqa: isort
 
 
 class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
@@ -38,7 +37,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
     def create(self,
                build: Union[ResourceId, Build],
                locale: Locale,
-               whats_new: Optional[Types.WhatsNewArgument] = None) -> BetaBuildLocalization:
+               whats_new: Optional[str] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
