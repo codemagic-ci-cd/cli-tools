@@ -128,8 +128,8 @@ def test_publish_action_testflight_with_localization(namespace_kwargs):
         def __init__(self, path: pathlib.Path):
             self.path = path
 
-        @staticmethod
-        def get_text_summary():
+        @classmethod
+        def get_text_summary(cls):
             return ''
 
     namespace_kwargs.update({'action': 'publish'})
