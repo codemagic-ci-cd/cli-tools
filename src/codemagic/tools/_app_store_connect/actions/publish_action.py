@@ -114,7 +114,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _get_publishing_application_packages(
             self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
         _path_patterns = list(path_patterns)
-        print(_path_patterns)
         if len(_path_patterns) == 1 and _path_patterns[0].exists():
             # Add exempt for single path that exists to avoid unnecessary log output
             found_application_paths = [_path_patterns[0]]
