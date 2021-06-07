@@ -96,11 +96,19 @@ class ResourceManagerMixin:
             else:
                 raise AppStoreConnectError(str(api_error))
 
-    def _modify_resource(self, resource_manager, resource_id: ResourceId, ignore_not_found: bool, *args, **kwargs):
+    def _modify_resource(
+            self,
+            resource_manager,
+            resource_id: ResourceId,
+            ignore_not_found: bool,
+            should_print: bool,
+            *args,
+            **kwargs):
         self.printer.log_modify(resource_manager.resource_type, resource_id)
         try:
-            resource_manager.modify(resource_id, *args, **kwargs)
+            resource = resource_manager.modify(resource_id, *args, **kwargs)
             self.printer.log_modified(resource_manager.resource_type, resource_id)
+            self.printer.print_resource(resource, should_print)
         except AppStoreConnectApiError as api_error:
             if ignore_not_found is True and api_error.status_code == 404:
                 self.printer.log_ignore_not_modified(resource_manager.resource_type, resource_id)

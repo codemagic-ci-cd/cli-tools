@@ -47,7 +47,11 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         ...
 
     def create_beta_build_localization(
-            self, build_id: ResourceId, locale: Locale, whats_new: Optional[str]) -> BetaBuildLocalization:
+            self,
+            build_id: ResourceId,
+            locale: Locale,
+            whats_new: Optional[str],
+            should_print: bool = True) -> BetaBuildLocalization:
         ...
 
     def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
