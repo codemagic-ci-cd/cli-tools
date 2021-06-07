@@ -31,6 +31,7 @@ class SerializedArgument(NamedTuple):
     default: str
     nargs: bool
     choices: str
+    store_boolean: bool
 
 
 class Action(NamedTuple):
@@ -52,6 +53,7 @@ class ArgumentKwargs(NamedTuple):
     required: bool
     default: str
     choices: str
+    store_boolean: bool
 
 
 class ArgumentsSerializer:
@@ -80,6 +82,7 @@ class ArgumentsSerializer:
                 default=kwargs.default,
                 nargs=kwargs.nargs,
                 choices=kwargs.choices,
+                store_boolean=kwargs.store_boolean,
             )
 
         args = list(map(_serialize, self.raw_arguments))
@@ -109,6 +112,7 @@ class ArgumentsSerializer:
             required=kwargs.get('required', True),
             default=_process_default(kwargs.get('default', '')),
             choices=_process_choice(kwargs.get('choices')),
+            store_boolean=kwargs.get('action') in ('store_true', 'store_false'),
         )
 
 
@@ -222,6 +226,7 @@ class ToolDocumentationGenerator:
                 default='',
                 nargs=False,
                 choices=' | '.join(option.choices) if option.choices else '',
+                store_boolean=str(type(option)) in ('_StoreTrueAction', '_StoreFalseAction'),
             )
 
         parser = argparse.ArgumentParser(
@@ -265,7 +270,9 @@ class CommandUsageGenerator:
     @classmethod
     def _get_formatted_flag(cls, arg: SerializedArgument) -> str:
         flag = f'{arg.flags.split(",")[0]}'
-        if not arg.flags and arg.name:
+        if arg.store_boolean:
+            pass
+        elif not arg.flags and arg.name:
             flag = arg.name
         elif arg.choices and not arg.name:
             flag = f'{flag} STREAM'
@@ -347,6 +354,8 @@ class Writer:
     def _write_arguments(cls, file: MdUtils, title: str, args: List[SerializedArgument]):
         def _process_flag(arg: SerializedArgument) -> str:
             flag = arg.flags
+            if arg.store_boolean:
+                return flag
             if flag and arg.choices:
                 return f'{flag}={arg.choices}'
             if flag and arg.name:
