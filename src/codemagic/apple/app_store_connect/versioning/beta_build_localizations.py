@@ -60,7 +60,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         return BetaBuildLocalization(response['data'], created=True)
 
     def modify(
-            self, resource_id: ResourceId, whats_new: Optional[Types.WhatsNewArgument] = None) -> BetaBuildLocalization:
+            self, resource_id: ResourceId, whats_new: Optional[str] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
         """
