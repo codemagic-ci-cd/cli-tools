@@ -40,7 +40,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
                 locale: Optional[Locale] = None,
-                whats_new: Optional[str] = None) -> None:
+                whats_new: Optional[Types.WhatsNewArgument] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """

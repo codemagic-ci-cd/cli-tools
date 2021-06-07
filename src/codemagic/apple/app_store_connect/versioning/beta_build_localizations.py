@@ -10,6 +10,7 @@ from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources.beta_build_localization import BetaBuildLocalization
 from codemagic.apple.resources.enums import Locale
+from codemagic.tools._app_store_connect.arguments import Types  # 3# noqa: isort
 
 
 class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
@@ -37,7 +38,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
     def create(self,
                build: Union[ResourceId, Build],
                locale: Locale,
-               whats_new: Optional[str] = None) -> BetaBuildLocalization:
+               whats_new: Optional[Types.WhatsNewArgument] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
@@ -59,7 +60,8 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         response = self.client.session.post(f'{self.client.API_URL}/betaBuildLocalizations', json=payload).json()
         return BetaBuildLocalization(response['data'], created=True)
 
-    def modify(self, resource_id: ResourceId, whats_new: Optional[str] = None) -> BetaBuildLocalization:
+    def modify(
+            self, resource_id: ResourceId, whats_new: Optional[Types.WhatsNewArgument] = None) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
         """

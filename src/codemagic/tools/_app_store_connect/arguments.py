@@ -55,6 +55,9 @@ class Types:
         def _is_valid(cls, value: str) -> bool:
             return bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', value))
 
+    class WhatsNewArgument(cli.EnvironmentArgumentValue[str]):
+        environment_variable_key = 'WHATS_NEW'
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -262,7 +265,7 @@ class PublishArgument(cli.Argument):
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
         flags=('--whats-new',),
-        type=str,
+        type=Types.WhatsNewArgument,
         description=('A field that describes changes and additions to a build '
                      'and indicates features you would like your users to test.'),
         argparse_kwargs={
@@ -364,7 +367,7 @@ class BuildArgument(cli.Argument):
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
         flags=('--whats-new',),
-        type=str,
+        type=Types.WhatsNewArgument,
         description=('A field that describes changes and additions to a build '
                      'and indicates features you would like your users to test.'),
         argparse_kwargs={

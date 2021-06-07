@@ -20,6 +20,7 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
+from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
 from .resource_printer import ResourcePrinter
 
@@ -50,7 +51,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             self,
             build_id: ResourceId,
             locale: Locale,
-            whats_new: Optional[str],
+            whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         ...
 

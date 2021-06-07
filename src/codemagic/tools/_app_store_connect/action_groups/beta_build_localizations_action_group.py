@@ -13,6 +13,7 @@ from codemagic.apple.resources import ResourceId
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
+from ..arguments import Types
 
 
 class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -52,7 +53,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             build_id: ResourceId,
             locale: Locale,
-            whats_new: Optional[str] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         """
         Create a beta build localization
@@ -81,7 +82,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def update_beta_build_localization(
             self,
             localization_id: ResourceId,
-            whats_new: Optional[str] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         """
         Update a beta build localization
