@@ -18,6 +18,8 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [-u APPLE_ID]
     [-p APP_SPECIFIC_PASSWORD]
     [-t]
+    [--locale LOCALE_OPTIONAL]
+    [--whats-new WHATS_NEW]
     [--skip-package-validation]
 ```
 ### Optional arguments for action `publish`
@@ -38,6 +40,14 @@ App-specific password used for application package validation and upload if App 
 
 
 Submit an app for Testflight beta app review to allow external testing
+##### `--locale=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+
+
+The specified locale, e.g. de-DE or en-GB
+##### `--whats-new=WHATS_NEW`
+
+
+A field that describes changes and additions to a build and indicates features you would like your users to test. If not given, the value will be checked from environment variable `WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ##### `--skip-package-validation`
 
 
