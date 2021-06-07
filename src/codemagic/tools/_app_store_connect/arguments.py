@@ -58,6 +58,10 @@ class Types:
     class WhatsNewArgument(cli.EnvironmentArgumentValue[str]):
         environment_variable_key = 'WHATS_NEW'
 
+    class AppStoreConnectSkipPackageValidation(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -270,6 +274,20 @@ class PublishArgument(cli.Argument):
                      'and indicates features you would like your users to test.'),
         argparse_kwargs={
             'required': False,
+        },
+    )
+    SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
+        key='skip_package_validation',
+        flags=('--skip-package-validation',),
+        type=Types.AppStoreConnectSkipPackageValidation,
+        description=(
+            'Skip package validation before uploading it to App Store Connect. '
+            'Use this switch to opt out from running `altool --validate-app` before uploading '
+            'package to App Store connect'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
         },
     )
 
