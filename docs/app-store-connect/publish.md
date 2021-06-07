@@ -18,6 +18,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [-u APPLE_ID]
     [-p APP_SPECIFIC_PASSWORD]
     [-t]
+    [--skip-package-validation SKIP_PACKAGE_VALIDATION]
 ```
 ### Optional arguments for action `publish`
 
@@ -37,6 +38,10 @@ App-specific password used for application package validation and upload if App 
 
 
 Submit an app for Testflight beta app review to allow external testing
+##### `--skip-package-validation=SKIP_PACKAGE_VALIDATION`
+
+
+Skip package validation before uploading it to App Store Connect. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

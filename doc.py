@@ -64,7 +64,7 @@ class ArgumentsSerializer:
         def _serialize(arg) -> SerializedArgument:
             description = str_plain(arg._value_.description)
             arg_type = getattr(arg._value_, 'type')
-            if isinstance(arg_type, type) and issubclass(arg_type, cli.argument.EnvironmentArgumentValue):
+            if isinstance(arg_type, type) and issubclass(arg_type, cli.argument.TypedCliArgument):
                 description = str_plain(arg.get_description())
                 env_var = arg_type.__dict__.get('environment_variable_key')
                 if env_var:
