@@ -69,7 +69,7 @@ def test_publish_action_with_username_and_password(_mock_altool, namespace_kwarg
 @pytest.mark.parametrize('skip_package_validation, should_validate', [
     (True, False),
     (False, True),
-    (None, True)
+    (None, True),
 ])
 def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_package_validation, should_validate):
     class MockIpa:
@@ -103,7 +103,7 @@ def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_pac
             mock_validate.assert_not_called()
 
 
-@pytest.mark.parametrize('environment_value', ['1', 'true', 'True', 'false', 'asdf', '   ', 'null', 'None', ])
+@pytest.mark.parametrize('environment_value', ['1', 'true', 'True', 'false', 'asdf', '   ', 'null', 'None'])
 def test_skip_package_validation_argument_from_env(environment_value):
     """
     Since this is a boolean switch any "truthy" string will resolve so that the switch will be turned on.
