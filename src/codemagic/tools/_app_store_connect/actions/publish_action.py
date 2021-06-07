@@ -51,10 +51,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         elif submit_to_testflight:
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
-        if not submit_to_testflight:
-            if locale or whats_new:
-                raise IOError('--testflight flag is required for providing beta build localization')
-        elif not xor(bool(locale), bool(whats_new)):
+        if not submit_to_testflight and (locale or whats_new):
+            raise IOError('--testflight flag is required for providing beta build localization')
+        elif xor(bool(locale), bool(whats_new)):
             raise IOError('Both --locale and --whats-new need to be defined for providing beta build localization')
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
