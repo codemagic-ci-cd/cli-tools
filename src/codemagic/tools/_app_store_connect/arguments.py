@@ -249,6 +249,26 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False},
     )
+    LOCALE_OPTIONAL = cli.ArgumentProperties(
+        key='locale',
+        flags=('--locale',),
+        type=Locale,
+        description='The specified locale, e.g. de-DE or en-GB',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new',),
+        type=str,
+        description=('A field that describes changes and additions to a build '
+                     'and indicates features you would like your users to test.'),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
 
 
 class BuildArgument(cli.Argument):

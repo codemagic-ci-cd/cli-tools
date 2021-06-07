@@ -12,7 +12,9 @@ from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersionSubmission
+from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
@@ -42,6 +44,10 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
 
     def create_beta_app_review_submission(
             self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
+        ...
+
+    def create_beta_build_localization(
+            self, build_id: ResourceId, locale: Locale, whats_new: Optional[str]) -> BetaBuildLocalization:
         ...
 
     def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
