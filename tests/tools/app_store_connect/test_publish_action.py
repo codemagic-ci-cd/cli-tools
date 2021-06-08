@@ -8,10 +8,18 @@ from unittest import mock
 import pytest
 
 from codemagic.apple.resources import Locale
-from codemagic.tools._app_store_connect.arguments import PublishArgument  # noqa
+from codemagic.tools._app_store_connect.arguments import PublishArgument
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
 from codemagic.tools.app_store_connect import Types
+
+
+@pytest.fixture()
+def publishing_namespace_kwargs(namespace_kwargs):
+    namespace_kwargs.update({
+        'action': 'publish',
+    })
+    return namespace_kwargs
 
 
 class MockIpa:
@@ -28,14 +36,13 @@ class MockBuild:
         self.id = build_id
 
 
-def test_publish_action_without_app_store_connect_key(namespace_kwargs):
-    namespace_kwargs.update({
+def test_publish_action_without_app_store_connect_key(publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({
         AppStoreConnectArgument.ISSUER_ID.key: None,
         AppStoreConnectArgument.KEY_IDENTIFIER.key: None,
         AppStoreConnectArgument.PRIVATE_KEY.key: None,
-        'action': 'publish',
     })
-    cli_args = argparse.Namespace(**namespace_kwargs)
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     _ = AppStoreConnect.from_cli_args(cli_args)
 
 
@@ -44,9 +51,9 @@ def test_publish_action_without_app_store_connect_key(namespace_kwargs):
     AppStoreConnectArgument.KEY_IDENTIFIER,
     AppStoreConnectArgument.PRIVATE_KEY,
 ])
-def test_publish_action_without_app_store_connect_key_testflight_submit(missing_argument, namespace_kwargs):
-    namespace_kwargs.update({missing_argument.key: None, 'action': 'publish'})
-    cli_args = argparse.Namespace(**namespace_kwargs)
+def test_publish_action_without_app_store_connect_key_testflight_submit(missing_argument, publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({missing_argument.key: None})
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     app_store_connect = AppStoreConnect.from_cli_args(cli_args)
     with pytest.raises(argparse.ArgumentError) as error_info:
         app_store_connect.publish(
@@ -57,15 +64,14 @@ def test_publish_action_without_app_store_connect_key_testflight_submit(missing_
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
-def test_publish_action_with_username_and_password(_mock_altool, namespace_kwargs):
-    namespace_kwargs.update({
+def test_publish_action_with_username_and_password(_mock_altool, publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({
         AppStoreConnectArgument.ISSUER_ID.key: None,
         AppStoreConnectArgument.KEY_IDENTIFIER.key: None,
         AppStoreConnectArgument.PRIVATE_KEY.key: None,
-        'action': 'publish',
     })
 
-    cli_args = argparse.Namespace(**namespace_kwargs)
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages:
         mock_get_packages.return_value = []
@@ -80,64 +86,24 @@ def test_publish_action_with_username_and_password(_mock_altool, namespace_kwarg
         mock_get_packages.assert_called_with(patterns)
 
 
-def test_publish_action_testflight(namespace_kwargs):
-    namespace_kwargs.update({'action': 'publish'})
-
-    cli_args = argparse.Namespace(**namespace_kwargs)
-    with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
-            mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages:
-        mock_get_packages.return_value = []
-        mock_find_paths.return_value = []
-
-        patterns = [pathlib.Path('path.pattern')]
-        AppStoreConnect.from_cli_args(cli_args).publish(
-            application_package_path_patterns=patterns,
-            apple_id='name@example.com',
-            submit_to_testflight=True,
-        )
-        mock_get_packages.assert_called_with(patterns)
-
-
-@pytest.mark.parametrize('localization_arguments', [{'whats_new': "What's new"}, {'locale': 'en-GB'}])
-def test_publish_action_testflight_with_localization_with_missing_key(localization_arguments, namespace_kwargs):
-    namespace_kwargs.update({'action': 'publish'})
-    cli_args = argparse.Namespace(**namespace_kwargs)
-    patterns = [pathlib.Path('path.pattern')]
-
-    with pytest.raises(IOError) as error_info:
-        AppStoreConnect.from_cli_args(cli_args).publish(
-            application_package_path_patterns=patterns,
-            apple_id='name@example.com',
-            submit_to_testflight=True,
-            **localization_arguments,
-        )
-
-    assert str(error_info.value) \
-        == 'Both --locale and --whats-new need to be defined for providing beta build localization'
-
-
-def test_publish_action_with_localization_and_no_testflight_submission(namespace_kwargs):
-    namespace_kwargs.update({'action': 'publish'})
-    cli_args = argparse.Namespace(**namespace_kwargs)
+def test_publish_action_with_localization_and_no_testflight_submission(publishing_namespace_kwargs):
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     patterns = [pathlib.Path('path.pattern')]
     locale = Locale('en-GB')
 
-    with pytest.raises(IOError) as error_info:
+    with pytest.raises(AttributeError) as error_info:
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
             locale=locale,
-            whats_new="What's new",
+            whats_new=Types.WhatsNewArgument("What's new"),
         )
 
-    assert str(error_info.value) \
-        == '--testflight flag is required for providing beta build localization'
+    assert str(error_info.value) == 'WHATS_NEW'
 
 
-def test_publish_action_testflight_with_localization(namespace_kwargs):
-    namespace_kwargs.update({'action': 'publish'})
-
-    cli_args = argparse.Namespace(**namespace_kwargs)
+def test_publish_action_testflight_with_localization(publishing_namespace_kwargs):
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
             mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload, \
@@ -158,7 +124,7 @@ def test_publish_action_testflight_with_localization(namespace_kwargs):
             apple_id='name@example.com',
             submit_to_testflight=True,
             locale=locale,
-            whats_new="What's new",
+            whats_new=Types.WhatsNewArgument("What's new"),
         )
 
         mock_get_packages.assert_called_with(patterns)

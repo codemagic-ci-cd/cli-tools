@@ -118,8 +118,5 @@ class ResourcePrinter:
     def log_modify(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(f'Modify {resource_type} {resource_id}')
 
-    def log_ignore_not_modified(self, resource_type: Type[R], resource_id: ResourceId):
-        self.logger.info(f'{resource_type} {resource_id} does not exist, did not modify.')
-
     def log_modified(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(Colors.GREEN(f'Successfully modified {resource_type} {resource_id}'))

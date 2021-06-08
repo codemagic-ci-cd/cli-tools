@@ -240,6 +240,9 @@ class ResourceType(_ResourceEnum):
 
 
 class Locale(_ResourceEnum):
+    """
+    Referenced in https://developer.apple.com/documentation/appstoreconnectapi/betaapplocalization/attributes#discussion
+    """
     DA = 'da'
     DE_DE = 'de-DE'
     EL = 'el'

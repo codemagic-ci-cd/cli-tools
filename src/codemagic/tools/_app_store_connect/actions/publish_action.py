@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 from abc import ABCMeta
-from operator import xor
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -19,6 +18,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -31,8 +31,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
-                PublishArgument.LOCALE_OPTIONAL,
-                PublishArgument.WHATS_NEW,
+                BuildArgument.LOCALE_OPTIONAL,
+                BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 action_options={'requires_api_client': False})
     def publish(self,
@@ -40,7 +40,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
-                locale: Optional[Locale] = None,
+                locale: Locale = Locale('en-US'),
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 skip_package_validation: Optional[bool] = None) -> None:
         """
@@ -53,10 +53,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         elif submit_to_testflight:
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
-        if not submit_to_testflight and (locale or whats_new):
-            raise IOError('--testflight flag is required for providing beta build localization')
-        elif xor(bool(locale), bool(whats_new)):
-            raise IOError('Both --locale and --whats-new need to be defined for providing beta build localization')
+        if whats_new and not submit_to_testflight:
+            raise PublishArgument.WHATS_NEW.raise_argument_error(
+                f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
@@ -79,7 +78,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     build, pre_release_version = self._get_uploaded_build(application_package)
                     self.create_beta_app_review_submission(build.id)
                     if locale and whats_new:
-                        self.create_beta_build_localization(build.id, locale, whats_new)
+                        self.create_beta_build_localization(build.id, locale, whats_new.value)
             except IOError as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))

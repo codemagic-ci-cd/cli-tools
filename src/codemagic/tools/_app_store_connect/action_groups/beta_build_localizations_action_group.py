@@ -13,6 +13,7 @@ from codemagic.apple.resources import ResourceId
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
+from ..arguments import CommonArgument
 from ..arguments import Types
 
 
@@ -21,7 +22,8 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action('get',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
-    def get_beta_build_localization(self, localization_id, should_print: bool = True):
+    def get_beta_build_localization(
+            self, localization_id: ResourceId, should_print: bool = True) -> BetaBuildLocalization:
         """
         Get beta build localization
         """
@@ -42,7 +44,8 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self._list_resources(
             BetaBuildLocalizations.Filter(build=build_id, locale=locale),
             self.api_client.beta_build_localizations,
-            should_print)
+            should_print,
+        )
 
     @cli.action('create',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
@@ -63,21 +66,24 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             build=build_id,
             locale=locale,
-            whats_new=whats_new)
+            whats_new=whats_new,
+        )
 
     @cli.action('delete',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
+                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
-    def delete_beta_build_localization(self, localization_id: ResourceId):
+    def delete_beta_build_localization(self, localization_id: ResourceId, ignore_not_found: bool = True):
         """
         Delete a beta build localization
         """
         self._delete_resource(
-            self.api_client.beta_build_localizations, localization_id, ignore_not_found=False)
+            self.api_client.beta_build_localizations, localization_id, ignore_not_found)
 
     @cli.action('modify',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
                 BuildArgument.WHATS_NEW,
+                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
     def update_beta_build_localization(
             self,
@@ -90,6 +96,6 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self._modify_resource(
             self.api_client.beta_build_localizations,
             localization_id,
-            ignore_not_found=False,
-            should_print=should_print,
-            whats_new=whats_new)
+            should_print,
+            whats_new=whats_new.value if whats_new else None,
+        )
