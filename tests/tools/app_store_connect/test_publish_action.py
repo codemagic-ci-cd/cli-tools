@@ -8,8 +8,8 @@ from unittest import mock
 import pytest
 
 from codemagic.apple.resources import Locale
-from codemagic.tools._app_store_connect.arguments import PublishArgument
 from codemagic.tools._app_store_connect.arguments import BuildArgument
+from codemagic.tools._app_store_connect.arguments import PublishArgument
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
 from codemagic.tools.app_store_connect import Types

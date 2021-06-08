@@ -14,6 +14,7 @@ app-store-connect beta-build-localizations delete [-h] [--log-stream STREAM] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--ignore-not-found]
     BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `delete`
@@ -21,7 +22,13 @@ app-store-connect beta-build-localizations delete [-h] [--log-stream STREAM] [--
 ##### `BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID`
 
 
-Beta build localization ID
+Alphanumeric ID value of the Beta Build Localization
+### Optional arguments for action `delete`
+
+##### `--ignore-not-found`
+
+
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

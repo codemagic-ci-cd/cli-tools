@@ -21,7 +21,7 @@ app-store-connect beta-build-localizations get [-h] [--log-stream STREAM] [--no-
 ##### `BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID`
 
 
-Beta build localization ID
+Alphanumeric ID value of the Beta Build Localization
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

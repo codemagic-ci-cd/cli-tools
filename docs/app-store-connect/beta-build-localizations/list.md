@@ -14,7 +14,7 @@ app-store-connect beta-build-localizations list [-h] [--log-stream STREAM] [--no
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--locale LOCALE_OPTIONAL]
+    [-l LOCALE_OPTIONAL]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `list`
@@ -25,10 +25,10 @@ app-store-connect beta-build-localizations list [-h] [--log-stream STREAM] [--no
 Alphanumeric ID value of the Build
 ### Optional arguments for action `list`
 
-##### `--locale=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `-l, --locale=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
-The specified locale, e.g. de-DE or en-GB
+The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
