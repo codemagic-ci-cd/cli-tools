@@ -9,6 +9,7 @@ import pytest
 
 from codemagic.apple.resources import Locale
 from codemagic.tools._app_store_connect.arguments import PublishArgument
+from codemagic.tools._app_store_connect.arguments import BuildArgument
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
 from codemagic.tools.app_store_connect import Types
@@ -86,12 +87,13 @@ def test_publish_action_with_username_and_password(_mock_altool, publishing_name
         mock_get_packages.assert_called_with(patterns)
 
 
-def test_publish_action_with_localization_and_no_testflight_submission(publishing_namespace_kwargs):
+def test_publish_action_with_localization_and_no_testflight_submission(publishing_namespace_kwargs, cli_argument_group):
+    BuildArgument.WHATS_NEW.register(cli_argument_group)
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     patterns = [pathlib.Path('path.pattern')]
     locale = Locale('en-GB')
 
-    with pytest.raises(IOError) as error_info:
+    with pytest.raises(argparse.ArgumentError) as error_info:
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
@@ -99,7 +101,7 @@ def test_publish_action_with_localization_and_no_testflight_submission(publishin
             whats_new=Types.WhatsNewArgument("What's new"),
         )
 
-    assert str(error_info.value) == 'WHATS_NEW'
+    assert str(error_info.value) == 'argument --whats-new: --testflight is required for submitting notes'
 
 
 def test_publish_action_testflight_with_localization(publishing_namespace_kwargs):
