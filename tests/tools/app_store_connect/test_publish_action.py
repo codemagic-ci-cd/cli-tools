@@ -7,10 +7,25 @@ from unittest import mock
 
 import pytest
 
+from codemagic.apple.resources import Locale
 from codemagic.tools._app_store_connect.arguments import PublishArgument  # noqa
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
 from codemagic.tools.app_store_connect import Types
+
+
+class MockIpa:
+    def __init__(self, path: pathlib.Path):
+        self.path = path
+
+    @classmethod
+    def get_text_summary(cls):
+        return ''
+
+
+class MockBuild:
+    def __init__(self, build_id):
+        self.id = build_id
 
 
 def test_publish_action_without_app_store_connect_key(namespace_kwargs):
@@ -78,7 +93,6 @@ def test_publish_action_testflight(namespace_kwargs):
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
-            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
             submit_to_testflight=True,
         )
         mock_get_packages.assert_called_with(patterns)
@@ -94,7 +108,6 @@ def test_publish_action_testflight_with_localization_with_missing_key(localizati
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
-            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
             submit_to_testflight=True,
             **localization_arguments,
         )
@@ -107,13 +120,13 @@ def test_publish_action_with_localization_and_no_testflight_submission(namespace
     namespace_kwargs.update({'action': 'publish'})
     cli_args = argparse.Namespace(**namespace_kwargs)
     patterns = [pathlib.Path('path.pattern')]
+    locale = Locale('en-GB')
 
     with pytest.raises(IOError) as error_info:
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
-            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
-            locale='en-GB',
+            locale=locale,
             whats_new="What's new",
         )
 
@@ -122,18 +135,6 @@ def test_publish_action_with_localization_and_no_testflight_submission(namespace
 
 
 def test_publish_action_testflight_with_localization(namespace_kwargs):
-    class MockBuild:
-        def __init__(self, build_id):
-            self.id = build_id
-
-    class MockIpa:
-        def __init__(self, path: pathlib.Path):
-            self.path = path
-
-        @classmethod
-        def get_text_summary(cls):
-            return ''
-
     namespace_kwargs.update({'action': 'publish'})
 
     cli_args = argparse.Namespace(**namespace_kwargs)
@@ -149,21 +150,22 @@ def test_publish_action_testflight_with_localization(namespace_kwargs):
         mock_get_packages.return_value = [MockIpa(ipa_path)]
         build = MockBuild('1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_build.return_value = [build, '1.0.0']
+        locale = Locale('en-GB')
 
         patterns = [pathlib.Path('path.pattern')]
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',
-            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
             submit_to_testflight=True,
-            locale='en-GB',
+            locale=locale,
             whats_new="What's new",
         )
+
+        mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
         mock_create_review.assert_called_with(build.id)
-        mock_get_packages.assert_called_with(patterns)
-        mock_create_localization.assert_called_with(build.id, 'en-GB', "What's new")
+        mock_create_localization.assert_called_with(build.id, locale, "What's new")
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
@@ -173,14 +175,6 @@ def test_publish_action_testflight_with_localization(namespace_kwargs):
     (None, True),
 ])
 def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_package_validation, should_validate):
-    class MockIpa:
-        def __init__(self, path: pathlib.Path):
-            self.path = path
-
-        @classmethod
-        def get_text_summary(cls):
-            return ''
-
     asc = AppStoreConnect.from_cli_args(argparse.Namespace(**namespace_kwargs))
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
