@@ -91,7 +91,7 @@ def test_publish_action_with_localization_and_no_testflight_submission(publishin
     patterns = [pathlib.Path('path.pattern')]
     locale = Locale('en-GB')
 
-    with pytest.raises(AttributeError) as error_info:
+    with pytest.raises(IOError) as error_info:
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
             apple_id='name@example.com',

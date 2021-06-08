@@ -54,7 +54,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
         if whats_new and not submit_to_testflight:
-            raise PublishArgument.WHATS_NEW.raise_argument_error(
+            raise BuildArgument.WHATS_NEW.raise_argument_error(
                 f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
