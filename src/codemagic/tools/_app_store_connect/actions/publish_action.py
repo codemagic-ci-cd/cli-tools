@@ -40,7 +40,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
-                locale: Locale = BuildArgument.LOCALE_OPTIONAL.get_default(),
+                locale: Locale = BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT.get_default(),
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 skip_package_validation: Optional[bool] = None) -> None:
         """

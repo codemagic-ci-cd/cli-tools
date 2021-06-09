@@ -87,7 +87,7 @@ def test_publish_action_with_localization_and_no_testflight_submission(publishin
             whats_new=Types.WhatsNewArgument("What's new"),
         )
 
-    assert str(error_info.value) == 'argument --whats-new: --testflight is required for submitting notes'
+    assert str(error_info.value) == 'argument -n/--whats-new: --testflight is required for submitting notes'
 
 
 def test_publish_action_testflight_with_localization(publishing_namespace_kwargs):
