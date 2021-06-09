@@ -73,7 +73,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
                 CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
-    def delete_beta_build_localization(self, localization_id: ResourceId, ignore_not_found: bool = True):
+    def delete_beta_build_localization(self, localization_id: ResourceId, ignore_not_found: bool = False):
         """
         Delete a beta build localization
         """
@@ -83,7 +83,6 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action('modify',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
                 BuildArgument.WHATS_NEW,
-                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
     def update_beta_build_localization(
             self,
