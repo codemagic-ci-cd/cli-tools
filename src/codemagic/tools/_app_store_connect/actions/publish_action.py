@@ -78,7 +78,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     build, pre_release_version = self._get_uploaded_build(application_package)
                     self.create_beta_app_review_submission(build.id)
                     if locale and whats_new:
-                        self.create_beta_build_localization(build.id, locale, whats_new.value)
+                        self.create_beta_build_localization(build.id, locale, whats_new)
             except IOError as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))

@@ -4,7 +4,12 @@ Version 0.7.6
 **Features**
 
 - Add option to submit "What's new" information along with Testflight build via `--locale` and `--whats-new` arguments in `app-store-connect publish` command.
-- Add a set of actions for managing "What's new" information for Testflight builds `app-store-connect beta-build-localizations`: `create`, `delete`, `modify`, `list`, and `get`.
+- Add a set of actions for managing "What's new" information for Testflight builds `app-store-connect beta-build-localizations`
+- Add action `app-store-connect beta-build-localizations create` to create localized "What's new" notes for a given beta build 
+- Add action `app-store-connect beta-build-localizations delete` to delete localized "What's new" notes by its ID
+- Add action `app-store-connect beta-build-localizations modify` to update "What's new" content by its ID
+- Add action `app-store-connect beta-build-localizations list` to list localized "What's new" notes filtered by Build ID and locale code 
+- Add action `app-store-connect beta-build-localizations get` to retrieve localized "What's new" notes by its ID
 
 Version 0.7.5
 -------------

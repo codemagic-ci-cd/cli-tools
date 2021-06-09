@@ -28,7 +28,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         build: Optional[ResourceId] = None
         locale: Optional[Locale] = None
 
-    def read(self, localization: Union[ResourceId, LinkedResourceData]):
+    def read(self, localization: Union[ResourceId, LinkedResourceData]) -> BetaBuildLocalization:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_beta_build_localization_information
         """
@@ -44,10 +44,10 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
         """
         attributes = {
-            'locale': str(locale),
+            'locale': locale.value,
         }
 
-        if whats_new:
+        if whats_new is not None:
             attributes['whatsNew'] = whats_new
 
         relationships = {
@@ -70,7 +70,7 @@ class BetaBuildLocalizations(ResourceManager[BetaBuildLocalization]):
         """
         attributes = {}
 
-        if whats_new:
+        if whats_new is not None:
             attributes['whatsNew'] = whats_new
 
         resource_id = self._get_resource_id(localization)

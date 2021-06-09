@@ -66,7 +66,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             build=build_id,
             locale=locale,
-            whats_new=whats_new,
+            whats_new=whats_new.value if whats_new else None,
         )
 
     @cli.action('delete',

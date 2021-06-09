@@ -8,6 +8,7 @@ from unittest import mock
 import pytest
 
 from codemagic.apple.resources import Locale
+from codemagic.models.application_package import Ipa
 from codemagic.tools._app_store_connect.arguments import BuildArgument
 from codemagic.tools._app_store_connect.arguments import PublishArgument
 from codemagic.tools.app_store_connect import AppStoreConnect
@@ -21,20 +22,6 @@ def publishing_namespace_kwargs(namespace_kwargs):
         'action': 'publish',
     })
     return namespace_kwargs
-
-
-class MockIpa:
-    def __init__(self, path: pathlib.Path):
-        self.path = path
-
-    @classmethod
-    def get_text_summary(cls):
-        return ''
-
-
-class MockBuild:
-    def __init__(self, build_id):
-        self.id = build_id
 
 
 def test_publish_action_without_app_store_connect_key(publishing_namespace_kwargs):
@@ -96,7 +83,6 @@ def test_publish_action_with_localization_and_no_testflight_submission(publishin
     with pytest.raises(argparse.ArgumentError) as error_info:
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
-            apple_id='name@example.com',
             locale=locale,
             whats_new=Types.WhatsNewArgument("What's new"),
         )
@@ -115,25 +101,25 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
             mock.patch.object(AppStoreConnect, 'create_beta_build_localization') as mock_create_localization:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
-        mock_get_packages.return_value = [MockIpa(ipa_path)]
-        build = MockBuild('1525e3c9-3015-407a-9ba5-9addd2558224')
+        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
+        build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_build.return_value = [build, '1.0.0']
         locale = Locale('en-GB')
 
+        whats_new = Types.WhatsNewArgument("What's new")
         patterns = [pathlib.Path('path.pattern')]
         AppStoreConnect.from_cli_args(cli_args).publish(
             application_package_path_patterns=patterns,
-            apple_id='name@example.com',
             submit_to_testflight=True,
             locale=locale,
-            whats_new=Types.WhatsNewArgument("What's new"),
+            whats_new=whats_new,
         )
 
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
         mock_create_review.assert_called_with(build.id)
-        mock_create_localization.assert_called_with(build.id, locale, "What's new")
+        mock_create_localization.assert_called_with(build.id, locale, whats_new)
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
@@ -150,7 +136,7 @@ def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_pac
             mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
-        mock_get_packages.return_value = [MockIpa(ipa_path)]
+        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
 
         asc.publish(
             application_package_path_patterns=[ipa_path],
