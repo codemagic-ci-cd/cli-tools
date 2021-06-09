@@ -9,10 +9,10 @@ import pytest
 
 from codemagic.apple.resources import Locale
 from codemagic.models.application_package import Ipa
-from codemagic.tools._app_store_connect.arguments import BuildArgument
-from codemagic.tools._app_store_connect.arguments import PublishArgument
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
+from codemagic.tools.app_store_connect import BuildArgument
+from codemagic.tools.app_store_connect import PublishArgument
 from codemagic.tools.app_store_connect import Types
 
 

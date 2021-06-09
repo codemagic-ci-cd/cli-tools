@@ -356,27 +356,18 @@ class BuildArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
-    LOCALE_OPTIONAL = cli.ArgumentProperties(
-        key='locale',
-        flags=('-l', '--locale'),
-        type=Locale,
-        description=(
-            'The locale code name for displaying localized "What\'s new" content in TestFlight. '
-            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
-            'betabuildlocalizationcreaterequest/data/attributes'
-        ),
-        argparse_kwargs={
-            'required': False,
-            'choices': list(Locale),
-        },
-    )
+    LOCALE_OPTIONAL = LOCALE.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Locale),
+        'default': Locale('en-US'),
+    })
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
-        flags=('--whats-new',),
+        flags=('-n', '--whats-new'),
         type=Types.WhatsNewArgument,
         description=(
-            'A field that describes changes and additions to a build '
-            'and indicates features you would like your users to test.'
+            'Describe the changes and additions to the build and indicate '
+            'the features you would like your users to tests.'
         ),
         argparse_kwargs={
             'required': False,

@@ -101,11 +101,10 @@ class ResourceManagerMixin:
             resource_manager,
             resource_id: ResourceId,
             should_print: bool,
-            *update_params,
-            **kw_update_params):
+            **update_params):
         self.printer.log_modify(resource_manager.resource_type, resource_id)
         try:
-            resource = resource_manager.modify(resource_id, *update_params, **kw_update_params)
+            resource = resource_manager.modify(resource_id, **update_params)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 

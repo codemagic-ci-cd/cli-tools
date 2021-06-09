@@ -56,6 +56,7 @@ from ._app_store_connect.arguments import CertificateArgument
 from ._app_store_connect.arguments import CommonArgument
 from ._app_store_connect.arguments import DeviceArgument
 from ._app_store_connect.arguments import ProfileArgument
+from ._app_store_connect.arguments import PublishArgument  # noqa: F401
 from ._app_store_connect.arguments import Types
 from ._app_store_connect.errors import AppStoreConnectError
 from ._app_store_connect.resource_manager_mixin import ResourceManagerMixin
