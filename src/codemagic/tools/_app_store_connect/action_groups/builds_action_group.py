@@ -14,6 +14,16 @@ from ..arguments import BuildArgument
 
 class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
+    @cli.action('get',
+                BuildArgument.BUILD_ID_RESOURCE_ID,
+                action_group=AppStoreConnectActionGroup.BUILDS)
+    def get_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
+        """
+        Get information about a specific build
+        """
+
+        return self._get_resource(build_id, self.api_client.builds, should_print)
+
     @cli.action('pre-release-version',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
                 action_group=AppStoreConnectActionGroup.BUILDS)
