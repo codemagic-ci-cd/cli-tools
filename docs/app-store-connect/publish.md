@@ -18,8 +18,8 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [-u APPLE_ID]
     [-p APP_SPECIFIC_PASSWORD]
     [-t]
-    [-l LOCALE_OPTIONAL]
-    [--whats-new WHATS_NEW]
+    [-l LOCALE_OPTIONAL_WITH_DEFAULT]
+    [-n WHATS_NEW]
     [--skip-package-validation]
 ```
 ### Optional arguments for action `publish`
@@ -43,11 +43,11 @@ Submit an app for Testflight beta app review to allow external testing
 ##### `-l, --locale=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
-The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
-##### `--whats-new=WHATS_NEW`
+The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes. Default:&nbsp;`en-US`
+##### `-n, --whats-new=WHATS_NEW`
 
 
-A field that describes changes and additions to a build and indicates features you would like your users to test. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ##### `--skip-package-validation`
 
 

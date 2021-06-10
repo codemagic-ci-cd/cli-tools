@@ -14,7 +14,7 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--whats-new WHATS_NEW]
+    [-n WHATS_NEW]
     BUILD_ID_RESOURCE_ID
     -l LOCALE
 ```
@@ -30,10 +30,10 @@ Alphanumeric ID value of the Build
 The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
 ### Optional arguments for action `create`
 
-##### `--whats-new=WHATS_NEW`
+##### `-n, --whats-new=WHATS_NEW`
 
 
-A field that describes changes and additions to a build and indicates features you would like your users to test. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

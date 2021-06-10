@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from typing import Optional
 
 from .resource import Relationship
 from .resource import Resource
+
+if TYPE_CHECKING:
+    from codemagic.apple.resources import Locale
 
 
 class BetaBuildLocalization(Resource):

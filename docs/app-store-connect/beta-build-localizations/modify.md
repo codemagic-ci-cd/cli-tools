@@ -14,8 +14,7 @@ app-store-connect beta-build-localizations modify [-h] [--log-stream STREAM] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--whats-new WHATS_NEW]
-    [--ignore-not-found]
+    [-n WHATS_NEW]
     BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `modify`
@@ -26,14 +25,10 @@ app-store-connect beta-build-localizations modify [-h] [--log-stream STREAM] [--
 Alphanumeric ID value of the Beta Build Localization
 ### Optional arguments for action `modify`
 
-##### `--whats-new=WHATS_NEW`
+##### `-n, --whats-new=WHATS_NEW`
 
 
-A field that describes changes and additions to a build and indicates features you would like your users to test. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
-##### `--ignore-not-found`
-
-
-Do not raise exceptions if the specified resource does not exist.
+Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
