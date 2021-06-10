@@ -1,3 +1,10 @@
+Version 0.7.6
+-------------
+
+**Fixes**
+
+- Make `altool` output parsing less strict. Do not fail `app-store-connect publish` action invocation if `altool` output cannot be interpreted. 
+
 Version 0.7.5
 -------------
 

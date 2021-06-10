@@ -11,6 +11,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import PreReleaseVersion
+from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
@@ -87,6 +88,21 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
+    def _find_build(
+        self,
+        app_id: ResourceId,
+        application_package: Union[Ipa, MacOsPackage],
+    ) -> Tuple[Build, PreReleaseVersion]:
+        # TODO: Make this more forgiving by using retries.
+        # TODO: Quite often new builds are not immediately available after upload.
+        for build in self.list_app_builds(app_id, should_print=False):
+            if build.attributes.version == application_package.version_code:
+                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
+                if pre_release_version.attributes.version == application_package.version:
+                    return build, pre_release_version
+        else:
+            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+
     def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
@@ -98,13 +114,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.printer.print_resource(app, True)
 
         self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
-        for build in self.list_app_builds(app.id, should_print=False):
-            if build.attributes.version == application_package.version_code:
-                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
-                if pre_release_version.attributes.version == application_package.version:
-                    break
-        else:
-            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+        build, pre_release_version = self._find_build(app.id, application_package)
 
         self.logger.info(Colors.GREEN('\nPublished build is'))
         self.printer.print_resource(build, True)
@@ -148,11 +158,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _validate_artifact_with_altool(self, altool: Altool, artifact_path: pathlib.Path):
         self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
         result = altool.validate_app(artifact_path)
-        message = result.success_message or f'No errors validating archive at "{artifact_path}".'
+        message = result.success_message if result else f'No errors validating archive at "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
 
     def _upload_artifact_with_altool(self, altool: Altool, artifact_path: pathlib.Path):
         self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
         result = altool.upload_app(artifact_path)
-        message = result.success_message or f'No errors uploading "{artifact_path}".'
+        message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
