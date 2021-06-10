@@ -47,7 +47,7 @@ class BetaBuildLocalizationsTest(ResourceManagerTestsBase):
         )
         localization = next(iter(self.api_client.beta_build_localizations.list(resource_filter)))
         beta_build_localization = self.api_client.beta_build_localizations.modify(
-            resource_id=localization.id,
+            localization=localization,
             whats_new=updated_whats_new,
         )
 
