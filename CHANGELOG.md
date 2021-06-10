@@ -11,6 +11,10 @@ Version 0.8.0
 - Add action `app-store-connect beta-build-localizations list` to list localized "What's new" notes filtered by Build ID and locale code 
 - Add action `app-store-connect beta-build-localizations get` to retrieve localized "What's new" notes by its ID
 
+**Development / Docs**
+
+- Fix `--testflight` option description for `app-store-connect publish` action.
+
 Version 0.7.5
 -------------
 
