@@ -1,3 +1,10 @@
+Version 0.7.7
+-------------
+
+**Fixes**
+
+- Before creating Beta App Review Submission (submitting build to TestFlight) as part of `app-store-connect publish`, wait until the uploaded build processing completes. 
+
 Version 0.7.6
 -------------
 

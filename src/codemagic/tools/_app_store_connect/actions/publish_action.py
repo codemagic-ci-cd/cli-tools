@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+import time
 from abc import ABCMeta
 from typing import List
 from typing import Optional
@@ -10,6 +11,7 @@ from typing import Union
 
 from codemagic import cli
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
@@ -92,16 +94,56 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         app_id: ResourceId,
         application_package: Union[Ipa, MacOsPackage],
+        retries: int = 10,
+        retry_wait_seconds: int = 30,
     ) -> Tuple[Build, PreReleaseVersion]:
-        # TODO: Make this more forgiving by using retries.
-        # TODO: Quite often new builds are not immediately available after upload.
+        """
+        Find corresponding build for the uploaded ipa or macOS package.
+        Take into account that sometimes the build is not immediately available
+        after the upload and as a result the API calls may not return it. Implement a
+        simple retrying logic to overcome this issue.
+        """
         for build in self.list_app_builds(app_id, should_print=False):
             if build.attributes.version == application_package.version_code:
                 pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
                 if pre_release_version.attributes.version == application_package.version:
                     return build, pre_release_version
+
+        # Matching build was not found.
+        if retries > 0:
+            # There are retries left, wait a bit and try again.
+            self.logger.info(
+                (
+                    'Did not find build matching uploaded version yet, it might be still processing. '
+                    'Waiting %d seconds to try again'
+                ),
+                retry_wait_seconds,
+            )
+            time.sleep(retry_wait_seconds)
+            return self._find_build(
+                app_id, application_package, retries=retries-1, retry_wait_seconds=retry_wait_seconds)
         else:
+            # There are no more retries left, give up.
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+
+    def _wait_until_build_is_processed(self, build: Build, retries: int = 20, retry_wait_seconds: int = 30) -> Build:
+        if build.attributes.processingState is BuildProcessingState.PROCESSING:
+            self.logger.info(
+                'Build %s is still being processed, wait %d seconds and check again', build.id, retry_wait_seconds)
+            if retries > 0:
+                time.sleep(retry_wait_seconds)
+                return self._wait_until_build_is_processed(
+                    self.get_build(build.id, should_print=False),
+                    retries=retries-1,
+                    retry_wait_seconds=retry_wait_seconds,
+                )
+            else:
+                raise IOError(f'Waiting for build {build.id} processing timed out')
+        elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
+            raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
+        else:
+            self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
+            return build
 
     def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         bundle_id = application_package.bundle_identifier
@@ -115,7 +157,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
         self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
         build, pre_release_version = self._find_build(app.id, application_package)
-
+        build = self._wait_until_build_is_processed(build)
         self.logger.info(Colors.GREEN('\nPublished build is'))
         self.printer.print_resource(build, True)
         self.printer.print_resource(pre_release_version, True)
