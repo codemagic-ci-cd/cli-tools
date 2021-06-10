@@ -14,8 +14,12 @@ class BetaBuildLocalization(Resource):
 
     @dataclass
     class Attributes(Resource.Attributes):
-        locale: str
+        locale: Locale
         whatsNew: Optional[str] = None
+
+        def __post_init__(self):
+            if isinstance(self.locale, str):
+                self.locale = Locale(self.locale)
 
     @dataclass
     class Relationships(Resource.Relationships):
