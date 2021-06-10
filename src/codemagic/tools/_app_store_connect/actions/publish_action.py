@@ -31,7 +31,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
-                BuildArgument.LOCALE_OPTIONAL,
+                BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 action_options={'requires_api_client': False})
