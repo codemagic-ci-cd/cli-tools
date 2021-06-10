@@ -225,7 +225,7 @@ class PublishArgument(cli.Argument):
     )
     SUBMIT_TO_TESTFLIGHT = cli.ArgumentProperties(
         key='submit_to_testflight',
-        flags=('-t', '--testflight'),
+        flags=('--testflight', '-t'),
         type=bool,
         description='Submit an app for Testflight beta app review to allow external testing',
         argparse_kwargs={
@@ -235,7 +235,7 @@ class PublishArgument(cli.Argument):
     )
     APPLE_ID = cli.ArgumentProperties(
         key='apple_id',
-        flags=('-u', '--apple-id'),
+        flags=('--apple-id', '-u'),
         description=(
             'App Store Connect username used for application package validation '
             'and upload if App Store Connect API key is not specified'
@@ -244,7 +244,7 @@ class PublishArgument(cli.Argument):
     )
     APP_SPECIFIC_PASSWORD = cli.ArgumentProperties(
         key='app_specific_password',
-        flags=('-p', '--password'),
+        flags=('--password', '-p'),
         type=Types.AppSpecificPassword,
         description=(
             'App-specific password used for application package validation '
@@ -344,7 +344,7 @@ class BuildArgument(cli.Argument):
     )
     LOCALE = cli.ArgumentProperties(
         key='locale',
-        flags=('-l', '--locale'),
+        flags=('--locale', '-l'),
         type=Locale,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
@@ -367,7 +367,7 @@ class BuildArgument(cli.Argument):
     })
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
-        flags=('-n', '--whats-new'),
+        flags=('--whats-new', '-n'),
         type=Types.WhatsNewArgument,
         description=(
             'Describe the changes and additions to the build and indicate '
