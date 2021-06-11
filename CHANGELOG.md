@@ -1,3 +1,10 @@
+Version 0.8.1
+-------------
+
+**Fixes**
+
+- Submit only uploaded iOS application packages (`*.ipa` files) to TestFlight from `app-store-connect publish` action when submission to Testflight is enabled by `--testflight` flag.
+
 Version 0.8.0
 -------------
 
