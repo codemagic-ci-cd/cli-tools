@@ -24,6 +24,7 @@ from .provisioning import SigningCertificates
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
 from .versioning import BetaAppReviewSubmissions
+from .versioning import BetaBuildLocalizations
 from .versioning import PreReleaseVersions
 
 
@@ -136,6 +137,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
     @property
     def beta_app_review_submissions(self) -> BetaAppReviewSubmissions:
         return BetaAppReviewSubmissions(self)
+
+    @property
+    def beta_build_localizations(self) -> BetaBuildLocalizations:
+        return BetaBuildLocalizations(self)
 
     @property
     def builds(self) -> Builds:

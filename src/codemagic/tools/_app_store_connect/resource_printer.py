@@ -114,3 +114,9 @@ class ResourcePrinter:
     def log_saved(self, resource: Union[SigningCertificate, Profile], path: pathlib.Path):
         destination = shlex.quote(str(path))
         self.logger.info(Colors.GREEN(f'Saved {resource.__class__} {resource.get_display_info()} to {destination}'))
+
+    def log_modify(self, resource_type: Type[R], resource_id: ResourceId):
+        self.logger.info(f'Modify {resource_type} {resource_id}')
+
+    def log_modified(self, resource_type: Type[R], resource_id: ResourceId):
+        self.logger.info(Colors.GREEN(f'Successfully modified {resource_type} {resource_id}'))

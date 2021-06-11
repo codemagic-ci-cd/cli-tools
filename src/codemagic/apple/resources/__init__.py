@@ -2,6 +2,7 @@ from .app import App
 from .app_store_version import AppStoreVersion
 from .app_store_version_submission import AppStoreVersionSubmission
 from .beta_app_review_submission import BetaAppReviewSubmission
+from .beta_build_localization import BetaBuildLocalization
 from .build import Build
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
@@ -19,6 +20,7 @@ from .enums import CertificateType
 from .enums import ContentRightsDeclaration
 from .enums import DeviceClass
 from .enums import DeviceStatus
+from .enums import Locale
 from .enums import Platform
 from .enums import ProfileState
 from .enums import ProfileType

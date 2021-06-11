@@ -44,6 +44,7 @@ from codemagic.models import ProvisioningProfile
 from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.action_groups import AppsActionGroup
 from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
+from ._app_store_connect.action_groups import BetaBuildLocalizationsActionGroup
 from ._app_store_connect.action_groups import BuildsActionGroup
 from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
@@ -55,6 +56,7 @@ from ._app_store_connect.arguments import CertificateArgument
 from ._app_store_connect.arguments import CommonArgument
 from ._app_store_connect.arguments import DeviceArgument
 from ._app_store_connect.arguments import ProfileArgument
+from ._app_store_connect.arguments import PublishArgument  # noqa: F401
 from ._app_store_connect.arguments import Types
 from ._app_store_connect.errors import AppStoreConnectError
 from ._app_store_connect.resource_manager_mixin import ResourceManagerMixin
@@ -79,6 +81,7 @@ class AppStoreConnect(cli.CliApp,
                       AppsActionGroup,
                       BuildsActionGroup,
                       BetaAppReviewSubmissionsActionGroup,
+                      BetaBuildLocalizationsActionGroup,
                       ResourceManagerMixin,
                       PathFinderMixin):
     """

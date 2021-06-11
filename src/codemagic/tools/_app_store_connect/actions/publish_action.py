@@ -12,6 +12,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
@@ -20,6 +21,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -32,6 +34,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
+                BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT,
+                BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 action_options={'requires_api_client': False})
     def publish(self,
@@ -39,6 +43,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
+                locale: Locale = BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT.get_default(),
+                whats_new: Optional[Types.WhatsNewArgument] = None,
                 skip_package_validation: Optional[bool] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
@@ -49,6 +55,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
         elif submit_to_testflight:
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
+
+        if whats_new and not submit_to_testflight:
+            raise BuildArgument.WHATS_NEW.raise_argument_error(
+                f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
@@ -70,6 +80,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 if submit_to_testflight:
                     build, pre_release_version = self._get_uploaded_build(application_package)
                     self.create_beta_app_review_submission(build.id)
+                    if locale and whats_new:
+                        self.create_beta_build_localization(build.id, locale, whats_new)
             except IOError as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))

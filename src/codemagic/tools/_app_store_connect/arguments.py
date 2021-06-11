@@ -10,6 +10,7 @@ from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -53,6 +54,9 @@ class Types:
         @classmethod
         def _is_valid(cls, value: str) -> bool:
             return bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', value))
+
+    class WhatsNewArgument(cli.EnvironmentArgumentValue[str]):
+        environment_variable_key = 'APP_STORE_CONNECT_WHATS_NEW'
 
     class AppStoreConnectSkipPackageValidation(cli.TypedCliArgument[bool]):
         argument_type = bool
@@ -332,6 +336,46 @@ class BuildArgument(cli.Argument):
             'For example `46`'
         ),
         argparse_kwargs={'required': False},
+    )
+    BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID = cli.ArgumentProperties(
+        key='localization_id',
+        type=ResourceId,
+        description='Alphanumeric ID value of the Beta Build Localization',
+    )
+    LOCALE = cli.ArgumentProperties(
+        key='locale',
+        flags=('-l', '--locale'),
+        type=Locale,
+        description=(
+            'The locale code name for displaying localized "What\'s new" content in TestFlight. '
+            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
+            'betabuildlocalizationcreaterequest/data/attributes'
+        ),
+        argparse_kwargs={
+            'required': True,
+            'choices': list(Locale),
+        },
+    )
+    LOCALE_OPTIONAL = LOCALE.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Locale),
+    })
+    LOCALE_OPTIONAL_WITH_DEFAULT = LOCALE.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Locale),
+        'default': Locale('en-US'),
+    })
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('-n', '--whats-new'),
+        type=Types.WhatsNewArgument,
+        description=(
+            'Describe the changes and additions to the build and indicate '
+            'the features you would like your users to tests.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
 
 

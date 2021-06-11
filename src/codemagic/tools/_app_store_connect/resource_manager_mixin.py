@@ -95,3 +95,19 @@ class ResourceManagerMixin:
                 self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
             else:
                 raise AppStoreConnectError(str(api_error))
+
+    def _modify_resource(
+            self,
+            resource_manager,
+            resource_id: ResourceId,
+            should_print: bool,
+            **update_params):
+        self.printer.log_modify(resource_manager.resource_type, resource_id)
+        try:
+            resource = resource_manager.modify(resource_id, **update_params)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        self.printer.log_modified(resource_manager.resource_type, resource_id)
+        self.printer.print_resource(resource, should_print)
+        return resource

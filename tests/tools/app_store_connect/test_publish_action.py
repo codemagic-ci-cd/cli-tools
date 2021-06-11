@@ -7,20 +7,30 @@ from unittest import mock
 
 import pytest
 
-from codemagic.tools._app_store_connect.arguments import PublishArgument
+from codemagic.apple.resources import Locale
+from codemagic.models.application_package import Ipa
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
+from codemagic.tools.app_store_connect import BuildArgument
+from codemagic.tools.app_store_connect import PublishArgument
 from codemagic.tools.app_store_connect import Types
 
 
-def test_publish_action_without_app_store_connect_key(namespace_kwargs):
+@pytest.fixture()
+def publishing_namespace_kwargs(namespace_kwargs):
     namespace_kwargs.update({
+        'action': 'publish',
+    })
+    return namespace_kwargs
+
+
+def test_publish_action_without_app_store_connect_key(publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({
         AppStoreConnectArgument.ISSUER_ID.key: None,
         AppStoreConnectArgument.KEY_IDENTIFIER.key: None,
         AppStoreConnectArgument.PRIVATE_KEY.key: None,
-        'action': 'publish',
     })
-    cli_args = argparse.Namespace(**namespace_kwargs)
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     _ = AppStoreConnect.from_cli_args(cli_args)
 
 
@@ -29,9 +39,9 @@ def test_publish_action_without_app_store_connect_key(namespace_kwargs):
     AppStoreConnectArgument.KEY_IDENTIFIER,
     AppStoreConnectArgument.PRIVATE_KEY,
 ])
-def test_publish_action_without_app_store_connect_key_testflight_submit(missing_argument, namespace_kwargs):
-    namespace_kwargs.update({missing_argument.key: None, 'action': 'publish'})
-    cli_args = argparse.Namespace(**namespace_kwargs)
+def test_publish_action_without_app_store_connect_key_testflight_submit(missing_argument, publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({missing_argument.key: None})
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     app_store_connect = AppStoreConnect.from_cli_args(cli_args)
     with pytest.raises(argparse.ArgumentError) as error_info:
         app_store_connect.publish(
@@ -42,15 +52,14 @@ def test_publish_action_without_app_store_connect_key_testflight_submit(missing_
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
-def test_publish_action_with_username_and_password(_mock_altool, namespace_kwargs):
-    namespace_kwargs.update({
+def test_publish_action_with_username_and_password(_mock_altool, publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({
         AppStoreConnectArgument.ISSUER_ID.key: None,
         AppStoreConnectArgument.KEY_IDENTIFIER.key: None,
         AppStoreConnectArgument.PRIVATE_KEY.key: None,
-        'action': 'publish',
     })
 
-    cli_args = argparse.Namespace(**namespace_kwargs)
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages:
         mock_get_packages.return_value = []
@@ -65,6 +74,54 @@ def test_publish_action_with_username_and_password(_mock_altool, namespace_kwarg
         mock_get_packages.assert_called_with(patterns)
 
 
+def test_publish_action_with_localization_and_no_testflight_submission(publishing_namespace_kwargs, cli_argument_group):
+    BuildArgument.WHATS_NEW.register(cli_argument_group)
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
+    patterns = [pathlib.Path('path.pattern')]
+    locale = Locale('en-GB')
+
+    with pytest.raises(argparse.ArgumentError) as error_info:
+        AppStoreConnect.from_cli_args(cli_args).publish(
+            application_package_path_patterns=patterns,
+            locale=locale,
+            whats_new=Types.WhatsNewArgument("What's new"),
+        )
+
+    assert str(error_info.value) == 'argument -n/--whats-new: --testflight is required for submitting notes'
+
+
+def test_publish_action_testflight_with_localization(publishing_namespace_kwargs):
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
+    with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
+            mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
+            mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload, \
+            mock.patch.object(AppStoreConnect, '_validate_artifact_with_altool') as mock_validate, \
+            mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
+            mock.patch.object(AppStoreConnect, 'create_beta_app_review_submission') as mock_create_review, \
+            mock.patch.object(AppStoreConnect, 'create_beta_build_localization') as mock_create_localization:
+        ipa_path = pathlib.Path('app.ipa')
+        mock_find_paths.return_value = [ipa_path]
+        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
+        build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
+        mock_get_build.return_value = [build, '1.0.0']
+        locale = Locale('en-GB')
+
+        whats_new = Types.WhatsNewArgument("What's new")
+        patterns = [pathlib.Path('path.pattern')]
+        AppStoreConnect.from_cli_args(cli_args).publish(
+            application_package_path_patterns=patterns,
+            submit_to_testflight=True,
+            locale=locale,
+            whats_new=whats_new,
+        )
+
+        mock_get_packages.assert_called_with(patterns)
+        mock_validate.assert_called()
+        mock_upload.assert_called()
+        mock_create_review.assert_called_with(build.id)
+        mock_create_localization.assert_called_with(build.id, locale, whats_new)
+
+
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
 @pytest.mark.parametrize('skip_package_validation, should_validate', [
     (True, False),
@@ -72,14 +129,6 @@ def test_publish_action_with_username_and_password(_mock_altool, namespace_kwarg
     (None, True),
 ])
 def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_package_validation, should_validate):
-    class MockIpa:
-        def __init__(self, path: pathlib.Path):
-            self.path = path
-
-        @classmethod
-        def get_text_summary(cls):
-            return ''
-
     asc = AppStoreConnect.from_cli_args(argparse.Namespace(**namespace_kwargs))
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
@@ -87,7 +136,7 @@ def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_pac
             mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
-        mock_get_packages.return_value = [MockIpa(ipa_path)]
+        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
 
         asc.publish(
             application_package_path_patterns=[ipa_path],
