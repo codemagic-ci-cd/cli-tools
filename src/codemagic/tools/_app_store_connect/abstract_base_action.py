@@ -53,6 +53,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             locale: Locale,
             whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
+        ...
 
     def get_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
         ...
