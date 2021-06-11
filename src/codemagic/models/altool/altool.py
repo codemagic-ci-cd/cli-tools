@@ -114,19 +114,19 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             '--output-format', 'json',
         )
 
-    def validate_app(self, artifact_path: pathlib.Path) -> AltoolResult:
+    def validate_app(self, artifact_path: pathlib.Path) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--validate-app', artifact_path, auth_flags)
             return self._run_command(cmd, f'Failed to validate archive at "{artifact_path}"')
 
-    def upload_app(self, artifact_path) -> AltoolResult:
+    def upload_app(self, artifact_path) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--upload-app', artifact_path, auth_flags)
             return self._run_command(cmd, f'Failed to upload archive at "{artifact_path}"')
 
-    def _run_command(self, command: Sequence[str], error_message: str) -> AltoolResult:
+    def _run_command(self, command: Sequence[str], error_message: str) -> Optional[AltoolResult]:
         process = None
         stdout = ''
         cli_app = self.get_current_cli_app()
@@ -140,7 +140,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 stdout = subprocess.check_output(command, stderr=subprocess.PIPE).decode()
         except subprocess.CalledProcessError as cpe:
             stdout = cpe.stdout
-            result = self._get_action_result(cpe.stdout, raise_error=False)
+            result = self._get_action_result(cpe.stdout)
             if result and result.product_errors:
                 product_errors = '\n'.join(pe.message for pe in result.product_errors)
                 error_message = f'{error_message}:\n{product_errors}'
@@ -148,18 +148,14 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         finally:
             self._log_process_output(stdout, cli_app)
 
-        action_result = self._get_action_result(stdout)
-        assert action_result  # Make Mypy happy
-        return action_result
+        return self._get_action_result(stdout)
 
     @classmethod
-    def _get_action_result(cls, action_stdout: AnyStr, raise_error: bool = True) -> Optional[AltoolResult]:
+    def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:
         try:
             parsed_result = json.loads(action_stdout)
             return AltoolResult.create(**parsed_result)
-        except (TypeError, ValueError) as e:
-            if raise_error:
-                raise IOError('Failed to load Altool result from process stdout') from e
+        except (TypeError, ValueError):
             return None
 
     @classmethod
