@@ -101,3 +101,25 @@ class Apps(ResourceManager[App]):
         params = resource_filter.as_query_params() if resource_filter else None
         app_store_versions = self.client.paginate(url, params=params, page_size=None)
         return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
+
+    def list_beta_app_localizations(self, app: Union[App, ResourceId]) -> List[LinkedResourceData]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_beta_app_localizations_of_an_app
+        """
+        if isinstance(app, App):
+            url = app.relationships.betaAppLocalizations.links.related
+        else:
+            url = f'{self.client.API_URL}/apps/{app}/betaAppLocalizations'
+        response = self.client.session.get(url).json()
+        return [LinkedResourceData(datum) for datum in response['data']]
+
+    def read_beta_app_review_detail(self, app: Union[App, ResourceId]) -> LinkedResourceData:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_beta_app_review_details_resource_of_an_app
+        """
+        if isinstance(app, App):
+            url = app.relationships.betaAppReviewDetail.links.related
+        else:
+            url = f'{self.client.API_URL}/apps/{app}/betaAppReviewDetail'
+        response = self.client.session.get(url).json()
+        return LinkedResourceData(response['data'])
