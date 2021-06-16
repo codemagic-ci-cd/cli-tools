@@ -388,7 +388,7 @@ class AppStoreConnect(cli.CliApp,
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AppStoreConnectError('Cannot create resource without private key')
+            raise AppStoreConnectError('Cannot create resource without certificate private key')
 
         csr = Certificate.create_certificate_signing_request(private_key)
         csr_content = Certificate.get_certificate_signing_request_content(csr)
@@ -419,7 +419,7 @@ class AppStoreConnect(cli.CliApp,
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AppStoreConnectError('Cannot save resource without private key')
+            raise AppStoreConnectError('Cannot save resource without certificate private key')
         else:
             assert private_key is not None
 
@@ -464,7 +464,7 @@ class AppStoreConnect(cli.CliApp,
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AppStoreConnectError('Cannot create or save resource without private key')
+            raise AppStoreConnectError('Cannot create or save resource without certificate private key')
 
         if profile_type:
             certificate_type = CertificateType.from_profile_type(profile_type)
@@ -676,7 +676,7 @@ class AppStoreConnect(cli.CliApp,
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AppStoreConnectError(f'Cannot save {SigningCertificate.s} without private key')
+            raise AppStoreConnectError(f'Cannot save {SigningCertificate.s} without certificate private key')
 
         bundle_ids = self._get_or_create_bundle_ids(
             bundle_id_identifier,
