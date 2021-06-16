@@ -1,3 +1,10 @@
+Version 0.8.2
+-------------
+
+**Improvements**
+
+- Explicitly mention "certificate" in `app-store-connect` error messages when `--certificate-key` is missing to avoid confusion with App Store Connect API key `--private-key`.
+
 Version 0.8.1
 -------------
 
