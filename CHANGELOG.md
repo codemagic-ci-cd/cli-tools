@@ -1,3 +1,24 @@
+Version 0.8.3
+-------------
+
+**Development / Docs**
+
+- Show the long version of CLI flag first in help messages and online documentation to reduce ambiguity. For example use `--testflight` instead of `-t` in help messages.
+
+Version 0.8.2
+-------------
+
+**Improvements**
+
+- Explicitly mention "certificate" in `app-store-connect` error messages when `--certificate-key` is missing to avoid confusion with App Store Connect API key `--private-key`.
+
+Version 0.8.1
+-------------
+
+**Fixes**
+
+- Submit only uploaded iOS application packages (`*.ipa` files) to TestFlight from `app-store-connect publish` action when submission to Testflight is enabled by `--testflight` flag.
+
 Version 0.8.0
 -------------
 
@@ -11,9 +32,19 @@ Version 0.8.0
 - Add action `app-store-connect beta-build-localizations list` to list localized "What's new" notes filtered by Build ID and locale code 
 - Add action `app-store-connect beta-build-localizations get` to retrieve localized "What's new" notes by its ID
 
-**Development / Docs**
+Version 0.7.7
+-------------
 
-- Fix `--testflight` option description for `app-store-connect publish` action.
+**Fixes**
+
+- Before creating Beta App Review Submission (submitting build to TestFlight) as part of `app-store-connect publish`, wait until the uploaded build processing completes. 
+
+Version 0.7.6
+-------------
+
+**Fixes**
+
+- Make `altool` output parsing less strict. Do not fail `app-store-connect publish` action invocation if `altool` output cannot be interpreted. 
 
 Version 0.7.5
 -------------

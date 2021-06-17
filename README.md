@@ -1,4 +1,6 @@
-Various utilities to simplify your builds at [codemagic.io](https://codemagic.io)
+# Codemagic CLI Tools
+
+Command line utilities for managing mobile app builds, code signing, and deployment. These power mobile app builds at [codemagic.io](https://codemagic.io).
 
 # Installing
 
