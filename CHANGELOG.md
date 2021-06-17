@@ -1,3 +1,15 @@
+Version 0.8.3
+-------------
+
+**Features**
+
+- Add `--max-build-processing-wait` option to configure maximum time that `app-store-connect publish` will wait for the package to be processed before failing the TestFlight submission.
+- Improve error message when waiting for package to be processed times out during TestFlight submission as part of `app-store-connect publish`.
+
+**Development / Docs**
+
+- Show default values for arguments of type `TypedCliArgument`. 
+
 Version 0.8.2
 -------------
 
