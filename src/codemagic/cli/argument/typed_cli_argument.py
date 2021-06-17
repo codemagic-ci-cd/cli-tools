@@ -56,11 +56,19 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         return self._apply_type(value)
 
     @classmethod
-    def get_description(cls, properties: 'ArgumentProperties') -> str:
+    def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
         description = f'{properties.description.rstrip(".")}.'
         if cls.environment_variable_key is not None:
             description += '\nIf not given, the value will be checked from ' \
                            f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
+        if include_default:
+            try:
+                default_value = (properties.argparse_kwargs or {})['default']
+            except KeyError:
+                pass
+            else:
+                default = ArgumentFormatter.format_default_value(default_value)
+                return '\n'.join([description, default])
         return description
 
     @classmethod
@@ -117,19 +125,23 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
             return super()._parse_value()
 
     @classmethod
-    def get_description(cls, properties: 'ArgumentProperties') -> str:
-        description = super().get_description(properties)
+    def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
+        description = super().get_description(properties, include_default=False)
         usage = f'Alternatively to entering {Colors.CYAN(properties.key.upper())} in plaintext, ' \
                 f'it may also be specified using a "@env:" prefix followed by a environment variable name, ' \
                 f'or "@file:" prefix followed by a path to the file containing the value.'
         example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>", ' \
                   'and "@file:<file_path>" uses the value from file at "<file_path>".'
-        try:
-            default_value = (properties.argparse_kwargs or {})['default']
-            default = ArgumentFormatter.format_default_value(default_value)
-            return '\n'.join([description, usage, example, default])
-        except KeyError:
-            return '\n'.join([description, usage, example])
+
+        if include_default:
+            try:
+                default_value = (properties.argparse_kwargs or {})['default']
+            except KeyError:
+                pass
+            else:
+                default = ArgumentFormatter.format_default_value(default_value)
+                return '\n'.join([description, usage, example, default])
+        return '\n'.join([description, usage, example])
 
     def __str__(self):
         return self._raw_value
