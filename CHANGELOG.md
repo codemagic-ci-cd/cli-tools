@@ -8,7 +8,9 @@ Version 0.8.3
 
 **Development / Docs**
 
-- Show default values for arguments of type `TypedCliArgument`. 
+- Show default values for arguments of type `TypedCliArgument`.
+- Add documentation for action `app-store-connect builds get`.
+- Document `--max-build-processing-wait` option in `app-store-connect publish` action.
 
 Version 0.8.2
 -------------
