@@ -26,6 +26,7 @@ T = TypeVar('T')
 class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
+    default_value: Optional[T] = None
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
@@ -63,7 +64,10 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
                            f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
         if include_default:
             try:
-                default_value = (properties.argparse_kwargs or {})['default']
+                if cls.default_value:
+                    default_value = cls.default_value
+                else:
+                    default_value = (properties.argparse_kwargs or {})['default']
             except KeyError:
                 pass
             else:
