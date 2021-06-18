@@ -10,6 +10,7 @@ from typing import Tuple
 from typing import Union
 
 from codemagic import cli
+from codemagic.apple.resources import App
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
@@ -78,16 +79,26 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             try:
                 self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
-                    build, pre_release_version = self._get_uploaded_build(application_package)
-                    self.create_beta_app_review_submission(build.id)
-                    if locale and whats_new:
-                        self.create_beta_build_localization(build.id, locale, whats_new)
+                    self._submit_build_to_testflight(application_package, locale, whats_new)
             except IOError as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
+
+    def _submit_build_to_testflight(
+        self,
+        application_package: Union[Ipa, MacOsPackage],
+        locale: Optional[Locale],
+        whats_new: Optional[Types.WhatsNewArgument],
+    ):
+        app = self._get_uploaded_build_application(application_package)
+        build, pre_release_version = self._get_uploaded_build(app, application_package)
+        build = self._wait_until_build_is_processed(build)
+        if locale and whats_new:
+            self.create_beta_build_localization(build.id, locale, whats_new)
+        self.create_beta_app_review_submission(build.id)
 
     def _publish_application_package(
             self, altool: Altool, application_package: Union[Ipa, MacOsPackage], validate_package: bool):
@@ -157,7 +168,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
             return build
 
-    def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
+    def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
         try:
@@ -166,10 +177,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
         else:
             self.printer.print_resource(app, True)
+        return app
 
+    def _get_uploaded_build(
+            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
         build, pre_release_version = self._find_build(app.id, application_package)
-        build = self._wait_until_build_is_processed(build)
         self.logger.info(Colors.GREEN('\nPublished build is'))
         self.printer.print_resource(build, True)
         self.printer.print_resource(pre_release_version, True)
