@@ -253,8 +253,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             missing_values = ', '.join(missing_beta_app_review_information)
             error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
 
-        raise ValueError(' '.join([
-            f'Application {app.attributes.name} cannot be submitted to TestFlight.',
+        name = app.attributes.name
+        raise ValueError('\n'.join([
+            f'Complete test information is required to submit application {name} build for external testing.',
             *error_lines,
             f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
         ]))
