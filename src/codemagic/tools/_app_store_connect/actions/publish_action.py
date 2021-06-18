@@ -271,7 +271,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         required_test_information = {
             'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
         }
-        return [field_name for field_name, value in required_test_information.items() if value]
+        return [field_name for field_name, value in required_test_information.items() if not value]
 
     def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
         beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
@@ -281,4 +281,4 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             'Phone Number': beta_app_review_detail.attributes.contactPhone,
             'Email': beta_app_review_detail.attributes.contactEmail,
         }
-        return [field_name for field_name, value in required_test_information.items() if value]
+        return [field_name for field_name, value in required_test_information.items() if not value]
