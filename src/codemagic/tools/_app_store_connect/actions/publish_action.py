@@ -10,6 +10,7 @@ from typing import Tuple
 from typing import Union
 
 from codemagic import cli
+from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
@@ -128,10 +129,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         after the upload and as a result the API calls may not return it. Implement a
         simple retrying logic to overcome this issue.
         """
-        for build in self.list_app_builds(app_id, should_print=False):
+        try:
+            found_builds = self.api_client.apps.list_builds(app_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        for build in found_builds:
             if build.attributes.version == application_package.version_code:
-                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
-                if pre_release_version.attributes.version == application_package.version:
+                pre_release_version = self.api_client.builds.read_pre_release_version(build.id)
+                if pre_release_version and pre_release_version.attributes.version == application_package.version:
                     return build, pre_release_version
 
         # Matching build was not found.
@@ -155,17 +161,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
 
         if build.attributes.processingState is BuildProcessingState.PROCESSING:
+            if retries < 1:
+                raise IOError(f'Waiting for build {build.id} processing timed out')
             self.logger.info(
                 'Build %s is still being processed, wait %d seconds and check again', build.id, retry_wait_seconds)
-            if retries > 0:
-                time.sleep(retry_wait_seconds)
-                return self._wait_until_build_is_processed(
-                    self.get_build(build.id, should_print=False),
-                    retries=retries-1,
-                    retry_wait_seconds=retry_wait_seconds,
-                )
-            else:
-                raise IOError(f'Waiting for build {build.id} processing timed out')
+            time.sleep(retry_wait_seconds)
+            try:
+                build = self.api_client.builds.read(build)
+            except AppStoreConnectApiError as api_error:
+                raise AppStoreConnectError(str(api_error))
+            return self._wait_until_build_is_processed(build, retries-1, retry_wait_seconds)
         elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
             raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
         else:
