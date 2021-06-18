@@ -108,11 +108,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
         app = self._get_uploaded_build_application(ipa)
         build, pre_release_version = self._get_uploaded_build(app, ipa)
-        if locale and whats_new:
-            self.create_beta_build_localization(build.id, locale, whats_new)
-
         build = self._wait_until_build_is_processed(build)
         self.create_beta_app_review_submission(build.id)
+        if locale and whats_new:
+            self.create_beta_build_localization(build.id, locale, whats_new)
 
     def _find_build(
         self,
