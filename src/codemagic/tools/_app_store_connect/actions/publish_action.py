@@ -79,26 +79,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             try:
                 self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
-                    self._submit_build_to_testflight(application_package, locale, whats_new)
+                    if isinstance(application_package, Ipa):
+                        self._submit_build_to_testflight(application_package, locale, whats_new)
+                    else:
+                        continue  # Cannot submit macOS packages to TestFlight, skip
             except IOError as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
-
-    def _submit_build_to_testflight(
-        self,
-        application_package: Union[Ipa, MacOsPackage],
-        locale: Optional[Locale],
-        whats_new: Optional[Types.WhatsNewArgument],
-    ):
-        app = self._get_uploaded_build_application(application_package)
-        build, pre_release_version = self._get_uploaded_build(app, application_package)
-        build = self._wait_until_build_is_processed(build)
-        if locale and whats_new:
-            self.create_beta_build_localization(build.id, locale, whats_new)
-        self.create_beta_app_review_submission(build.id)
 
     def _publish_application_package(
             self, altool: Altool, application_package: Union[Ipa, MacOsPackage], validate_package: bool):
@@ -112,6 +102,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
+
+    def _submit_build_to_testflight(self, ipa: Ipa, locale: Locale, whats_new: Optional[Types.WhatsNewArgument]):
+        self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
+
+        app = self._get_uploaded_build_application(ipa)
+        build, pre_release_version = self._get_uploaded_build(app, ipa)
+        if locale and whats_new:
+            self.create_beta_build_localization(build.id, locale, whats_new)
+
+        build = self._wait_until_build_is_processed(build)
+        self.create_beta_app_review_submission(build.id)
 
     def _find_build(
         self,
