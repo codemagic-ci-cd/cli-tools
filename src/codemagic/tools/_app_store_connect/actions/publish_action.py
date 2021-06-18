@@ -262,29 +262,18 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     def _get_missing_beta_app_information(self, app: App) -> List[str]:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
-        default_localization = beta_app_localizations[0]
-        test_information = {
-            'Beta App Description': default_localization.attributes.description,
-            'Feedback Email': default_localization.attributes.feedbackEmail,
-            'Marketing URL': default_localization.attributes.marketingUrl,
-            'Privacy Policy URL': default_localization.attributes.privacyPolicyUrlm,
+        default_beta_app_localization = beta_app_localizations[0]
+        required_test_information = {
+            'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
         }
-        return [field_name for field_name, value in test_information.items() if value]
+        return [field_name for field_name, value in required_test_information.items() if value]
 
     def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
         beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
-
-        test_information = {
+        required_test_information = {
             'First Name': beta_app_review_detail.attributes.contactFirstName,
             'Last Name': beta_app_review_detail.attributes.contactLastName,
             'Phone Number': beta_app_review_detail.attributes.contactPhone,
             'Email': beta_app_review_detail.attributes.contactEmail,
-            'Review Notes': beta_app_review_detail.attributes.notes,
         }
-        missing_values = [field_name for field_name, value in test_information.items() if value]
-        if beta_app_review_detail.attributes.demoAccountRequired:
-            if not beta_app_review_detail.attributes.demoAccountName:
-                missing_values.append('Demo Account User Name')
-            if not beta_app_review_detail.attributes.demoAccountPassword:
-                missing_values.append('Demo Account Password')
-        return missing_values
+        return [field_name for field_name, value in required_test_information.items() if value]
