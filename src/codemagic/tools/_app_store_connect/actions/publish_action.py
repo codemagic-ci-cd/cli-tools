@@ -83,7 +83,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                         self._submit_build_to_testflight(application_package, locale, whats_new)
                     else:
                         continue  # Cannot submit macOS packages to TestFlight, skip
-            except IOError as error:
+            except (IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
@@ -105,13 +105,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     def _submit_build_to_testflight(self, ipa: Ipa, locale: Locale, whats_new: Optional[Types.WhatsNewArgument]):
         self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
-
         app = self._get_uploaded_build_application(ipa)
         build, pre_release_version = self._get_uploaded_build(app, ipa)
-        build = self._wait_until_build_is_processed(build)
-        self.create_beta_app_review_submission(build.id)
+
         if locale and whats_new:
             self.create_beta_build_localization(build.id, locale, whats_new)
+
+        self._assert_app_has_testflight_information(app)
+        build = self._wait_until_build_is_processed(build)
+        self.create_beta_app_review_submission(build.id)
 
     def _find_build(
         self,
@@ -150,6 +152,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
     def _wait_until_build_is_processed(self, build: Build, retries: int = 20, retry_wait_seconds: int = 30) -> Build:
+        self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
+
         if build.attributes.processingState is BuildProcessingState.PROCESSING:
             self.logger.info(
                 'Build %s is still being processed, wait %d seconds and check again', build.id, retry_wait_seconds)
@@ -233,3 +237,53 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         result = altool.upload_app(artifact_path)
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
+
+    def _assert_app_has_testflight_information(self, app: App):
+        missing_beta_app_information = self._get_missing_beta_app_information(app)
+        missing_beta_app_review_information = self._get_missing_beta_app_review_information(app)
+
+        if not missing_beta_app_information and not missing_beta_app_review_information:
+            return  # All information required for TestFlight submission seems to be present
+
+        error_lines = []
+        if missing_beta_app_information:
+            missing_values = ', '.join(missing_beta_app_information)
+            error_lines.append(f'App is missing required Beta App Information: {missing_values}.')
+        if missing_beta_app_review_information:
+            missing_values = ', '.join(missing_beta_app_review_information)
+            error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
+
+        raise ValueError(' '.join([
+            f'Application {app.attributes.name} cannot be submitted to TestFlight.',
+            *error_lines,
+            f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
+        ]))
+
+    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
+        default_localization = beta_app_localizations[0]
+        test_information = {
+            'Beta App Description': default_localization.attributes.description,
+            'Feedback Email': default_localization.attributes.feedbackEmail,
+            'Marketing URL': default_localization.attributes.marketingUrl,
+            'Privacy Policy URL': default_localization.attributes.privacyPolicyUrlm,
+        }
+        return [field_name for field_name, value in test_information.items() if value]
+
+    def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
+        beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
+
+        test_information = {
+            'First Name': beta_app_review_detail.attributes.contactFirstName,
+            'Last Name': beta_app_review_detail.attributes.contactLastName,
+            'Phone Number': beta_app_review_detail.attributes.contactPhone,
+            'Email': beta_app_review_detail.attributes.contactEmail,
+            'Review Notes': beta_app_review_detail.attributes.notes,
+        }
+        missing_values = [field_name for field_name, value in test_information.items() if value]
+        if beta_app_review_detail.attributes.demoAccountRequired:
+            if not beta_app_review_detail.attributes.demoAccountName:
+                missing_values.append('Demo Account User Name')
+            if not beta_app_review_detail.attributes.demoAccountPassword:
+                missing_values.append('Demo Account Password')
+        return missing_values
