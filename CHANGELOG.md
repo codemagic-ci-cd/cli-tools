@@ -1,3 +1,10 @@
+Version 0.8.3
+-------------
+
+**Features**
+
+- Check if application has complete test information in App Store Connect before submitting a build for external testing with `app-store-connect publish --testflight`. This will enable the submission to fail fast with descriptive message instead of waiting until build processing completes by Apple and only then failing while creating the TestFlight submission.
+
 Version 0.8.2
 -------------
 
