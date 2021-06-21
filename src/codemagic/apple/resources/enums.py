@@ -6,7 +6,7 @@ from typing import Optional
 from codemagic.utilities import log
 
 
-class _ResourceEnumMeta(enum.EnumMeta):
+class ResourceEnumMeta(enum.EnumMeta):
     """
     Custom metaclass for Resource enumerations to accommodate the cases when
     App Store Connect API returns such a value that our definitions do not describe.
@@ -17,17 +17,21 @@ class _ResourceEnumMeta(enum.EnumMeta):
     fails unexpectedly, which is not desirable.
     """
 
+    graceful_fallback = True
+
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
         try:
             return super().__call__(value, *args, **kwargs)
         except ValueError as ve:
+            if not cls.graceful_fallback:
+                raise
             logger = log.get_logger(cls, log_to_stream=False)
             logger.warning('Undefined Resource enumeration: %s', ve)
             enum_class = _ResourceEnum(f'Graceful{cls.__name__}', {value: value})
             return enum_class(value)
 
 
-class _ResourceEnum(enum.Enum, metaclass=_ResourceEnumMeta):
+class _ResourceEnum(enum.Enum, metaclass=ResourceEnumMeta):
 
     def __str__(self):
         return str(self.value)
