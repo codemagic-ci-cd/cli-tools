@@ -62,6 +62,11 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
+        default_value = 20
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -268,6 +273,19 @@ class PublishArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
+        },
+    )
+    MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
+        key='max_build_processing_wait',
+        flags=('--max-build-processing-wait',),
+        type=Types.MaxBuildProcessingWait,
+        description=(
+            'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
+            'Apple and retry submitting the build for beta review. If the processing is not finished '
+            'within the specified timeframe, further submission will be terminated'
+        ),
+        argparse_kwargs={
+            'required': False,
         },
     )
 

@@ -26,6 +26,7 @@ T = TypeVar('T')
 class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
+    default_value: Optional[T] = None
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
@@ -61,7 +62,16 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         if cls.environment_variable_key is not None:
             description += '\nIf not given, the value will be checked from ' \
                            f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
-        return description
+        try:
+            if cls.default_value:
+                default_value = cls.default_value
+            else:
+                default_value = (properties.argparse_kwargs or {})['default']
+        except KeyError:
+            return description
+        else:
+            default = ArgumentFormatter.format_default_value(default_value)
+            return '\n'.join([description, default])
 
     @classmethod
     def get_missing_value_error_message(cls, properties: 'ArgumentProperties') -> str:
