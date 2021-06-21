@@ -39,6 +39,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
+                PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
@@ -47,10 +48,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 submit_to_testflight: Optional[bool] = None,
                 locale: Locale = BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT.get_default(),
                 whats_new: Optional[Types.WhatsNewArgument] = None,
-                skip_package_validation: Optional[bool] = None) -> None:
+                skip_package_validation: Optional[bool] = None,
+                max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """
+
+        # Workaround to support overriding default value by environment variable.
+        if max_build_processing_wait:
+            max_processing_minutes = max_build_processing_wait.value
+        else:
+            max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
@@ -81,7 +89,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
                     if isinstance(application_package, Ipa):
-                        self._submit_build_to_testflight(application_package, locale, whats_new)
+                        self._submit_build_to_testflight(application_package, locale, whats_new, max_processing_minutes)
                     else:
                         continue  # Cannot submit macOS packages to TestFlight, skip
             except (IOError, ValueError) as error:
@@ -104,7 +112,13 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
-    def _submit_build_to_testflight(self, ipa: Ipa, locale: Locale, whats_new: Optional[Types.WhatsNewArgument]):
+    def _submit_build_to_testflight(
+        self,
+        ipa: Ipa,
+        locale: Locale,
+        whats_new: Optional[Types.WhatsNewArgument],
+        max_processing_minutes: int,
+    ):
         self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
         app = self._get_uploaded_build_application(ipa)
         build, pre_release_version = self._get_uploaded_build(app, ipa)
@@ -113,7 +127,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.create_beta_build_localization(build.id, locale, whats_new)
 
         self._assert_app_has_testflight_information(app)
-        build = self._wait_until_build_is_processed(build)
+        build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
 
     def _find_build(
@@ -157,25 +171,35 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # There are no more retries left, give up.
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
-    def _wait_until_build_is_processed(self, build: Build, retries: int = 20, retry_wait_seconds: int = 30) -> Build:
+    def _wait_until_build_is_processed(
+        self,
+        build: Build,
+        max_processing_minutes: int,
+        retry_wait_seconds: int = 30,
+    ) -> Build:
         self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
 
-        if build.attributes.processingState is BuildProcessingState.PROCESSING:
-            if retries < 1:
-                raise IOError(f'Waiting for build {build.id} processing timed out')
-            self.logger.info(
-                'Build %s is still being processed, wait %d seconds and check again', build.id, retry_wait_seconds)
-            time.sleep(retry_wait_seconds)
-            try:
-                build = self.api_client.builds.read(build)
-            except AppStoreConnectApiError as api_error:
-                raise AppStoreConnectError(str(api_error))
-            return self._wait_until_build_is_processed(build, retries-1, retry_wait_seconds)
-        elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
-            raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
-        else:
-            self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
-            return build
+        start_waiting = time.time()
+        while time.time() - start_waiting < max_processing_minutes * 60:
+            if build.attributes.processingState is BuildProcessingState.PROCESSING:
+                msg_template = 'Build %s is still being processed, wait %d seconds and check again'
+                self.logger.info(msg_template, build.id, retry_wait_seconds)
+                time.sleep(retry_wait_seconds)
+                try:
+                    build = self.api_client.builds.read(build)
+                except AppStoreConnectApiError as api_error:
+                    raise AppStoreConnectError(str(api_error))
+            elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
+                raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
+            else:
+                self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
+                return build
+
+        raise IOError((
+            f'Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. '
+            f'You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} '
+            f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
+        ))
 
     def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier

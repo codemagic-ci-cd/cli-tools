@@ -62,6 +62,11 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
+        default_value = 20
+
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
 
@@ -225,7 +230,7 @@ class PublishArgument(cli.Argument):
     )
     SUBMIT_TO_TESTFLIGHT = cli.ArgumentProperties(
         key='submit_to_testflight',
-        flags=('-t', '--testflight'),
+        flags=('--testflight', '-t'),
         type=bool,
         description='Submit an app for Testflight beta app review to allow external testing',
         argparse_kwargs={
@@ -235,7 +240,7 @@ class PublishArgument(cli.Argument):
     )
     APPLE_ID = cli.ArgumentProperties(
         key='apple_id',
-        flags=('-u', '--apple-id'),
+        flags=('--apple-id', '-u'),
         description=(
             'App Store Connect username used for application package validation '
             'and upload if App Store Connect API key is not specified'
@@ -244,7 +249,7 @@ class PublishArgument(cli.Argument):
     )
     APP_SPECIFIC_PASSWORD = cli.ArgumentProperties(
         key='app_specific_password',
-        flags=('-p', '--password'),
+        flags=('--password', '-p'),
         type=Types.AppSpecificPassword,
         description=(
             'App-specific password used for application package validation '
@@ -268,6 +273,19 @@ class PublishArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
+        },
+    )
+    MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
+        key='max_build_processing_wait',
+        flags=('--max-build-processing-wait',),
+        type=Types.MaxBuildProcessingWait,
+        description=(
+            'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
+            'Apple and retry submitting the build for beta review. If the processing is not finished '
+            'within the specified timeframe, further submission will be terminated'
+        ),
+        argparse_kwargs={
+            'required': False,
         },
     )
 
@@ -344,7 +362,7 @@ class BuildArgument(cli.Argument):
     )
     LOCALE = cli.ArgumentProperties(
         key='locale',
-        flags=('-l', '--locale'),
+        flags=('--locale', '-l'),
         type=Locale,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
@@ -367,7 +385,7 @@ class BuildArgument(cli.Argument):
     })
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
-        flags=('-n', '--whats-new'),
+        flags=('--whats-new', '-n'),
         type=Types.WhatsNewArgument,
         description=(
             'Describe the changes and additions to the build and indicate '
