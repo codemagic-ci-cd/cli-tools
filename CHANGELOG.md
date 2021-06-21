@@ -12,6 +12,7 @@ Version 0.8.3
 - Add documentation for action `app-store-connect builds get`.
 - Document `--max-build-processing-wait` option in `app-store-connect publish` action.
 - Show default values for arguments of type `TypedCliArgument`. 
+- Show the long version of CLI flag first in help messages and online documentation to reduce ambiguity. For example use `--testflight` instead of `-t` in help messages.
 
 Version 0.8.2
 -------------

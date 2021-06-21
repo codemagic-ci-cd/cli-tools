@@ -14,9 +14,9 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [-n WHATS_NEW]
+    [--whats-new WHATS_NEW]
     BUILD_ID_RESOURCE_ID
-    -l LOCALE
+    --locale LOCALE
 ```
 ### Required arguments for action `create`
 
@@ -24,13 +24,13 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
 
 
 Alphanumeric ID value of the Build
-##### `-l, --locale=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
 The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
 ### Optional arguments for action `create`
 
-##### `-n, --whats-new=WHATS_NEW`
+##### `--whats-new, -n=WHATS_NEW`
 
 
 Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
