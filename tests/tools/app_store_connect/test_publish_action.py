@@ -96,6 +96,8 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
             mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload, \
             mock.patch.object(AppStoreConnect, '_validate_artifact_with_altool') as mock_validate, \
+            mock.patch.object(AppStoreConnect, '_assert_app_has_testflight_information'), \
+            mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
             mock.patch.object(AppStoreConnect, 'create_beta_app_review_submission') as mock_create_review, \
             mock.patch.object(AppStoreConnect, 'create_beta_build_localization') as mock_create_localization:
@@ -103,6 +105,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_find_paths.return_value = [ipa_path]
         mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
         build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
+        mock_get_app.return_value = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_build.return_value = [build, '1.0.0']
         locale = Locale('en-GB')
 

@@ -3,11 +3,16 @@ Version 0.8.3
 
 **Features**
 
+- Check if application has complete test information in App Store Connect before submitting a build for external testing with `app-store-connect publish --testflight`. This will enable the submission to fail fast with descriptive message instead of waiting until build processing completes by Apple and only then failing while creating the TestFlight submission.
 - Add `--max-build-processing-wait` option to configure maximum time that `app-store-connect publish` will wait for the package to be processed before failing the TestFlight submission.
 - Improve error message when waiting for package to be processed times out during TestFlight submission as part of `app-store-connect publish`.
 
 **Development / Docs**
 
+- Get build and related resources using App Store Connect API client directly for `app-store-connect publish` instead of reusing other `app-store-connect` actions to reduce unnecessary repetition in the terminal output.
+- Extract application lookup into a separate method for finding uploaded build.
+- Define new models for Apple API resources: `BetaAppLocalization` and `BetaAppReviewDetail`.
+- Implement new App Store Connect API client methods to consume endpoints to [list beta app Localizations of an app](https://developer.apple.com/documentation/appstoreconnectapi/list_all_beta_app_localizations_of_an_app) and to [read the beta app review details of an app](https://developer.apple.com/documentation/appstoreconnectapi/read_the_beta_app_review_details_resource_of_an_app).
 - Show default values for arguments of type `TypedCliArgument`.
 - Add documentation for action `app-store-connect builds get`.
 - Document `--max-build-processing-wait` option in `app-store-connect publish` action.

@@ -228,6 +228,8 @@ class ResourceType(_ResourceEnum):
     APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
+    BETA_APP_LOCALIZATIONS = 'betaAppLocalizations'
+    BETA_APP_REVIEW_DETAILS = 'betaAppReviewDetails'
     BETA_APP_REVIEW_SUBMISSIONS = 'betaAppReviewSubmissions'
     BETA_BUILD_LOCALIZATIONS = 'betaBuildLocalizations'
     BUILDS = 'builds'
