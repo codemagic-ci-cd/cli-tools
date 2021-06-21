@@ -10,6 +10,8 @@ from typing import Tuple
 from typing import Union
 
 from codemagic import cli
+from codemagic.apple import AppStoreConnectApiError
+from codemagic.apple.resources import App
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
@@ -37,6 +39,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
+                PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
@@ -45,10 +48,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 submit_to_testflight: Optional[bool] = None,
                 locale: Locale = BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT.get_default(),
                 whats_new: Optional[Types.WhatsNewArgument] = None,
-                skip_package_validation: Optional[bool] = None) -> None:
+                skip_package_validation: Optional[bool] = None,
+                max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """
+
+        # Workaround to support overriding default value by environment variable.
+        if max_build_processing_wait:
+            max_processing_minutes = max_build_processing_wait.value
+        else:
+            max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
@@ -79,10 +89,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
                     if isinstance(application_package, Ipa):
-                        self._submit_build_to_testflight(application_package, locale, whats_new)
+                        self._submit_build_to_testflight(application_package, locale, whats_new, max_processing_minutes)
                     else:
                         continue  # Cannot submit macOS packages to TestFlight, skip
-            except IOError as error:
+            except (IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
@@ -102,13 +112,23 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
-    def _submit_build_to_testflight(self, ipa: Ipa, locale: Locale, whats_new: Optional[Types.WhatsNewArgument]):
+    def _submit_build_to_testflight(
+        self,
+        ipa: Ipa,
+        locale: Locale,
+        whats_new: Optional[Types.WhatsNewArgument],
+        max_processing_minutes: int,
+    ):
         self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
+        app = self._get_uploaded_build_application(ipa)
+        build, pre_release_version = self._get_uploaded_build(app, ipa)
 
-        build, pre_release_version = self._get_uploaded_build(ipa)
-        self.create_beta_app_review_submission(build.id)
         if locale and whats_new:
             self.create_beta_build_localization(build.id, locale, whats_new)
+
+        self._assert_app_has_testflight_information(app)
+        build = self._wait_until_build_is_processed(build, max_processing_minutes)
+        self.create_beta_app_review_submission(build.id)
 
     def _find_build(
         self,
@@ -123,10 +143,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         after the upload and as a result the API calls may not return it. Implement a
         simple retrying logic to overcome this issue.
         """
-        for build in self.list_app_builds(app_id, should_print=False):
+        try:
+            found_builds = self.api_client.apps.list_builds(app_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        for build in found_builds:
             if build.attributes.version == application_package.version_code:
-                pre_release_version = self.get_build_pre_release_version(build.id, should_print=False)
-                if pre_release_version.attributes.version == application_package.version:
+                pre_release_version = self.api_client.builds.read_pre_release_version(build.id)
+                if pre_release_version and pre_release_version.attributes.version == application_package.version:
                     return build, pre_release_version
 
         # Matching build was not found.
@@ -146,26 +171,37 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # There are no more retries left, give up.
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
-    def _wait_until_build_is_processed(self, build: Build, retries: int = 20, retry_wait_seconds: int = 30) -> Build:
-        if build.attributes.processingState is BuildProcessingState.PROCESSING:
-            self.logger.info(
-                'Build %s is still being processed, wait %d seconds and check again', build.id, retry_wait_seconds)
-            if retries > 0:
-                time.sleep(retry_wait_seconds)
-                return self._wait_until_build_is_processed(
-                    self.get_build(build.id, should_print=False),
-                    retries=retries-1,
-                    retry_wait_seconds=retry_wait_seconds,
-                )
-            else:
-                raise IOError(f'Waiting for build {build.id} processing timed out')
-        elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
-            raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
-        else:
-            self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
-            return build
+    def _wait_until_build_is_processed(
+        self,
+        build: Build,
+        max_processing_minutes: int,
+        retry_wait_seconds: int = 30,
+    ) -> Build:
+        self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
 
-    def _get_uploaded_build(self, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
+        start_waiting = time.time()
+        while time.time() - start_waiting < max_processing_minutes * 60:
+            if build.attributes.processingState is BuildProcessingState.PROCESSING:
+                msg_template = 'Build %s is still being processed, wait %d seconds and check again'
+                self.logger.info(msg_template, build.id, retry_wait_seconds)
+                time.sleep(retry_wait_seconds)
+                try:
+                    build = self.api_client.builds.read(build)
+                except AppStoreConnectApiError as api_error:
+                    raise AppStoreConnectError(str(api_error))
+            elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
+                raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
+            else:
+                self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
+                return build
+
+        raise IOError((
+            f'Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. '
+            f'You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} '
+            f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
+        ))
+
+    def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
         try:
@@ -174,10 +210,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
         else:
             self.printer.print_resource(app, True)
+        return app
 
+    def _get_uploaded_build(
+            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
         self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
         build, pre_release_version = self._find_build(app.id, application_package)
-        build = self._wait_until_build_is_processed(build)
         self.logger.info(Colors.GREEN('\nPublished build is'))
         self.printer.print_resource(build, True)
         self.printer.print_resource(pre_release_version, True)
@@ -228,3 +266,43 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         result = altool.upload_app(artifact_path)
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
+
+    def _assert_app_has_testflight_information(self, app: App):
+        missing_beta_app_information = self._get_missing_beta_app_information(app)
+        missing_beta_app_review_information = self._get_missing_beta_app_review_information(app)
+
+        if not missing_beta_app_information and not missing_beta_app_review_information:
+            return  # All information required for TestFlight submission seems to be present
+
+        error_lines = []
+        if missing_beta_app_information:
+            missing_values = ', '.join(missing_beta_app_information)
+            error_lines.append(f'App is missing required Beta App Information: {missing_values}.')
+        if missing_beta_app_review_information:
+            missing_values = ', '.join(missing_beta_app_review_information)
+            error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
+
+        name = app.attributes.name
+        raise ValueError('\n'.join([
+            f'Complete test information is required to submit application {name} build for external testing.',
+            *error_lines,
+            f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
+        ]))
+
+    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
+        default_beta_app_localization = beta_app_localizations[0]
+        required_test_information = {
+            'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
+        }
+        return [field_name for field_name, value in required_test_information.items() if not value]
+
+    def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
+        beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
+        required_test_information = {
+            'First Name': beta_app_review_detail.attributes.contactFirstName,
+            'Last Name': beta_app_review_detail.attributes.contactLastName,
+            'Phone Number': beta_app_review_detail.attributes.contactPhone,
+            'Email': beta_app_review_detail.attributes.contactEmail,
+        }
+        return [field_name for field_name, value in required_test_information.items() if not value]

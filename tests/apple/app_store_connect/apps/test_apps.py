@@ -26,6 +26,23 @@ class AppsTest(ResourceManagerTestsBase):
         assert app.id == app_id
         assert app.type is ResourceType.APPS
 
+    def test_read_beta_app_localizations(self):
+        banaan_app_id = ResourceId('1481211155')  # Banaan iOS
+        capybara_app_id = ResourceId('1496105355')  # CapybaraApp
+        for app_id in (banaan_app_id, capybara_app_id):
+            beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app_id)
+            for beta_app_localization in beta_app_localizations:
+                assert beta_app_localization.type is ResourceType.BETA_APP_LOCALIZATIONS
+                assert beta_app_localization.relationships.app
+
+    def test_read_beta_app_review_detail(self):
+        banaan_app_id = ResourceId('1481211155')  # Banaan iOS
+        capybara_app_id = ResourceId('1496105355')  # CapybaraApp
+        for app_id in (banaan_app_id, capybara_app_id):
+            beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app_id)
+            assert beta_app_review_detail.type is ResourceType.BETA_APP_REVIEW_DETAILS
+            assert beta_app_review_detail.relationships.app
+
     def test_read_not_found(self):
         with pytest.raises(AppStoreConnectApiError) as exception_info:
             self.api_client.apps.read(ResourceId('invalid-id'))

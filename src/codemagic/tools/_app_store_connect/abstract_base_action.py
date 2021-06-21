@@ -13,10 +13,8 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaBuildLocalization
-from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
-from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
@@ -53,15 +51,6 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             locale: Locale,
             whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
-        ...
-
-    def get_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
-        ...
-
-    def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
-        ...
-
-    def list_app_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
         ...
 
     def list_apps(self,
