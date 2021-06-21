@@ -1,12 +1,12 @@
 
-builds
-======
+get
+===
 
 
-**Manage your builds in App Store Connect**
+**Get information about a specific build**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,14 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `get`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,9 +78,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
