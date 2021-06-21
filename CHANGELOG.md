@@ -1,3 +1,11 @@
+Version 0.8.4
+-------------
+
+**Development / Docs**
+
+- Do not use runtime enum definition generation during argument parsing.
+- Fix error messages for invalid enumeration values.
+
 Version 0.8.3
 -------------
 
