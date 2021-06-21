@@ -62,7 +62,9 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Create a beta build localization
         """
         if locale is None:
-            locale = self._get_default_locale(build_id)
+            app = self.api_client.builds.read_app(build_id)
+            locale = self._get_application_default_locale(app.id)
+            self.logger.info('Using application %s primary locale %s for beta build localization')
 
         return self._create_resource(
             self.api_client.beta_build_localizations,
@@ -102,8 +104,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             whats_new=whats_new.value if whats_new else None,
         )
 
-    def _get_default_locale(self, build_id: ResourceId) -> Locale:
-        app = self.api_client.builds.read_app(build_id)
-        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
+    def _get_application_default_locale(self, app_id: ResourceId) -> Locale:
+        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app_id)
         default_beta_app_localization = beta_app_localizations[0]
         return default_beta_app_localization.attributes.locale
