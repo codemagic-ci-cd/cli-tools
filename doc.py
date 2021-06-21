@@ -365,7 +365,10 @@ class Writer:
         def _process_description(arg: SerializedArgument) -> str:
             description = arg.description.replace('*', r'\*')
             description += '. Multiple arguments' if arg.nargs else ''
-            return f'{description}. Default:&nbsp;`{arg.default}`' if arg.default else description
+            if arg.default and '[Default:' not in description:
+                return f'{description}. Default:&nbsp;`{arg.default}`'
+            else:
+                return description
 
         if not args:
             return

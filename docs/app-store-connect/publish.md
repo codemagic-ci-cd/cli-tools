@@ -21,6 +21,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--locale LOCALE_OPTIONAL_WITH_DEFAULT]
     [--whats-new WHATS_NEW]
     [--skip-package-validation]
+    [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
 ```
 ### Optional arguments for action `publish`
 
@@ -52,6 +53,10 @@ Describe the changes and additions to the build and indicate the features you wo
 
 
 Skip package validation before uploading it to App Store Connect. Use this switch to opt out from running `altool --validate-app` before uploading package to App Store connect. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
+##### `--max-build-processing-wait=MAX_BUILD_PROCESSING_WAIT`
+
+
+Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
