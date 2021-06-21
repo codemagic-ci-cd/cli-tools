@@ -370,19 +370,10 @@ class BuildArgument(cli.Argument):
             'betabuildlocalizationcreaterequest/data/attributes'
         ),
         argparse_kwargs={
-            'required': True,
+            'required': False,
             'choices': list(Locale),
         },
     )
-    LOCALE_OPTIONAL = LOCALE.duplicate(argparse_kwargs={
-        'required': False,
-        'choices': list(Locale),
-    })
-    LOCALE_OPTIONAL_WITH_DEFAULT = LOCALE.duplicate(argparse_kwargs={
-        'required': False,
-        'choices': list(Locale),
-        'default': Locale('en-US'),
-    })
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
         flags=('--whats-new', '-n'),

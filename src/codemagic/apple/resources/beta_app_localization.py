@@ -22,6 +22,10 @@ class BetaAppLocalization(Resource):
         privacyPolicyUrl: Optional[str]
         tvOsPrivacyPolicy: Optional[str]
 
+        def __post_init__(self):
+            if isinstance(self.locale, str):
+                self.locale = Locale(self.locale)
+
     @dataclass
     class Relationships(Resource.Relationships):
         app: Relationship
