@@ -1,3 +1,10 @@
+Version 0.8.4
+-------------
+
+**Features**
+
+- Remove default value from `--locale` option for actions `app-store-connect beta-build-localizations create` and `app-store-connect publish`. In case it is not provided, resolve the default locale value from related application's primary test information.
+
 Version 0.8.3
 -------------
 

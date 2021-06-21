@@ -36,7 +36,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
-                BuildArgument.LOCALE,
+                BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,

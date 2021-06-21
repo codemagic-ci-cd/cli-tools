@@ -31,7 +31,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('list',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
-                BuildArgument.LOCALE,
+                BuildArgument.LOCALE_OPTIONAL,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
     def list_beta_build_localizations(
             self,
@@ -49,7 +49,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('create',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
-                BuildArgument.LOCALE,
+                BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 action_group=AppStoreConnectActionGroup.BETA_BUILDS_LOCALIZATIONS)
     def create_beta_build_localization(
