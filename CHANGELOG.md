@@ -1,3 +1,10 @@
+Version 0.8.4
+-------------
+
+**Development / Docs**
+
+- Update [requests](https://docs.python-requests.org/en/master/) dependency requirement from version 2.22.0 to 2.25.1.
+
 Version 0.8.3
 -------------
 
