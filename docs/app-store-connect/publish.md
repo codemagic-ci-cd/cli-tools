@@ -18,7 +18,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--apple-id APPLE_ID]
     [--password APP_SPECIFIC_PASSWORD]
     [--testflight]
-    [--locale LOCALE_OPTIONAL_WITH_DEFAULT]
+    [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
     [--skip-package-validation]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
@@ -44,7 +44,7 @@ Submit an app for Testflight beta app review to allow external testing
 ##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
-The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes. Default:&nbsp;`en-US`
+The locale code name for displaying localized "What's new" content in TestFlight. In case not provided, application's primary locale from test information is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
 ##### `--whats-new, -n=WHATS_NEW`
 
 
