@@ -36,7 +36,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
-                BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT,
+                BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
@@ -46,7 +46,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
-                locale: Locale = BuildArgument.LOCALE_OPTIONAL_WITH_DEFAULT.get_default(),
+                locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
@@ -115,7 +115,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _submit_build_to_testflight(
         self,
         ipa: Ipa,
-        locale: Locale,
+        locale: Optional[Locale],
         whats_new: Optional[Types.WhatsNewArgument],
         max_processing_minutes: int,
     ):
@@ -123,7 +123,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         app = self._get_uploaded_build_application(ipa)
         build, pre_release_version = self._get_uploaded_build(app, ipa)
 
-        if locale and whats_new:
+        if whats_new:
             self.create_beta_build_localization(build.id, locale, whats_new)
 
         self._assert_app_has_testflight_information(app)
