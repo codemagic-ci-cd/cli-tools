@@ -6,7 +6,7 @@ from typing import Optional
 from codemagic.utilities import log
 
 
-class _ResourceEnumMeta(enum.EnumMeta):
+class ResourceEnumMeta(enum.EnumMeta):
     """
     Custom metaclass for Resource enumerations to accommodate the cases when
     App Store Connect API returns such a value that our definitions do not describe.
@@ -17,23 +17,30 @@ class _ResourceEnumMeta(enum.EnumMeta):
     fails unexpectedly, which is not desirable.
     """
 
+    graceful_fallback = True
+
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
         try:
             return super().__call__(value, *args, **kwargs)
         except ValueError as ve:
+            if not cls.graceful_fallback:
+                raise
             logger = log.get_logger(cls, log_to_stream=False)
             logger.warning('Undefined Resource enumeration: %s', ve)
-            enum_class = _ResourceEnum(f'Graceful{cls.__name__}', {value: value})
-            return enum_class(value)
+            try:
+                enum_class = ResourceEnum(f'Graceful{cls.__name__}', {value: value})
+                return enum_class(value)
+            except TypeError:
+                raise ve
 
 
-class _ResourceEnum(enum.Enum, metaclass=_ResourceEnumMeta):
+class ResourceEnum(enum.Enum, metaclass=ResourceEnumMeta):
 
     def __str__(self):
         return str(self.value)
 
 
-class AppStoreState(_ResourceEnum):
+class AppStoreState(ResourceEnum):
     DEVELOPER_REMOVED_FROM_SALE = 'DEVELOPER_REMOVED_FROM_SALE'
     DEVELOPER_REJECTED = 'DEVELOPER_REJECTED'
     IN_REVIEW = 'IN_REVIEW'
@@ -53,28 +60,28 @@ class AppStoreState(_ResourceEnum):
     REPLACED_WITH_NEW_VERSION = 'REPLACED_WITH_NEW_VERSION'
 
 
-class BetaReviewState(_ResourceEnum):
+class BetaReviewState(ResourceEnum):
     APPROVED = 'APPROVED'
     IN_REVIEW = 'IN_REVIEW'
     REJECTED = 'REJECTED'
     WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
 
 
-class BuildProcessingState(_ResourceEnum):
+class BuildProcessingState(ResourceEnum):
     PROCESSING = 'PROCESSING'
     FAILED = 'FAILED'
     INVALID = 'INVALID'
     VALID = 'VALID'
 
 
-class BundleIdPlatform(_ResourceEnum):
+class BundleIdPlatform(ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
     UNIVERSAL = 'UNIVERSAL'
     SERVICES = 'SERVICES'
 
 
-class CapabilityOptionKey(_ResourceEnum):
+class CapabilityOptionKey(ResourceEnum):
     XCODE_5 = 'XCODE_5'
     XCODE_6 = 'XCODE_6'
     COMPLETE_PROTECTION = 'COMPLETE_PROTECTION'
@@ -82,18 +89,18 @@ class CapabilityOptionKey(_ResourceEnum):
     PROTECTED_UNTIL_FIRST_USER_AUTH = 'PROTECTED_UNTIL_FIRST_USER_AUTH'
 
 
-class CapabilitySettingAllowedInstance(_ResourceEnum):
+class CapabilitySettingAllowedInstance(ResourceEnum):
     ENTRY = 'ENTRY'
     SINGLE = 'SINGLE'
     MULTIPLE = 'MULTIPLE'
 
 
-class CapabilitySettingKey(_ResourceEnum):
+class CapabilitySettingKey(ResourceEnum):
     ICLOUD_VERSION = 'ICLOUD_VERSION'
     DATA_PROTECTION_PERMISSION_LEVEL = 'DATA_PROTECTION_PERMISSION_LEVEL'
 
 
-class CapabilityType(_ResourceEnum):
+class CapabilityType(ResourceEnum):
     ACCESS_WIFI_INFORMATION = 'ACCESS_WIFI_INFORMATION'
     APP_GROUPS = 'APP_GROUPS'
     APPLE_PAY = 'APPLE_PAY'
@@ -119,7 +126,7 @@ class CapabilityType(_ResourceEnum):
     WIRELESS_ACCESSORY_CONFIGURATION = 'WIRELESS_ACCESSORY_CONFIGURATION'
 
 
-class CertificateType(_ResourceEnum):
+class CertificateType(ResourceEnum):
     DEVELOPER_ID_APPLICATION = 'DEVELOPER_ID_APPLICATION'
     DEVELOPER_ID_KEXT = 'DEVELOPER_ID_KEXT'
     DEVELOPMENT = 'DEVELOPMENT'
@@ -152,12 +159,12 @@ class CertificateType(_ResourceEnum):
             raise ValueError(f'Certificate type for profile type {profile_type} is unknown')
 
 
-class ContentRightsDeclaration(_ResourceEnum):
+class ContentRightsDeclaration(ResourceEnum):
     DOES_NOT_USE_THIRD_PARTY_CONTENT = 'DOES_NOT_USE_THIRD_PARTY_CONTENT'
     USES_THIRD_PARTY_CONTENT = 'USES_THIRD_PARTY_CONTENT'
 
 
-class DeviceClass(_ResourceEnum):
+class DeviceClass(ResourceEnum):
     APPLE_TV = 'APPLE_TV'
     APPLE_WATCH = 'APPLE_WATCH'
     IPAD = 'IPAD'
@@ -166,24 +173,24 @@ class DeviceClass(_ResourceEnum):
     MAC = 'MAC'
 
 
-class DeviceStatus(_ResourceEnum):
+class DeviceStatus(ResourceEnum):
     DISABLED = 'DISABLED'
     ENABLED = 'ENABLED'
 
 
-class Platform(_ResourceEnum):
+class Platform(ResourceEnum):
     IOS = 'IOS'
     MAC_OS = 'MAC_OS'
     TV_OS = 'TV_OS'
 
 
-class ProfileState(_ResourceEnum):
+class ProfileState(ResourceEnum):
     ACTIVE = 'ACTIVE'
     INVALID = 'INVALID'
     EXPIRED = 'EXPIRED'  # Undocumented Profile State
 
 
-class ProfileType(_ResourceEnum):
+class ProfileType(ResourceEnum):
     IOS_APP_ADHOC = 'IOS_APP_ADHOC'
     IOS_APP_DEVELOPMENT = 'IOS_APP_DEVELOPMENT'
     IOS_APP_INHOUSE = 'IOS_APP_INHOUSE'
@@ -218,13 +225,13 @@ class ProfileType(_ResourceEnum):
         return self.is_development_type or self.is_ad_hoc_type
 
 
-class ReleaseType(_ResourceEnum):
+class ReleaseType(ResourceEnum):
     MANUAL = 'MANUAL'
     AFTER_APPROVAL = 'AFTER_APPROVAL'
     SCHEDULED = 'SCHEDULED'
 
 
-class ResourceType(_ResourceEnum):
+class ResourceType(ResourceEnum):
     APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
@@ -241,7 +248,7 @@ class ResourceType(_ResourceEnum):
     PROFILES = 'profiles'
 
 
-class Locale(_ResourceEnum):
+class Locale(ResourceEnum):
     """
     Referenced in https://developer.apple.com/documentation/appstoreconnectapi/betaapplocalization/attributes#discussion
     """

@@ -10,6 +10,8 @@ Version 0.8.4
 
 - Update `app-store-connect publish` action docs.
 - Update `app-store-connect beta-build-localizations create` action docs.
+- Do not use runtime enum definition generation during argument parsing.
+- Fix error messages for invalid enumeration values.
 
 Version 0.8.3
 -------------
