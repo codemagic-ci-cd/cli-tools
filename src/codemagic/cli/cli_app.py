@@ -167,10 +167,24 @@ class CliApp(metaclass=abc.ABCMeta):
         return os.environ.get('_CLI_INVOCATION') == 'true'
 
     @classmethod
+    def _resolve_cli_invocation_arg(cls):
+        from codemagic.apple.resources.enums import ResourceEnumMeta
+
+        parser = cls._setup_cli_options()
+        # Turn off graceful enumeration fallback to get proper error messages
+        ResourceEnumMeta.graceful_fallback = False
+        try:
+            args = parser.parse_args()
+        finally:
+            ResourceEnumMeta.graceful_fallback = True
+
+        return parser, args
+
+    @classmethod
     def invoke_cli(cls) -> NoReturn:
         os.environ['_CLI_INVOCATION'] = 'true'
-        parser = cls._setup_cli_options()
-        args = parser.parse_args()
+
+        parser, args = cls._resolve_cli_invocation_arg()
         cls._setup_logging(args)
 
         cls._log_cli_invoke_started()
