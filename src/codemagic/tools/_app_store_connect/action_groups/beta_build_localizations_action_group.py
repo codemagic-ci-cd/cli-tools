@@ -5,6 +5,7 @@ from typing import List
 from typing import Optional
 
 from codemagic import cli
+from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.versioning import BetaBuildLocalizations
 from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import Locale
@@ -59,20 +60,36 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             whats_new: Optional[Types.WhatsNewArgument] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         """
-        Create a beta build localization
+        Create a beta build localization if it doesn't exist or update existing
+        beta build localization for specified locale
         """
         if locale is None:
             app = self.api_client.builds.read_app(build_id)
             locale = self._get_application_default_locale(app.id)
-            self.logger.info('Using application %s primary locale %s for beta build localization')
+            msg_template = 'Using application %s primary locale %s for beta build localization'
+            self.logger.info(msg_template, app.attributes.name, locale.value)
 
-        return self._create_resource(
-            self.api_client.beta_build_localizations,
-            should_print,
-            build=build_id,
-            locale=locale,
-            whats_new=whats_new.value if whats_new else None,
-        )
+        beta_localizations_filter = BetaBuildLocalizations.Filter(build=build_id, locale=locale)
+        try:
+            beta_build_localizations = self.api_client.beta_build_localizations.list(beta_localizations_filter)
+        except AppStoreConnectApiError:
+            beta_build_localizations = []
+
+        # The notes are automatically created for default locale some time after the build is
+        # submitted to App Store Connect. In that case we just need to modify the resource.
+        # Otherwise, either when the resource is not created yet, or we are working with non-default
+        # locales, we need to create the BetaBuildLocalization resource by ourselves.
+        if not beta_build_localizations:
+            return self._create_resource(
+                self.api_client.beta_build_localizations,
+                should_print,
+                build=build_id,
+                locale=locale,
+                whats_new=whats_new.value if whats_new else None,
+            )
+        else:
+            beta_build_localization = beta_build_localizations[0]
+            return self.update_beta_build_localization(beta_build_localization.id, whats_new)
 
     @cli.action('delete',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
