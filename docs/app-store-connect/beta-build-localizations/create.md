@@ -3,7 +3,7 @@ create
 ======
 
 
-**Create a beta build localization**
+**Create a beta build localization if it doesn't exist or update existing         beta build localization for specified locale**
 ### Usage
 ```bash
 app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -14,9 +14,9 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
     BUILD_ID_RESOURCE_ID
-    --locale LOCALE
 ```
 ### Required arguments for action `create`
 
@@ -24,12 +24,12 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
 
 
 Alphanumeric ID value of the Build
+### Optional arguments for action `create`
+
 ##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
-The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
-### Optional arguments for action `create`
-
+The locale code name for displaying localized "What's new" content in TestFlight. In case not provided, application's primary locale from test information is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
 ##### `--whats-new, -n=WHATS_NEW`
 
 

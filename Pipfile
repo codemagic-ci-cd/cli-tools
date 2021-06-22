@@ -18,11 +18,12 @@ flake8 = "*"
 flake8-commas = "*"
 flake8-quotes = "*"
 pep8-naming = "*"
+types-requests = "*"
 
 [packages]
 pyopenssl = "~=19.0"
 pyjwt = "~=2.0"
-requests = "~=2.22.0"
+requests = "~=2.25"
 cryptography = "~=3.3"
 oauth2client = "~=4.1.3"
 google-api-python-client = "~=1.7.12"
