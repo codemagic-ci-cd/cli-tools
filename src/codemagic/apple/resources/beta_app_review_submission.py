@@ -16,6 +16,10 @@ class BetaAppReviewSubmission(Resource):
     class Attributes(Resource.Attributes):
         betaReviewState: BetaReviewState
 
+        def __post_init__(self):
+            if isinstance(self.betaReviewState, str):
+                self.betaReviewState = BetaReviewState(self.betaReviewState)
+
     @dataclass
     class Relationships(Resource.Relationships):
         build: Relationship

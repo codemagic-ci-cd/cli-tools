@@ -1,8 +1,17 @@
 Version 0.8.4
 -------------
 
+**Features**
+
+- Remove default value from `--locale` option for actions `app-store-connect beta-build-localizations create` and `app-store-connect publish`. In case it is not provided, resolve the default locale value from related application's primary test information.
+- Make `app-store-connect beta-build-localizations create` more forgiving and allow the cases when beta build localization already exists for the locale. On such occasions just update the resource.
+
 **Development / Docs**
 
+- Update `app-store-connect publish` action docs.
+- Update `app-store-connect beta-build-localizations create` action docs.
+- Do not use runtime enum definition generation during argument parsing.
+- Fix error messages for invalid enumeration values.
 - Update [requests](https://docs.python-requests.org/en/master/) dependency requirement from version 2.22.0 to 2.25.1.
 
 Version 0.8.3
