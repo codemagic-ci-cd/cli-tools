@@ -31,7 +31,7 @@ setup(
         'oauth2client>=4.1.3',
         'PyJWT>=2.0.0,<3',
         'pyopenssl>=19.0',
-        'requests>=2.22.0',
+        'requests>=2.25.1',
     ],
     extras_require={
         'dev': ['pytest'],
