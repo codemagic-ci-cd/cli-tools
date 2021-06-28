@@ -132,17 +132,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         build = self._get_uploaded_build(app, ipa)
 
         if beta_build_infos:
-            self._submit_beta_build_localization_infos(ipa, build, beta_build_infos)
+            self._submit_beta_build_localization_infos(build, beta_build_infos)
         if submit_to_testflight:
-            self._submit_build_to_testflight(ipa, build, app, max_processing_minutes)
+            self._submit_build_to_testflight(build, app, max_processing_minutes)
 
-    def _submit_beta_build_localization_infos(self, ipa: Ipa, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
-        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for %s'), ipa.path)
+    def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
+        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
         for info in beta_build_infos:
             self.create_beta_build_localization(build_id=build.id, locale=info.locale, whats_new=info.whats_new)
 
-    def _submit_build_to_testflight(self, ipa: Ipa, build: Build, app: App, max_processing_minutes: int):
-        self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
+    def _submit_build_to_testflight(self, build: Build, app: App, max_processing_minutes: int):
+        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
