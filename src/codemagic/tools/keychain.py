@@ -267,7 +267,9 @@ class Keychain(cli.CliApp, PathFinderMixin):
         return certificates
 
     def _generate_path(self):
-        with NamedTemporaryFile(prefix='build_', suffix='.keychain') as tf:
+        keychain_dir = pathlib.Path('~/Library/Keychains/codemagic-cli-tools').expanduser()
+        keychain_dir.mkdir(parents=True, exist_ok=True)
+        with NamedTemporaryFile(prefix='build_', suffix='.keychain', dir=keychain_dir) as tf:
             self._path = pathlib.Path(tf.name)
 
     @cli.action('add-certificates',
