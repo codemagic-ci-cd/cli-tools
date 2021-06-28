@@ -11,6 +11,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
+from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
@@ -305,9 +306,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
         ]))
 
-    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+    def _get_app_default_beta_localization(self, app: App) -> BetaAppLocalization:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
-        default_beta_app_localization = beta_app_localizations[0]
+        for beta_app_localization in beta_app_localizations:
+            if beta_app_localization.attributes.locale.value == app.attributes.primaryLocale:
+                return beta_app_localization
+        # If nothing matches, then just take the first
+        return beta_app_localizations[0]
+
+    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+        default_beta_app_localization = self._get_app_default_beta_localization(app)
         required_test_information = {
             'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
         }
