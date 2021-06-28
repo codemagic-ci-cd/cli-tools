@@ -83,7 +83,7 @@ class Types:
                 given_beta_build_localizations = json.loads(non_typed_value)
                 assert isinstance(given_beta_build_localizations, list)
             except (ValueError, AssertionError):
-                raise ArgumentTypeError('Provided value is not a valid JSON encoded list')
+                raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded list')
 
             beta_build_localization_attributes: List[BetaBuildLocalization.Attributes] = []
             error_prefix = 'Invalid beta build localization'
@@ -94,11 +94,11 @@ class Types:
                         whatsNew=bbl['whats_new'],
                     )
                 except TypeError:  # Given beta build localization is not a dictionary
-                    raise ArgumentTypeError(f'{error_prefix} on index {i}: {bbl!r}')
+                    raise ArgumentTypeError(f'{error_prefix} value {bbl!r} on index {i}')
                 except ValueError as ve:  # Invalid locale
-                    raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve}: {bbl!r}')
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve} in {bbl!r}')
                 except KeyError as ke:  # Required key is missing from input
-                    raise ArgumentTypeError(f'{error_prefix} on index {i}, missing {ke.args[0]}: {bbl!r}')
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, missing {ke.args[0]} in {bbl!r}')
                 beta_build_localization_attributes.append(attributes)
 
             locales = Counter(a.locale for a in beta_build_localization_attributes)
