@@ -120,11 +120,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self._upload_artifact_with_altool(altool, application_package.path)
 
     def _handle_ipa_testflight_submission(
-            self,
-            ipa: Ipa,
-            submit_to_testflight: Optional[bool],
-            beta_build_infos: Sequence[BetaBuildInfo],
-            max_processing_minutes: int,
+        self,
+        ipa: Ipa,
+        submit_to_testflight: Optional[bool],
+        beta_build_infos: Sequence[BetaBuildInfo],
+        max_processing_minutes: int,
     ):
         if not beta_build_infos and not submit_to_testflight:
             return  # Nothing to do with the ipa...
