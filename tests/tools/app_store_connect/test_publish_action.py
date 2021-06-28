@@ -122,7 +122,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_validate.assert_called()
         mock_upload.assert_called()
         mock_create_review.assert_called_with(build.id)
-        mock_create_localization.assert_called_with(build.id, locale, whats_new)
+        mock_create_localization.assert_called_with(build_id=build.id, locale=locale, whats_new=whats_new.value)
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
