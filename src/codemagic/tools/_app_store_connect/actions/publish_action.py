@@ -6,7 +6,6 @@ from abc import ABCMeta
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 from typing import Union
 
 from codemagic import cli
@@ -15,7 +14,6 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
-from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Altool
@@ -72,9 +70,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
         if whats_new:
-            if not submit_to_testflight:
-                raise BuildArgument.WHATS_NEW.raise_argument_error(
-                    f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
             beta_build_infos.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
@@ -94,11 +89,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         for application_package in application_packages:
             try:
                 self._publish_application_package(altool, application_package, validate_package)
-                if submit_to_testflight:
-                    if isinstance(application_package, Ipa):
-                        self._submit_build_to_testflight(application_package, beta_build_infos, max_processing_minutes)
-                    else:
-                        continue  # Cannot submit macOS packages to TestFlight, skip
+                if isinstance(application_package, Ipa):
+                    self._handle_ipa_testflight_submission(
+                        application_package,
+                        submit_to_testflight,
+                        beta_build_infos,
+                        max_processing_minutes,
+                    )
+                else:
+                    continue  # Cannot submit macOS packages to TestFlight, skip
             except (IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
@@ -119,30 +118,42 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
-    def _submit_build_to_testflight(
-        self,
-        ipa: Ipa,
-        beta_build_infos: Sequence[BetaBuildInfo],
-        max_processing_minutes: int,
+    def _handle_ipa_testflight_submission(
+            self,
+            ipa: Ipa,
+            submit_to_testflight: bool,
+            beta_build_infos: Sequence[BetaBuildInfo],
+            max_processing_minutes: int,
     ):
-        self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
-        app = self._get_uploaded_build_application(ipa)
-        build, pre_release_version = self._get_uploaded_build(app, ipa)
+        if not beta_build_infos and not submit_to_testflight:
+            return  # Nothing to do with the ipa...
 
+        app = self._get_uploaded_build_application(ipa)
+        build = self._get_uploaded_build(app, ipa)
+
+        if beta_build_infos:
+            self._submit_beta_build_localization_infos(ipa, build, beta_build_infos)
+        if submit_to_testflight:
+            self._submit_build_to_testflight(ipa, build, app, max_processing_minutes)
+
+    def _submit_beta_build_localization_infos(self, ipa: Ipa, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
+        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for %s'), ipa.path)
         for info in beta_build_infos:
             self.create_beta_build_localization(build_id=build.id, locale=info.locale, whats_new=info.whats_new)
 
+    def _submit_build_to_testflight(self, ipa: Ipa, build: Build, app: App, max_processing_minutes: int):
+        self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
 
     def _find_build(
-        self,
-        app_id: ResourceId,
-        application_package: Union[Ipa, MacOsPackage],
-        retries: int = 10,
-        retry_wait_seconds: int = 30,
-    ) -> Tuple[Build, PreReleaseVersion]:
+            self,
+            app_id: ResourceId,
+            application_package: Union[Ipa, MacOsPackage],
+            retries: int = 10,
+            retry_wait_seconds: int = 30,
+    ) -> Build:
         """
         Find corresponding build for the uploaded ipa or macOS package.
         Take into account that sometimes the build is not immediately available
@@ -158,7 +169,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if build.attributes.version == application_package.version_code:
                 pre_release_version = self.api_client.builds.read_pre_release_version(build.id)
                 if pre_release_version and pre_release_version.attributes.version == application_package.version:
-                    return build, pre_release_version
+                    return build
 
         # Matching build was not found.
         if retries > 0:
@@ -172,16 +183,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             )
             time.sleep(retry_wait_seconds)
             return self._find_build(
-                app_id, application_package, retries=retries-1, retry_wait_seconds=retry_wait_seconds)
+                app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds)
         else:
             # There are no more retries left, give up.
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
     def _wait_until_build_is_processed(
-        self,
-        build: Build,
-        max_processing_minutes: int,
-        retry_wait_seconds: int = 30,
+            self,
+            build: Build,
+            max_processing_minutes: int,
+            retry_wait_seconds: int = 30,
     ) -> Build:
         self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
 
@@ -198,7 +209,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
                 raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
             else:
-                self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
+                self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
                 return build
 
         raise IOError((
@@ -219,13 +230,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         return app
 
     def _get_uploaded_build(
-            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
-        self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
-        build, pre_release_version = self._find_build(app.id, application_package)
-        self.logger.info(Colors.GREEN('\nPublished build is'))
+            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Build:
+        self.logger.info(Colors.BLUE('\nFind uploaded build'))
+        build = self._find_build(app.id, application_package)
+        self.logger.info(Colors.GREEN('\nUploaded build is'))
         self.printer.print_resource(build, True)
-        self.printer.print_resource(pre_release_version, True)
-        return build, pre_release_version
+        return build
 
     def _get_publishing_application_packages(
             self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
