@@ -190,10 +190,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
 
     def _wait_until_build_is_processed(
-            self,
-            build: Build,
-            max_processing_minutes: int,
-            retry_wait_seconds: int = 30,
+        self,
+        build: Build,
+        max_processing_minutes: int,
+        retry_wait_seconds: int = 30,
     ) -> Build:
         self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
 
