@@ -1,11 +1,16 @@
+import json
 import pathlib
 import re
+from argparse import ArgumentTypeError
+from collections import Counter
+from typing import List
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -66,6 +71,45 @@ class Types:
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
         default_value = 20
+
+    class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildLocalization.Attributes]]):
+        argument_type = List[BetaBuildLocalization.Attributes]
+        environment_variable_key = 'APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS'
+        example_value = json.dumps([{'locale': 'en-US', 'whats_new': "What's new in english"}])
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> List[BetaBuildLocalization.Attributes]:
+            try:
+                given_beta_build_localizations = json.loads(non_typed_value)
+                assert isinstance(given_beta_build_localizations, list)
+            except (ValueError, AssertionError):
+                raise ArgumentTypeError('Provided value is not a valid JSON encoded list')
+
+            beta_build_localization_attributes: List[BetaBuildLocalization.Attributes] = []
+            error_prefix = 'Invalid beta build localization'
+            for i, bbl in enumerate(given_beta_build_localizations):
+                try:
+                    attributes = BetaBuildLocalization.Attributes(
+                        locale=Locale(bbl['locale']),
+                        whatsNew=bbl['whats_new'],
+                    )
+                except TypeError:  # Given beta build localization is not a dictionary
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}: {bbl!r}')
+                except ValueError as ve:  # Invalid locale
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve}: {bbl!r}')
+                except KeyError as ke:  # Required key is missing from input
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, missing {ke.args[0]}: {bbl!r}')
+                beta_build_localization_attributes.append(attributes)
+
+            locales = Counter(a.locale for a in beta_build_localization_attributes)
+            duplicate_locales = {locale.value for locale, used_count in locales.items() if used_count > 1}
+            if duplicate_locales:
+                raise ArgumentTypeError((
+                    f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
+                    'Please define beta build localization for each locale exactly once.'
+                ))
+
+            return beta_build_localization_attributes
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
@@ -389,6 +433,19 @@ class BuildArgument(cli.Argument):
         description=(
             'Describe the changes and additions to the build and indicate '
             'the features you would like your users to tests.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    BETA_BUILD_LOCALIZATIONS = cli.ArgumentProperties(
+        key='beta_build_localizations',
+        flags=('--beta-build-localizations',),
+        type=Types.BetaBuildLocalizations,
+        description=(
+            "Localized beta test info for what's new in the uploaded build as JSON encoded list. "
+            f'For example {Colors.WHITE(f"`{Types.BetaBuildLocalizations.example_value}`")}. '
+            f'See {Colors.WHITE(f"`{LOCALE_OPTIONAL.flags[0]}`")} for possible locale options.'
         ),
         argparse_kwargs={
             'required': False,

@@ -38,6 +38,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
                 BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
+                BuildArgument.BETA_BUILD_LOCALIZATIONS,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
@@ -48,11 +49,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 submit_to_testflight: Optional[bool] = None,
                 locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
+                beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
         Publish application packages to App Store and submit them to Testflight
         """
+
+        # TODO: Make use of given beta_build_localizations.
+        _ = beta_build_localizations
 
         # Workaround to support overriding default value by environment variable.
         if max_build_processing_wait:
