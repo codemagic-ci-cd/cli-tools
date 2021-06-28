@@ -11,7 +11,6 @@ from codemagic.apple.resources import Locale
 from codemagic.models.application_package import Ipa
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
-from codemagic.tools.app_store_connect import BuildArgument
 from codemagic.tools.app_store_connect import PublishArgument
 from codemagic.tools.app_store_connect import Types
 
@@ -74,22 +73,6 @@ def test_publish_action_with_username_and_password(_mock_altool, publishing_name
         mock_get_packages.assert_called_with(patterns)
 
 
-def test_publish_action_with_localization_and_no_testflight_submission(publishing_namespace_kwargs, cli_argument_group):
-    BuildArgument.WHATS_NEW.register(cli_argument_group)
-    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
-    patterns = [pathlib.Path('path.pattern')]
-    locale = Locale('en-GB')
-
-    with pytest.raises(argparse.ArgumentError) as error_info:
-        AppStoreConnect.from_cli_args(cli_args).publish(
-            application_package_path_patterns=patterns,
-            locale=locale,
-            whats_new=Types.WhatsNewArgument("What's new"),
-        )
-
-    assert str(error_info.value) == 'argument --whats-new/-n: --testflight is required for submitting notes'
-
-
 def test_publish_action_testflight_with_localization(publishing_namespace_kwargs):
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
@@ -106,7 +89,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
         build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_app.return_value = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
-        mock_get_build.return_value = [build, '1.0.0']
+        mock_get_build.return_value = build
         locale = Locale('en-GB')
 
         whats_new = Types.WhatsNewArgument("What's new")
