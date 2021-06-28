@@ -121,7 +121,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _handle_ipa_testflight_submission(
             self,
             ipa: Ipa,
-            submit_to_testflight: bool,
+            submit_to_testflight: Optional[bool],
             beta_build_infos: Sequence[BetaBuildInfo],
             max_processing_minutes: int,
     ):
