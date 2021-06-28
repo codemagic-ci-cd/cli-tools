@@ -23,6 +23,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
@@ -56,14 +57,13 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         Publish application packages to App Store and submit them to Testflight
         """
 
-        # TODO: Make use of given beta_build_localizations.
-        _ = beta_build_localizations
-
         # Workaround to support overriding default value by environment variable.
         if max_build_processing_wait:
             max_processing_minutes = max_build_processing_wait.value
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
+
+        beta_build_infos = [*beta_build_localizations.value] if beta_build_localizations else []
 
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
@@ -71,9 +71,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         elif submit_to_testflight:
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
-        if whats_new and not submit_to_testflight:
-            raise BuildArgument.WHATS_NEW.raise_argument_error(
-                f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
+        if whats_new:
+            if not submit_to_testflight:
+                raise BuildArgument.WHATS_NEW.raise_argument_error(
+                    f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
+            beta_build_infos.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
@@ -94,7 +96,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self._publish_application_package(altool, application_package, validate_package)
                 if submit_to_testflight:
                     if isinstance(application_package, Ipa):
-                        self._submit_build_to_testflight(application_package, locale, whats_new, max_processing_minutes)
+                        self._submit_build_to_testflight(application_package, beta_build_infos, max_processing_minutes)
                     else:
                         continue  # Cannot submit macOS packages to TestFlight, skip
             except (IOError, ValueError) as error:
@@ -120,16 +122,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _submit_build_to_testflight(
         self,
         ipa: Ipa,
-        locale: Optional[Locale],
-        whats_new: Optional[Types.WhatsNewArgument],
+        beta_build_infos: Sequence[BetaBuildInfo],
         max_processing_minutes: int,
     ):
         self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
         app = self._get_uploaded_build_application(ipa)
         build, pre_release_version = self._get_uploaded_build(app, ipa)
 
-        if whats_new:
-            self.create_beta_build_localization(build.id, locale, whats_new)
+        for info in beta_build_infos:
+            self.create_beta_build_localization(build_id=build.id, locale=info.locale, whats_new=info.whats_new)
 
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)

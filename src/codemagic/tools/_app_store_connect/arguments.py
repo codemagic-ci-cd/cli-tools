@@ -3,14 +3,15 @@ import pathlib
 import re
 from argparse import ArgumentTypeError
 from collections import Counter
+from dataclasses import dataclass
 from typing import List
+from typing import Optional
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreState
-from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -23,6 +24,12 @@ from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
+
+
+@dataclass
+class BetaBuildInfo:
+    whats_new: str
+    locale: Optional[Locale]
 
 
 class Types:
@@ -72,44 +79,42 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
         default_value = 20
 
-    class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildLocalization.Attributes]]):
-        argument_type = List[BetaBuildLocalization.Attributes]
+    class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
+        argument_type = List[BetaBuildInfo]
         environment_variable_key = 'APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS'
         example_value = json.dumps([{'locale': 'en-US', 'whats_new': "What's new in english"}])
 
         @classmethod
-        def _apply_type(cls, non_typed_value: str) -> List[BetaBuildLocalization.Attributes]:
+        def _apply_type(cls, non_typed_value: str) -> List[BetaBuildInfo]:
             try:
                 given_beta_build_localizations = json.loads(non_typed_value)
                 assert isinstance(given_beta_build_localizations, list)
             except (ValueError, AssertionError):
                 raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded list')
 
-            beta_build_localization_attributes: List[BetaBuildLocalization.Attributes] = []
+            beta_build_infos: List[BetaBuildInfo] = []
             error_prefix = 'Invalid beta build localization'
             for i, bbl in enumerate(given_beta_build_localizations):
                 try:
-                    attributes = BetaBuildLocalization.Attributes(
-                        locale=Locale(bbl['locale']),
-                        whatsNew=bbl['whats_new'],
-                    )
+                    whats_new: str = bbl['whats_new']
+                    locale = Locale(bbl['locale'])
                 except TypeError:  # Given beta build localization is not a dictionary
                     raise ArgumentTypeError(f'{error_prefix} value {bbl!r} on index {i}')
                 except ValueError as ve:  # Invalid locale
                     raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve} in {bbl!r}')
                 except KeyError as ke:  # Required key is missing from input
                     raise ArgumentTypeError(f'{error_prefix} on index {i}, missing {ke.args[0]} in {bbl!r}')
-                beta_build_localization_attributes.append(attributes)
+                beta_build_infos.append(BetaBuildInfo(whats_new=whats_new, locale=locale))
 
-            locales = Counter(a.locale for a in beta_build_localization_attributes)
-            duplicate_locales = {locale.value for locale, used_count in locales.items() if used_count > 1}
+            locales = Counter(info.locale for info in beta_build_infos)
+            duplicate_locales = {locale.value for locale, uses in locales.items() if locale and uses > 1}
             if duplicate_locales:
                 raise ArgumentTypeError((
                     f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
                     'Please define beta build localization for each locale exactly once.'
                 ))
 
-            return beta_build_localization_attributes
+            return beta_build_infos
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'

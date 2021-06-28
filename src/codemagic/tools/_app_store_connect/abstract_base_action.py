@@ -5,6 +5,7 @@ import pathlib
 from abc import ABCMeta
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic.apple import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
@@ -49,7 +50,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             self,
             build_id: ResourceId,
             locale: Optional[Locale],
-            whats_new: Optional[Types.WhatsNewArgument] = None,
+            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         ...
 

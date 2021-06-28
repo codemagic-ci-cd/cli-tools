@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -57,7 +58,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             build_id: ResourceId,
             locale: Optional[Locale] = None,
-            whats_new: Optional[Types.WhatsNewArgument] = None,
+            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         """
         Create a beta build localization if it doesn't exist or update existing
@@ -85,7 +86,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 should_print,
                 build=build_id,
                 locale=locale,
-                whats_new=whats_new.value if whats_new else None,
+                whats_new=self._get_whats_new_value(whats_new),
             )
         else:
             beta_build_localization = beta_build_localizations[0]
@@ -109,7 +110,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def update_beta_build_localization(
             self,
             localization_id: ResourceId,
-            whats_new: Optional[Types.WhatsNewArgument] = None,
+            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             should_print: bool = True) -> BetaBuildLocalization:
         """
         Update a beta build localization
@@ -118,10 +119,20 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.api_client.beta_build_localizations,
             localization_id,
             should_print,
-            whats_new=whats_new.value if whats_new else None,
+            whats_new=self._get_whats_new_value(whats_new),
         )
 
     def _get_application_default_locale(self, app_id: ResourceId) -> Locale:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app_id)
         default_beta_app_localization = beta_app_localizations[0]
         return default_beta_app_localization.attributes.locale
+
+    @classmethod
+    def _get_whats_new_value(cls, whats_new: Optional[Union[str, Types.WhatsNewArgument]]) -> Optional[str]:
+        if whats_new is None:
+            return None
+        elif isinstance(whats_new, str):
+            return whats_new
+        elif isinstance(whats_new, Types.WhatsNewArgument):
+            return whats_new.value
+        raise TypeError(f'Invalid type {type(whats_new)} for whats_new')
