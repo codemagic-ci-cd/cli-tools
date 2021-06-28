@@ -66,7 +66,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         if locale is None:
             app = self.api_client.builds.read_app(build_id)
-            locale = self._get_application_default_locale(app.id)
+            locale = Locale(app.attributes.primaryLocale)
             msg_template = 'Using application %s primary locale %s for beta build localization'
             self.logger.info(msg_template, app.attributes.name, locale.value)
 
@@ -121,11 +121,6 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             whats_new=self._get_whats_new_value(whats_new),
         )
-
-    def _get_application_default_locale(self, app_id: ResourceId) -> Locale:
-        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app_id)
-        default_beta_app_localization = beta_app_localizations[0]
-        return default_beta_app_localization.attributes.locale
 
     @classmethod
     def _get_whats_new_value(cls, whats_new: Optional[Union[str, Types.WhatsNewArgument]]) -> Optional[str]:
