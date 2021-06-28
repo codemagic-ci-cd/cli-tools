@@ -148,11 +148,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self.create_beta_app_review_submission(build.id)
 
     def _find_build(
-            self,
-            app_id: ResourceId,
-            application_package: Union[Ipa, MacOsPackage],
-            retries: int = 10,
-            retry_wait_seconds: int = 30,
+        self,
+        app_id: ResourceId,
+        application_package: Union[Ipa, MacOsPackage],
+        retries: int = 10,
+        retry_wait_seconds: int = 30,
     ) -> Build:
         """
         Find corresponding build for the uploaded ipa or macOS package.
