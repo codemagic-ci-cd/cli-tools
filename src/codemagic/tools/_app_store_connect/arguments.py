@@ -82,7 +82,7 @@ class Types:
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
         environment_variable_key = 'APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS'
-        example_value = json.dumps([{'locale': 'en-US', 'whats_new': "What's new in english"}])
+        example_value = json.dumps([{'locale': 'en-US', 'whats_new': "What's new in English"}])
 
         @classmethod
         def _apply_type(cls, non_typed_value: str) -> List[BetaBuildInfo]:
@@ -448,8 +448,8 @@ class BuildArgument(cli.Argument):
         flags=('--beta-build-localizations',),
         type=Types.BetaBuildLocalizations,
         description=(
-            "Localized beta test info for what's new in the uploaded build as JSON encoded list. "
-            f'For example "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
+            "Localized beta test info for what's new in the uploaded build as a JSON encoded list. "
+            f'For example, "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
             f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
         ),
         argparse_kwargs={
