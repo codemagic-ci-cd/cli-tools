@@ -65,7 +65,7 @@ class ArgumentsSerializer:
     @classmethod
     def _replace_quotes(cls, description: str) -> str:
         json_array = re.compile(r'"(\[[^\]]+\])"')
-        # Dummy handling for description containing JSON arrays as an examples
+        # Dummy handling for description containing JSON arrays as an example
         if not json_array.search(description):
             return description.replace('"', '`')
 
