@@ -449,8 +449,8 @@ class BuildArgument(cli.Argument):
         type=Types.BetaBuildLocalizations,
         description=(
             "Localized beta test info for what's new in the uploaded build as JSON encoded list. "
-            f'For example {Colors.WHITE(f"`{Types.BetaBuildLocalizations.example_value}`")}. '
-            f'See {Colors.WHITE(f"`{LOCALE_OPTIONAL.flags[0]}`")} for possible locale options.'
+            f'For example "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
+            f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
         ),
         argparse_kwargs={
             'required': False,
