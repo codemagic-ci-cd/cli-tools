@@ -306,18 +306,20 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
         ]))
 
-    def _get_app_default_beta_localization(self, app: App) -> BetaAppLocalization:
+    def _get_app_default_beta_localization(self, app: App) -> Optional[BetaAppLocalization]:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
         for beta_app_localization in beta_app_localizations:
             if beta_app_localization.attributes.locale.value == app.attributes.primaryLocale:
                 return beta_app_localization
         # If nothing matches, then just take the first
-        return beta_app_localizations[0]
+        return beta_app_localizations[0] if beta_app_localizations else None
 
     def _get_missing_beta_app_information(self, app: App) -> List[str]:
-        default_beta_app_localization = self._get_app_default_beta_localization(app)
+        app_beta_localization = self._get_app_default_beta_localization(app)
+
+        feedback_email = app_beta_localization.attributes.feedbackEmail if app_beta_localization else None
         required_test_information = {
-            'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
+            'Feedback Email': feedback_email,
         }
         return [field_name for field_name, value in required_test_information.items() if not value]
 
