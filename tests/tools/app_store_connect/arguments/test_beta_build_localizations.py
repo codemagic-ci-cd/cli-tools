@@ -92,8 +92,8 @@ def test_from_file(valid_input, expected_valid_result):
     ('[{"locale": "en-US", "whats_new": "..."}, 1]', 'Invalid beta build localization value 1 on index 1'),
     ('[{"locale": "en-US", "whats_new": "..."}, []]', 'Invalid beta build localization value [] on index 1'),
     (
-            '[{"locale": "en-US", "whats_new": "..."}, "lorem ipsum"]',
-            "Invalid beta build localization value 'lorem ipsum' on index 1",
+        '[{"locale": "en-US", "whats_new": "..."}, "lorem ipsum"]',
+        "Invalid beta build localization value 'lorem ipsum' on index 1",
     ),
 ])
 def test_invalid_input(given_input, expected_error):
