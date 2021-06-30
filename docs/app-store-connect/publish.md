@@ -20,6 +20,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--testflight]
     [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
+    [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--skip-package-validation]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
 ```
@@ -49,6 +50,10 @@ The locale code name for displaying localized "What's new" content in TestFlight
 
 
 Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering` WHATS_NEW `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
+##### `--beta-build-localizations=BETA_BUILD_LOCALIZATIONS`
+
+
+Localized beta test info for what's new in the uploaded build as a JSON encoded list. For example, `[{"locale": "en-US", "whats_new": "What's new in English"}]`. See `--locale` for possible locale options. If not given, the value will be checked from environment variable `APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS`. Alternatively to entering` BETA_BUILD_LOCALIZATIONS `in plaintext, it may also be specified using a `@env:` prefix followed by a environment variable name, or `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`.
 ##### `--skip-package-validation`
 
 

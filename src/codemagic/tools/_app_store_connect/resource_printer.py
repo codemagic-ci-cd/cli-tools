@@ -103,7 +103,7 @@ class ResourcePrinter:
             self.logger.info(Colors.GREEN(f'Filtered out {count} {name} {constraint}'))
 
     def log_delete(self, resource_type: Type[R], resource_id: ResourceId):
-        self.logger.info(f'Delete {resource_type} {resource_id}')
+        self.logger.info(Colors.BLUE(f'Delete {resource_type} {resource_id}'))
 
     def log_ignore_not_deleted(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(f'{resource_type} {resource_id} does not exist, did not delete.')
@@ -116,7 +116,7 @@ class ResourcePrinter:
         self.logger.info(Colors.GREEN(f'Saved {resource.__class__} {resource.get_display_info()} to {destination}'))
 
     def log_modify(self, resource_type: Type[R], resource_id: ResourceId):
-        self.logger.info(f'Modify {resource_type} {resource_id}')
+        self.logger.info(Colors.BLUE(f'Modify {resource_type} {resource_id}'))
 
     def log_modified(self, resource_type: Type[R], resource_id: ResourceId):
         self.logger.info(Colors.GREEN(f'Successfully modified {resource_type} {resource_id}'))

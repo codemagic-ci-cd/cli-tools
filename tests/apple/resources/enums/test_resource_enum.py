@@ -36,3 +36,12 @@ def test_resource_enum_graceful_fallback_disabled(enum_value):
     with pytest.raises(ValueError):
         MockEnum(enum_value)
     ResourceEnumMeta.graceful_fallback = True
+
+
+@pytest.mark.parametrize('is_graceful_before', [True, False])
+def test_context_manager(is_graceful_before):
+    ResourceEnumMeta.graceful_fallback = is_graceful_before
+    with ResourceEnumMeta.without_graceful_fallback():
+        with pytest.raises(ValueError):
+            MockEnum('invalid value')
+    assert ResourceEnumMeta.graceful_fallback is is_graceful_before

@@ -6,16 +6,15 @@ from abc import ABCMeta
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
+from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
-from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Altool
@@ -23,6 +22,7 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
@@ -38,6 +38,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
                 BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
+                BuildArgument.BETA_BUILD_LOCALIZATIONS,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
@@ -48,6 +49,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 submit_to_testflight: Optional[bool] = None,
                 locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
+                beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
@@ -60,15 +62,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
+        beta_build_infos = [*beta_build_localizations.value] if beta_build_localizations else []
+
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
         elif submit_to_testflight:
             self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
 
-        if whats_new and not submit_to_testflight:
-            raise BuildArgument.WHATS_NEW.raise_argument_error(
-                f'{PublishArgument.SUBMIT_TO_TESTFLIGHT.flag} is required for submitting notes')
+        if whats_new:
+            beta_build_infos.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
@@ -87,11 +90,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         for application_package in application_packages:
             try:
                 self._publish_application_package(altool, application_package, validate_package)
-                if submit_to_testflight:
-                    if isinstance(application_package, Ipa):
-                        self._submit_build_to_testflight(application_package, locale, whats_new, max_processing_minutes)
-                    else:
-                        continue  # Cannot submit macOS packages to TestFlight, skip
+                if isinstance(application_package, Ipa):
+                    self._handle_ipa_testflight_submission(
+                        application_package,
+                        submit_to_testflight,
+                        beta_build_infos,
+                        max_processing_minutes,
+                    )
+                else:
+                    continue  # Cannot submit macOS packages to TestFlight, skip
             except (IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
@@ -112,20 +119,31 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
         self._upload_artifact_with_altool(altool, application_package.path)
 
-    def _submit_build_to_testflight(
+    def _handle_ipa_testflight_submission(
         self,
         ipa: Ipa,
-        locale: Optional[Locale],
-        whats_new: Optional[Types.WhatsNewArgument],
+        submit_to_testflight: Optional[bool],
+        beta_build_infos: Sequence[BetaBuildInfo],
         max_processing_minutes: int,
     ):
-        self.logger.info(Colors.BLUE('\nSubmit %s to TestFlight'), ipa.path)
+        if not beta_build_infos and not submit_to_testflight:
+            return  # Nothing to do with the ipa...
+
         app = self._get_uploaded_build_application(ipa)
-        build, pre_release_version = self._get_uploaded_build(app, ipa)
+        build = self._get_uploaded_build(app, ipa)
 
-        if whats_new:
-            self.create_beta_build_localization(build.id, locale, whats_new)
+        if beta_build_infos:
+            self._submit_beta_build_localization_infos(build, beta_build_infos)
+        if submit_to_testflight:
+            self._submit_build_to_testflight(build, app, max_processing_minutes)
 
+    def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
+        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
+        for info in beta_build_infos:
+            self.create_beta_build_localization(build_id=build.id, locale=info.locale, whats_new=info.whats_new)
+
+    def _submit_build_to_testflight(self, build: Build, app: App, max_processing_minutes: int):
+        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
@@ -136,7 +154,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         application_package: Union[Ipa, MacOsPackage],
         retries: int = 10,
         retry_wait_seconds: int = 30,
-    ) -> Tuple[Build, PreReleaseVersion]:
+    ) -> Build:
         """
         Find corresponding build for the uploaded ipa or macOS package.
         Take into account that sometimes the build is not immediately available
@@ -152,7 +170,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if build.attributes.version == application_package.version_code:
                 pre_release_version = self.api_client.builds.read_pre_release_version(build.id)
                 if pre_release_version and pre_release_version.attributes.version == application_package.version:
-                    return build, pre_release_version
+                    return build
 
         # Matching build was not found.
         if retries > 0:
@@ -166,7 +184,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             )
             time.sleep(retry_wait_seconds)
             return self._find_build(
-                app_id, application_package, retries=retries-1, retry_wait_seconds=retry_wait_seconds)
+                app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds)
         else:
             # There are no more retries left, give up.
             raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
@@ -192,7 +210,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
                 raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
             else:
-                self.logger.info(Colors.BLUE('Processing build %s is completed'), build.id)
+                self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
                 return build
 
         raise IOError((
@@ -213,13 +231,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         return app
 
     def _get_uploaded_build(
-            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Tuple[Build, PreReleaseVersion]:
-        self.logger.info(Colors.BLUE('\nFind freshly uploaded build'))
-        build, pre_release_version = self._find_build(app.id, application_package)
-        self.logger.info(Colors.GREEN('\nPublished build is'))
+            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Build:
+        self.logger.info(Colors.BLUE('\nFind uploaded build'))
+        build = self._find_build(app.id, application_package)
+        self.logger.info(Colors.GREEN('\nUploaded build is'))
         self.printer.print_resource(build, True)
-        self.printer.print_resource(pre_release_version, True)
-        return build, pre_release_version
+        return build
 
     def _get_publishing_application_packages(
             self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
@@ -289,11 +306,20 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
         ]))
 
-    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+    def _get_app_default_beta_localization(self, app: App) -> Optional[BetaAppLocalization]:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
-        default_beta_app_localization = beta_app_localizations[0]
+        for beta_app_localization in beta_app_localizations:
+            if beta_app_localization.attributes.locale.value == app.attributes.primaryLocale:
+                return beta_app_localization
+        # If nothing matches, then just take the first
+        return beta_app_localizations[0] if beta_app_localizations else None
+
+    def _get_missing_beta_app_information(self, app: App) -> List[str]:
+        app_beta_localization = self._get_app_default_beta_localization(app)
+
+        feedback_email = app_beta_localization.attributes.feedbackEmail if app_beta_localization else None
         required_test_information = {
-            'Feedback Email': default_beta_app_localization.attributes.feedbackEmail,
+            'Feedback Email': feedback_email,
         }
         return [field_name for field_name, value in required_test_information.items() if not value]
 
