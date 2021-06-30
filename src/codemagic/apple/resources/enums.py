@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import enum
 from typing import Optional
 
@@ -32,6 +33,16 @@ class ResourceEnumMeta(enum.EnumMeta):
                 return enum_class(value)
             except TypeError:
                 raise ve
+
+    @staticmethod
+    @contextlib.contextmanager
+    def without_graceful_fallback():
+        original_value = ResourceEnumMeta.graceful_fallback
+        ResourceEnumMeta.graceful_fallback = False
+        try:
+            yield
+        finally:
+            ResourceEnumMeta.graceful_fallback = original_value
 
 
 class ResourceEnum(enum.Enum, metaclass=ResourceEnumMeta):
