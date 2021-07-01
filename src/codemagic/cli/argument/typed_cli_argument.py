@@ -60,7 +60,7 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
         description = f'{properties.description.rstrip(".")}.'
         if cls.environment_variable_key is not None:
-            description += '\nIf not given, the value will be checked from ' \
+            description += '\nIf not given, the value will be checked from the ' \
                            f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
         if include_default:
             try:
@@ -132,8 +132,8 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
     def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
         description = super().get_description(properties, include_default=False)
         usage = f'Alternatively to entering {Colors.CYAN(properties.key.upper())} in plaintext, ' \
-                f'it may also be specified using a "{Colors.WHITE("@env:")}" prefix followed ' \
-                f'by a environment variable name, or "{Colors.WHITE("@file:")}" prefix followed ' \
+                f'it may also be specified using the "{Colors.WHITE("@env:")}" prefix followed ' \
+                f'by an environment variable name, or the "{Colors.WHITE("@file:")}" prefix followed ' \
                 f'by a path to the file containing the value.'
         example = f'Example: "{Colors.WHITE("@env:<variable>")}" uses the value in the environment variable ' \
                   f'named "{Colors.WHITE("<variable>")}", and "{Colors.WHITE("@file:<file_path>")}" ' \
