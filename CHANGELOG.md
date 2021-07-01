@@ -1,3 +1,10 @@
+Version 0.8.6
+-------------
+
+**Improvements**
+
+- Save new keychain to `~/Library/Keychains/codemagic-cli-tools` instead of `$TMPDIR` by default with `keychain initialize` in case the `--path` option is not specified.
+
 Version 0.8.5
 -------------
 
