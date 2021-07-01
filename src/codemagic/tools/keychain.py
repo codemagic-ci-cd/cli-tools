@@ -235,7 +235,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         if process.returncode != 0:
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
-    @cli.action('use-login', action_options={'requires_default_keychain': False})
+    @cli.action('use-login')
     def use_login_keychain(self) -> Keychain:
         """
         Use login keychain as the default keychain
