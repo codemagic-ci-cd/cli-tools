@@ -1,3 +1,18 @@
+Version 0.9.0
+-------------
+
+**Features**
+
+- Add action `keychain use-login` to make login keychain from `~/Library/Keychains` system default keychain again.
+
+**Improvements**
+
+- Save new keychain to `~/Library/Keychains/codemagic-cli-tools` instead of `$TMPDIR` by default with `keychain initialize` in case the `--path` option is not specified.
+
+**Development / Docs**
+
+- Add docs for action `keychain use-login`.
+
 Version 0.8.5
 -------------
 

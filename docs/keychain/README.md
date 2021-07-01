@@ -57,3 +57,4 @@ Enable verbose logging for commands
 |[`set-timeout`](set-timeout.md)|Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set|
 |[`show-info`](show-info.md)|Show all settings for the keychain|
 |[`unlock`](unlock.md)|Unlock the specified keychain|
+|[`use-login`](use-login.md)|Use login keychain as the default keychain|
