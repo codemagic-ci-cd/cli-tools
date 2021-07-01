@@ -23,7 +23,7 @@ Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to m
 ##### `--certificate-password=CERTIFICATE_PASSWORD`
 
 
-Encrypted p12 certificate password. Alternatively to entering CERTIFICATE_PASSWORD in plaintext, it may also be specified using a "@env:" prefix followed by a environment variable name, or "@file:" prefix followed by a path to the file containing the value. Example: "@env:<variable>" uses the value in the environment variable named "<variable>", and "@file:<file_path>" uses the value from file at "<file_path>". [Default: '']
+Encrypted p12 certificate password. Alternatively to entering CERTIFICATE_PASSWORD in plaintext, it may also be specified using the "@env:" prefix followed by an environment variable name, or the "@file:" prefix followed by a path to the file containing the value. Example: "@env:<variable>" uses the value in the environment variable named "<variable>", and "@file:<file_path>" uses the value from file at "<file_path>". [Default: '']
 ##### `-a, --allow-app=ALLOWED_APPLICATIONS`
 
 

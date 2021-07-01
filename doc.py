@@ -82,7 +82,7 @@ class ArgumentsSerializer:
                 description = str_plain(arg.get_description())
                 env_var = arg_type.__dict__.get('environment_variable_key')
                 if env_var:
-                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description)
+                    description = re.sub(f'(\\s?)({env_var}|{arg._name_})(\\s?)', r'\1`\2`\3', description)
                     description = self._replace_quotes(description)
 
             kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
