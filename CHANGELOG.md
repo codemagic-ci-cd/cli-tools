@@ -1,3 +1,10 @@
+Version 0.9.1
+-------------
+
+**Development / Docs**
+
+- Fix typos in CLI arguments help messages/docs that can be specified using `@env:` or `@file:` prefixes.
+
 Version 0.9.0
 -------------
 
