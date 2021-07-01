@@ -62,6 +62,18 @@ class ArgumentsSerializer:
         self.required_args: List[SerializedArgument]
         self.optional_args: List[SerializedArgument]
 
+    @classmethod
+    def _replace_quotes(cls, description: str) -> str:
+        json_array = re.compile(r'"(\[[^\]]+\])"')
+        # Dummy handling for description containing JSON arrays as an example
+        if not json_array.search(description):
+            return description.replace('"', '`')
+
+        before, array, after = json_array.split(description)
+        before = before.replace('"', '`')
+        after = after.replace('"', '`')
+        return f'{before}`{array}`{after}'
+
     def serialize(self) -> ArgumentsSerializer:
         def _serialize(arg) -> SerializedArgument:
             description = str_plain(arg._value_.description)
@@ -70,7 +82,8 @@ class ArgumentsSerializer:
                 description = str_plain(arg.get_description())
                 env_var = arg_type.__dict__.get('environment_variable_key')
                 if env_var:
-                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description).replace('"', '`')
+                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description)
+                    description = self._replace_quotes(description)
 
             kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
             return SerializedArgument(

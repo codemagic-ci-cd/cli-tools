@@ -1,3 +1,19 @@
+Version 0.8.5
+-------------
+
+**Features**
+
+- Make `--whats-new` option independent of `--testflight` for `app-store-connect publish` since submission to external beta review is not necessary to specify notes.
+- Make App Store Connect application entry default locale detection more robust by using `primaryLocale` attribute instead of using the first `betaAppLocalization` for that app.
+- Show more descriptive error messages for invalid inputs to CLI arguments that can be defined using `@env:<var_name>` and `@file:<file_path>` notations.
+- Add more blue and green colors to logs to indicate the start of an activity and completion of it.
+
+**Development / Docs**
+
+- Allow `str` input for `whats_new` arguments to actions defined in `BetaBuildLocalizationsActionGroup`.
+- Remove obsolete test which verified that `--whats-new` could only be used together with `--testflight`.
+- Update `app-store-connect publish` action docs.
+
 Version 0.8.4
 -------------
 

@@ -64,7 +64,7 @@ def test_invalid_credentials_from_env(namespace_kwargs):
     os.environ[Types.CredentialsArgument.environment_variable_key] = 'invalid credentials'
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
-    with pytest.raises(argparse.ArgumentError) as exception_info:
+    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
         GooglePlay.from_cli_args(cli_args)
     assert 'invalid credentials' in str(exception_info.value)
 

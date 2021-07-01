@@ -59,7 +59,7 @@ def test_invalid_private_key_from_env(namespace_kwargs):
     os.environ[Types.PrivateKeyArgument.environment_variable_key] = 'this is not a private key'
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
-    with pytest.raises(argparse.ArgumentError) as exception_info:
+    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
         AppStoreConnect.from_cli_args(cli_args)
     assert 'this is not a private key' in str(exception_info.value)
 

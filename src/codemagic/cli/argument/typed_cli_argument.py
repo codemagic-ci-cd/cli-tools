@@ -49,7 +49,7 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
     def _apply_type(cls, non_typed_value: str) -> T:
         value = cls.argument_type(non_typed_value)
         if not cls._is_valid(value):
-            raise ValueError(f'Provided value "{value}" is not valid')
+            raise argparse.ArgumentTypeError(f'Provided value "{value}" is not valid')
         return value
 
     def _parse_value(self) -> T:
@@ -132,10 +132,12 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
     def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
         description = super().get_description(properties, include_default=False)
         usage = f'Alternatively to entering {Colors.CYAN(properties.key.upper())} in plaintext, ' \
-                f'it may also be specified using a "@env:" prefix followed by a environment variable name, ' \
-                f'or "@file:" prefix followed by a path to the file containing the value.'
-        example = 'Example: "@env:<variable>" uses the value in the environment variable named "<variable>", ' \
-                  'and "@file:<file_path>" uses the value from file at "<file_path>".'
+                f'it may also be specified using a "{Colors.WHITE("@env:")}" prefix followed ' \
+                f'by a environment variable name, or "{Colors.WHITE("@file:")}" prefix followed ' \
+                f'by a path to the file containing the value.'
+        example = f'Example: "{Colors.WHITE("@env:<variable>")}" uses the value in the environment variable ' \
+                  f'named "{Colors.WHITE("<variable>")}", and "{Colors.WHITE("@file:<file_path>")}" ' \
+                  f'uses the value from file at "{Colors.WHITE("<file_path>")}".'
 
         if include_default:
             try:
