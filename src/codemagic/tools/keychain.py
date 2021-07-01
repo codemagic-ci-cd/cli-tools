@@ -258,7 +258,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
-        Make it default and unlock it for upcoming use.
+        Make it default and unlock it for upcoming use
         """
 
         if not self._path:

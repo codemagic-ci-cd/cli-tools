@@ -50,7 +50,7 @@ Enable verbose logging for commands
 |[`create`](create.md)|Create a macOS keychain, add it to the search list|
 |[`delete`](delete.md)|Delete keychains and remove them from the search list|
 |[`get-default`](get-default.md)|Show the system default keychain|
-|[`initialize`](initialize.md)|Set up the keychain to be used for code signing. Create the keychain         at specified path with specified password with given timeout.         Make it default and unlock it for upcoming use.|
+|[`initialize`](initialize.md)|Set up the keychain to be used for code signing. Create the keychain         at specified path with specified password with given timeout.         Make it default and unlock it for upcoming use|
 |[`list-certificates`](list-certificates.md)|List available code signing certificates in specified keychain|
 |[`lock`](lock.md)|Lock the specified keychain|
 |[`make-default`](make-default.md)|Set the keychain as the system default keychain|
