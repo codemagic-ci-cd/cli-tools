@@ -235,12 +235,30 @@ class Keychain(cli.CliApp, PathFinderMixin):
         if process.returncode != 0:
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
 
+    @cli.action('use-login', action_options={'requires_default_keychain': False})
+    def use_login_keychain(self) -> Keychain:
+        """
+        Use login keychain as the default keychain
+        """
+
+        for keychain_name in ('login.keychain-db', 'login.keychain'):
+            keychain_path = self._keychains_root / keychain_name
+            if keychain_path.is_file():
+                self._path = keychain_path
+                break
+        else:
+            raise KeychainError(f'Login keychain not found from {self._keychains_root}')
+
+        self.logger.info(Colors.GREEN('Use login keychain %s as system default keychain'), self.path)
+        self.make_default()
+        return self
+
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
     def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None) -> Keychain:
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
-        Make it default and unlock it for upcoming use
+        Make it default and unlock it for upcoming use.
         """
 
         if not self._path:
@@ -267,8 +285,12 @@ class Keychain(cli.CliApp, PathFinderMixin):
             self.echo(json.dumps(certificates, sort_keys=True, indent=4))
         return certificates
 
+    @property
+    def _keychains_root(self) -> pathlib.Path:
+        return pathlib.Path('~/Library/Keychains/').expanduser()
+
     def _generate_path(self):
-        keychain_dir = pathlib.Path('~/Library/Keychains/codemagic-cli-tools').expanduser()
+        keychain_dir = self._keychains_root / 'codemagic-cli-tools'
         keychain_dir.mkdir(parents=True, exist_ok=True)
         date = datetime.now().strftime('%d-%m-%y')
         with NamedTemporaryFile(prefix=f'{date}_', suffix='.keychain-db', dir=keychain_dir) as tf:
