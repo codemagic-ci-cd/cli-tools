@@ -5,6 +5,7 @@ import json
 import os
 import pathlib
 import shutil
+from datetime import datetime
 from tempfile import NamedTemporaryFile
 from typing import Iterable
 from typing import List
@@ -269,7 +270,8 @@ class Keychain(cli.CliApp, PathFinderMixin):
     def _generate_path(self):
         keychain_dir = pathlib.Path('~/Library/Keychains/codemagic-cli-tools').expanduser()
         keychain_dir.mkdir(parents=True, exist_ok=True)
-        with NamedTemporaryFile(prefix='build_', suffix='.keychain', dir=keychain_dir) as tf:
+        date = datetime.now().strftime('%d-%m-%y')
+        with NamedTemporaryFile(prefix=f'{date}_', suffix='.keychain-db', dir=keychain_dir) as tf:
             self._path = pathlib.Path(tf.name)
 
     @cli.action('add-certificates',
