@@ -16,7 +16,7 @@ keychain initialize [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v
 ##### `-pw, --password=PASSWORD`
 
 
-Keychain password. Alternatively to entering `PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from file at `<file_path>`. [Default: '']
+Keychain password. Alternatively to entering `PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`. [Default: '']
 ##### `-t, --timeout=TIMEOUT`
 
 
