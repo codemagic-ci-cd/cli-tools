@@ -372,6 +372,7 @@ class BuildArgument(cli.Argument):
         description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
     )
+    BUILD_ID_RESOURCE_ID_REQUIRED = BUILD_ID_RESOURCE_ID_OPTIONAL.duplicate(argparse_kwargs={'required': True})
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
         flags=('--pre-release-version',),
@@ -453,6 +454,23 @@ class BuildArgument(cli.Argument):
             f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
         ),
         argparse_kwargs={
+            'required': False,
+        },
+    )
+    BETA_GROUP_NAMES_REQUIRED = cli.ArgumentProperties(
+        key='beta_group_names',
+        flags=('--beta-group-names',),
+        type=str,
+        description='Name of your Beta group',
+        argparse_kwargs={
+            'nargs': '+',
+            'metavar': 'beta-group-name',
+        },
+    )
+    BETA_GROUP_NAMES_OPTIONAL = BETA_GROUP_NAMES_REQUIRED.duplicate(
+        argparse_kwargs={
+            'nargs': '+',
+            'metavar': 'beta-group-name',
             'required': False,
         },
     )

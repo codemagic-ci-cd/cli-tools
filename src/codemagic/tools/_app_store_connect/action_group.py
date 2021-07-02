@@ -22,3 +22,7 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name='beta-build-localizations',
         description='Manage your beta builds localizations in App Store Connect',
     )
+    BETA_GROUPS = cli.ActionGroupProperties(
+        name='beta-groups',
+        description='Manage your beta groups in App Store Connect',
+    )

@@ -17,7 +17,7 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
     [--expired]
     [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-id BUILD_ID_RESOURCE_ID_WITH_FLAGS_OPTIONAL]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
     [--build-version-number BUILD_VERSION_NUMBER]

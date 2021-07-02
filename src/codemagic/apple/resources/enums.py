@@ -250,6 +250,7 @@ class ResourceType(ResourceEnum):
     BETA_APP_REVIEW_DETAILS = 'betaAppReviewDetails'
     BETA_APP_REVIEW_SUBMISSIONS = 'betaAppReviewSubmissions'
     BETA_BUILD_LOCALIZATIONS = 'betaBuildLocalizations'
+    BETA_GROUPS = 'betaGroups'
     BUILDS = 'builds'
     BUNDLE_ID = 'bundleIds'
     BUNDLE_ID_CAPABILITIES = 'bundleIdCapabilities'

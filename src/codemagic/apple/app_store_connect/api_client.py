@@ -16,6 +16,7 @@ from codemagic.utilities import log
 from .api_session import AppStoreConnectApiSession
 from .apps import Apps
 from .builds import Builds
+from .provisioning import BetaGroups
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
 from .provisioning import Devices
@@ -157,6 +158,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
     @property
     def devices(self) -> Devices:
         return Devices(self)
+
+    @property
+    def beta_groups(self) -> BetaGroups:
+        return BetaGroups(self)
 
     @property
     def pre_release_versions(self) -> PreReleaseVersions:
