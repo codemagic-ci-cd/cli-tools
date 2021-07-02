@@ -3,7 +3,6 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
-from codemagic.apple.app_store_connect.api_error import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import BetaGroup
 from codemagic.apple.resources import Build

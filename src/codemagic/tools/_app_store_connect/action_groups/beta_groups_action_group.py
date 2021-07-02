@@ -52,7 +52,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
             raise AppStoreConnectError(
                 '\n'.join(
                     message.format(name=name, error_response=error_response) for name, error_response in errors
-                )
+                ),
             )
 
     @cli.action('remove-build',
