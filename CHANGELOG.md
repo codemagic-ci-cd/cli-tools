@@ -1,3 +1,10 @@
+Version 0.9.2
+-------------
+
+**Improvements**
+
+- Require API key based authentication for `app-store-connect publish` when `--beta-build-localizations` is used.
+
 Version 0.9.1
 -------------
 

@@ -67,8 +67,13 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
-        elif submit_to_testflight:
-            self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
+        else:
+            # Those need API key based authentication
+            if submit_to_testflight:
+                self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
+            if beta_build_localizations:
+                self._assert_api_client_credentials(
+                    "It is required for submitting localized beta test info for what's new in the uploaded build.")
 
         if whats_new:
             beta_build_infos.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
