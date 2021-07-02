@@ -137,7 +137,7 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
                 f'by a path to the file containing the value.'
         example = f'Example: "{Colors.WHITE("@env:<variable>")}" uses the value in the environment variable ' \
                   f'named "{Colors.WHITE("<variable>")}", and "{Colors.WHITE("@file:<file_path>")}" ' \
-                  f'uses the value from file at "{Colors.WHITE("<file_path>")}".'
+                  f'uses the value from the file at "{Colors.WHITE("<file_path>")}".'
 
         if include_default:
             try:
