@@ -136,6 +136,12 @@ class Keychain(cli.CliApp, PathFinderMixin):
         if process.returncode != 0:
             raise KeychainError(f'Unable to create keychain {self.path}', process)
 
+        if not self.path.exists():
+            # In some cases `security` adds a '-db' suffix to the keychain name
+            self._path = pathlib.Path(f'{self.path}-db')
+        if not self.path.exists():
+            raise KeychainError('Keychain was not created')
+
         process = self.execute(('security', 'list-keychains', '-d', 'user', '-s', 'login.keychain', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Unable to add keychain {self.path} to keychain search list', process)
