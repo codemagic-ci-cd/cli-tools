@@ -140,8 +140,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self._submit_beta_build_localization_infos(build, beta_build_infos)
         if submit_to_testflight:
             self._submit_build_to_testflight(build, app, max_processing_minutes)
-        if beta_group_names:
-            self._add_build_to_beta_groups(build, beta_group_names)
+        if submit_to_testflight and beta_group_names:
+            self.add_build_to_beta_group(build, beta_group_names)
 
     def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
         self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
@@ -153,9 +153,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
-
-    def _add_build_to_beta_groups(self, build, beta_group_names):
-        self.add_build_to_beta_group(build, beta_group_names)
 
     def _find_build(
         self,

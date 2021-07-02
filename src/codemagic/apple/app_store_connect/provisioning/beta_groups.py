@@ -29,18 +29,10 @@ class BetaGroups(ResourceManager[BetaGroup]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
         """
-        # avoid filtering by name to avoid missing matches that contain non-breakable space symbols
-        name = resource_filter.name
-        resource_filter.name = None
-
         params = {**resource_filter.as_query_params()}
         response = self.client.paginate(f'{self.client.API_URL}/betaGroups', params)
 
-        beta_groups = [BetaGroup(item) for item in response]
-        return [
-            beta_group for beta_group in beta_groups
-            if name and self._are_names_equal(name, beta_group.attributes.name)
-        ]
+        return [BetaGroup(item) for item in response]
 
     def add_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
         """
@@ -71,10 +63,3 @@ class BetaGroups(ResourceManager[BetaGroup]):
         }
         self.client.session.delete(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
-
-    @staticmethod
-    def _are_names_equal(name: str, other_name: str):
-        """
-        Compare names disregarding non-breakable space symbols
-        """
-        return name.replace('\xa0', ' ') == other_name.replace('\xa0', ' ')
