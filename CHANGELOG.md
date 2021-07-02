@@ -1,8 +1,14 @@
 Version 0.9.1
 -------------
 
+**Features**
+
+- Add action `codemagic-cli-tools installed-tools` to show the tools that are installed by current Codemagic CLI tools version.
+- Add action `codemagic-cli-tools version` to show version of currently installed Codemagic CLI tools.
+
 **Development / Docs**
 
+- Add docs for new actions from tool `codemagic-cli-tools`.
 - Fix typos in CLI arguments help messages/docs that can be specified using `@env:` or `@file:` prefixes.
 
 Version 0.9.0
