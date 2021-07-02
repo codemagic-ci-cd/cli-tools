@@ -56,7 +56,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             should_print: bool = True) -> BetaBuildLocalization:
         ...
 
-    def add_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def add_build_to_beta_group(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         ...
 
     def list_apps(self,

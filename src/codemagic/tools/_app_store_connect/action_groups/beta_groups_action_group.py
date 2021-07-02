@@ -21,7 +21,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def add_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def add_build_to_beta_group(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Add build to a Beta group
         """
@@ -59,7 +59,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def remove_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def remove_build_from_beta_group(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Remove build from a Beta group
         """
