@@ -1,12 +1,12 @@
 
-list-builds
+beta-groups
 ===========
 
 
-**List Builds from Apple Developer Portal matching given constraints**
+**Manage your beta groups in App Store Connect**
 ### Usage
 ```bash
-app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect beta-groups [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,44 +14,8 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
-    [--expired]
-    [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
-    [--pre-release-version PRE_RELEASE_VERSION]
-    [--processing-state PROCESSING_STATE]
-    [--build-version-number BUILD_VERSION_NUMBER]
+    ACTION
 ```
-### Optional arguments for action `list-builds`
-
-##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
-
-
-Application Apple ID. An automatically generated ID assigned to your app
-##### `--expired`
-
-
-List only expired builds
-##### `--not-expired`
-
-
-List only not expired builds
-##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
-
-
-Alphanumeric ID value of the Build
-##### `--pre-release-version=PRE_RELEASE_VERSION`
-
-
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
-
-
-Build processing state
-##### `--build-version-number=BUILD_VERSION_NUMBER`
-
-
-Build version number is the version number of the uploaded build. For example `46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -108,3 +72,9 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`modify-add-build`](beta-groups/modify-add-build.md)|Add build to a Beta group|
+|[`modify-remove-build`](beta-groups/modify-remove-build.md)|Remove build from a Beta group|

@@ -1,12 +1,12 @@
 
-list-builds
-===========
+modify-remove-build
+===================
 
 
-**List Builds from Apple Developer Portal matching given constraints**
+**Remove build from a Beta group**
 ### Usage
 ```bash
-app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect beta-groups modify-remove-build [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,44 +14,19 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
-    [--expired]
-    [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
-    [--pre-release-version PRE_RELEASE_VERSION]
-    [--processing-state PROCESSING_STATE]
-    [--build-version-number BUILD_VERSION_NUMBER]
+    --build-id BUILD_ID_RESOURCE_ID_REQUIRED
+    --beta-group-names BETA_GROUP_NAMES_REQUIRED
 ```
-### Optional arguments for action `list-builds`
+### Required arguments for action `modify-remove-build`
 
-##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
-
-
-Application Apple ID. An automatically generated ID assigned to your app
-##### `--expired`
-
-
-List only expired builds
-##### `--not-expired`
-
-
-List only not expired builds
-##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
+##### `--build-id=BUILD_ID_RESOURCE_ID_REQUIRED`
 
 
 Alphanumeric ID value of the Build
-##### `--pre-release-version=PRE_RELEASE_VERSION`
+##### `--beta-group-names=BETA_GROUP_NAMES_REQUIRED`
 
 
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
-
-
-Build processing state
-##### `--build-version-number=BUILD_VERSION_NUMBER`
-
-
-Build version number is the version number of the uploaded build. For example `46`
+Name of your Beta group. Multiple arguments
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

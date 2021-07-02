@@ -104,4 +104,5 @@ Enable verbose logging for commands
 |[`apps`](apps.md)|Manage your apps in App Store Connect|
 |[`beta-app-review-submissions`](beta-app-review-submissions.md)|Manage your application's TestFlight submissions|
 |[`beta-build-localizations`](beta-build-localizations.md)|Manage your beta builds localizations in App Store Connect|
+|[`beta-groups`](beta-groups.md)|Manage your beta groups in App Store Connect|
 |[`builds`](builds.md)|Manage your builds in App Store Connect|
