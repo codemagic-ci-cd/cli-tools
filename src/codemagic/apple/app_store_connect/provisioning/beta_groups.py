@@ -6,7 +6,6 @@ from typing import Union
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import BetaGroup
 from codemagic.apple.resources import Build
-from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 
@@ -48,8 +47,8 @@ class BetaGroups(ResourceManager[BetaGroup]):
 
         payload = {
             'data': [
-                self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS)
-            ]
+                self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
+            ],
         }
         self.client.session.post(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
@@ -60,8 +59,8 @@ class BetaGroups(ResourceManager[BetaGroup]):
 
         payload = {
             'data': [
-                self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS)
-            ]
+                self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
+            ],
         }
         self.client.session.delete(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)

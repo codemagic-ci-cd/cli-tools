@@ -86,7 +86,7 @@ class AppStoreConnect(cli.CliApp,
                       BetaBuildLocalizationsActionGroup,
                       BetaGroupsActionGroup,
                       ResourceManagerMixin,
-                      PathFinderMixin,):
+                      PathFinderMixin):
     """
     Interact with Apple services via App Store Connect API
     """
