@@ -9,6 +9,7 @@ Version 0.9.1
 **Development / Docs**
 
 - Add docs for new actions from tool `codemagic-cli-tools`.
+- Fix typos in CLI arguments help messages/docs that can be specified using `@env:` or `@file:` prefixes.
 
 Version 0.9.0
 -------------
