@@ -1,3 +1,10 @@
+Version 0.9.1
+-------------
+
+**Development / Docs**
+
+- Create keychains in `~/Library/codemagic-cli-tools/keychains` by default when `--path` is not specified with `keychain initialize`.
+
 Version 0.9.0
 -------------
 
