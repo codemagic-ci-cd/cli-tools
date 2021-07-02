@@ -220,7 +220,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
         self.logger.info('Get system default keychain')
         default = self._get_default()
-        self.echo(default)
+        self.echo(str(default))
         return default
 
     def _get_default(self):
@@ -247,13 +247,14 @@ class Keychain(cli.CliApp, PathFinderMixin):
         Use login keychain as the default keychain
         """
 
+        keychains_root = pathlib.Path('~/Library/Keychains/').expanduser()
         for keychain_name in ('login.keychain-db', 'login.keychain'):
-            keychain_path = self._keychains_root / keychain_name
+            keychain_path = keychains_root / keychain_name
             if keychain_path.is_file():
                 self._path = keychain_path
                 break
         else:
-            raise KeychainError(f'Login keychain not found from {self._keychains_root}')
+            raise KeychainError(f'Login keychain not found from {keychains_root}')
 
         self.logger.info(Colors.GREEN('Use login keychain %s as system default keychain'), self.path)
         self.make_default()
@@ -291,12 +292,8 @@ class Keychain(cli.CliApp, PathFinderMixin):
             self.echo(json.dumps(certificates, sort_keys=True, indent=4))
         return certificates
 
-    @property
-    def _keychains_root(self) -> pathlib.Path:
-        return pathlib.Path('~/Library/Keychains/').expanduser()
-
     def _generate_path(self):
-        keychain_dir = self._keychains_root / 'codemagic-cli-tools'
+        keychain_dir = pathlib.Path('~/Library/codemagic-cli-tools/keychains').expanduser()
         keychain_dir.mkdir(parents=True, exist_ok=True)
         date = datetime.now().strftime('%d-%m-%y')
         with NamedTemporaryFile(prefix=f'{date}_', suffix='.keychain-db', dir=keychain_dir) as tf:
