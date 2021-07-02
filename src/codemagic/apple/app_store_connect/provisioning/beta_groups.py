@@ -3,6 +3,7 @@ from typing import Optional
 from typing import Type
 from typing import Union
 
+from codemagic.apple.app_store_connect.api_error import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import BetaGroup
 from codemagic.apple.resources import Build
@@ -29,14 +30,18 @@ class BetaGroups(ResourceManager[BetaGroup]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
         """
-        # add a non-breakable space in the name of the automatically created internal group
-        if resource_filter.name == 'App Store Connect Users':
-            resource_filter.name = 'App\xa0Store Connect Users'
+        # avoid filtering by name to avoid missing matches that contain non-breakable space symbols
+        name = resource_filter.name
+        resource_filter.name = None
 
         params = {**resource_filter.as_query_params()}
-        beta_groups = self.client.paginate(f'{self.client.API_URL}/betaGroups', params)
+        response = self.client.paginate(f'{self.client.API_URL}/betaGroups', params)
 
-        return [BetaGroup(beta_group) for beta_group in beta_groups]
+        beta_groups = [BetaGroup(item) for item in response]
+        return [
+            beta_group for beta_group in beta_groups
+            if name and self._are_names_equal(name, beta_group.attributes.name)
+        ]
 
     def add_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
         """
@@ -67,3 +72,10 @@ class BetaGroups(ResourceManager[BetaGroup]):
         }
         self.client.session.delete(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
+
+    @staticmethod
+    def _are_names_equal(name: str, other_name: str):
+        """
+        Compare names disregarding non-breakable space symbols
+        """
+        return name.replace('\xa0', ' ') == other_name.replace('\xa0', ' ')

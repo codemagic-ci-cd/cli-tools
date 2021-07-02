@@ -43,10 +43,10 @@ class TestBetaGroups(ResourceManagerTestsBase):
         build = ResourceId('02c602b8-f7e5-4a72-8f16-fd34500fb43a')
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
-        self.api_client.beta_groups.modify_add_build(beta_group, build)
+        self.api_client.beta_groups.add_build(beta_group, build)
 
     def test_remove_build_from_beta_group(self):
         build = ResourceId('02c602b8-f7e5-4a72-8f16-fd34500fb43a')
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
-        self.api_client.beta_groups.modify_remove_build(beta_group, build)
+        self.api_client.beta_groups.remove_build(beta_group, build)

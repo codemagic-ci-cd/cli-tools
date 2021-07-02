@@ -2,6 +2,7 @@ from typing import Sequence
 from typing import Union
 
 from codemagic import cli
+from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.app_store_connect.provisioning.beta_groups import BetaGroups
 from codemagic.apple.resources import Build
@@ -11,6 +12,7 @@ from codemagic.cli import Colors
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
+from ..errors import AppStoreConnectError
 
 
 class BetaGroupsActionGroup(AbstractBaseAction):
@@ -37,8 +39,21 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 continue
             beta_groups.extend(matched_beta_groups)
 
+        errors = []
         for beta_group in beta_groups:
-            beta_groups_manager.add_build(beta_group, build_id)
+            try:
+                beta_groups_manager.add_build(beta_group, build_id)
+                self.logger.error(Colors.GREEN(f"Added build '{build_id}' to '{beta_group.attributes.name}'"))
+            except AppStoreConnectApiError as e:
+                errors.append([beta_group.attributes.name, e.error_response])
+
+        if errors:
+            message = f"Failed to add a build '{build_id}' to '{{name}}'. {{error_response}}"
+            raise AppStoreConnectError(
+                '\n'.join(
+                    message.format(name=name, error_response=error_response) for name, error_response in errors
+                )
+            )
 
     @cli.action('remove-build',
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
@@ -64,3 +79,4 @@ class BetaGroupsActionGroup(AbstractBaseAction):
 
         for beta_group in beta_groups:
             beta_groups_manager.remove_build(beta_group, build_id)
+            self.logger.info(Colors.GREEN(f"Removed build '{build_id}' from '{beta_group.attributes.name}'"))
