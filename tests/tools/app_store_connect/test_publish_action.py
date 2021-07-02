@@ -44,8 +44,29 @@ def test_publish_action_without_app_store_connect_key_testflight_submit(missing_
     app_store_connect = AppStoreConnect.from_cli_args(cli_args)
     with pytest.raises(argparse.ArgumentError) as error_info:
         app_store_connect.publish(
+            apple_id='name@example.com',
+            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
             application_package_path_patterns=[pathlib.Path('path.pattern')],
             submit_to_testflight=True,
+        )
+    assert missing_argument.flag in error_info.value.argument_name
+
+
+@pytest.mark.parametrize('missing_argument', [
+    AppStoreConnectArgument.ISSUER_ID,
+    AppStoreConnectArgument.KEY_IDENTIFIER,
+    AppStoreConnectArgument.PRIVATE_KEY,
+])
+def test_publish_action_without_app_store_connect_key_and_beta_locales(missing_argument, publishing_namespace_kwargs):
+    publishing_namespace_kwargs.update({missing_argument.key: None})
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
+    app_store_connect = AppStoreConnect.from_cli_args(cli_args)
+    with pytest.raises(argparse.ArgumentError) as error_info:
+        app_store_connect.publish(
+            application_package_path_patterns=[pathlib.Path('path.pattern')],
+            apple_id='name@example.com',
+            app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
+            beta_build_localizations=Types.BetaBuildLocalizations('[]'),
         )
     assert missing_argument.flag in error_info.value.argument_name
 
