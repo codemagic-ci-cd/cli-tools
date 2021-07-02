@@ -8,6 +8,7 @@ Version 0.9.1
 
 **Development / Docs**
 
+- Create keychains in `~/Library/codemagic-cli-tools/keychains` by default when `--path` is not specified with `keychain initialize`.
 - Add docs for new actions from tool `codemagic-cli-tools`.
 - Fix typos in CLI arguments help messages/docs that can be specified using `@env:` or `@file:` prefixes.
 
