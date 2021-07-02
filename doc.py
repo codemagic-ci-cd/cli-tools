@@ -59,8 +59,8 @@ class ArgumentKwargs(NamedTuple):
 class ArgumentsSerializer:
     def __init__(self, raw_arguments):
         self.raw_arguments = raw_arguments
-        self.required_args: List[SerializedArgument]
-        self.optional_args: List[SerializedArgument]
+        self.required_args: List[SerializedArgument] = []
+        self.optional_args: List[SerializedArgument] = []
 
     @classmethod
     def _replace_quotes(cls, description: str) -> str:
@@ -74,31 +74,31 @@ class ArgumentsSerializer:
         after = after.replace('"', '`')
         return f'{before}`{array}`{after}'
 
+    def _serialize_argument(self, arg) -> SerializedArgument:
+        description = str_plain(arg._value_.description)
+        arg_type = getattr(arg._value_, 'type')
+        if isinstance(arg_type, type) and issubclass(arg_type, cli.argument.TypedCliArgument):
+            description = str_plain(arg.get_description())
+            env_var = arg_type.__dict__.get('environment_variable_key')
+            to_match = f'{env_var}|{arg._name_}' if env_var else arg._name_
+            description = re.sub(f'(\\s?)({to_match})(\\s?)', r'\1`\2`\3', description)
+            description = self._replace_quotes(description)
+
+        kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
+        return SerializedArgument(
+            key=arg._value_.key,
+            description=description,
+            flags=', '.join(getattr(arg._value_, 'flags', '')),
+            name='' if arg_type and arg_type.__name__ == 'bool' else arg._name_,
+            required=kwargs.required,
+            default=kwargs.default,
+            nargs=kwargs.nargs,
+            choices=kwargs.choices,
+            store_boolean=kwargs.store_boolean,
+        )
+
     def serialize(self) -> ArgumentsSerializer:
-        def _serialize(arg) -> SerializedArgument:
-            description = str_plain(arg._value_.description)
-            arg_type = getattr(arg._value_, 'type')
-            if isinstance(arg_type, type) and issubclass(arg_type, cli.argument.TypedCliArgument):
-                description = str_plain(arg.get_description())
-                env_var = arg_type.__dict__.get('environment_variable_key')
-                if env_var:
-                    description = re.sub(f'({env_var}| {arg._name_} )', r'`\1`', description)
-                    description = self._replace_quotes(description)
-
-            kwargs = self._proccess_kwargs(getattr(arg._value_, 'argparse_kwargs'))
-            return SerializedArgument(
-                key=arg._value_.key,
-                description=description,
-                flags=', '.join(getattr(arg._value_, 'flags', '')),
-                name='' if arg_type and arg_type.__name__ == 'bool' else arg._name_,
-                required=kwargs.required,
-                default=kwargs.default,
-                nargs=kwargs.nargs,
-                choices=kwargs.choices,
-                store_boolean=kwargs.store_boolean,
-            )
-
-        args = list(map(_serialize, self.raw_arguments))
+        args = list(map(self._serialize_argument, self.raw_arguments))
         self.required_args = [arg for arg in args if arg.required]
         self.optional_args = [arg for arg in args if not arg.required]
         return self
