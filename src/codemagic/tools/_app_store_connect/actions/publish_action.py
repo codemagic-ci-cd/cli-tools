@@ -39,6 +39,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 BuildArgument.BETA_BUILD_LOCALIZATIONS,
+                BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
@@ -50,6 +51,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
+                beta_group_names: Optional[List[str]] = None,
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
@@ -96,6 +98,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                         submit_to_testflight,
                         beta_build_infos,
                         max_processing_minutes,
+                        beta_group_names,
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
@@ -125,6 +128,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         submit_to_testflight: Optional[bool],
         beta_build_infos: Sequence[BetaBuildInfo],
         max_processing_minutes: int,
+        beta_group_names: Optional[List[str]],
     ):
         if not beta_build_infos and not submit_to_testflight:
             return  # Nothing to do with the ipa...
@@ -136,6 +140,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self._submit_beta_build_localization_infos(build, beta_build_infos)
         if submit_to_testflight:
             self._submit_build_to_testflight(build, app, max_processing_minutes)
+        if beta_group_names:
+            self._submit_build_to_beta_groups(build, beta_group_names)
 
     def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
         self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
@@ -147,6 +153,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self._assert_app_has_testflight_information(app)
         build = self._wait_until_build_is_processed(build, max_processing_minutes)
         self.create_beta_app_review_submission(build.id)
+
+    def _submit_build_to_beta_groups(self, build, beta_group_names):
+        self.add_build(build, beta_group_names)
 
     def _find_build(
         self,

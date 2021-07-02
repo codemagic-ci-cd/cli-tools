@@ -5,6 +5,7 @@ import pathlib
 from abc import ABCMeta
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic.apple import AppStoreConnectApiClient
@@ -14,6 +15,7 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
@@ -52,6 +54,9 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             locale: Optional[Locale],
             whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             should_print: bool = True) -> BetaBuildLocalization:
+        ...
+
+    def add_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         ...
 
     def list_apps(self,
