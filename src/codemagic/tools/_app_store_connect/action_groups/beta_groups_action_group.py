@@ -15,11 +15,11 @@ from ..arguments import BuildArgument
 
 class BetaGroupsActionGroup(AbstractBaseAction):
 
-    @cli.action('modify-add-build',
+    @cli.action('add-build',
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def modify_add_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def add_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Add build to a Beta group
         """
@@ -38,13 +38,13 @@ class BetaGroupsActionGroup(AbstractBaseAction):
             beta_groups.extend(matched_beta_groups)
 
         for beta_group in beta_groups:
-            beta_groups_manager.modify_add_build(beta_group, build_id)
+            beta_groups_manager.add_build(beta_group, build_id)
 
-    @cli.action('modify-remove-build',
+    @cli.action('remove-build',
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def modify_remove_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def remove_build(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Remove build from a Beta group
         """
@@ -63,4 +63,4 @@ class BetaGroupsActionGroup(AbstractBaseAction):
             beta_groups.extend(matched_beta_groups)
 
         for beta_group in beta_groups:
-            beta_groups_manager.modify_remove_build(beta_group, build_id)
+            beta_groups_manager.remove_build(beta_group, build_id)

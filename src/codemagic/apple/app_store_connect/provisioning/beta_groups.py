@@ -21,7 +21,7 @@ class BetaGroups(ResourceManager[BetaGroup]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
-        id: Optional[Union[str, ResourceId]] = None
+        id: Optional[ResourceId] = None
         name: Optional[str] = None
         app: Optional[str] = None
 
@@ -38,7 +38,7 @@ class BetaGroups(ResourceManager[BetaGroup]):
 
         return [BetaGroup(beta_group) for beta_group in beta_groups]
 
-    def modify_add_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
+    def add_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/add_builds_to_a_beta_group
         """
@@ -53,7 +53,10 @@ class BetaGroups(ResourceManager[BetaGroup]):
         self.client.session.post(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
 
-    def modify_remove_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
+    def remove_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/remove_builds_from_a_beta_group
+        """
         beta_group_resource_id = self._get_resource_id(beta_group)
         build_resource_id = self._get_resource_id(build)
 

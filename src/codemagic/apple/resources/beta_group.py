@@ -14,7 +14,7 @@ class BetaGroup(Resource):
     class Attributes(Resource.Attributes):
         name: str
         createdDate: str
-        isInternalGroup: Optional[str] = None
+        isInternalGroup: bool
         hasAccessToAllBuilds: Optional[bool] = None
         publicLinkEnabled: Optional[bool] = None
         publicLinkId: Optional[str] = None
