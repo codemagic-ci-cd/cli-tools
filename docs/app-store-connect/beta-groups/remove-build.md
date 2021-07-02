@@ -1,12 +1,12 @@
 
-beta-groups
-===========
+remove-build
+============
 
 
-**Manage your beta groups in App Store Connect**
+**Remove build from a Beta group**
 ### Usage
 ```bash
-app-store-connect beta-groups [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect beta-groups remove-build [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,19 @@ app-store-connect beta-groups [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    --build-id BUILD_ID_RESOURCE_ID_REQUIRED
+    --beta-group BETA_GROUP_NAMES_REQUIRED
 ```
+### Required arguments for action `remove-build`
+
+##### `--build-id=BUILD_ID_RESOURCE_ID_REQUIRED`
+
+
+Alphanumeric ID value of the Build
+##### `--beta-group=BETA_GROUP_NAMES_REQUIRED`
+
+
+Name of your Beta group. Multiple arguments
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,9 +83,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-build`](beta-groups/add-build.md)|Add build to a Beta group|
-|[`remove-build`](beta-groups/remove-build.md)|Remove build from a Beta group|
