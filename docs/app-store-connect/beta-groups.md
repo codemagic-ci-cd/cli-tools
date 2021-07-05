@@ -3,7 +3,7 @@ beta-groups
 ===========
 
 
-**Manage your beta groups in App Store Connect**
+**Manage your groups of beta testers in App Store Connect**
 ### Usage
 ```bash
 app-store-connect beta-groups [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

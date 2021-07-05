@@ -3,7 +3,7 @@ publish
 =======
 
 
-**Publish application packages to App Store and submit them to Testflight**
+**Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers**
 ### Usage
 ```bash
 app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -94,7 +94,7 @@ Enable verbose logging for commands
 |[`list-certificates`](list-certificates.md)|List Signing Certificates from Apple Developer Portal matching given constraints|
 |[`list-devices`](list-devices.md)|List Devices from Apple Developer portal matching given constraints|
 |[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints|
-|[`publish`](publish.md)|Publish application packages to App Store and submit them to Testflight|
+|[`publish`](publish.md)|Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers|
 
 ### Action groups
 
@@ -104,5 +104,5 @@ Enable verbose logging for commands
 |[`apps`](apps.md)|Manage your apps in App Store Connect|
 |[`beta-app-review-submissions`](beta-app-review-submissions.md)|Manage your application's TestFlight submissions|
 |[`beta-build-localizations`](beta-build-localizations.md)|Manage your beta builds localizations in App Store Connect|
-|[`beta-groups`](beta-groups.md)|Manage your beta groups in App Store Connect|
+|[`beta-groups`](beta-groups.md)|Manage your groups of beta testers in App Store Connect|
 |[`builds`](builds.md)|Manage your builds in App Store Connect|
