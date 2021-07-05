@@ -3,7 +3,7 @@ Version 0.8.6
 **Features**
 
 - New `app-store-connect beta-groups` action set to add and remove TestFlight builds from groups of beta testers.
-- `app-store-connect publish` action accepts multiple Beta group names under `--beta-groups` key. The uploaded TestFlight build will be made available to the specified groups of beta testers.
+- `app-store-connect publish` action accepts multiple Beta group names under `--beta-group` key. The uploaded TestFlight build will be made available to the specified groups of beta testers.
 
 **Development / Docs**
 
