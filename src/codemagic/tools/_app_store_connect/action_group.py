@@ -24,5 +24,5 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
     )
     BETA_GROUPS = cli.ActionGroupProperties(
         name='beta-groups',
-        description='Manage your beta groups in App Store Connect',
+        description='Manage your groups of beta testers in App Store Connect',
     )

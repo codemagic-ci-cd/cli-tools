@@ -19,7 +19,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def add_build_to_beta_group(self, build_id: Union[ResourceId, Build], beta_group_names_list: Sequence[str]):
+    def add_build_to_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Add build to a Beta group
         """
@@ -28,26 +28,28 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         resource_filter = self.api_client.beta_groups.Filter(app=app.id)
         app_beta_groups = self.api_client.beta_groups.list(resource_filter=resource_filter)
 
-        beta_group_names = set(beta_group_names_list)
         matched_beta_groups = set(
             beta_group for beta_group in app_beta_groups if beta_group.attributes.name in beta_group_names)
-
-        missing_beta_group_names = \
-            beta_group_names - set(beta_group.attributes.name for beta_group in matched_beta_groups)
-        self.logger.info(Colors.YELLOW(
-            '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         errors = []
         for beta_group in matched_beta_groups:
             beta_group_name = beta_group.attributes.name
             try:
                 self.api_client.beta_groups.add_build(beta_group, build_id)
-                self.logger.error(Colors.GREEN(f"Added build '{build_id}' to '{beta_group_name}'"))
             except AppStoreConnectApiError as e:
                 errors.append([beta_group_name, e.error_response])
+            else:
+                self.logger.error(Colors.GREEN(f"Added build '{build_id}' to '{beta_group_name}' beta group"))
+
+        missing_beta_group_names = \
+            set(beta_group_names) - set(beta_group.attributes.name for beta_group in matched_beta_groups)
+
+        if missing_beta_group_names:
+            self.logger.info(Colors.YELLOW(
+                '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
-            message = f"Failed to add a build '{build_id}' to '{{name}}'. {{error_response}}"
+            message = f"Failed to add a build '{build_id}' to '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
                     message.format(name=name, error_response=error_response) for name, error_response in errors
@@ -58,7 +60,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def remove_build_from_beta_group(self, build_id: Union[ResourceId, Build], beta_group_names_list: Sequence[str]):
+    def remove_build_from_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         """
         Remove build from a Beta group
         """
@@ -67,26 +69,28 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         resource_filter = self.api_client.beta_groups.Filter(app=app.id)
         app_beta_groups = self.api_client.beta_groups.list(resource_filter=resource_filter)
 
-        beta_group_names = set(beta_group_names_list)
         matched_beta_groups = set(
             beta_group for beta_group in app_beta_groups if beta_group.attributes.name in beta_group_names)
-
-        missing_beta_group_names = \
-            beta_group_names - set(beta_group.attributes.name for beta_group in matched_beta_groups)
-        self.logger.info(Colors.YELLOW(
-            '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         errors = []
         for beta_group in matched_beta_groups:
             beta_group_name = beta_group.attributes.name
             try:
                 self.api_client.beta_groups.remove_build(beta_group, build_id)
-                self.logger.error(Colors.GREEN(f"Removed build '{build_id}' from '{beta_group_name}'"))
             except AppStoreConnectApiError as e:
                 errors.append([beta_group_name, e.error_response])
+            else:
+                self.logger.error(Colors.GREEN(f"Removed build '{build_id}' from '{beta_group_name}' beta group"))
+
+        missing_beta_group_names = \
+            set(beta_group_names) - set(beta_group.attributes.name for beta_group in matched_beta_groups)
+
+        if missing_beta_group_names:
+            self.logger.info(Colors.YELLOW(
+                '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
-            message = f"Failed to remove a build '{build_id}' to '{{name}}'. {{error_response}}"
+            message = f"Failed to remove a build '{build_id}' from '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
                     message.format(name=name, error_response=error_response) for name, error_response in errors

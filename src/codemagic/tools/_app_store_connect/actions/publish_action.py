@@ -55,7 +55,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
-        Publish application packages to App Store and submit them to Testflight
+        Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
         """
 
         # Workaround to support overriding default value by environment variable.
@@ -141,7 +141,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_testflight:
             self._submit_build_to_testflight(build, app, max_processing_minutes)
         if submit_to_testflight and beta_group_names:
-            self.add_build_to_beta_group(build, beta_group_names)
+            self.add_build_to_beta_groups(build, beta_group_names)
 
     def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
         self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
