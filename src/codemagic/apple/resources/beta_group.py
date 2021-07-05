@@ -15,14 +15,14 @@ class BetaGroup(Resource):
         name: str
         createdDate: str
         isInternalGroup: bool
-        hasAccessToAllBuilds: Optional[bool] = None
-        publicLinkEnabled: Optional[bool] = None
-        publicLinkId: Optional[str] = None
-        publicLinkLimitEnabled: Optional[bool] = None
-        publicLinkLimit: Optional[int] = None
-        publicLink: Optional[str] = None
-        feedbackEnabled: Optional[bool] = None
-        areIOSBuildsAvailableForAppleSiliconMac: Optional[bool] = None
+        hasAccessToAllBuilds: Optional[bool]
+        publicLinkEnabled: Optional[bool]
+        publicLinkId: Optional[str]
+        publicLinkLimitEnabled: Optional[bool]
+        publicLinkLimit: Optional[int]
+        publicLink: Optional[str]
+        feedbackEnabled: Optional[bool]
+        areIOSBuildsAvailableForAppleSiliconMac: Optional[bool]
 
     @dataclass
     class Relationships(Resource.Relationships):
