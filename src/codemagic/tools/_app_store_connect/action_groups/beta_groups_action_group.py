@@ -1,8 +1,11 @@
 from typing import Sequence
+from typing import Set
+from typing import Tuple
 from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
+from codemagic.apple.resources import BetaGroup
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
@@ -31,7 +34,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
             try:
                 self.api_client.beta_groups.add_build(beta_group, build_id)
             except AppStoreConnectApiError as e:
-                errors.append([beta_group_name, e.error_response])
+                errors.append((beta_group_name, e.error_response))
             else:
                 self.logger.info(Colors.GREEN(f"Added build '{build_id}' to '{beta_group_name}' beta group"))
 
@@ -64,7 +67,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
             try:
                 self.api_client.beta_groups.remove_build(beta_group, build_id)
             except AppStoreConnectApiError as e:
-                errors.append([beta_group_name, e.error_response])
+                errors.append((beta_group_name, e.error_response))
             else:
                 self.logger.info(Colors.GREEN(f"Removed build '{build_id}' from '{beta_group_name}' beta group"))
 
@@ -81,7 +84,10 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 ),
             )
 
-    def _get_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def _get_beta_groups(
+            self,
+            build_id: Union[ResourceId, Build],
+            beta_group_names: Sequence[str]) -> Tuple[Set[BetaGroup], Set[str]]:
         app = self.api_client.builds.read_app(build_id)
 
         resource_filter = self.api_client.beta_groups.Filter(app=app.id)
@@ -90,6 +96,6 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         matched_beta_groups = set(
             beta_group for beta_group in app_beta_groups if beta_group.attributes.name in beta_group_names)
 
-        matched_beta_group_names = set(beta_group for beta_group in app_beta_groups)
+        matched_beta_group_names = set(beta_group.attributes.name for beta_group in app_beta_groups)
 
-        return [matched_beta_groups, matched_beta_group_names]
+        return matched_beta_groups, matched_beta_group_names
