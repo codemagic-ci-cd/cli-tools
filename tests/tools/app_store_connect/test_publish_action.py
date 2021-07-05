@@ -162,7 +162,7 @@ def test_no_skip_package_validation_argument_from_env(cli_argument_group):
     assert str(error_info.value) == 'Provided value "False" is not valid'
 
 
-def test_add_build_to_beta_group(publishing_namespace_kwargs):
+def test_add_build_to_beta_groups(publishing_namespace_kwargs):
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
@@ -172,7 +172,7 @@ def test_add_build_to_beta_group(publishing_namespace_kwargs):
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
             mock.patch.object(AppStoreConnect, 'create_beta_app_review_submission') as mock_create_review, \
-            mock.patch.object(AppStoreConnect, 'add_build_to_beta_group') as mock_add_build_to_beta_group:
+            mock.patch.object(AppStoreConnect, 'add_build_to_beta_groups') as mock_add_build_to_beta_groups:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
         mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
@@ -192,4 +192,4 @@ def test_add_build_to_beta_group(publishing_namespace_kwargs):
         mock_validate.assert_called()
         mock_upload.assert_called()
         mock_create_review.assert_called_with(build.id)
-        mock_add_build_to_beta_group.assert_called_with(build, beta_group_names)
+        mock_add_build_to_beta_groups.assert_called_with(build, beta_group_names)

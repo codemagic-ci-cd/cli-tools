@@ -29,23 +29,23 @@ class TestBetaGroups(ResourceManagerTestsBase):
     def test_list_with_filter_for_internal_group(self):
         app = ResourceId('1496105355')
 
-        for internal_beta_group_name in ['App Store Connect Users', 'App\xa0Store Connect Users']:
-            resource_filter = BetaGroups.Filter(app=app, name=internal_beta_group_name)
-            beta_groups = self.api_client.beta_groups.list(resource_filter)
-            beta_group = beta_groups[0]
+        internal_beta_group_name = 'App\xa0Store Connect Users'
+        resource_filter = BetaGroups.Filter(app=app, name=internal_beta_group_name)
+        beta_groups = self.api_client.beta_groups.list(resource_filter)
+        beta_group = beta_groups[0]
 
-            assert len(beta_groups) == 1
-            assert beta_group.attributes.name == 'App\xa0Store Connect Users'
-            assert beta_group.attributes.isInternalGroup is True
-            assert beta_group.attributes.hasAccessToAllBuilds is True
+        assert len(beta_groups) == 1
+        assert beta_group.attributes.name == 'App\xa0Store Connect Users'
+        assert beta_group.attributes.isInternalGroup is True
+        assert beta_group.attributes.hasAccessToAllBuilds is True
 
-    def test_add_build_to_beta_group(self):
+    def test_add_build_to_beta_groups(self):
         build = ResourceId('02c602b8-f7e5-4a72-8f16-fd34500fb43a')
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
         self.api_client.beta_groups.add_build(beta_group, build)
 
-    def test_remove_build_from_beta_group(self):
+    def test_remove_build_from_beta_groups(self):
         build = ResourceId('02c602b8-f7e5-4a72-8f16-fd34500fb43a')
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
