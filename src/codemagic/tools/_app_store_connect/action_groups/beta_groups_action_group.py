@@ -7,6 +7,7 @@ from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import BetaGroup
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 
@@ -44,6 +45,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
+            build_id = self._get_resource_id(build_id)
             message = f"Failed to add a build '{build_id}' to '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
@@ -77,6 +79,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
+            build_id = self._get_resource_id(build_id)
             message = f"Failed to remove a build '{build_id}' from '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
@@ -99,3 +102,10 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         matched_beta_group_names = set(beta_group.attributes.name for beta_group in app_beta_groups)
 
         return matched_beta_groups, matched_beta_group_names
+
+    @staticmethod
+    def _get_resource_id(resource: Union[ResourceId, LinkedResourceData]) -> ResourceId:
+        if isinstance(resource, LinkedResourceData):
+            return resource.id
+        else:
+            return resource
