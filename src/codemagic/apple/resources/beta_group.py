@@ -22,7 +22,7 @@ class BetaGroup(Resource):
         publicLinkLimit: Optional[int]
         publicLink: Optional[str]
         feedbackEnabled: Optional[bool]
-        areIOSBuildsAvailableForAppleSiliconMac: Optional[bool]
+        areIOSBuildsAvailableForAppleSiliconMac: Optional[bool] = None
 
     @dataclass
     class Relationships(Resource.Relationships):
