@@ -5,6 +5,7 @@ import json
 import os
 import pathlib
 import shutil
+from datetime import datetime
 from tempfile import NamedTemporaryFile
 from typing import Iterable
 from typing import List
@@ -135,6 +136,12 @@ class Keychain(cli.CliApp, PathFinderMixin):
         if process.returncode != 0:
             raise KeychainError(f'Unable to create keychain {self.path}', process)
 
+        if not self.path.exists():
+            # In some cases `security` adds a '-db' suffix to the keychain name
+            self._path = pathlib.Path(f'{self.path}-db')
+        if not self.path.exists():
+            raise KeychainError('Keychain was not created')
+
         process = self.execute(('security', 'list-keychains', '-d', 'user', '-s', 'login.keychain', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Unable to add keychain {self.path} to keychain search list', process)
@@ -213,7 +220,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
 
         self.logger.info('Get system default keychain')
         default = self._get_default()
-        self.echo(default)
+        self.echo(str(default))
         return default
 
     def _get_default(self):
@@ -233,6 +240,25 @@ class Keychain(cli.CliApp, PathFinderMixin):
         process = self.execute(('security', 'default-keychain', '-s', self.path))
         if process.returncode != 0:
             raise KeychainError(f'Unable to set {self.path} as default keychain', process)
+
+    @cli.action('use-login')
+    def use_login_keychain(self) -> Keychain:
+        """
+        Use login keychain as the default keychain
+        """
+
+        keychains_root = pathlib.Path('~/Library/Keychains/').expanduser()
+        for keychain_name in ('login.keychain-db', 'login.keychain'):
+            keychain_path = keychains_root / keychain_name
+            if keychain_path.is_file():
+                self._path = keychain_path
+                break
+        else:
+            raise KeychainError(f'Login keychain not found from {keychains_root}')
+
+        self.logger.info(Colors.GREEN('Use login keychain %s as system default keychain'), self.path)
+        self.make_default()
+        return self
 
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
     def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None) -> Keychain:
@@ -267,7 +293,10 @@ class Keychain(cli.CliApp, PathFinderMixin):
         return certificates
 
     def _generate_path(self):
-        with NamedTemporaryFile(prefix='build_', suffix='.keychain') as tf:
+        keychain_dir = pathlib.Path('~/Library/codemagic-cli-tools/keychains').expanduser()
+        keychain_dir.mkdir(parents=True, exist_ok=True)
+        date = datetime.now().strftime('%d-%m-%y')
+        with NamedTemporaryFile(prefix=f'{date}_', suffix='.keychain-db', dir=keychain_dir) as tf:
             self._path = pathlib.Path(tf.name)
 
     @cli.action('add-certificates',

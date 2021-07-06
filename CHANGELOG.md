@@ -1,4 +1,4 @@
-Version 0.8.6
+Version 0.9.3
 -------------
 **Features**
 
@@ -8,6 +8,43 @@ Version 0.8.6
 **Development / Docs**
 
 - Update `app-store-connect publish` action docs.
+
+Version 0.9.2
+-------------
+
+**Improvements**
+
+- Require API key based authentication for `app-store-connect publish` when `--beta-build-localizations` is used.
+
+Version 0.9.1
+-------------
+
+**Features**
+
+- Add action `codemagic-cli-tools installed-tools` to show the tools that are installed by current Codemagic CLI tools version.
+- Add action `codemagic-cli-tools version` to show version of currently installed Codemagic CLI tools.
+
+**Development / Docs**
+
+- Create keychains in `~/Library/codemagic-cli-tools/keychains` by default when `--path` is not specified with `keychain initialize`.
+- Add docs for new actions from tool `codemagic-cli-tools`.
+- Fix typos in CLI arguments help messages/docs that can be specified using `@env:` or `@file:` prefixes.
+
+Version 0.9.0
+-------------
+
+**Features**
+
+- Add action `keychain use-login` to make login keychain from `~/Library/Keychains` system default keychain again.
+
+**Improvements**
+
+- Save new keychain to `~/Library/Keychains/codemagic-cli-tools` instead of `$TMPDIR` by default with `keychain initialize` in case the `--path` option is not specified.
+
+**Development / Docs**
+
+- Add docs for action `keychain use-login`.
+>>>>>>> 822bd3f11e8c5186f493bea313bcb28f179df7be
 
 Version 0.8.5
 -------------
