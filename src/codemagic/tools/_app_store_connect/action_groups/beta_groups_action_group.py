@@ -27,6 +27,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         """
         Add build to a Beta group
         """
+        build_id = self._get_resource_id(build_id)
         matched_beta_groups, matched_beta_group_names = self._get_beta_groups(build_id, beta_group_names)
 
         errors = []
@@ -45,7 +46,6 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
-            build_id = self._get_resource_id(build_id)
             message = f"Failed to add a build '{build_id}' to '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
@@ -61,6 +61,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         """
         Remove build from a Beta group
         """
+        build_id = self._get_resource_id(build_id)
         matched_beta_groups, matched_beta_group_names = self._get_beta_groups(build_id, beta_group_names)
 
         errors = []
@@ -79,7 +80,6 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 '\n'.join(f"Cannot find Beta group with the name '{name}'" for name in missing_beta_group_names)))
 
         if errors:
-            build_id = self._get_resource_id(build_id)
             message = f"Failed to remove a build '{build_id}' from '{{name}}' beta group. {{error_response}}"
             raise AppStoreConnectError(
                 '\n'.join(
