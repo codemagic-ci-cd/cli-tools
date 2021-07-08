@@ -182,8 +182,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # There are retries left, wait a bit and try again.
             self.logger.info(
                 (
-                    'Build has finished uploading but is processing on App Store Connect side. Could not find '
-                    'build matching uploaded version yet. Waiting %d seconds to try again, %d attempts remaining.'
+                    'Build has finished uploading but is processing on App Store Connect side. Could not find the '
+                    'build matching the uploaded version yet. Waiting %d seconds to try again, %d attempts remaining.'
                 ),
                 retry_wait_seconds,
                 retries,
@@ -216,8 +216,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         start_waiting = time.time()
         while time.time() - start_waiting < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
-                msg_template = 'Build %s is still being processed on Apple Store Connect side, ' \
-                               'waiting %d seconds and checking again'
+                msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
+                               'and checking again'
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
                 time.sleep(retry_wait_seconds)
                 try:
