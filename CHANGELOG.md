@@ -1,3 +1,10 @@
+Version 0.9.3
+-------------
+
+**Improvements**
+
+- Double the number of attempts to find an uploaded build on App Store Connect side
+
 Version 0.9.2
 -------------
 
