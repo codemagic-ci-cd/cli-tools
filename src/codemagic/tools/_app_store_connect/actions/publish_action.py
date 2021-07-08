@@ -195,9 +195,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(
                 'The build was successfully uploaded to App Store Connect but the corresponding artifact '
                 f'"{application_package.path}" has not finished processing and is unavailable for further actions '
-                'like uploading release notes or submitting to beta review. You can upload release notes or '
-                'submit the build to beta review manually once the uploaded build has finished processing.'
-            )
+                'like uploading What to test notes or submitting to beta review. You can upload release notes or '
+                'submit the build to beta review manually once the uploaded build has finished processing.')
 
     def _wait_until_build_is_processed(
         self,
