@@ -207,9 +207,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     ) -> Build:
         self.logger.info(
             Colors.BLUE(
-                '\nProcessing of builds by Apple can take a while, the timeout for waiting the processing to finish '
-                'for build %s is set to %d minutes.'
-            ),
+                '\nProcessing of builds by Apple can take a while, the timeout for waiting the processing '
+                'to finish for build %s is set to %d minutes.'),
             build.id,
             max_processing_minutes,
         )
