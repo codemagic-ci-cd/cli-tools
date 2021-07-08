@@ -157,7 +157,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         app_id: ResourceId,
         application_package: Union[Ipa, MacOsPackage],
-        retries: int = 10,
+        retries: int = 20,
         retry_wait_seconds: int = 30,
     ) -> Build:
         """
@@ -192,7 +192,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds)
         else:
             # There are no more retries left, give up.
-            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+            raise IOError(
+                f'Could not yet find corresponding build from App Store versions for "{application_package.path}" '
+                'artifact. The build is uploaded successfully, but it is not yet available for further actions, '
+                'since App Store Connect is still processing the uploaded build.')
 
     def _wait_until_build_is_processed(
         self,
