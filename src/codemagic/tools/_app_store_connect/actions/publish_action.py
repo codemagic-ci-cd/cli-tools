@@ -182,10 +182,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # There are retries left, wait a bit and try again.
             self.logger.info(
                 (
-                    'Did not find build matching uploaded version yet, it might be still processing. '
-                    'Waiting %d seconds to try again'
+                    'Build has finished uploading but is processing on App Store Connect side. Could not find '
+                    'build matching uploaded version yet. Waiting %d seconds to try again, %d attempts remaining.'
                 ),
                 retry_wait_seconds,
+                retries,
             )
             time.sleep(retry_wait_seconds)
             return self._find_build(
