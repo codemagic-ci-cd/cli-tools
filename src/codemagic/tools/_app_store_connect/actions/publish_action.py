@@ -205,12 +205,20 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
     ) -> Build:
-        self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
+        self.logger.info(
+            Colors.BLUE(
+                '\nProcessing of builds by Apple can take a while, the timeout for waiting the completion of '
+                'processing of build %s is set to %d minutes.'
+            ),
+            build.id,
+            max_processing_minutes,
+        )
 
         start_waiting = time.time()
         while time.time() - start_waiting < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
-                msg_template = 'Build %s is still being processed, wait %d seconds and check again'
+                msg_template = 'Build %s is still being processed on Apple Store Connect side, ' \
+                               'waiting %d seconds and checking again'
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
                 time.sleep(retry_wait_seconds)
                 try:
