@@ -196,8 +196,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise IOError(
                 'The build was successfully uploaded to App Store Connect but processing the corresponding artifact '
                 f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
-                'What to test information or submitting the build to beta review could not be performed but can be '
-                'completed manually in TestFlight once the build has finished processing.')
+                'What to test information or submitting the build to beta review could not be performed at the moment '
+                'but can be completed manually in TestFlight once the build has finished processing.')
 
     def _wait_until_build_is_processed(
         self,
