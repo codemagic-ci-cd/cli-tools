@@ -193,9 +193,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             # There are no more retries left, give up.
             raise IOError(
-                f'Could not yet find corresponding build from App Store versions for "{application_package.path}" '
-                'artifact. The build is uploaded successfully, but it is not yet available for further actions, '
-                'since App Store Connect is still processing the uploaded build.')
+                'The build was successfully uploaded to App Store Connect but the corresponding artifact '
+                f'"{application_package.path}" has not finished processing and is unavailable for further actions '
+                'like uploading release notes or submitting to beta review. You can upload release notes or '
+                'submit the build to beta review manually once the uploaded build has finished processing.'
+            )
 
     def _wait_until_build_is_processed(
         self,
