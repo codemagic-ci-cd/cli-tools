@@ -1,5 +1,6 @@
-Version 0.9.3
+Version 0.9.4
 -------------
+
 **Features**
 
 - New `app-store-connect beta-groups` action set to add and remove TestFlight builds from groups of beta testers.
@@ -8,6 +9,13 @@ Version 0.9.3
 **Development / Docs**
 
 - Update `app-store-connect publish` action docs.
+
+Version 0.9.3
+-------------
+
+**Improvements**
+
+- Double the number of attempts to find an uploaded build on App Store Connect side
 
 Version 0.9.2
 -------------

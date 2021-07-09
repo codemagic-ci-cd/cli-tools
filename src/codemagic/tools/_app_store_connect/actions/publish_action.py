@@ -163,7 +163,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         app_id: ResourceId,
         application_package: Union[Ipa, MacOsPackage],
-        retries: int = 10,
+        retries: int = 20,
         retry_wait_seconds: int = 30,
     ) -> Build:
         """
@@ -188,17 +188,22 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # There are retries left, wait a bit and try again.
             self.logger.info(
                 (
-                    'Did not find build matching uploaded version yet, it might be still processing. '
-                    'Waiting %d seconds to try again'
+                    'Build has finished uploading but is processing on App Store Connect side. Could not find the '
+                    'build matching the uploaded version yet. Waiting %d seconds to try again, %d attempts remaining.'
                 ),
                 retry_wait_seconds,
+                retries,
             )
             time.sleep(retry_wait_seconds)
             return self._find_build(
                 app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds)
         else:
             # There are no more retries left, give up.
-            raise IOError(f'Did not find corresponding build from App Store versions for "{application_package.path}"')
+            raise IOError(
+                'The build was successfully uploaded to App Store Connect but processing the corresponding artifact '
+                f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
+                'What to test information or submitting the build to beta review could not be performed at the moment '
+                'but can be completed manually in TestFlight once the build has finished processing.')
 
     def _wait_until_build_is_processed(
         self,
@@ -206,12 +211,19 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
     ) -> Build:
-        self.logger.info(Colors.BLUE('\nWait until processing build %s is completed'), build.id)
+        self.logger.info(
+            Colors.BLUE(
+                '\nProcessing of builds by Apple can take a while, the timeout for waiting the processing '
+                'to finish for build %s is set to %d minutes.'),
+            build.id,
+            max_processing_minutes,
+        )
 
         start_waiting = time.time()
         while time.time() - start_waiting < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
-                msg_template = 'Build %s is still being processed, wait %d seconds and check again'
+                msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
+                               'and checking again'
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
                 time.sleep(retry_wait_seconds)
                 try:
