@@ -1,3 +1,10 @@
+Version 0.9.4
+-------------
+
+**Improvements**
+
+- Add option to save logs to a variable
+
 Version 0.9.3
 -------------
 

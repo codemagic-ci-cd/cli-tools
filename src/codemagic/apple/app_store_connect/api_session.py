@@ -15,7 +15,7 @@ class AppStoreConnectApiSession(requests.Session):
     def __init__(self, auth_headers_factory: Callable[[], Dict[str, str]], log_requests: bool = False):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
-        self._logger = log.get_logger(self.__class__, log_to_stream=log_requests)
+        self._logger = log.get_logger(self.__class__, log_to_stream=log_requests, log_to_variable=log_requests)
 
     def _log_response(self, response):
         try:
