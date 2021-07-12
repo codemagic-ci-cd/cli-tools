@@ -39,7 +39,6 @@ class App(Resource):
         betaGroups: Relationship
         betaLicenseAgreement: Relationship
         builds: Relationship
-        ciProduct: Relationship
         endUserLicenseAgreement: Relationship
         gameCenterEnabledVersions: Relationship
         inAppPurchases: Relationship
