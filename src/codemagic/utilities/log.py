@@ -102,6 +102,7 @@ def get_printer(klass: Type):
 
     printer.setLevel(logging.DEBUG)
     printer.addHandler(LogHandlers.get_file_handler())
+    printer.addHandler(LogHandlers.get_variable_handler())
 
     if CliApp.is_cli_invocation():
         stream_formatter = logging.Formatter('%(message)s')
