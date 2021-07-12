@@ -90,7 +90,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             )
         else:
             beta_build_localization = beta_build_localizations[0]
-            return self.update_beta_build_localization(beta_build_localization.id, whats_new)
+            return self.update_beta_build_localization(beta_build_localization.id, whats_new, should_print=should_print)
 
     @cli.action('delete',
                 BuildArgument.BETA_BUILD_LOCALIZATION_ID_RESOURCE_ID,
