@@ -6,9 +6,16 @@ import tempfile
 from datetime import datetime
 from typing import IO
 from typing import Optional
-from typing import Type
+from typing import Type, List
 
 Logger = logging.Logger
+
+
+class VariableHandler(logging.Handler):
+    variable: List[str] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.variable.append(self.format(record))
 
 
 class LogHandlers:
@@ -18,6 +25,7 @@ class LogHandlers:
 
     _stream_handler: Optional[logging.StreamHandler] = None
     _file_handler: Optional[logging.FileHandler] = None
+    _variable_handler: Optional[VariableHandler] = None
 
     @classmethod
     def configure_stream_handler(cls,
@@ -48,12 +56,24 @@ class LogHandlers:
         return cls._file_handler
 
     @classmethod
+    def configure_variable_handler(cls) -> VariableHandler:
+        variable_formatter = logging.Formatter(cls.stream_fmt, '%H:%M:%S')
+        cls._variable_handler = VariableHandler()
+        cls._variable_handler.setLevel(logging.INFO)
+        cls._variable_handler.setFormatter(variable_formatter)
+        return cls._variable_handler
+
+    @classmethod
     def get_file_handler(cls) -> logging.FileHandler:
         return cls._file_handler or cls.configure_file_handler()
 
     @classmethod
     def get_stream_handler(cls) -> logging.StreamHandler:
         return cls._stream_handler or cls.configure_stream_handler(enable_logging=False)
+
+    @classmethod
+    def get_variable_handler(cls) -> VariableHandler:
+        return cls._variable_handler or cls.configure_variable_handler()
 
 
 def get_log_path() -> pathlib.Path:
@@ -93,18 +113,27 @@ def get_printer(klass: Type):
     return printer
 
 
-def get_logger(klass: Type, *, log_to_file: bool = True, log_to_stream: bool = True) -> logging.Logger:
+def get_logger(
+        klass: Type,
+        *,
+        log_to_file: bool = True,
+        log_to_stream: bool = True,
+        log_to_variable: bool = True) -> logging.Logger:
+
     logger_name = _get_logger_name(klass.__name__, log_to_file, log_to_stream)
     logger = logging.getLogger(logger_name)
     if logger.handlers:
         return logger
 
     logger.setLevel(logging.DEBUG)
+
     if log_to_file:
         logger.addHandler(LogHandlers.get_file_handler())
     if log_to_stream:
         logger.addHandler(LogHandlers.get_stream_handler())
-    if not log_to_stream and not log_to_file:
+    if log_to_variable:
+        logger.addHandler(LogHandlers.get_variable_handler())
+    if not log_to_stream and not log_to_file and not log_to_variable:
         logger.addHandler(logging.NullHandler())
 
     return logger
