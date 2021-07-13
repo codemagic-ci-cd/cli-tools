@@ -89,6 +89,8 @@ def get_printer(klass: Type):
         stream_handler.setLevel(logging.DEBUG)
         stream_handler.setFormatter(stream_formatter)
         printer.addHandler(stream_handler)
+    else:
+        printer.addHandler(LogHandlers.get_stream_handler())
 
     return printer
 
