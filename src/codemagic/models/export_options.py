@@ -178,7 +178,7 @@ class ExportOptions(StringConverterMixin):
             setattr(self, field_name, value)
 
     def update(self, **other_options):
-        for field_name, value in other_options:
+        for field_name, value in other_options.items():
             self.set_value(field_name, value)
 
     @classmethod
