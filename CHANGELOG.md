@@ -1,3 +1,10 @@
+Version 0.9.4
+-------------
+
+**Fixes**
+
+- Create a dictview (key, value) tuple pair to iterate over when using `xcode-project use-profiles --custom-export-options`.
+
 Version 0.9.3
 -------------
 
