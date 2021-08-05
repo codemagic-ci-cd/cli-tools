@@ -19,6 +19,7 @@ flake8-commas = "*"
 flake8-quotes = "*"
 pep8-naming = "*"
 types-requests = "*"
+coverage = "==5.5"
 
 [packages]
 pyopenssl = "~=19.0"
