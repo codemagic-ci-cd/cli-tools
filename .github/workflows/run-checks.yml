@@ -14,13 +14,6 @@ jobs:
       with:
         python-version: 3.7
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pipv2-${{ hashFiles('**/Pipfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-pipv2-
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip pipenv
