@@ -17,9 +17,9 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        key: ${{ runner.os }}-pipv2-${{ hashFiles('**/Pipfile.lock') }}
         restore-keys: |
-          ${{ runner.os }}-pip-
+          ${{ runner.os }}-pipv2-
 
     - name: Install dependencies
       run: |
