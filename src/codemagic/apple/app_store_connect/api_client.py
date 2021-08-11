@@ -6,6 +6,7 @@ from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
+from urllib import parse
 
 import jwt
 
@@ -100,21 +101,19 @@ class AppStoreConnectApiClient(StringConverterMixin):
     def _paginate(self, url, params, page_size) -> PaginateResult:
         params = {k: v for k, v in (params or {}).items() if v is not None}
         if page_size is None:
-            response = self.session.get(url, params=params)
+            response = self.session.get(url, params=params).json()
         else:
-            response = self.session.get(url, params={'limit': page_size, **params})
-        response_payload = response.json()
-        result = PaginateResult(response_payload.get('data', []), response_payload.get('included', []))
-        while 'next' in response_payload['links']:
+            response = self.session.get(url, params={'limit': page_size, **params}).json()
+        result = PaginateResult(response.get('data', []), response.get('included', []))
+        while 'next' in response['links']:
             # Query params from previous pagination call can be included in the next URL
             # and duplicate parameters are not allowed, so we need to filter those out.
-            # parsed_url = parse.urlparse(response_payload['links']['next'])
-            # included_params = parse.parse_qs(parsed_url.query)
-            # step_params = {k: v for k, v in params.items() if k not in included_params}
-            response = self.session.get(response_payload['links']['next'])
-            response_payload = response.json()
-            result.data.extend(response_payload['data'])
-            result.included.extend(response_payload.get('included', []))
+            parsed_url = parse.urlparse(response['links']['next'])
+            included_params = parse.parse_qs(parsed_url.query)
+            step_params = {k: v for k, v in params.items() if k not in included_params}
+            response = self.session.get(response['links']['next'], params=step_params).json()
+            result.data.extend(response['data'])
+            result.included.extend(response.get('included', []))
         return result
 
     def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
