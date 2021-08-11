@@ -11,7 +11,6 @@ from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import BetaAppReviewDetail
-from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
@@ -69,16 +68,6 @@ class Apps(ResourceManager[App]):
         app_id = self._get_resource_id(app)
         response = self.client.session.get(f'{self.client.API_URL}/apps/{app_id}').json()
         return App(response['data'])
-
-    def list_builds(self, app: Union[LinkedResourceData, ResourceId]) -> List[Build]:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_an_app
-        """
-        if isinstance(app, App):
-            url = app.relationships.builds.links.related
-        else:
-            url = f'{self.client.API_URL}/apps/{app}/builds'
-        return [Build(build) for build in self.client.paginate(url, page_size=None)]
 
     def list_pre_release_versions(self, app: Union[LinkedResourceData, ResourceId]) -> List[PreReleaseVersion]:
         """

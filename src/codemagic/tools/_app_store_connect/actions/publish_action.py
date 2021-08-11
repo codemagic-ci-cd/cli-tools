@@ -166,8 +166,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         after the upload and as a result the API calls may not return it. Implement a
         simple retrying logic to overcome this issue.
         """
+        builds_filter = self.api_client.builds.Filter(app=app_id)
         try:
-            found_builds = self.api_client.apps.list_builds(app_id)
+            found_builds = self.api_client.builds.list(builds_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 

@@ -61,7 +61,7 @@ class Builds(ResourceManager[Build]):
         """
 
         params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
-        builds = self.client.paginate(f'{self.client.API_URL}/builds', params=params)
+        builds = self.client.paginate(f'{self.client.API_URL}/builds', params=params, page_size=10)
         return [Build(build) for build in builds]
 
     def read_app(self, build: Union[Build, ResourceId]) -> App:
