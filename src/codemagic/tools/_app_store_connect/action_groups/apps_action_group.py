@@ -69,7 +69,9 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Get a list of builds associated with a specific app
         """
 
-        builds_filter = self.api_client.builds.Filter(app=application_id)
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
+        )
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @cli.action('pre-release-versions',
