@@ -3,7 +3,7 @@ Version 0.9.4
 
 **Fixes**
 
-- Create a dictview (key, value) tuple pair to iterate over when using `xcode-project use-profiles --custom-export-options`.
+- Fix custom export option usage on `xcode-project use-profiles --custom-export-options`. Replace faulty argument unpacking usage with plain dictionary updates and iteration.
 
 Version 0.9.3
 -------------
