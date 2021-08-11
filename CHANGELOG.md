@@ -1,3 +1,10 @@
+Version 0.9.4
+-------------
+
+**Fixes**
+
+- Fix custom export option usage on `xcode-project use-profiles --custom-export-options`. Replace faulty argument unpacking usage with plain dictionary updates and iteration.
+
 Version 0.9.3
 -------------
 
