@@ -22,6 +22,8 @@ class BetaAppReviewSubmission(Resource):
         def __post_init__(self):
             if isinstance(self.betaReviewState, str):
                 self.betaReviewState = BetaReviewState(self.betaReviewState)
+            if isinstance(self.submittedDate, str):
+                self.submittedDate = Resource.from_iso_8601(self.submittedDate)
 
     @dataclass
     class Relationships(Resource.Relationships):
