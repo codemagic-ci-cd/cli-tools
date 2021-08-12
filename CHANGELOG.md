@@ -1,3 +1,10 @@
+Version 0.9.5
+-------------
+
+**Improvements**
+
+- Add missing `submittedDate` to Beta App Review Submission attributes 
+
 Version 0.9.4
 -------------
 
