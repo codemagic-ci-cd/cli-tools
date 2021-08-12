@@ -1,6 +1,10 @@
 Version 0.9.5
 -------------
 
+**Improvements**
+
+- Add missing `submittedDate` to Beta App Review Submission attributes 
+
 **Fixes**
 
 - Ignore undefined model attributes in App Store Connect API responses instead of failing with `TypeError`.
