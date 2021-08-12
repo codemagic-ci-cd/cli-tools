@@ -1,4 +1,11 @@
-Version 0.9.4
+Version 0.9.5
+-------------
+
+**Fixes**
+
+- Ignore undefined model attributes in App Store Connect API responses instead of failing with `TypeError`.
+
+- Version 0.9.4
 -------------
 
 **Fixes**
