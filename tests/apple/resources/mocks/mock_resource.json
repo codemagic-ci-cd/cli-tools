@@ -1,0 +1,21 @@
+{
+    "type": "mockResource",
+    "id": "253YPL8VY6",
+    "attributes": {
+        "name": "John Smith"
+    },
+    "relationships": {
+        "parent": {
+            "data": {
+                "type": "mockResource",
+                "id": "F88J43FA9J"
+            },
+            "links": {
+                "self": "https://example.com/mock_resource/F88J43FA9J"
+            }
+        }
+    },
+    "links": {
+        "self": "https://example.com/mock_resource/253YPL8VY6"
+    }
+}
