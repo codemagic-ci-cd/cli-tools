@@ -4,8 +4,18 @@ Version 0.9.5
 **Fixes**
 
 - Ignore undefined model attributes in App Store Connect API responses instead of failing with `TypeError`.
+- Fix finding uploaded build as part of `app-store-connect publish`.
+- Fix `app-store-connect apps builds` action by replacing broken [List All Builds of an App
+](https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_an_app) API endpoint by [List Builds
+](https://developer.apple.com/documentation/appstoreconnectapi/list_builds) endpoint.
 
-- Version 0.9.4
+**Development / Docs**
+
+- Add warning to method `list_builds` in `Apps` resource manager about malfunctioning pagination.
+- Add missing relationship `ciProduct` to `App` model.
+- Accept strings for builds filter version restriction.
+
+Version 0.9.4
 -------------
 
 **Fixes**

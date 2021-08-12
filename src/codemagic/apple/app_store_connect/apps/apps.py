@@ -73,6 +73,9 @@ class Apps(ResourceManager[App]):
     def list_builds(self, app: Union[LinkedResourceData, ResourceId]) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_an_app
+
+        Warning! As of 11.08.21 pagination does not work as expected for this API endpoint. See
+        https://github.com/codemagic-ci-cd/cli-tools/pull/140 for more information.
         """
         if isinstance(app, App):
             url = app.relationships.builds.links.related

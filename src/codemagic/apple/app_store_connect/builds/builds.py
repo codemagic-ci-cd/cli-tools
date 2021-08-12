@@ -30,7 +30,7 @@ class Builds(ResourceManager[Build]):
         expired: Optional[bool] = None
         id: Optional[ResourceId] = None
         processing_state: Optional[BuildProcessingState] = None
-        version: Optional[int] = None
+        version: Optional[Union[str, int]] = None
         pre_release_version_version: Optional[str] = None
 
         @classmethod
