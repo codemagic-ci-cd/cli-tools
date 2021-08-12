@@ -166,16 +166,18 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         after the upload and as a result the API calls may not return it. Implement a
         simple retrying logic to overcome this issue.
         """
+        builds_filter = self.api_client.builds.Filter(
+            app=app_id,
+            version=application_package.version_code,
+            pre_release_version_version=application_package.version,
+        )
         try:
-            found_builds = self.api_client.apps.list_builds(app_id)
+            found_builds = self.api_client.builds.list(builds_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
-        for build in found_builds:
-            if build.attributes.version == application_package.version_code:
-                pre_release_version = self.api_client.builds.read_pre_release_version(build.id)
-                if pre_release_version and pre_release_version.attributes.version == application_package.version:
-                    return build
+        if found_builds:
+            return found_builds[0]
 
         # Matching build was not found.
         if retries > 0:
