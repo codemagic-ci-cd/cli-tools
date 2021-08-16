@@ -1,10 +1,5 @@
 from __future__ import annotations
 
-from codemagic.apple.resources import PreReleaseVersion
-
-from ..action_group import AppStoreConnectActionGroup
-from ..arguments import BetaBuildInfo
-
 import time
 from abc import ABCMeta
 from typing import List
@@ -18,10 +13,13 @@ from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 
 from ..abstract_base_action import AbstractBaseAction
+from ..action_group import AppStoreConnectActionGroup
+from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
