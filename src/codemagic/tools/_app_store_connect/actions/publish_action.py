@@ -11,9 +11,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
-from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import Build
-from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
@@ -22,7 +20,6 @@ from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
 
 from ..abstract_base_action import AbstractBaseAction
-from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
@@ -56,14 +53,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         Publish application packages to App Store and submit them to Testflight
         """
 
-        # Workaround to support overriding default value by environment variable.
-        if max_build_processing_wait:
-            max_processing_minutes = max_build_processing_wait.value
-        else:
-            max_processing_minutes = Types.MaxBuildProcessingWait.default_value
-
-        beta_build_infos = [*beta_build_localizations.value] if beta_build_localizations else []
-
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
@@ -74,9 +63,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if beta_build_localizations:
                 self._assert_api_client_credentials(
                     "It is required for submitting localized beta test info for what's new in the uploaded build.")
-
-        if whats_new:
-            beta_build_infos.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)
         try:
@@ -99,8 +85,10 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     self._handle_ipa_testflight_submission(
                         application_package,
                         submit_to_testflight,
-                        beta_build_infos,
-                        max_processing_minutes,
+                        beta_build_localizations,
+                        locale,
+                        whats_new,
+                        max_build_processing_wait,
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
@@ -128,30 +116,23 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         ipa: Ipa,
         submit_to_testflight: Optional[bool],
-        beta_build_infos: Sequence[BetaBuildInfo],
-        max_processing_minutes: int,
+        beta_build_localizations: Optional[Types.BetaBuildLocalizations],
+        locale: Optional[Locale],
+        whats_new: Optional[Types.WhatsNewArgument],
+        max_build_processing_wait: Optional[Types.MaxBuildProcessingWait],
     ):
-        if not beta_build_infos and not submit_to_testflight:
+        if not beta_build_localizations and not submit_to_testflight:
             return  # Nothing to do with the ipa...
 
         app = self._get_uploaded_build_application(ipa)
         build = self._get_uploaded_build(app, ipa)
 
-        if beta_build_infos:
-            self._submit_beta_build_localization_infos(build, beta_build_infos)
+        if beta_build_localizations:
+            self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
+            self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
         if submit_to_testflight:
-            self._submit_build_to_testflight(build, app, max_processing_minutes)
-
-    def _submit_beta_build_localization_infos(self, build: Build, beta_build_infos: Sequence[BetaBuildInfo]):
-        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
-        for info in beta_build_infos:
-            self.create_beta_build_localization(build_id=build.id, locale=info.locale, whats_new=info.whats_new)
-
-    def _submit_build_to_testflight(self, build: Build, app: App, max_processing_minutes: int):
-        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
-        self._assert_app_has_testflight_information(app)
-        build = self._wait_until_build_is_processed(build, max_processing_minutes)
-        self.create_beta_app_review_submission(build.id)
+            self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
+            self.submit_to_testflight(build.id, max_build_processing_wait)
 
     def _find_build(
         self,
@@ -200,43 +181,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
                 'What to test information or submitting the build to beta review could not be performed at the moment '
                 'but can be completed manually in TestFlight once the build has finished processing.')
-
-    def _wait_until_build_is_processed(
-        self,
-        build: Build,
-        max_processing_minutes: int,
-        retry_wait_seconds: int = 30,
-    ) -> Build:
-        self.logger.info(
-            Colors.BLUE(
-                '\nProcessing of builds by Apple can take a while, the timeout for waiting the processing '
-                'to finish for build %s is set to %d minutes.'),
-            build.id,
-            max_processing_minutes,
-        )
-
-        start_waiting = time.time()
-        while time.time() - start_waiting < max_processing_minutes * 60:
-            if build.attributes.processingState is BuildProcessingState.PROCESSING:
-                msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
-                               'and checking again'
-                self.logger.info(msg_template, build.id, retry_wait_seconds)
-                time.sleep(retry_wait_seconds)
-                try:
-                    build = self.api_client.builds.read(build)
-                except AppStoreConnectApiError as api_error:
-                    raise AppStoreConnectError(str(api_error))
-            elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
-                raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
-            else:
-                self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
-                return build
-
-        raise IOError((
-            f'Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. '
-            f'You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} '
-            f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
-        ))
 
     def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
@@ -302,52 +246,3 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         result = altool.upload_app(artifact_path)
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
-
-    def _assert_app_has_testflight_information(self, app: App):
-        missing_beta_app_information = self._get_missing_beta_app_information(app)
-        missing_beta_app_review_information = self._get_missing_beta_app_review_information(app)
-
-        if not missing_beta_app_information and not missing_beta_app_review_information:
-            return  # All information required for TestFlight submission seems to be present
-
-        error_lines = []
-        if missing_beta_app_information:
-            missing_values = ', '.join(missing_beta_app_information)
-            error_lines.append(f'App is missing required Beta App Information: {missing_values}.')
-        if missing_beta_app_review_information:
-            missing_values = ', '.join(missing_beta_app_review_information)
-            error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
-
-        name = app.attributes.name
-        raise ValueError('\n'.join([
-            f'Complete test information is required to submit application {name} build for external testing.',
-            *error_lines,
-            f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
-        ]))
-
-    def _get_app_default_beta_localization(self, app: App) -> Optional[BetaAppLocalization]:
-        beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
-        for beta_app_localization in beta_app_localizations:
-            if beta_app_localization.attributes.locale.value == app.attributes.primaryLocale:
-                return beta_app_localization
-        # If nothing matches, then just take the first
-        return beta_app_localizations[0] if beta_app_localizations else None
-
-    def _get_missing_beta_app_information(self, app: App) -> List[str]:
-        app_beta_localization = self._get_app_default_beta_localization(app)
-
-        feedback_email = app_beta_localization.attributes.feedbackEmail if app_beta_localization else None
-        required_test_information = {
-            'Feedback Email': feedback_email,
-        }
-        return [field_name for field_name, value in required_test_information.items() if not value]
-
-    def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
-        beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
-        required_test_information = {
-            'First Name': beta_app_review_detail.attributes.contactFirstName,
-            'Last Name': beta_app_review_detail.attributes.contactLastName,
-            'Phone Number': beta_app_review_detail.attributes.contactPhone,
-            'Email': beta_app_review_detail.attributes.contactEmail,
-        }
-        return [field_name for field_name, value in required_test_information.items() if not value]

@@ -1,3 +1,15 @@
+Version 0.9.6
+-------------
+
+**Improvements**
+
+- Add new action `add-beta-test-info` to submit What's new (What to test) localized information for a beta build.
+- Add new action `submit-to-testflight` to submit beta build to TestFlight.
+
+**Development**
+
+- `publish` command will now rely on `add-beta-test-info` and `submit-to-testflight` tasks.
+
 Version 0.9.5
 -------------
 
