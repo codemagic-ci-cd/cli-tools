@@ -4,7 +4,6 @@ import time
 from abc import ABCMeta
 from typing import List
 from typing import Optional
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -65,7 +64,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                            build_id: ResourceId,
                            beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                            locale: Optional[Locale] = None,
-                           whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None):
+                           whats_new: Optional[Types.WhatsNewArgument] = None):
         """
         Add localized What's new (what to test) information
         """
@@ -73,7 +72,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         beta_test_info_items = [*beta_build_localizations.value] if beta_build_localizations else []
 
         if whats_new:
-            beta_test_info_items.append(BetaBuildInfo(whats_new=whats_new, locale=locale))
+            beta_test_info_items.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
         for item in beta_test_info_items:
             self.create_beta_build_localization(build_id=build_id, locale=item.locale, whats_new=item.whats_new)
