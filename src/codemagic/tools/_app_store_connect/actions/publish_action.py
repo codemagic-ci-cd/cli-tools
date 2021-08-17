@@ -127,7 +127,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         app = self._get_uploaded_build_application(ipa)
         build = self._get_uploaded_build(app, ipa)
 
-        if beta_build_localizations:
+        if beta_build_localizations or whats_new:
             self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
             self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
         if submit_to_testflight:
