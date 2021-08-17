@@ -15,6 +15,7 @@ app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] 
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
+    [--strict-match-identifier]
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
     [--app-name APPLICATION_NAME]
     [--app-sku APPLICATION_SKU]
@@ -28,6 +29,10 @@ app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] 
 
 
 Identifier of the Bundle ID. For example `com.example.app`
+##### `--strict-match-identifier`
+
+
+Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.app.extension`
 ##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
 
 
