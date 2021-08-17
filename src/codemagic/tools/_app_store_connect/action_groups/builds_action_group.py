@@ -4,6 +4,7 @@ import time
 from abc import ABCMeta
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -83,14 +84,17 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_testflight(
-            self, build_id: ResourceId, max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None):
+            self,
+            build_id: ResourceId,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
         """
         Submit build to TestFlight
         """
 
         # Workaround to support overriding default value by environment variable.
-        if max_build_processing_wait:
-            max_processing_minutes = max_build_processing_wait.value
+        if max_build_processing_wait is not None:
+            max_processing_minutes = max_build_processing_wait.value if \
+                isinstance(max_build_processing_wait, Types.MaxBuildProcessingWait) else max_build_processing_wait
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
@@ -98,7 +102,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         self._assert_app_has_testflight_information(app)
 
-        if max_build_processing_wait:
+        if max_processing_minutes:
             build = self._wait_until_build_is_processed(build, max_processing_minutes)
 
         self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))

@@ -62,7 +62,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         ...
 
     def submit_to_testflight(
-            self, build_id: ResourceId, max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None):
+            self, build_id: ResourceId, max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
         ...
 
     def list_apps(self,

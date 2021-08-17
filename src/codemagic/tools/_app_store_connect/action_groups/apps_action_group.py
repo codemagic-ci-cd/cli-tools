@@ -32,6 +32,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('list',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
+                BundleIdArgument.IDENTIFIER_STRICT_MATCH,
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 AppArgument.APPLICATION_NAME,
                 AppArgument.APPLICATION_SKU,
