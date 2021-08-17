@@ -184,7 +184,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
         try:
-            app = self.list_apps(bundle_id_identifier=bundle_id, should_print=False)[0]
+            app = self.list_apps(
+                bundle_id_identifier=bundle_id, bundle_id_identifier_strict_match=True, should_print=False)[0]
         except IndexError:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
         else:

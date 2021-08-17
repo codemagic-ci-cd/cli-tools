@@ -67,6 +67,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
 
     def list_apps(self,
                   bundle_id_identifier: Optional[str] = None,
+                  bundle_id_identifier_strict_match: bool = False,
                   application_id: Optional[ResourceId] = None,
                   application_name: Optional[str] = None,
                   application_sku: Optional[str] = None,
