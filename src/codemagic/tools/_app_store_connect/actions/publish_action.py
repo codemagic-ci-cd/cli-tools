@@ -121,17 +121,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         whats_new: Optional[Types.WhatsNewArgument],
         max_build_processing_wait: Optional[Types.MaxBuildProcessingWait],
     ):
-        if not beta_build_localizations and not submit_to_testflight:
+        if not beta_build_localizations and not whats_new and not submit_to_testflight:
             return  # Nothing to do with the ipa...
 
         app = self._get_uploaded_build_application(ipa)
         build = self._get_uploaded_build(app, ipa)
 
         if beta_build_localizations or whats_new:
-            self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
             self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
         if submit_to_testflight:
-            self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
             self.submit_to_testflight(build.id, max_build_processing_wait)
 
     def _find_build(

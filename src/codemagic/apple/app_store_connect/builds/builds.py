@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Type
+from typing import TypeVar
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
@@ -11,7 +13,10 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import PreReleaseVersion
+from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+
+IncludedResource = TypeVar('IncludedResource', bound=Resource)
 
 
 class Builds(ResourceManager[Build]):
@@ -100,3 +105,27 @@ class Builds(ResourceManager[Build]):
         if response['data'] is None:
             return None
         return PreReleaseVersion(response['data'])
+
+    def read_with_include(
+            self,
+            build: Union[LinkedResourceData, ResourceId],
+            include_type: Type[IncludedResource],
+    ) -> Tuple[Build, IncludedResource]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
+        """
+        included_field = self._get_include_field_name(include_type)
+
+        build_id = self._get_resource_id(build)
+        response = self.client.session.get(
+            f'{self.client.API_URL}/builds/{build_id}',
+            params={'include': included_field},
+        ).json()
+
+        return Build(response['data']), include_type(response['included'][0])
+
+    @classmethod
+    def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
+        if include_type is App:
+            return 'app'
+        raise ValueError(f'Unknown include type {include_type}')

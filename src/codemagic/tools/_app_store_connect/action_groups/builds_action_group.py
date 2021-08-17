@@ -74,6 +74,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if whats_new:
             beta_test_info_items.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
+        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
         for item in beta_test_info_items:
             self.create_beta_build_localization(build_id=build_id, locale=item.locale, whats_new=item.whats_new)
 
@@ -93,12 +94,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
-        app = self.api_client.builds.read_app(build_id)
-        build = self.api_client.builds.read(build_id)
+        build, app = self.api_client.builds.read_with_include(build_id, App)
 
         self._assert_app_has_testflight_information(app)
-        build = self._wait_until_build_is_processed(build, max_processing_minutes)
 
+        if max_build_processing_wait:
+            build = self._wait_until_build_is_processed(build, max_processing_minutes)
+
+        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
         self.create_beta_app_review_submission(build.id)
 
     def _wait_until_build_is_processed(
