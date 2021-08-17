@@ -56,7 +56,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
 
     def add_beta_test_info(self,
                            build_id: ResourceId,
-                           beta_build_localizations: Types.BetaBuildLocalizations,
+                           beta_build_localizations: Optional[Types.BetaBuildLocalizations],
                            locale: Optional[Locale],
                            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None):
         ...
