@@ -61,7 +61,7 @@ Skip package validation before uploading it to App Store Connect. Use this switc
 ##### `--max-build-processing-wait=MAX_BUILD_PROCESSING_WAIT`
 
 
-Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

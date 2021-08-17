@@ -82,6 +82,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'submit-to-testflight',
         BuildArgument.BUILD_ID_RESOURCE_ID,
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_testflight(
             self,
@@ -93,8 +94,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         # Workaround to support overriding default value by environment variable.
         if max_build_processing_wait is not None:
-            max_processing_minutes = max_build_processing_wait.value if \
-                isinstance(max_build_processing_wait, Types.MaxBuildProcessingWait) else max_build_processing_wait
+            if isinstance(max_build_processing_wait, Types.MaxBuildProcessingWait):
+                max_processing_minutes = max_build_processing_wait.value
+            else:
+                max_processing_minutes = max_build_processing_wait
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
