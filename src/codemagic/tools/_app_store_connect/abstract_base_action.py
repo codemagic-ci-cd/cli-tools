@@ -19,6 +19,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
+from .arguments import BetaBuildInfo
 from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
 from .resource_printer import ResourcePrinter
@@ -54,11 +55,12 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             should_print: bool = True) -> BetaBuildLocalization:
         ...
 
-    def add_beta_test_info(self,
-                           build_id: ResourceId,
-                           beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
-                           locale: Optional[Locale] = None,
-                           whats_new: Optional[Types.WhatsNewArgument] = None):
+    def add_beta_test_info(
+            self,
+            build_id: ResourceId,
+            beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
+            locale: Optional[Locale] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None):
         ...
 
     def submit_to_testflight(

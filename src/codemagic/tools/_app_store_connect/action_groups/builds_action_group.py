@@ -62,12 +62,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BuildArgument.WHATS_NEW,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def add_beta_test_info(
-        self,
-        build_id: ResourceId,
-        beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
-        locale: Optional[Locale] = None,
-        whats_new: Optional[Types.WhatsNewArgument] = None,
-    ):
+            self,
+            build_id: ResourceId,
+            beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
+            locale: Optional[Locale] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None):
         """
         Add localized What's new (what to test) information
         """
