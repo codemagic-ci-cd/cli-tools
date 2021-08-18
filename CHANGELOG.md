@@ -1,3 +1,10 @@
+Version 0.9.7
+-------------
+
+**Improvements**
+
+- Accept list of `BetaBuildInfo` objects as `beta_build_localizations` argument for `AppStoreConnect.add_beta_test_info` using Python API.
+
 Version 0.9.6
 -------------
 
