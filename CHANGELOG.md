@@ -1,3 +1,18 @@
+Version 0.9.6
+-------------
+
+**Improvements**
+
+- Add new action `add-beta-test-info` to submit What's new (What to test) localized information for a beta build.
+- Add new action `submit-to-testflight` to submit beta build to TestFlight.
+- Introduce strict with match with `--strict-match-identifier` keyword when listing applications filtered by Bundle ID.
+- Avoid waiting for processed build when `MAX_BUILD_PROCESSING_WAIT` or `--max-build-processing-wait` is set to 0.
+
+**Development**
+
+- `publish` command will now rely on `add-beta-test-info` and `submit-to-testflight` tasks.
+- Add `read_with_include` for Builds to return an application along with a build.
+
 Version 0.9.5
 -------------
 
