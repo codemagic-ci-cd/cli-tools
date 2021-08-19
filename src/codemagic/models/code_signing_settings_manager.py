@@ -120,5 +120,5 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     def generate_export_options(self, custom_options: Optional[Dict]) -> ExportOptions:
         export_options = ExportOptions.from_matched_profiles(self._matched_profiles)
-        export_options.update(**(custom_options or {}))
+        export_options.update(custom_options or {})
         return export_options

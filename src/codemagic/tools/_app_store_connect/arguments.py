@@ -331,7 +331,9 @@ class PublishArgument(cli.Argument):
         description=(
             'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
             'Apple and retry submitting the build for beta review. If the processing is not finished '
-            'within the specified timeframe, further submission will be terminated'
+            'within the specified timeframe, further submission will be terminated. '
+            'Waiting will be skipped if the value is set to 0, further actions might fail '
+            'if the build is not processed yet.'
         ),
         argparse_kwargs={
             'required': False,

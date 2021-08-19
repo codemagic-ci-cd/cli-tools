@@ -21,6 +21,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
+from .arguments import BetaBuildInfo
 from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
 from .resource_printer import ResourcePrinter
@@ -59,8 +60,23 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def add_build_to_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
         ...
 
+    def add_beta_test_info(
+            self,
+            build_id: ResourceId,
+            beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
+            locale: Optional[Locale] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None):
+        ...
+
+    def submit_to_testflight(
+            self,
+            build_id: ResourceId,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
+        ...
+
     def list_apps(self,
                   bundle_id_identifier: Optional[str] = None,
+                  bundle_id_identifier_strict_match: bool = False,
                   application_id: Optional[ResourceId] = None,
                   application_name: Optional[str] = None,
                   application_sku: Optional[str] = None,

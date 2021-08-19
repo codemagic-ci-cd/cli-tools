@@ -103,8 +103,8 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
             mock.patch.object(AppStoreConnect, '_assert_app_has_testflight_information'), \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
-            mock.patch.object(AppStoreConnect, 'create_beta_app_review_submission') as mock_create_review, \
-            mock.patch.object(AppStoreConnect, 'create_beta_build_localization') as mock_create_localization:
+            mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
+            mock.patch.object(AppStoreConnect, 'add_beta_test_info') as mock_add_beta_test_info:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
         mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path)]
@@ -125,8 +125,8 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
-        mock_create_review.assert_called_with(build.id)
-        mock_create_localization.assert_called_with(build_id=build.id, locale=locale, whats_new=whats_new.value)
+        mock_submit_to_testflight.assert_called_with(build.id, None)
+        mock_add_beta_test_info.assert_called_with(build.id, None, locale, whats_new)
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')

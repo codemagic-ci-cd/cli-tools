@@ -1,12 +1,12 @@
 
-publish
-=======
+add-beta-test-info
+==================
 
 
-**Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers**
+**Add localized What's new (what to test) information**
 ### Usage
 ```bash
-app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds add-beta-test-info [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,35 +14,23 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--path APPLICATION_PACKAGE_PATH_PATTERNS]
-    [--apple-id APPLE_ID]
-    [--password APP_SPECIFIC_PASSWORD]
-    [--testflight]
+    [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
-    [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
-    [--beta-group BETA_GROUP_NAMES_OPTIONAL]
-    [--skip-package-validation]
-    [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    BUILD_ID_RESOURCE_ID
 ```
-### Optional arguments for action `publish`
+### Required arguments for action `add-beta-test-info`
 
-##### `--path=APPLICATION_PACKAGE_PATH_PATTERNS`
-
-
-Path to artifact (\*.ipa or \*.pkg). Can be either a path literal, or a glob pattern to match projects in working directory. Multiple arguments. Default:&nbsp;`**/*.ipa, **/*.pkg`
-##### `--apple-id, -u=APPLE_ID`
+##### `BUILD_ID_RESOURCE_ID`
 
 
-App Store Connect username used for application package validation and upload if App Store Connect API key is not specified
-##### `--password, -p=APP_SPECIFIC_PASSWORD`
+Alphanumeric ID value of the Build
+### Optional arguments for action `add-beta-test-info`
+
+##### `--beta-build-localizations=BETA_BUILD_LOCALIZATIONS`
 
 
-App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id and should match pattern `abcd-abcd-abcd-abcd`. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from the environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering `APP_SPECIFIC_PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--testflight, -t`
-
-
-Submit an app for Testflight beta app review to allow external testing
+Localized beta test info for what's new in the uploaded build as a JSON encoded list. For example, `[{"locale": "en-US", "whats_new": "What's new in English"}]`. See `--locale` for possible locale options. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS`. Alternatively to entering `BETA_BUILD_LOCALIZATIONS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
@@ -51,22 +39,6 @@ The locale code name for displaying localized "What's new" content in TestFlight
 
 
 Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--beta-build-localizations=BETA_BUILD_LOCALIZATIONS`
-
-
-Localized beta test info for what's new in the uploaded build as a JSON encoded list. For example, `[{"locale": "en-US", "whats_new": "What's new in English"}]`. See `--locale` for possible locale options. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS`. Alternatively to entering `BETA_BUILD_LOCALIZATIONS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
-
-
-Name of your Beta group. Multiple arguments
-##### `--skip-package-validation`
-
-
-Skip package validation before uploading it to App Store Connect. Use this switch to opt out from running `altool --validate-app` before uploading package to App Store connect. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
-##### `--max-build-processing-wait=MAX_BUILD_PROCESSING_WAIT`
-
-
-Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

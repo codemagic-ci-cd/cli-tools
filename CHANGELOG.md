@@ -1,4 +1,4 @@
-Version 0.9.4
+Version 0.9.8
 -------------
 
 **Features**
@@ -9,6 +9,56 @@ Version 0.9.4
 **Development / Docs**
 
 - Update `app-store-connect publish` action docs.
+
+Version 0.9.7
+-------------
+
+**Improvements**
+
+- Accept list of `BetaBuildInfo` objects as `beta_build_localizations` argument for `AppStoreConnect.add_beta_test_info` using Python API.
+
+Version 0.9.6
+-------------
+
+**Improvements**
+
+- Add new action `add-beta-test-info` to submit What's new (What to test) localized information for a beta build.
+- Add new action `submit-to-testflight` to submit beta build to TestFlight.
+- Introduce strict with match with `--strict-match-identifier` keyword when listing applications filtered by Bundle ID.
+- Avoid waiting for processed build when `MAX_BUILD_PROCESSING_WAIT` or `--max-build-processing-wait` is set to 0.
+
+**Development**
+
+- `publish` command will now rely on `add-beta-test-info` and `submit-to-testflight` tasks.
+- Add `read_with_include` for Builds to return an application along with a build.
+
+Version 0.9.5
+-------------
+
+**Improvements**
+
+- Add missing `submittedDate` to Beta App Review Submission attributes 
+
+**Fixes**
+
+- Ignore undefined model attributes in App Store Connect API responses instead of failing with `TypeError`.
+- Fix finding uploaded build as part of `app-store-connect publish`.
+- Fix `app-store-connect apps builds` action by replacing broken [List All Builds of an App
+](https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_an_app) API endpoint by [List Builds
+](https://developer.apple.com/documentation/appstoreconnectapi/list_builds) endpoint.
+
+**Development / Docs**
+
+- Add warning to method `list_builds` in `Apps` resource manager about malfunctioning pagination.
+- Add missing relationship `ciProduct` to `App` model.
+- Accept strings for builds filter version restriction.
+
+Version 0.9.4
+-------------
+
+**Fixes**
+
+- Fix custom export option usage on `xcode-project use-profiles --custom-export-options`. Replace faulty argument unpacking usage with plain dictionary updates and iteration.
 
 Version 0.9.3
 -------------

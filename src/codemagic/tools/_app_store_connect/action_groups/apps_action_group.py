@@ -32,6 +32,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('list',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
+                BundleIdArgument.IDENTIFIER_STRICT_MATCH,
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
                 AppArgument.APPLICATION_NAME,
                 AppArgument.APPLICATION_SKU,
@@ -41,6 +42,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 action_group=AppStoreConnectActionGroup.APPS)
     def list_apps(self,
                   bundle_id_identifier: Optional[str] = None,
+                  bundle_id_identifier_strict_match: bool = False,
                   application_id: Optional[ResourceId] = None,
                   application_name: Optional[str] = None,
                   application_sku: Optional[str] = None,
@@ -52,6 +54,9 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Find and list apps added in App Store Connect
         """
 
+        def predicate(app):
+            return app.attributes.bundleId == bundle_id_identifier
+
         apps_filter = self.api_client.apps.Filter(
             bundle_id=bundle_id_identifier,
             id=application_id,
@@ -61,7 +66,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_versions_platform=platform,
             app_store_versions_app_store_state=app_store_state,
         )
-        return self._list_resources(apps_filter, self.api_client.apps, should_print)
+
+        return self._list_resources(
+            apps_filter,
+            self.api_client.apps,
+            should_print,
+            filter_predicate=predicate if bundle_id_identifier and bundle_id_identifier_strict_match else None,
+        )
 
     @cli.action('builds', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
     def list_app_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
@@ -69,14 +80,10 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Get a list of builds associated with a specific app
         """
 
-        return self._list_related_resources(
-            application_id,
-            App,
-            Build,
-            self.api_client.apps.list_builds,
-            None,
-            should_print,
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
         )
+        return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @cli.action('pre-release-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,

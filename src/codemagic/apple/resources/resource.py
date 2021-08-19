@@ -12,6 +12,7 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
+from typing import Type
 from typing import Union
 from typing import overload
 
@@ -54,6 +55,24 @@ class DictSerializable:
 
     def dict(self) -> Dict:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
+
+
+class GracefulDataclassMixin:
+    @classmethod
+    def get_fields(cls) -> Set[str]:
+        return {f.name for f in dataclasses.fields(cls)}
+
+    @classmethod
+    def get_defined_fields(cls, parent_class: Type, given_fields: Dict[str, Any]) -> Dict[str, Any]:
+        logger = log.get_logger(cls, log_to_stream=False)
+        defined_fields = cls.get_fields()
+        fields = {}
+        for field_name, field_value in given_fields.items():
+            if field_name in defined_fields:
+                fields[field_name] = field_value
+            else:
+                logger.warning('Unknown field %r for resource %s.%s', field_name, parent_class.__name__, cls.__name__)
+        return fields
 
 
 @dataclass
@@ -158,36 +177,26 @@ class PrettyNameMeta(JsonSerializableMeta):
 
 class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
     @dataclass
-    class Attributes(DictSerializable):
+    class Attributes(DictSerializable, GracefulDataclassMixin):
         pass
 
     @dataclass
-    class Relationships(DictSerializable):
+    class Relationships(DictSerializable, GracefulDataclassMixin):
         def __post_init__(self):
             for field in self.__dict__:
                 value = getattr(self, field)
                 if not isinstance(value, (Relationship, type(None))):
                     setattr(self, field, Relationship(**value))
 
-        @classmethod
-        def get_fields(cls) -> Set[str]:
-            return {f.name for f in dataclasses.fields(cls)}
-
     @classmethod
     def _create_attributes(cls, api_response):
-        return cls.Attributes(**api_response['attributes'])
+        defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
+        return cls.Attributes(**defined_fields)
 
     @classmethod
     def _create_relationships(cls, api_response):
-        logger = log.get_logger(cls, log_to_stream=False)
-        known_relationships = cls.Relationships.get_fields()
-        relationships = {}
-        for relationship_name, relationship in api_response['relationships'].items():
-            if relationship_name in known_relationships:
-                relationships[relationship_name] = relationship
-            else:
-                logger.warning('Unknown relationship %r for resource %r', relationship_name, cls.__name__)
-        return cls.Relationships(**relationships)
+        defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
+        return cls.Relationships(**defined_fields)
 
     def __init__(self, api_response: Dict, created: bool = False):
         super().__init__(api_response)
