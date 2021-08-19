@@ -1,0 +1,14 @@
+{
+    "errors": [
+        {
+            "id": "XHI3JTPAXPXMTCWTY6RJMMMZUI",
+            "status": "403",
+            "code": "FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED",
+            "title": "A required agreement is missing or has expired.",
+            "detail": "This request requires an in-effect agreement that has not been signed or has expired.",
+            "links": {
+                "see": "/agreements"
+            }
+        }
+    ]
+}

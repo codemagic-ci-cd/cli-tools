@@ -48,6 +48,12 @@ def api_error_response() -> Dict:
 
 
 @pytest.fixture
+def api_error_response_with_links() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / 'mocks' / 'error_response_with_links.json'
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
 def api_pre_release_version() -> Dict:
     mock_path = pathlib.Path(__file__).parent / 'mocks' / 'pre_release_version.json'
     return json.loads(mock_path.read_text())
