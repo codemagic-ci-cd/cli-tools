@@ -107,7 +107,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         build, app = self.api_client.builds.read_with_include(build_id, App)
 
-        self._assert_app_has_testflight_information(app)
+        try:
+            self._assert_app_has_testflight_information(app)
+        except ValueError as ve:
+            raise AppStoreConnectError(str(ve)) from ve
 
         if max_processing_minutes:
             build = self._wait_until_build_is_processed(build, max_processing_minutes)
