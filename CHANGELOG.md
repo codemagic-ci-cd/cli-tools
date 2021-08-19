@@ -1,3 +1,10 @@
+Version 0.9.8
+-------------
+
+**Fixes**
+
+- Support `links` field in App Store Connect API [error responses](https://developer.apple.com/documentation/appstoreconnectapi/errorresponse/errors). 
+
 Version 0.9.7
 -------------
 
