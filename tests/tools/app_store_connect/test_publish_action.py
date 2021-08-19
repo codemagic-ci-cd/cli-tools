@@ -189,10 +189,9 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
             mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload, \
             mock.patch.object(AppStoreConnect, '_validate_artifact_with_altool') as mock_validate, \
-            mock.patch.object(AppStoreConnect, '_assert_app_has_testflight_information'), \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
-            mock.patch.object(AppStoreConnect, 'create_beta_app_review_submission') as mock_create_review, \
+            mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
             mock.patch.object(AppStoreConnect, 'add_build_to_beta_groups') as mock_add_build_to_beta_groups:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
@@ -212,5 +211,5 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
-        mock_create_review.assert_called_with(build.id)
+        mock_submit_to_testflight.assert_called_with(build.id, None)
         mock_add_build_to_beta_groups.assert_called_with(build, beta_group_names)
