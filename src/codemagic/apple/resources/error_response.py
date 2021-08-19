@@ -33,7 +33,7 @@ class ErrorMeta(DictSerializable):
 
 @dataclass
 class Error(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('meta',)
+    _OMIT_IF_NONE_KEYS = ('meta', 'source', 'links')
 
     code: str
     status: str
@@ -42,6 +42,7 @@ class Error(DictSerializable):
     id: Optional[str] = None
     source: Optional[Dict[str, str]] = None
     meta: Optional[ErrorMeta] = None
+    links: Optional[Dict[str, str]] = None
 
     def __post_init__(self):
         if isinstance(self.meta, dict):
