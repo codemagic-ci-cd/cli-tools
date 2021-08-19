@@ -102,7 +102,6 @@ Version 0.9.0
 **Development / Docs**
 
 - Add docs for action `keychain use-login`.
->>>>>>> 822bd3f11e8c5186f493bea313bcb28f179df7be
 
 Version 0.8.5
 -------------
