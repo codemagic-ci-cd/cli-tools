@@ -105,6 +105,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         else:
             max_processing_minutes = Types.MaxBuildProcessingWait.default_value
 
+        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
+
         build, app = self.api_client.builds.read_with_include(build_id, App)
 
         try:
@@ -115,7 +117,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if max_processing_minutes:
             build = self._wait_until_build_is_processed(build, max_processing_minutes)
 
-        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
         self.create_beta_app_review_submission(build.id)
 
     def _wait_until_build_is_processed(
