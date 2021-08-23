@@ -467,6 +467,7 @@ class BuildArgument(cli.Argument):
         argparse_kwargs={
             'nargs': '+',
             'metavar': 'beta-group',
+            'required': True,
         },
     )
     BETA_GROUP_NAMES_OPTIONAL = BETA_GROUP_NAMES_REQUIRED.duplicate(

@@ -76,5 +76,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-build`](beta-groups/add-build.md)|Add build to a Beta group|
-|[`remove-build`](beta-groups/remove-build.md)|Remove build from a Beta group|
+|[`add-build`](beta-groups/add-build.md)|Add build to Beta groups|
+|[`remove-build`](beta-groups/remove-build.md)|Remove build from Beta groups|

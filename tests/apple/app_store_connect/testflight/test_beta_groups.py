@@ -50,3 +50,9 @@ class TestBetaGroups(ResourceManagerTestsBase):
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
         self.api_client.beta_groups.remove_build(beta_group, build)
+
+    def test_add_if_build_does_not_exist(self):
+        build = ResourceId('00000000-0000-0000-0000-000000000000')
+        beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
+
+        self.api_client.beta_groups.add_build(beta_group, build)

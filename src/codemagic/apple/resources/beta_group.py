@@ -8,7 +8,7 @@ from .resource import Resource
 
 class BetaGroup(Resource):
     """
-    https://developer.apple.com/documentation/appstoreconnectapi/prerelease_versions_and_beta_testers/beta_groups
+    https://developer.apple.com/documentation/appstoreconnectapi/betagroup
     """
 
     @dataclass

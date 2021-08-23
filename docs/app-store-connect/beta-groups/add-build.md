@@ -3,7 +3,7 @@ add-build
 =========
 
 
-**Add build to a Beta group**
+**Add build to Beta groups**
 ### Usage
 ```bash
 app-store-connect beta-groups add-build [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

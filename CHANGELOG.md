@@ -1,4 +1,4 @@
-Version 0.9.8
+Version 0.10.0
 -------------
 
 **Features**

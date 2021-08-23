@@ -13,7 +13,7 @@ from codemagic.apple.resources import ResourceType
 
 class BetaGroups(ResourceManager[BetaGroup]):
     """
-    https://developer.apple.com/documentation/appstoreconnectapi/betagroup
+    https://developer.apple.com/documentation/appstoreconnectapi/prerelease_versions_and_beta_testers/beta_groups
     """
 
     @property

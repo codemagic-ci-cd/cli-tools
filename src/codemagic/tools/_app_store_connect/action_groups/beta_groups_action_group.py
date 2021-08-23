@@ -1,3 +1,4 @@
+from typing import List
 from typing import Sequence
 from typing import Set
 from typing import Tuple
@@ -91,14 +92,18 @@ class BetaGroupsActionGroup(AbstractBaseAction):
     def _get_beta_groups(
             self,
             build_id: ResourceId,
-            beta_group_names: Sequence[str]) -> Tuple[Set[BetaGroup], Set[str]]:
-        app = self.api_client.builds.read_app(build_id)
+            beta_group_names: Sequence[str]) -> Tuple[List[BetaGroup], Set[str]]:
+
+        try:
+            app = self.api_client.builds.read_app(build_id)
+        except AppStoreConnectApiError as e:
+            raise AppStoreConnectError(str(e))
 
         resource_filter = self.api_client.beta_groups.Filter(app=app.id)
         app_beta_groups = self.api_client.beta_groups.list(resource_filter=resource_filter)
 
-        matched_beta_groups = set(
-            beta_group for beta_group in app_beta_groups if beta_group.attributes.name in beta_group_names)
+        matched_beta_groups = [
+            beta_group for beta_group in app_beta_groups if beta_group.attributes.name in beta_group_names]
 
         matched_beta_group_names = set(beta_group.attributes.name for beta_group in app_beta_groups)
 

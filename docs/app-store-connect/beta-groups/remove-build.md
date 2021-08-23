@@ -3,7 +3,7 @@ remove-build
 ============
 
 
-**Remove build from a Beta group**
+**Remove build from Beta groups**
 ### Usage
 ```bash
 app-store-connect beta-groups remove-build [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
