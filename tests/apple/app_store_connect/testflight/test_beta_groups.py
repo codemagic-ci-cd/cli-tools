@@ -2,9 +2,9 @@ import os
 
 import pytest
 
+from codemagic.apple.app_store_connect import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.testflight import BetaGroups
 from codemagic.apple.resources import ResourceId
-from codemagic.apple.app_store_connect import AppStoreConnectApiError
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
