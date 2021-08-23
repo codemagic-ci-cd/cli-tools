@@ -374,7 +374,6 @@ class BuildArgument(cli.Argument):
         description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
     )
-    BUILD_ID_RESOURCE_ID_REQUIRED = BUILD_ID_RESOURCE_ID_OPTIONAL.duplicate(argparse_kwargs={'required': True})
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
         flags=('--pre-release-version',),
