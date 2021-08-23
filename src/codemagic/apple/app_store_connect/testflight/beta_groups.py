@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 from typing import Optional
 from typing import Type
 from typing import Union
@@ -23,14 +24,16 @@ class BetaGroups(ResourceManager[BetaGroup]):
     class Filter(ResourceManager.Filter):
         id: Optional[ResourceId] = None
         name: Optional[str] = None
-        app: Optional[str] = None
+        app: Optional[ResourceId] = None
 
-    def list(self, resource_filter: Filter = Filter()):
+    def list(self, resource_filter: Filter = Filter()) -> List[BetaGroup]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
         """
-        params = {**resource_filter.as_query_params()}
-        response = self.client.paginate(f'{self.client.API_URL}/betaGroups', params)
+        response = self.client.paginate(
+            f'{self.client.API_URL}/betaGroups',
+            params=resource_filter.as_query_params(),
+        )
 
         return [BetaGroup(item) for item in response]
 
@@ -46,6 +49,7 @@ class BetaGroups(ResourceManager[BetaGroup]):
                 self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
             ],
         }
+
         self.client.session.post(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
 
@@ -61,5 +65,6 @@ class BetaGroups(ResourceManager[BetaGroup]):
                 self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
             ],
         }
+
         self.client.session.delete(
             f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)

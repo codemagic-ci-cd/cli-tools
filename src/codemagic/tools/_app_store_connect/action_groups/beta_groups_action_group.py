@@ -23,11 +23,13 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def add_build_to_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def add_build_to_beta_groups(self, build_id: ResourceId, beta_group_names: Sequence[str]):
         """
-        Add build to a Beta group
+        Add build to Beta groups
         """
-        build_id = self._get_resource_id(build_id)
+        self.logger.info(
+            Colors.BLUE(f"Adding build '{build_id}' to the following beta groups: {', '.join(beta_group_names)}."))
+
         matched_beta_groups, matched_beta_group_names = self._get_beta_groups(build_id, beta_group_names)
 
         errors = []
@@ -57,11 +59,13 @@ class BetaGroupsActionGroup(AbstractBaseAction):
                 BuildArgument.BUILD_ID_RESOURCE_ID_REQUIRED,
                 BuildArgument.BETA_GROUP_NAMES_REQUIRED,
                 action_group=AppStoreConnectActionGroup.BETA_GROUPS)
-    def remove_build_from_beta_groups(self, build_id: Union[ResourceId, Build], beta_group_names: Sequence[str]):
+    def remove_build_from_beta_groups(self, build_id: ResourceId, beta_group_names: Sequence[str]):
         """
-        Remove build from a Beta group
+        Remove build from Beta groups
         """
-        build_id = self._get_resource_id(build_id)
+        self.logger.info(
+            Colors.BLUE(f"Removing build '{build_id}' from the following beta groups: {', '.join(beta_group_names)}."))
+
         matched_beta_groups, matched_beta_group_names = self._get_beta_groups(build_id, beta_group_names)
 
         errors = []
@@ -89,7 +93,7 @@ class BetaGroupsActionGroup(AbstractBaseAction):
 
     def _get_beta_groups(
             self,
-            build_id: Union[ResourceId, Build],
+            build_id: ResourceId,
             beta_group_names: Sequence[str]) -> Tuple[Set[BetaGroup], Set[str]]:
         app = self.api_client.builds.read_app(build_id)
 
@@ -102,10 +106,3 @@ class BetaGroupsActionGroup(AbstractBaseAction):
         matched_beta_group_names = set(beta_group.attributes.name for beta_group in app_beta_groups)
 
         return matched_beta_groups, matched_beta_group_names
-
-    @staticmethod
-    def _get_resource_id(resource: Union[ResourceId, LinkedResourceData]) -> ResourceId:
-        if isinstance(resource, LinkedResourceData):
-            return resource.id
-        else:
-            return resource

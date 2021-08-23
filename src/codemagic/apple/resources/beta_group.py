@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 
 from .resource import Relationship
@@ -7,13 +8,13 @@ from .resource import Resource
 
 class BetaGroup(Resource):
     """
-    https://developer.apple.com/documentation/appstoreconnectapi/betagroup
+    https://developer.apple.com/documentation/appstoreconnectapi/prerelease_versions_and_beta_testers/beta_groups
     """
 
     @dataclass
     class Attributes(Resource.Attributes):
         name: str
-        createdDate: str
+        createdDate: datetime
         isInternalGroup: bool
         hasAccessToAllBuilds: Optional[bool]
         publicLinkEnabled: Optional[bool]
@@ -23,6 +24,10 @@ class BetaGroup(Resource):
         publicLink: Optional[str]
         feedbackEnabled: Optional[bool]
         areIOSBuildsAvailableForAppleSiliconMac: Optional[bool] = None
+
+        def __post_init__(self):
+            if isinstance(self.createdDate, str):
+                self.createdDate = Resource.from_iso_8601(self.createdDate)
 
     @dataclass
     class Relationships(Resource.Relationships):
