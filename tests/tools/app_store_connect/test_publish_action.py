@@ -212,4 +212,4 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_validate.assert_called()
         mock_upload.assert_called()
         mock_submit_to_testflight.assert_called_with(build.id, None)
-        mock_add_build_to_beta_groups.assert_called_with(build, beta_group_names)
+        mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names)
