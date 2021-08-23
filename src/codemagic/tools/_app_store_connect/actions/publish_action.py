@@ -136,7 +136,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_testflight:
             self.submit_to_testflight(build.id, max_build_processing_wait)
         if submit_to_testflight and beta_group_names:
-            self.add_build_to_beta_groups(build, beta_group_names)
+            self.add_build_to_beta_groups(build.id, beta_group_names)
 
     def _find_build(
         self,
