@@ -95,7 +95,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
-            except (IOError, ValueError) as error:
+            except (AppStoreConnectError, IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 

@@ -10,6 +10,14 @@ Version 0.10.0
 
 - Update `app-store-connect publish` action docs.
 
+Version 0.9.8
+-------------
+
+**Fixes**
+
+- Fail action `app-store-connect builds subtmit-to-testflight` properly using error handling in case the application is missing required test information in App Store Connect.
+- Support `links` field in App Store Connect API [error responses](https://developer.apple.com/documentation/appstoreconnectapi/errorresponse/errors). 
+
 Version 0.9.7
 -------------
 
