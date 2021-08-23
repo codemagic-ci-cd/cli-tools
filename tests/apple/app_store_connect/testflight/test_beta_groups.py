@@ -4,6 +4,7 @@ import pytest
 
 from codemagic.apple.app_store_connect.testflight import BetaGroups
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.app_store_connect import AppStoreConnectApiError
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
@@ -55,4 +56,5 @@ class TestBetaGroups(ResourceManagerTestsBase):
         build = ResourceId('00000000-0000-0000-0000-000000000000')
         beta_group = ResourceId('c954ae49-625e-49cc-a8eb-3dbf8aff94c9')
 
-        self.api_client.beta_groups.add_build(beta_group, build)
+        with pytest.raises(AppStoreConnectApiError):
+            self.api_client.beta_groups.add_build(beta_group, build)
