@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from codemagic.apple.app_store_connect.provisioning import BetaGroups
+from codemagic.apple.app_store_connect.testflight import BetaGroups
 from codemagic.apple.resources import ResourceId
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 

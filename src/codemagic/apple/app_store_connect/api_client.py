@@ -16,12 +16,12 @@ from codemagic.utilities import log
 from .api_session import AppStoreConnectApiSession
 from .apps import Apps
 from .builds import Builds
-from .provisioning import BetaGroups
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
 from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
+from .testflight import BetaGroups
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
 from .versioning import BetaAppReviewSubmissions
