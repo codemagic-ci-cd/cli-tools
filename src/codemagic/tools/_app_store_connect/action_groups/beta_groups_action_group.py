@@ -1,13 +1,10 @@
 from typing import Sequence
 from typing import Set
 from typing import Tuple
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import BetaGroup
-from codemagic.apple.resources import Build
-from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 
