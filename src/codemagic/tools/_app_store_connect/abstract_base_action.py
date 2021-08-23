@@ -15,7 +15,6 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaBuildLocalization
-from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
