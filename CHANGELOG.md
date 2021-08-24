@@ -1,3 +1,10 @@
+Version 0.10.1
+-------------
+
+**Fixes**
+
+- Fix `codemagic.models.application_package.Ipa` initialization for packages that are compressed using [`LZFSE`](https://github.com/lzfse/lzfse) compression algorithm. Fix requires `unzip` to be available in system `$PATH`. 
+
 Version 0.10.0
 -------------
 
