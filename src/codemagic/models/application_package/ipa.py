@@ -1,5 +1,6 @@
 import pathlib
 import plistlib
+import subprocess
 import tempfile
 import zipfile
 from functools import lru_cache
@@ -30,8 +31,20 @@ class Ipa(AbstractPackage):
                 found_file_name = next(filter(filename_filter, zf.namelist()))
             except StopIteration:
                 raise FileNotFoundError(filename_filter.__name__, self.path)
-            with zf.open(found_file_name, 'r') as fd:
-                return fd.read()
+
+            try:
+                with zf.open(found_file_name, 'r') as fd:
+                    return fd.read()
+            except zipfile.BadZipFile as e:
+                if str(e) == 'Bad magic number for file header':
+                    # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
+                    # Unfortunately Python's built-in zip library is not capable to handle those
+                    pass
+                else:
+                    raise
+
+            completed_process = subprocess.run(['unzip', '-p', self.path, found_file_name], capture_output=True)
+            return completed_process.stdout
 
     def _get_app_file_contents(self, filename: str) -> bytes:
         """
