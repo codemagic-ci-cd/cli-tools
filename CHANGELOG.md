@@ -1,3 +1,23 @@
+Version 0.10.0
+-------------
+
+**Features**
+
+- New `app-store-connect beta-groups` action set to add and remove TestFlight builds from groups of beta testers.
+- `app-store-connect publish` action accepts multiple Beta group names under `--beta-group` key. The uploaded TestFlight build will be made available to the specified groups of beta testers.
+
+**Development / Docs**
+
+- Update `app-store-connect publish` action docs.
+
+Version 0.9.8
+-------------
+
+**Fixes**
+
+- Fail action `app-store-connect builds subtmit-to-testflight` properly using error handling in case the application is missing required test information in App Store Connect.
+- Support `links` field in App Store Connect API [error responses](https://developer.apple.com/documentation/appstoreconnectapi/errorresponse/errors). 
+
 Version 0.9.7
 -------------
 

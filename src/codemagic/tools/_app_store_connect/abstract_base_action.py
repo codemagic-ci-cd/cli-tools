@@ -5,6 +5,7 @@ import pathlib
 from abc import ABCMeta
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic.apple import AppStoreConnectApiClient
@@ -53,6 +54,9 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             locale: Optional[Locale],
             whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             should_print: bool = True) -> BetaBuildLocalization:
+        ...
+
+    def add_build_to_beta_groups(self, build_id: ResourceId, beta_group_names: Sequence[str]):
         ...
 
     def add_beta_test_info(

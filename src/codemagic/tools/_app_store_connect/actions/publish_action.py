@@ -36,6 +36,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 BuildArgument.BETA_BUILD_LOCALIZATIONS,
+                BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 action_options={'requires_api_client': False})
@@ -47,10 +48,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
+                beta_group_names: Optional[List[str]] = None,
                 skip_package_validation: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
-        Publish application packages to App Store and submit them to Testflight
+        Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
         """
 
         if not (apple_id and app_specific_password):
@@ -89,10 +91,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                         locale,
                         whats_new,
                         max_build_processing_wait,
+                        beta_group_names,
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
-            except (IOError, ValueError) as error:
+            except (AppStoreConnectError, IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
 
@@ -120,8 +123,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         locale: Optional[Locale],
         whats_new: Optional[Types.WhatsNewArgument],
         max_build_processing_wait: Optional[Types.MaxBuildProcessingWait],
+        beta_group_names: Optional[List[str]],
     ):
-        if not beta_build_localizations and not whats_new and not submit_to_testflight:
+        if not beta_build_localizations and not whats_new and not submit_to_testflight and not beta_group_names:
             return  # Nothing to do with the ipa...
 
         app = self._get_uploaded_build_application(ipa)
@@ -131,6 +135,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
         if submit_to_testflight:
             self.submit_to_testflight(build.id, max_build_processing_wait)
+        if submit_to_testflight and beta_group_names:
+            self.add_build_to_beta_groups(build.id, beta_group_names)
 
     def _find_build(
         self,

@@ -3,7 +3,7 @@ publish
 =======
 
 
-**Publish application packages to App Store and submit them to Testflight**
+**Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers**
 ### Usage
 ```bash
 app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -21,6 +21,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
+    [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--skip-package-validation]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
 ```
@@ -54,6 +55,10 @@ Describe the changes and additions to the build and indicate the features you wo
 
 
 Localized beta test info for what's new in the uploaded build as a JSON encoded list. For example, `[{"locale": "en-US", "whats_new": "What's new in English"}]`. See `--locale` for possible locale options. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS`. Alternatively to entering `BETA_BUILD_LOCALIZATIONS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
+
+
+Name of your Beta group. Multiple arguments
 ##### `--skip-package-validation`
 
 

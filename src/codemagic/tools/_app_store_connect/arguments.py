@@ -458,6 +458,24 @@ class BuildArgument(cli.Argument):
             'required': False,
         },
     )
+    BETA_GROUP_NAMES_REQUIRED = cli.ArgumentProperties(
+        key='beta_group_names',
+        flags=('--beta-group',),
+        type=str,
+        description='Name of your Beta group',
+        argparse_kwargs={
+            'nargs': '+',
+            'metavar': 'beta-group',
+            'required': True,
+        },
+    )
+    BETA_GROUP_NAMES_OPTIONAL = BETA_GROUP_NAMES_REQUIRED.duplicate(
+        argparse_kwargs={
+            'nargs': '+',
+            'metavar': 'beta-group',
+            'required': False,
+        },
+    )
 
 
 class BundleIdArgument(cli.Argument):
