@@ -5,6 +5,7 @@ from .beta_app_localization import BetaAppLocalization
 from .beta_app_review_detail import BetaAppReviewDetail
 from .beta_app_review_submission import BetaAppReviewSubmission
 from .beta_build_localization import BetaBuildLocalization
+from .beta_group import BetaGroup
 from .build import Build
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability

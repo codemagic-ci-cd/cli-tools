@@ -21,6 +21,7 @@ from .provisioning import BundleIds
 from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
+from .testflight import BetaGroups
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
 from .versioning import BetaAppReviewSubmissions
@@ -157,6 +158,10 @@ class AppStoreConnectApiClient(StringConverterMixin):
     @property
     def devices(self) -> Devices:
         return Devices(self)
+
+    @property
+    def beta_groups(self) -> BetaGroups:
+        return BetaGroups(self)
 
     @property
     def pre_release_versions(self) -> PreReleaseVersions:

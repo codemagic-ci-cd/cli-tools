@@ -45,6 +45,7 @@ from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.action_groups import AppsActionGroup
 from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaBuildLocalizationsActionGroup
+from ._app_store_connect.action_groups import BetaGroupsActionGroup
 from ._app_store_connect.action_groups import BuildsActionGroup
 from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
@@ -83,6 +84,7 @@ class AppStoreConnect(cli.CliApp,
                       BuildsActionGroup,
                       BetaAppReviewSubmissionsActionGroup,
                       BetaBuildLocalizationsActionGroup,
+                      BetaGroupsActionGroup,
                       ResourceManagerMixin,
                       PathFinderMixin):
     """
