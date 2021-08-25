@@ -29,7 +29,7 @@ class App(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
-        _OMIT_IF_NONE_KEYS = ('betaTesters', 'perfPowerMetrics')
+        _OMIT_IF_NONE_KEYS = ('betaTesters', 'ciProduct', 'perfPowerMetrics')
 
         appInfos: Relationship
         appStoreVersions: Relationship
@@ -39,7 +39,6 @@ class App(Resource):
         betaGroups: Relationship
         betaLicenseAgreement: Relationship
         builds: Relationship
-        ciProduct: Relationship
         endUserLicenseAgreement: Relationship
         gameCenterEnabledVersions: Relationship
         inAppPurchases: Relationship
@@ -48,4 +47,5 @@ class App(Resource):
         prices: Relationship
 
         betaTesters: Optional[Relationship] = None
+        ciProduct: Optional[Relationship] = None
         perfPowerMetrics: Optional[Relationship] = None
