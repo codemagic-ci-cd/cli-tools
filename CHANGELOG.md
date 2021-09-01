@@ -1,3 +1,10 @@
+Version 0.10.2
+-------------
+
+**Fixes**
+
+- Make `codemagic.apple.resources.App` relationship for `ciProduct` optional.
+
 Version 0.10.1
 -------------
 
