@@ -96,6 +96,18 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return self.x509.get_serial_number()
 
     @property
+    def sha1_fingerprint(self) -> str:
+        x509_certificate = self.x509.to_cryptography()
+        fingerprint = x509_certificate.fingerprint(hashes.SHA1())
+        return fingerprint.hex().upper()
+
+    @property
+    def sha256_fingerprint(self) -> str:
+        x509_certificate = self.x509.to_cryptography()
+        fingerprint = x509_certificate.fingerprint(hashes.SHA256())
+        return fingerprint.hex().upper()
+
+    @property
     def extensions(self) -> List[str]:
         extensions_count = self.x509.get_extension_count()
         return [self._str(self.x509.get_extension(i).get_short_name()) for i in range(extensions_count)]

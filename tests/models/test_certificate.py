@@ -130,3 +130,16 @@ def test_is_code_signing_certificate(cert_common_name, is_code_signing_certifica
     with mock.patch.object(Certificate, 'common_name', new_callable=patched_common_name):
         certificate = Certificate.from_ans1(certificate_asn1)
         assert certificate.is_code_signing_certificate() is is_code_signing_certificate
+
+
+def test_certificate_sha1_fingerprint(certificate_asn1):
+    certificate = Certificate.from_ans1(certificate_asn1)
+    expected_fingerprint = 'F9 DA F0 C5 BA 5C 82 1E 46 25 D8 C4 3E 69 66 CF 8F 63 86 37'
+    assert certificate.sha1_fingerprint == expected_fingerprint.replace(' ', '')
+
+
+def test_certificate_sha256_fingerprint(certificate_asn1):
+    certificate = Certificate.from_ans1(certificate_asn1)
+    expected_fingerprint = \
+        '42 FD E9 13 4E 92 B3 FC 2C 60 47 A9 6F B3 31 38 8F B4 60 85 BC B3 7C 67 0F 5D 78 76 1F DE E5 E3'
+    assert certificate.sha256_fingerprint == expected_fingerprint.replace(' ', '')
