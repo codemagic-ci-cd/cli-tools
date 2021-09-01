@@ -95,19 +95,6 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def serial(self) -> int:
         return self.x509.get_serial_number()
 
-    def _get_fingerprint(self, algorithm: hashes.HashAlgorithm) -> str:
-        x509_certificate = self.x509.to_cryptography()
-        fingerprint = x509_certificate.fingerprint(algorithm)
-        return fingerprint.hex().upper()
-
-    @property
-    def sha1_fingerprint(self) -> str:
-        return self._get_fingerprint(hashes.SHA1())
-
-    @property
-    def sha256_fingerprint(self) -> str:
-        return self._get_fingerprint(hashes.SHA256())
-
     @property
     def extensions(self) -> List[str]:
         extensions_count = self.x509.get_extension_count()
@@ -158,6 +145,11 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def get_certificate_signing_request_content(cls, csr: x509.CertificateSigningRequest) -> str:
         public_bytes = csr.public_bytes(serialization.Encoding.PEM)
         return cls._str(public_bytes)
+
+    def get_fingerprint(self, algorithm: hashes.HashAlgorithm) -> str:
+        x509_certificate = self.x509.to_cryptography()
+        fingerprint = x509_certificate.fingerprint(algorithm)
+        return fingerprint.hex().upper()
 
     def export_p12(self,
                    private_key: PrivateKey,

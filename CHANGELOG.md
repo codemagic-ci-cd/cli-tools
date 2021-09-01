@@ -3,7 +3,7 @@ Version 0.10.3
 
 **Development / Docs**
 
-- Add new properties `sha1_fingerprint` and `sha256_fingerprint` to `codemagic.models.Certificate` class that return certificate's hexadecimal SHA1 and SHA256 fingerprints respectively.
+- Add `get_fingerprint` method to `codemagic.models.Certificate` class which returns certificate's hexadecimal fingerprint for requested hashing algorithm.
 
 Version 0.10.2
 -------------
