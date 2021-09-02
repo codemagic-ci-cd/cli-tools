@@ -1,3 +1,10 @@
+Version 0.10.3
+-------------
+
+**Development / Docs**
+
+- Add `get_fingerprint` method to `codemagic.models.Certificate` class which returns certificate's hexadecimal fingerprint for requested hashing algorithm.
+
 Version 0.10.2
 -------------
 

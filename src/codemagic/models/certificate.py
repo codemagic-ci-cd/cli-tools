@@ -146,6 +146,11 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         public_bytes = csr.public_bytes(serialization.Encoding.PEM)
         return cls._str(public_bytes)
 
+    def get_fingerprint(self, algorithm: hashes.HashAlgorithm) -> str:
+        x509_certificate = self.x509.to_cryptography()
+        fingerprint = x509_certificate.fingerprint(algorithm)
+        return fingerprint.hex().upper()
+
     def export_p12(self,
                    private_key: PrivateKey,
                    container_password: str,
