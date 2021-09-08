@@ -564,7 +564,16 @@ class DeviceArgument(cli.Argument):
         key='device_name',
         flags=('--name',),
         description='Name of the Device',
+        argparse_kwargs={'required': True},
+    )
+    DEVICE_NAME_OPTIONAL = DEVICE_NAME.duplicate(
         argparse_kwargs={'required': False},
+    )
+    DEVICE_UDID = cli.ArgumentProperties(
+        key='device_udid',
+        flags=('--udid',),
+        description='Device ID (UDID)',
+        argparse_kwargs={'required': True},
     )
     DEVICE_STATUS = cli.ArgumentProperties(
         key='device_status',

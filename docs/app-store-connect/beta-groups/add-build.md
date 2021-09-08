@@ -14,12 +14,12 @@ app-store-connect beta-groups add-build [-h] [--log-stream STREAM] [--no-color] 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    --build-id BUILD_ID_RESOURCE_ID_REQUIRED
+    BUILD_ID_RESOURCE_ID
     --beta-group BETA_GROUP_NAMES_REQUIRED
 ```
 ### Required arguments for action `add-build`
 
-##### `--build-id=BUILD_ID_RESOURCE_ID_REQUIRED`
+##### `BUILD_ID_RESOURCE_ID`
 
 
 Alphanumeric ID value of the Build

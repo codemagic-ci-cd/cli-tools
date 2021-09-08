@@ -284,7 +284,7 @@ class AppStoreConnect(cli.CliApp,
 
     @cli.action('list-devices',
                 BundleIdArgument.PLATFORM_OPTIONAL,
-                DeviceArgument.DEVICE_NAME,
+                DeviceArgument.DEVICE_NAME_OPTIONAL,
                 DeviceArgument.DEVICE_STATUS)
     def list_devices(self,
                      platform: Optional[BundleIdPlatform] = None,
@@ -298,6 +298,28 @@ class AppStoreConnect(cli.CliApp,
         device_filter = self.api_client.devices.Filter(
             name=device_name, platform=platform, status=device_status)
         return self._list_resources(device_filter, self.api_client.devices, should_print)
+
+    @cli.action('register-device',
+                BundleIdArgument.PLATFORM,
+                DeviceArgument.DEVICE_NAME,
+                DeviceArgument.DEVICE_UDID)
+    def register_device(
+        self,
+        platform: BundleIdPlatform,
+        device_name: str,
+        device_udid: str,
+        should_print: bool = True,
+    ) -> Device:
+        """
+        Register a new device for app development
+        """
+        return self._create_resource(
+            self.api_client.devices,
+            should_print,
+            udid=device_udid,
+            name=device_name,
+            platform=platform,
+        )
 
     @cli.action('create-bundle-id',
                 BundleIdArgument.BUNDLE_ID_IDENTIFIER,

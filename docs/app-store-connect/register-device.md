@@ -1,12 +1,12 @@
 
-remove-build
-============
+register-device
+===============
 
 
-**Remove build from Beta groups**
+**Register a new device for app development**
 ### Usage
 ```bash
-app-store-connect beta-groups remove-build [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,19 +14,26 @@ app-store-connect beta-groups remove-build [-h] [--log-stream STREAM] [--no-colo
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    BUILD_ID_RESOURCE_ID
-    --beta-group BETA_GROUP_NAMES_REQUIRED
+    [--platform PLATFORM]
+    --name DEVICE_NAME
+    --udid DEVICE_UDID
 ```
-### Required arguments for action `remove-build`
+### Required arguments for action `register-device`
 
-##### `BUILD_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Build
-##### `--beta-group=BETA_GROUP_NAMES_REQUIRED`
+##### `--name=DEVICE_NAME`
 
 
-Name of your Beta group. Multiple arguments
+Name of the Device
+##### `--udid=DEVICE_UDID`
+
+
+Device ID (UDID)
+### Optional arguments for action `register-device`
+
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
+
+
+Bundle ID platform. Default:&nbsp;`IOS`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
