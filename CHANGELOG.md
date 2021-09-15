@@ -1,3 +1,18 @@
+Version 0.11.0
+-------------
+
+**Features**
+
+- New `app-store-connect register-device` action to add new device to Apple Developer team. Registering a device allows creating a provisioning profile for app testing and ad hoc distribution.
+
+**Development / Docs**
+
+- Rename `DeviceArgument.DEVICE_NAME` CLI argument to `DeviceArgument.DEVICE_NAME_OPTIONAL`.
+- Update docs for action `app-store-connect beta-groups add-build`.
+- Update docs for action `app-store-connect beta-groups remove-build`.
+- Update docs for action `app-store-connect list-devices`.
+- Add docs for action `app-store-connect register-device`.
+
 Version 0.10.3
 -------------
 
