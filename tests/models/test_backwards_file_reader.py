@@ -7,15 +7,24 @@ import pytest
 from codemagic.models.backwards_file_reader import BackwardsFileReader
 
 
+@pytest.fixture
+def random_lines():
+    lines = []
+    for c in (string.ascii_letters + string.digits):
+        lines.extend([random.randint(80, 10000) * c, ''])
+    return lines
+
+
 @pytest.mark.parametrize('buffer_size', [2**i for i in range(5, 15)])
-def test_backwards_file_reader(buffer_size):
-    lines = [random.randint(80, 10000) * c for c in (string.ascii_letters + string.digits)]
+def test_backwards_file_reader(buffer_size, random_lines):
     with tempfile.NamedTemporaryFile(mode='w') as tf:
-        for line in lines:
-            tf.write(f'{line}\n')
+        for i, line in enumerate(random_lines, 1):
+            # Do not write double line break in the very end
+            line_end = '\n' if i < len(random_lines) else ''
+            tf.write(f'{line}{line_end}')
         tf.flush()
 
         reader = BackwardsFileReader(tf.name, buffer_size)
         backwards_lines = list(reader.iter_backwards())
 
-    assert backwards_lines == list(reversed(lines))
+    assert list(reversed(backwards_lines)) == random_lines

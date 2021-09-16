@@ -22,20 +22,17 @@ class BackwardsFileReader:
                 fd.seek(self._size - offset_from_end)
                 buffer = fd.read(min(unprocessed_size, self._buffer_size))
                 unprocessed_size -= self._buffer_size
-                lines = buffer.split('\n')
+                lines = buffer.splitlines()
 
-                if current_segment is not None:
-                    if buffer.endswith('\n'):
-                        # Previous segment was not a half line.
-                        yield current_segment
-                    else:
-                        # Previous segment did not end at a line break.
-                        lines[-1] += current_segment
+                if buffer.endswith('\n'):  # Previous segment was not a half line.
+                    yield current_segment or ''
+                else:  # Previous segment did not end at a line break.
+                    lines[-1] += current_segment or ''
 
                 # Retain the first line for next iteration as it might might have some
                 # portion not captured by current buffer.
                 current_segment = lines[0]
-                for line in filter(bool, reversed(lines[1:])):
+                for line in reversed(lines[1:]):
                     yield line
 
             if current_segment is not None:
