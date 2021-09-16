@@ -345,7 +345,7 @@ class _XcodebuildLogErrorFinder:
         return error_lines
 
     def _get_failed_command_logs(self, failed_commands, max_lines) -> Dict[str, List[str]]:
-        lines_cache = []
+        lines_cache: List[str] = []
         capture_lines = False
         logs: Dict[str, List[str]] = {}
         for line in self._backwards_log_iterator:

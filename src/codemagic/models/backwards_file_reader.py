@@ -1,5 +1,6 @@
 import io
 from pathlib import Path
+from typing import Iterable
 from typing import Union
 
 
@@ -10,7 +11,7 @@ class BackwardsFileReader:
         self._size = self._file_path.stat().st_size
         self._buffer_size = buffer_size
 
-    def iter_backwards(self):
+    def iter_backwards(self) -> Iterable[str]:
         """A generator that returns the lines of a file in reverse order"""
         with open(self._file_path) as fd:
             current_segment = None
