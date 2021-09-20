@@ -3,11 +3,11 @@ Version 0.11.1
 
 **Features**
 
-- Show unformatted Xcode build errors on `xcode-project build-ipa` invocations that fail due to errors on `xcodebuild archive`. PR #153.
+- Show unformatted Xcode build errors on `xcode-project build-ipa` invocations that fail due to errors on `xcodebuild archive`. [PR #153](https://github.com/codemagic-ci-cd/cli-tools/pull/153).
 
 **Development / Docs**
 
-- Add a generator `codemagic.utilities.backwards_file_reader.iter_backwards` that returns the lines of a file in reverse order. PR #153.
+- Add a generator `codemagic.utilities.backwards_file_reader.iter_backwards` that returns the lines of a file in reverse order. [PR #153](https://github.com/codemagic-ci-cd/cli-tools/pull/153).
 
 Version 0.11.0
 -------------
