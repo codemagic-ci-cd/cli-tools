@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from codemagic.models.backwards_file_reader import BackwardsFileReader
+from codemagic.utilities.backwards_file_reader import iter_backwards
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_backwards_file_reader(buffer_size, random_lines):
             tf.write(f'{line}{line_end}')
         tf.flush()
 
-        reader = BackwardsFileReader(tf.name, buffer_size)
-        backwards_lines = list(reader.iter_backwards())
+        iterator = iter_backwards(tf.name, buffer_size)
+        backwards_lines = list(iterator)
 
     assert list(reversed(backwards_lines)) == random_lines

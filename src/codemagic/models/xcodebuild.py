@@ -19,9 +19,9 @@ from typing import Union
 from codemagic.cli import CliProcess
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
+from codemagic.utilities.backwards_file_reader import iter_backwards
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
 
-from .backwards_file_reader import BackwardsFileReader
 from .export_options import ExportOptions
 from .simulator import CoreSimulatorService
 from .simulator import Simulator
@@ -327,7 +327,7 @@ class _XcodebuildLogErrorFinder:
 
     def __init__(self, log_path: Union[pathlib.Path, str]):
         self._log_path = pathlib.Path(log_path)
-        self._backwards_log_iterator = BackwardsFileReader(log_path).iter_backwards()
+        self._backwards_log_iterator = iter_backwards(log_path)
 
     def _get_failed_commands(self):
         capture_lines = False
