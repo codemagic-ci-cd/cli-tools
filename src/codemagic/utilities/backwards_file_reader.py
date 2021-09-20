@@ -29,7 +29,7 @@ def iter_backwards(file_path: Union[Path, str], buffer_size=8192) -> Iterable[st
             else:  # Previous segment did not end at a line break.
                 lines[-1] += current_segment or ''
 
-            # Retain the first line for next iteration as it might might have some
+            # Retain the first line for next iteration as it might have some
             # portion not captured by current buffer.
             current_segment = lines[0]
             for line in reversed(lines[1:]):
