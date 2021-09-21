@@ -549,10 +549,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             return ExportOptions.from_path(export_options_plist)
         except FileNotFoundError:
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
-                f'Specified export options file {export_options_plist} does not exist')
+                f'Path "{export_options_plist}" does not exist')
         except ValueError:
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
-                f'Specified export options file {export_options_plist} is not a valid property list')
+                f'File "{export_options_plist}" is not a valid property list')
 
     def _get_test_destinations(self, requested_devices: Optional[List[str]]) -> List[Simulator]:
         if not requested_devices:
