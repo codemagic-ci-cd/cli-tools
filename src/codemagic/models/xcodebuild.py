@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import re
 import shlex
 import subprocess
 import sys
@@ -10,12 +11,15 @@ import time
 from functools import reduce
 from operator import add
 from typing import IO
+from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic.cli import CliProcess
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.utilities import log
+from codemagic.utilities.backwards_file_reader import iter_backwards
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
 
 from .export_options import ExportOptions
@@ -203,7 +207,16 @@ class Xcodebuild(RunningCliAppMixin):
         xcarchive = pathlib.Path(temp_dir)
 
         cmd = self._construct_archive_command(xcarchive, export_options, xcargs, custom_flags)
-        self._run_command(cmd, f'Failed to archive {self.workspace or self.project}')
+        try:
+            self._run_command(cmd, f'Failed to archive {self.workspace or self.project}')
+        except IOError as error:
+            if not self.xcpretty:
+                raise
+            message, process = error.args
+            errors = _XcodebuildLogErrorFinder(self.logs_path).find_failure_logs()
+            if not errors:
+                raise
+            raise IOError('\n'.join([f'{message}. The following build commands failed:', '', errors]), process)
 
         return xcarchive
 
@@ -308,3 +321,69 @@ class XcodebuildCliProcess(CliProcess):
                 self._buffer = None
             if self.xcpretty:
                 self.xcpretty.flush()
+
+
+class _XcodebuildLogErrorFinder:
+
+    def __init__(self, log_path: Union[pathlib.Path, str]):
+        self._log_path = pathlib.Path(log_path)
+        self._backwards_log_iterator = iter_backwards(log_path)
+
+    def _get_failed_commands(self):
+        capture_lines = False
+        error_lines = []
+        for line in self._backwards_log_iterator:
+            line = line.strip()
+            if re.match(r'^\(\d+ failures?\)$', line):
+                capture_lines = True
+                continue
+            elif line == 'The following build commands failed:':
+                break
+            elif capture_lines and line:
+                error_lines.append(line)
+
+        return error_lines
+
+    def _get_failed_command_logs(self, failed_commands, max_lines) -> Dict[str, List[str]]:
+        lines_cache: List[str] = []
+        capture_lines = False
+        logs: Dict[str, List[str]] = {}
+        for line in self._backwards_log_iterator:
+            line = line.strip()
+            if not line:
+                continue
+            elif re.match(r'^\*\* [^ ]+ FAILED \*\*', line):  # Match lines like '** ARCHIVE FAILED **'
+                # From here on upwards we can start looking for error logs
+                capture_lines = True
+                continue
+            elif line in failed_commands:
+                # Found a line that refers to a failed command, save its logs
+                if line not in logs:
+                    # Capture up to 10 last lines of the logs
+                    log_lines = reversed(lines_cache[:max_lines])
+                    logs[line] = ['...', *log_lines] if len(lines_cache) > max_lines else list(log_lines)
+                if set(logs.keys()) == set(failed_commands):
+                    # All errors are processed, stop
+                    break
+                lines_cache = []
+            elif capture_lines:
+                lines_cache.append(line)
+
+        return logs
+
+    @classmethod
+    def _format_errors(cls, failed_command_logs: Dict[str, List[str]]) -> str:
+        lines = []
+        for error in sorted(failed_command_logs.keys()):
+            lines.append(error)
+            for log_line in failed_command_logs[error]:
+                lines.append(f'\t{log_line}')
+            lines.append('')
+        return '\n'.join(lines[:-1])
+
+    def find_failure_logs(self, max_lines_per_error=6) -> Optional[str]:
+        failed_commands = self._get_failed_commands()
+        failed_command_logs = self._get_failed_command_logs(failed_commands, max_lines_per_error)
+        if not failed_command_logs:
+            return None
+        return self._format_errors(failed_command_logs)
