@@ -167,7 +167,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 XcodeArgument.ARCHIVE_FLAGS,
                 XcodeArgument.ARCHIVE_XCARGS,
                 ExportIpaArgument.IPA_DIRECTORY,
-                ExportIpaArgument.EXPORT_OPTIONS_PATH_EXISTING,
+                ExportIpaArgument.EXPORT_OPTIONS_PATH,
                 XcodeArgument.EXPORT_FLAGS,
                 XcodeArgument.EXPORT_XCARGS,
                 ExportIpaArgument.REMOVE_XCARCHIVE,
@@ -184,7 +184,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                   archive_xcargs: Optional[str] = XcodeArgument.ARCHIVE_XCARGS.get_default(),
                   archive_flags: Optional[str] = XcodeArgument.ARCHIVE_FLAGS.get_default(),
                   ipa_directory: pathlib.Path = ExportIpaArgument.IPA_DIRECTORY.get_default(),
-                  export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH_EXISTING.get_default(),
+                  export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
                   export_xcargs: Optional[str] = XcodeArgument.EXPORT_XCARGS.get_default(),
                   export_flags: Optional[str] = XcodeArgument.EXPORT_FLAGS.get_default(),
                   remove_xcarchive: bool = False,
@@ -195,7 +195,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
 
-        export_options = ExportOptions.from_path(export_options_plist)
+        export_options = self._get_export_options_from_path(export_options_plist)
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
@@ -542,6 +542,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if xcode_project is None and xcode_workspace is None:
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(
                 'Workspace or project argument needs to be specified')
+
+    @classmethod
+    def _get_export_options_from_path(cls, export_options_plist: pathlib.Path) -> ExportOptions:
+        try:
+            return ExportOptions.from_path(export_options_plist)
+        except FileNotFoundError:
+            raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
+                f'Specified export options file {export_options_plist} does not exist')
+        except ValueError:
+            raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
+                f'Specified export options file {export_options_plist} is not a valid property list')
 
     def _get_test_destinations(self, requested_devices: Optional[List[str]]) -> List[Simulator]:
         if not requested_devices:

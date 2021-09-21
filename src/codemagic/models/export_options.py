@@ -185,9 +185,13 @@ class ExportOptions(StringConverterMixin):
     def from_path(cls, plist_path: Union[pathlib.Path, AnyStr]) -> ExportOptions:
         if isinstance(plist_path, (bytes, str)):
             plist_path = pathlib.Path(cls._str(plist_path))
-
+        if not plist_path.is_file():
+            raise FileNotFoundError(plist_path)
         with plist_path.open('rb') as fd:
-            data = plistlib.load(fd)  # type: ignore
+            try:
+                data = plistlib.load(fd)  # type: ignore
+            except plistlib.InvalidFileException:
+                raise ValueError('Invalid plist')
         return ExportOptions(**data)
 
     @classmethod

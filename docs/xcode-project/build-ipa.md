@@ -17,7 +17,7 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--archive-flags ARCHIVE_FLAGS]
     [--archive-xcargs ARCHIVE_XCARGS]
     [--ipa-directory IPA_DIRECTORY]
-    [--export-options-plist EXPORT_OPTIONS_PATH_EXISTING]
+    [--export-options-plist EXPORT_OPTIONS_PATH]
     [--export-flags EXPORT_FLAGS]
     [--export-xcargs EXPORT_XCARGS]
     [--remove-xcarchive]
@@ -66,7 +66,7 @@ Pass additional arguments to xcodebuild for the archive phase. For example `COMP
 
 
 Directory where the built ipa is stored. Default:&nbsp;`build/ios/ipa`
-##### `--export-options-plist=EXPORT_OPTIONS_PATH_EXISTING`
+##### `--export-options-plist=EXPORT_OPTIONS_PATH`
 
 
 Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.plist`
