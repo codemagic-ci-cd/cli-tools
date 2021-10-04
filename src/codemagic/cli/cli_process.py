@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
 import os
 import shlex
 import subprocess
@@ -65,6 +64,11 @@ class CliProcess:
         self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _ensure_process_streams_are_non_blocking(self):
+        try:
+            import fcntl
+        except ImportError:
+            return
+
         for stream in (self._process.stdout, self._process.stderr):
             if stream is None:
                 continue

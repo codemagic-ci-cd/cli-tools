@@ -1,3 +1,10 @@
+Version 0.11.2
+-------------
+
+**Development / Docs**
+
+- Do not import `fcntl` module globally in order to support Windows platform.
+
 Version 0.11.1
 -------------
 

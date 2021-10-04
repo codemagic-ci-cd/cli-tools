@@ -1,4 +1,3 @@
-import fcntl
 import os
 import subprocess
 from tempfile import NamedTemporaryFile
@@ -7,6 +6,10 @@ from codemagic import cli
 
 
 def assert_non_blocking(stream):
+    try:
+        import fcntl
+    except ImportError:
+        assert False, 'Failed to import module "fcntl"'
     stream_flags = fcntl.fcntl(stream.fileno(), fcntl.F_GETFL)
     assert stream_flags & os.O_NONBLOCK == os.O_NONBLOCK
 
