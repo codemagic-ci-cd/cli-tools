@@ -24,7 +24,7 @@ class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
     @classmethod
     def create(cls, stream_descriptor: IO, output_stream: IO, blocking: bool = False) -> CliProcessStream:
         if os.name == 'nt':  # Running on Windows
-            stream = _WindowsCliProcessStream(stream_descriptor, output_stream)
+            stream: CliProcessStream = _WindowsCliProcessStream(stream_descriptor, output_stream)
         else:
             stream = _PosixCliProcessStream(stream_descriptor, output_stream)
         if not blocking:
@@ -82,7 +82,7 @@ class _WindowsCliProcessStream(CliProcessStream):
 
     def __init__(self, stream_descriptor: IO, output_stream: IO):
         super().__init__(stream_descriptor, output_stream)
-        self._pipe_handle = msvcrt.get_osfhandle(self._fileno)
+        self._pipe_handle = msvcrt.get_osfhandle(self._fileno)  # type: ignore
 
     def unblock(self):
         # https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-setnamedpipehandlestate
@@ -99,5 +99,5 @@ class _WindowsCliProcessStream(CliProcessStream):
     def read_all(self) -> bytes:
         # https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-peeknamedpipe
         # Check how much is there still remaining in the pipe to be read and use that as the final buffer size
-        _data, buffer_size, _res = winapi.PeekNamedPipe(self._pipe_handle, 1)
+        _data, buffer_size, *_rest = winapi.PeekNamedPipe(self._pipe_handle, 1)
         return self.read(buffer_size)
