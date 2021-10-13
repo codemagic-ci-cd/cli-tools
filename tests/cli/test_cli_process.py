@@ -26,7 +26,6 @@ def test_non_blocking_streams():
     cli_process._process.kill()
 
 
-@pytest.mark.skipif(os.name == 'nt', reason='Cannot run on Windows')
 def test_non_blocking_streams_file_fd():
     with NamedTemporaryFile(mode='wb') as tf:
         cli_process = cli.CliProcess([])
@@ -38,5 +37,7 @@ def test_non_blocking_streams_file_fd():
 
         assert cli_process._process.stdout is None
         assert cli_process._process.stderr is None
+        assert cli_process._stdout_stream is None
+        assert cli_process._stderr_stream is None
 
         cli_process._process.kill()
