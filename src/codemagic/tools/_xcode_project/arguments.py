@@ -139,16 +139,6 @@ class ExportIpaArgument(cli.Argument):
             'default': pathlib.Path('~/export_options.plist').expanduser(),
         },
     )
-    EXPORT_OPTIONS_PATH_EXISTING = cli.ArgumentProperties(
-        key='export_options_plist',
-        flags=('--export-options-plist',),
-        type=cli.CommonArgumentTypes.existing_path,
-        description='Path to the generated export options plist',
-        argparse_kwargs={
-            'required': False,
-            'default': pathlib.Path('~/export_options.plist').expanduser(),
-        },
-    )
     IPA_DIRECTORY = cli.ArgumentProperties(
         key='ipa_directory',
         flags=('--ipa-directory',),
