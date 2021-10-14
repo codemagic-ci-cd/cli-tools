@@ -1,3 +1,16 @@
+Version 0.11.2
+-------------
+
+**Features**
+
+- Support running subprocesses on Windows. [PR #156](https://github.com/codemagic-ci-cd/cli-tools/pull/156)
+- Capture logs from subprocesses on Windows. [PR #156](https://github.com/codemagic-ci-cd/cli-tools/pull/156)
+
+**Development / Docs**
+
+- Do not import `fcntl` module globally in order to support Windows platform. [PR #156](https://github.com/codemagic-ci-cd/cli-tools/pull/156)
+- Create `CliProcessStream` abstraction layer to handle streams on both POSIX and Windows. [PR #156](https://github.com/codemagic-ci-cd/cli-tools/pull/156)
+
 Version 0.11.1
 -------------
 

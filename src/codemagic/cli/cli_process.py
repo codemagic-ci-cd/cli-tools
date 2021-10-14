@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import fcntl
-import os
 import shlex
 import subprocess
 import sys
@@ -15,6 +13,7 @@ from typing import Union
 
 from codemagic.utilities import log
 
+from .cli_process_stream import CliProcessStream
 from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 
@@ -38,6 +37,8 @@ class CliProcess:
             self.safe_form = ObfuscatedCommand(full_command)
         self._stdout = ''
         self._stderr = ''
+        self._stdout_stream: Optional[CliProcessStream] = None
+        self._stderr_stream: Optional[CliProcessStream] = None
 
     @property
     def stdout(self) -> str:
@@ -64,32 +65,19 @@ class CliProcess:
         file_logger.debug('STDERR: %s', self.stderr)
         self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
-    def _ensure_process_streams_are_non_blocking(self):
-        for stream in (self._process.stdout, self._process.stderr):
-            if stream is None:
-                continue
-            stream_descriptor = stream.fileno()
-            current_stream_flags = fcntl.fcntl(stream_descriptor, fcntl.F_GETFL)
-            fcntl.fcntl(stream_descriptor, fcntl.F_SETFL, current_stream_flags | os.O_NONBLOCK)
-
-    def _handle_stream(self, input_stream: IO, output_stream: IO, buffer_size: Optional[int] = None) -> str:
-        if buffer_size:
-            bytes_chunk = input_stream.read(buffer_size)
-        else:
-            bytes_chunk = input_stream.read()
-
-        chunk = '' if bytes_chunk is None else bytes_chunk.decode()
-        if self._print_streams:
-            output_stream.write(chunk)
-        return chunk
-
     def _handle_streams(self, buffer_size: Optional[int] = None):
         if self._process is None:
             return
+        if self._stdout_stream:
+            self._stdout += self._stdout_stream.process_buffer(buffer_size, self._print_streams)
+        if self._stderr_stream:
+            self._stderr += self._stderr_stream.process_buffer(buffer_size, self._print_streams)
+
+    def _configure_process_streams(self):
         if self._process.stdout:
-            self._stdout += self._handle_stream(self._process.stdout, sys.stdout, buffer_size)
+            self._stdout_stream = CliProcessStream.create(self._process.stdout, sys.stdout, blocking=False)
         if self._process.stderr:
-            self._stderr += self._handle_stream(self._process.stderr, sys.stderr, buffer_size)
+            self._stderr_stream = CliProcessStream.create(self._process.stderr, sys.stderr, blocking=False)
 
     def execute(self,
                 stdout: Union[int, IO] = subprocess.PIPE,
@@ -99,7 +87,7 @@ class CliProcess:
         try:
             if not self._dry_run:
                 self._process = subprocess.Popen(self._command_args, stdout=stdout, stderr=stderr)
-                self._ensure_process_streams_are_non_blocking()
+                self._configure_process_streams()
                 while self._process.poll() is None:
                     self._handle_streams(self._buffer_size)
                     time.sleep(0.1)

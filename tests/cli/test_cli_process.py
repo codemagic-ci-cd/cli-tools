@@ -1,23 +1,24 @@
-import fcntl
 import os
 import subprocess
 from tempfile import NamedTemporaryFile
+
+import pytest
 
 from codemagic import cli
 
 
 def assert_non_blocking(stream):
-    stream_flags = fcntl.fcntl(stream.fileno(), fcntl.F_GETFL)
-    assert stream_flags & os.O_NONBLOCK == os.O_NONBLOCK
+    assert os.get_blocking(stream.fileno()) is False
 
 
+@pytest.mark.skipif(os.name == 'nt', reason='Cannot run on Windows')
 def test_non_blocking_streams():
     cli_process = cli.CliProcess([])
     cli_process._process = subprocess.Popen(
         ['sleep', '3'],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    cli_process._ensure_process_streams_are_non_blocking()
+    cli_process._configure_process_streams()
 
     assert_non_blocking(cli_process._process.stdout)
     assert_non_blocking(cli_process._process.stderr)
@@ -32,9 +33,11 @@ def test_non_blocking_streams_file_fd():
             ['sleep', '3'],
             stdout=tf,
             stderr=tf)
-        cli_process._ensure_process_streams_are_non_blocking()
+        cli_process._configure_process_streams()
 
         assert cli_process._process.stdout is None
         assert cli_process._process.stderr is None
+        assert cli_process._stdout_stream is None
+        assert cli_process._stderr_stream is None
 
         cli_process._process.kill()
