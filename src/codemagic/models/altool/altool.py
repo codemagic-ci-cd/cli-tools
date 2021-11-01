@@ -34,7 +34,8 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                  issuer_id: Optional[IssuerId] = None,
                  private_key: Optional[str] = None,
                  username: Optional[str] = None,
-                 password: Optional[str] = None):
+                 password: Optional[str] = None,
+                 verbose: bool = False):
         # JWT authentication fields
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id
@@ -44,6 +45,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         self._password = password  # App Specific Password
         self._validate_authentication_info()
         self.logger = log.get_logger(self.__class__)
+        self.verbose = verbose
 
     @classmethod
     @lru_cache(1)
@@ -103,15 +105,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             except KeyError:
                 pass
 
-    @classmethod
     def _construct_action_command(
-            cls, action_name: str, artifact_path: pathlib.Path, auth_flags: Sequence[str]) -> Tuple[str, ...]:
+            self, action_name: str, artifact_path: pathlib.Path, auth_flags: Sequence[str]) -> Tuple[str, ...]:
+        verbose_flags = ['--verbose'] if self.verbose else []
         return (
             'xcrun', 'altool', action_name,
             '--file', str(artifact_path),
             '--type', PlatformType.from_path(artifact_path).value,
             *auth_flags,
             '--output-format', 'json',
+            *verbose_flags,
         )
 
     def validate_app(self, artifact_path: pathlib.Path) -> Optional[AltoolResult]:
@@ -133,11 +136,19 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         obfuscate_patterns = [self._password] if self._password else []
         try:
             if cli_app:
-                process = cli_app.execute(command, obfuscate_patterns, show_output=False)
+                process = cli_app.execute(
+                    command,
+                    obfuscate_patterns,
+                    show_output=False,
+                    stderr=subprocess.STDOUT,
+                )
                 stdout = process.stdout
                 process.raise_for_returncode()
             else:
-                stdout = subprocess.check_output(command, stderr=subprocess.PIPE).decode()
+                stdout = subprocess.check_output(
+                    command,
+                    stderr=subprocess.STDOUT,
+                ).decode()
         except subprocess.CalledProcessError as cpe:
             stdout = cpe.stdout
             result = self._get_action_result(cpe.stdout)
