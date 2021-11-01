@@ -1,3 +1,14 @@
+Version 0.11.3
+-------------
+
+**Features**
+
+- Add switch to use verbose logging for `altool` subcommands that are executed as part of `app-store-connect publish`. [PR #160](https://github.com/codemagic-ci-cd/cli-tools/pull/160)
+
+**Development / Docs**
+
+- Update `app-store-connect publish` action docs. [PR #160](https://github.com/codemagic-ci-cd/cli-tools/pull/160)
+
 Version 0.11.2
 -------------
 
