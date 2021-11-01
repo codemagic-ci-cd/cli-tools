@@ -24,6 +24,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--skip-package-validation]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    [--verbose-altool-logging]
 ```
 ### Optional arguments for action `publish`
 
@@ -67,6 +68,10 @@ Skip package validation before uploading it to App Store Connect. Use this switc
 
 
 Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+##### `--verbose-altool-logging`
+
+
+Show verbose log output when launching Application Loader tool. That is add `--verbose` flag to `altool` invocations when either validating the package, or while uploading the pakcage to App Store Connect. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
