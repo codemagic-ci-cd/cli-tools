@@ -415,7 +415,8 @@ class CliApp(metaclass=abc.ABCMeta):
     def execute(self, command_args: Sequence[CommandArg],
                 obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
                 show_output: bool = True,
-                suppress_output: bool = False) -> CliProcess:
+                suppress_output: bool = False,
+                **execute_kwargs) -> CliProcess:
         if suppress_output:
             print_streams = False
         else:
@@ -426,7 +427,7 @@ class CliApp(metaclass=abc.ABCMeta):
             self._obfuscate_command(command_args, obfuscate_patterns),
             dry=self.dry_run,
             print_streams=print_streams,
-        ).execute()
+        ).execute(**execute_kwargs)
 
 
 def action(action_name: str,

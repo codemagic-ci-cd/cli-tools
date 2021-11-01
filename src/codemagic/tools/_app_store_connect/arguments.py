@@ -74,6 +74,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class AppStoreConnectVerboseAltoolLogging(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING'
+
     class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
@@ -337,6 +341,20 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
+        },
+    )
+    VERBOSE_ALTOOL_LOGGING = cli.ArgumentProperties(
+        key='verbose_altool_logging',
+        flags=('--verbose-altool-logging',),
+        type=Types.AppStoreConnectVerboseAltoolLogging,
+        description=(
+            'Show verbose log output when launching Application Loader tool. '
+            'That is add `--verbose` flag to `altool` invocations when either validating '
+            'the package, or while uploading the pakcage to App Store Connect.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
         },
     )
 
