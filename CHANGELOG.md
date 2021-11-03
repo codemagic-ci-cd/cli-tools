@@ -3,7 +3,7 @@ Version 0.11.4
 
 **Fixes**
 
-- Fix decoding undefined byte sequences while processing subprocess streams. [PR #161](https://github.com/codemagic-ci-cd/cli-tools/pull/160)
+- Fix decoding undefined byte sequences while processing subprocess streams. [PR #162](https://github.com/codemagic-ci-cd/cli-tools/pull/162)
 
 Version 0.11.3
 -------------
