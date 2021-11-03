@@ -55,7 +55,7 @@ class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
         else:
             bytes_chunk = self.read_all()
 
-        chunk = bytes_chunk.decode()
+        chunk = bytes_chunk.decode(encoding='utf-8', errors='ignore')
         if multiplex_output:
             self._output_stream.write(chunk)
         return chunk
