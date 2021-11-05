@@ -78,6 +78,24 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING'
 
+    class AltoolRetriesCount(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
+        default_value = 10
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
+
+    class AltoolRetryWait(cli.TypedCliArgument[float]):
+        argument_type = float
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRY_WAIT'
+        default_value = 0.5
+
+        @classmethod
+        def _is_valid(cls, value: float) -> bool:
+            return value >= 0
+
     class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
@@ -355,6 +373,28 @@ class PublishArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
+        },
+    )
+    ALTOOL_RETRIES_COUNT = cli.ArgumentProperties(
+        key='altool_retries_count',
+        flags=('--altool-retries',),
+        type=Types.AltoolRetriesCount,
+        description=(
+            'TDB'  # TODO: add docstring
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    ALTOOL_RETRY_WAIT = cli.ArgumentProperties(
+        key='altool_retry_wait',
+        flags=('--altool-retry-wait',),
+        type=Types.AltoolRetryWait,
+        description=(
+            'TDB'  # TODO: add docstring
+        ),
+        argparse_kwargs={
+            'required': False,
         },
     )
 
