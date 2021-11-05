@@ -1,3 +1,14 @@
+Version 0.12.0
+-------------
+
+**Features**
+
+- ...
+
+**Development / Docs**
+
+- ...
+
 Version 0.11.4
 -------------
 
