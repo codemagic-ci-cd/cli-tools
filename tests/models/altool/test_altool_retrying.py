@@ -12,6 +12,7 @@ from codemagic.models.altool.altool import AltoolCommandError
 
 @pytest.fixture
 def mock_altool():
+    Altool._ensure_altool = mock.Mock(return_value=True)
     altool = Altool(
         username='user@example.com',
         password='xxxx-yyyy-zzzz-wwww',
