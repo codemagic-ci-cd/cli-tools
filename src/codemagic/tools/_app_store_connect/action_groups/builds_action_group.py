@@ -96,14 +96,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Submit build to TestFlight
         """
 
-        # Workaround to support overriding default value by environment variable.
-        if max_build_processing_wait is not None:
-            if isinstance(max_build_processing_wait, Types.MaxBuildProcessingWait):
-                max_processing_minutes = max_build_processing_wait.value
-            else:
-                max_processing_minutes = max_build_processing_wait
-        else:
-            max_processing_minutes = Types.MaxBuildProcessingWait.default_value
+        max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
 
         self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
 

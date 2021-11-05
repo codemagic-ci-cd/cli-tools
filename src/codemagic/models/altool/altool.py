@@ -5,13 +5,16 @@ import os
 import pathlib
 import re
 import subprocess
+import time
 from contextlib import contextmanager
 from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import AnyStr
+from typing import Callable
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -25,6 +28,12 @@ if TYPE_CHECKING:
     from codemagic.apple.app_store_connect import IssuerId
     from codemagic.apple.app_store_connect import KeyIdentifier
     from codemagic.cli import CliApp
+
+
+class AltoolCommandError(Exception):
+    def __init__(self, error_message: str, process_output: str):
+        super().__init__(error_message)
+        self.process_output = process_output
 
 
 class Altool(RunningCliAppMixin, StringConverterMixin):
@@ -117,22 +126,70 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             *verbose_flags,
         )
 
-    def validate_app(self, artifact_path: pathlib.Path) -> Optional[AltoolResult]:
+    def validate_app(
+            self,
+            artifact_path: pathlib.Path,
+            retries: int = 1,
+            retry_wait_seconds: Union[int, float] = 0.5,
+    ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--validate-app', artifact_path, auth_flags)
-            return self._run_command(cmd, f'Failed to validate archive at "{artifact_path}"')
+            return self._run_retrying_command(cmd, artifact_path, 'validate', retries, retry_wait_seconds)
 
-    def upload_app(self, artifact_path) -> Optional[AltoolResult]:
+    def upload_app(
+            self,
+            artifact_path: pathlib.Path,
+            retries: int = 1,
+            retry_wait_seconds: Union[int, float] = 0.5,
+    ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
             cmd = self._construct_action_command('--upload-app', artifact_path, auth_flags)
-            return self._run_command(cmd, f'Failed to upload archive at "{artifact_path}"')
+            return self._run_retrying_command(cmd, artifact_path, 'upload', retries, retry_wait_seconds)
 
-    def _run_command(self, command: Sequence[str], error_message: str) -> Optional[AltoolResult]:
-        process = None
-        stdout = ''
+    def _run_retrying_command(
+            self,
+            command: Sequence[str],
+            artifact_path: pathlib.Path,
+            action_name: str,
+            retries: int,
+            retry_delay: Union[int, float],
+    ) -> Optional[AltoolResult]:
         cli_app = self.get_current_cli_app()
+        initial_retry_count = retries
+        attempt = 0
+
+        if cli_app:
+            print_fn: Callable[[str], None] = cli_app.echo
+        else:
+            print_fn = print
+
+        while attempt == 0 or retries > 0:
+            retries -= 1
+            attempt += 1
+            try:
+                return self._run_command(command, f'Failed to {action_name} archive at "{artifact_path}"', cli_app)
+            except AltoolCommandError as error:
+                has_retries = retries > 0
+                should_retry = self._should_retry_command(error.process_output)
+                if has_retries and should_retry:
+                    if attempt == 1:
+                        print_fn(f'Failed to {action_name} archive, but this might be a temporary issue, retrying...')
+                    else:
+                        print_fn(f'Attempt #{attempt} to {action_name} failed, retrying...')
+                else:
+                    if initial_retry_count > retries + 1:  # Only print this in case retrying was used
+                        print_fn(f'Attempt #{attempt} to {action_name} failed.')
+                    self._log_process_output(error.process_output, cli_app)
+                    raise IOError(str(error)) from error
+
+            self.logger.debug(f'Wait {retry_delay:.1f}s after failed attempt #{attempt}, {retries} tries remaining')
+            time.sleep(retry_delay)
+        raise RuntimeError('Did not return')
+
+    def _run_command(
+            self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp]) -> Optional[AltoolResult]:
         obfuscate_patterns = [self._password] if self._password else []
         try:
             if cli_app:
@@ -155,11 +212,19 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             if result and result.product_errors:
                 product_errors = '\n'.join(pe.message for pe in result.product_errors)
                 error_message = f'{error_message}:\n{product_errors}'
-            raise IOError(error_message, process)
-        finally:
-            self._log_process_output(stdout, cli_app)
+            raise AltoolCommandError(error_message, self._str(stdout or ''))
 
+        self._log_process_output(stdout, cli_app)
         return self._get_action_result(stdout)
+
+    @classmethod
+    def _should_retry_command(cls, process_output: str):
+        patterns = (
+            re.compile('Unable to authenticate.*-19209'),
+            re.compile('server returned an invalid response.*try your request again'),
+            re.compile('The request timed out.'),
+        )
+        return any(pattern.search(process_output) for pattern in patterns)
 
     @classmethod
     def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:

@@ -34,6 +34,22 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         self._from_environment = from_environment
 
     @classmethod
+    def resolve_value(cls, argument_instance: Optional[Union[T, TypedCliArgument]]) -> T:
+        """
+        Resolve variable value from either typed argument or literal value, or
+        return the default value defined for the typed argument in case no argument
+        instance is available.
+        This is a workaround to support overriding default value by environment variable.
+        """
+        if argument_instance is not None:
+            if isinstance(argument_instance, cls):
+                return argument_instance.value
+            else:
+                return argument_instance  # type: ignore
+        assert cls.default_value is not None
+        return cls.default_value
+
+    @classmethod
     def from_environment_variable_default(cls) -> Optional['TypedCliArgument[T]']:
         if cls.environment_variable_key is None:
             return None

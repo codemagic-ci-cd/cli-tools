@@ -300,7 +300,7 @@ class Writer:
 
     def write_description(self, content: str):
         content = str_plain(content)
-        self.file.new_paragraph(f'**{content}**')
+        self.file.new_paragraph(f'**{content}**', wrap_width=0)
 
     def write_command_usage(self,
                             generator: ToolDocumentationGenerator,
@@ -317,7 +317,7 @@ class Writer:
             text=header + flat_content,
             text_align='left',
         )
-        self.file.write(table)
+        self.file.write(table, wrap_width=0)
 
     def write_tools_table(self, tools: List[cli.CliApp]):
         def _get_tool_link(tool: cli.CliApp) -> str:
@@ -361,7 +361,7 @@ class Writer:
     def _write_command_usage(cls, file: MdUtils, lines: List[str]):
         file.new_header(level=3, title='Usage', add_table_of_contents='n')
         main_lines = ''.join([f'    {line}\n' for line in lines[1:]])
-        file.write(f'```bash\n{lines[0]}\n{main_lines}```')
+        file.write(f'```bash\n{lines[0]}\n{main_lines}```', wrap_width=0)
 
     @classmethod
     def _write_arguments(cls, file: MdUtils, title: str, args: List[SerializedArgument]):
@@ -390,7 +390,7 @@ class Writer:
         for arg in args:
             description = _process_description(arg).replace('..', '.')
             file.new_header(level=5, title=f'`{_process_flag(arg)}`', add_table_of_contents='n')
-            file.new_paragraph(description)
+            file.new_paragraph(description, wrap_width=0)
 
 
 def str_plain(string: str) -> str:

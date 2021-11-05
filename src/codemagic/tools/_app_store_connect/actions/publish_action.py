@@ -39,7 +39,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-                PublishArgument.VERBOSE_ALTOOL_LOGGING,
+                PublishArgument.ALTOOL_RETRIES_COUNT,
+                PublishArgument.ALTOOL_RETRY_WAIT,
+                PublishArgument.ALTOOL_VERBOSE_LOGGING,
                 action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
@@ -51,7 +53,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                 beta_group_names: Optional[List[str]] = None,
                 skip_package_validation: Optional[bool] = None,
-                verbose_altool_logging: Optional[bool] = None,
+                altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
+                altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
+                altool_verbose_logging: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
         Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
@@ -76,7 +80,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 key_identifier=self._key_identifier,
                 issuer_id=self._issuer_id,
                 private_key=self._private_key,
-                verbose=bool(verbose_altool_logging),
+                verbose=bool(altool_verbose_logging),
             )
         except ValueError as ve:
             raise AppStoreConnectError(str(ve))
@@ -85,7 +89,13 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         failed_packages: List[str] = []
         for application_package in application_packages:
             try:
-                self._publish_application_package(altool, application_package, validate_package)
+                self._publish_application_package(
+                    altool,
+                    application_package,
+                    validate_package,
+                    Types.AltoolRetriesCount.resolve_value(altool_retries_count),
+                    Types.AltoolRetryWait.resolve_value(altool_retry_wait),
+                )
                 if isinstance(application_package, Ipa):
                     self._handle_ipa_testflight_submission(
                         application_package,
@@ -106,17 +116,23 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
     def _publish_application_package(
-            self, altool: Altool, application_package: Union[Ipa, MacOsPackage], validate_package: bool):
+            self,
+            altool: Altool,
+            application_package: Union[Ipa, MacOsPackage],
+            validate_package: bool,
+            altool_retries: int,
+            altool_retry_wait: float,
+    ):
         """
         :raises IOError in case any step of publishing fails
         """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
         if validate_package:
-            self._validate_artifact_with_altool(altool, application_package.path)
+            self._validate_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
         else:
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
-        self._upload_artifact_with_altool(altool, application_package.path)
+        self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
 
     def _handle_ipa_testflight_submission(
         self,
@@ -243,14 +259,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(f'No application packages found for patterns {patterns}')
         return application_packages
 
-    def _validate_artifact_with_altool(self, altool: Altool, artifact_path: pathlib.Path):
+    def _validate_artifact_with_altool(
+            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float):
         self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
-        result = altool.validate_app(artifact_path)
+        result = altool.validate_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
         message = result.success_message if result else f'No errors validating archive at "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
 
-    def _upload_artifact_with_altool(self, altool: Altool, artifact_path: pathlib.Path):
+    def _upload_artifact_with_altool(
+            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float):
         self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
-        result = altool.upload_app(artifact_path)
+        result = altool.upload_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))

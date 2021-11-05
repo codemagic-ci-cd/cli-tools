@@ -74,9 +74,27 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
-    class AppStoreConnectVerboseAltoolLogging(cli.TypedCliArgument[bool]):
+    class AltoolRetriesCount(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
+        default_value = 10
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
+
+    class AltoolRetryWait(cli.TypedCliArgument[float]):
+        argument_type = float
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRY_WAIT'
+        default_value = 0.5
+
+        @classmethod
+        def _is_valid(cls, value: float) -> bool:
+            return value >= 0
+
+    class AltoolVerboseLogging(cli.TypedCliArgument[bool]):
         argument_type = bool
-        environment_variable_key = 'APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING'
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_VERBOSE_LOGGING'
 
     class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
         argument_type = int
@@ -343,10 +361,10 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
-    VERBOSE_ALTOOL_LOGGING = cli.ArgumentProperties(
-        key='verbose_altool_logging',
-        flags=('--verbose-altool-logging',),
-        type=Types.AppStoreConnectVerboseAltoolLogging,
+    ALTOOL_VERBOSE_LOGGING = cli.ArgumentProperties(
+        key='altool_verbose_logging',
+        flags=('--altool-verbose-logging',),
+        type=Types.AltoolVerboseLogging,
         description=(
             'Show verbose log output when launching Application Loader tool. '
             'That is add `--verbose` flag to `altool` invocations when either validating '
@@ -355,6 +373,32 @@ class PublishArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
+        },
+    )
+    ALTOOL_RETRIES_COUNT = cli.ArgumentProperties(
+        key='altool_retries_count',
+        flags=('--altool-retries',),
+        type=Types.AltoolRetriesCount,
+        description=(
+            'Define how many times should the package validation or upload action be attempted in case it '
+            'failed due to a known `altool` issue (authentication failure or request timeout).'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    ALTOOL_RETRY_WAIT = cli.ArgumentProperties(
+        key='altool_retry_wait',
+        flags=('--altool-retry-wait',),
+        type=Types.AltoolRetryWait,
+        description=(
+            'For how long (in seconds) should the tool wait between the retries of package validation or '
+            'upload action retries in case they failed due to a known `altool` issues '
+            '(authentication failure or request timeout). '
+            f'See also {ALTOOL_RETRIES_COUNT.flags[0]} for more configuration options.'
+        ),
+        argparse_kwargs={
+            'required': False,
         },
     )
 
