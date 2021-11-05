@@ -39,9 +39,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-                PublishArgument.VERBOSE_ALTOOL_LOGGING,
                 PublishArgument.ALTOOL_RETRIES_COUNT,
                 PublishArgument.ALTOOL_RETRY_WAIT,
+                PublishArgument.ALTOOL_VERBOSE_LOGGING,
                 action_options={'requires_api_client': False})
     def publish(self,
                 application_package_path_patterns: Sequence[pathlib.Path],
@@ -53,9 +53,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                 beta_group_names: Optional[List[str]] = None,
                 skip_package_validation: Optional[bool] = None,
-                verbose_altool_logging: Optional[bool] = None,
                 altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
                 altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
+                altool_verbose_logging: Optional[bool] = None,
                 max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
         """
         Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
@@ -80,7 +80,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 key_identifier=self._key_identifier,
                 issuer_id=self._issuer_id,
                 private_key=self._private_key,
-                verbose=bool(verbose_altool_logging),
+                verbose=bool(altool_verbose_logging),
             )
         except ValueError as ve:
             raise AppStoreConnectError(str(ve))

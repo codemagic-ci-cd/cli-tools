@@ -74,10 +74,6 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
-    class AppStoreConnectVerboseAltoolLogging(cli.TypedCliArgument[bool]):
-        argument_type = bool
-        environment_variable_key = 'APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING'
-
     class AltoolRetriesCount(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
@@ -95,6 +91,10 @@ class Types:
         @classmethod
         def _is_valid(cls, value: float) -> bool:
             return value >= 0
+
+    class AltoolVerboseLogging(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_VERBOSE_LOGGING'
 
     class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
         argument_type = int
@@ -361,10 +361,10 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
-    VERBOSE_ALTOOL_LOGGING = cli.ArgumentProperties(
-        key='verbose_altool_logging',
-        flags=('--verbose-altool-logging',),
-        type=Types.AppStoreConnectVerboseAltoolLogging,
+    ALTOOL_VERBOSE_LOGGING = cli.ArgumentProperties(
+        key='altool_verbose_logging',
+        flags=('--altool-verbose-logging',),
+        type=Types.AltoolVerboseLogging,
         description=(
             'Show verbose log output when launching Application Loader tool. '
             'That is add `--verbose` flag to `altool` invocations when either validating '
