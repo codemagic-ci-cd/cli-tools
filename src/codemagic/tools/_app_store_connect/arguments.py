@@ -392,8 +392,9 @@ class PublishArgument(cli.Argument):
         flags=('--altool-retry-wait',),
         type=Types.AltoolRetryWait,
         description=(
-            'For how long (in should) the tool wait between the retries of package validation or upload actions '
-            'in case they failed due to known `altool` issues (authentication failure or request timeout). '
+            'For how long (in seconds) should the tool wait between the retries of package validation or '
+            'upload actions in case they failed due to known `altool` issues '
+            '(authentication failure or request timeout). '
             f'See also {ALTOOL_RETRIES_COUNT.flags[0]} for more configuration options.'
         ),
         argparse_kwargs={
