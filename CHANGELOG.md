@@ -1,13 +1,22 @@
 Version 0.12.0
 -------------
 
+**Breaking**
+
+- Action `app-store-connect publish` option `--verbose-altool-logging` was renamed to `--altool-verbose-logging`. Corresponding environment variable configuration options was also changed from `APP_STORE_CONNECT_VERBOSE_ALTOOL_LOGGING` to `APP_STORE_CONNECT_ALTOOL_VERBOSE_LOGGING`. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+- Python API for `AppStoreConnect.publish` was changed: keyword argument `verbose_altool_logging` was renamed to `altool_verbose_logging`. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+
 **Features**
 
-- ...
+- Action `app-store-connect pubish` will now retry package validation and upload in case of some known errors (authentication failure, timeout) for configured amount of time. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+- Add new option `--altool-retries` to action `app-store-connect pubish` to configure how many times `altool` action will be retried on known flaky error. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+- Add new option `--altool-retry-wait` to action `app-store-connect pubish` to configure wait duration in seconds between `altool` action retries. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
 
 **Development / Docs**
 
-- ...
+- Do not use line wrapping when generating docs (new feature in [`mdutils` version 1.3.1](https://github.com/didix21/mdutils/blob/master/CHANGELOG.md#v131-2021-07-10)). [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+- Generate new docs for action `app-store-connect publish`. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
+- 
 
 Version 0.11.4
 -------------
