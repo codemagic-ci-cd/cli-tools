@@ -73,11 +73,11 @@ Maximum amount of minutes to wait for the freshly uploaded build to be processed
 ##### `--altool-retries=ALTOOL_RETRIES_COUNT`
 
 
-TDB. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ALTOOL_RETRIES`. [Default: 10]
+How many times should the package validation or upload action attempted in case it failed due to known `altool` issue (authentication failure or request timeout). If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ALTOOL_RETRIES`. [Default: 10]
 ##### `--altool-retry-wait=ALTOOL_RETRY_WAIT`
 
 
-TDB. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ALTOOL_RETRY_WAIT`. [Default: 0.5]
+For how long (in should) the tool wait between the retries of package validation or upload actions in case they failed due to known `altool` issues (authentication failure or request timeout). See also --altool-retries for more configuration options. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ALTOOL_RETRY_WAIT`. [Default: 0.5]
 ##### `--altool-verbose-logging`
 
 

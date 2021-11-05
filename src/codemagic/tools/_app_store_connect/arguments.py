@@ -380,7 +380,8 @@ class PublishArgument(cli.Argument):
         flags=('--altool-retries',),
         type=Types.AltoolRetriesCount,
         description=(
-            'TDB'  # TODO: add docstring
+            'How many times should the package validation or upload action attempted in case it '
+            'failed due to known `altool` issue (authentication failure or request timeout).'
         ),
         argparse_kwargs={
             'required': False,
@@ -391,7 +392,9 @@ class PublishArgument(cli.Argument):
         flags=('--altool-retry-wait',),
         type=Types.AltoolRetryWait,
         description=(
-            'TDB'  # TODO: add docstring
+            'For how long (in should) the tool wait between the retries of package validation or upload actions '
+            'in case they failed due to known `altool` issues (authentication failure or request timeout). '
+            f'See also {ALTOOL_RETRIES_COUNT.flags[0]} for more configuration options.'
         ),
         argparse_kwargs={
             'required': False,
