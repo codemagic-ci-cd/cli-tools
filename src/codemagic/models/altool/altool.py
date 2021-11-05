@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import AnyStr
+from typing import Callable
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 
 
 class AltoolCommandError(Exception):
-    def __init__(self, error_message: str, process_output: Optional[AnyStr]):
+    def __init__(self, error_message: str, process_output: str):
         super().__init__(error_message)
         self.process_output = process_output
 
@@ -158,7 +159,12 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         cli_app = self.get_current_cli_app()
         initial_retry_count = retries
         attempt = 0
-        print_fn = cli_app.echo if cli_app else print
+
+        if cli_app:
+            print_fn: Callable[[str], None] = cli_app.echo
+        else:
+            print_fn = print
+
         while attempt == 0 or retries > 0:
             retries -= 1
             attempt += 1
@@ -180,6 +186,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
 
             self.logger.debug(f'Wait {retry_delay:.1f}s after failed attempt #{attempt}, {retries} tries remaining')
             time.sleep(retry_delay)
+        raise RuntimeError('Did not return')
 
     def _run_command(
             self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp]) -> Optional[AltoolResult]:
@@ -205,20 +212,19 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             if result and result.product_errors:
                 product_errors = '\n'.join(pe.message for pe in result.product_errors)
                 error_message = f'{error_message}:\n{product_errors}'
-            raise AltoolCommandError(error_message, stdout)
+            raise AltoolCommandError(error_message, self._str(stdout or ''))
 
         self._log_process_output(stdout, cli_app)
         return self._get_action_result(stdout)
 
     @classmethod
-    def _should_retry_command(cls, process_output: Optional[AnyStr]):
-        if not process_output:
-            return False
-        output = cls._str(process_output)
+    def _should_retry_command(cls, process_output: str):
         patterns = (
             re.compile('Unable to authenticate.*-19209'),
+            re.compile('server returned an invalid response.*try your request again'),
+            re.compile('The request timed out.'),
         )
-        return any(pattern.search(output) for pattern in patterns)
+        return any(pattern.search(process_output) for pattern in patterns)
 
     @classmethod
     def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:

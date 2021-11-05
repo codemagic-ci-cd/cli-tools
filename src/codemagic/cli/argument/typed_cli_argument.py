@@ -34,7 +34,7 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         self._from_environment = from_environment
 
     @classmethod
-    def resolve_value(cls, argument_instance: Optional[T, TypedCliArgument]) -> Optional[T]:
+    def resolve_value(cls, argument_instance: Optional[Union[T, TypedCliArgument]]) -> T:
         """
         Resolve variable value from either typed argument or literal value, or
         return the default value defined for the typed argument in case no argument
@@ -45,7 +45,8 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
             if isinstance(argument_instance, cls):
                 return argument_instance.value
             else:
-                return argument_instance
+                return argument_instance  # type: ignore
+        assert cls.default_value is not None
         return cls.default_value
 
     @classmethod
