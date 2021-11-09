@@ -20,7 +20,6 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
-from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -41,8 +40,8 @@ from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 
-from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.action_groups import AppsActionGroup
+from ._app_store_connect.action_groups import AppStoreVersionSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaBuildLocalizationsActionGroup
 from ._app_store_connect.action_groups import BetaGroupsActionGroup
@@ -79,12 +78,13 @@ def _get_certificate_key(
 
 @cli.common_arguments(*AppStoreConnectArgument)
 class AppStoreConnect(cli.CliApp,
-                      PublishAction,
+                      AppStoreVersionSubmissionsActionGroup,
                       AppsActionGroup,
-                      BuildsActionGroup,
                       BetaAppReviewSubmissionsActionGroup,
                       BetaBuildLocalizationsActionGroup,
                       BetaGroupsActionGroup,
+                      BuildsActionGroup,
+                      PublishAction,
                       ResourceManagerMixin,
                       PathFinderMixin):
     """
@@ -511,37 +511,6 @@ class AppStoreConnect(cli.CliApp,
             self._save_certificates(certificates, private_key, p12_container_password)
 
         return certificates
-
-    @cli.action('create',
-                AppStoreVersionArgument.APP_STORE_VERSION_ID,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def create_app_store_version_submission(self,
-                                            app_store_version_id: ResourceId,
-                                            should_print: bool = True) -> AppStoreVersionSubmission:
-        """
-        Submit an App Store Version to App Review
-        """
-        return self._create_resource(
-            self.api_client.app_store_version_submissions,
-            should_print,
-            app_store_version=app_store_version_id,
-        )
-
-    @cli.action('delete',
-                AppStoreVersionArgument.APP_STORE_VERSION_SUBMISSION_ID,
-                CommonArgument.IGNORE_NOT_FOUND,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def delete_app_store_version_submission(self,
-                                            app_store_version_submission_id: ResourceId,
-                                            ignore_not_found: bool = False) -> None:
-        """
-        Remove a version submission from App Store review
-        """
-        self._delete_resource(
-            self.api_client.app_store_version_submissions,
-            app_store_version_submission_id,
-            ignore_not_found=ignore_not_found,
-        )
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
