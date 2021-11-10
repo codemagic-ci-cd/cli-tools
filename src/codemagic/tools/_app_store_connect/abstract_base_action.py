@@ -15,13 +15,14 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
+from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
-from ...apple.resources import Build
 from .arguments import BetaBuildInfo
 from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
@@ -66,7 +67,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         ...
 
     def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
+            self, build_id: ResourceId, should_print: bool = True) -> BetaAppReviewSubmission:
         ...
 
     def create_beta_build_localization(

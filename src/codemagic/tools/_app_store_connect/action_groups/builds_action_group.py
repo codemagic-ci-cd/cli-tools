@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from abc import ABCMeta
+from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Union
@@ -10,18 +11,24 @@ from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppLocalization
+from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
+from ..arguments import AppStoreVersionArgument
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
+from ..arguments import CommonArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -92,7 +99,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def submit_to_testflight(
             self,
             build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+    ) -> BetaAppReviewSubmission:
         """
         Submit build to TestFlight
         """
@@ -101,7 +109,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
 
-        build, app = self.api_client.builds.read_with_include(build_id, App)
+        try:
+            build, app = self.api_client.builds.read_with_include(build_id, App)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
 
         try:
             self._assert_app_has_testflight_information(app)
@@ -111,33 +122,52 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if max_processing_minutes:
             build = self._wait_until_build_is_processed(build, max_processing_minutes)
 
-        self.create_beta_app_review_submission(build.id)
+        return self.create_beta_app_review_submission(build.id)
 
     @cli.action(
         'submit-to-app-store',
+        AppStoreVersionArgument.COPYRIGHT,
+        AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
+        AppStoreVersionArgument.VERSION_STRING,
         BuildArgument.BUILD_ID_RESOURCE_ID,
+        CommonArgument.PLATFORM,
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_app_store(
             self,
             build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[datetime] = None,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            platform: Platform = CommonArgument.PLATFORM.get_default(),
+            release_type: Optional[ReleaseType] = None,
+            version_string: Optional[str] = None,
+    ) -> AppStoreVersionSubmission:
         """
-        Submit build to App Store
+        Submit build to App Store review
         """
-
-        # TODO: Support all options that are supported by create new App Store version action
 
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
 
         self.logger.info(Colors.BLUE('\nSubmit uploaded build to App Store review'))
 
-        build, app = self.api_client.builds.read_with_include(build_id, App)
+        try:
+            build = self.api_client.builds.read(build_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
         if max_processing_minutes:
             build = self._wait_until_build_is_processed(build, max_processing_minutes)
 
-        app_store_version = self._ensure_app_store_version(app, build)
-        self.create_app_store_version_submission(app_store_version.id)
+        app_store_version = self._ensure_app_store_version(
+            build,
+            copyright=copyright,
+            earliest_release_date=earliest_release_date,
+            platform=platform,
+            release_type=release_type,
+            version_string=version_string,
+        )
+        return self.create_app_store_version_submission(app_store_version.id)
 
     def _wait_until_build_is_processed(
         self,
@@ -225,7 +255,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         # If nothing matches, then just take the first
         return beta_app_localizations[0] if beta_app_localizations else None
 
-    def _ensure_app_store_version(self, app: App, build: Build) -> AppStoreVersion:
+    def _ensure_app_store_version(self, build: Build, **app_store_version_create_params) -> AppStoreVersion:
         try:
             app_store_version = self.api_client.builds.read_app_store_version(build)
         except AppStoreConnectApiError as api_error:
@@ -233,5 +263,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         if app_store_version is None:
             # Version does not exist, create it
-            app_store_version = self.create_app_store_version(build_id=build, app_id=app)
+            app_store_version = self.create_app_store_version(
+                build_id=build.id,
+                **app_store_version_create_params,
+            )
         return app_store_version
