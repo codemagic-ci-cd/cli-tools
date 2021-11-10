@@ -20,6 +20,7 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Certificate
@@ -259,6 +260,26 @@ class AppStoreVersionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the App Store Version Submission',
     )
+    COPYRIGHT = cli.ArgumentProperties(
+        key='copyright',
+        flags=('--copyright',),
+        description=(
+            'The name of the person or entity that owns the exclusive rights to your app, '
+            'preceded by the year the rights were obtained (for example, "2008 Acme Inc."). '
+            'Do not provide a URL.'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    EARLIEST_RELEASE_DATE = cli.ArgumentProperties(
+        key='earliest_release_date',
+        flags=('--earliest-release-date',),
+        type=cli.CommonArgumentTypes.iso_8601_date,
+        description=(
+            f'Specify earliest return date for scheduled release type '
+            f'(see {Colors.BRIGHT_BLUE("--release-type")} configuration option). '
+            f'ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".'
+        ),
+    )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
         flags=('--platform', '--app-store-version-platform'),
@@ -267,6 +288,25 @@ class AppStoreVersionArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(Platform),
+            'default': Platform.IOS,
+        },
+    )
+    PLATFORM_OPTIONAL = PLATFORM.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Platform),
+    })
+    RELEASE_TYPE = cli.ArgumentProperties(
+        key='release_type',
+        flags=('--release-type',),
+        type=ReleaseType,
+        description=(
+            'Choose when to release the app. You can either manually release the app at a later date on '
+            'the App Store Connect website, or the app version can be automatically released right after '
+            'it has been approved by App Review.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReleaseType),
         },
     )
     VERSION_STRING = cli.ArgumentProperties(

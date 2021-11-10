@@ -13,6 +13,7 @@ from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import Locale
@@ -20,6 +21,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
+from ...apple.resources import Build
 from .arguments import BetaBuildInfo
 from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
@@ -41,7 +43,26 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
+    @classmethod
+    def echo(cls, message: str, *args, **kwargs) -> None:
+        ...
+
     def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
+        ...
+
+    def create_app_store_version(
+            self,
+            build_id: Union[ResourceId, Build],
+            app_id: Optional[Union[ResourceId, App]] = None,
+            platform: Platform = Platform.IOS,
+            copyright: Optional[str] = None,
+            version_string: Optional[str] = None,
+            should_print: bool = True,
+    ) -> AppStoreVersion:
+        ...
+
+    def create_app_store_version_submission(
+            self, app_store_version_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
         ...
 
     def create_beta_app_review_submission(

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -7,13 +8,16 @@ from typing import TypeVar
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceType
 
 IncludedResource = TypeVar('IncludedResource', bound=Resource)
 
@@ -41,6 +45,46 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             return 'build'
         raise ValueError(f'Unknown include type {include_type}')
 
+    def create(
+            self,
+            platform: Platform,
+            version: str,
+            app: Union[ResourceId, App],
+            build: Optional[Union[ResourceId, Build]] = None,
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[datetime] = None,
+            release_type: Optional[ReleaseType] = None,
+    ) -> AppStoreVersion:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
+        """
+        relationships = {
+            'app': {
+                'data': self._get_attribute_data(app, ResourceType.APPS),
+            },
+        }
+        if build:
+            relationships['build'] = {'data': self._get_attribute_data(build, ResourceType.BUILDS)}
+
+        attributes = {
+            'platform': platform.value,
+            'versionString': version,
+        }
+        if release_type:
+            attributes['releaseType'] = release_type.value
+        if copyright:
+            attributes['copyright'] = copyright
+        if earliest_release_date:
+            attributes['earliestReleaseDate'] = Resource.to_iso_8601(earliest_release_date)
+
+        payload = self._get_create_payload(
+            ResourceType.APP_STORE_VERSIONS,
+            attributes=attributes,
+            relationships=relationships,
+        )
+        response = self.client.session.post(f'{self.client.API_URL}/appStoreVersions', json=payload).json()
+        return AppStoreVersion(response['data'], created=True)
+
     def read(self, app_store_version: Union[LinkedResourceData, ResourceId]) -> AppStoreVersion:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_information
@@ -48,6 +92,17 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         app_id = self._get_resource_id(app_store_version)
         response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_id}').json()
         return AppStoreVersion(response['data'])
+
+    def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Build:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
+        """
+        if isinstance(app_store_version, AppStoreVersion):
+            url = app_store_version.relationships.build.links.related
+        else:
+            url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/build'
+        response = self.client.session.get(url).json()
+        return Build(response['data'])
 
     def list_with_include(
             self,

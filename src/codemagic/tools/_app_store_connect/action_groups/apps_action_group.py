@@ -37,7 +37,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 AppArgument.APPLICATION_NAME,
                 AppArgument.APPLICATION_SKU,
                 AppStoreVersionArgument.VERSION_STRING,
-                AppStoreVersionArgument.PLATFORM,
+                AppStoreVersionArgument.PLATFORM_OPTIONAL,
                 AppStoreVersionArgument.APP_STORE_STATE,
                 action_group=AppStoreConnectActionGroup.APPS)
     def list_apps(self,
@@ -107,7 +107,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 AppArgument.APPLICATION_ID_RESOURCE_ID,
                 AppStoreVersionArgument.APP_STORE_VERSION_ID_OPTIONAL,
                 AppStoreVersionArgument.VERSION_STRING,
-                AppStoreVersionArgument.PLATFORM,
+                AppStoreVersionArgument.PLATFORM_OPTIONAL,
                 AppStoreVersionArgument.APP_STORE_STATE,
                 action_group=AppStoreConnectActionGroup.APPS)
     def list_app_store_versions_for_app(

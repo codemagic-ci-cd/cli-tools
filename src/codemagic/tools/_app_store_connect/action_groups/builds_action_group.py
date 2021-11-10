@@ -9,6 +9,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
@@ -112,6 +113,32 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         self.create_beta_app_review_submission(build.id)
 
+    @cli.action(
+        'submit-to-app-store',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        action_group=AppStoreConnectActionGroup.BUILDS)
+    def submit_to_app_store(
+            self,
+            build_id: ResourceId,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
+        """
+        Submit build to App Store
+        """
+
+        # TODO: Support all options that are supported by create new App Store version action
+
+        max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
+
+        self.logger.info(Colors.BLUE('\nSubmit uploaded build to App Store review'))
+
+        build, app = self.api_client.builds.read_with_include(build_id, App)
+        if max_processing_minutes:
+            build = self._wait_until_build_is_processed(build, max_processing_minutes)
+
+        app_store_version = self._ensure_app_store_version(app, build)
+        self.create_app_store_version_submission(app_store_version.id)
+
     def _wait_until_build_is_processed(
         self,
         build: Build,
@@ -197,3 +224,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 return beta_app_localization
         # If nothing matches, then just take the first
         return beta_app_localizations[0] if beta_app_localizations else None
+
+    def _ensure_app_store_version(self, app: App, build: Build) -> AppStoreVersion:
+        try:
+            app_store_version = self.api_client.builds.read_app_store_version(build)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        if app_store_version is None:
+            # Version does not exist, create it
+            app_store_version = self.create_app_store_version(build_id=build, app_id=app)
+        return app_store_version
