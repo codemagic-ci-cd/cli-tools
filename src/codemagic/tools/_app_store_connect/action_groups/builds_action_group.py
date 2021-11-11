@@ -28,7 +28,6 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
-from ..arguments import CommonArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -120,7 +119,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(ve)) from ve
 
         if max_processing_minutes:
-            build = self._wait_until_build_is_processed(build, max_processing_minutes)
+            build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
         return self.create_beta_app_review_submission(build.id)
 
@@ -130,7 +129,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
         AppStoreVersionArgument.VERSION_STRING,
         BuildArgument.BUILD_ID_RESOURCE_ID,
-        CommonArgument.PLATFORM,
+        AppStoreVersionArgument.PLATFORM,
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_app_store(
@@ -139,7 +138,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             copyright: Optional[str] = None,
             earliest_release_date: Optional[datetime] = None,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-            platform: Platform = CommonArgument.PLATFORM.get_default(),
+            platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
     ) -> AppStoreVersionSubmission:
@@ -157,7 +156,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(api_error))
 
         if max_processing_minutes:
-            build = self._wait_until_build_is_processed(build, max_processing_minutes)
+            build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
         app_store_version = self._ensure_app_store_version(
             build,
@@ -169,7 +168,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
         return self.create_app_store_version_submission(app_store_version.id)
 
-    def _wait_until_build_is_processed(
+    def wait_until_build_is_processed(
         self,
         build: Build,
         max_processing_minutes: int,

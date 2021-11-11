@@ -33,6 +33,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 PublishArgument.APPLE_ID,
                 PublishArgument.APP_SPECIFIC_PASSWORD,
                 PublishArgument.SUBMIT_TO_TESTFLIGHT,
+                PublishArgument.SUBMIT_TO_APP_STORE,
                 BuildArgument.LOCALE_DEFAULT,
                 BuildArgument.WHATS_NEW,
                 BuildArgument.BETA_BUILD_LOCALIZATIONS,
@@ -48,6 +49,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 apple_id: Optional[str] = None,
                 app_specific_password: Optional[Types.AppSpecificPassword] = None,
                 submit_to_testflight: Optional[bool] = None,
+                submit_to_app_store: Optional[bool] = None,
                 locale: Optional[Locale] = None,
                 whats_new: Optional[Types.WhatsNewArgument] = None,
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
@@ -100,6 +102,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     self._handle_ipa_testflight_submission(
                         application_package,
                         submit_to_testflight,
+                        submit_to_app_store,
                         beta_build_localizations,
                         locale,
                         whats_new,
@@ -138,13 +141,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         ipa: Ipa,
         submit_to_testflight: Optional[bool],
+        submit_to_app_store: Optional[bool],
         beta_build_localizations: Optional[Types.BetaBuildLocalizations],
         locale: Optional[Locale],
         whats_new: Optional[Types.WhatsNewArgument],
         max_build_processing_wait: Optional[Types.MaxBuildProcessingWait],
         beta_group_names: Optional[List[str]],
     ):
-        if not beta_build_localizations and not whats_new and not submit_to_testflight and not beta_group_names:
+        if not any([beta_build_localizations, whats_new, submit_to_testflight, beta_group_names, submit_to_app_store]):
             return  # Nothing to do with the ipa...
 
         app = self._get_uploaded_build_application(ipa)
@@ -152,10 +156,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
         if beta_build_localizations or whats_new:
             self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
+
+        max_processing_duration: int = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
+        if max_processing_duration > 0:
+            self.wait_until_build_is_processed(build, max_processing_duration)
+
         if submit_to_testflight:
-            self.submit_to_testflight(build.id, max_build_processing_wait)
+            self.submit_to_testflight(build.id, max_build_processing_wait=0)
         if submit_to_testflight and beta_group_names:
             self.add_build_to_beta_groups(build.id, beta_group_names)
+        if submit_to_app_store:
+            self.submit_to_app_store(build.id, max_build_processing_wait=0, version_string=ipa.version)
 
     def _find_build(
         self,

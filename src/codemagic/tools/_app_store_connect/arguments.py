@@ -102,6 +102,10 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
         default_value = 20
 
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value >= 0
+
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
         environment_variable_key = 'APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS'
@@ -344,6 +348,16 @@ class PublishArgument(cli.Argument):
         flags=('--testflight', '-t'),
         type=bool,
         description='Submit an app for Testflight beta app review to allow external testing',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
+        key='submit_to_app_store',
+        flags=('--app-store',),
+        type=bool,
+        description='Submit an app to App Store App Review',
         argparse_kwargs={
             'required': False,
             'action': 'store_true',

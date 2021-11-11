@@ -8,6 +8,7 @@ from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
@@ -50,16 +51,31 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(api_error))
 
         create_params = dict(
-            app=app,
-            build=build,
+            app=app.id,
+            build=build.id,
             copyright=copyright,
             earliest_release_date=earliest_release_date,
             platform=platform,
             release_type=release_type,
-            version=version_string if version_string is not None else build.attributes.version,
+            version=self._get_build_version(version_string, build),
         )
         return self._create_resource(
             self.api_client.app_store_versions,
             should_print,
             **{k: v for k, v in create_params.items() if v is not None},
         )
+
+    def _get_build_version(self, version_string: Optional[str], build: Build) -> str:
+        if version_string:
+            return version_string
+        try:
+            pre_release_version = self.api_client.builds.read_pre_release_version(build)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(
+                f'Build version is not specified and checking it from prerelease version failed: {api_error}')
+
+        if not pre_release_version:
+            raise AppStoreConnectError(
+                'Build version is not specified and build does not have prerelease version to check the version from')
+
+        return pre_release_version.attributes.version
