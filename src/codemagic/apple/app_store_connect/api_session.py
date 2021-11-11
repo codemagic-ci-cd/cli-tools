@@ -61,7 +61,7 @@ class AppStoreConnectApiSession(requests.Session):
         self._cache[cache_key] = response
         return response
 
-    def get(self, url, use_cache: bool = False, **kwargs):
+    def get(self, url, use_cache: bool = False, **kwargs):  # type: ignore
         params = kwargs.get('params')
         if use_cache:
             try:
