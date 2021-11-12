@@ -103,6 +103,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
             mock.patch.object(AppStoreConnect, '_assert_app_has_testflight_information'), \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
+            mock.patch.object(AppStoreConnect, 'wait_until_build_is_processed') as mock_wait_until_build_is_processed, \
             mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
             mock.patch.object(AppStoreConnect, 'submit_to_app_store') as mock_submit_to_app_store, \
             mock.patch.object(AppStoreConnect, 'add_beta_test_info') as mock_add_beta_test_info:
@@ -126,9 +127,46 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
+        mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
         mock_submit_to_app_store.assert_not_called()
         mock_add_beta_test_info.assert_called_with(build.id, None, locale, whats_new)
+
+
+def test_publish_action_app_store_submit(publishing_namespace_kwargs):
+    cli_args = argparse.Namespace(**publishing_namespace_kwargs)
+    with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
+            mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
+            mock.patch.object(AppStoreConnect, '_upload_artifact_with_altool') as mock_upload, \
+            mock.patch.object(AppStoreConnect, '_validate_artifact_with_altool') as mock_validate, \
+            mock.patch.object(AppStoreConnect, '_assert_app_has_testflight_information'), \
+            mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
+            mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
+            mock.patch.object(AppStoreConnect, 'wait_until_build_is_processed') as mock_wait_until_build_is_processed, \
+            mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
+            mock.patch.object(AppStoreConnect, 'submit_to_app_store') as mock_submit_to_app_store, \
+            mock.patch.object(AppStoreConnect, 'add_beta_test_info') as mock_add_beta_test_info:
+        ipa_path = pathlib.Path('app.ipa')
+        mock_find_paths.return_value = [ipa_path]
+        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path, version='1.2.3')]
+        build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
+        mock_get_app.return_value = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
+        mock_get_build.return_value = build
+
+        patterns = [pathlib.Path('path.pattern')]
+        AppStoreConnect.from_cli_args(cli_args).publish(
+            application_package_path_patterns=patterns,
+            submit_to_app_store=True,
+            max_build_processing_wait=Types.MaxBuildProcessingWait('5'),
+        )
+
+        mock_get_packages.assert_called_with(patterns)
+        mock_validate.assert_called()
+        mock_upload.assert_called()
+        mock_wait_until_build_is_processed.assert_called_with(build, 5)
+        mock_submit_to_testflight.assert_not_called()
+        mock_submit_to_app_store.assert_called_with(build.id, max_build_processing_wait=0, version_string='1.2.3')
+        mock_add_beta_test_info.assert_not_called()
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
@@ -194,6 +232,8 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
             mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
+            mock.patch.object(AppStoreConnect, 'submit_to_app_store') as mock_submit_to_app_store, \
+            mock.patch.object(AppStoreConnect, 'wait_until_build_is_processed') as mock_wait_until_build_is_processed, \
             mock.patch.object(AppStoreConnect, 'add_build_to_beta_groups') as mock_add_build_to_beta_groups:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
@@ -213,5 +253,7 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
+        mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
+        mock_submit_to_app_store.assert_not_called()
         mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names)
