@@ -104,6 +104,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
             mock.patch.object(AppStoreConnect, '_get_uploaded_build_application') as mock_get_app, \
             mock.patch.object(AppStoreConnect, '_get_uploaded_build') as mock_get_build, \
             mock.patch.object(AppStoreConnect, 'submit_to_testflight') as mock_submit_to_testflight, \
+            mock.patch.object(AppStoreConnect, 'submit_to_app_store') as mock_submit_to_app_store, \
             mock.patch.object(AppStoreConnect, 'add_beta_test_info') as mock_add_beta_test_info:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
@@ -125,7 +126,8 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
-        mock_submit_to_testflight.assert_called_with(build.id, None)
+        mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
+        mock_submit_to_app_store.assert_not_called()
         mock_add_beta_test_info.assert_called_with(build.id, None, locale, whats_new)
 
 
@@ -211,5 +213,5 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_get_packages.assert_called_with(patterns)
         mock_validate.assert_called()
         mock_upload.assert_called()
-        mock_submit_to_testflight.assert_called_with(build.id, None)
+        mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
         mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names)
