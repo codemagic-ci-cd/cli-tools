@@ -190,12 +190,20 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     def _create_attributes(cls, api_response):
-        defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
+        if cls.Attributes is Resource.Attributes:
+            # In case the resource does not have attributes
+            defined_fields = {}
+        else:
+            defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
         return cls.Attributes(**defined_fields)
 
     @classmethod
     def _create_relationships(cls, api_response):
-        defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
+        if cls.Relationships is Resource.Relationships:
+            # In case the resource does not have relationships
+            defined_fields = {}
+        else:
+            defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
         return cls.Relationships(**defined_fields)
 
     def __init__(self, api_response: Dict, created: bool = False):

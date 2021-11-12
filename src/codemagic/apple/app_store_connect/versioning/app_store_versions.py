@@ -11,6 +11,7 @@ from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
@@ -104,6 +105,20 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         response = self.client.session.get(url).json()
         return Build(response['data'])
 
+    def read_app_store_version_submission(
+            self,
+            app_store_version: Union[AppStoreVersion, ResourceId],
+    ) -> AppStoreVersionSubmission:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_submission_information_of_an_app_store_version
+        """
+        if isinstance(app_store_version, AppStoreVersion):
+            url = app_store_version.relationships.appStoreVersionSubmission.links.related
+        else:
+            url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionSubmission'
+        response = self.client.session.get(url).json()
+        return AppStoreVersionSubmission(response['data'])
+
     def list_with_include(
             self,
             application_id: ResourceId,
@@ -125,3 +140,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             [AppStoreVersion(app_store_version) for app_store_version in results.data],
             [include_type(included) for included in results.included],
         )
+
+    def delete(self, app_store_version: Union[LinkedResourceData, ResourceId]) -> None:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version
+        """
+        app_store_version_id = self._get_resource_id(app_store_version)
+        self.client.session.delete(f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}')

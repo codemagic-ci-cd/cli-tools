@@ -75,6 +75,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class AppStoreConnectSkipPackageUpload(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD'
+
     class AltoolRetriesCount(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
@@ -388,7 +392,7 @@ class PublishArgument(cli.Argument):
     )
     SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
         key='skip_package_validation',
-        flags=('--skip-package-validation',),
+        flags=('--skip-package-validation', '-sv'),
         type=Types.AppStoreConnectSkipPackageValidation,
         description=(
             'Skip package validation before uploading it to App Store Connect. '
@@ -400,9 +404,23 @@ class PublishArgument(cli.Argument):
             'action': 'store_true',
         },
     )
+    SKIP_PACKAGE_UPLOAD = cli.ArgumentProperties(
+        key='skip_package_upload',
+        flags=('--skip-package-upload', '-su'),
+        type=Types.AppStoreConnectSkipPackageUpload,
+        description=(
+            'Skip package upload before doing any other TestFlight or App Store related actions. '
+            'Using this switch will opt out from running `altool --upload-app` as part of publishing '
+            'action. Use this option in case your application package is already uploaded to App Store.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
         key='max_build_processing_wait',
-        flags=('--max-build-processing-wait',),
+        flags=('--max-build-processing-wait', '-w'),
         type=Types.MaxBuildProcessingWait,
         description=(
             'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '

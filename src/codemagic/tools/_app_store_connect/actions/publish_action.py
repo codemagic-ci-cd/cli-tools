@@ -39,6 +39,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 BuildArgument.BETA_BUILD_LOCALIZATIONS,
                 BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
                 PublishArgument.SKIP_PACKAGE_VALIDATION,
+                PublishArgument.SKIP_PACKAGE_UPLOAD,
                 PublishArgument.MAX_BUILD_PROCESSING_WAIT,
                 PublishArgument.ALTOOL_RETRIES_COUNT,
                 PublishArgument.ALTOOL_RETRY_WAIT,
@@ -55,6 +56,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
                 beta_group_names: Optional[List[str]] = None,
                 skip_package_validation: Optional[bool] = None,
+                skip_package_upload: Optional[bool] = None,
                 altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
                 altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
                 altool_verbose_logging: Optional[bool] = None,
@@ -88,6 +90,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(ve))
 
         validate_package = not bool(skip_package_validation)
+        upload_package = not bool(skip_package_upload)
         failed_packages: List[str] = []
         for application_package in application_packages:
             try:
@@ -95,6 +98,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     altool,
                     application_package,
                     validate_package,
+                    upload_package,
                     Types.AltoolRetriesCount.resolve_value(altool_retries_count),
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
                 )
@@ -123,6 +127,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             altool: Altool,
             application_package: Union[Ipa, MacOsPackage],
             validate_package: bool,
+            upload_package: bool,
             altool_retries: int,
             altool_retry_wait: float,
     ):
@@ -131,11 +136,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
+
         if validate_package:
             self._validate_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
         else:
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
-        self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
+
+        if upload_package:
+            self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
+        else:
+            self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
 
     def _handle_ipa_testflight_submission(
         self,

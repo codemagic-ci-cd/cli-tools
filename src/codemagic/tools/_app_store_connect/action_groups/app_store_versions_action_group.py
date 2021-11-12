@@ -65,6 +65,24 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             **{k: v for k, v in create_params.items() if v is not None},
         )
 
+    @cli.action(
+        'delete',
+        AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        CommonArgument.IGNORE_NOT_FOUND,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
+    )
+    def delete_app_store_version(self,
+                                 app_store_version_id: ResourceId,
+                                 ignore_not_found: bool = False) -> None:
+        """
+        Delete specified App Store version from Apple Developer portal
+        """
+        self._delete_resource(
+            self.api_client.app_store_versions,
+            app_store_version_id,
+            ignore_not_found,
+        )
+
     def _get_build_version(self, version_string: Optional[str], build: Build) -> str:
         if version_string:
             return version_string

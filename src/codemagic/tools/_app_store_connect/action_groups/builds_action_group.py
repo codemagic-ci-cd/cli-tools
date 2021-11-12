@@ -261,9 +261,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(api_error))
 
         if app_store_version is None:
-            # Version does not exist, create it
+            # Version does not exist, create a new version for App Store review submission
+            self.logger.info(f'\n{AppStoreVersion} does not exist for build {build.id}')
             app_store_version = self.create_app_store_version(
                 build_id=build.id,
                 **app_store_version_create_params,
             )
+        else:
+            # Use existing version for App Store review submission
+            self.logger.info(Colors.GREEN(f'\nFound {AppStoreVersion} for build {build.id}'))
+            self.printer.print_resource(app_store_version, True)
+        self.logger.info('')
+
         return app_store_version
