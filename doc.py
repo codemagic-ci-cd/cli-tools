@@ -380,7 +380,7 @@ class Writer:
         self._write_arguments(self.file, f'Required arguments for {obj}', required)
         self._write_arguments(self.file, f'Optional arguments for {obj}', optional)
         for group_name, custom_arguments in custom.items():
-            self._write_arguments(self.file, f'Optional arguments for command {obj} to {group_name}', custom_arguments)
+            self._write_arguments(self.file, f'Optional arguments to {group_name}', custom_arguments)
 
     def write_options(self, options: List[SerializedArgument]):
         self._write_arguments(self.file, 'Common options', options)
