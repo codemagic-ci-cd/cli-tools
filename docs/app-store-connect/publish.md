@@ -61,6 +61,8 @@ Skip package upload before doing any other TestFlight or App Store related actio
 
 
 Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+### Optional arguments for command action `publish` to add localized What's new (what to test) information to uploaded build
+
 ##### `--beta-build-localizations=BETA_BUILD_LOCALIZATIONS`
 
 
@@ -73,14 +75,20 @@ The locale code name for displaying localized "What's new" content in TestFlight
 
 
 Describe the changes and additions to the build and indicate the features you would like your users to tests. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+### Optional arguments for command action `publish` to submit build to TestFlight for beta review
+
 ##### `--testflight, -t`
 
 
 Enable submission of an app for Testflight beta app review to allow external testing.
+### Optional arguments for command action `publish` to add build to Beta groups
+
 ##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
 
 
 Name of your Beta group. Multiple arguments
+### Optional arguments for command action `publish` to submit build to App Store review
+
 ##### `--app-store, -a`
 
 
@@ -105,6 +113,8 @@ Choose when to release the app. You can either manually release the app at a lat
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+### Optional arguments for command action `publish` to set Apple's altool configuration options
+
 ##### `--altool-retries=ALTOOL_RETRIES_COUNT`
 
 

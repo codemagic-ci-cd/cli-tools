@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import operator
 import os
 import re
 import sys
+from collections import defaultdict
+from functools import reduce
 from pathlib import Path
 from typing import Callable
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import NamedTuple
@@ -28,6 +32,7 @@ class SerializedArgument(NamedTuple):
     flags: str
     name: str
     required: bool
+    argument_group_name: Optional[str]
     default: str
     nargs: bool
     choices: str
@@ -40,6 +45,7 @@ class Action(NamedTuple):
     description: str
     required_args: List[SerializedArgument]
     optional_args: List[SerializedArgument]
+    custom_args: Dict[str, List[SerializedArgument]]
 
 
 class ActionGroup(NamedTuple):
@@ -61,6 +67,7 @@ class ArgumentsSerializer:
         self.raw_arguments = raw_arguments
         self.required_args: List[SerializedArgument] = []
         self.optional_args: List[SerializedArgument] = []
+        self.custom_args: Dict[str, List[SerializedArgument]] = defaultdict(list)
 
     @classmethod
     def _replace_quotes(cls, description: str) -> str:
@@ -91,6 +98,7 @@ class ArgumentsSerializer:
             flags=', '.join(getattr(arg._value_, 'flags', '')),
             name='' if arg_type and arg_type.__name__ == 'bool' else arg._name_,
             required=kwargs.required,
+            argument_group_name=arg._value_.argument_group_name,
             default=kwargs.default,
             nargs=kwargs.nargs,
             choices=kwargs.choices,
@@ -98,9 +106,13 @@ class ArgumentsSerializer:
         )
 
     def serialize(self) -> ArgumentsSerializer:
-        args = list(map(self._serialize_argument, self.raw_arguments))
-        self.required_args = [arg for arg in args if arg.required]
-        self.optional_args = [arg for arg in args if not arg.required]
+        for argument in map(self._serialize_argument, self.raw_arguments):
+            if argument.required:
+                self.required_args.append(argument)
+            elif argument.argument_group_name:
+                self.custom_args[argument.argument_group_name].append(argument)
+            else:
+                self.optional_args.append(argument)
         return self
 
     @classmethod
@@ -165,7 +177,7 @@ class ToolDocumentationGenerator:
             self._write_action_group_page(group)
 
     def _write_tool_command_arguments_and_options(self, writer):
-        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args)
+        writer.write_arguments(f'command `{self.tool_command}`', self.tool_optional_args, self.tool_required_args, {})
         writer.write_options(self.tool_options)
 
     def _write_tool_page(self):
@@ -198,7 +210,12 @@ class ToolDocumentationGenerator:
         writer = Writer(md)
         writer.write_description(action.description)
         writer.write_command_usage(self, action_group=action_group, action=action)
-        writer.write_arguments(f'action `{action.action_name}`', action.optional_args, action.required_args)
+        writer.write_arguments(
+            f'action `{action.action_name}`',
+            action.optional_args,
+            action.required_args,
+            action.custom_args,
+        )
         self._write_tool_command_arguments_and_options(writer)
         md.create_md_file()
 
@@ -223,6 +240,7 @@ class ToolDocumentationGenerator:
                 description=action.__doc__,
                 required_args=action_args_serializer.required_args,
                 optional_args=action_args_serializer.optional_args,
+                custom_args=action_args_serializer.custom_args,
             )
 
         return list(map(_serialize_action, tool.iter_class_cli_actions(action_group=action_group)))
@@ -236,6 +254,7 @@ class ToolDocumentationGenerator:
                 flags=', '.join(option.option_strings),
                 name='',
                 required=False,
+                argument_group_name=None,
                 default='',
                 nargs=False,
                 choices=' | '.join(option.choices) if option.choices else '',
@@ -246,7 +265,7 @@ class ToolDocumentationGenerator:
             description=tool.__doc__,
             formatter_class=cli.cli_help_formatter.CliHelpFormatter,
         )
-        cli.CliActionParserBuilder.set_default_cli_options(parser)
+        cli.cli_action_parser_builder.CliActionParserBuilder.set_default_cli_options(parser)
         return list(map(_serialize_option, parser._actions))
 
 
@@ -263,6 +282,7 @@ class CommandUsageGenerator:
         action_args = [
             *map(self._get_formatted_flag, action.optional_args),
             *map(self._get_formatted_flag, action.required_args),
+            *map(self._get_formatted_flag, reduce(operator.add, action.custom_args.values(), [])),
         ] if action else ['ACTION']
 
         return [
@@ -350,9 +370,17 @@ class Writer:
         self.file.new_header(level=3, title='Action groups', add_table_of_contents='n')
         self.write_table(list(map(_get_group_doc, groups)), ['Action group', 'Description'])
 
-    def write_arguments(self, obj: str, optional: List[SerializedArgument], required: List[SerializedArgument]):
+    def write_arguments(
+            self,
+            obj: str,
+            optional: List[SerializedArgument],
+            required: List[SerializedArgument],
+            custom: Dict[str, List[SerializedArgument]],
+    ):
         self._write_arguments(self.file, f'Required arguments for {obj}', required)
         self._write_arguments(self.file, f'Optional arguments for {obj}', optional)
+        for group_name, custom_arguments in custom.items():
+            self._write_arguments(self.file, f'Optional arguments for command {obj} to {group_name}', custom_arguments)
 
     def write_options(self, options: List[SerializedArgument]):
         self._write_arguments(self.file, 'Common options', options)
