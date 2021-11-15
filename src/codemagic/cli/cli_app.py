@@ -31,7 +31,7 @@ from codemagic.utilities import log
 from .action_group import ActionGroup
 from .argument import ActionCallable
 from .argument import Argument
-from .argument import ArgumentFormatter
+from .cli_action_parser_builder import CliActionParserBuilder
 from .cli_help_formatter import CliHelpFormatter
 from .cli_process import CliProcess
 from .cli_types import CommandArg
@@ -284,57 +284,6 @@ class CliApp(metaclass=abc.ABCMeta):
         )
 
     @classmethod
-    def set_default_cli_options(cls, cli_options_parser):
-        options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
-        options_group.add_argument('--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
-                                   help=f'Log output stream. {ArgumentFormatter.format_default_value("stderr")}')
-        options_group.add_argument('--no-color', dest='no_color', action='store_true',
-                                   help='Do not use ANSI colors to format terminal output')
-        options_group.add_argument('--version', dest='show_version', action='store_true',
-                                   help='Show tool version and exit')
-        options_group.add_argument('-s', '--silent', dest='enable_logging', action='store_false',
-                                   help='Disable log output for commands')
-        options_group.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                                   help='Enable verbose logging for commands')
-
-        options_group.set_defaults(
-            enable_logging=True,
-            no_color=False,
-            show_version=False,
-            verbose=False,
-        )
-
-    @classmethod
-    def _setup_class_cli_options(cls, cli_options_parser):
-        executable = cli_options_parser.prog.split()[0]
-        tool_required_arguments = cli_options_parser.add_argument_group(
-            Colors.UNDERLINE(f'Required arguments for {Colors.BOLD(executable)}'))
-        tool_optional_arguments = cli_options_parser.add_argument_group(
-            Colors.UNDERLINE(f'Optional arguments for {Colors.BOLD(executable)}'))
-        for argument in cls.CLASS_ARGUMENTS:
-            argument_group = tool_required_arguments if argument.is_required() else tool_optional_arguments
-            argument.register(argument_group)
-
-    @classmethod
-    def _add_action_parser(cls, cli_action, parent_parser):
-        action_parser = parent_parser.add_parser(
-            cli_action.action_name,
-            formatter_class=CliHelpFormatter,
-            help=cli_action.__doc__,
-            description=Colors.BOLD(cli_action.__doc__),
-        )
-        cls.set_default_cli_options(action_parser)
-
-        required_arguments = action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Required arguments for command {Colors.BOLD(cli_action.action_name)}'))
-        optional_arguments = action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Optional arguments for command {Colors.BOLD(cli_action.action_name)}'))
-        for argument in cli_action.arguments:
-            argument_group = required_arguments if argument.is_required() else optional_arguments
-            argument.register(argument_group)
-        cls._setup_class_cli_options(action_parser)
-
-    @classmethod
     def _add_action_group(cls, action_group, parent_parser):
         group_parser = parent_parser.add_parser(
             action_group.name,
@@ -342,7 +291,7 @@ class CliApp(metaclass=abc.ABCMeta):
             help=action_group.description,
             description=action_group.description,
         )
-        cls.set_default_cli_options(group_parser)
+        CliActionParserBuilder.set_default_cli_options(group_parser)
 
         group_title = Colors.BOLD(Colors.UNDERLINE(f'Available subcommands for {action_group.name}'))
         return group_parser.add_subparsers(title=group_title, dest='action_subcommand')
@@ -356,7 +305,7 @@ class CliApp(metaclass=abc.ABCMeta):
             description=Colors.BOLD(cls.__doc__),
             formatter_class=CliHelpFormatter,
         )
-        cls.set_default_cli_options(main_parser)
+        CliActionParserBuilder.set_default_cli_options(main_parser)
 
         formatted_title = Colors.BOLD(Colors.UNDERLINE('Available commands'))
         action_parsers = main_parser.add_subparsers(dest='action', title=formatted_title)
@@ -371,10 +320,10 @@ class CliApp(metaclass=abc.ABCMeta):
                 action_group: ActionGroup = action_or_group
                 group_parsers = cls._add_action_group(action_group, action_parsers)
                 for group_action in cls.iter_class_cli_actions(action_group):
-                    cls._add_action_parser(group_action, group_parsers)
+                    CliActionParserBuilder(cls, group_action, group_parsers).build()
             else:
                 main_action: ActionCallable = action_or_group
-                cls._add_action_parser(main_action, action_parsers)
+                CliActionParserBuilder(cls, main_action, action_parsers).build()
 
         return main_parser
 
@@ -442,12 +391,21 @@ def action(action_name: str,
     :param action_options: Meta information about the action to check whether some conditions are met
     """
 
+    # Ensure that each argument is used exactly once
+    unique_arguments = set()
+    function_cli_arguments = []
+    for argument in arguments:
+        argument_name = f'{argument.__class__.__name__}.{argument.name}'
+        if argument_name not in unique_arguments:
+            function_cli_arguments.append(argument)
+            unique_arguments.add(argument_name)
+
     def decorator(func):
         if func.__doc__ is None:
             raise RuntimeError(f'Action "{action_name}" defined by {func} is not documented')
         func.action_group = action_group
         func.action_name = action_name
-        func.arguments = arguments
+        func.arguments = function_cli_arguments
         func.is_cli_action = True
         func.action_options = action_options or {}
 

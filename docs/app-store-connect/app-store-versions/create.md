@@ -1,12 +1,12 @@
 
-builds
+create
 ======
 
 
-**Manage your builds in App Store Connect**
+**Add a new App Store version to an app.**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-versions create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,36 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--copyright COPYRIGHT]
+    [--version-string VERSION_STRING]
+    [--earliest-release-date EARLIEST_RELEASE_DATE]
+    [--platform PLATFORM]
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `create`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
+### Optional arguments for action `create`
+
+##### `--copyright=COPYRIGHT`
+
+
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "2008 Acme Inc."). Do not provide a URL.
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
+
+
+Specify earliest return date for scheduled release type (see --release-type configuration option). ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".
+##### `--platform=IOS | MAC_OS | TV_OS`
+
+
+Apple operating systems
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,12 +100,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

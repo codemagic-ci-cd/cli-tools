@@ -26,6 +26,7 @@ from codemagic.cli import Colors
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
+from ..arguments import ArgumentGroups
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
@@ -64,9 +65,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'add-beta-test-info',
         BuildArgument.BUILD_ID_RESOURCE_ID,
-        BuildArgument.BETA_BUILD_LOCALIZATIONS,
-        BuildArgument.LOCALE_DEFAULT,
-        BuildArgument.WHATS_NEW,
+        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def add_beta_test_info(
             self,
@@ -93,7 +92,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'submit-to-testflight',
         BuildArgument.BUILD_ID_RESOURCE_ID,
-        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_testflight(
             self,
@@ -125,12 +124,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action(
         'submit-to-app-store',
-        AppStoreVersionArgument.COPYRIGHT,
-        AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
-        AppStoreVersionArgument.VERSION_STRING,
         BuildArgument.BUILD_ID_RESOURCE_ID,
-        AppStoreVersionArgument.PLATFORM,
-        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS)
     def submit_to_app_store(
             self,

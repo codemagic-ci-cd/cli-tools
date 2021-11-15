@@ -20,7 +20,7 @@ app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] 
     [--app-name APPLICATION_NAME]
     [--app-sku APPLICATION_SKU]
     [--version-string VERSION_STRING]
-    [--platform PLATFORM]
+    [--platform PLATFORM_OPTIONAL]
     [--state APP_STORE_STATE]
 ```
 ### Optional arguments for action `list`

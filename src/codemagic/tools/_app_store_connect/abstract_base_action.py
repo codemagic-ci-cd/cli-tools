@@ -50,7 +50,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def echo(cls, message: str, *args, **kwargs) -> None:
         ...
 
-    def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
+    def _assert_api_client_credentials(self, custom_error: Optional[str] = None):
         ...
 
     def create_app_store_version(

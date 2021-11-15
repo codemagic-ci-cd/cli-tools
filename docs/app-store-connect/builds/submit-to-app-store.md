@@ -1,12 +1,12 @@
 
-builds
-======
+submit-to-app-store
+===================
 
 
-**Manage your builds in App Store Connect**
+**Submit build to App Store review**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,46 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--copyright COPYRIGHT]
+    [--earliest-release-date EARLIEST_RELEASE_DATE]
+    [--platform PLATFORM]
+    [--release-type RELEASE_TYPE]
+    [--version-string VERSION_STRING]
+    [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `submit-to-app-store`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
+### Optional arguments for action `submit-to-app-store`
+
+##### `--copyright=COPYRIGHT`
+
+
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "2008 Acme Inc."). Do not provide a URL.
+##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
+
+
+Specify earliest return date for scheduled release type (see --release-type configuration option). ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+
+
+App Store Version platform. Default:&nbsp;`IOS`
+##### `--release-type=MANUAL | AFTER_APPROVAL | SCHEDULED`
+
+
+Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
+
+
+Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,12 +110,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

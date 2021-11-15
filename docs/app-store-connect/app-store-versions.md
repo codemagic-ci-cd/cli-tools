@@ -1,12 +1,12 @@
 
-builds
-======
+app-store-versions
+==================
 
 
-**Manage your builds in App Store Connect**
+**Manage the information related to an App Store version of your app**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -76,8 +76,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|
+|[`create`](app-store-versions/create.md)|Add a new App Store version to an app.|
+|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|

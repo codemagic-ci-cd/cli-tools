@@ -16,7 +16,7 @@ app-store-connect apps app-store-versions [-h] [--log-stream STREAM] [--no-color
     [--profiles-dir PROFILES_DIRECTORY]
     [--version-id APP_STORE_VERSION_ID_OPTIONAL]
     [--version-string VERSION_STRING]
-    [--platform PLATFORM]
+    [--platform PLATFORM_OPTIONAL]
     [--state APP_STORE_STATE]
     APPLICATION_ID_RESOURCE_ID
 ```

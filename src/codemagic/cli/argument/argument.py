@@ -17,6 +17,16 @@ from .argument_properties import ArgumentProperties
 class Argument(ArgumentProperties, enum.Enum):
 
     @classmethod
+    def with_custom_argument_group(cls, argument_group_name: str, *arguments):
+        # Use the functional API that enum module provides
+        # to make duplicates of the given Argument enumerations
+        # with different values.
+        for argument in arguments:
+            updated_properties = argument.duplicate(argument_group_name=argument_group_name)
+            argument_class = Argument(argument.__class__.__name__, {argument.name: updated_properties})  # type: ignore
+            yield argument_class[argument.name]
+
+    @classmethod
     def resolve_optional_two_way_switch(cls,
                                         is_switched_on: Optional[bool],
                                         is_switched_off: Optional[bool]) -> Optional[bool]:

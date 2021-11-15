@@ -1,12 +1,12 @@
 
-builds
+delete
 ======
 
 
-**Manage your builds in App Store Connect**
+**Delete specified App Store version from Apple Developer portal**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-versions delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,21 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--ignore-not-found]
+    APP_STORE_VERSION_ID
 ```
+### Required arguments for action `delete`
+
+##### `APP_STORE_VERSION_ID`
+
+
+UUID value of the App Store Version
+### Optional arguments for action `delete`
+
+##### `--ignore-not-found`
+
+
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,12 +85,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

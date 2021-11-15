@@ -287,6 +287,7 @@ class AppStoreVersionArgument(cli.Argument):
             f'(see {Colors.BRIGHT_BLUE("--release-type")} configuration option). '
             f'ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".'
         ),
+        argparse_kwargs={'required': False},
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -351,7 +352,7 @@ class PublishArgument(cli.Argument):
         key='submit_to_testflight',
         flags=('--testflight', '-t'),
         type=bool,
-        description='Submit an app for Testflight beta app review to allow external testing',
+        description='Enable submission of an app for Testflight beta app review to allow external testing.',
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -359,9 +360,9 @@ class PublishArgument(cli.Argument):
     )
     SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
         key='submit_to_app_store',
-        flags=('--app-store',),
+        flags=('--app-store', '-a'),
         type=bool,
-        description='Submit an app to App Store App Review',
+        description='Enable submission of an app to App Store app review procedure.',
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -424,7 +425,9 @@ class PublishArgument(cli.Argument):
         type=Types.MaxBuildProcessingWait,
         description=(
             'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
-            'Apple and retry submitting the build for beta review. If the processing is not finished '
+            'Apple and retry submitting the build for (beta) review. Works in conjunction with '
+            'TestFlight beta review submission, or App Store review submission and operations that '
+            'depend on either one of those. If the processing is not finished '
             'within the specified timeframe, further submission will be terminated. '
             'Waiting will be skipped if the value is set to 0, further actions might fail '
             'if the build is not processed yet.'
@@ -890,4 +893,35 @@ class CommonArgument(cli.Argument):
             'required': False,
             'choices': list(Platform),
         },
+    )
+
+
+class ArgumentGroups:
+    ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_BUILD_LOCALIZATIONS,
+        BuildArgument.LOCALE_DEFAULT,
+        BuildArgument.WHATS_NEW,
+    )
+    ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
+    )
+    ALTOOL_CONFIGURATION_ARGUMENTS = (
+        PublishArgument.ALTOOL_RETRIES_COUNT,
+        PublishArgument.ALTOOL_RETRY_WAIT,
+        PublishArgument.ALTOOL_VERBOSE_LOGGING,
+    )
+    PACKAGE_UPLOAD_ARGUMENTS = (
+        PublishArgument.SKIP_PACKAGE_VALIDATION,
+        PublishArgument.SKIP_PACKAGE_UPLOAD,
+    )
+    SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
+        AppStoreVersionArgument.COPYRIGHT,
+        AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
+        AppStoreVersionArgument.PLATFORM,
+        AppStoreVersionArgument.RELEASE_TYPE,
+        AppStoreVersionArgument.VERSION_STRING,
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+    )
+    SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
     )
