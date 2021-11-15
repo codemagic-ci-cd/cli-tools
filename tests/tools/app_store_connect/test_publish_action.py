@@ -8,6 +8,8 @@ from unittest import mock
 import pytest
 
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import Platform
+from codemagic.apple.resources import ReleaseType
 from codemagic.models.application_package import Ipa
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect import AppStoreConnectArgument
@@ -130,7 +132,12 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
         mock_submit_to_app_store.assert_not_called()
-        mock_add_beta_test_info.assert_called_with(build.id, None, locale, whats_new)
+        mock_add_beta_test_info.assert_called_with(
+            build.id,
+            beta_build_localizations=None,
+            locale=locale,
+            whats_new=whats_new,
+        )
 
 
 def test_publish_action_app_store_submit(publishing_namespace_kwargs):
@@ -158,6 +165,7 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
             application_package_path_patterns=patterns,
             submit_to_app_store=True,
             max_build_processing_wait=Types.MaxBuildProcessingWait('5'),
+            release_type=ReleaseType.AFTER_APPROVAL,
         )
 
         mock_get_packages.assert_called_with(patterns)
@@ -165,7 +173,15 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, 5)
         mock_submit_to_testflight.assert_not_called()
-        mock_submit_to_app_store.assert_called_with(build.id, max_build_processing_wait=0, version_string='1.2.3')
+        mock_submit_to_app_store.assert_called_with(
+            build.id,
+            copyright=None,
+            earliest_release_date=None,
+            max_build_processing_wait=0,
+            platform=Platform.IOS,
+            release_type=ReleaseType.AFTER_APPROVAL,
+            version_string='1.2.3',
+        )
         mock_add_beta_test_info.assert_not_called()
 
 
@@ -256,4 +272,4 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
         mock_submit_to_app_store.assert_not_called()
-        mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names)
+        mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names=beta_group_names)

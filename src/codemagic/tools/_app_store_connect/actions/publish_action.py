@@ -103,8 +103,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_app_store_connect_submit_options(
             cls,
-            submit_to_testflight: Optional[bool] = None,
-            submit_to_app_store: Optional[bool] = None,
+            submit_to_testflight: Optional[bool],
+            submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
             max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
             # Beta test info arguments
@@ -235,7 +235,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 if isinstance(application_package, Ipa):
                     self._handle_ipa_app_store_submission(
                         application_package,
-                        *self._get_app_store_connect_submit_options(**app_store_connect_submit_options),
+                        *self._get_app_store_connect_submit_options(
+                            submit_to_testflight,
+                            submit_to_app_store,
+                            **app_store_connect_submit_options,
+                        ),
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
