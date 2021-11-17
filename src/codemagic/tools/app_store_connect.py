@@ -51,6 +51,7 @@ from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
+from ._app_store_connect.arguments import ArgumentGroups
 from ._app_store_connect.arguments import BetaBuildInfo  # noqa: F401
 from ._app_store_connect.arguments import BuildArgument
 from ._app_store_connect.arguments import BundleIdArgument
@@ -196,12 +197,7 @@ class AppStoreConnect(cli.CliApp,
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
-                BuildArgument.EXPIRED,
-                BuildArgument.NOT_EXPIRED,
-                BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
-                BuildArgument.PRE_RELEASE_VERSION,
-                BuildArgument.PROCESSING_STATE,
-                BuildArgument.BUILD_VERSION_NUMBER)
+                *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS)
     def list_builds(self,
                     application_id: Optional[ResourceId] = None,
                     expired: Optional[bool] = None,

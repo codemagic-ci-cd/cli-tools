@@ -17,6 +17,7 @@ from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
+from ..arguments import ArgumentGroups
 from ..arguments import BundleIdArgument
 
 
@@ -74,16 +75,15 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             filter_predicate=predicate if bundle_id_identifier and bundle_id_identifier_strict_match else None,
         )
 
-    @cli.action('builds', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
-    def list_app_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
+    @cli.action('builds',
+                AppArgument.APPLICATION_ID_RESOURCE_ID,
+                *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS,
+                action_group=AppStoreConnectActionGroup.APPS)
+    def list_app_builds(self, application_id: ResourceId, should_print: bool = True, **builds_filters) -> List[Build]:
         """
-        Get a list of builds associated with a specific app
+        Get a list of builds associated with a specific app matching given constrains
         """
-
-        builds_filter = self.api_client.builds.Filter(
-            app=application_id,
-        )
-        return self._list_resources(builds_filter, self.api_client.builds, should_print)
+        return self.list_builds(application_id=application_id, **builds_filters, should_print=should_print)
 
     @cli.action('pre-release-versions',
                 AppArgument.APPLICATION_ID_RESOURCE_ID,

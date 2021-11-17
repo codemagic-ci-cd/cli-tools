@@ -19,6 +19,7 @@ from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
@@ -128,4 +129,15 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
                   platform: Optional[Platform] = None,
                   app_store_state: Optional[AppStoreState] = None,
                   should_print: bool = True) -> List[App]:
+        ...
+
+    def list_builds(self,
+                    application_id: Optional[ResourceId] = None,
+                    expired: Optional[bool] = None,
+                    not_expired: Optional[bool] = None,
+                    build_id: Optional[ResourceId] = None,
+                    pre_release_version: Optional[str] = None,
+                    processing_state: Optional[BuildProcessingState] = None,
+                    build_version_number: Optional[int] = None,
+                    should_print: bool = True) -> List[Build]:
         ...
