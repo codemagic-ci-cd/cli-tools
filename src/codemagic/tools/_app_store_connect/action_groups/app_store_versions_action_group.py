@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import ABCMeta
 from datetime import datetime
 from typing import Optional
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -80,7 +79,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def update_app_store_version(
             self,
             app_store_version_id: ResourceId,
-            build_id: Optional[Union[ResourceId, Build]] = None,
+            build_id: Optional[ResourceId] = None,
             copyright: Optional[str] = None,
             earliest_release_date: Optional[datetime] = None,
             release_type: Optional[ReleaseType] = None,

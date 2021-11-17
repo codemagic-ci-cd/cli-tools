@@ -92,6 +92,17 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             whats_new: Optional[Types.WhatsNewArgument] = None):
         ...
 
+    def update_app_store_version(
+            self,
+            app_store_version_id: ResourceId,
+            build_id: Optional[ResourceId] = None,
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[datetime] = None,
+            release_type: Optional[ReleaseType] = None,
+            version_string: Optional[str] = None,
+            should_print: bool = True) -> AppStoreVersion:
+        ...
+
     def wait_until_build_is_processed(
         self,
         build: Build,

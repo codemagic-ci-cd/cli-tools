@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import shlex
 import time
 from abc import ABCMeta
 from datetime import datetime
+from distutils.version import LooseVersion
 from typing import List
 from typing import Optional
 from typing import Union
@@ -10,6 +12,7 @@ from typing import Union
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppLocalization
@@ -29,7 +32,6 @@ from ..arguments import AppStoreVersionArgument
 from ..arguments import ArgumentGroups
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
-from ..arguments import CommonArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -49,14 +51,12 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('pre-release-version',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
-                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BUILDS)
     def get_build_pre_release_version(
             self,
             build_id: ResourceId,
-            ignore_not_found: bool = False,
             should_print: bool = True,
-    ) -> Optional[PreReleaseVersion]:
+    ) -> PreReleaseVersion:
         """
         Get the prerelease version for a specific build
         """
@@ -67,19 +67,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             PreReleaseVersion,
             self.api_client.builds.read_pre_release_version,
             should_print,
-            ignore_not_found,
         )
 
     @cli.action('app-store-version',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
-                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BUILDS)
     def get_build_app_store_version(
             self,
             build_id: ResourceId,
-            ignore_not_found: bool = False,
             should_print: bool = True,
-    ) -> Optional[AppStoreVersion]:
+    ) -> AppStoreVersion:
         """
         Get the App Store version of a specific build.
         """
@@ -90,7 +87,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             AppStoreVersion,
             self.api_client.builds.read_app_store_version,
             should_print,
-            ignore_not_found,
         )
 
     @cli.action(
@@ -177,22 +173,38 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
         try:
-            build = self.api_client.builds.read(build_id)
+            build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
+        if version_string is None:
+            self.logger.info("\nVersion string is not specified. Obtain it from build's pre-release version...")
+            pre_release_version = self.get_build_pre_release_version(build_id, should_print=False)
+            version_string = pre_release_version.attributes.version
+
+        self.logger.info(Colors.BLUE(f'\nUsing version {version_string} for App Store submission'))
+
         app_store_version = self._ensure_app_store_version(
+            app,
             build,
+            platform,
             copyright=copyright,
             earliest_release_date=earliest_release_date,
-            platform=platform,
             release_type=release_type,
             version_string=version_string,
         )
-        return self.create_app_store_version_submission(app_store_version.id)
+        self.logger.info('')
+
+        app_store_version_submission = self.create_app_store_version_submission(app_store_version.id)
+
+        platform_slug = platform.value.lower().replace('_', '')
+        submission_url = f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/{platform_slug}/version/inflight'
+        self.logger.info(f'\nCheck App Store submission details from {submission_url}\n')
+
+        return app_store_version_submission
 
     def wait_until_build_is_processed(
         self,
@@ -200,12 +212,12 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
     ) -> Build:
-        is_processing_message_logged = False
+        is_first_attempt = True
         start_waiting = time.time()
         while time.time() - start_waiting < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
-                if not is_processing_message_logged:
-                    is_processing_message_logged = self._log_build_processing_message(build.id, max_processing_minutes)
+                if is_first_attempt:
+                    self._log_build_processing_message(build.id, max_processing_minutes)
 
                 msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
                                'and checking again'
@@ -218,8 +230,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
                 raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
             else:
-                self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
+                if not is_first_attempt:
+                    self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
                 return build
+            is_first_attempt = False
 
         raise IOError((
             f'Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. '
@@ -227,7 +241,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
         ))
 
-    def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int) -> bool:
+    def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int):
         processing_message_template = (
             '\n'
             'Processing of builds by Apple can take a while, '
@@ -235,7 +249,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             'to finish for build %s is set to %d minutes.'
         )
         self.logger.info(Colors.BLUE(processing_message_template), build_id, max_processing_minutes)
-        return True
 
     def _assert_app_has_testflight_information(self, app: App):
         missing_beta_app_information = self._get_missing_beta_app_information(app)
@@ -286,28 +299,46 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         # If nothing matches, then just take the first
         return beta_app_localizations[0] if beta_app_localizations else None
 
-    def _ensure_app_store_version(self, build: Build, **app_store_version_create_params) -> AppStoreVersion:
-        app_store_version = self.get_build_app_store_version(build.id, ignore_not_found=True, should_print=False)
-        if app_store_version is None:
-            # App Store version does not exist for the build. Check if there is another version we could use.
-            app_store_version = self._get_editable_app_store_version()
-
+    def _ensure_app_store_version(
+            self,
+            app: App,
+            build: Build,
+            platform: Platform,
+            **app_store_version_params,
+    ) -> AppStoreVersion:
+        app_store_version = self._get_editable_app_store_version(app, platform)
         if app_store_version is None:
             # Version does not exist, create a new version for App Store review submission
             self.logger.info(f'\n{AppStoreVersion} does not exist for build {build.id}')
             app_store_version = self.create_app_store_version(
-                build_id=build.id,
-                **app_store_version_create_params,
+                build.id,
+                platform=platform,
+                **app_store_version_params,
             )
         else:
-            # Use existing version for App Store review submission
-            self.logger.info(Colors.GREEN(f'\nFound {AppStoreVersion} for build {build.id}'))
-            self.printer.print_resource(app_store_version, True)
-        self.logger.info('')
+            self.logger.info((
+                f'\nFound existing {AppStoreVersion} {app_store_version.id} '
+                f'in state "{app_store_version.attributes.appStoreState.pretty_value()}". '
+            ))
+            updates = ', '.join(
+                f'{param}={shlex.quote(value)}'
+                for param, value in {'build': build.id, **app_store_version_params}.items()
+                if value is not None
+            )
+            self.logger.info(f'Use it for current submission by updating it with {updates }.')
 
+            app_store_version = self.update_app_store_version(
+                app_store_version.id,
+                build_id=build.id,
+                **app_store_version_params,
+            )
         return app_store_version
 
-    def _get_editable_app_store_version(self) -> Optional[AppStoreVersion]:
-        # TODO
-        # self.api_client.apps.list_app_store_versions()
-        return None
+    def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
+        versions_filter = self.api_client.app_store_versions.Filter(
+            app_store_state=AppStoreState.editable_states(),
+            platform=platform,
+        )
+        app_store_versions = self.api_client.apps.list_app_store_versions(app, resource_filter=versions_filter)
+        app_store_versions.sort(key=lambda asv: LooseVersion(asv.attributes.versionString))
+        return app_store_versions[-1] if app_store_versions else None

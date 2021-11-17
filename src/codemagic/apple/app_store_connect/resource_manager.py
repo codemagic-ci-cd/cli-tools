@@ -96,7 +96,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             attributes: Optional[Dict] = None,
             relationships: Optional[Dict] = None,
     ) -> Dict:
-        data = {
+        data: Dict[str, Any] = {
             'id': resource_id,
             'type': resource_type.value,
         }
