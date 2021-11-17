@@ -910,6 +910,14 @@ class ArgumentGroups:
         PublishArgument.ALTOOL_RETRY_WAIT,
         PublishArgument.ALTOOL_VERBOSE_LOGGING,
     )
+    LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
+        BuildArgument.BUILD_VERSION_NUMBER,
+        BuildArgument.EXPIRED,
+        BuildArgument.NOT_EXPIRED,
+        BuildArgument.PRE_RELEASE_VERSION,
+        BuildArgument.PROCESSING_STATE,
+    )
     PACKAGE_UPLOAD_ARGUMENTS = (
         PublishArgument.SKIP_PACKAGE_VALIDATION,
         PublishArgument.SKIP_PACKAGE_UPLOAD,
