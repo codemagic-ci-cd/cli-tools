@@ -536,10 +536,9 @@ class BuildArgument(cli.Argument):
     BUILD_VERSION_NUMBER = cli.ArgumentProperties(
         key='build_version_number',
         flags=('--build-version-number',),
-        type=int,
         description=(
             'Build version number is the version number of the uploaded build. '
-            'For example `46`'
+            'For example `46` or `1.0.13.5`.'
         ),
         argparse_kwargs={'required': False},
     )
