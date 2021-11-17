@@ -166,6 +166,8 @@ class CertificateType(ResourceEnum):
             return CertificateType.DISTRIBUTION
         elif profile_type is profile_type.TVOS_APP_ADHOC:
             return CertificateType.DISTRIBUTION
+        elif profile_type is profile_type.ANY_APP_STORE:
+            return CertificateType.DISTRIBUTION
         else:
             raise ValueError(f'Certificate type for profile type {profile_type} is unknown')
 
@@ -216,6 +218,7 @@ class ProfileType(ResourceEnum):
     TVOS_APP_DEVELOPMENT = 'TVOS_APP_DEVELOPMENT'
     TVOS_APP_INHOUSE = 'TVOS_APP_INHOUSE'
     TVOS_APP_STORE = 'TVOS_APP_STORE'
+    ANY_APP_STORE = 'ANY_APP_STORE'
 
     @property
     def is_ad_hoc_type(self) -> bool:
