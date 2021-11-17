@@ -58,12 +58,23 @@ class ResourceManagerMixin:
                               resource_type,
                               related_resource_type,
                               read_related_resource_method,
-                              should_print: bool):
+                              should_print: bool,
+                              ignore_not_found: bool):
         self.printer.log_get_related(related_resource_type, resource_type, resource_id)
         try:
             resource = read_related_resource_method(resource_id)
         except AppStoreConnectApiError as api_error:
+            if ignore_not_found and api_error.status_code == 404:
+                self.printer.log_ignore_related_not_found(related_resource_type, resource_type, resource_id)
+                return None
             raise AppStoreConnectError(str(api_error))
+
+        if resource is None:
+            if ignore_not_found:
+                self.printer.log_ignore_related_not_found(related_resource_type, resource_type, resource_id)
+                return None
+            raise AppStoreConnectError(f'{related_resource_type} for {resource_type} {resource_id} does not exist.')
+
         self.printer.print_resource(resource, should_print)
         return resource
 

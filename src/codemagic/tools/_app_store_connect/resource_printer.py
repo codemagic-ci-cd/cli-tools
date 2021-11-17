@@ -80,6 +80,10 @@ class ResourcePrinter:
     def log_get_related(self, related_resource_type: Type[R], resource_type: Type[R2], resource_id: ResourceId):
         self.logger.info(f'Get {related_resource_type.s} for {resource_type} {resource_id}')
 
+    def log_ignore_related_not_found(
+            self, related_resource_type: Type[R], resource_type: Type[R2], resource_id: ResourceId):
+        self.logger.info(f'{related_resource_type} for {resource_type} {resource_id} was not found.')
+
     def log_found(self,
                   resource_type: Type[R],
                   resources: Sequence[R],

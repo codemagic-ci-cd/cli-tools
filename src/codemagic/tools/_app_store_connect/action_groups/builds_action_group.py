@@ -29,6 +29,7 @@ from ..arguments import AppStoreVersionArgument
 from ..arguments import ArgumentGroups
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
+from ..arguments import CommonArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
@@ -48,8 +49,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action('pre-release-version',
                 BuildArgument.BUILD_ID_RESOURCE_ID,
+                CommonArgument.IGNORE_NOT_FOUND,
                 action_group=AppStoreConnectActionGroup.BUILDS)
-    def get_build_pre_release_version(self, build_id: ResourceId, should_print: bool = True) -> PreReleaseVersion:
+    def get_build_pre_release_version(
+            self,
+            build_id: ResourceId,
+            ignore_not_found: bool = False,
+            should_print: bool = True,
+    ) -> Optional[PreReleaseVersion]:
         """
         Get the prerelease version for a specific build
         """
@@ -60,6 +67,30 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             PreReleaseVersion,
             self.api_client.builds.read_pre_release_version,
             should_print,
+            ignore_not_found,
+        )
+
+    @cli.action('app-store-version',
+                BuildArgument.BUILD_ID_RESOURCE_ID,
+                CommonArgument.IGNORE_NOT_FOUND,
+                action_group=AppStoreConnectActionGroup.BUILDS)
+    def get_build_app_store_version(
+            self,
+            build_id: ResourceId,
+            ignore_not_found: bool = False,
+            should_print: bool = True,
+    ) -> Optional[AppStoreVersion]:
+        """
+        Get the App Store version of a specific build.
+        """
+
+        return self._get_related_resource(
+            build_id,
+            Build,
+            AppStoreVersion,
+            self.api_client.builds.read_app_store_version,
+            should_print,
+            ignore_not_found,
         )
 
     @cli.action(
@@ -256,10 +287,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return beta_app_localizations[0] if beta_app_localizations else None
 
     def _ensure_app_store_version(self, build: Build, **app_store_version_create_params) -> AppStoreVersion:
-        try:
-            app_store_version = self.api_client.builds.read_app_store_version(build)
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+        app_store_version = self.get_build_app_store_version(build.id, ignore_not_found=True, should_print=False)
+        if app_store_version is None:
+            # App Store version does not exist for the build. Check if there is another version we could use.
+            app_store_version = self._get_editable_app_store_version()
 
         if app_store_version is None:
             # Version does not exist, create a new version for App Store review submission
@@ -275,3 +306,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         self.logger.info('')
 
         return app_store_version
+
+    def _get_editable_app_store_version(self) -> Optional[AppStoreVersion]:
+        # TODO
+        # self.api_client.apps.list_app_store_versions()
+        return None
