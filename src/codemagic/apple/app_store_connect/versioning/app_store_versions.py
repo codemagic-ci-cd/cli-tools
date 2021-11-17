@@ -142,6 +142,43 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             [include_type(included) for included in results.included],
         )
 
+    def modify(
+            self,
+            app_store_version: Union[LinkedResourceData, ResourceId],
+            build: Optional[Union[ResourceId, Build]] = None,
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[datetime] = None,
+            release_type: Optional[ReleaseType] = None,
+            version: Optional[str] = None,
+    ) -> AppStoreVersion:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
+        """
+        attributes = {}
+        if copyright:
+            attributes['copyright'] = copyright
+        if earliest_release_date:
+            attributes['earliestReleaseDate'] = Resource.to_iso_8601(earliest_release_date)
+        if release_type:
+            attributes['releaseType'] = release_type.value
+        if version:
+            attributes['versionString'] = version
+
+        relationships = {}
+        if build:
+            relationships['build'] = {'data': self._get_attribute_data(build, ResourceType.BUILDS)}
+
+        app_store_version_id = self._get_resource_id(app_store_version)
+        payload = self._get_update_payload(
+            app_store_version_id,
+            ResourceType.APP_STORE_VERSIONS,
+            attributes=attributes,
+            relationships=relationships,
+        )
+        response = self.client.session.patch(
+            f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}', json=payload).json()
+        return AppStoreVersion(response['data'])
+
     def delete(self, app_store_version: Union[LinkedResourceData, ResourceId]) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version

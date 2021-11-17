@@ -89,14 +89,22 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
     @classmethod
     def _get_update_payload(
-            cls, resource_id: ResourceId, resource_type: ResourceType, attributes: Dict) -> Dict:
-        return {
-            'data': {
-                'id': resource_id,
-                'type': resource_type.value,
-                'attributes': attributes,
-            },
+            cls,
+            resource_id: ResourceId,
+            resource_type: ResourceType,
+            *,
+            attributes: Optional[Dict] = None,
+            relationships: Optional[Dict] = None,
+    ) -> Dict:
+        data = {
+            'id': resource_id,
+            'type': resource_type.value,
         }
+        if attributes:
+            data['attributes'] = attributes
+        if relationships:
+            data['relationships'] = relationships
+        return {'data': data}
 
     @classmethod
     def _get_create_payload(cls,
