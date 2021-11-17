@@ -105,7 +105,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
 
-        self.logger.info(Colors.BLUE('\nSubmit uploaded build to TestFlight beta review'))
+        self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to TestFlight beta review'))
 
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
@@ -143,7 +143,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
 
-        self.logger.info(Colors.BLUE('\nSubmit uploaded build to App Store review'))
+        self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
         try:
             build = self.api_client.builds.read(build_id)
@@ -169,17 +169,13 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
     ) -> Build:
-        self.logger.info(
-            Colors.BLUE(
-                '\nProcessing of builds by Apple can take a while, the timeout for waiting the processing '
-                'to finish for build %s is set to %d minutes.'),
-            build.id,
-            max_processing_minutes,
-        )
-
+        is_processing_message_logged = False
         start_waiting = time.time()
         while time.time() - start_waiting < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
+                if not is_processing_message_logged:
+                    is_processing_message_logged = self._log_build_processing_message(build.id, max_processing_minutes)
+
                 msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
                                'and checking again'
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
@@ -199,6 +195,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             f'You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} '
             f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
         ))
+
+    def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int) -> bool:
+        processing_message_template = (
+            '\n'
+            'Processing of builds by Apple can take a while, '
+            'the timeout for waiting the processing '
+            'to finish for build %s is set to %d minutes.'
+        )
+        self.logger.info(Colors.BLUE(processing_message_template), build_id, max_processing_minutes)
+        return True
 
     def _assert_app_has_testflight_information(self, app: App):
         missing_beta_app_information = self._get_missing_beta_app_information(app)
