@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
@@ -38,7 +39,7 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         id: Optional[ResourceId] = None
         platform: Optional[Platform] = None
         version_string: Optional[str] = None
-        app_store_state: Optional[AppStoreState] = None
+        app_store_state: Optional[Union[AppStoreState, Sequence[AppStoreState]]] = None
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:

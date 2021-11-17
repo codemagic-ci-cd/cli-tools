@@ -9,6 +9,7 @@ from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
+from typing import Sequence
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -36,10 +37,14 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             return patt.sub(lambda m: m.group(1).upper(), field_name)
 
         @classmethod
-        def _get_param_value(cls, filed_value) -> str:
-            if isinstance(filed_value, enum.Enum):
-                return str(filed_value.value)
-            return str(filed_value)
+        def _get_param_value(cls, field_value) -> str:
+            if isinstance(field_value, enum.Enum):
+                return str(field_value.value)
+            elif isinstance(field_value, str):
+                return field_value
+            elif isinstance(field_value, Sequence):
+                return ','.join(cls._get_param_value(element) for element in field_value)
+            return str(field_value)
 
         def _get_restrictions(self) -> Dict[str, str]:
             return {
