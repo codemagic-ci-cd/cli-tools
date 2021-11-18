@@ -81,7 +81,7 @@ class ResourceManagerMixin:
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
-        self.printer.log_found(related_resource_type, resources, resource_filter, resource_type)
+        self.printer.log_found(related_resource_type, resources, resource_filter, resource_type, resource_id)
         self.printer.print_resources(resources, should_print)
         return resources
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import enum
-from typing import Optional
 
 from codemagic.utilities import log
 
@@ -149,13 +148,13 @@ class CertificateType(ResourceEnum):
     MAC_INSTALLER_DISTRIBUTION = 'MAC_INSTALLER_DISTRIBUTION'
 
     @classmethod
-    def from_profile_type(cls, profile_type: ProfileType) -> Optional[CertificateType]:
+    def from_profile_type(cls, profile_type: ProfileType) -> CertificateType:
         if profile_type is profile_type.IOS_APP_ADHOC:
             return CertificateType.IOS_DISTRIBUTION
         elif profile_type is profile_type.IOS_APP_DEVELOPMENT:
             return CertificateType.IOS_DEVELOPMENT
         elif profile_type is profile_type.IOS_APP_STORE:
-            return CertificateType.IOS_DISTRIBUTION
+            return CertificateType.DISTRIBUTION
         elif profile_type is profile_type.MAC_APP_DEVELOPMENT:
             return CertificateType.MAC_APP_DEVELOPMENT
         elif profile_type is profile_type.MAC_APP_STORE:

@@ -84,11 +84,15 @@ class ResourcePrinter:
                   resource_type: Type[R],
                   resources: Sequence[R],
                   resource_filter: Optional[ResourceManager.Filter] = None,
-                  related_resource_type: Optional[Type[R2]] = None):
+                  related_resource_type: Optional[Type[R2]] = None,
+                  related_resource_id: Optional[ResourceId] = None,
+                  ):
         count = len(resources)
         name = resource_type.plural(count)
         suffix = f' matching specified filters: {resource_filter}.' if resource_filter is not None else ''
         related = f' for {related_resource_type}' if related_resource_type is not None else ''
+        if related_resource_id:
+            related = f'{related} {related_resource_id}'
         if count == 0:
             self.logger.info(Colors.YELLOW(f'Did not find any {name}{related}{suffix}'))
         else:

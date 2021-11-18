@@ -467,7 +467,7 @@ class AppStoreConnect(cli.CliApp,
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
 
     @cli.action('list-certificates',
-                CertificateArgument.CERTIFICATE_TYPE_OPTIONAL,
+                CertificateArgument.CERTIFICATE_TYPES_OPTIONAL,
                 CertificateArgument.PROFILE_TYPE_OPTIONAL,
                 CertificateArgument.DISPLAY_NAME,
                 CertificateArgument.PRIVATE_KEY,
@@ -475,7 +475,7 @@ class AppStoreConnect(cli.CliApp,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
     def list_certificates(self,
-                          certificate_type: Optional[CertificateType] = None,
+                          certificate_types: Optional[List[CertificateType]] = None,
                           profile_type: Optional[ProfileType] = None,
                           display_name: Optional[str] = None,
                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
@@ -493,9 +493,13 @@ class AppStoreConnect(cli.CliApp,
 
         if profile_type:
             certificate_type = CertificateType.from_profile_type(profile_type)
+            if certificate_types is None:
+                certificate_types = [certificate_type]
+            elif certificate_type not in certificate_types:
+                certificate_types.append(certificate_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
-            certificate_type=certificate_type,
+            certificate_type=certificate_types,
             display_name=display_name)
         certificates = self._list_resources(certificate_filter, self.api_client.signing_certificates, should_print)
 
@@ -505,6 +509,8 @@ class AppStoreConnect(cli.CliApp,
                 if Certificate.from_ans1(certificate.asn1_content).is_signed_with(private_key)
             ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
+            for c in certificates:
+                self.logger.info(f'{c.attributes.name} ({c.id})')
 
         if save:
             assert private_key is not None  # Make mypy happy
@@ -732,6 +738,9 @@ class AppStoreConnect(cli.CliApp,
             if not create_resource:
                 raise AppStoreConnectError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
+        else:
+            for bundle_id in bundle_ids:
+                self.logger.info(f'{bundle_id.attributes.name} ({bundle_id.attributes.identifier})')
         return bundle_ids
 
     def _get_or_create_certificates(self,
@@ -739,18 +748,24 @@ class AppStoreConnect(cli.CliApp,
                                     certificate_key: Optional[Types.CertificateKeyArgument],
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
-        certificate_type = CertificateType.from_profile_type(profile_type)
+        certificate_types = [CertificateType.from_profile_type(profile_type)]
+        if profile_type is ProfileType.IOS_APP_STORE:
+            certificate_types.append(CertificateType.IOS_DISTRIBUTION)
+
         certificates = self.list_certificates(
-            certificate_type=certificate_type,
+            certificate_types=certificate_types,
             certificate_key=certificate_key,
             certificate_key_password=certificate_key_password,
             should_print=False)
 
         if not certificates:
             if not create_resource:
-                raise AppStoreConnectError(f'Did not find {certificate_type} {SigningCertificate.s}')
+                if len(certificate_types) > 1:
+                    raise AppStoreConnectError(f'Did not find {SigningCertificate.s} with type {certificate_types}')
+                else:
+                    raise AppStoreConnectError(f'Did not find {certificate_types[0]} {SigningCertificate.s}')
             certificates.append(self.create_certificate(
-                certificate_type,
+                certificate_types[0],
                 certificate_key=certificate_key,
                 certificate_key_password=certificate_key_password,
                 should_print=False))
@@ -811,6 +826,8 @@ class AppStoreConnect(cli.CliApp,
         certificate_names = (f'{c.attributes.displayName} [{c.attributes.serialNumber}]' for c in certificates)
         message = f'that contain certificate(s) {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
+        for p in profiles:
+            self.logger.info(f'{p.attributes.profileType} {p.attributes.name} ({p.attributes.uuid})')
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
