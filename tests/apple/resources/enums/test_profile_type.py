@@ -18,7 +18,7 @@ from codemagic.apple.resources import ProfileType
     (ProfileType.TVOS_APP_DEVELOPMENT, True),
     (ProfileType.TVOS_APP_INHOUSE, False),
     (ProfileType.TVOS_APP_STORE, False),
-    (ProfileType.ANY_APP_STORE, True),
+    (ProfileType.ANY_APP_STORE, False),
 ])
 def test_devices_allowed(profile_type, should_be_allowed):
     assert profile_type.devices_allowed() is should_be_allowed
