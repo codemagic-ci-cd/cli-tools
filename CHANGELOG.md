@@ -1,3 +1,9 @@
+Version 0.12.1
+-------------
+
+**Features**
+- Add new profile type `ANY_APP_STORE` to `app-store-connect` to tell the CLI to use a Distribution certificate for signing. [PR #165](https://github.com/codemagic-ci-cd/cli-tools/pull/165)
+
 Version 0.12.0
 -------------
 
@@ -16,7 +22,6 @@ Version 0.12.0
 
 - Do not use line wrapping when generating docs (new feature in [`mdutils` version 1.3.1](https://github.com/didix21/mdutils/blob/master/CHANGELOG.md#v131-2021-07-10)). [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
 - Generate new docs for action `app-store-connect publish`. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
-- 
 
 Version 0.11.4
 -------------
