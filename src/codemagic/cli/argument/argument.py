@@ -7,6 +7,8 @@ import inspect
 import types
 from typing import NoReturn
 from typing import Optional
+from typing import Sequence
+from typing import Type
 
 from codemagic.cli.colors import Colors
 
@@ -17,13 +19,23 @@ from .argument_properties import ArgumentProperties
 class Argument(ArgumentProperties, enum.Enum):
 
     @classmethod
-    def with_custom_argument_group(cls, argument_group_name: str, *arguments):
-        # Use the functional API that enum module provides
-        # to make duplicates of the given Argument enumerations
-        # with different values.
+    def with_custom_argument_group(
+            cls,
+            argument_group_name: str,
+            *arguments: Argument,
+            exclude: Sequence[Argument] = tuple(),
+    ):
+        # https://docs.python.org/3/library/enum.html#functional-api
+        # Use the functional API that enum module provides to make duplicates of
+        # the given Argument enumerations with updated values.
         for argument in arguments:
+            if argument in exclude:
+                continue
             updated_properties = argument.duplicate(argument_group_name=argument_group_name)
-            argument_class = Argument(argument.__class__.__name__, {argument.name: updated_properties})  # type: ignore
+            argument_class: Type[Argument] = Argument(  # type: ignore
+                argument.__class__.__name__,
+                {argument.name: updated_properties},  # type: ignore
+            )
             yield argument_class[argument.name]
 
     @classmethod

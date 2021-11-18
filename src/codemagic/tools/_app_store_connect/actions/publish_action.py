@@ -103,6 +103,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_app_store_connect_submit_options(
             cls,
+            ipa: Ipa,
             submit_to_testflight: Optional[bool],
             submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
@@ -116,7 +117,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             # Submit to App Store arguments
             copyright: Optional[str] = None,
             earliest_release_date: Optional[datetime] = None,
-            platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
+            platform: Optional[Platform] = None,
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
     ):
@@ -124,6 +125,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         submit_to_app_store_options = None
         add_build_to_beta_group_options = None
         add_beta_test_info_options = None
+
+        if not platform:
+            if any('tv' in platform_name.lower() for platform_name in ipa.supported_platforms):
+                platform = Platform.TV_OS
+            else:
+                platform = Platform.IOS
 
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
@@ -184,7 +191,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         *PublishArgument.with_custom_argument_group(
             'submit build to App Store review',
             PublishArgument.SUBMIT_TO_APP_STORE,
+            AppStoreVersionArgument.PLATFORM_OPTIONAL,
             *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
+            exclude=(AppStoreVersionArgument.PLATFORM,),
         ),
         *PublishArgument.with_custom_argument_group(
             "set Apple's altool configuration options",
@@ -236,6 +245,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     self._handle_ipa_app_store_submission(
                         application_package,
                         *self._get_app_store_connect_submit_options(
+                            application_package,
                             submit_to_testflight,
                             submit_to_app_store,
                             **app_store_connect_submit_options,
