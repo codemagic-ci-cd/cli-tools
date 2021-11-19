@@ -284,8 +284,8 @@ class AppStoreVersionArgument(cli.Argument):
         type=cli.CommonArgumentTypes.iso_8601_date,
         description=(
             f'Specify earliest return date for scheduled release type '
-            f'(see {Colors.BRIGHT_BLUE("--release-type")} configuration option). '
-            f'ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".'
+            f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
+            f'ISO8601 datetime, for example `2021-11-10T14:55:41+00:00`.'
         ),
         argparse_kwargs={'required': False},
     )

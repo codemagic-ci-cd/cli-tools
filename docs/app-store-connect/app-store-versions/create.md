@@ -17,6 +17,7 @@ app-store-connect app-store-versions create [-h] [--log-stream STREAM] [--no-col
     [--copyright COPYRIGHT]
     [--version-string VERSION_STRING]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
+    [--release-type RELEASE_TYPE]
     [--platform PLATFORM]
     BUILD_ID_RESOURCE_ID
 ```
@@ -39,7 +40,11 @@ Version of the build published to App Store that identifies an iteration of the 
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
-Specify earliest return date for scheduled release type (see --release-type configuration option). ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".
+Specify earliest return date for scheduled release type (see `--release-type` configuration option). ISO8601 datetime, for example `2021-11-10T14:55:41+00:00`.
+##### `--release-type=MANUAL | AFTER_APPROVAL | SCHEDULED`
+
+
+Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
 ##### `--platform=IOS | MAC_OS | TV_OS`
 
 

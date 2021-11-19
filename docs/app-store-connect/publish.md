@@ -26,9 +26,9 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--testflight]
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--app-store]
+    [--platform PLATFORM_OPTIONAL]
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
-    [--platform PLATFORM]
     [--release-type RELEASE_TYPE]
     [--version-string VERSION_STRING]
     [--altool-retries ALTOOL_RETRIES_COUNT]
@@ -93,6 +93,10 @@ Name of your Beta group. Multiple arguments
 
 
 Enable submission of an app to App Store app review procedure.
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+
+
+App Store Version platform
 ##### `--copyright=COPYRIGHT`
 
 
@@ -100,11 +104,7 @@ The name of the person or entity that owns the exclusive rights to your app, pre
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
-Specify earliest return date for scheduled release type (see --release-type configuration option). ISO8601 datetime, for example "2021-11-10T14:55:41+00:00".
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
-
-
-App Store Version platform. Default:&nbsp;`IOS`
+Specify earliest return date for scheduled release type (see `--release-type` configuration option). ISO8601 datetime, for example `2021-11-10T14:55:41+00:00`.
 ##### `--release-type=MANUAL | AFTER_APPROVAL | SCHEDULED`
 
 

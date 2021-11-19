@@ -1,12 +1,12 @@
 
-app-store-versions
-==================
+app-store-version
+=================
 
 
-**Manage the information related to an App Store version of your app**
+**Get the App Store version of a specific build.**
 ### Usage
 ```bash
-app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds app-store-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,14 @@ app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `app-store-version`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,10 +78,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app.|
-|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
-|[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|

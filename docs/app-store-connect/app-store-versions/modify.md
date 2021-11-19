@@ -1,12 +1,12 @@
 
-app-store-versions
-==================
+modify
+======
 
 
-**Manage the information related to an App Store version of your app**
+**Update the app store version for a specific app.**
 ### Usage
 ```bash
-app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-versions modify [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,8 +14,41 @@ app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--copyright COPYRIGHT]
+    [--earliest-release-date EARLIEST_RELEASE_DATE]
+    [--release-type RELEASE_TYPE]
+    [--version-string VERSION_STRING]
+    APP_STORE_VERSION_ID
 ```
+### Required arguments for action `modify`
+
+##### `APP_STORE_VERSION_ID`
+
+
+UUID value of the App Store Version
+### Optional arguments for action `modify`
+
+##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
+
+
+Alphanumeric ID value of the Build
+##### `--copyright=COPYRIGHT`
+
+
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "2008 Acme Inc."). Do not provide a URL.
+##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
+
+
+Specify earliest return date for scheduled release type (see `--release-type` configuration option). ISO8601 datetime, for example `2021-11-10T14:55:41+00:00`.
+##### `--release-type=MANUAL | AFTER_APPROVAL | SCHEDULED`
+
+
+Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -72,10 +105,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app.|
-|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
-|[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|
