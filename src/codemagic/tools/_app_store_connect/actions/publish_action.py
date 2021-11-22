@@ -58,6 +58,43 @@ class SubmitToAppStoreOptions:
     version_string: Optional[str] = None
 
 
+ACTION_ARGUMENTS = (
+    PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
+    PublishArgument.APPLE_ID,
+    PublishArgument.APP_SPECIFIC_PASSWORD,
+    *ArgumentGroups.PACKAGE_UPLOAD_ARGUMENTS,
+    PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+    *PublishArgument.with_custom_argument_group(
+        "add localized What's new (what to test) information to uploaded build",
+        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        "add localized What's new (what to test) information to uploaded build",
+        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'submit build to TestFlight for beta review',
+        PublishArgument.SUBMIT_TO_TESTFLIGHT,
+        *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'add build to Beta groups',
+        *ArgumentGroups.ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'submit build to App Store review',
+        PublishArgument.SUBMIT_TO_APP_STORE,
+        AppStoreVersionArgument.PLATFORM_OPTIONAL,
+        *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
+        exclude=(AppStoreVersionArgument.PLATFORM,),
+    ),
+    *PublishArgument.with_custom_argument_group(
+        "set Apple's altool configuration options",
+        *ArgumentGroups.ALTOOL_CONFIGURATION_ARGUMENTS,
+    ),
+)
+
+
 class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     def _validate_publishing_arguments(
@@ -69,7 +106,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
     ) -> None:
         if not (apple_id and app_specific_password):
-
             self._assert_api_client_credentials(
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
         else:
@@ -166,39 +202,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
     @cli.action(
         'publish',
-        PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
-        PublishArgument.APPLE_ID,
-        PublishArgument.APP_SPECIFIC_PASSWORD,
-        *ArgumentGroups.PACKAGE_UPLOAD_ARGUMENTS,
-        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-        *PublishArgument.with_custom_argument_group(
-            "add localized What's new (what to test) information to uploaded build",
-            *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
-        ),
-        *PublishArgument.with_custom_argument_group(
-            "add localized What's new (what to test) information to uploaded build",
-            *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
-        ),
-        *PublishArgument.with_custom_argument_group(
-            'submit build to TestFlight for beta review',
-            PublishArgument.SUBMIT_TO_TESTFLIGHT,
-            *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
-        ),
-        *PublishArgument.with_custom_argument_group(
-            'add build to Beta groups',
-            *ArgumentGroups.ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS,
-        ),
-        *PublishArgument.with_custom_argument_group(
-            'submit build to App Store review',
-            PublishArgument.SUBMIT_TO_APP_STORE,
-            AppStoreVersionArgument.PLATFORM_OPTIONAL,
-            *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
-            exclude=(AppStoreVersionArgument.PLATFORM,),
-        ),
-        *PublishArgument.with_custom_argument_group(
-            "set Apple's altool configuration options",
-            *ArgumentGroups.ALTOOL_CONFIGURATION_ARGUMENTS,
-        ),
+        *ACTION_ARGUMENTS,
         action_options={'requires_api_client': False},
     )
     def publish(
@@ -242,7 +246,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
                 )
                 if isinstance(application_package, Ipa):
-                    self._handle_ipa_app_store_submission(
+                    self._process_ipa_after_upload(
                         application_package,
                         *self._get_app_store_connect_submit_options(
                             application_package,
@@ -285,7 +289,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
 
-    def _handle_ipa_app_store_submission(
+    def _process_ipa_after_upload(
             self,
             ipa: Ipa,
             testflight_options: Optional[SubmitToTestFlightOptions],
