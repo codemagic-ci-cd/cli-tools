@@ -79,8 +79,7 @@ class BundleIds(ResourceManager[BundleId]):
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_bundle_id
         """
         bundle_id_resource_id = self._get_resource_id(bundle_id)
-        attributes = {'name': name}
-        payload = self._get_update_payload(bundle_id_resource_id, ResourceType.BUNDLE_ID, attributes=attributes)
+        payload = self._get_update_payload(bundle_id_resource_id, ResourceType.BUNDLE_ID, attributes={'name': name})
         response = self.client.session.patch(
             f'{self.client.API_URL}/bundleIds/{bundle_id_resource_id}', json=payload).json()
         return BundleId(response['data'])

@@ -3,17 +3,23 @@ from typing import TYPE_CHECKING
 from typing import Dict
 from typing import Type
 
-from .argument import ArgumentFormatter
-from .cli_help_formatter import CliHelpFormatter
-from .colors import Colors
+from codemagic.cli.cli_help_formatter import CliHelpFormatter
+from codemagic.cli.colors import Colors
+
+from .argument_formatter import ArgumentFormatter
 
 if TYPE_CHECKING:
-    from .argument import ActionCallable
-    from .cli_app import CliApp
+    from codemagic.cli.argument import ActionCallable
+    from codemagic.cli.cli_app import CliApp
 
 
-class CliActionParserBuilder:
-    def __init__(self, cli_app: Type['CliApp'], cli_action: 'ActionCallable', parent_parser):
+class ArgumentParserBuilder:
+    def __init__(
+            self,
+            cli_app: Type['CliApp'],
+            cli_action: 'ActionCallable',
+            parent_parser: argparse._SubParsersAction,
+    ):
         self._cli_app = cli_app
         self._cli_action = cli_action
         self._action_parser = parent_parser.add_parser(

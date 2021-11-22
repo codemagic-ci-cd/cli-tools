@@ -31,7 +31,7 @@ from codemagic.utilities import log
 from .action_group import ActionGroup
 from .argument import ActionCallable
 from .argument import Argument
-from .cli_action_parser_builder import CliActionParserBuilder
+from .argument import ArgumentParserBuilder
 from .cli_help_formatter import CliHelpFormatter
 from .cli_process import CliProcess
 from .cli_types import CommandArg
@@ -291,7 +291,7 @@ class CliApp(metaclass=abc.ABCMeta):
             help=action_group.description,
             description=action_group.description,
         )
-        CliActionParserBuilder.set_default_cli_options(group_parser)
+        ArgumentParserBuilder.set_default_cli_options(group_parser)
 
         group_title = Colors.BOLD(Colors.UNDERLINE(f'Available subcommands for {action_group.name}'))
         return group_parser.add_subparsers(title=group_title, dest='action_subcommand')
@@ -305,7 +305,7 @@ class CliApp(metaclass=abc.ABCMeta):
             description=Colors.BOLD(cls.__doc__),
             formatter_class=CliHelpFormatter,
         )
-        CliActionParserBuilder.set_default_cli_options(main_parser)
+        ArgumentParserBuilder.set_default_cli_options(main_parser)
 
         formatted_title = Colors.BOLD(Colors.UNDERLINE('Available commands'))
         action_parsers = main_parser.add_subparsers(dest='action', title=formatted_title)
@@ -320,10 +320,10 @@ class CliApp(metaclass=abc.ABCMeta):
                 action_group: ActionGroup = action_or_group
                 group_parsers = cls._add_action_group(action_group, action_parsers)
                 for group_action in cls.iter_class_cli_actions(action_group):
-                    CliActionParserBuilder(cls, group_action, group_parsers).build()
+                    ArgumentParserBuilder(cls, group_action, group_parsers).build()
             else:
                 main_action: ActionCallable = action_or_group
-                CliActionParserBuilder(cls, main_action, action_parsers).build()
+                ArgumentParserBuilder(cls, main_action, action_parsers).build()
 
         return main_parser
 

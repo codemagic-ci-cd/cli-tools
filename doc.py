@@ -265,7 +265,7 @@ class ToolDocumentationGenerator:
             description=tool.__doc__,
             formatter_class=cli.cli_help_formatter.CliHelpFormatter,
         )
-        cli.cli_action_parser_builder.CliActionParserBuilder.set_default_cli_options(parser)
+        cli.argument.ArgumentParserBuilder.set_default_cli_options(parser)
         return list(map(_serialize_option, parser._actions))
 
 
