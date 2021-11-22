@@ -95,7 +95,7 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_id}').json()
         return AppStoreVersion(response['data'])
 
-    def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Build:
+    def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Optional[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
         """
@@ -104,6 +104,9 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         else:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/build'
         response = self.client.session.get(url).json()
+
+        if response['data'] is None:
+            return None
         return Build(response['data'])
 
     def read_app_store_version_submission(

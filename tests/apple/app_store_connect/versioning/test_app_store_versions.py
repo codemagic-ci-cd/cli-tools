@@ -57,3 +57,9 @@ class AppStoreVersionsTest(ResourceManagerTestsBase):
     def test_delete(self):
         app_store_version_id = ResourceId('409ebefb-ebd1-4f1a-903d-6ba16e013ebf')
         self.api_client.app_store_versions.delete(app_store_version_id)
+
+    def test_read_build(self):
+        app_store_version_id = ResourceId('409ebefb-ebd1-4f1a-903d-6ba16e013ebf')
+        build = self.api_client.app_store_versions.read_build(app_store_version_id)
+        assert isinstance(build, Build)
+        assert build.id == ResourceId('9d967d5e-4946-432f-a111-1fd94949820b')
