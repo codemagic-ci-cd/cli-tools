@@ -202,7 +202,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         platform_slug = platform.value.lower().replace('_', '')
         submission_url = f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/{platform_slug}/version/inflight'
-        self.logger.info(f'\nCheck App Store submission details from {submission_url}\n')
+        self.logger.info(f'\nCheck App Store submission details from\n{submission_url}\n')
 
         return app_store_version_submission
 
