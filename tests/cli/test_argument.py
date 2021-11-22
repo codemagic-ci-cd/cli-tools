@@ -188,8 +188,9 @@ def test_binary_arguments_value(is_switched_on, is_switched_off, expected_value)
 
 
 def test_with_custom_argument_group():
+    argument_group_name = 'group_name'
     args_with_custom_group = tuple(cli.Argument.with_custom_argument_group(
-        'group_name',
+        argument_group_name,
         _TestArgument.TYPED_ARGUMENT,
         _TestArgument.INT_ARGUMENT,
         exclude=[_TestArgument.TYPED_ARGUMENT],
@@ -199,6 +200,10 @@ def test_with_custom_argument_group():
     assert arg is not _TestArgument.INT_ARGUMENT
     assert arg.name == _TestArgument.INT_ARGUMENT.name
     assert arg.__class__.__name__ == _TestArgument.INT_ARGUMENT.__class__.__name__
-    assert arg.value.argument_group_name == 'group_name'
-    for k in ('key', 'description', 'type', 'flags', 'argparse_kwargs'):
-        assert getattr(arg.value, k) == getattr(_TestArgument.INT_ARGUMENT.value, k)
+    assert arg.value.argument_group_name == argument_group_name
+    assert _TestArgument.INT_ARGUMENT.value.argument_group_name is None
+    assert arg.value.key == _TestArgument.INT_ARGUMENT.key
+    assert arg.value.description == _TestArgument.INT_ARGUMENT.description
+    assert arg.value.type == _TestArgument.INT_ARGUMENT.type
+    assert arg.value.flags == _TestArgument.INT_ARGUMENT.flags
+    assert arg.value.argparse_kwargs == _TestArgument.INT_ARGUMENT.argparse_kwargs
