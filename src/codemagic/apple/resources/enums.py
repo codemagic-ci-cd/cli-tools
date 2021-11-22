@@ -51,9 +51,6 @@ class ResourceEnum(enum.Enum, metaclass=ResourceEnumMeta):
     def __str__(self):
         return str(self.value)
 
-    def pretty_value(self) -> str:
-        return str(self.value).replace('_', ' ').lower()
-
 
 class AppStoreState(ResourceEnum):
     DEVELOPER_REMOVED_FROM_SALE = 'DEVELOPER_REMOVED_FROM_SALE'

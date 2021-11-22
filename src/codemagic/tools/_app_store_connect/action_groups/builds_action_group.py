@@ -318,7 +318,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self.logger.info((
                 f'\nFound existing {AppStoreVersion} {app_store_version.id} '
-                f'in state "{app_store_version.attributes.appStoreState.pretty_value()}". '
+                f'in state "{app_store_version.attributes.appStoreState}". '
             ))
             updates = ', '.join(
                 f'{param}={shlex.quote(value)}'
