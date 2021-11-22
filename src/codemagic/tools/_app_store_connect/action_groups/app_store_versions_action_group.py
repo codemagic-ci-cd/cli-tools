@@ -44,7 +44,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print: bool = True,
     ) -> AppStoreVersion:
         """
-        Add a new App Store version to an app.
+        Add a new App Store version to an app using specified build.
         """
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)

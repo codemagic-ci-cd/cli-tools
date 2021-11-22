@@ -3,7 +3,7 @@ create
 ======
 
 
-**Add a new App Store version to an app.**
+**Add a new App Store version to an app using specified build.**
 ### Usage
 ```bash
 app-store-connect app-store-versions create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

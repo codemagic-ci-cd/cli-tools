@@ -76,6 +76,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app.|
+|[`create`](app-store-versions/create.md)|Add a new App Store version to an app using specified build.|
 |[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
 |[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|
