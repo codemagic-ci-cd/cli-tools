@@ -25,6 +25,13 @@ class Argument(ArgumentProperties, enum.Enum):
             *arguments: Argument,
             exclude: Sequence[Argument] = tuple(),
     ):
+        """
+        Make duplicates of given arguments with a specified argument group name.
+        Duplicate arguments will have all the same properties as the original except the
+        argument_group_name attribute. Note that also the enumeration class name and
+        value attribute name are persisted, but comparison to the original enumeration
+        will fail.
+        """
         # https://docs.python.org/3/library/enum.html#functional-api
         # Use the functional API that enum module provides to make duplicates of
         # the given Argument enumerations with updated values.

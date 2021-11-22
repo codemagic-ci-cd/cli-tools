@@ -185,3 +185,20 @@ def test_exclusive_optional_arguments_exception(is_switched_on, is_switched_off)
 ])
 def test_binary_arguments_value(is_switched_on, is_switched_off, expected_value):
     assert Argument.resolve_optional_two_way_switch(is_switched_on, is_switched_off) == expected_value
+
+
+def test_with_custom_argument_group():
+    args_with_custom_group = tuple(cli.Argument.with_custom_argument_group(
+        'group_name',
+        _TestArgument.TYPED_ARGUMENT,
+        _TestArgument.INT_ARGUMENT,
+        exclude=[_TestArgument.TYPED_ARGUMENT],
+    ))
+    assert len(args_with_custom_group) == 1
+    arg = args_with_custom_group[0]
+    assert arg is not _TestArgument.INT_ARGUMENT
+    assert arg.name == _TestArgument.INT_ARGUMENT.name
+    assert arg.__class__.__name__ == _TestArgument.INT_ARGUMENT.__class__.__name__
+    assert arg.value.argument_group_name == 'group_name'
+    for k in ('key', 'description', 'type', 'flags', 'argparse_kwargs'):
+        assert getattr(arg.value, k) == getattr(_TestArgument.INT_ARGUMENT.value, k)
