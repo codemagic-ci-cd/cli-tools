@@ -213,7 +213,7 @@ class AppStoreConnect(cli.CliApp,
         try:
             expired_value = Argument.resolve_optional_two_way_switch(expired, not_expired)
         except ValueError:
-            flags = f'{BuildArgument.EXPIRED.flags!r} and {BuildArgument.NOT_EXPIRED.flags!r}'
+            flags = f'{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}'
             raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
 
         builds_filter = self.api_client.builds.Filter(
