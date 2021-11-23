@@ -41,11 +41,11 @@ Build version number is the version number of the uploaded build. For example `4
 ##### `--expired`
 
 
-List only expired builds
+List only expired builds. Mutually exclusive with option `--not-expired`.
 ##### `--not-expired`
 
 
-List only not expired builds
+List only not expired builds. Mutually exclusive with option `--expired`.
 ##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 

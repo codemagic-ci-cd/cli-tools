@@ -483,7 +483,9 @@ class BuildArgument(cli.Argument):
         key='expired',
         flags=('--expired',),
         type=bool,
-        description='List only expired builds',
+        description=(
+            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -493,7 +495,9 @@ class BuildArgument(cli.Argument):
         key='not_expired',
         flags=('--not-expired',),
         type=bool,
-        description='List only not expired builds',
+        description=(
+            f'List only not expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
