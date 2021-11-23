@@ -316,23 +316,51 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 **app_store_version_params,
             )
         else:
-            self.logger.info((
-                f'\nFound existing {AppStoreVersion} {app_store_version.id} '
-                f'in state "{app_store_version.attributes.appStoreState}". '
-            ))
-            updates = ', '.join(
-                f'{param}={shlex.quote(value)}'
-                for param, value in {'build': build.id, **app_store_version_params}.items()
-                if value is not None
-            )
-            self.logger.info(f'Use it for current submission by updating it with {updates }.')
-
-            app_store_version = self.update_app_store_version(
-                app_store_version.id,
-                build_id=build.id,
+            self._update_existing_app_store_version(
+                app_store_version,
+                build,
                 **app_store_version_params,
             )
         return app_store_version
+
+    def _update_existing_app_store_version(
+        self,
+        app_store_version: AppStoreVersion,
+        build: Build,
+        copyright: Optional[str] = None,
+        earliest_release_date: Optional[datetime] = None,
+        release_type: Optional[ReleaseType] = None,
+        version_string: Optional[str] = None,
+    ):
+        self.logger.info((
+            f'\nFound existing {AppStoreVersion} {app_store_version.id} '
+            f'in state "{app_store_version.attributes.appStoreState}". '
+        ))
+
+        updates = {'build': build.id}
+        if copyright:
+            updates['copyright'] = copyright
+        if earliest_release_date:
+            updates['earliest release date'] = AppStoreVersion.to_iso_8601(earliest_release_date)
+        if release_type:
+            updates['release type'] = release_type.value.lower()
+        if version_string:
+            updates['version string'] = version_string
+
+        update_message = ', '.join(
+            f'{param}: {shlex.quote(value)}'
+            for param, value in updates.items()
+        )
+        self.logger.info(f'Use it for current submission by updating it with {update_message}.')
+
+        return self.update_app_store_version(
+            app_store_version.id,
+            build_id=build.id,
+            copyright=copyright,
+            earliest_release_date=earliest_release_date,
+            release_type=release_type,
+            version_string=version_string,
+        )
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
         versions_filter = self.api_client.app_store_versions.Filter(
