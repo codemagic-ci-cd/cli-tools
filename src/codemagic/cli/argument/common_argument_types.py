@@ -33,7 +33,7 @@ class CommonArgumentTypes:
         return d
 
     @staticmethod
-    def iso_8601_date(iso_8601_timestamp: str) -> datetime:
+    def iso_8601_datetime(iso_8601_timestamp: str) -> datetime:
         """
         Parse ISO8601 timestamp to datetime instance. Accept timestamps
         with and without the milliseconds portion. For example:

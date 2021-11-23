@@ -281,7 +281,7 @@ class AppStoreVersionArgument(cli.Argument):
     EARLIEST_RELEASE_DATE = cli.ArgumentProperties(
         key='earliest_release_date',
         flags=('--earliest-release-date',),
-        type=cli.CommonArgumentTypes.iso_8601_date,
+        type=cli.CommonArgumentTypes.iso_8601_datetime,
         description=(
             f'Specify earliest return date for scheduled release type '
             f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
