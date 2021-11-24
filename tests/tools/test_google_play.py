@@ -64,18 +64,18 @@ def test_invalid_credentials_from_env(namespace_kwargs):
     os.environ[Types.CredentialsArgument.environment_variable_key] = 'invalid credentials'
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
-    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
+    with pytest.raises(argparse.ArgumentError) as exception_info:
         GooglePlay.from_cli_args(cli_args)
-    assert 'invalid credentials' in str(exception_info.value)
+    assert str(exception_info.value) == 'argument --credentials: Provided value "invalid credentials" is not valid'
 
 
 def test_credentials_invalid_path(namespace_kwargs):
     os.environ[Types.CredentialsArgument.environment_variable_key] = '@file:this-is-not-a-file'
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
-    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
+    with pytest.raises(argparse.ArgumentError) as exception_info:
         GooglePlay.from_cli_args(cli_args)
-    assert 'this-is-not-a-file' in str(exception_info.value)
+    assert str(exception_info.value) == 'argument --credentials: File "this-is-not-a-file" does not exist'
 
 
 @mock.patch('codemagic.tools.google_play.GooglePlayDeveloperAPIClient')

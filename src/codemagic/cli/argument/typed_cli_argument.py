@@ -55,7 +55,10 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
             return None
         elif cls.environment_variable_key not in os.environ:
             return None
-        return cls(os.environ[cls.environment_variable_key], from_environment=True)
+        try:
+            return cls(os.environ[cls.environment_variable_key], from_environment=True)
+        except argparse.ArgumentTypeError as ate:
+            raise ValueError(str(ate)) from ate
 
     @classmethod
     def _is_valid(cls, value: T) -> bool:
@@ -134,7 +137,10 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
         if not path.is_file():
             raise argparse.ArgumentTypeError(f'"{path}" is not a file')
         content = path.read_text()
-        return self._apply_type(content)
+        try:
+            return self._apply_type(content)
+        except argparse.ArgumentTypeError:
+            raise argparse.ArgumentTypeError(f'Provided value in file "{path}" is not valid')
 
     def _parse_value(self) -> T:
         if self._is_from_environment():
