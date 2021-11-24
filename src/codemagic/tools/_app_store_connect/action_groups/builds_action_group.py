@@ -5,6 +5,7 @@ import time
 from abc import ABCMeta
 from datetime import datetime
 from distutils.version import LooseVersion
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
@@ -337,7 +338,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             f'in state "{app_store_version.attributes.appStoreState}". '
         ))
 
-        updates = {'build': build.id}
+        updates: Dict[str, str] = {'build': build.id}
         if copyright:
             updates['copyright'] = copyright
         if earliest_release_date:
