@@ -14,7 +14,7 @@ from codemagic.cli import Colors
 from codemagic.cli.argument import EnvironmentArgumentValue
 from codemagic.cli.argument import TypedCliArgument
 
-mock_dir = pathlib.Path(__file__).parent / 'mocks'
+mocks_dir = pathlib.Path(__file__).parent.parent / 'mocks'
 
 
 class CustomStr(str):
@@ -54,7 +54,7 @@ class _TestArgument(cli.Argument):
     '\nmy secret value\n',
     '( ͡° ͜ʖ ͡°)',
     '(╯°□°）╯︵ ┻━┻',
-    mock_dir / 'utf-8-sample.txt',
+    mocks_dir / 'utf-8-sample.txt',
 ])
 def test_environment_argument_value_from_file(file_contents: Union[pathlib.Path, str]):
     if isinstance(file_contents, pathlib.Path):
