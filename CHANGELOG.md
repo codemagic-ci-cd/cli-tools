@@ -1,3 +1,10 @@
+Version 0.12.1
+-------------
+
+**Fixes**
+
+- Show appropriate error messages when invalid values are passed to CLI actions using environment variables.
+
 Version 0.12.0
 -------------
 
