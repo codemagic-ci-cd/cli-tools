@@ -42,9 +42,7 @@ class CommonArgumentTypes:
         datetime_formats = (
             '%Y-%m-%dT%H:%M:%S.%f%z',
             '%Y-%m-%dT%H:%M:%S%z',
-            '%Y-%m-%dT%H:%M:%S',
             '%Y%m%dT%H%M%S%z',
-            '%Y%m%dT%H%M%S',
         )
         for datetime_format in datetime_formats:
             try:

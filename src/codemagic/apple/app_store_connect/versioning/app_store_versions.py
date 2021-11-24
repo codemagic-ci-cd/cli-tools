@@ -161,7 +161,8 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         if copyright:
             attributes['copyright'] = copyright
         if earliest_release_date:
-            attributes['earliestReleaseDate'] = Resource.to_iso_8601(earliest_release_date)
+            timestamp = Resource.to_iso_8601(earliest_release_date, with_fractional_seconds=False)
+            attributes['earliestReleaseDate'] = timestamp
         if release_type:
             attributes['releaseType'] = release_type.value
         if version:
