@@ -215,27 +215,29 @@ def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_pac
             mock_validate.assert_not_called()
 
 
+@pytest.mark.parametrize('argument', (PublishArgument.SKIP_PACKAGE_VALIDATION, PublishArgument.SKIP_PACKAGE_UPLOAD))
 @pytest.mark.parametrize('environment_value', ['1', 'true', 'True', 'false', 'asdf', '   ', 'null', 'None'])
-def test_skip_package_validation_argument_from_env(environment_value):
+def test_skip_package_upload_or_validation_argument_from_env(argument, environment_value):
     """
     Since this is a boolean switch any "truthy" string will resolve so that the switch will be turned on.
     """
-    args = argparse.Namespace(skip_package_validation=None)
-    os.environ[Types.AppStoreConnectSkipPackageValidation.environment_variable_key] = environment_value
-    parsed_value = PublishArgument.SKIP_PACKAGE_VALIDATION.from_args(args)
+    args = argparse.Namespace(**{argument.key: None})
+    os.environ[argument.type.environment_variable_key] = environment_value
+    parsed_value = argument.from_args(args)
     assert parsed_value.value is True
 
 
-def test_no_skip_package_validation_argument_from_env(cli_argument_group):
+@pytest.mark.parametrize('argument', (PublishArgument.SKIP_PACKAGE_VALIDATION, PublishArgument.SKIP_PACKAGE_UPLOAD))
+def test_no_skip_package_upload_or_validation_argument_from_env(cli_argument_group, argument):
     """
     Non "truthy" value is not valid as this action just turns the switch on.
     """
-    PublishArgument.SKIP_PACKAGE_VALIDATION.register(cli_argument_group)
-    args = argparse.Namespace(skip_package_validation=None)
-    os.environ[Types.AppStoreConnectSkipPackageValidation.environment_variable_key] = ''
+    argument.register(cli_argument_group)
+    args = argparse.Namespace(**{argument.key: None})
+    os.environ[argument.type.environment_variable_key] = ''
     with pytest.raises(argparse.ArgumentError) as error_info:
-        PublishArgument.SKIP_PACKAGE_VALIDATION.from_args(args)
-    assert str(error_info.value) == 'argument --skip-package-validation: Provided value "False" is not valid'
+        argument.from_args(args)
+    assert str(error_info.value) == f'argument {"/".join(argument.flags)}: Provided value "False" is not valid'
 
 
 def test_add_build_to_beta_groups(publishing_namespace_kwargs):
