@@ -177,10 +177,9 @@ def test_no_skip_package_validation_argument_from_env(cli_argument_group):
     PublishArgument.SKIP_PACKAGE_VALIDATION.register(cli_argument_group)
     args = argparse.Namespace(skip_package_validation=None)
     os.environ[Types.AppStoreConnectSkipPackageValidation.environment_variable_key] = ''
-    with pytest.raises(argparse.ArgumentTypeError) as error_info:
+    with pytest.raises(argparse.ArgumentError) as error_info:
         PublishArgument.SKIP_PACKAGE_VALIDATION.from_args(args)
-    print(error_info.value)
-    assert str(error_info.value) == 'Provided value "False" is not valid'
+    assert str(error_info.value) == 'argument --skip-package-validation: Provided value "False" is not valid'
 
 
 def test_add_build_to_beta_groups(publishing_namespace_kwargs):
