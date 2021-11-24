@@ -59,18 +59,31 @@ def test_invalid_private_key_from_env(namespace_kwargs):
     os.environ[Types.PrivateKeyArgument.environment_variable_key] = 'this is not a private key'
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
-    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
+    with pytest.raises(argparse.ArgumentError) as exception_info:
         AppStoreConnect.from_cli_args(cli_args)
-    assert 'this is not a private key' in str(exception_info.value)
+    expected_error = 'argument --private-key: Provided value "this is not a private key" is not valid'
+    assert str(exception_info.value) == expected_error
+
+
+def test_invalid_private_key_from_file(namespace_kwargs):
+    with NamedTemporaryFile(suffix='.pk') as tf:
+        tf.write(b'not a valid private key')
+        tf.flush()
+        os.environ[Types.PrivateKeyArgument.environment_variable_key] = f'@file:{tf.name}'
+        namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
+        cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
+        with pytest.raises(argparse.ArgumentError) as exception_info:
+            AppStoreConnect.from_cli_args(cli_args)
+        assert str(exception_info.value) == f'argument --private-key: Provided value in file "{tf.name}" is not valid'
 
 
 def test_private_key_invalid_path(namespace_kwargs):
     os.environ[Types.PrivateKeyArgument.environment_variable_key] = '@file:this-is-not-a-file'
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
-    with pytest.raises(argparse.ArgumentTypeError) as exception_info:
+    with pytest.raises(argparse.ArgumentError) as exception_info:
         AppStoreConnect.from_cli_args(cli_args)
-    assert 'this-is-not-a-file' in str(exception_info.value)
+    assert str(exception_info.value) == 'argument --private-key: File "this-is-not-a-file" does not exist'
 
 
 @mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
