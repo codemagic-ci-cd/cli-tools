@@ -3,7 +3,7 @@ Version 0.12.1
 
 **Fixes**
 
-- Show appropriate error messages when invalid values are passed to CLI actions using environment variables.
+- Show appropriate error messages when invalid values are passed to CLI actions using environment variables. [PR #168](https://github.com/codemagic-ci-cd/cli-tools/pull/168)
 
 Version 0.12.0
 -------------
