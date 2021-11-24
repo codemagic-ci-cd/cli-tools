@@ -39,12 +39,16 @@ class CommonArgumentTypes:
         with and without the milliseconds portion. For example:
         '2020-08-04T11:44:12.000+0000' and '2021-01-28T06:01:32-08:00'.
         """
-        try:
-            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
-        except ValueError:
-            pass
-
-        try:
-            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S%z')
-        except ValueError:
-            raise argparse.ArgumentTypeError(f'"{iso_8601_timestamp}" is not a valid ISO 8601 timestamp')
+        datetime_formats = (
+            '%Y-%m-%dT%H:%M:%S.%f%z',
+            '%Y-%m-%dT%H:%M:%S%z',
+            '%Y-%m-%dT%H:%M:%S',
+            '%Y%m%dT%H%M%S%z',
+            '%Y%m%dT%H%M%S',
+        )
+        for datetime_format in datetime_formats:
+            try:
+                return datetime.strptime(iso_8601_timestamp, datetime_format)
+            except ValueError:
+                continue
+        raise argparse.ArgumentTypeError(f'"{iso_8601_timestamp}" is not a valid ISO 8601 timestamp')
