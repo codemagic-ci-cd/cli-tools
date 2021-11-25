@@ -159,7 +159,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             build_id: ResourceId,
             copyright: Optional[str] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
             platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
             release_type: Optional[ReleaseType] = None,
@@ -170,6 +170,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
+        if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+            earliest_release_date = earliest_release_date.value
 
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 

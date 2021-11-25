@@ -4,6 +4,8 @@ import re
 from argparse import ArgumentTypeError
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime
+from datetime import timezone
 from typing import List
 from typing import Optional
 
@@ -109,6 +111,22 @@ class Types:
         @classmethod
         def _is_valid(cls, value: int) -> bool:
             return value >= 0
+
+    class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
+        argument_type = datetime
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> datetime:
+            value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
+            if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
+                raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
+            elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
+                raise ArgumentTypeError((
+                    f'Provided value "{value}" is not valid, '
+                    f'only hour precision is allowed and '
+                    f'minutes and seconds are not permitted'
+                ))
+            return value
 
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
@@ -281,11 +299,12 @@ class AppStoreVersionArgument(cli.Argument):
     EARLIEST_RELEASE_DATE = cli.ArgumentProperties(
         key='earliest_release_date',
         flags=('--earliest-release-date',),
-        type=cli.CommonArgumentTypes.iso_8601_datetime,
+        type=Types.EarliestReleaseDate,
         description=(
             f'Specify earliest return date for scheduled release type '
             f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
-            f'ISO8601 datetime, for example `2021-11-10T14:55:41+00:00`.'
+            f'Timezone aware ISO8601 timestamp with hour precision, '
+            f'for example `2021-11-10T14:00:00+00:00`.'
         ),
         argparse_kwargs={'required': False},
     )

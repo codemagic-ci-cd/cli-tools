@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta
 from datetime import datetime
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -18,6 +19,7 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
 from ..arguments import BuildArgument
 from ..arguments import CommonArgument
+from ..arguments import Types
 from ..errors import AppStoreConnectError
 
 
@@ -40,12 +42,15 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             copyright: Optional[str] = None,
             version_string: Optional[str] = None,
             release_type: Optional[ReleaseType] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             should_print: bool = True,
     ) -> AppStoreVersion:
         """
         Add a new App Store version to an app using specified build.
         """
+        if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+            earliest_release_date = earliest_release_date.value
+
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
@@ -81,13 +86,15 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_version_id: ResourceId,
             build_id: Optional[ResourceId] = None,
             copyright: Optional[str] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
             should_print: bool = True) -> AppStoreVersion:
         """
         Update the app store version for a specific app.
         """
+        if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+            earliest_release_date = earliest_release_date.value
         return self._modify_resource(
             self.api_client.app_store_versions,
             app_store_version_id,

@@ -97,7 +97,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             app_store_version_id: ResourceId,
             build_id: Optional[ResourceId] = None,
             copyright: Optional[str] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
             should_print: bool = True) -> AppStoreVersion:
@@ -122,7 +122,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             self,
             build_id: ResourceId,
             copyright: Optional[str] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
             platform: Platform = Platform.IOS,
             release_type: Optional[ReleaseType] = None,

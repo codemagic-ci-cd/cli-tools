@@ -152,7 +152,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             beta_group_names: Optional[List[str]] = None,
             # Submit to App Store arguments
             copyright: Optional[str] = None,
-            earliest_release_date: Optional[datetime] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             platform: Optional[Platform] = None,
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
@@ -173,6 +173,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             )
         if submit_to_app_store:
+            if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+                earliest_release_date = earliest_release_date.value
             submit_to_app_store_options = SubmitToAppStoreOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
                 copyright=copyright,
