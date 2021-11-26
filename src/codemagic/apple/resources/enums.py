@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import enum
 from typing import Optional
+from typing import Tuple
 
 from codemagic.utilities import log
 
@@ -69,6 +70,17 @@ class AppStoreState(ResourceEnum):
     WAITING_FOR_EXPORT_COMPLIANCE = 'WAITING_FOR_EXPORT_COMPLIANCE'
     WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
     REPLACED_WITH_NEW_VERSION = 'REPLACED_WITH_NEW_VERSION'
+
+    @classmethod
+    def editable_states(cls) -> Tuple[AppStoreState, ...]:
+        return (
+            AppStoreState.DEVELOPER_REJECTED,
+            AppStoreState.INVALID_BINARY,
+            AppStoreState.METADATA_REJECTED,
+            AppStoreState.PREPARE_FOR_SUBMISSION,
+            AppStoreState.REJECTED,
+            AppStoreState.WAITING_FOR_REVIEW,
+        )
 
 
 class BetaReviewState(ResourceEnum):

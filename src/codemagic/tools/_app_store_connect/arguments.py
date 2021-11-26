@@ -4,6 +4,8 @@ import re
 from argparse import ArgumentTypeError
 from collections import Counter
 from dataclasses import dataclass
+from datetime import datetime
+from datetime import timezone
 from typing import List
 from typing import Optional
 
@@ -20,6 +22,7 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Certificate
@@ -74,6 +77,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class AppStoreConnectSkipPackageUpload(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD'
+
     class AltoolRetriesCount(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
@@ -100,6 +107,26 @@ class Types:
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
         default_value = 20
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value >= 0
+
+    class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
+        argument_type = datetime
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> datetime:
+            value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
+            if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
+                raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
+            elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
+                raise ArgumentTypeError((
+                    f'Provided value "{value}" is not valid, '
+                    f'only hour precision is allowed and '
+                    f'minutes and seconds are not permitted'
+                ))
+            return value
 
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
@@ -259,6 +286,28 @@ class AppStoreVersionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the App Store Version Submission',
     )
+    COPYRIGHT = cli.ArgumentProperties(
+        key='copyright',
+        flags=('--copyright',),
+        description=(
+            'The name of the person or entity that owns the exclusive rights to your app, '
+            'preceded by the year the rights were obtained (for example, "2008 Acme Inc."). '
+            'Do not provide a URL.'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    EARLIEST_RELEASE_DATE = cli.ArgumentProperties(
+        key='earliest_release_date',
+        flags=('--earliest-release-date',),
+        type=Types.EarliestReleaseDate,
+        description=(
+            f'Specify earliest return date for scheduled release type '
+            f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
+            f'Timezone aware ISO8601 timestamp with hour precision, '
+            f'for example `2021-11-10T14:00:00+00:00`.'
+        ),
+        argparse_kwargs={'required': False},
+    )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
         flags=('--platform', '--app-store-version-platform'),
@@ -267,6 +316,25 @@ class AppStoreVersionArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(Platform),
+            'default': Platform.IOS,
+        },
+    )
+    PLATFORM_OPTIONAL = PLATFORM.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Platform),
+    })
+    RELEASE_TYPE = cli.ArgumentProperties(
+        key='release_type',
+        flags=('--release-type',),
+        type=ReleaseType,
+        description=(
+            'Choose when to release the app. You can either manually release the app at a later date on '
+            'the App Store Connect website, or the app version can be automatically released right after '
+            'it has been approved by App Review.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReleaseType),
         },
     )
     VERSION_STRING = cli.ArgumentProperties(
@@ -303,7 +371,17 @@ class PublishArgument(cli.Argument):
         key='submit_to_testflight',
         flags=('--testflight', '-t'),
         type=bool,
-        description='Submit an app for Testflight beta app review to allow external testing',
+        description='Enable submission of an app for Testflight beta app review to allow external testing.',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
+        key='submit_to_app_store',
+        flags=('--app-store', '-a'),
+        type=bool,
+        description='Enable submission of an app to App Store app review procedure.',
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -334,7 +412,7 @@ class PublishArgument(cli.Argument):
     )
     SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
         key='skip_package_validation',
-        flags=('--skip-package-validation',),
+        flags=('--skip-package-validation', '-sv'),
         type=Types.AppStoreConnectSkipPackageValidation,
         description=(
             'Skip package validation before uploading it to App Store Connect. '
@@ -346,13 +424,29 @@ class PublishArgument(cli.Argument):
             'action': 'store_true',
         },
     )
+    SKIP_PACKAGE_UPLOAD = cli.ArgumentProperties(
+        key='skip_package_upload',
+        flags=('--skip-package-upload', '-su'),
+        type=Types.AppStoreConnectSkipPackageUpload,
+        description=(
+            'Skip package upload before doing any other TestFlight or App Store related actions. '
+            'Using this switch will opt out from running `altool --upload-app` as part of publishing '
+            'action. Use this option in case your application package is already uploaded to App Store.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
         key='max_build_processing_wait',
-        flags=('--max-build-processing-wait',),
+        flags=('--max-build-processing-wait', '-w'),
         type=Types.MaxBuildProcessingWait,
         description=(
             'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
-            'Apple and retry submitting the build for beta review. If the processing is not finished '
+            'Apple and retry submitting the build for (beta) review. Works in conjunction with '
+            'TestFlight beta review submission, or App Store review submission and operations that '
+            'depend on either one of those. If the processing is not finished '
             'within the specified timeframe, further submission will be terminated. '
             'Waiting will be skipped if the value is set to 0, further actions might fail '
             'if the build is not processed yet.'
@@ -408,7 +502,9 @@ class BuildArgument(cli.Argument):
         key='expired',
         flags=('--expired',),
         type=bool,
-        description='List only expired builds',
+        description=(
+            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -418,7 +514,9 @@ class BuildArgument(cli.Argument):
         key='not_expired',
         flags=('--not-expired',),
         type=bool,
-        description='List only not expired builds',
+        description=(
+            f'List only not expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -461,10 +559,9 @@ class BuildArgument(cli.Argument):
     BUILD_VERSION_NUMBER = cli.ArgumentProperties(
         key='build_version_number',
         flags=('--build-version-number',),
-        type=int,
         description=(
             'Build version number is the version number of the uploaded build. '
-            'For example `46`'
+            'For example `46` or `1.0.13.5`.'
         ),
         argparse_kwargs={'required': False},
     )
@@ -818,4 +915,43 @@ class CommonArgument(cli.Argument):
             'required': False,
             'choices': list(Platform),
         },
+    )
+
+
+class ArgumentGroups:
+    ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_BUILD_LOCALIZATIONS,
+        BuildArgument.LOCALE_DEFAULT,
+        BuildArgument.WHATS_NEW,
+    )
+    ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
+    )
+    ALTOOL_CONFIGURATION_ARGUMENTS = (
+        PublishArgument.ALTOOL_RETRIES_COUNT,
+        PublishArgument.ALTOOL_RETRY_WAIT,
+        PublishArgument.ALTOOL_VERBOSE_LOGGING,
+    )
+    LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
+        BuildArgument.BUILD_VERSION_NUMBER,
+        BuildArgument.EXPIRED,
+        BuildArgument.NOT_EXPIRED,
+        BuildArgument.PRE_RELEASE_VERSION,
+        BuildArgument.PROCESSING_STATE,
+    )
+    PACKAGE_UPLOAD_ARGUMENTS = (
+        PublishArgument.SKIP_PACKAGE_VALIDATION,
+        PublishArgument.SKIP_PACKAGE_UPLOAD,
+    )
+    SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
+        AppStoreVersionArgument.COPYRIGHT,
+        AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
+        AppStoreVersionArgument.PLATFORM,
+        AppStoreVersionArgument.RELEASE_TYPE,
+        AppStoreVersionArgument.VERSION_STRING,
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+    )
+    SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
     )

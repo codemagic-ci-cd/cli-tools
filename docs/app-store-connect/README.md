@@ -102,6 +102,7 @@ Enable verbose logging for commands
 |Action group|Description|
 | :--- | :--- |
 |[`app-store-version-submissions`](app-store-version-submissions.md)|Manage your application's App Store version review process|
+|[`app-store-versions`](app-store-versions.md)|Manage the information related to an App Store version of your app|
 |[`apps`](apps.md)|Manage your apps in App Store Connect|
 |[`beta-app-review-submissions`](beta-app-review-submissions.md)|Manage your application's TestFlight submissions|
 |[`beta-build-localizations`](beta-build-localizations.md)|Manage your beta builds localizations in App Store Connect|

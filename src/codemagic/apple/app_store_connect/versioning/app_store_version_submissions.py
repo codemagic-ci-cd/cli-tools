@@ -19,7 +19,7 @@ class AppStoreVersionSubmissions(ResourceManager[AppStoreVersionSubmission]):
     def resource_type(self) -> Type[AppStoreVersionSubmission]:
         return AppStoreVersionSubmission
 
-    def create(self, app_store_version: Union[ResourceId, AppStoreVersion]):
+    def create(self, app_store_version: Union[ResourceId, AppStoreVersion]) -> AppStoreVersionSubmission:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission
         """

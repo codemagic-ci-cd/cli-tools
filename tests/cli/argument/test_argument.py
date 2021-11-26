@@ -14,7 +14,7 @@ from codemagic.cli import Colors
 from codemagic.cli.argument import EnvironmentArgumentValue
 from codemagic.cli.argument import TypedCliArgument
 
-mock_dir = pathlib.Path(__file__).parent / 'mocks'
+mocks_dir = pathlib.Path(__file__).parent.parent / 'mocks'
 
 
 class CustomStr(str):
@@ -54,7 +54,7 @@ class _TestArgument(cli.Argument):
     '\nmy secret value\n',
     '( ͡° ͜ʖ ͡°)',
     '(╯°□°）╯︵ ┻━┻',
-    mock_dir / 'utf-8-sample.txt',
+    mocks_dir / 'utf-8-sample.txt',
 ])
 def test_environment_argument_value_from_file(file_contents: Union[pathlib.Path, str]):
     if isinstance(file_contents, pathlib.Path):
@@ -185,3 +185,25 @@ def test_exclusive_optional_arguments_exception(is_switched_on, is_switched_off)
 ])
 def test_binary_arguments_value(is_switched_on, is_switched_off, expected_value):
     assert Argument.resolve_optional_two_way_switch(is_switched_on, is_switched_off) == expected_value
+
+
+def test_with_custom_argument_group():
+    argument_group_name = 'group_name'
+    args_with_custom_group = tuple(cli.Argument.with_custom_argument_group(
+        argument_group_name,
+        _TestArgument.TYPED_ARGUMENT,
+        _TestArgument.INT_ARGUMENT,
+        exclude=[_TestArgument.TYPED_ARGUMENT],
+    ))
+    assert len(args_with_custom_group) == 1
+    arg = args_with_custom_group[0]
+    assert arg is not _TestArgument.INT_ARGUMENT
+    assert arg.name == _TestArgument.INT_ARGUMENT.name
+    assert arg.__class__.__name__ == _TestArgument.INT_ARGUMENT.__class__.__name__
+    assert arg.value.argument_group_name == argument_group_name
+    assert _TestArgument.INT_ARGUMENT.value.argument_group_name is None
+    assert arg.value.key == _TestArgument.INT_ARGUMENT.key
+    assert arg.value.description == _TestArgument.INT_ARGUMENT.description
+    assert arg.value.type == _TestArgument.INT_ARGUMENT.type
+    assert arg.value.flags == _TestArgument.INT_ARGUMENT.flags
+    assert arg.value.argparse_kwargs == _TestArgument.INT_ARGUMENT.argparse_kwargs

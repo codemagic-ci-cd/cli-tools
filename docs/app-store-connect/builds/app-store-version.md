@@ -1,12 +1,12 @@
 
-list
-====
+app-store-version
+=================
 
 
-**Find and list apps added in App Store Connect**
+**Get the App Store version of a specific build.**
 ### Usage
 ```bash
-app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds app-store-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -14,49 +14,14 @@ app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
-    [--strict-match-identifier]
-    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
-    [--app-name APPLICATION_NAME]
-    [--app-sku APPLICATION_SKU]
-    [--version-string VERSION_STRING]
-    [--platform PLATFORM_OPTIONAL]
-    [--state APP_STORE_STATE]
+    BUILD_ID_RESOURCE_ID
 ```
-### Optional arguments for action `list`
+### Required arguments for action `app-store-version`
 
-##### `--bundle-id-identifier=BUNDLE_ID_IDENTIFIER_OPTIONAL`
-
-
-Identifier of the Bundle ID. For example `com.example.app`
-##### `--strict-match-identifier`
+##### `BUILD_ID_RESOURCE_ID`
 
 
-Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.app.extension`
-##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
-
-
-Application Apple ID. An automatically generated ID assigned to your app
-##### `--app-name, --application-name=APPLICATION_NAME`
-
-
-The name of your app as it will appear in the App Store
-##### `--app-sku, --application-sku=APPLICATION_SKU`
-
-
-A unique ID for your app that is not visible on the App Store.
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
-
-
-App Store Version platform
-##### `--state, --app-store-version-state=DEVELOPER_REMOVED_FROM_SALE | DEVELOPER_REJECTED | IN_REVIEW | INVALID_BINARY | METADATA_REJECTED | PENDING_APPLE_RELEASE | PENDING_CONTRACT | PENDING_DEVELOPER_RELEASE | PREPARE_FOR_SUBMISSION | PREORDER_READY_FOR_SALE | PROCESSING_FOR_APP_STORE | READY_FOR_SALE | REJECTED | REMOVED_FROM_SALE | WAITING_FOR_EXPORT_COMPLIANCE | WAITING_FOR_REVIEW | REPLACED_WITH_NEW_VERSION`
-
-
-State of App Store Version
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

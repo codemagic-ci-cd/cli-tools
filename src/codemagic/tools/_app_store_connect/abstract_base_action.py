@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from abc import ABCMeta
+from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -13,10 +14,15 @@ from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionSubmission
+from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
@@ -41,11 +47,30 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
-    def _assert_api_client_credentials(self, custom_error: Optional[str]) -> str:
+    @classmethod
+    def echo(cls, message: str, *args, **kwargs) -> None:
+        ...
+
+    def _assert_api_client_credentials(self, custom_error: Optional[str] = None):
+        ...
+
+    def create_app_store_version(
+            self,
+            build_id: Union[ResourceId, Build],
+            app_id: Optional[Union[ResourceId, App]] = None,
+            platform: Platform = Platform.IOS,
+            copyright: Optional[str] = None,
+            version_string: Optional[str] = None,
+            should_print: bool = True,
+    ) -> AppStoreVersion:
+        ...
+
+    def create_app_store_version_submission(
+            self, app_store_version_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
         ...
 
     def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
+            self, build_id: ResourceId, should_print: bool = True) -> BetaAppReviewSubmission:
         ...
 
     def create_beta_build_localization(
@@ -67,10 +92,42 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
             whats_new: Optional[Types.WhatsNewArgument] = None):
         ...
 
+    def update_app_store_version(
+            self,
+            app_store_version_id: ResourceId,
+            build_id: Optional[ResourceId] = None,
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+            release_type: Optional[ReleaseType] = None,
+            version_string: Optional[str] = None,
+            should_print: bool = True) -> AppStoreVersion:
+        ...
+
+    def wait_until_build_is_processed(
+        self,
+        build: Build,
+        max_processing_minutes: int,
+        retry_wait_seconds: int = 30,
+    ) -> Build:
+        ...
+
     def submit_to_testflight(
             self,
             build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None):
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+    ) -> BetaAppReviewSubmission:
+        ...
+
+    def submit_to_app_store(
+            self,
+            build_id: ResourceId,
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            platform: Platform = Platform.IOS,
+            release_type: Optional[ReleaseType] = None,
+            version_string: Optional[str] = None,
+    ) -> AppStoreVersionSubmission:
         ...
 
     def list_apps(self,
@@ -83,4 +140,15 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
                   platform: Optional[Platform] = None,
                   app_store_state: Optional[AppStoreState] = None,
                   should_print: bool = True) -> List[App]:
+        ...
+
+    def list_builds(self,
+                    application_id: Optional[ResourceId] = None,
+                    expired: Optional[bool] = None,
+                    not_expired: Optional[bool] = None,
+                    build_id: Optional[ResourceId] = None,
+                    pre_release_version: Optional[str] = None,
+                    processing_state: Optional[BuildProcessingState] = None,
+                    build_version_number: Optional[int] = None,
+                    should_print: bool = True) -> List[Build]:
         ...

@@ -15,12 +15,12 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-version-number BUILD_VERSION_NUMBER]
     [--expired]
     [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
-    [--build-version-number BUILD_VERSION_NUMBER]
 ```
 ### Optional arguments for action `list-builds`
 
@@ -28,18 +28,22 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-##### `--expired`
-
-
-List only expired builds
-##### `--not-expired`
-
-
-List only not expired builds
 ##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
 
 
 Alphanumeric ID value of the Build
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build. For example `46` or `1.0.13.5`.
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
 ##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 
@@ -48,10 +52,6 @@ Version of the build published to Testflight that identifies an iteration of the
 
 
 Build processing state
-##### `--build-version-number=BUILD_VERSION_NUMBER`
-
-
-Build version number is the version number of the uploaded build. For example `46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

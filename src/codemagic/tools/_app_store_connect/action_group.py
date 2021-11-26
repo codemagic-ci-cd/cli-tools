@@ -6,6 +6,10 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name='apps',
         description='Manage your apps in App Store Connect',
     )
+    APP_STORE_VERSIONS = cli.ActionGroupProperties(
+        name='app-store-versions',
+        description='Manage the information related to an App Store version of your app',
+    )
     APP_STORE_VERSION_SUBMISSIONS = cli.ActionGroupProperties(
         name='app-store-version-submissions',
         description="Manage your application's App Store version review process",

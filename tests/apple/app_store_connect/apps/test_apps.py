@@ -4,6 +4,7 @@ import pytest
 
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
+from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
@@ -48,6 +49,19 @@ class AppsTest(ResourceManagerTestsBase):
             self.api_client.apps.read(ResourceId('invalid-id'))
         response = exception_info.value.response
         assert response.status_code == 404
+
+    def test_list_app_store_versions(self):
+        banaan_app_id = ResourceId('1481211155')  # Banaan iOS
+        versions_filter = self.api_client.app_store_versions.Filter(
+            app_store_state=[AppStoreState.IN_REVIEW, AppStoreState.REJECTED],
+        )
+        app_store_versions = self.api_client.apps.list_app_store_versions(
+            banaan_app_id,
+            resource_filter=versions_filter,
+        )
+        assert len(app_store_versions) == 1
+        app_store_version = app_store_versions[0]
+        assert app_store_version.attributes.appStoreState is AppStoreState.REJECTED
 
 
 @pytest.mark.parametrize('python_field_name, apple_filter_name', [

@@ -3,6 +3,8 @@ from __future__ import annotations
 import pathlib
 import time
 from abc import ABCMeta
+from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -13,54 +15,96 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import Platform
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
+from codemagic.tools._app_store_connect.arguments import AppStoreVersionArgument
 
 from ..abstract_base_action import AbstractBaseAction
-from ..arguments import BuildArgument
+from ..arguments import ArgumentGroups
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
 
 
+@dataclass
+class AddBetaTestInfoOptions:
+    beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None
+    locale: Optional[Locale] = None
+    whats_new: Optional[Types.WhatsNewArgument] = None
+
+
+@dataclass
+class AddBuildToBetaGroupOptions:
+    beta_group_names: List[str]
+
+
+@dataclass
+class SubmitToTestFlightOptions:
+    max_build_processing_wait: int
+
+
+@dataclass
+class SubmitToAppStoreOptions:
+    max_build_processing_wait: int
+    copyright: Optional[str] = None
+    earliest_release_date: Optional[datetime] = None
+    platform: Platform = AppStoreVersionArgument.PLATFORM.get_default()
+    release_type: Optional[ReleaseType] = None
+    version_string: Optional[str] = None
+
+
+ACTION_ARGUMENTS = (
+    PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
+    PublishArgument.APPLE_ID,
+    PublishArgument.APP_SPECIFIC_PASSWORD,
+    *ArgumentGroups.PACKAGE_UPLOAD_ARGUMENTS,
+    PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+    *PublishArgument.with_custom_argument_group(
+        "add localized What's new (what to test) information to uploaded build",
+        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        "add localized What's new (what to test) information to uploaded build",
+        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'submit build to TestFlight for beta review',
+        PublishArgument.SUBMIT_TO_TESTFLIGHT,
+        *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'add build to Beta groups',
+        *ArgumentGroups.ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS,
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'submit build to App Store review',
+        PublishArgument.SUBMIT_TO_APP_STORE,
+        AppStoreVersionArgument.PLATFORM_OPTIONAL,
+        *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
+        exclude=(AppStoreVersionArgument.PLATFORM,),
+    ),
+    *PublishArgument.with_custom_argument_group(
+        "set Apple's altool configuration options",
+        *ArgumentGroups.ALTOOL_CONFIGURATION_ARGUMENTS,
+    ),
+)
+
+
 class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
-    @cli.action('publish',
-                PublishArgument.APPLICATION_PACKAGE_PATH_PATTERNS,
-                PublishArgument.APPLE_ID,
-                PublishArgument.APP_SPECIFIC_PASSWORD,
-                PublishArgument.SUBMIT_TO_TESTFLIGHT,
-                BuildArgument.LOCALE_DEFAULT,
-                BuildArgument.WHATS_NEW,
-                BuildArgument.BETA_BUILD_LOCALIZATIONS,
-                BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
-                PublishArgument.SKIP_PACKAGE_VALIDATION,
-                PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-                PublishArgument.ALTOOL_RETRIES_COUNT,
-                PublishArgument.ALTOOL_RETRY_WAIT,
-                PublishArgument.ALTOOL_VERBOSE_LOGGING,
-                action_options={'requires_api_client': False})
-    def publish(self,
-                application_package_path_patterns: Sequence[pathlib.Path],
-                apple_id: Optional[str] = None,
-                app_specific_password: Optional[Types.AppSpecificPassword] = None,
-                submit_to_testflight: Optional[bool] = None,
-                locale: Optional[Locale] = None,
-                whats_new: Optional[Types.WhatsNewArgument] = None,
-                beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
-                beta_group_names: Optional[List[str]] = None,
-                skip_package_validation: Optional[bool] = None,
-                altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
-                altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
-                altool_verbose_logging: Optional[bool] = None,
-                max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None) -> None:
-        """
-        Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
-        """
-
+    def _validate_publishing_arguments(
+            self,
+            apple_id: Optional[str] = None,
+            app_specific_password: Optional[Types.AppSpecificPassword] = None,
+            submit_to_testflight: Optional[bool] = None,
+            submit_to_app_store: Optional[bool] = None,
+            beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
+    ) -> None:
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
                 'Either Apple ID and app specific password or App Store Connect API key information is required.')
@@ -71,10 +115,17 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if beta_build_localizations:
                 self._assert_api_client_credentials(
                     "It is required for submitting localized beta test info for what's new in the uploaded build.")
+            if submit_to_app_store:
+                self._assert_api_client_credentials('It is required for submitting an app to App Store review.')
 
-        application_packages = self._get_publishing_application_packages(application_package_path_patterns)
+    def _get_altool(
+            self,
+            apple_id: Optional[str] = None,
+            app_specific_password: Optional[Types.AppSpecificPassword] = None,
+            altool_verbose_logging: Optional[bool] = None,
+    ) -> Altool:
         try:
-            altool = Altool(
+            return Altool(
                 username=apple_id,
                 password=app_specific_password.value if app_specific_password else None,
                 key_identifier=self._key_identifier,
@@ -85,26 +136,126 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         except ValueError as ve:
             raise AppStoreConnectError(str(ve))
 
-        validate_package = not bool(skip_package_validation)
+    @classmethod
+    def _get_app_store_connect_submit_options(
+            cls,
+            ipa: Ipa,
+            submit_to_testflight: Optional[bool],
+            submit_to_app_store: Optional[bool],
+            # Submit to TestFlight arguments
+            max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
+            # Beta test info arguments
+            beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
+            locale: Optional[Locale] = None,
+            whats_new: Optional[Types.WhatsNewArgument] = None,
+            # Add build to beta group arguments
+            beta_group_names: Optional[List[str]] = None,
+            # Submit to App Store arguments
+            copyright: Optional[str] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+            platform: Optional[Platform] = None,
+            release_type: Optional[ReleaseType] = None,
+            version_string: Optional[str] = None,
+    ):
+        submit_to_testflight_options = None
+        submit_to_app_store_options = None
+        add_build_to_beta_group_options = None
+        add_beta_test_info_options = None
+
+        if not platform:
+            if any('tv' in platform_name.lower() for platform_name in ipa.supported_platforms):
+                platform = Platform.TV_OS
+            else:
+                platform = Platform.IOS
+
+        if submit_to_testflight:
+            submit_to_testflight_options = SubmitToTestFlightOptions(
+                max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+            )
+        if submit_to_app_store:
+            if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+                earliest_release_date = earliest_release_date.value
+            submit_to_app_store_options = SubmitToAppStoreOptions(
+                max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+                copyright=copyright,
+                earliest_release_date=earliest_release_date,
+                platform=platform,
+                release_type=release_type,
+                version_string=version_string,
+            )
+        if submit_to_testflight and beta_group_names:
+            # Only builds submitted to TestFlight can be added to beta groups
+            add_build_to_beta_group_options = AddBuildToBetaGroupOptions(
+                beta_group_names=beta_group_names,
+            )
+        if beta_build_localizations or whats_new:
+            add_beta_test_info_options = AddBetaTestInfoOptions(
+                beta_build_localizations=beta_build_localizations,
+                locale=locale,
+                whats_new=whats_new,
+            )
+
+        return (
+            submit_to_testflight_options,
+            submit_to_app_store_options,
+            add_beta_test_info_options,
+            add_build_to_beta_group_options,
+        )
+
+    @cli.action(
+        'publish',
+        *ACTION_ARGUMENTS,
+        action_options={'requires_api_client': False},
+    )
+    def publish(
+            self,
+            application_package_path_patterns: Sequence[pathlib.Path],
+            apple_id: Optional[str] = None,
+            app_specific_password: Optional[Types.AppSpecificPassword] = None,
+            submit_to_testflight: Optional[bool] = None,
+            submit_to_app_store: Optional[bool] = None,
+            # Package upload and validation arguments
+            skip_package_validation: Optional[bool] = None,
+            skip_package_upload: Optional[bool] = None,
+            altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
+            altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
+            altool_verbose_logging: Optional[bool] = None,
+            **app_store_connect_submit_options,
+    ) -> None:
+        """
+        Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
+        """
+        self._validate_publishing_arguments(
+            apple_id,
+            app_specific_password,
+            submit_to_testflight,
+            submit_to_app_store,
+            app_store_connect_submit_options.get('beta_build_localizations'),
+        )
+
+        application_packages = self._get_publishing_application_packages(application_package_path_patterns)
+        altool = self._get_altool(apple_id, app_specific_password, altool_verbose_logging)
         failed_packages: List[str] = []
+
         for application_package in application_packages:
             try:
                 self._publish_application_package(
                     altool,
                     application_package,
-                    validate_package,
+                    skip_package_validation,
+                    skip_package_upload,
                     Types.AltoolRetriesCount.resolve_value(altool_retries_count),
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
                 )
                 if isinstance(application_package, Ipa):
-                    self._handle_ipa_testflight_submission(
+                    self._process_ipa_after_upload(
                         application_package,
-                        submit_to_testflight,
-                        beta_build_localizations,
-                        locale,
-                        whats_new,
-                        max_build_processing_wait,
-                        beta_group_names,
+                        *self._get_app_store_connect_submit_options(
+                            application_package,
+                            submit_to_testflight,
+                            submit_to_app_store,
+                            **app_store_connect_submit_options,
+                        ),
                     )
                 else:
                     continue  # Cannot submit macOS packages to TestFlight, skip
@@ -119,7 +270,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self,
             altool: Altool,
             application_package: Union[Ipa, MacOsPackage],
-            validate_package: bool,
+            skip_package_validation: Optional[bool],
+            skip_package_upload: Optional[bool],
             altool_retries: int,
             altool_retry_wait: float,
     ):
@@ -128,41 +280,63 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         """
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
-        if validate_package:
+
+        if not bool(skip_package_validation):
             self._validate_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
         else:
             self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
-        self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
 
-    def _handle_ipa_testflight_submission(
-        self,
-        ipa: Ipa,
-        submit_to_testflight: Optional[bool],
-        beta_build_localizations: Optional[Types.BetaBuildLocalizations],
-        locale: Optional[Locale],
-        whats_new: Optional[Types.WhatsNewArgument],
-        max_build_processing_wait: Optional[Types.MaxBuildProcessingWait],
-        beta_group_names: Optional[List[str]],
-    ):
-        if not beta_build_localizations and not whats_new and not submit_to_testflight and not beta_group_names:
+        if not bool(skip_package_upload):
+            self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
+        else:
+            self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
+
+    def _process_ipa_after_upload(
+            self,
+            ipa: Ipa,
+            testflight_options: Optional[SubmitToTestFlightOptions],
+            app_store_options: Optional[SubmitToAppStoreOptions],
+            beta_test_info_options: Optional[AddBetaTestInfoOptions],
+            beta_group_options: Optional[AddBuildToBetaGroupOptions],
+    ) -> None:
+        if not any([testflight_options, app_store_options, beta_test_info_options, beta_group_options]):
             return  # Nothing to do with the ipa...
 
         app = self._get_uploaded_build_application(ipa)
         build = self._get_uploaded_build(app, ipa)
 
-        if beta_build_localizations or whats_new:
-            self.add_beta_test_info(build.id, beta_build_localizations, locale, whats_new)
-        if submit_to_testflight:
-            self.submit_to_testflight(build.id, max_build_processing_wait)
-        if submit_to_testflight and beta_group_names:
-            self.add_build_to_beta_groups(build.id, beta_group_names)
+        if beta_test_info_options:
+            self.add_beta_test_info(build.id, **beta_test_info_options.__dict__)
+
+        if testflight_options:
+            self.wait_until_build_is_processed(build, testflight_options.max_build_processing_wait)
+        elif app_store_options:
+            self.wait_until_build_is_processed(build, app_store_options.max_build_processing_wait)
+
+        if testflight_options:
+            testflight_submission_kwargs = {
+                **testflight_options.__dict__,
+                'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
+            }
+            self.submit_to_testflight(build.id, **testflight_submission_kwargs)
+
+        if beta_group_options:
+            self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)
+
+        if app_store_options:
+            app_store_submission_kwargs = {
+                **app_store_options.__dict__,
+                'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
+                'version_string': app_store_options.version_string or ipa.version,
+            }
+            self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
 
     def _find_build(
-        self,
-        app_id: ResourceId,
-        application_package: Union[Ipa, MacOsPackage],
-        retries: int = 20,
-        retry_wait_seconds: int = 30,
+            self,
+            app_id: ResourceId,
+            application_package: Union[Ipa, MacOsPackage],
+            retries: int = 20,
+            retry_wait_seconds: int = 30,
     ) -> Build:
         """
         Find corresponding build for the uploaded ipa or macOS package.

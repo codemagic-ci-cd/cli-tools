@@ -1,3 +1,70 @@
+Version 0.13.0
+-------------
+
+Additions and changes from [pull request #164](https://github.com/codemagic-ci-cd/cli-tools/pull/164).
+
+**Features**
+
+- Add new App Store Connect API client method `AppStoreVersions.create` to create an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.read_build` to read associated build from an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.read_app_store_version_submission` to read associated App Store version submission from an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_submission_information_of_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.modify` to edit existing App Store version details. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.delete` to delete an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version).
+- Add ability to group optional CLI action arguments into named argument groups.
+- Add new actions group `app-store-versions` to `app-store-connect`.
+- Add new action `app-store-connect app-store-versions create` to create a new App Store version using specified build to an app.
+- Add new action `app-store-connect app-store-versions modify` to update existing App Store version details.
+- Add new action `app-store-connect app-store-versions delete` to remove App Store version.
+- Add option to specify build filters for action `app-store-connect apps builds`.
+- Add new action `app-store-connect builds app-store-version` to get the App Store version of a specific build.
+- Add new action `app-store-connect builds submit-to-app-store` to submit specified build to App Store review. Optionally specify version details and release type.
+- Update `app-store-connect publish` action to allow automatic App Store review submission after binary upload.
+- Use grouped CLI arguments in action `app-store-connect publish` for better help messages and documentation. 
+- Add new option `--skip-package-upload` to `app-store-connect publish`.
+- Add short aliases for CLI flags:
+  - `-su` for `--skip-package-upload`,
+  - `-sv` for `--skip-package-validation`,
+  - `-w` for `--max-build-processing-wait`.
+- 
+
+**Fixes**
+
+- Fix creating `Resource` objects that do not have any attributes.
+- Fix `--max-build-processing-wait` CLI option validation.
+- Allow non-integer version numbers for `--build-version-number`.
+
+**Docs**
+
+- Update docs for tool `app-store-connect`.
+- Create docs for `app-store-connect` actions group `app-store-versions`.
+- Create docs for action `app-store-connect app-store-versions create`.
+- Create docs for action `app-store-connect app-store-versions delete`.
+- Create docs for action `app-store-connect app-store-versions modify`.
+- Create docs for `app-store-connect` actions group `apps`.
+- Update docs for action `app-store-connect apps app-store-versions`.
+- Update docs for action `app-store-connect apps builds`.
+- Update docs for action `app-store-connect apps list`.
+- Create docs for `app-store-connect` actions group `builds`.
+- Create docs for action `app-store-connect builds app-store-version`.
+- Create docs for action `app-store-connect builds submit-to-app-store`.
+- Update docs for action `app-store-connect builds submit-to-testflight`.
+- Update docs for action `app-store-connect list-builds`.
+- Update docs for action `app-store-connect publish`.
+
+**Development**
+
+- Support filtering by multiple values for one parameter in `ResourceManager.filter`.
+- Change `ResourceManager._get_update_payload` to accept `relationships` in addition to `attributes`. Make `attributes` and `relationships` arguments keyword-only.
+- Add missing return type hints to resource manger methods that did not have them.
+- Extract argument parser setup from `CliApp` class into separate module under `ArgumentParserBuilder` class.
+- Move `create_app_store_version_submission` and `delete_app_store_version_submission` methods from `AppStoreConnect` class to `AppStoreVersionSubmissionsActionGroup`.
+- Collect `app-store-connect` actions arguments that are used number of times under argument groups to reduce duplication.
+- Refactor `PublishAction` class:
+  - extract `publish` action arguments validation into separate method,
+  - move decorator arguments into separate tuple, 
+  - add dataclasses for subaction options, 
+  - support App Store review submission.
+
 Version 0.12.1
 -------------
 
