@@ -257,6 +257,7 @@ class ReleaseType(ResourceEnum):
 class ResourceType(ResourceEnum):
     APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
+    APP_STORE_VERSION_LOCALIZATIONS = 'appStoreVersionLocalizations'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BETA_APP_LOCALIZATIONS = 'betaAppLocalizations'
     BETA_APP_REVIEW_DETAILS = 'betaAppReviewDetails'
