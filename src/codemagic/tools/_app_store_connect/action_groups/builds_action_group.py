@@ -30,12 +30,23 @@ from codemagic.cli import Colors
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
+from ..arguments import AppStoreVersionInfo
+from ..arguments import AppStoreVersionLocalizationInfo
 from ..arguments import ArgumentGroups
 from ..arguments import BetaBuildInfo
 from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+AppStoreVersionLocalizationInfos = Union[
+    List[AppStoreVersionLocalizationInfo],
+    Types.AppStoreVersionLocalizationInfoArgument,
+]
+BetaBuildLocalizationsInfo = Union[
+    List[BetaBuildInfo],
+    Types.BetaBuildLocalizations,
+]
 
 
 class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -98,7 +109,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def add_beta_test_info(
             self,
             build_id: ResourceId,
-            beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
+            beta_build_localizations: Optional[BetaBuildLocalizationsInfo] = None,
             locale: Optional[Locale] = None,
             whats_new: Optional[Types.WhatsNewArgument] = None):
         """
@@ -158,20 +169,30 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def submit_to_app_store(
             self,
             build_id: ResourceId,
+            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            # App Store Version information arguments
             copyright: Optional[str] = None,
             earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
             platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
+            app_store_version_info: Optional[AppStoreVersionInfo] = None,
+            # App Store Version Localization arguments
+            app_store_version_localization_infos: Optional[AppStoreVersionLocalizationInfos] = None,
+            # TODO: Add arguments to define primary locale info
     ) -> AppStoreVersionSubmission:
         """
         Submit build to App Store review
         """
-
+        app_store_version_info = self._get_app_store_version_info(
+            app_store_version_info,
+            copyright,
+            earliest_release_date,
+            platform,
+            release_type,
+            version_string,
+        )
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
-        if isinstance(earliest_release_date, Types.EarliestReleaseDate):
-            earliest_release_date = earliest_release_date.value
 
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
@@ -183,27 +204,21 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
-        if version_string is None:
+        if app_store_version_info.version_string is None:
             self.logger.info("\nVersion string is not specified. Obtain it from build's pre-release version...")
             pre_release_version = self.get_build_pre_release_version(build_id, should_print=False)
-            version_string = pre_release_version.attributes.version
+            app_store_version_info.version_string = pre_release_version.attributes.version
 
-        self.logger.info(Colors.BLUE(f'\nUsing version {version_string} for App Store submission'))
-
-        app_store_version = self._ensure_app_store_version(
-            app,
-            build,
-            platform,
-            copyright=copyright,
-            earliest_release_date=earliest_release_date,
-            release_type=release_type,
-            version_string=version_string,
+        self.logger.info(
+            Colors.BLUE(f'\nUsing version {app_store_version_info.version_string} for App Store submission'),
         )
+
+        app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
         self.logger.info('')
 
         app_store_version_submission = self.create_app_store_version_submission(app_store_version.id)
 
-        platform_slug = platform.value.lower().replace('_', '')
+        platform_slug = app_store_version_info.platform.value.lower().replace('_', '')
         submission_url = f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/{platform_slug}/version/inflight'
         self.logger.info(f'\nCheck App Store submission details from\n{submission_url}\n')
 
@@ -306,34 +321,29 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             app: App,
             build: Build,
-            platform: Platform,
-            **app_store_version_params,
+            app_store_version_info: AppStoreVersionInfo,
     ) -> AppStoreVersion:
-        app_store_version = self._get_editable_app_store_version(app, platform)
+        app_store_version = self._get_editable_app_store_version(app, app_store_version_info.platform)
         if app_store_version is None:
             # Version does not exist, create a new version for App Store review submission
             self.logger.info(f'\n{AppStoreVersion} does not exist for build {build.id}')
             app_store_version = self.create_app_store_version(
                 build.id,
-                platform=platform,
-                **app_store_version_params,
+                platform=app_store_version_info.platform,
+                copyright=app_store_version_info.copyright,
+                earliest_release_date=app_store_version_info.earliest_release_date,
+                release_type=app_store_version_info.release_type,
+                version_string=app_store_version_info.version_string,
             )
         else:
-            self._update_existing_app_store_version(
-                app_store_version,
-                build,
-                **app_store_version_params,
-            )
+            self._update_existing_app_store_version(app_store_version, build, app_store_version_info)
         return app_store_version
 
     def _update_existing_app_store_version(
         self,
         app_store_version: AppStoreVersion,
         build: Build,
-        copyright: Optional[str] = None,
-        earliest_release_date: Optional[datetime] = None,
-        release_type: Optional[ReleaseType] = None,
-        version_string: Optional[str] = None,
+        app_store_version_info: AppStoreVersionInfo,
     ):
         self.logger.info((
             f'\nFound existing {AppStoreVersion} {app_store_version.id} '
@@ -341,14 +351,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ))
 
         updates: Dict[str, str] = {'build': build.id}
-        if copyright:
-            updates['copyright'] = copyright
-        if earliest_release_date:
-            updates['earliest release date'] = AppStoreVersion.to_iso_8601(earliest_release_date)
-        if release_type:
-            updates['release type'] = release_type.value.lower()
-        if version_string:
-            updates['version string'] = version_string
+        if app_store_version_info.copyright:
+            updates['copyright'] = app_store_version_info.copyright
+        if app_store_version_info.earliest_release_date:
+            updates['earliest release date'] = AppStoreVersion.to_iso_8601(app_store_version_info.earliest_release_date)
+        if app_store_version_info.release_type:
+            updates['release type'] = app_store_version_info.release_type.value.lower()
+        if app_store_version_info.version_string:
+            updates['version string'] = app_store_version_info.version_string
 
         update_message = ', '.join(
             f'{param}: {shlex.quote(value)}'
@@ -359,10 +369,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self.update_app_store_version(
             app_store_version.id,
             build_id=build.id,
-            copyright=copyright,
-            earliest_release_date=earliest_release_date,
-            release_type=release_type,
-            version_string=version_string,
+            copyright=app_store_version_info.copyright,
+            earliest_release_date=app_store_version_info.earliest_release_date,
+            release_type=app_store_version_info.release_type,
+            version_string=app_store_version_info.version_string,
         )
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
@@ -373,3 +383,28 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_versions = self.api_client.apps.list_app_store_versions(app, resource_filter=versions_filter)
         app_store_versions.sort(key=lambda asv: LooseVersion(asv.attributes.versionString))
         return app_store_versions[-1] if app_store_versions else None
+
+    @classmethod
+    def _get_app_store_version_info(
+        cls,
+        app_store_version_info: Optional[AppStoreVersionInfo],
+        copyright: Optional[str],
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]],
+        platform: Platform,
+        release_type: Optional[ReleaseType],
+        version_string: Optional[str],
+    ):
+        if app_store_version_info is None:
+            app_store_version_info = AppStoreVersionInfo(platform=platform)
+        if copyright:
+            app_store_version_info.copyright = copyright
+        if earliest_release_date:
+            if isinstance(earliest_release_date, Types.EarliestReleaseDate):
+                app_store_version_info.earliest_release_date = earliest_release_date.value
+            else:
+                app_store_version_info.earliest_release_date = earliest_release_date
+        if release_type:
+            app_store_version_info.release_type = release_type
+        if version_string:
+            app_store_version_info.version_string = version_string
+        return app_store_version_info

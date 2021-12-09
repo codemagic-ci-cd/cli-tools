@@ -4,6 +4,7 @@ import re
 from argparse import ArgumentTypeError
 from collections import Counter
 from dataclasses import dataclass
+from dataclasses import fields
 from datetime import datetime
 from datetime import timezone
 from typing import List
@@ -33,6 +34,26 @@ from codemagic.models import ProvisioningProfile
 class BetaBuildInfo:
     whats_new: str
     locale: Optional[Locale]
+
+
+@dataclass
+class AppStoreVersionInfo:
+    platform: Platform
+    copyright: Optional[str] = None
+    earliest_release_date: Optional[datetime] = None
+    release_type: Optional[ReleaseType] = None
+    version_string: Optional[str] = None
+
+
+@dataclass
+class AppStoreVersionLocalizationInfo:
+    locale: Locale
+    description: Optional[str] = None
+    keywords: Optional[str] = None
+    marketing_url: Optional[str] = None
+    promotional_text: Optional[str] = None
+    support_url: Optional[str] = None
+    whats_new: Optional[str] = None
 
 
 class Types:
@@ -116,8 +137,7 @@ class Types:
         argument_type = datetime
 
         @classmethod
-        def _apply_type(cls, non_typed_value: str) -> datetime:
-            value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
+        def validate(cls, value: datetime):
             if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
                 raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
             elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
@@ -126,7 +146,71 @@ class Types:
                     f'only hour precision is allowed and '
                     f'minutes and seconds are not permitted'
                 ))
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> datetime:
+            value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
+            cls.validate(value)
             return value
+
+    class AppStoreVersionInfoArgument(cli.EnvironmentArgumentValue[AppStoreVersionInfo]):
+        argument_type = List[AppStoreVersionInfo]
+        environment_variable_key = 'APP_STORE_CONNECT_APP_STORE_VERSION_INFO'
+        example_value = json.dumps([{
+            'platform': 'IOS',
+            'copyright': '2008 Acme Inc.',
+            'version_string': '1.0.8',
+            'release_type': 'SCHEDULED',
+            'earliest_release_date': '2021-11-10T14:00:00+00:00',
+        }])
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> AppStoreVersionInfo:
+            try:
+                given_app_store_version_info = json.loads(non_typed_value)
+                assert isinstance(given_app_store_version_info, dict)
+            except (ValueError, AssertionError):
+                raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded object')
+
+            allowed_fields = {field.name for field in fields(AppStoreVersionInfo)}
+            invalid_keys = given_app_store_version_info.keys() - allowed_fields
+            if invalid_keys:
+                keys = ', '.join(map(str, invalid_keys))
+                raise ArgumentTypeError(f'Unknown App Store version option(s) {keys}')
+
+            try:
+                platform = Platform(given_app_store_version_info['platform'])
+            except KeyError:
+                platform = AppStoreVersionArgument.PLATFORM.get_default()
+            except ValueError as ve:
+                raise ArgumentTypeError(f'Invalid App Store version info: {ve}')
+            app_store_version_info = AppStoreVersionInfo(platform=platform)
+
+            try:
+                given_earliest_release_date = given_app_store_version_info['given_app_store_version_info']
+                app_store_version_info.earliest_release_date = \
+                    cli.CommonArgumentTypes.iso_8601_datetime(given_earliest_release_date)
+                Types.EarliestReleaseDate.validate(app_store_version_info.earliest_release_date)
+            except KeyError:
+                pass
+            except ArgumentTypeError as ate:
+                raise ArgumentTypeError(f'Invalid "earliest_release_date" in App Store version info: {ate}') from ate
+
+            if 'release_type' in given_app_store_version_info:
+                try:
+                    app_store_version_info.release_type = ReleaseType(given_app_store_version_info['release_type'])
+                except ValueError as ve:
+                    raise ArgumentTypeError(f'Invalid App Store version info: {ve}')
+
+            if 'copyright' in given_app_store_version_info:
+                app_store_version_info.copyright = given_app_store_version_info['copyright']
+            if 'version_string' in given_app_store_version_info:
+                app_store_version_info.version_string = given_app_store_version_info['version_string']
+
+            return app_store_version_info
+
+    class AppStoreVersionLocalizationInfoArgument(cli.EnvironmentArgumentValue[List[AppStoreVersionLocalizationInfo]]):
+        pass
 
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
@@ -282,6 +366,20 @@ class AppStoreVersionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the App Store Version',
         argparse_kwargs={'required': False},
+    )
+    APP_STORE_VERSION_INFO = cli.ArgumentProperties(
+        key='app_store_version_info',
+        flags=('--app-store-version-info',),
+        type=Types.AppStoreVersionInfoArgument,
+        description=(
+            'General App information and version release options for App Store version submission '
+            'as a JSON encoded object. Can be used in place '
+            f'For example, "{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}". '
+            'Definitions from the JSON will be overridden by dedicated CLI options if provided.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
         key='app_store_version_submission_id',
@@ -1014,6 +1112,7 @@ class ArgumentGroups:
     SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
         AppStoreVersionArgument.COPYRIGHT,
         AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
+        AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.PLATFORM,
         AppStoreVersionArgument.RELEASE_TYPE,
         AppStoreVersionArgument.VERSION_STRING,

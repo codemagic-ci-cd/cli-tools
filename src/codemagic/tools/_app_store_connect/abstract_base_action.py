@@ -56,11 +56,12 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
 
     def create_app_store_version(
             self,
-            build_id: Union[ResourceId, Build],
-            app_id: Optional[Union[ResourceId, App]] = None,
+            build_id: ResourceId,
             platform: Platform = Platform.IOS,
             copyright: Optional[str] = None,
             version_string: Optional[str] = None,
+            release_type: Optional[ReleaseType] = None,
+            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
             should_print: bool = True,
     ) -> AppStoreVersion:
         ...
