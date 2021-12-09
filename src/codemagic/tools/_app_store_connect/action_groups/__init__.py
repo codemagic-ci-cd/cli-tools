@@ -1,3 +1,4 @@
+from .app_store_version_localizations_action_group import AppStoreVersionLocalizationsActionGroup
 from .app_store_version_submissions_action_group import AppStoreVersionSubmissionsActionGroup
 from .app_store_versions_action_group import AppStoreVersionsActionGroup
 from .apps_action_group import AppsActionGroup

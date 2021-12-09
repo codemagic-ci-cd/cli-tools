@@ -167,6 +167,8 @@ class Types:
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
+_LOCALE_CODES_URL = \
+    'https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes'
 
 
 class AppArgument(cli.Argument):
@@ -348,6 +350,73 @@ class AppStoreVersionArgument(cli.Argument):
             'For example `3.2.46`'
         ),
         argparse_kwargs={'required': False},
+    )
+
+
+class AppStoreVersionLocalizationArgument(cli.Argument):
+    APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
+        key='app_store_version_localization_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version localization',
+    )
+    LOCALE = cli.ArgumentProperties(
+        key='locale',
+        type=Locale,
+        description=(
+            'The locale code name for App Store metadata in different languages. '
+            f'See available locale code names from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'choices': list(Locale),
+        },
+    )
+    DESCRIPTION = cli.ArgumentProperties(
+        key='description',
+        flags=('--description',),
+        description='A description of your app, detailing features and functionality.',
+    )
+    KEYWORDS = cli.ArgumentProperties(
+        key='keywords',
+        flags=('--keywords',),
+        description=(
+            'Include one or more keywords that describe your app. Keywords make '
+            'App Store search results more accurate. Separate keywords with an '
+            'English comma, Chinese comma, or a mix of both.'
+        ),
+    )
+    MARKETING_URL = cli.ArgumentProperties(
+        key='marketing_url',
+        flags=('--marketing-url',),
+        description=(
+            'A URL with marketing information about your app. '
+            'This URL will be visible on the App Store.'
+        ),
+    )
+    PROMOTIONAL_TEXT = cli.ArgumentProperties(
+        key='promotional_text',
+        flags=('--promotional-text',),
+        description=(
+            'Promotional text lets you inform your App Store visitors of any current '
+            'app features without requiring an updated submission. This text will '
+            'appear above your description on the App Store for customers with devices '
+            'running iOS 11 or later, and macOS 10.13 or later.'
+        ),
+    )
+    SUPPORT_URL = cli.ArgumentProperties(
+        key='support_url',
+        flags=('--support-url',),
+        description=(
+            'A URL with support information for your app. '
+            'This URL will be visible on the App Store.'
+        ),
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new',),
+        description=(
+            "Describe what's new in this version of your app, "
+            'such as new features, improvements, and bug fixes.'
+        ),
     )
 
 
@@ -576,8 +645,7 @@ class BuildArgument(cli.Argument):
         type=Locale,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
-            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
-            'betabuildlocalizationcreaterequest/data/attributes'
+            f'Learn more from {_LOCALE_CODES_URL}'
         ),
         argparse_kwargs={
             'required': False,
@@ -588,8 +656,7 @@ class BuildArgument(cli.Argument):
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
             "In case not provided, application's primary locale from test information is used instead. "
-            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
-            'betabuildlocalizationcreaterequest/data/attributes'
+            f'Learn more from {_LOCALE_CODES_URL}'
         ),
     )
     WHATS_NEW = cli.ArgumentProperties(

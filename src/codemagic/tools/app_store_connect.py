@@ -41,6 +41,7 @@ from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 
 from ._app_store_connect.action_groups import AppsActionGroup
+from ._app_store_connect.action_groups import AppStoreVersionLocalizationsActionGroup
 from ._app_store_connect.action_groups import AppStoreVersionsActionGroup
 from ._app_store_connect.action_groups import AppStoreVersionSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
@@ -79,17 +80,20 @@ def _get_certificate_key(
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
-class AppStoreConnect(cli.CliApp,
-                      AppStoreVersionSubmissionsActionGroup,
-                      AppStoreVersionsActionGroup,
-                      AppsActionGroup,
-                      BetaAppReviewSubmissionsActionGroup,
-                      BetaBuildLocalizationsActionGroup,
-                      BetaGroupsActionGroup,
-                      BuildsActionGroup,
-                      PublishAction,
-                      ResourceManagerMixin,
-                      PathFinderMixin):
+class AppStoreConnect(
+    cli.CliApp,
+    AppStoreVersionSubmissionsActionGroup,
+    AppStoreVersionsActionGroup,
+    AppStoreVersionLocalizationsActionGroup,
+    AppsActionGroup,
+    BetaAppReviewSubmissionsActionGroup,
+    BetaBuildLocalizationsActionGroup,
+    BetaGroupsActionGroup,
+    BuildsActionGroup,
+    PublishAction,
+    ResourceManagerMixin,
+    PathFinderMixin,
+):
     """
     Interact with Apple services via App Store Connect API
     """

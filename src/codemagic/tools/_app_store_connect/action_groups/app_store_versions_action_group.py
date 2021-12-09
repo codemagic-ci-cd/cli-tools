@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta
 from datetime import datetime
+from typing import List
 from typing import Optional
 from typing import Union
 
@@ -9,6 +10,7 @@ from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
@@ -36,14 +38,14 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )
     def create_app_store_version(
-            self,
-            build_id: ResourceId,
-            platform: Platform = CommonArgument.PLATFORM.get_default(),
-            copyright: Optional[str] = None,
-            version_string: Optional[str] = None,
-            release_type: Optional[ReleaseType] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            should_print: bool = True,
+        self,
+        build_id: ResourceId,
+        platform: Platform = CommonArgument.PLATFORM.get_default(),
+        copyright: Optional[str] = None,
+        version_string: Optional[str] = None,
+        release_type: Optional[ReleaseType] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        should_print: bool = True,
     ) -> AppStoreVersion:
         """
         Add a new App Store version to an app using specified build.
@@ -82,14 +84,15 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )
     def update_app_store_version(
-            self,
-            app_store_version_id: ResourceId,
-            build_id: Optional[ResourceId] = None,
-            copyright: Optional[str] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            release_type: Optional[ReleaseType] = None,
-            version_string: Optional[str] = None,
-            should_print: bool = True) -> AppStoreVersion:
+        self,
+        app_store_version_id: ResourceId,
+        build_id: Optional[ResourceId] = None,
+        copyright: Optional[str] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        release_type: Optional[ReleaseType] = None,
+        version_string: Optional[str] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersion:
         """
         Update the app store version for a specific app.
         """
@@ -112,9 +115,11 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )
-    def delete_app_store_version(self,
-                                 app_store_version_id: ResourceId,
-                                 ignore_not_found: bool = False) -> None:
+    def delete_app_store_version(
+        self,
+        app_store_version_id: ResourceId,
+        ignore_not_found: bool = False,
+    ) -> None:
         """
         Delete specified App Store version from Apple Developer portal
         """
@@ -138,3 +143,26 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 'Build version is not specified and build does not have prerelease version to check the version from')
 
         return pre_release_version.attributes.version
+
+    @cli.action(
+        'localizations',
+        AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
+    )
+    def list_app_store_version_localizations(
+        self,
+        app_store_version_id: ResourceId,
+        should_print: bool = True,
+    ) -> List[AppStoreVersionLocalization]:
+        """
+        List All App Store Version Localizations for an App Store Version.
+        Get a list of localized, version-level information about an app, for all locales.
+        """
+        return self._list_related_resources(
+            app_store_version_id,
+            AppStoreVersion,
+            AppStoreVersionLocalization,
+            self.api_client.app_store_versions.list_app_store_version_localizations,
+            None,
+            should_print,
+        )
