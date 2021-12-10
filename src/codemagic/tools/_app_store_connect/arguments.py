@@ -465,7 +465,7 @@ class AppStoreVersionArgument(cli.Argument):
             f'Specify earliest return date for scheduled release type '
             f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
             f'Timezone aware ISO8601 timestamp with hour precision, '
-            f'for example "`{Colors.WHITE("2021-11-10T14:00:00+00:00")}`".'
+            f'for example "{Colors.WHITE("2021-11-10T14:00:00+00:00")}".'
         ),
         argparse_kwargs={'required': False},
     )

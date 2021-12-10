@@ -78,7 +78,7 @@ The name of the person or entity that owns the exclusive rights to your app, pre
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
-Specify earliest return date for scheduled release type (see `--release-type` configuration option). Timezone aware ISO8601 timestamp with hour precision, for example ``2021-11-10T14:00:00+00:00``.
+Specify earliest return date for scheduled release type (see `--release-type` configuration option). Timezone aware ISO8601 timestamp with hour precision, for example `2021-11-10T14:00:00+00:00`.
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 

@@ -40,7 +40,7 @@ The name of the person or entity that owns the exclusive rights to your app, pre
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
-Specify earliest return date for scheduled release type (see `--release-type` configuration option). Timezone aware ISO8601 timestamp with hour precision, for example ``2021-11-10T14:00:00+00:00``.
+Specify earliest return date for scheduled release type (see `--release-type` configuration option). Timezone aware ISO8601 timestamp with hour precision, for example `2021-11-10T14:00:00+00:00`.
 ##### `--release-type=MANUAL | AFTER_APPROVAL | SCHEDULED`
 
 
