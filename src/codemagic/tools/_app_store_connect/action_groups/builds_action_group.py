@@ -176,10 +176,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
-            app_store_version_info: Optional[AppStoreVersionInfo] = None,
+            app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
             # App Store Version Localization arguments
-            app_store_version_localization_infos: Optional[AppStoreVersionLocalizationInfos] = None,
-            # TODO: Add arguments to define primary locale info
+            description: Optional[str] = None,
+            keywords: Optional[str] = None,
+            locale: Optional[Locale] = None,
+            marketing_url: Optional[str] = None,
+            promotional_text: Optional[str] = None,
+            support_url: Optional[str] = None,
+            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
+            app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
     ) -> AppStoreVersionSubmission:
         """
         Submit build to App Store review
@@ -192,8 +198,30 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             release_type,
             version_string,
         )
-        max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
+        app_store_version_localization_infos = self._get_app_store_version_localization_infos(
+            app_store_version_localizations,
+            description,
+            keywords,
+            locale,
+            marketing_url,
+            promotional_text,
+            support_url,
+            whats_new,
+        )
+        return self._submit_to_app_store(
+            build_id,
+            Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+            app_store_version_info,
+            app_store_version_localization_infos,
+        )
 
+    def _submit_to_app_store(
+        self,
+        build_id: ResourceId,
+        max_processing_minutes: int,
+        app_store_version_info: AppStoreVersionInfo,
+        app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
+    ) -> AppStoreVersionSubmission:
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
         try:
@@ -215,6 +243,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
         self.logger.info('')
+
+        self._update_app_store_version_localizations(app, app_store_version, app_store_version_localization_infos)
 
         app_store_version_submission = self.create_app_store_version_submission(app_store_version.id)
 
@@ -312,16 +342,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def _get_app_default_beta_localization(self, app: App) -> Optional[BetaAppLocalization]:
         beta_app_localizations = self.api_client.apps.list_beta_app_localizations(app)
         for beta_app_localization in beta_app_localizations:
-            if beta_app_localization.attributes.locale.value == app.attributes.primaryLocale:
+            if beta_app_localization.attributes.locale is app.attributes.primaryLocale:
                 return beta_app_localization
         # If nothing matches, then just take the first
         return beta_app_localizations[0] if beta_app_localizations else None
 
     def _ensure_app_store_version(
-            self,
-            app: App,
-            build: Build,
-            app_store_version_info: AppStoreVersionInfo,
+        self,
+        app: App,
+        build: Build,
+        app_store_version_info: AppStoreVersionInfo,
     ) -> AppStoreVersion:
         app_store_version = self._get_editable_app_store_version(app, app_store_version_info.platform)
         if app_store_version is None:
@@ -338,6 +368,46 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self._update_existing_app_store_version(app_store_version, build, app_store_version_info)
         return app_store_version
+
+    def _update_app_store_version_localizations(
+        self,
+        app: App,
+        app_store_version: AppStoreVersion,
+        app_store_version_localizations: List[AppStoreVersionLocalizationInfo],
+    ):
+        existing_localizations: Dict[Locale, ResourceId] = {
+            localization.attributes.locale: localization.id
+            for localization in self.list_app_store_version_localizations(app_store_version.id, should_print=False)
+        }
+        for localization in app_store_version_localizations:
+            if localization.locale is None:  # Use primary locale
+                localization.locale = app.attributes.primaryLocale
+
+            try:
+                existing_localization_id = existing_localizations[localization.locale]
+            except KeyError:
+                self.create_app_store_version_localization(
+                    app_store_version.id,
+                    localization.locale,
+                    description=localization.description,
+                    keywords=localization.keywords,
+                    marketing_url=localization.marketing_url,
+                    promotional_text=localization.promotional_text,
+                    support_url=localization.support_url,
+                    whats_new=localization.whats_new,
+                    should_print=False,
+                )
+            else:
+                self.update_app_store_version_localization(
+                    existing_localization_id,
+                    description=localization.description,
+                    keywords=localization.keywords,
+                    marketing_url=localization.marketing_url,
+                    promotional_text=localization.promotional_text,
+                    support_url=localization.support_url,
+                    whats_new=localization.whats_new,
+                    should_print=False,
+                )
 
     def _update_existing_app_store_version(
         self,
@@ -387,15 +457,24 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_app_store_version_info(
         cls,
-        app_store_version_info: Optional[AppStoreVersionInfo],
+        app_store_version_info_argument: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]],
         copyright: Optional[str],
         earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]],
         platform: Platform,
         release_type: Optional[ReleaseType],
         version_string: Optional[str],
-    ):
-        if app_store_version_info is None:
+    ) -> AppStoreVersionInfo:
+        if app_store_version_info_argument is None:
             app_store_version_info = AppStoreVersionInfo(platform=platform)
+        elif isinstance(app_store_version_info_argument, Types.AppStoreVersionInfoArgument):
+            app_store_version_info = app_store_version_info_argument.value
+        else:
+            app_store_version_info = app_store_version_info_argument
+
+        if platform is not AppStoreVersionArgument.PLATFORM.get_default():
+            # Platform has a default value when invoked from CLI,
+            # override it only in case non-default value was provided
+            app_store_version_info.platform = platform
         if copyright:
             app_store_version_info.copyright = copyright
         if earliest_release_date:
@@ -408,3 +487,35 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if version_string:
             app_store_version_info.version_string = version_string
         return app_store_version_info
+
+    @classmethod
+    def _get_app_store_version_localization_infos(
+        cls,
+        app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos],
+        description: Optional[str],
+        keywords: Optional[str],
+        locale: Optional[Locale],
+        marketing_url: Optional[str],
+        promotional_text: Optional[str],
+        support_url: Optional[str],
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
+    ) -> List[AppStoreVersionLocalizationInfo]:
+        if isinstance(app_store_version_localizations, Types.AppStoreVersionLocalizationInfoArgument):
+            app_store_version_localization_infos = app_store_version_localizations.value
+        else:
+            app_store_version_localization_infos = app_store_version_localizations or []
+
+        app_store_version_localization_info = AppStoreVersionLocalizationInfo(
+            description=description,
+            keywords=keywords,
+            locale=locale,
+            marketing_url=marketing_url,
+            promotional_text=promotional_text,
+            support_url=support_url,
+            whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
+        )
+        if set(app_store_version_localization_info.__dict__.values()) != {None}:
+            # At least some field is defined
+            app_store_version_localization_infos.append(app_store_version_localization_info)
+
+        return app_store_version_localization_infos

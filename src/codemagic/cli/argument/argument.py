@@ -67,7 +67,7 @@ class Argument(ArgumentProperties, enum.Enum):
             kwargs['type'] = self.value.type
         self._parser_argument = argument_group.add_argument(
             *self.value.flags,
-            help=self.get_description(),
+            help=self.get_description().replace('`', ''),
             dest=self.value.key,
             **kwargs)
 

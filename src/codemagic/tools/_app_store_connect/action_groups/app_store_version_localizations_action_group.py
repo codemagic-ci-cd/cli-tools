@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABCMeta
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple.resources import AppStoreVersionLocalization
@@ -13,6 +14,7 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionLocalizationArgument
 from ..arguments import CommonArgument
+from ..arguments import Types
 
 
 class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -58,7 +60,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         marketing_url: Optional[str] = None,
         promotional_text: Optional[str] = None,
         support_url: Optional[str] = None,
-        whats_new: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         should_print: bool = True,
     ) -> AppStoreVersionLocalization:
         """
@@ -73,7 +75,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
             marketing_url=marketing_url,
             promotional_text=promotional_text,
             support_url=support_url,
-            whats_new=whats_new,
+            whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
         )
         return self._create_resource(
             self.api_client.app_store_version_localizations,
@@ -100,7 +102,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         marketing_url: Optional[str] = None,
         promotional_text: Optional[str] = None,
         support_url: Optional[str] = None,
-        whats_new: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         should_print: bool = True,
     ) -> AppStoreVersionLocalization:
         """
@@ -116,7 +118,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
             marketing_url=marketing_url,
             promotional_text=promotional_text,
             support_url=support_url,
-            whats_new=whats_new,
+            whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
         )
 
     @cli.action(

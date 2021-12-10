@@ -28,10 +28,17 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.mixins import PathFinderMixin
 
+from .arguments import AppStoreVersionInfo
+from .arguments import AppStoreVersionLocalizationInfo
 from .arguments import BetaBuildInfo
 from .arguments import Types
 from .resource_manager_mixin import ResourceManagerMixin
 from .resource_printer import ResourcePrinter
+
+AppStoreVersionLocalizationInfos = Union[
+    List[AppStoreVersionLocalizationInfo],
+    Types.AppStoreVersionLocalizationInfoArgument,
+]
 
 
 class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMeta):
@@ -105,7 +112,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         marketing_url: Optional[str] = None,
         promotional_text: Optional[str] = None,
         support_url: Optional[str] = None,
-        whats_new: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         should_print: bool = True,
     ) -> AppStoreVersionLocalization:
         from .action_groups import AppStoreVersionLocalizationsActionGroup
@@ -191,12 +198,23 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def submit_to_app_store(
         self,
         build_id: ResourceId,
+        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        # App Store Version information arguments
         copyright: Optional[str] = None,
         earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
         platform: Platform = Platform.IOS,
         release_type: Optional[ReleaseType] = None,
         version_string: Optional[str] = None,
+        app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
+        # App Store Version Localization arguments
+        description: Optional[str] = None,
+        keywords: Optional[str] = None,
+        locale: Optional[Locale] = None,
+        marketing_url: Optional[str] = None,
+        promotional_text: Optional[str] = None,
+        support_url: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
+        app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
     ) -> AppStoreVersionSubmission:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_app_store  # Implementation
@@ -236,7 +254,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         marketing_url: Optional[str] = None,
         promotional_text: Optional[str] = None,
         support_url: Optional[str] = None,
-        whats_new: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         should_print: bool = True,
     ) -> AppStoreVersionLocalization:
         from .action_groups import AppStoreVersionLocalizationsActionGroup

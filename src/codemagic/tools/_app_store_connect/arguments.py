@@ -47,9 +47,9 @@ class AppStoreVersionInfo:
 
 @dataclass
 class AppStoreVersionLocalizationInfo:
-    locale: Locale
     description: Optional[str] = None
     keywords: Optional[str] = None
+    locale: Optional[Locale] = None
     marketing_url: Optional[str] = None
     promotional_text: Optional[str] = None
     support_url: Optional[str] = None
@@ -156,13 +156,13 @@ class Types:
     class AppStoreVersionInfoArgument(cli.EnvironmentArgumentValue[AppStoreVersionInfo]):
         argument_type = List[AppStoreVersionInfo]
         environment_variable_key = 'APP_STORE_CONNECT_APP_STORE_VERSION_INFO'
-        example_value = json.dumps([{
+        example_value = json.dumps({
             'platform': 'IOS',
             'copyright': '2008 Acme Inc.',
             'version_string': '1.0.8',
             'release_type': 'SCHEDULED',
             'earliest_release_date': '2021-11-10T14:00:00+00:00',
-        }])
+        })
 
         @classmethod
         def _apply_type(cls, non_typed_value: str) -> AppStoreVersionInfo:
@@ -210,7 +210,65 @@ class Types:
             return app_store_version_info
 
     class AppStoreVersionLocalizationInfoArgument(cli.EnvironmentArgumentValue[List[AppStoreVersionLocalizationInfo]]):
-        pass
+        argument_type = List[AppStoreVersionLocalizationInfo]
+        environment_variable_key = 'APP_STORE_CONNECT_APP_STORE_VERSION_LOCALIZATIONS'
+        example_value = json.dumps([{
+            'description': 'App description',
+            'keywords': 'keyword, other keyword',
+            'locale': 'en-US',
+            'marketing_url': 'https://example.com',
+            'promotional_text': 'Promotional text',
+            'support_url': 'https://example.com',
+            'whats_new': 'Fixes an issue ...',
+        }])
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> List[AppStoreVersionLocalizationInfo]:
+            try:
+                given_localization_infos = json.loads(non_typed_value)
+                assert isinstance(given_localization_infos, list)
+            except (ValueError, AssertionError):
+                raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded list')
+
+            app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo] = []
+            error_prefix = 'Invalid App Store Version localization'
+            for i, given_localization_info in enumerate(given_localization_infos):
+                try:
+                    locale: Optional[Locale] = Locale(given_localization_info['locale'])
+                except KeyError:
+                    locale = None
+                except ValueError as ve:  # Invalid locale
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve} in {given_localization_info!r}')
+                except TypeError:  # Given beta build localization is not a dictionary
+                    raise ArgumentTypeError(f'{error_prefix} value {given_localization_info!r} on index {i}')
+
+                localization_info = AppStoreVersionLocalizationInfo(
+                    description=given_localization_info.get('description'),
+                    keywords=given_localization_info.get('keywords'),
+                    locale=locale,
+                    marketing_url=given_localization_info.get('marketing_url'),
+                    promotional_text=given_localization_info.get('promotional_text'),
+                    support_url=given_localization_info.get('support_url'),
+                    whats_new=given_localization_info.get('whats_new'),
+                )
+
+                if set(localization_info.__dict__.values()) == {None}:
+                    raise ArgumentTypeError(f'{error_prefix} value {given_localization_info!r} on index {i}')
+                app_store_version_localization_infos.append(localization_info)
+
+            locales = Counter(info.locale for info in app_store_version_localization_infos)
+            duplicate_locales = {
+                locale.value if locale else 'primary'
+                for locale, uses in locales.items()
+                if uses > 1
+            }
+            if duplicate_locales:
+                raise ArgumentTypeError((
+                    f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
+                    'Please define App Store Version localization for each locale exactly once.'
+                ))
+
+            return app_store_version_localization_infos
 
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
@@ -369,12 +427,15 @@ class AppStoreVersionArgument(cli.Argument):
     )
     APP_STORE_VERSION_INFO = cli.ArgumentProperties(
         key='app_store_version_info',
-        flags=('--app-store-version-info',),
+        flags=('--app-store-version-info', '-vi'),
         type=Types.AppStoreVersionInfoArgument,
         description=(
             'General App information and version release options for App Store version submission '
-            'as a JSON encoded object. Can be used in place '
-            f'For example, "{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}". '
+            'as a JSON encoded object. Alternative to individually defining '
+            f'`{Colors.BRIGHT_BLUE("--platform")}`, `{Colors.BRIGHT_BLUE("--copyright")}`, '
+            f'`{Colors.BRIGHT_BLUE("--earliest-release-date")}`, `{Colors.BRIGHT_BLUE("--release-type")}` '
+            f'and `{Colors.BRIGHT_BLUE("--version-string")}`. '
+            f'For example, `{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}`. '
             'Definitions from the JSON will be overridden by dedicated CLI options if provided.'
         ),
         argparse_kwargs={
@@ -391,7 +452,7 @@ class AppStoreVersionArgument(cli.Argument):
         flags=('--copyright',),
         description=(
             'The name of the person or entity that owns the exclusive rights to your app, '
-            'preceded by the year the rights were obtained (for example, "2008 Acme Inc."). '
+            f'preceded by the year the rights were obtained (for example, "`{Colors.WHITE("2008 Acme Inc.")}`"). '
             'Do not provide a URL.'
         ),
         argparse_kwargs={'required': False},
@@ -404,7 +465,7 @@ class AppStoreVersionArgument(cli.Argument):
             f'Specify earliest return date for scheduled release type '
             f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
             f'Timezone aware ISO8601 timestamp with hour precision, '
-            f'for example `2021-11-10T14:00:00+00:00`.'
+            f'for example "`{Colors.WHITE("2021-11-10T14:00:00+00:00")}`".'
         ),
         argparse_kwargs={'required': False},
     )
@@ -445,7 +506,7 @@ class AppStoreVersionArgument(cli.Argument):
             'that identifies an iteration of the bundle. '
             'The string can only contain one to three groups of numeric characters (0-9) '
             'separated by period in the format [Major].[Minor].[Patch]. '
-            'For example `3.2.46`'
+            f'For example `"{Colors.WHITE("3.2.46")}"`'
         ),
         argparse_kwargs={'required': False},
     )
@@ -468,14 +529,26 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
+    LOCALE_DEFAULT = LOCALE.duplicate(
+        flags=('--locale', '-l'),
+        description=(
+            'The locale code name for App Store metadata in different languages. '
+            "In case not provided, application's primary locale is used instead. "
+            f'Learn more from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
     DESCRIPTION = cli.ArgumentProperties(
         key='description',
-        flags=('--description',),
+        flags=('--description', '-d'),
         description='A description of your app, detailing features and functionality.',
     )
     KEYWORDS = cli.ArgumentProperties(
         key='keywords',
-        flags=('--keywords',),
+        flags=('--keywords', '-k'),
         description=(
             'Include one or more keywords that describe your app. Keywords make '
             'App Store search results more accurate. Separate keywords with an '
@@ -510,11 +583,27 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
     )
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
-        flags=('--whats-new',),
+        flags=('--whats-new', '-n'),
+        type=Types.WhatsNewArgument,
         description=(
             "Describe what's new in this version of your app, "
             'such as new features, improvements, and bug fixes.'
         ),
+    )
+    APP_STORE_VERSION_LOCALIZATION_INFOS = cli.ArgumentProperties(
+        key='app_store_version_localizations',
+        flags=('--app-store-version-localizations', '-vl'),
+        type=Types.AppStoreVersionLocalizationInfoArgument,
+        description=(
+            'Localized App Store version meta information for App Store version submission '
+            'as a JSON encoded list. Alternative to individually defining version release notes '
+            f'and other options via dedicated CLI options such as `{Colors.BRIGHT_BLUE("--whats-new")}`. '
+            'Definitions for duplicate locales are not allowed. '
+            f'For example, `{Colors.WHITE(Types.AppStoreVersionLocalizationInfoArgument.example_value)}`'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
 
 
@@ -603,6 +692,34 @@ class PublishArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
+        },
+    )
+    LOCALE_DEFAULT = cli.ArgumentProperties(
+        key='locale',
+        flags=('--locale', '-l'),
+        type=Locale,
+        description=(
+            'The locale code name for App Store metadata in different languages, '
+            'or for displaying localized "What\'s new" content in TestFlight. '
+            "In case not provided, application's primary locale is used instead. "
+            f'Learn more from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new', '-n'),
+        type=Types.WhatsNewArgument,
+        description=(
+            'Release notes either for TestFlight or App Store review submission. '
+            "Describe what's new in this version of your app, "
+            'such as new features, improvements, and bug fixes.'
+        ),
+        argparse_kwargs={
+            'required': False,
         },
     )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
@@ -775,7 +892,7 @@ class BuildArgument(cli.Argument):
         type=Types.BetaBuildLocalizations,
         description=(
             "Localized beta test info for what's new in the uploaded build as a JSON encoded list. "
-            f'For example, "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
+            f'For example, `{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}`. '
             f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
         ),
         argparse_kwargs={
@@ -1110,13 +1227,23 @@ class ArgumentGroups:
         PublishArgument.SKIP_PACKAGE_UPLOAD,
     )
     SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        # Generic App Store Version information arguments
+        AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.COPYRIGHT,
         AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
-        AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.PLATFORM,
         AppStoreVersionArgument.RELEASE_TYPE,
         AppStoreVersionArgument.VERSION_STRING,
-        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        # Localized App Store Version arguments
+        AppStoreVersionLocalizationArgument.DESCRIPTION,
+        AppStoreVersionLocalizationArgument.KEYWORDS,
+        AppStoreVersionLocalizationArgument.LOCALE_DEFAULT,
+        AppStoreVersionLocalizationArgument.MARKETING_URL,
+        AppStoreVersionLocalizationArgument.PROMOTIONAL_TEXT,
+        AppStoreVersionLocalizationArgument.SUPPORT_URL,
+        AppStoreVersionLocalizationArgument.WHATS_NEW,
+        AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_INFOS,
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
