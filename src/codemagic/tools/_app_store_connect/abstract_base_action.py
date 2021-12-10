@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from abc import ABCMeta
+from abc import abstractmethod
 from datetime import datetime
 from typing import List
 from typing import Optional
@@ -15,6 +16,7 @@ from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
@@ -54,102 +56,200 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def _assert_api_client_credentials(self, custom_error: Optional[str] = None):
         ...
 
-    def create_app_store_version(
-            self,
-            build_id: ResourceId,
-            platform: Platform = Platform.IOS,
-            copyright: Optional[str] = None,
-            version_string: Optional[str] = None,
-            release_type: Optional[ReleaseType] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            should_print: bool = True,
-    ) -> AppStoreVersion:
-        ...
+    # Action signatures in alphabetical order
 
-    def create_app_store_version_submission(
-            self, app_store_version_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
-        ...
-
-    def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> BetaAppReviewSubmission:
-        ...
-
-    def create_beta_build_localization(
-            self,
-            build_id: ResourceId,
-            locale: Optional[Locale],
-            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
-            should_print: bool = True) -> BetaBuildLocalization:
-        ...
-
-    def add_build_to_beta_groups(self, build_id: ResourceId, beta_group_names: Sequence[str]):
-        ...
-
+    @abstractmethod
     def add_beta_test_info(
-            self,
-            build_id: ResourceId,
-            beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
-            locale: Optional[Locale] = None,
-            whats_new: Optional[Types.WhatsNewArgument] = None):
-        ...
+        self,
+        build_id: ResourceId,
+        beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
+        locale: Optional[Locale] = None,
+        whats_new: Optional[Types.WhatsNewArgument] = None,
+    ):
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.add_beta_test_info  # Implementation
+        raise NotImplementedError()
 
+    @abstractmethod
+    def add_build_to_beta_groups(
+        self,
+        build_id: ResourceId,
+        beta_group_names: Sequence[str],
+    ):
+        from .action_groups import BetaGroupsActionGroup
+        _ = BetaGroupsActionGroup.add_build_to_beta_groups  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_app_store_version(
+        self,
+        build_id: ResourceId,
+        platform: Platform = Platform.IOS,
+        copyright: Optional[str] = None,
+        version_string: Optional[str] = None,
+        release_type: Optional[ReleaseType] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersion:  # type: ignore
+        from .action_groups import AppStoreVersionsActionGroup
+        _ = AppStoreVersionsActionGroup.create_app_store_version  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_app_store_version_localization(
+        self,
+        app_store_version_id: ResourceId,
+        locale: Locale,
+        description: Optional[str] = None,
+        keywords: Optional[str] = None,
+        marketing_url: Optional[str] = None,
+        promotional_text: Optional[str] = None,
+        support_url: Optional[str] = None,
+        whats_new: Optional[str] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersionLocalization:  # type: ignore
+        from .action_groups import AppStoreVersionLocalizationsActionGroup
+        _ = AppStoreVersionLocalizationsActionGroup.create_app_store_version_localization  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_app_store_version_submission(
+        self,
+        app_store_version_id: ResourceId,
+        should_print: bool = True,
+    ) -> AppStoreVersionSubmission:  # type: ignore
+        from .action_groups import AppStoreVersionSubmissionsActionGroup
+        _ = AppStoreVersionSubmissionsActionGroup.create_app_store_version_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_beta_app_review_submission(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> BetaAppReviewSubmission:  # type: ignore
+        from .action_groups import BetaAppReviewSubmissionsActionGroup
+        _ = BetaAppReviewSubmissionsActionGroup.create_beta_app_review_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_beta_build_localization(
+        self,
+        build_id: ResourceId,
+        locale: Optional[Locale],
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
+        should_print: bool = True,
+    ) -> BetaBuildLocalization:  # type: ignore
+        from .action_groups import BetaBuildLocalizationsActionGroup
+        _ = BetaBuildLocalizationsActionGroup.create_beta_build_localization  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def list_app_store_version_localizations(
+        self,
+        app_store_version_id: ResourceId,
+        should_print: bool = True,
+    ) -> List[AppStoreVersionLocalization]:  # type: ignore
+        from .action_groups import AppStoreVersionsActionGroup
+        _ = AppStoreVersionsActionGroup.list_app_store_version_localizations  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def list_apps(
+        self,
+        bundle_id_identifier: Optional[str] = None,
+        bundle_id_identifier_strict_match: bool = False,
+        application_id: Optional[ResourceId] = None,
+        application_name: Optional[str] = None,
+        application_sku: Optional[str] = None,
+        version_string: Optional[str] = None,
+        platform: Optional[Platform] = None,
+        app_store_state: Optional[AppStoreState] = None,
+        should_print: bool = True,
+    ) -> List[App]:  # type: ignore
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.list_apps  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def list_builds(
+        self,
+        application_id: Optional[ResourceId] = None,
+        expired: Optional[bool] = None,
+        not_expired: Optional[bool] = None,
+        build_id: Optional[ResourceId] = None,
+        pre_release_version: Optional[str] = None,
+        processing_state: Optional[BuildProcessingState] = None,
+        build_version_number: Optional[int] = None,
+        should_print: bool = True,
+    ) -> List[Build]:  # type: ignore
+        from ..app_store_connect import AppStoreConnect
+        _ = AppStoreConnect.list_builds  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def submit_to_app_store(
+        self,
+        build_id: ResourceId,
+        copyright: Optional[str] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        platform: Platform = Platform.IOS,
+        release_type: Optional[ReleaseType] = None,
+        version_string: Optional[str] = None,
+    ) -> AppStoreVersionSubmission:  # type: ignore
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.submit_to_app_store  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def submit_to_testflight(
+        self,
+        build_id: ResourceId,
+        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+    ) -> BetaAppReviewSubmission:  # type: ignore
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.submit_to_testflight  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def update_app_store_version(
-            self,
-            app_store_version_id: ResourceId,
-            build_id: Optional[ResourceId] = None,
-            copyright: Optional[str] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            release_type: Optional[ReleaseType] = None,
-            version_string: Optional[str] = None,
-            should_print: bool = True) -> AppStoreVersion:
-        ...
+        self,
+        app_store_version_id: ResourceId,
+        build_id: Optional[ResourceId] = None,
+        copyright: Optional[str] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        release_type: Optional[ReleaseType] = None,
+        version_string: Optional[str] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersion:  # type: ignore
+        from .action_groups import AppStoreVersionsActionGroup
+        _ = AppStoreVersionsActionGroup.update_app_store_version  # Implementation
+        raise NotImplementedError()
 
+    @abstractmethod
+    def update_app_store_version_localization(
+        self,
+        app_store_version_localization_id: ResourceId,
+        description: Optional[str] = None,
+        keywords: Optional[str] = None,
+        marketing_url: Optional[str] = None,
+        promotional_text: Optional[str] = None,
+        support_url: Optional[str] = None,
+        whats_new: Optional[str] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersionLocalization:  # type: ignore
+        from .action_groups import AppStoreVersionLocalizationsActionGroup
+        _ = AppStoreVersionLocalizationsActionGroup.update_app_store_version_localization  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def wait_until_build_is_processed(
         self,
         build: Build,
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
-    ) -> Build:
-        ...
-
-    def submit_to_testflight(
-            self,
-            build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-    ) -> BetaAppReviewSubmission:
-        ...
-
-    def submit_to_app_store(
-            self,
-            build_id: ResourceId,
-            copyright: Optional[str] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-            platform: Platform = Platform.IOS,
-            release_type: Optional[ReleaseType] = None,
-            version_string: Optional[str] = None,
-    ) -> AppStoreVersionSubmission:
-        ...
-
-    def list_apps(self,
-                  bundle_id_identifier: Optional[str] = None,
-                  bundle_id_identifier_strict_match: bool = False,
-                  application_id: Optional[ResourceId] = None,
-                  application_name: Optional[str] = None,
-                  application_sku: Optional[str] = None,
-                  version_string: Optional[str] = None,
-                  platform: Optional[Platform] = None,
-                  app_store_state: Optional[AppStoreState] = None,
-                  should_print: bool = True) -> List[App]:
-        ...
-
-    def list_builds(self,
-                    application_id: Optional[ResourceId] = None,
-                    expired: Optional[bool] = None,
-                    not_expired: Optional[bool] = None,
-                    build_id: Optional[ResourceId] = None,
-                    pre_release_version: Optional[str] = None,
-                    processing_state: Optional[BuildProcessingState] = None,
-                    build_version_number: Optional[int] = None,
-                    should_print: bool = True) -> List[Build]:
-        ...
+    ) -> Build:  # type: ignore
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.wait_until_build_is_processed  # Implementation
+        raise NotImplementedError()
