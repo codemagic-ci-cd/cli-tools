@@ -90,7 +90,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         release_type: Optional[ReleaseType] = None,
         earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
         should_print: bool = True,
-    ) -> AppStoreVersion:  # type: ignore
+    ) -> AppStoreVersion:
         from .action_groups import AppStoreVersionsActionGroup
         _ = AppStoreVersionsActionGroup.create_app_store_version  # Implementation
         raise NotImplementedError()
@@ -107,7 +107,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         support_url: Optional[str] = None,
         whats_new: Optional[str] = None,
         should_print: bool = True,
-    ) -> AppStoreVersionLocalization:  # type: ignore
+    ) -> AppStoreVersionLocalization:
         from .action_groups import AppStoreVersionLocalizationsActionGroup
         _ = AppStoreVersionLocalizationsActionGroup.create_app_store_version_localization  # Implementation
         raise NotImplementedError()
@@ -117,7 +117,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         self,
         app_store_version_id: ResourceId,
         should_print: bool = True,
-    ) -> AppStoreVersionSubmission:  # type: ignore
+    ) -> AppStoreVersionSubmission:
         from .action_groups import AppStoreVersionSubmissionsActionGroup
         _ = AppStoreVersionSubmissionsActionGroup.create_app_store_version_submission  # Implementation
         raise NotImplementedError()
@@ -127,7 +127,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         self,
         build_id: ResourceId,
         should_print: bool = True,
-    ) -> BetaAppReviewSubmission:  # type: ignore
+    ) -> BetaAppReviewSubmission:
         from .action_groups import BetaAppReviewSubmissionsActionGroup
         _ = BetaAppReviewSubmissionsActionGroup.create_beta_app_review_submission  # Implementation
         raise NotImplementedError()
@@ -139,7 +139,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         locale: Optional[Locale],
         whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         should_print: bool = True,
-    ) -> BetaBuildLocalization:  # type: ignore
+    ) -> BetaBuildLocalization:
         from .action_groups import BetaBuildLocalizationsActionGroup
         _ = BetaBuildLocalizationsActionGroup.create_beta_build_localization  # Implementation
         raise NotImplementedError()
@@ -149,7 +149,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         self,
         app_store_version_id: ResourceId,
         should_print: bool = True,
-    ) -> List[AppStoreVersionLocalization]:  # type: ignore
+    ) -> List[AppStoreVersionLocalization]:
         from .action_groups import AppStoreVersionsActionGroup
         _ = AppStoreVersionsActionGroup.list_app_store_version_localizations  # Implementation
         raise NotImplementedError()
@@ -166,7 +166,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         platform: Optional[Platform] = None,
         app_store_state: Optional[AppStoreState] = None,
         should_print: bool = True,
-    ) -> List[App]:  # type: ignore
+    ) -> List[App]:
         from .action_groups import AppsActionGroup
         _ = AppsActionGroup.list_apps  # Implementation
         raise NotImplementedError()
@@ -182,7 +182,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         processing_state: Optional[BuildProcessingState] = None,
         build_version_number: Optional[int] = None,
         should_print: bool = True,
-    ) -> List[Build]:  # type: ignore
+    ) -> List[Build]:
         from ..app_store_connect import AppStoreConnect
         _ = AppStoreConnect.list_builds  # Implementation
         raise NotImplementedError()
@@ -197,7 +197,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         platform: Platform = Platform.IOS,
         release_type: Optional[ReleaseType] = None,
         version_string: Optional[str] = None,
-    ) -> AppStoreVersionSubmission:  # type: ignore
+    ) -> AppStoreVersionSubmission:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_app_store  # Implementation
         raise NotImplementedError()
@@ -207,7 +207,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         self,
         build_id: ResourceId,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-    ) -> BetaAppReviewSubmission:  # type: ignore
+    ) -> BetaAppReviewSubmission:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_testflight  # Implementation
         raise NotImplementedError()
@@ -222,7 +222,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         release_type: Optional[ReleaseType] = None,
         version_string: Optional[str] = None,
         should_print: bool = True,
-    ) -> AppStoreVersion:  # type: ignore
+    ) -> AppStoreVersion:
         from .action_groups import AppStoreVersionsActionGroup
         _ = AppStoreVersionsActionGroup.update_app_store_version  # Implementation
         raise NotImplementedError()
@@ -238,7 +238,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         support_url: Optional[str] = None,
         whats_new: Optional[str] = None,
         should_print: bool = True,
-    ) -> AppStoreVersionLocalization:  # type: ignore
+    ) -> AppStoreVersionLocalization:
         from .action_groups import AppStoreVersionLocalizationsActionGroup
         _ = AppStoreVersionLocalizationsActionGroup.update_app_store_version_localization  # Implementation
         raise NotImplementedError()
@@ -249,7 +249,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         build: Build,
         max_processing_minutes: int,
         retry_wait_seconds: int = 30,
-    ) -> Build:  # type: ignore
+    ) -> Build:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.wait_until_build_is_processed  # Implementation
         raise NotImplementedError()
