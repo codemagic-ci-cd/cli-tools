@@ -36,7 +36,7 @@ Alphanumeric ID value of the Build
 ##### `--copyright=COPYRIGHT`
 
 
-The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "`2008 Acme Inc.`"). Do not provide a URL.
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, `2008 Acme Inc.`). Do not provide a URL.
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
@@ -48,7 +48,7 @@ Choose when to release the app. You can either manually release the app at a lat
 ##### `--version-string, --app-store-version=VERSION_STRING`
 
 
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `"3.2.46"`
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

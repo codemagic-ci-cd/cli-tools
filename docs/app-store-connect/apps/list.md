@@ -48,7 +48,7 @@ A unique ID for your app that is not visible on the App Store.
 ##### `--version-string, --app-store-version=VERSION_STRING`
 
 
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `"3.2.46"`
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 

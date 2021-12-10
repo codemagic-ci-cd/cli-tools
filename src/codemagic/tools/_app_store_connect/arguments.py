@@ -452,7 +452,7 @@ class AppStoreVersionArgument(cli.Argument):
         flags=('--copyright',),
         description=(
             'The name of the person or entity that owns the exclusive rights to your app, '
-            f'preceded by the year the rights were obtained (for example, "`{Colors.WHITE("2008 Acme Inc.")}`"). '
+            f'preceded by the year the rights were obtained (for example, `{Colors.WHITE("2008 Acme Inc.")}`). '
             'Do not provide a URL.'
         ),
         argparse_kwargs={'required': False},
@@ -506,7 +506,7 @@ class AppStoreVersionArgument(cli.Argument):
             'that identifies an iteration of the bundle. '
             'The string can only contain one to three groups of numeric characters (0-9) '
             'separated by period in the format [Major].[Minor].[Patch]. '
-            f'For example `"{Colors.WHITE("3.2.46")}"`'
+            f'For example `{Colors.WHITE("3.2.46")}`'
         ),
         argparse_kwargs={'required': False},
     )
