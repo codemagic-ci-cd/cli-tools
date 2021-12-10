@@ -66,7 +66,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         if locale is None:
             app = self.api_client.builds.read_app(build_id)
-            locale = Locale(app.attributes.primaryLocale)
+            locale = app.attributes.primaryLocale
             msg_template = 'Using application %s primary locale %s for beta build localization'
             self.logger.info(msg_template, app.attributes.name, locale.value)
 
