@@ -435,7 +435,7 @@ class AppStoreVersionArgument(cli.Argument):
             f'`{Colors.BRIGHT_BLUE("--platform")}`, `{Colors.BRIGHT_BLUE("--copyright")}`, '
             f'`{Colors.BRIGHT_BLUE("--earliest-release-date")}`, `{Colors.BRIGHT_BLUE("--release-type")}` '
             f'and `{Colors.BRIGHT_BLUE("--version-string")}`. '
-            f'For example, `{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}`. '
+            f'For example, "{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}". '
             'Definitions from the JSON will be overridden by dedicated CLI options if provided.'
         ),
         argparse_kwargs={
@@ -599,7 +599,7 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'as a JSON encoded list. Alternative to individually defining version release notes '
             f'and other options via dedicated CLI options such as `{Colors.BRIGHT_BLUE("--whats-new")}`. '
             'Definitions for duplicate locales are not allowed. '
-            f'For example, `{Colors.WHITE(Types.AppStoreVersionLocalizationInfoArgument.example_value)}`'
+            f'For example, "{Colors.WHITE(Types.AppStoreVersionLocalizationInfoArgument.example_value)}"'
         ),
         argparse_kwargs={
             'required': False,
@@ -892,7 +892,7 @@ class BuildArgument(cli.Argument):
         type=Types.BetaBuildLocalizations,
         description=(
             "Localized beta test info for what's new in the uploaded build as a JSON encoded list. "
-            f'For example, `{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}`. '
+            f'For example, "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
             f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
         ),
         argparse_kwargs={
