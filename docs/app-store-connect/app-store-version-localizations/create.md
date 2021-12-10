@@ -33,11 +33,11 @@ UUID value of the App Store Version
 
 
 The locale code name for App Store metadata in different languages. See available locale code names from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
-##### `--description=DESCRIPTION`
+##### `--description, -d=DESCRIPTION`
 
 
 A description of your app, detailing features and functionality.
-##### `--keywords=KEYWORDS`
+##### `--keywords, -k=KEYWORDS`
 
 
 Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
@@ -53,10 +53,10 @@ Promotional text lets you inform your App Store visitors of any current app feat
 
 
 A URL with support information for your app. This URL will be visible on the App Store.
-##### `--whats-new=WHATS_NEW`
+##### `--whats-new, -n=WHATS_NEW`
 
 
-Describe what's new in this version of your app, such as new features, improvements, and bug fixes.
+Describe what's new in this version of your app, such as new features, improvements, and bug fixes. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
