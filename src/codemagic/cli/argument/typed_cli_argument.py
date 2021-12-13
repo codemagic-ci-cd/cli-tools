@@ -130,7 +130,8 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
         except KeyError:
             raise argparse.ArgumentTypeError(f'Environment variable "{key}" is not defined')
         except argparse.ArgumentTypeError as ate:
-            raise argparse.ArgumentTypeError(f'Provided value in environment variable "{key}" is not valid') from ate
+            error_message = f'Provided value in environment variable "{key}" is not valid. {ate}'
+            raise argparse.ArgumentTypeError(error_message) from ate
 
     def _get_from_file(self) -> T:
         path = Path(self._raw_value[6:])
@@ -142,7 +143,8 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
         try:
             return self._apply_type(content)
         except argparse.ArgumentTypeError as ate:
-            raise argparse.ArgumentTypeError(f'Provided value in file "{path}" is not valid') from ate
+            error_message = f'Provided value in file "{path}" is not valid. {ate}'
+            raise argparse.ArgumentTypeError(error_message) from ate
 
     def _parse_value(self) -> T:
         if self._is_from_environment():
