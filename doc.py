@@ -72,14 +72,16 @@ class ArgumentsSerializer:
     @classmethod
     def _replace_quotes(cls, description: str) -> str:
         json_array = re.compile(r'"(\[[^\]]+\])"')
-        # Dummy handling for description containing JSON arrays as an example
-        if not json_array.search(description):
-            return description.replace('"', '`')
-
-        before, array, after = json_array.split(description)
-        before = before.replace('"', '`')
-        after = after.replace('"', '`')
-        return f'{before}`{array}`{after}'
+        json_object = re.compile(r'"(\{[^\}]+\})"')
+        # Dummy handling for description containing JSON arrays and objects as an example
+        for patt in (json_object, json_array):
+            if not patt.search(description):
+                continue
+            before, obj, after = patt.split(description)
+            before = before.replace('"', '`')
+            after = after.replace('"', '`')
+            return f'{before}`{obj}`{after}'
+        return description.replace('"', '`')
 
     def _serialize_argument(self, arg) -> SerializedArgument:
         description = str_plain(arg._value_.description)
