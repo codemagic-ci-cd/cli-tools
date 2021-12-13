@@ -14,13 +14,13 @@ app-store-connect app-store-version-localizations modify [-h] [--log-stream STRE
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--description DESCRIPTION]
+    [--keywords KEYWORDS]
+    [--marketing-url MARKETING_URL]
+    [--promotional-text PROMOTIONAL_TEXT]
+    [--support-url SUPPORT_URL]
+    [--whats-new WHATS_NEW]
     APP_STORE_VERSION_LOCALIZATION_ID
-    --description DESCRIPTION
-    --keywords KEYWORDS
-    --marketing-url MARKETING_URL
-    --promotional-text PROMOTIONAL_TEXT
-    --support-url SUPPORT_URL
-    --whats-new WHATS_NEW
 ```
 ### Required arguments for action `modify`
 
@@ -28,6 +28,8 @@ app-store-connect app-store-version-localizations modify [-h] [--log-stream STRE
 
 
 UUID value of the App Store Version localization
+### Optional arguments for action `modify`
+
 ##### `--description, -d=DESCRIPTION`
 
 

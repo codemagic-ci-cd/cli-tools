@@ -20,11 +20,6 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--skip-package-validation]
     [--skip-package-upload]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
-    --description DESCRIPTION
-    --keywords KEYWORDS
-    --marketing-url MARKETING_URL
-    --promotional-text PROMOTIONAL_TEXT
-    --support-url SUPPORT_URL
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
@@ -35,6 +30,11 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--earliest-release-date EARLIEST_RELEASE_DATE]
     [--release-type RELEASE_TYPE]
     [--version-string VERSION_STRING]
+    [--description DESCRIPTION]
+    [--keywords KEYWORDS]
+    [--marketing-url MARKETING_URL]
+    [--promotional-text PROMOTIONAL_TEXT]
+    [--support-url SUPPORT_URL]
     [--app-store-version-localizations APP_STORE_VERSION_LOCALIZATION_INFOS]
     [--locale LOCALE_DEFAULT]
     [--whats-new WHATS_NEW]
@@ -42,28 +42,6 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--altool-retry-wait ALTOOL_RETRY_WAIT]
     [--altool-verbose-logging]
 ```
-### Required arguments for action `publish`
-
-##### `--description, -d=DESCRIPTION`
-
-
-A description of your app, detailing features and functionality.
-##### `--keywords, -k=KEYWORDS`
-
-
-Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
-##### `--marketing-url=MARKETING_URL`
-
-
-A URL with marketing information about your app. This URL will be visible on the App Store.
-##### `--promotional-text=PROMOTIONAL_TEXT`
-
-
-Promotional text lets you inform your App Store visitors of any current app features without requiring an updated submission. This text will appear above your description on the App Store for customers with devices running iOS 11 or later, and macOS 10.13 or later.
-##### `--support-url=SUPPORT_URL`
-
-
-A URL with support information for your app. This URL will be visible on the App Store.
 ### Optional arguments for action `publish`
 
 ##### `--path=APPLICATION_PACKAGE_PATH_PATTERNS`
@@ -138,6 +116,26 @@ Choose when to release the app. You can either manually release the app at a lat
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--description, -d=DESCRIPTION`
+
+
+A description of your app, detailing features and functionality.
+##### `--keywords, -k=KEYWORDS`
+
+
+Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
+##### `--marketing-url=MARKETING_URL`
+
+
+A URL with marketing information about your app. This URL will be visible on the App Store.
+##### `--promotional-text=PROMOTIONAL_TEXT`
+
+
+Promotional text lets you inform your App Store visitors of any current app features without requiring an updated submission. This text will appear above your description on the App Store for customers with devices running iOS 11 or later, and macOS 10.13 or later.
+##### `--support-url=SUPPORT_URL`
+
+
+A URL with support information for your app. This URL will be visible on the App Store.
 ##### `--app-store-version-localizations, -vl=APP_STORE_VERSION_LOCALIZATION_INFOS`
 
 

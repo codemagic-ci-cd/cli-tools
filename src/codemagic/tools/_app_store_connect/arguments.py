@@ -545,6 +545,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
         key='description',
         flags=('--description', '-d'),
         description='A description of your app, detailing features and functionality.',
+        argparse_kwargs={
+            'required': False,
+        },
     )
     KEYWORDS = cli.ArgumentProperties(
         key='keywords',
@@ -554,6 +557,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'App Store search results more accurate. Separate keywords with an '
             'English comma, Chinese comma, or a mix of both.'
         ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     MARKETING_URL = cli.ArgumentProperties(
         key='marketing_url',
@@ -562,6 +568,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'A URL with marketing information about your app. '
             'This URL will be visible on the App Store.'
         ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     PROMOTIONAL_TEXT = cli.ArgumentProperties(
         key='promotional_text',
@@ -572,6 +581,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'appear above your description on the App Store for customers with devices '
             'running iOS 11 or later, and macOS 10.13 or later.'
         ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     SUPPORT_URL = cli.ArgumentProperties(
         key='support_url',
@@ -580,6 +592,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'A URL with support information for your app. '
             'This URL will be visible on the App Store.'
         ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     WHATS_NEW = cli.ArgumentProperties(
         key='whats_new',
@@ -589,6 +604,9 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             "Describe what's new in this version of your app, "
             'such as new features, improvements, and bug fixes.'
         ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
     APP_STORE_VERSION_LOCALIZATION_INFOS = cli.ArgumentProperties(
         key='app_store_version_localizations',

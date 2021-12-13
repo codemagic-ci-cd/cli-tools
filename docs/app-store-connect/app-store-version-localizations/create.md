@@ -14,14 +14,14 @@ app-store-connect app-store-version-localizations create [-h] [--log-stream STRE
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--description DESCRIPTION]
+    [--keywords KEYWORDS]
+    [--marketing-url MARKETING_URL]
+    [--promotional-text PROMOTIONAL_TEXT]
+    [--support-url SUPPORT_URL]
+    [--whats-new WHATS_NEW]
     APP_STORE_VERSION_ID
     LOCALE
-    --description DESCRIPTION
-    --keywords KEYWORDS
-    --marketing-url MARKETING_URL
-    --promotional-text PROMOTIONAL_TEXT
-    --support-url SUPPORT_URL
-    --whats-new WHATS_NEW
 ```
 ### Required arguments for action `create`
 
@@ -33,6 +33,8 @@ UUID value of the App Store Version
 
 
 The locale code name for App Store metadata in different languages. See available locale code names from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
+### Optional arguments for action `create`
+
 ##### `--description, -d=DESCRIPTION`
 
 

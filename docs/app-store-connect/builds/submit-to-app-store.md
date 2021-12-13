@@ -21,15 +21,15 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--platform PLATFORM]
     [--release-type RELEASE_TYPE]
     [--version-string VERSION_STRING]
+    [--description DESCRIPTION]
+    [--keywords KEYWORDS]
     [--locale LOCALE_DEFAULT]
+    [--marketing-url MARKETING_URL]
+    [--promotional-text PROMOTIONAL_TEXT]
+    [--support-url SUPPORT_URL]
+    [--whats-new WHATS_NEW]
     [--app-store-version-localizations APP_STORE_VERSION_LOCALIZATION_INFOS]
     BUILD_ID_RESOURCE_ID
-    --description DESCRIPTION
-    --keywords KEYWORDS
-    --marketing-url MARKETING_URL
-    --promotional-text PROMOTIONAL_TEXT
-    --support-url SUPPORT_URL
-    --whats-new WHATS_NEW
 ```
 ### Required arguments for action `submit-to-app-store`
 
@@ -37,30 +37,6 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
 
 
 Alphanumeric ID value of the Build
-##### `--description, -d=DESCRIPTION`
-
-
-A description of your app, detailing features and functionality.
-##### `--keywords, -k=KEYWORDS`
-
-
-Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
-##### `--marketing-url=MARKETING_URL`
-
-
-A URL with marketing information about your app. This URL will be visible on the App Store.
-##### `--promotional-text=PROMOTIONAL_TEXT`
-
-
-Promotional text lets you inform your App Store visitors of any current app features without requiring an updated submission. This text will appear above your description on the App Store for customers with devices running iOS 11 or later, and macOS 10.13 or later.
-##### `--support-url=SUPPORT_URL`
-
-
-A URL with support information for your app. This URL will be visible on the App Store.
-##### `--whats-new, -n=WHATS_NEW`
-
-
-Describe what's new in this version of your app, such as new features, improvements, and bug fixes. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Optional arguments for action `submit-to-app-store`
 
 ##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
@@ -91,10 +67,34 @@ Choose when to release the app. You can either manually release the app at a lat
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--description, -d=DESCRIPTION`
+
+
+A description of your app, detailing features and functionality.
+##### `--keywords, -k=KEYWORDS`
+
+
+Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
 ##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
 
 
 The locale code name for App Store metadata in different languages. In case not provided, application's primary locale is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
+##### `--marketing-url=MARKETING_URL`
+
+
+A URL with marketing information about your app. This URL will be visible on the App Store.
+##### `--promotional-text=PROMOTIONAL_TEXT`
+
+
+Promotional text lets you inform your App Store visitors of any current app features without requiring an updated submission. This text will appear above your description on the App Store for customers with devices running iOS 11 or later, and macOS 10.13 or later.
+##### `--support-url=SUPPORT_URL`
+
+
+A URL with support information for your app. This URL will be visible on the App Store.
+##### `--whats-new, -n=WHATS_NEW`
+
+
+Describe what's new in this version of your app, such as new features, improvements, and bug fixes. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--app-store-version-localizations, -vl=APP_STORE_VERSION_LOCALIZATION_INFOS`
 
 
