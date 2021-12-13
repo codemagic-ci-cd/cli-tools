@@ -375,6 +375,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version: AppStoreVersion,
         app_store_version_localizations: List[AppStoreVersionLocalizationInfo],
     ):
+        is_first_app_store_version = self._is_first_app_store_version(app, app_store_version.attributes.platform)
         existing_localizations: Dict[Locale, ResourceId] = {
             localization.attributes.locale: localization.id
             for localization in self.list_app_store_version_localizations(app_store_version.id, should_print=False)
@@ -382,6 +383,9 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         for localization in app_store_version_localizations:
             if localization.locale is None:  # Use primary locale
                 localization.locale = app.attributes.primaryLocale
+
+            if is_first_app_store_version:  # Release notes are not allowed for first releases
+                localization.whats_new = None
 
             try:
                 existing_localization_id = existing_localizations[localization.locale]
@@ -444,6 +448,15 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             release_type=app_store_version_info.release_type,
             version_string=app_store_version_info.version_string,
         )
+
+    def _is_first_app_store_version(self, app: App, platform: Platform) -> bool:
+        versions_filter = self.api_client.app_store_versions.Filter(platform=platform)
+        app_store_versions = self.api_client.apps.list_app_store_versions(
+            app,
+            resource_filter=versions_filter,
+            limit=2,
+        )
+        return len(app_store_versions) < 2
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
         versions_filter = self.api_client.app_store_versions.Filter(

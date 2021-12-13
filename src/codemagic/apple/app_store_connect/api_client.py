@@ -100,14 +100,28 @@ class AppStoreConnectApiClient(StringConverterMixin):
     def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
-    def _paginate(self, url, params, page_size) -> PaginateResult:
+    @classmethod
+    def _get_pagination_page_size(cls, page_size: Optional[int], limit: Optional[int]) -> Optional[int]:
+        try:
+            return min(page_size, limit)
+        except TypeError:  # In case either or both are None
+            return page_size or limit
+
+    def _paginate(
+            self,
+            url: str,
+            params: Dict,
+            page_size: Optional[int],
+            limit: Optional[int],
+    ) -> PaginateResult:
         params = {k: v for k, v in (params or {}).items() if v is not None}
+        page_size = self._get_pagination_page_size(page_size, limit)
         if page_size is None:
             response = self.session.get(url, params=params).json()
         else:
             response = self.session.get(url, params={'limit': page_size, **params}).json()
         result = PaginateResult(response.get('data', []), response.get('included', []))
-        while 'next' in response['links']:
+        while 'next' in response['links'] and (limit is None or len(result.data) < limit):
             # Query params from previous pagination call can be included in the next URL
             # and duplicate parameters are not allowed, so we need to filter those out.
             parsed_url = parse.urlparse(response['links']['next'])
@@ -118,11 +132,11 @@ class AppStoreConnectApiClient(StringConverterMixin):
             result.included.extend(response.get('included', []))
         return result
 
-    def paginate(self, url, params=None, page_size: Optional[int] = 100) -> List[Dict]:
-        return self._paginate(url, params, page_size).data
+    def paginate(self, url, params=None, page_size: Optional[int] = 100, limit=None) -> List[Dict]:
+        return self._paginate(url, params, page_size, limit).data
 
-    def paginate_with_included(self, url, params=None, page_size: Optional[int] = 100) -> PaginateResult:
-        return self._paginate(url, params, page_size)
+    def paginate_with_included(self, url, params=None, page_size: Optional[int] = 100, limit=None) -> PaginateResult:
+        return self._paginate(url, params, page_size, limit)
 
     @property
     def apps(self) -> Apps:
