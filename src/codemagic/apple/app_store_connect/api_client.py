@@ -102,10 +102,9 @@ class AppStoreConnectApiClient(StringConverterMixin):
 
     @classmethod
     def _get_pagination_page_size(cls, page_size: Optional[int], limit: Optional[int]) -> Optional[int]:
-        try:
+        if page_size is not None and limit is not None:
             return min(page_size, limit)
-        except TypeError:  # In case either or both are None
-            return page_size or limit
+        return page_size or limit
 
     def _paginate(
             self,
