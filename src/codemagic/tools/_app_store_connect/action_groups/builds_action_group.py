@@ -15,6 +15,7 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import BetaAppReviewSubmission
@@ -242,7 +243,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
         app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
-        self.logger.info('')
+        self.echo('')
 
         self._update_app_store_version_localizations(app, app_store_version, app_store_version_localization_infos)
 
@@ -376,10 +377,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version_localizations: List[AppStoreVersionLocalizationInfo],
     ):
         is_first_app_store_version = self._is_first_app_store_version(app, app_store_version.attributes.platform)
-        existing_localizations: Dict[Locale, ResourceId] = {
-            localization.attributes.locale: localization.id
-            for localization in self.list_app_store_version_localizations(app_store_version.id, should_print=False)
-        }
+        existing_localizations = self._get_existing_app_store_version_localizations(app_store_version)
         for localization in app_store_version_localizations:
             if localization.locale is None:  # Use primary locale
                 localization.locale = app.attributes.primaryLocale
@@ -390,8 +388,9 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             try:
                 existing_localization_id = existing_localizations[localization.locale]
             except KeyError:
-                self.create_app_store_version_localization(
-                    app_store_version.id,
+                self.echo(Colors.GREEN(f'Create new {AppStoreVersionLocalization} for locale {localization.locale}'))
+                app_store_version_localization = self.api_client.app_store_version_localizations.create(
+                    app_store_version,
                     localization.locale,
                     description=localization.description,
                     keywords=localization.keywords,
@@ -399,10 +398,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                     promotional_text=localization.promotional_text,
                     support_url=localization.support_url,
                     whats_new=localization.whats_new,
-                    should_print=False,
                 )
             else:
-                self.update_app_store_version_localization(
+                self.echo(Colors.GREEN(f'Update {AppStoreVersionLocalization} for locale {localization.locale}'))
+                app_store_version_localization = self.api_client.app_store_version_localizations.modify(
                     existing_localization_id,
                     description=localization.description,
                     keywords=localization.keywords,
@@ -410,8 +409,9 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                     promotional_text=localization.promotional_text,
                     support_url=localization.support_url,
                     whats_new=localization.whats_new,
-                    should_print=False,
                 )
+            self.printer.print_resource(app_store_version_localization, True)
+            self.echo('')
 
     def _update_existing_app_store_version(
         self,
@@ -457,6 +457,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             limit=2,
         )
         return len(app_store_versions) < 2
+
+    def _get_existing_app_store_version_localizations(
+        self,
+        app_store_version: AppStoreVersion,
+    ) -> Dict[Locale, ResourceId]:
+        localizations = self.api_client.app_store_versions.list_app_store_version_localizations(app_store_version)
+        return {
+            localization.attributes.locale: localization.id
+            for localization in localizations
+        }
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
         versions_filter = self.api_client.app_store_versions.Filter(
