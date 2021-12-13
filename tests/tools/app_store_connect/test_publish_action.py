@@ -175,12 +175,23 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
         mock_submit_to_testflight.assert_not_called()
         mock_submit_to_app_store.assert_called_with(
             build.id,
+            max_build_processing_wait=0,
+            # General App Store version info
             copyright=None,
             earliest_release_date=None,
-            max_build_processing_wait=0,
             platform=Platform.IOS,
             release_type=ReleaseType.AFTER_APPROVAL,
             version_string='1.2.3',
+            # Localized App Store version information
+            app_store_version_info=None,
+            app_store_version_localizations=None,
+            description=None,
+            keywords=None,
+            locale=None,
+            marketing_url=None,
+            promotional_text=None,
+            support_url=None,
+            whats_new=None,
         )
         mock_add_beta_test_info.assert_not_called()
 
