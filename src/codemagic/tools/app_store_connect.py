@@ -52,6 +52,8 @@ from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
+from ._app_store_connect.arguments import AppStoreVersionInfo  # noqa: F401
+from ._app_store_connect.arguments import AppStoreVersionLocalizationInfo  # noqa: F401
 from ._app_store_connect.arguments import ArgumentGroups
 from ._app_store_connect.arguments import BetaBuildInfo  # noqa: F401
 from ._app_store_connect.arguments import BuildArgument
