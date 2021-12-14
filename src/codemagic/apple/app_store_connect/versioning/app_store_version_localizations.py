@@ -84,6 +84,9 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
         support_url: Optional[str] = None,
         whats_new: Optional[str] = None,
     ) -> AppStoreVersionLocalization:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
+        """
         attributes = self._construct_payload_attributes(
             description=description,
             keywords=keywords,
