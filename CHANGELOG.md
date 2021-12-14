@@ -1,7 +1,56 @@
 Version 0.13.1
 -------------
 
-**TODO**
+This is an enhancement release to further streamline the App Store review submission automation capabilities.
+
+Additions and changes from [pull request #172](https://github.com/codemagic-ci-cd/cli-tools/pull/172).
+
+**Features**
+- Support setting localized meta information for App Store versions when submitting build to App Store review.
+- Add new actions group `app-store-version-localizations` to `app-store-connect`.
+- Add new action `app-store-connect app-store-version-localizations create` to add localized metadata to an App Store version.
+- Add new action `app-store-connect app-store-version-localizations delete` to remove localized metadata from an App Store version.
+- Add new action `app-store-connect app-store-version-localizations get` to read App Store version localized metadata.
+- Add new action `app-store-connect app-store-version-localizations modify` to edit App Store version localized metadata.
+- Add new action `app-store-connect app-store-versions localizations` to list App Store version localizations for an App Store version.
+- Change `app-store-connect publish` to support adding localized version metadata when submitting build to App Store review.
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.create` to create App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.read` to obtain App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_localization_information).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.modify` to edit existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.delete` to remove existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersions.list_app_store_version_localizations` to list all App Store version localizations for given App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version).
+- Show more informative error messages in case CLI arguments from environment variables or files are invalid.
+- Add new options to `app-store-connect publish`:
+  - `--app-store-version-info`,
+  - `--description`,
+  - `--keywords`,
+  - `--marketing-url`,
+  - `--promotional-text`,
+  - `--support-url`,
+  - `--app-store-version-localizations`.
+
+**Docs**
+
+- Create docs for `app-store-connect` actions group `app-store-version-localizations`.
+- Create docs for action `app-store-connect app-store-version-localizations create`.
+- Create docs for action `app-store-connect app-store-version-localizations delete`.
+- Create docs for action `app-store-connect app-store-version-localizations get`.
+- Create docs for action `app-store-connect app-store-version-localizations modify`.
+- Update docs for `app-store-connect` actions group `app-store-versions`.
+- Create docs for action `app-store-connect app-store-versions localizations`.
+- Update docs for action `app-store-connect app-store-versions create`.
+- Update docs for action `app-store-connect app-store-versions modify`.
+- Update docs for action `app-store-connect builds submit-to-app-store`.
+- Update docs for action `app-store-connect publish`.
+- Remove backticks from terminal help messages and keep them only for markdown documentation formatting.
+
+**Development**
+
+- Add option to limit number of responses in App Store Connect API client pagination method.
+- Change type of `App.Attributes.locale` from plain `str` to `Locale` enumeration.
+- Add definition for `AppStoreVersionLocalization` resource. See official resource [documentation](https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization).
+- Reorder method signatures in `AbstractBaseAction` and unify indentation for method arguments.
+- Add references to implementing methods to `AbstractBaseAction` interface.
 
 Version 0.13.0
 -------------
@@ -30,7 +79,6 @@ Additions and changes from [pull request #164](https://github.com/codemagic-ci-c
   - `-su` for `--skip-package-upload`,
   - `-sv` for `--skip-package-validation`,
   - `-w` for `--max-build-processing-wait`.
-- 
 
 **Fixes**
 
