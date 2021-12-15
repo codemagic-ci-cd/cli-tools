@@ -13,14 +13,15 @@ Additions and changes from [pull request #172](https://github.com/codemagic-ci-c
 - Add new action `app-store-connect app-store-version-localizations get` to read App Store version localized metadata.
 - Add new action `app-store-connect app-store-version-localizations modify` to edit App Store version localized metadata.
 - Add new action `app-store-connect app-store-versions localizations` to list App Store version localizations for an App Store version.
-- Change `app-store-connect publish` to support adding localized version metadata when submitting build to App Store review.
+- Change `app-store-connect publish` to support adding or updating localized version metadata when submitting build to App Store review.
+- Change `app-store-connect builds submit-to-app-store` to support adding or updating localized version metadata for App Store version.
 - Add new App Store Connect API client method `AppStoreVersionLocalizations.create` to create App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_localization).
 - Add new App Store Connect API client method `AppStoreVersionLocalizations.read` to obtain App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_localization_information).
 - Add new App Store Connect API client method `AppStoreVersionLocalizations.modify` to edit existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization).
 - Add new App Store Connect API client method `AppStoreVersionLocalizations.delete` to remove existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_localization).
 - Add new App Store Connect API client method `AppStoreVersions.list_app_store_version_localizations` to list all App Store version localizations for given App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version).
 - Show more informative error messages in case CLI arguments from environment variables or files are invalid.
-- Add new options to `app-store-connect publish`:
+- Add new options to actions `app-store-connect publish` and `app-store-connect builds submit-to-app-store`:
   - `--app-store-version-info`,
   - `--description`,
   - `--keywords`,

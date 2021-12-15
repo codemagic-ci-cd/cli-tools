@@ -245,7 +245,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
         self.echo('')
 
-        self._update_app_store_version_localizations(app, app_store_version, app_store_version_localization_infos)
+        self._create_or_update_app_store_version_localizations(
+            app,
+            app_store_version,
+            app_store_version_localization_infos,
+        )
 
         app_store_version_submission = self.create_app_store_version_submission(app_store_version.id)
 
@@ -370,7 +374,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self._update_existing_app_store_version(app_store_version, build, app_store_version_info)
         return app_store_version
 
-    def _update_app_store_version_localizations(
+    def _create_or_update_app_store_version_localizations(
         self,
         app: App,
         app_store_version: AppStoreVersion,
