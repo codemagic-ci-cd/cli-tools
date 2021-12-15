@@ -3,6 +3,7 @@ import os
 import pytest
 
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
@@ -63,3 +64,11 @@ class AppStoreVersionsTest(ResourceManagerTestsBase):
         build = self.api_client.app_store_versions.read_build(app_store_version_id)
         assert isinstance(build, Build)
         assert build.id == ResourceId('9d967d5e-4946-432f-a111-1fd94949820b')
+
+    def test_list_app_store_version_localizations(self):
+        app_store_version_id = ResourceId('409ebefb-ebd1-4f1a-903d-6ba16e013ebf')
+        app_store_version_localizations = \
+            self.api_client.app_store_versions.list_app_store_version_localizations(app_store_version_id)
+        for app_store_version_localization in app_store_version_localizations:
+            assert isinstance(app_store_version_localization, AppStoreVersionLocalization)
+            print(app_store_version_localization.json())

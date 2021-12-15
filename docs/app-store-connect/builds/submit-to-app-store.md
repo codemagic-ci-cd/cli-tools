@@ -14,12 +14,21 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    [--app-store-version-info APP_STORE_VERSION_INFO]
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
     [--platform PLATFORM]
     [--release-type RELEASE_TYPE]
     [--version-string VERSION_STRING]
-    [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    [--description DESCRIPTION]
+    [--keywords KEYWORDS]
+    [--locale LOCALE_DEFAULT]
+    [--marketing-url MARKETING_URL]
+    [--promotional-text PROMOTIONAL_TEXT]
+    [--support-url SUPPORT_URL]
+    [--whats-new WHATS_NEW]
+    [--app-store-version-localizations APP_STORE_VERSION_LOCALIZATION_INFOS]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `submit-to-app-store`
@@ -30,10 +39,18 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
 Alphanumeric ID value of the Build
 ### Optional arguments for action `submit-to-app-store`
 
+##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
+
+
+Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+##### `--app-store-version-info, -vi=APP_STORE_VERSION_INFO`
+
+
+General App information and version release options for App Store version submission as a JSON encoded object. Alternative to individually defining `--platform`, `--copyright`, `--earliest-release-date`, `--release-type` and `--version-string`. For example, `{"platform": "IOS", "copyright": "2008 Acme Inc.", "version_string": "1.0.8", "release_type": "SCHEDULED", "earliest_release_date": "2021-11-10T14:00:00+00:00"}`. Definitions from the JSON will be overridden by dedicated CLI options if provided. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_APP_STORE_VERSION_INFO`. Alternatively to entering `APP_STORE_VERSION_INFO` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--copyright=COPYRIGHT`
 
 
-The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "2008 Acme Inc."). Do not provide a URL.
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, `2008 Acme Inc.`). Do not provide a URL.
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
@@ -50,10 +67,38 @@ Choose when to release the app. You can either manually release the app at a lat
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
-##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
+##### `--description, -d=DESCRIPTION`
 
 
-Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+A description of your app, detailing features and functionality.
+##### `--keywords, -k=KEYWORDS`
+
+
+Include one or more keywords that describe your app. Keywords make App Store search results more accurate. Separate keywords with an English comma, Chinese comma, or a mix of both.
+##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+
+
+The locale code name for App Store metadata in different languages. In case not provided, application's primary locale is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
+##### `--marketing-url=MARKETING_URL`
+
+
+A URL with marketing information about your app. This URL will be visible on the App Store.
+##### `--promotional-text=PROMOTIONAL_TEXT`
+
+
+Promotional text lets you inform your App Store visitors of any current app features without requiring an updated submission. This text will appear above your description on the App Store for customers with devices running iOS 11 or later, and macOS 10.13 or later.
+##### `--support-url=SUPPORT_URL`
+
+
+A URL with support information for your app. This URL will be visible on the App Store.
+##### `--whats-new, -n=WHATS_NEW`
+
+
+Describe what's new in this version of your app, such as new features, improvements, and bug fixes. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_WHATS_NEW`. Alternatively to entering `WHATS_NEW` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--app-store-version-localizations, -vl=APP_STORE_VERSION_LOCALIZATION_INFOS`
+
+
+Localized App Store version meta information for App Store version submission as a JSON encoded list. Alternative to individually defining version release notes and other options via dedicated CLI options such as `--whats-new`. Definitions for duplicate locales are not allowed. For example, `[{"description": "App description", "keywords": "keyword, other keyword", "locale": "en-US", "marketing_url": "https://example.com", "promotional_text": "Promotional text", "support_url": "https://example.com", "whats_new": "Fixes an issue .."}]`. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_APP_STORE_VERSION_LOCALIZATIONS`. Alternatively to entering APP_STORE_VERSION_LOCALIZATIONS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

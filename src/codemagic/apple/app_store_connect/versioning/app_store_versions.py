@@ -12,6 +12,7 @@ from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
@@ -122,6 +123,22 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionSubmission'
         response = self.client.session.get(url).json()
         return AppStoreVersionSubmission(response['data'])
+
+    def list_app_store_version_localizations(
+        self,
+        app_store_version: Union[LinkedResourceData, ResourceId],
+    ) -> List[AppStoreVersionLocalization]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
+        """
+        if isinstance(app_store_version, AppStoreVersion):
+            url = app_store_version.relationships.appStoreVersionLocalizations.links.related
+        else:
+            url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionLocalizations'
+        return [
+            AppStoreVersionLocalization(app_store_version_localization)
+            for app_store_version_localization in self.client.paginate(url, page_size=None)
+        ]
 
     def list_with_include(
             self,

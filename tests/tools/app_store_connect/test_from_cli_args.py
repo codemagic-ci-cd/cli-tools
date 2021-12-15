@@ -74,7 +74,11 @@ def test_invalid_private_key_from_file(namespace_kwargs):
         cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
         with pytest.raises(argparse.ArgumentError) as exception_info:
             AppStoreConnect.from_cli_args(cli_args)
-        assert str(exception_info.value) == f'argument --private-key: Provided value in file "{tf.name}" is not valid'
+
+        assert str(exception_info.value) == (
+            f'argument --private-key: Provided value in file "{tf.name}" is not valid. '
+            f'Provided value "not a valid private key" is not valid'
+        )
 
 
 def test_private_key_invalid_path(namespace_kwargs):

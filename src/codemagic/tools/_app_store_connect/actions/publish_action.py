@@ -25,10 +25,19 @@ from codemagic.models.application_package import MacOsPackage
 from codemagic.tools._app_store_connect.arguments import AppStoreVersionArgument
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import AppStoreVersionInfo
+from ..arguments import AppStoreVersionLocalizationArgument
+from ..arguments import AppStoreVersionLocalizationInfo
 from ..arguments import ArgumentGroups
+from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+AppStoreVersionLocalizationInfos = Union[
+    List[AppStoreVersionLocalizationInfo],
+    Types.AppStoreVersionLocalizationInfoArgument,
+]
 
 
 @dataclass
@@ -51,11 +60,22 @@ class SubmitToTestFlightOptions:
 @dataclass
 class SubmitToAppStoreOptions:
     max_build_processing_wait: int
+    # App Store Version information arguments
     copyright: Optional[str] = None
     earliest_release_date: Optional[datetime] = None
     platform: Platform = AppStoreVersionArgument.PLATFORM.get_default()
     release_type: Optional[ReleaseType] = None
     version_string: Optional[str] = None
+    app_store_version_info: Optional[AppStoreVersionInfo] = None
+    # App Store Version Localization arguments
+    description: Optional[str] = None
+    keywords: Optional[str] = None
+    locale: Optional[Locale] = None
+    marketing_url: Optional[str] = None
+    promotional_text: Optional[str] = None
+    support_url: Optional[str] = None
+    whats_new: Optional[str] = None
+    app_store_version_localizations: Optional[List[AppStoreVersionLocalizationInfo]] = None
 
 
 ACTION_ARGUMENTS = (
@@ -67,10 +87,10 @@ ACTION_ARGUMENTS = (
     *PublishArgument.with_custom_argument_group(
         "add localized What's new (what to test) information to uploaded build",
         *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
-    ),
-    *PublishArgument.with_custom_argument_group(
-        "add localized What's new (what to test) information to uploaded build",
-        *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
+        exclude=(
+            BuildArgument.LOCALE_DEFAULT,
+            BuildArgument.WHATS_NEW,
+        ),
     ),
     *PublishArgument.with_custom_argument_group(
         'submit build to TestFlight for beta review',
@@ -86,7 +106,16 @@ ACTION_ARGUMENTS = (
         PublishArgument.SUBMIT_TO_APP_STORE,
         AppStoreVersionArgument.PLATFORM_OPTIONAL,
         *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
-        exclude=(AppStoreVersionArgument.PLATFORM,),
+        exclude=(
+            AppStoreVersionArgument.PLATFORM,
+            AppStoreVersionLocalizationArgument.LOCALE_DEFAULT,
+            AppStoreVersionLocalizationArgument.WHATS_NEW,
+        ),
+    ),
+    *PublishArgument.with_custom_argument_group(
+        'add localized meta information about build for TestFlight or App Store review submission',
+        PublishArgument.LOCALE_DEFAULT,
+        PublishArgument.WHATS_NEW,
     ),
     *PublishArgument.with_custom_argument_group(
         "set Apple's altool configuration options",
@@ -156,6 +185,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             platform: Optional[Platform] = None,
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
+            app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
+            # App Store Version Localization arguments
+            description: Optional[str] = None,
+            keywords: Optional[str] = None,
+            marketing_url: Optional[str] = None,
+            promotional_text: Optional[str] = None,
+            support_url: Optional[str] = None,
+            app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
     ):
         submit_to_testflight_options = None
         submit_to_app_store_options = None
@@ -175,13 +212,28 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_app_store:
             if isinstance(earliest_release_date, Types.EarliestReleaseDate):
                 earliest_release_date = earliest_release_date.value
+            if isinstance(app_store_version_info, Types.AppStoreVersionInfoArgument):
+                app_store_version_info = app_store_version_info.value
+            if isinstance(app_store_version_localizations, Types.AppStoreVersionLocalizationInfoArgument):
+                app_store_version_localizations = app_store_version_localizations.value
             submit_to_app_store_options = SubmitToAppStoreOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+                # Non localized app metadata
                 copyright=copyright,
                 earliest_release_date=earliest_release_date,
                 platform=platform,
                 release_type=release_type,
                 version_string=version_string,
+                app_store_version_info=app_store_version_info,
+                # Localized app metadata
+                description=description,
+                keywords=keywords,
+                locale=locale,
+                marketing_url=marketing_url,
+                promotional_text=promotional_text,
+                support_url=support_url,
+                whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
+                app_store_version_localizations=app_store_version_localizations,
             )
         if submit_to_testflight and beta_group_names:
             # Only builds submitted to TestFlight can be added to beta groups

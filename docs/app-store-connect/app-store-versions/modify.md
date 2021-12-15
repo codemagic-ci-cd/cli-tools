@@ -36,7 +36,7 @@ Alphanumeric ID value of the Build
 ##### `--copyright=COPYRIGHT`
 
 
-The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, "2008 Acme Inc."). Do not provide a URL.
+The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, `2008 Acme Inc.`). Do not provide a URL.
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
