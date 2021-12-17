@@ -4,6 +4,10 @@ Version 0.13.2
 **Features**
 - Improve error messages for CLI invocations in case invalid value was provided for argument with `Enum` type. [pull request #170](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
 
+**Fixes**
+
+- Use correct package type for `altool` commands when publishing tvOS apps using `app-store-connect publish`. [PR #173](https://github.com/codemagic-ci-cd/cli-tools/pull/173)
+
 Version 0.13.1
 -------------
 

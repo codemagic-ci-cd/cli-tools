@@ -8,6 +8,7 @@ import pytest
 from codemagic.models import Altool
 from codemagic.models.altool import AltoolResult
 from codemagic.models.altool.altool import AltoolCommandError
+from codemagic.models.altool.altool import PlatformType
 
 
 @pytest.fixture
@@ -49,6 +50,7 @@ def mock_success_stdout() -> str:
     return mock_path.read_text()
 
 
+@mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
 @pytest.mark.parametrize('retries, error_message', [
     (2, 'error'),
     (5, 'another error'),
@@ -66,6 +68,7 @@ def test_retrying_command_exhaustion(mock_altool, mock_auth_error_stdout, retrie
     assert final_echo_call[0][0] == json.dumps(json.loads(mock_auth_error_stdout), indent=4)
 
 
+@mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
 def test_no_retries(mock_altool, mock_auth_error_stdout):
     raise_error = mock.Mock(side_effect=AltoolCommandError('my error', mock_auth_error_stdout))
     with mock.patch.object(mock_altool, '_run_command', side_effect=raise_error):
@@ -78,6 +81,7 @@ def test_no_retries(mock_altool, mock_auth_error_stdout):
     assert final_echo_call[0][0] == json.dumps(json.loads(mock_auth_error_stdout), indent=4)
 
 
+@mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
 def test_retrying_command_failure(mock_altool, mock_auth_error_stdout, mock_other_error_stdout):
     raise_errors = mock.Mock(side_effect=(
         AltoolCommandError('my error', mock_auth_error_stdout),
@@ -100,6 +104,7 @@ def test_retrying_command_failure(mock_altool, mock_auth_error_stdout, mock_othe
         assert call[0][0] == expected_output
 
 
+@mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
 def test_retrying_command_success(mock_altool, mock_auth_error_stdout, mock_success_result):
     raise_errors = mock.Mock(side_effect=(
         AltoolCommandError('my error', mock_auth_error_stdout),
@@ -120,6 +125,7 @@ def test_retrying_command_success(mock_altool, mock_auth_error_stdout, mock_succ
         assert call[0][0] == expected_output
 
 
+@mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
 def test_retrying_command_immediate_success(mock_altool, mock_success_stdout, mock_success_result):
     with mock.patch.object(mock_altool, '_run_command', side_effect=[mock_success_result]):
         result = mock_altool.upload_app(pathlib.Path('app.ipa'), retries=100, retry_wait_seconds=0)

@@ -184,3 +184,6 @@ class Ipa(AbstractPackage):
             'version': self.version,
             'version_code': self.version_code,
         }
+
+    def is_for_tvos(self) -> bool:
+        return any('tv' in platform_name.lower() for platform_name in self.supported_platforms)
