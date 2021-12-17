@@ -200,7 +200,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         add_beta_test_info_options = None
 
         if not platform:
-            if any('tv' in platform_name.lower() for platform_name in ipa.supported_platforms):
+            if ipa.is_for_tvos():
                 platform = Platform.TV_OS
             else:
                 platform = Platform.IOS

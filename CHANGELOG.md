@@ -1,3 +1,10 @@
+Version 0.13.2
+-------------
+
+**Fixes**
+
+- Use correct package type for `altool` commands when publishing tvOS apps using `app-store-connect publish`. [PR #173](https://github.com/codemagic-ci-cd/cli-tools/pull/173)
+
 Version 0.13.1
 -------------
 
