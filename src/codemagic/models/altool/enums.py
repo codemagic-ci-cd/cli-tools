@@ -6,6 +6,7 @@ from typing import AnyStr
 from typing import Union
 
 from codemagic.mixins import StringConverterMixin
+from codemagic.models.application_package import Ipa
 
 
 class AuthenticationMethod(enum.Enum):
@@ -27,6 +28,8 @@ class PlatformType(StringConverterMixin, str, enum.Enum):
         if artifact_path.suffix == '.pkg':
             return PlatformType.MAC_OS
         elif artifact_path.suffix == '.ipa':
+            if Ipa(artifact_path).is_for_tvos():
+                return PlatformType.APPLE_TV_OS
             return PlatformType.IOS
         else:
             raise ValueError(f'Unknown artifact type from path {artifact_path}')
