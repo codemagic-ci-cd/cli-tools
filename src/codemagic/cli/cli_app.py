@@ -171,12 +171,8 @@ class CliApp(metaclass=abc.ABCMeta):
         from codemagic.apple.resources.enums import ResourceEnumMeta
 
         parser = cls._setup_cli_options()
-        # Turn off graceful enumeration fallback to get proper error messages
-        ResourceEnumMeta.graceful_fallback = False
-        try:
+        with ResourceEnumMeta.cli_arguments_parsing_mode():
             args = parser.parse_args()
-        finally:
-            ResourceEnumMeta.graceful_fallback = True
 
         return parser, args
 
