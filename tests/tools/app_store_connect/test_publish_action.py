@@ -155,7 +155,9 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
             mock.patch.object(AppStoreConnect, 'add_beta_test_info') as mock_add_beta_test_info:
         ipa_path = pathlib.Path('app.ipa')
         mock_find_paths.return_value = [ipa_path]
-        mock_get_packages.return_value = [mock.create_autospec(Ipa, instance=True, path=ipa_path, version='1.2.3')]
+        mock_ipa = mock.create_autospec(Ipa, instance=True, path=ipa_path, version='1.2.3')
+        mock_ipa.is_for_tvos = lambda: False
+        mock_get_packages.return_value = [mock_ipa]
         build = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_app.return_value = mock.Mock(id='1525e3c9-3015-407a-9ba5-9addd2558224')
         mock_get_build.return_value = build
