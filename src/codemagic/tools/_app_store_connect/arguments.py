@@ -4,6 +4,9 @@ import re
 from argparse import ArgumentTypeError
 from collections import Counter
 from dataclasses import dataclass
+from dataclasses import fields
+from datetime import datetime
+from datetime import timezone
 from typing import List
 from typing import Optional
 
@@ -20,6 +23,7 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.cli import Colors
 from codemagic.models import Certificate
@@ -30,6 +34,26 @@ from codemagic.models import ProvisioningProfile
 class BetaBuildInfo:
     whats_new: str
     locale: Optional[Locale]
+
+
+@dataclass
+class AppStoreVersionInfo:
+    platform: Platform
+    copyright: Optional[str] = None
+    earliest_release_date: Optional[datetime] = None
+    release_type: Optional[ReleaseType] = None
+    version_string: Optional[str] = None
+
+
+@dataclass
+class AppStoreVersionLocalizationInfo:
+    description: Optional[str] = None
+    keywords: Optional[str] = None
+    locale: Optional[Locale] = None
+    marketing_url: Optional[str] = None
+    promotional_text: Optional[str] = None
+    support_url: Optional[str] = None
+    whats_new: Optional[str] = None
 
 
 class Types:
@@ -74,6 +98,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class AppStoreConnectSkipPackageUpload(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD'
+
     class AltoolRetriesCount(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
@@ -100,6 +128,147 @@ class Types:
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT'
         default_value = 20
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value >= 0
+
+    class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
+        argument_type = datetime
+
+        @classmethod
+        def validate(cls, value: datetime):
+            if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
+                raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
+            elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
+                raise ArgumentTypeError((
+                    f'Provided value "{value}" is not valid, '
+                    f'only hour precision is allowed and '
+                    f'minutes and seconds are not permitted'
+                ))
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> datetime:
+            value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
+            cls.validate(value)
+            return value
+
+    class AppStoreVersionInfoArgument(cli.EnvironmentArgumentValue[AppStoreVersionInfo]):
+        argument_type = List[AppStoreVersionInfo]
+        environment_variable_key = 'APP_STORE_CONNECT_APP_STORE_VERSION_INFO'
+        example_value = json.dumps({
+            'platform': 'IOS',
+            'copyright': '2008 Acme Inc.',
+            'version_string': '1.0.8',
+            'release_type': 'SCHEDULED',
+            'earliest_release_date': '2021-11-10T14:00:00+00:00',
+        })
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> AppStoreVersionInfo:
+            try:
+                given_app_store_version_info = json.loads(non_typed_value)
+                assert isinstance(given_app_store_version_info, dict)
+            except (ValueError, AssertionError):
+                raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded object')
+
+            allowed_fields = {field.name for field in fields(AppStoreVersionInfo)}
+            invalid_keys = given_app_store_version_info.keys() - allowed_fields
+            if invalid_keys:
+                keys = ', '.join(map(str, invalid_keys))
+                raise ArgumentTypeError(f'Unknown App Store version option(s) {keys}')
+
+            try:
+                platform = Platform(given_app_store_version_info['platform'])
+            except KeyError:
+                platform = AppStoreVersionArgument.PLATFORM.get_default()
+            except ValueError as ve:
+                raise ArgumentTypeError(f'Invalid App Store version info: {ve}')
+            app_store_version_info = AppStoreVersionInfo(platform=platform)
+
+            try:
+                given_earliest_release_date = given_app_store_version_info['given_app_store_version_info']
+                app_store_version_info.earliest_release_date = \
+                    cli.CommonArgumentTypes.iso_8601_datetime(given_earliest_release_date)
+                Types.EarliestReleaseDate.validate(app_store_version_info.earliest_release_date)
+            except KeyError:
+                pass
+            except ArgumentTypeError as ate:
+                raise ArgumentTypeError(f'Invalid "earliest_release_date" in App Store version info: {ate}') from ate
+
+            if 'release_type' in given_app_store_version_info:
+                try:
+                    app_store_version_info.release_type = ReleaseType(given_app_store_version_info['release_type'])
+                except ValueError as ve:
+                    raise ArgumentTypeError(f'Invalid App Store version info: {ve}')
+
+            if 'copyright' in given_app_store_version_info:
+                app_store_version_info.copyright = given_app_store_version_info['copyright']
+            if 'version_string' in given_app_store_version_info:
+                app_store_version_info.version_string = given_app_store_version_info['version_string']
+
+            return app_store_version_info
+
+    class AppStoreVersionLocalizationInfoArgument(cli.EnvironmentArgumentValue[List[AppStoreVersionLocalizationInfo]]):
+        argument_type = List[AppStoreVersionLocalizationInfo]
+        environment_variable_key = 'APP_STORE_CONNECT_APP_STORE_VERSION_LOCALIZATIONS'
+        example_value = json.dumps([{
+            'description': 'App description',
+            'keywords': 'keyword, other keyword',
+            'locale': 'en-US',
+            'marketing_url': 'https://example.com',
+            'promotional_text': 'Promotional text',
+            'support_url': 'https://example.com',
+            'whats_new': 'Fixes an issue ...',
+        }])
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> List[AppStoreVersionLocalizationInfo]:
+            try:
+                given_localization_infos = json.loads(non_typed_value)
+                assert isinstance(given_localization_infos, list)
+            except (ValueError, AssertionError):
+                raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded list')
+
+            app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo] = []
+            error_prefix = 'Invalid App Store Version localization'
+            for i, given_localization_info in enumerate(given_localization_infos):
+                try:
+                    locale: Optional[Locale] = Locale(given_localization_info['locale'])
+                except KeyError:
+                    locale = None
+                except ValueError as ve:  # Invalid locale
+                    raise ArgumentTypeError(f'{error_prefix} on index {i}, {ve} in {given_localization_info!r}')
+                except TypeError:  # Given beta build localization is not a dictionary
+                    raise ArgumentTypeError(f'{error_prefix} value {given_localization_info!r} on index {i}')
+
+                localization_info = AppStoreVersionLocalizationInfo(
+                    description=given_localization_info.get('description'),
+                    keywords=given_localization_info.get('keywords'),
+                    locale=locale,
+                    marketing_url=given_localization_info.get('marketing_url'),
+                    promotional_text=given_localization_info.get('promotional_text'),
+                    support_url=given_localization_info.get('support_url'),
+                    whats_new=given_localization_info.get('whats_new'),
+                )
+
+                if set(localization_info.__dict__.values()) == {None}:
+                    raise ArgumentTypeError(f'{error_prefix} value {given_localization_info!r} on index {i}')
+                app_store_version_localization_infos.append(localization_info)
+
+            locales = Counter(info.locale for info in app_store_version_localization_infos)
+            duplicate_locales = {
+                locale.value if locale else 'primary'
+                for locale, uses in locales.items()
+                if uses > 1
+            }
+            if duplicate_locales:
+                raise ArgumentTypeError((
+                    f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
+                    'Please define App Store Version localization for each locale exactly once.'
+                ))
+
+            return app_store_version_localization_infos
 
     class BetaBuildLocalizations(cli.EnvironmentArgumentValue[List[BetaBuildInfo]]):
         argument_type = List[BetaBuildInfo]
@@ -140,6 +309,8 @@ class Types:
 
 
 _API_DOCS_REFERENCE = f'Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}.'
+_LOCALE_CODES_URL = \
+    'https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes'
 
 
 class AppArgument(cli.Argument):
@@ -254,10 +425,49 @@ class AppStoreVersionArgument(cli.Argument):
         description='UUID value of the App Store Version',
         argparse_kwargs={'required': False},
     )
+    APP_STORE_VERSION_INFO = cli.ArgumentProperties(
+        key='app_store_version_info',
+        flags=('--app-store-version-info', '-vi'),
+        type=Types.AppStoreVersionInfoArgument,
+        description=(
+            'General App information and version release options for App Store version submission '
+            'as a JSON encoded object. Alternative to individually defining '
+            f'`{Colors.BRIGHT_BLUE("--platform")}`, `{Colors.BRIGHT_BLUE("--copyright")}`, '
+            f'`{Colors.BRIGHT_BLUE("--earliest-release-date")}`, `{Colors.BRIGHT_BLUE("--release-type")}` '
+            f'and `{Colors.BRIGHT_BLUE("--version-string")}`. '
+            f'For example, "{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}". '
+            'Definitions from the JSON will be overridden by dedicated CLI options if provided.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
     APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
         key='app_store_version_submission_id',
         type=ResourceId,
         description='UUID value of the App Store Version Submission',
+    )
+    COPYRIGHT = cli.ArgumentProperties(
+        key='copyright',
+        flags=('--copyright',),
+        description=(
+            'The name of the person or entity that owns the exclusive rights to your app, '
+            f'preceded by the year the rights were obtained (for example, `{Colors.WHITE("2008 Acme Inc.")}`). '
+            'Do not provide a URL.'
+        ),
+        argparse_kwargs={'required': False},
+    )
+    EARLIEST_RELEASE_DATE = cli.ArgumentProperties(
+        key='earliest_release_date',
+        flags=('--earliest-release-date',),
+        type=Types.EarliestReleaseDate,
+        description=(
+            f'Specify earliest return date for scheduled release type '
+            f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
+            f'Timezone aware ISO8601 timestamp with hour precision, '
+            f'for example "{Colors.WHITE("2021-11-10T14:00:00+00:00")}".'
+        ),
+        argparse_kwargs={'required': False},
     )
     PLATFORM = cli.ArgumentProperties(
         key='platform',
@@ -267,6 +477,25 @@ class AppStoreVersionArgument(cli.Argument):
         argparse_kwargs={
             'required': False,
             'choices': list(Platform),
+            'default': Platform.IOS,
+        },
+    )
+    PLATFORM_OPTIONAL = PLATFORM.duplicate(argparse_kwargs={
+        'required': False,
+        'choices': list(Platform),
+    })
+    RELEASE_TYPE = cli.ArgumentProperties(
+        key='release_type',
+        flags=('--release-type',),
+        type=ReleaseType,
+        description=(
+            'Choose when to release the app. You can either manually release the app at a later date on '
+            'the App Store Connect website, or the app version can be automatically released right after '
+            'it has been approved by App Review.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReleaseType),
         },
     )
     VERSION_STRING = cli.ArgumentProperties(
@@ -277,9 +506,122 @@ class AppStoreVersionArgument(cli.Argument):
             'that identifies an iteration of the bundle. '
             'The string can only contain one to three groups of numeric characters (0-9) '
             'separated by period in the format [Major].[Minor].[Patch]. '
-            'For example `3.2.46`'
+            f'For example `{Colors.WHITE("3.2.46")}`'
         ),
         argparse_kwargs={'required': False},
+    )
+
+
+class AppStoreVersionLocalizationArgument(cli.Argument):
+    APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
+        key='app_store_version_localization_id',
+        type=ResourceId,
+        description='UUID value of the App Store Version localization',
+    )
+    LOCALE = cli.ArgumentProperties(
+        key='locale',
+        type=Locale,
+        description=(
+            'The locale code name for App Store metadata in different languages. '
+            f'See available locale code names from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'choices': list(Locale),
+        },
+    )
+    LOCALE_DEFAULT = LOCALE.duplicate(
+        flags=('--locale', '-l'),
+        description=(
+            'The locale code name for App Store metadata in different languages. '
+            "In case not provided, application's primary locale is used instead. "
+            f'Learn more from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
+    DESCRIPTION = cli.ArgumentProperties(
+        key='description',
+        flags=('--description', '-d'),
+        description='A description of your app, detailing features and functionality.',
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    KEYWORDS = cli.ArgumentProperties(
+        key='keywords',
+        flags=('--keywords', '-k'),
+        description=(
+            'Include one or more keywords that describe your app. Keywords make '
+            'App Store search results more accurate. Separate keywords with an '
+            'English comma, Chinese comma, or a mix of both.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    MARKETING_URL = cli.ArgumentProperties(
+        key='marketing_url',
+        flags=('--marketing-url',),
+        description=(
+            'A URL with marketing information about your app. '
+            'This URL will be visible on the App Store.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    PROMOTIONAL_TEXT = cli.ArgumentProperties(
+        key='promotional_text',
+        flags=('--promotional-text',),
+        description=(
+            'Promotional text lets you inform your App Store visitors of any current '
+            'app features without requiring an updated submission. This text will '
+            'appear above your description on the App Store for customers with devices '
+            'running iOS 11 or later, and macOS 10.13 or later.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    SUPPORT_URL = cli.ArgumentProperties(
+        key='support_url',
+        flags=('--support-url',),
+        description=(
+            'A URL with support information for your app. '
+            'This URL will be visible on the App Store.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new', '-n'),
+        type=Types.WhatsNewArgument,
+        description=(
+            "Describe what's new in this version of your app, "
+            'such as new features, improvements, and bug fixes.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    APP_STORE_VERSION_LOCALIZATION_INFOS = cli.ArgumentProperties(
+        key='app_store_version_localizations',
+        flags=('--app-store-version-localizations', '-vl'),
+        type=Types.AppStoreVersionLocalizationInfoArgument,
+        description=(
+            'Localized App Store version meta information for App Store version submission '
+            'as a JSON encoded list. Alternative to individually defining version release notes '
+            f'and other options via dedicated CLI options such as `{Colors.BRIGHT_BLUE("--whats-new")}`. '
+            'Definitions for duplicate locales are not allowed. '
+            f'For example, "{Colors.WHITE(Types.AppStoreVersionLocalizationInfoArgument.example_value)}"'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
     )
 
 
@@ -303,7 +645,17 @@ class PublishArgument(cli.Argument):
         key='submit_to_testflight',
         flags=('--testflight', '-t'),
         type=bool,
-        description='Submit an app for Testflight beta app review to allow external testing',
+        description='Enable submission of an app for Testflight beta app review to allow external testing.',
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    SUBMIT_TO_APP_STORE = cli.ArgumentProperties(
+        key='submit_to_app_store',
+        flags=('--app-store', '-a'),
+        type=bool,
+        description='Enable submission of an app to App Store app review procedure.',
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -334,7 +686,7 @@ class PublishArgument(cli.Argument):
     )
     SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
         key='skip_package_validation',
-        flags=('--skip-package-validation',),
+        flags=('--skip-package-validation', '-sv'),
         type=Types.AppStoreConnectSkipPackageValidation,
         description=(
             'Skip package validation before uploading it to App Store Connect. '
@@ -346,13 +698,57 @@ class PublishArgument(cli.Argument):
             'action': 'store_true',
         },
     )
+    SKIP_PACKAGE_UPLOAD = cli.ArgumentProperties(
+        key='skip_package_upload',
+        flags=('--skip-package-upload', '-su'),
+        type=Types.AppStoreConnectSkipPackageUpload,
+        description=(
+            'Skip package upload before doing any other TestFlight or App Store related actions. '
+            'Using this switch will opt out from running `altool --upload-app` as part of publishing '
+            'action. Use this option in case your application package is already uploaded to App Store.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    LOCALE_DEFAULT = cli.ArgumentProperties(
+        key='locale',
+        flags=('--locale', '-l'),
+        type=Locale,
+        description=(
+            'The locale code name for App Store metadata in different languages, '
+            'or for displaying localized "What\'s new" content in TestFlight. '
+            "In case not provided, application's primary locale is used instead. "
+            f'Learn more from {_LOCALE_CODES_URL}'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Locale),
+        },
+    )
+    WHATS_NEW = cli.ArgumentProperties(
+        key='whats_new',
+        flags=('--whats-new', '-n'),
+        type=Types.WhatsNewArgument,
+        description=(
+            'Release notes either for TestFlight or App Store review submission. '
+            "Describe what's new in this version of your app, "
+            'such as new features, improvements, and bug fixes.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
         key='max_build_processing_wait',
-        flags=('--max-build-processing-wait',),
+        flags=('--max-build-processing-wait', '-w'),
         type=Types.MaxBuildProcessingWait,
         description=(
             'Maximum amount of minutes to wait for the freshly uploaded build to be processed by '
-            'Apple and retry submitting the build for beta review. If the processing is not finished '
+            'Apple and retry submitting the build for (beta) review. Works in conjunction with '
+            'TestFlight beta review submission, or App Store review submission and operations that '
+            'depend on either one of those. If the processing is not finished '
             'within the specified timeframe, further submission will be terminated. '
             'Waiting will be skipped if the value is set to 0, further actions might fail '
             'if the build is not processed yet.'
@@ -408,7 +804,9 @@ class BuildArgument(cli.Argument):
         key='expired',
         flags=('--expired',),
         type=bool,
-        description='List only expired builds',
+        description=(
+            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -418,7 +816,9 @@ class BuildArgument(cli.Argument):
         key='not_expired',
         flags=('--not-expired',),
         type=bool,
-        description='List only not expired builds',
+        description=(
+            f'List only not expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--expired")}`.'
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -461,10 +861,9 @@ class BuildArgument(cli.Argument):
     BUILD_VERSION_NUMBER = cli.ArgumentProperties(
         key='build_version_number',
         flags=('--build-version-number',),
-        type=int,
         description=(
             'Build version number is the version number of the uploaded build. '
-            'For example `46`'
+            'For example `46` or `1.0.13.5`.'
         ),
         argparse_kwargs={'required': False},
     )
@@ -479,8 +878,7 @@ class BuildArgument(cli.Argument):
         type=Locale,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
-            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
-            'betabuildlocalizationcreaterequest/data/attributes'
+            f'Learn more from {_LOCALE_CODES_URL}'
         ),
         argparse_kwargs={
             'required': False,
@@ -491,8 +889,7 @@ class BuildArgument(cli.Argument):
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
             "In case not provided, application's primary locale from test information is used instead. "
-            'Learn more from https://developer.apple.com/documentation/appstoreconnectapi/'
-            'betabuildlocalizationcreaterequest/data/attributes'
+            f'Learn more from {_LOCALE_CODES_URL}'
         ),
     )
     WHATS_NEW = cli.ArgumentProperties(
@@ -818,4 +1215,54 @@ class CommonArgument(cli.Argument):
             'required': False,
             'choices': list(Platform),
         },
+    )
+
+
+class ArgumentGroups:
+    ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_BUILD_LOCALIZATIONS,
+        BuildArgument.LOCALE_DEFAULT,
+        BuildArgument.WHATS_NEW,
+    )
+    ADD_BUILD_TO_BETA_GROUPS_OPTIONAL_ARGUMENTS = (
+        BuildArgument.BETA_GROUP_NAMES_OPTIONAL,
+    )
+    ALTOOL_CONFIGURATION_ARGUMENTS = (
+        PublishArgument.ALTOOL_RETRIES_COUNT,
+        PublishArgument.ALTOOL_RETRY_WAIT,
+        PublishArgument.ALTOOL_VERBOSE_LOGGING,
+    )
+    LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
+        BuildArgument.BUILD_VERSION_NUMBER,
+        BuildArgument.EXPIRED,
+        BuildArgument.NOT_EXPIRED,
+        BuildArgument.PRE_RELEASE_VERSION,
+        BuildArgument.PROCESSING_STATE,
+    )
+    PACKAGE_UPLOAD_ARGUMENTS = (
+        PublishArgument.SKIP_PACKAGE_VALIDATION,
+        PublishArgument.SKIP_PACKAGE_UPLOAD,
+    )
+    SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        # Generic App Store Version information arguments
+        AppStoreVersionArgument.APP_STORE_VERSION_INFO,
+        AppStoreVersionArgument.COPYRIGHT,
+        AppStoreVersionArgument.EARLIEST_RELEASE_DATE,
+        AppStoreVersionArgument.PLATFORM,
+        AppStoreVersionArgument.RELEASE_TYPE,
+        AppStoreVersionArgument.VERSION_STRING,
+        # Localized App Store Version arguments
+        AppStoreVersionLocalizationArgument.DESCRIPTION,
+        AppStoreVersionLocalizationArgument.KEYWORDS,
+        AppStoreVersionLocalizationArgument.LOCALE_DEFAULT,
+        AppStoreVersionLocalizationArgument.MARKETING_URL,
+        AppStoreVersionLocalizationArgument.PROMOTIONAL_TEXT,
+        AppStoreVersionLocalizationArgument.SUPPORT_URL,
+        AppStoreVersionLocalizationArgument.WHATS_NEW,
+        AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_INFOS,
+    )
+    SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
+        PublishArgument.MAX_BUILD_PROCESSING_WAIT,
     )

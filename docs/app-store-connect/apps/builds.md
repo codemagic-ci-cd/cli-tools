@@ -3,7 +3,7 @@ builds
 ======
 
 
-**Get a list of builds associated with a specific app**
+**Get a list of builds associated with a specific app matching given constrains**
 ### Usage
 ```bash
 app-store-connect apps builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -14,6 +14,12 @@ app-store-connect apps builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-version-number BUILD_VERSION_NUMBER]
+    [--expired]
+    [--not-expired]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    [--processing-state PROCESSING_STATE]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `builds`
@@ -22,6 +28,32 @@ app-store-connect apps builds [-h] [--log-stream STREAM] [--no-color] [--version
 
 
 Application Apple ID. An automatically generated ID assigned to your app
+### Optional arguments for action `builds`
+
+##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
+
+
+Alphanumeric ID value of the Build
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build. For example `46` or `1.0.13.5`.
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
+##### `--pre-release-version=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
+
+
+Build processing state
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

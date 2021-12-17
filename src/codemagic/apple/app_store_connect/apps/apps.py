@@ -93,9 +93,12 @@ class Apps(ResourceManager[App]):
             url = f'{self.client.API_URL}/apps/{app}/preReleaseVersions'
         return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
 
-    def list_app_store_versions(self,
-                                app: Union[LinkedResourceData, ResourceId],
-                                resource_filter: Optional[AppStoreVersions.Filter] = None) -> List[AppStoreVersion]:
+    def list_app_store_versions(
+            self,
+            app: Union[LinkedResourceData, ResourceId],
+            resource_filter: Optional[AppStoreVersions.Filter] = None,
+            limit: Optional[int] = None,
+    ) -> List[AppStoreVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
@@ -104,7 +107,7 @@ class Apps(ResourceManager[App]):
         else:
             url = f'{self.client.API_URL}/apps/{app}/appStoreVersions'
         params = resource_filter.as_query_params() if resource_filter else None
-        app_store_versions = self.client.paginate(url, params=params, page_size=None)
+        app_store_versions = self.client.paginate(url, params=params, limit=limit)
         return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
 
     def list_beta_app_localizations(self, app: Union[App, ResourceId]) -> List[BetaAppLocalization]:

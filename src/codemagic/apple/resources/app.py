@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .enums import ContentRightsDeclaration
+from .enums import Locale
 from .resource import Relationship
 from .resource import Resource
 
@@ -17,7 +18,7 @@ class App(Resource):
     class Attributes(Resource.Attributes):
         bundleId: str
         name: str
-        primaryLocale: str
+        primaryLocale: Locale
         sku: str
         availableInNewTerritories: bool
         contentRightsDeclaration: ContentRightsDeclaration
@@ -26,6 +27,8 @@ class App(Resource):
         def __post_init__(self):
             if isinstance(self.contentRightsDeclaration, str):
                 self.contentRightsDeclaration = ContentRightsDeclaration(self.contentRightsDeclaration)
+            if isinstance(self.primaryLocale, str):
+                self.primaryLocale = Locale(self.primaryLocale)
 
     @dataclass
     class Relationships(Resource.Relationships):

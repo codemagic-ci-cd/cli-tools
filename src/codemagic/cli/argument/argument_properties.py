@@ -17,7 +17,8 @@ class ArgumentProperties(NamedTuple):
     description: str
     type: Union[Type, Callable[[str], Any]] = str
     flags: Tuple[str, ...] = tuple()
-    argparse_kwargs: Optional[Dict[str, object]] = None
+    argparse_kwargs: Optional[Dict[str, Any]] = None
+    argument_group_name: Optional[str] = None
 
     def duplicate(self, **overwrites) -> ArgumentProperties:
         kwargs = {}
