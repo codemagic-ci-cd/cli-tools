@@ -1,3 +1,9 @@
+Version 0.13.2
+-------------
+
+**Features**
+- Improve error messages for CLI invocations in case invalid value was provided for argument with `Enum` type. [pull request #170](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+
 Version 0.13.1
 -------------
 
