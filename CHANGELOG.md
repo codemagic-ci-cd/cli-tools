@@ -2,17 +2,17 @@ Version 0.14.1
 -------------
 
 **Fixes**
-- In case updating or creating localized App Store version meta information fails for any of the provided languages, do not fail the calling action, but log the error instead. Has an effect on `app-store-connect publish` and `app-store-connect builds submit-to-app-store`.
+- In case updating or creating localized App Store version meta information fails for any of the provided languages, do not fail the calling action, but log the error instead. Has an effect on `app-store-connect publish` and `app-store-connect builds submit-to-app-store`. [PR #175](https://github.com/codemagic-ci-cd/cli-tools/pull/175)
 
 Version 0.14.0
 -------------
 
 **Deprecations**
-- Option `--skip-package-validation` of `app-store-connect publish` is ignored and shows a deprecation warning. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+- Option `--skip-package-validation` of `app-store-connect publish` is ignored and shows a deprecation warning. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
 
 **Features**
-- Change `app-store-connect publish` not to run package validation by default before uploading it to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
-- Add new option `--enable-package-validation` to action `app-store-connect publish` that turns on package validation before it is uploaded to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+- Change `app-store-connect publish` not to run package validation by default before uploading it to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
+- Add new option `--enable-package-validation` to action `app-store-connect publish` that turns on package validation before it is uploaded to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
 
 Version 0.13.2
 -------------
