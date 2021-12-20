@@ -98,6 +98,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION'
 
+    class AppStoreConnectEnablePackageValidation(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_ENABLE_PACKAGE_VALIDATION'
+
     class AppStoreConnectSkipPackageUpload(cli.TypedCliArgument[bool]):
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD'
@@ -684,14 +688,28 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False},
     )
+    ENABLE_PACKAGE_VALIDATION = cli.ArgumentProperties(
+        key='enable_package_validation',
+        flags=('--enable-package-validation', '-ev'),
+        type=Types.AppStoreConnectEnablePackageValidation,
+        description=(
+            'Validate package before uploading it to App Store Connect. '
+            'Use this switch to enable running `altool --validate-app` before uploading '
+            'the package to App Store connect'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     SKIP_PACKAGE_VALIDATION = cli.ArgumentProperties(
         key='skip_package_validation',
         flags=('--skip-package-validation', '-sv'),
         type=Types.AppStoreConnectSkipPackageValidation,
         description=(
-            'Skip package validation before uploading it to App Store Connect. '
-            'Use this switch to opt out from running `altool --validate-app` before uploading '
-            'package to App Store connect'
+            f'{Colors.BOLD("Deprecated")}. '
+            f'Starting from version `0.14.0` package validation before '
+            'uploading it to App Store Connect is disabled by default.'
         ),
         argparse_kwargs={
             'required': False,
@@ -1241,6 +1259,7 @@ class ArgumentGroups:
         BuildArgument.PROCESSING_STATE,
     )
     PACKAGE_UPLOAD_ARGUMENTS = (
+        PublishArgument.ENABLE_PACKAGE_VALIDATION,
         PublishArgument.SKIP_PACKAGE_VALIDATION,
         PublishArgument.SKIP_PACKAGE_UPLOAD,
     )
