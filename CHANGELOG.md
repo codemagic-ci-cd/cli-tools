@@ -1,3 +1,13 @@
+Version 0.14.0
+-------------
+
+**Deprecations**
+- Option `--skip-package-validation` of `app-store-connect publish` is ignored and shows a deprecation warning. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+
+**Features**
+- Change `app-store-connect publish` not to run package validation by default before uploading it to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+- Add new option `--enable-package-validation` to action `app-store-connect publish` that turns on package validation before it is uploaded to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+
 Version 0.13.2
 -------------
 
