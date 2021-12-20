@@ -127,7 +127,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         )
 
         mock_get_packages.assert_called_with(patterns)
-        mock_validate.assert_called()
+        mock_validate.assert_not_called()
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
@@ -171,7 +171,7 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
         )
 
         mock_get_packages.assert_called_with(patterns)
-        mock_validate.assert_called()
+        mock_validate.assert_not_called()
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, 5)
         mock_submit_to_testflight.assert_not_called()
@@ -199,12 +199,12 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
-@pytest.mark.parametrize('skip_package_validation, should_validate', [
-    (True, False),
-    (False, True),
-    (None, True),
+@pytest.mark.parametrize('enable_package_validation, should_validate', [
+    (True, True),
+    (False, False),
+    (None, False),
 ])
-def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_package_validation, should_validate):
+def test_publish_action_enable_validation(_mock_altool, namespace_kwargs, enable_package_validation, should_validate):
     asc = AppStoreConnect.from_cli_args(argparse.Namespace(**namespace_kwargs))
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
             mock.patch.object(AppStoreConnect, '_get_publishing_application_packages') as mock_get_packages, \
@@ -218,7 +218,7 @@ def test_publish_action_skip_validation(_mock_altool, namespace_kwargs, skip_pac
             application_package_path_patterns=[ipa_path],
             apple_id='name@example.com',
             app_specific_password=Types.AppSpecificPassword('xxxx-yyyy-zzzz-wwww'),
-            skip_package_validation=skip_package_validation,
+            enable_package_validation=enable_package_validation,
         )
 
         mock_upload.assert_called()
@@ -281,7 +281,7 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         )
 
         mock_get_packages.assert_called_with(patterns)
-        mock_validate.assert_called()
+        mock_validate.assert_not_called()
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
