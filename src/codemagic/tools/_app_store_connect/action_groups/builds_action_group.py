@@ -383,39 +383,54 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         is_first_app_store_version = self._is_first_app_store_version(app, app_store_version.attributes.platform)
         existing_localizations = self._get_existing_app_store_version_localizations(app_store_version)
         for localization in app_store_version_localizations:
-            if localization.locale is None:  # Use primary locale
-                localization.locale = app.attributes.primaryLocale
-
             if is_first_app_store_version:  # Release notes are not allowed for first releases
                 localization.whats_new = None
+            localization_id = existing_localizations.get(localization.locale or app.attributes.primaryLocale)
 
             try:
-                existing_localization_id = existing_localizations[localization.locale]
-            except KeyError:
-                self.echo(Colors.GREEN(f'Create new {AppStoreVersionLocalization} for locale {localization.locale}'))
-                app_store_version_localization = self.api_client.app_store_version_localizations.create(
+                self._create_or_update_app_store_version_localization(
+                    localization_id,
+                    app,
                     app_store_version,
-                    localization.locale,
-                    description=localization.description,
-                    keywords=localization.keywords,
-                    marketing_url=localization.marketing_url,
-                    promotional_text=localization.promotional_text,
-                    support_url=localization.support_url,
-                    whats_new=localization.whats_new,
+                    localization,
                 )
-            else:
-                self.echo(Colors.GREEN(f'Update {AppStoreVersionLocalization} for locale {localization.locale}'))
-                app_store_version_localization = self.api_client.app_store_version_localizations.modify(
-                    existing_localization_id,
-                    description=localization.description,
-                    keywords=localization.keywords,
-                    marketing_url=localization.marketing_url,
-                    promotional_text=localization.promotional_text,
-                    support_url=localization.support_url,
-                    whats_new=localization.whats_new,
-                )
-            self.printer.print_resource(app_store_version_localization, True)
-            self.echo('')
+            except AppStoreConnectApiError as error:
+                verb = 'update' if localization_id else 'create new'
+                message = f'Failed to {verb} {AppStoreVersionLocalization} for locale {localization.locale}:'
+                self.echo(f'{Colors.YELLOW(message)}\n{error}\n')
+
+    def _create_or_update_app_store_version_localization(
+            self,
+            existing_localization_id: Optional[ResourceId],
+            app: App,
+            app_store_version: AppStoreVersion,
+            localization: AppStoreVersionLocalizationInfo,
+    ):
+        if existing_localization_id is None:
+            self.echo(Colors.GREEN(f'Create new {AppStoreVersionLocalization} for locale {localization.locale}'))
+            app_store_version_localization = self.api_client.app_store_version_localizations.create(
+                app_store_version,
+                localization.locale or app.attributes.primaryLocale,  # Use app's primary locale if not defined
+                description=localization.description,
+                keywords=localization.keywords,
+                marketing_url=localization.marketing_url,
+                promotional_text=localization.promotional_text,
+                support_url=localization.support_url,
+                whats_new=localization.whats_new,
+            )
+        else:
+            self.echo(Colors.GREEN(f'Update {AppStoreVersionLocalization} for locale {localization.locale}'))
+            app_store_version_localization = self.api_client.app_store_version_localizations.modify(
+                existing_localization_id,
+                description=localization.description,
+                keywords=localization.keywords,
+                marketing_url=localization.marketing_url,
+                promotional_text=localization.promotional_text,
+                support_url=localization.support_url,
+                whats_new=localization.whats_new,
+            )
+        self.printer.print_resource(app_store_version_localization, True)
+        self.echo('')
 
     def _update_existing_app_store_version(
         self,

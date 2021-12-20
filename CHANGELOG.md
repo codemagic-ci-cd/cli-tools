@@ -1,3 +1,9 @@
+Version 0.14.1
+-------------
+
+**Fixes**
+- In case updating or creating localized App Store version meta information fails for any of the provided languages, do not fail the calling action, but log the error instead. Has an effect on `app-store-connect publish` and `app-store-connect builds submit-to-app-store`.
+
 Version 0.14.0
 -------------
 
