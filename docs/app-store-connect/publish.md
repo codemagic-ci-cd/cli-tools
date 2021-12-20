@@ -17,6 +17,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--path APPLICATION_PACKAGE_PATH_PATTERNS]
     [--apple-id APPLE_ID]
     [--password APP_SPECIFIC_PASSWORD]
+    [--enable-package-validation]
     [--skip-package-validation]
     [--skip-package-upload]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
@@ -56,10 +57,14 @@ App Store Connect username used for application package validation and upload if
 
 
 App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id and should match pattern `abcd-abcd-abcd-abcd`. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from the environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering `APP_SPECIFIC_PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--enable-package-validation, -ev`
+
+
+Validate package before uploading it to App Store Connect. Use this switch to enable running `altool --validate-app` before uploading the package to App Store connect. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ENABLE_PACKAGE_VALIDATION`.
 ##### `--skip-package-validation, -sv`
 
 
-Skip package validation before uploading it to App Store Connect. Use this switch to opt out from running `altool --validate-app` before uploading package to App Store connect. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
+Deprecated. Starting from version `0.14.0` package validation before uploading it to App Store Connect is disabled by default. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
 ##### `--skip-package-upload, -su`
 
 

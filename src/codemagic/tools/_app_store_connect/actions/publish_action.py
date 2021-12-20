@@ -267,7 +267,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             submit_to_testflight: Optional[bool] = None,
             submit_to_app_store: Optional[bool] = None,
             # Package upload and validation arguments
-            skip_package_validation: Optional[bool] = None,
+            skip_package_validation: Optional[bool] = None,  # Deprecated
+            enable_package_validation: Optional[bool] = None,
             skip_package_upload: Optional[bool] = None,
             altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
             altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
@@ -277,6 +278,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         """
         Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers
         """
+        if bool(skip_package_validation):
+            self._log_skip_validation_deprecation()
+
         self._validate_publishing_arguments(
             apple_id,
             app_specific_password,
@@ -294,7 +298,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self._publish_application_package(
                     altool,
                     application_package,
-                    skip_package_validation,
+                    enable_package_validation,
                     skip_package_upload,
                     Types.AltoolRetriesCount.resolve_value(altool_retries_count),
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
@@ -318,11 +322,22 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if failed_packages:
             raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
 
+    def _log_skip_validation_deprecation(self):
+        flag = PublishArgument.SKIP_PACKAGE_VALIDATION.flag
+        message = (
+            f'{Colors.YELLOW("Deprecation warning!")} Support for {Colors.WHITE(flag)} is deprecated'
+            'and this flag will be removed in future releases.'
+            '\n'
+            f'Starting from version 0.14.0 package validation '
+            f'is disabled by default and using {Colors.WHITE(flag)} has no effect.'
+        )
+        self.logger.info(message)
+
     def _publish_application_package(
             self,
             altool: Altool,
             application_package: Union[Ipa, MacOsPackage],
-            skip_package_validation: Optional[bool],
+            enable_package_validation: Optional[bool],
             skip_package_upload: Optional[bool],
             altool_retries: int,
             altool_retry_wait: float,
@@ -333,10 +348,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self.logger.info(Colors.BLUE('\nPublish "%s" to App Store Connect'), application_package.path)
         self.logger.info(application_package.get_text_summary())
 
-        if not bool(skip_package_validation):
+        if bool(enable_package_validation):
             self._validate_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
-        else:
-            self.logger.info(Colors.YELLOW('\nSkip validating "%s" for App Store Connect'), application_package.path)
 
         if not bool(skip_package_upload):
             self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
