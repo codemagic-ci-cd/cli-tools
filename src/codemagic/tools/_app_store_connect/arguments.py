@@ -140,7 +140,7 @@ class Types:
     class ApiUnauthorizedRetries(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES'
-        default_value = 1
+        default_value = 3
 
         @classmethod
         def _is_valid(cls, value: int) -> bool:
