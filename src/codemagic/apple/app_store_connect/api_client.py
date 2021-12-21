@@ -51,7 +51,14 @@ class AppStoreConnectApiClient(StringConverterMixin):
     API_KEYS_DOCS_URL = \
         'https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api'
 
-    def __init__(self, key_identifier: KeyIdentifier, issuer_id: IssuerId, private_key: str, log_requests=False):
+    def __init__(
+            self,
+            key_identifier: KeyIdentifier,
+            issuer_id: IssuerId,
+            private_key: str,
+            log_requests: bool = False,
+            unauthorized_request_retries: int = 1,
+    ):
         """
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
         :param issuer_id: Your issuer ID from the API Keys page in
@@ -63,7 +70,11 @@ class AppStoreConnectApiClient(StringConverterMixin):
         self._private_key = private_key
         self._jwt: Optional[str] = None
         self._jwt_expires: datetime = datetime.now()
-        self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
+        self.session = AppStoreConnectApiSession(
+            self.generate_auth_headers,
+            log_requests=log_requests,
+            unauthorized_request_retries=unauthorized_request_retries,
+        )
         self._logger = log.get_logger(self.__class__)
 
     @property
@@ -78,6 +89,9 @@ class AppStoreConnectApiClient(StringConverterMixin):
             headers={'kid': self._key_identifier})
         self._jwt = self._str(token)
         return self._jwt
+
+    def reset_jwt(self):
+        self._jwt = None
 
     def _is_token_expired(self) -> bool:
         delta = timedelta(seconds=30)
@@ -97,7 +111,9 @@ class AppStoreConnectApiClient(StringConverterMixin):
             'aud': AppStoreConnectApiClient.JWT_AUDIENCE,
         }
 
-    def generate_auth_headers(self) -> Dict[str, str]:
+    def generate_auth_headers(self, reset_token: bool = False) -> Dict[str, str]:
+        if reset_token:
+            self.reset_jwt()
         return {'Authorization': f'Bearer {self.jwt}'}
 
     @classmethod
