@@ -361,7 +361,7 @@ class AppStoreConnectArgument(cli.Argument):
         description='Turn on logging for App Store Connect API HTTP requests',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
-    RETRY_REQUESTS = cli.ArgumentProperties(
+    UNAUTHORIZED_REQUEST_RETRIES = cli.ArgumentProperties(
         key='unauthorized_request_retries',
         flags=('--api-unauthorized-retries', '-r'),
         type=Types.ApiUnauthorizedRetries,
