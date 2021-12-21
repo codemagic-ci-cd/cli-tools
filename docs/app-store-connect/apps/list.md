@@ -8,6 +8,7 @@ list
 ```bash
 app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -63,6 +64,10 @@ State of App Store Version
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times should the App Store Connect API request be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case unauthorized response is returned, then the new request is attempted with a new JSON Web Token until number of attempts is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 1]
 ##### `--json`
 
 
