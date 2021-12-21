@@ -23,6 +23,16 @@ from ..arguments import BundleIdArgument
 
 class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
+    @cli.action('banaan', action_group=AppStoreConnectActionGroup.APPS)
+    def get_banaan(self):
+        """
+        Show banaan 10 times
+        """
+        import time
+        for i in range(10):
+            self.get_app('1481211155', False)
+            time.sleep(10)
+
     @cli.action('get', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
     def get_app(self, application_id: ResourceId, should_print: bool = True) -> App:
         """

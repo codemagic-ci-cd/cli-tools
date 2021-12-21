@@ -1,27 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
-from datetime import timedelta
 from typing import Dict
 from typing import List
 from typing import Optional
 from urllib import parse
 
-import jwt
-
-from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 from .api_session import AppStoreConnectApiSession
 from .apps import Apps
 from .builds import Builds
+from .json_web_token_manager import JsonWebTokenManager
 from .provisioning import BundleIdCapabilities
 from .provisioning import BundleIds
 from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
 from .testflight import BetaGroups
+from .type_declarations import IssuerId
+from .type_declarations import KeyIdentifier
+from .type_declarations import PaginateResult
 from .versioning import AppStoreVersionLocalizations
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
@@ -30,23 +28,7 @@ from .versioning import BetaBuildLocalizations
 from .versioning import PreReleaseVersions
 
 
-@dataclass
-class PaginateResult:
-    data: List[Dict]
-    included: List[Dict]
-
-
-class KeyIdentifier(str):
-    pass
-
-
-class IssuerId(str):
-    pass
-
-
-class AppStoreConnectApiClient(StringConverterMixin):
-    JWT_AUDIENCE = 'appstoreconnect-v1'
-    JWT_ALGORITHM = 'ES256'
+class AppStoreConnectApiClient:
     API_URL = 'https://api.appstoreconnect.apple.com/v1'
     API_KEYS_DOCS_URL = \
         'https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api'
@@ -58,44 +40,13 @@ class AppStoreConnectApiClient(StringConverterMixin):
                           App Store Connect (Ex: 57246542-96fe-1a63-e053-0824d011072a)
         :param private_key: Private key associated with the key_identifier you specified
         """
-        self._key_identifier = key_identifier
-        self._issuer_id = issuer_id
-        self._private_key = private_key
-        self._jwt: Optional[str] = None
-        self._jwt_expires: datetime = datetime.now()
         self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
         self._logger = log.get_logger(self.__class__)
+        self._jwt_manager = JsonWebTokenManager(key_identifier, issuer_id, private_key)
 
     @property
     def jwt(self) -> str:
-        if self._jwt and not self._is_token_expired():
-            return self._jwt
-        self._logger.debug('Generate new JWT for App Store Connect')
-        token = jwt.encode(
-            self._get_jwt_payload(),
-            self._private_key,
-            algorithm=AppStoreConnectApiClient.JWT_ALGORITHM,
-            headers={'kid': self._key_identifier})
-        self._jwt = self._str(token)
-        return self._jwt
-
-    def _is_token_expired(self) -> bool:
-        delta = timedelta(seconds=30)
-        return datetime.now() - delta > self._jwt_expires
-
-    def _get_timestamp(self) -> int:
-        now = datetime.now()
-        delta = timedelta(minutes=19)
-        dt = now + delta
-        self._jwt_expires = dt
-        return int(dt.timestamp())
-
-    def _get_jwt_payload(self) -> Dict:
-        return {
-            'iss': self._issuer_id,
-            'exp': self._get_timestamp(),
-            'aud': AppStoreConnectApiClient.JWT_AUDIENCE,
-        }
+        return self._jwt_manager.get_jwt()
 
     def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
