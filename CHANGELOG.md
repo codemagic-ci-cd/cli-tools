@@ -1,3 +1,12 @@
+Version 0.15.0
+-------------
+
+**Features**
+- Add `--api-unauthorized-retries` option to `app-store-connect` actions to gracefully handle invalid `401 Unauthorized` responses from App Store Connect API. In case HTTP request to App Store Connect API fails with authentication error, generate new JSON Web Token, and try to do the request again until retries are exhausted. Retry count default to `3` for CLI invocations. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+
+**Development**
+- `AppStoreConnect`, `AppStoreConnectApiClient` and `AppStoreConnectApiSession` classes take new optional keyword argument `unauthorized_request_retries` which defines how many times request with unauthorized response should be retried. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+
 Version 0.14.1
 -------------
 
