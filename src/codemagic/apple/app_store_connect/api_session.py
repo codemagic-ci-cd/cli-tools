@@ -38,23 +38,24 @@ class AppStoreConnectApiSession(requests.Session):
         self._logger.info(f'>>> {method} {url} {body}')
 
     def request(self, *args, **kwargs) -> requests.Response:
-        request_new_jwt = False
         for attempt in range(1, self._unauthorized_retries+1):
             self._log_request(*args, **kwargs)
             headers = kwargs.pop('headers', {})
-            headers.update(self._auth_headers_factory(request_new_jwt))
+            reset_jwt = attempt > 1
+            headers.update(self._auth_headers_factory(reset_jwt))
             kwargs['headers'] = headers
             response = super().request(*args, **kwargs)
             self._log_response(response)
-            if not response.ok:
-                error = AppStoreConnectApiError(response)
-                if not error.is_authentication_error():
-                    raise error
-                else:
-                    self._logger.info('Request failed due to authentication failure, attempt #%d', attempt)
-                    if attempt == self._unauthorized_retries:
-                        self._logger.info('Unauthorized retries are exhausted, stop trying')
-                        raise error
-                    request_new_jwt = True
-            else:
+
+            if response.ok:
                 return response
+            elif response.status_code != 401:  # Not an authorization failure, fail immediately
+                raise AppStoreConnectApiError(response)
+            elif attempt == self._unauthorized_retries:
+                self._logger.info('Unauthorized request retries are exhausted with %d attempts, stop trying', attempt)
+                raise AppStoreConnectApiError(response)
+            else:
+                self._logger.info('Request failed due to authentication failure on attempt #%d, try again', attempt)
+
+        # Make mypy happy. We should never end up here.
+        raise RuntimeError('Request attempts exhausted without raising or returning')
