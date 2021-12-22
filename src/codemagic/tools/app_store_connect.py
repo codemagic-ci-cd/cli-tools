@@ -105,7 +105,6 @@ class AppStoreConnect(
                  issuer_id: Optional[IssuerId],
                  private_key: Optional[str],
                  log_requests: bool = False,
-                 unauthorized_request_retries: int = 1,
                  json_output: bool = False,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
                  certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
@@ -118,21 +117,18 @@ class AppStoreConnect(
         self._issuer_id = issuer_id
         self._private_key = private_key
         self._log_requests = log_requests
-        self._unauthorized_request_retries = unauthorized_request_retries
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
         key_identifier_argument = AppStoreConnectArgument.KEY_IDENTIFIER.from_args(cli_args)
         issuer_id_argument = AppStoreConnectArgument.ISSUER_ID.from_args(cli_args)
         private_key_argument = AppStoreConnectArgument.PRIVATE_KEY.from_args(cli_args)
-        unauthorized_request_retries = Types.ApiUnauthorizedRetries.resolve_value(cli_args.unauthorized_request_retries)
 
         app_store_connect = AppStoreConnect(
             key_identifier=key_identifier_argument.value if key_identifier_argument else None,
             issuer_id=issuer_id_argument.value if issuer_id_argument else None,
             private_key=private_key_argument.value if private_key_argument else None,
             log_requests=cli_args.log_requests,
-            unauthorized_request_retries=unauthorized_request_retries,
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,
             certificates_directory=cli_args.certificates_directory,
@@ -199,7 +195,6 @@ class AppStoreConnect(
             self._issuer_id,
             self._private_key,
             log_requests=self._log_requests,
-            unauthorized_request_retries=self._unauthorized_request_retries,
         )
 
     @property

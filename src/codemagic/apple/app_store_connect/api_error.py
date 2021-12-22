@@ -20,8 +20,5 @@ class AppStoreConnectApiError(Exception):
     def status_code(self) -> int:
         return self.response.status_code
 
-    def is_authentication_error(self):
-        return self.status_code == 401
-
     def __str__(self):
         return f'{self.request.method} {self.request.url} returned {self.response.status_code}: {self.error_response}'

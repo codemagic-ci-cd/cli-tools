@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class TypedCliArgumentMeta(abc.ABCMeta):
-    argument_type: Union[Type[T], Callable[[str], T]] = str
+class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
+    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     enable_name_transformation: bool = False
     type_name_in_argparse_error: Optional[str] = None
 
