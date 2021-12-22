@@ -51,7 +51,7 @@ def sample_jwt(api_key) -> JWT:
 @mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.datetime')
 def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_datetime.now.return_value = sample_jwt.expires_at - timedelta(minutes=10)
-    mock_datetime.fromtimestamp = datetime.fromtimestamp
+    mock_datetime.fromtimestamp.return_value = sample_jwt.expires_at
     mock_jwt.decode.return_value = sample_jwt.payload
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
 
@@ -60,6 +60,7 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
 
     # Check that correct JWT is loaded from cache
     assert jwt == sample_jwt
+    mock_datetime.fromtimestamp.assert_called_with(sample_jwt.payload['exp'])
 
     # Check that cache file has only been read and not written
     assert len(mock_cache_path.method_calls) == 1
@@ -77,7 +78,7 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
 def test_cache_expired(mock_datetime, mock_jwt, api_key, sample_jwt):
     now = sample_jwt.expires_at + timedelta(days=1)
     mock_datetime.now.return_value = now
-    mock_datetime.fromtimestamp = datetime.fromtimestamp
+    mock_datetime.fromtimestamp.return_value = sample_jwt.expires_at
     mock_jwt.decode.return_value = sample_jwt.payload
     mock_jwt.encode.return_value = '<token>'
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
