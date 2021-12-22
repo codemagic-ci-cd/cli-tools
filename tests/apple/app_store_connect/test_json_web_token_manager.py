@@ -64,6 +64,7 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
     # Check that cache file has only been read and not written
     assert len(mock_cache_path.method_calls) == 1
     mock_cache_path.read_text.assert_called()
+    mock_cache_path.unlink.assert_not_called()
     mock_cache_path.write_text.assert_not_called()
 
     # Check that cached token is decoded and nothing is encoded
@@ -165,10 +166,13 @@ def test_token_expiration(mock_datetime, mock_jwt, api_key, sample_jwt):
     (True, timedelta(days=-5)),
     (True, timedelta(hours=-1)),
     (True, timedelta(minutes=-15)),
+    (True, timedelta(minutes=-1)),
     (True, timedelta(seconds=-31)),
+    (True, timedelta(seconds=-29)),
+    (True, timedelta(seconds=-15)),
+    (True, timedelta(seconds=-1)),
     (False, timedelta(seconds=0)),
-    (False, timedelta(seconds=-15)),
-    (False, timedelta(seconds=-29)),
+    (False, timedelta(seconds=1)),
     (False, timedelta(seconds=60)),
     (False, timedelta(minutes=15)),
     (False, timedelta(hours=20)),

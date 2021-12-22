@@ -36,14 +36,12 @@ class JsonWebTokenManager(StringConverterMixin):
         self,
         api_key: ApiKey,
         token_duration: Seconds = 19*60,
-        token_duration_error_margin: Seconds = 30,
         audience='appstoreconnect-v1',
         algorithm='ES256',
     ):
         self._logger = log.get_logger(self.__class__)
         # Authentication and expiration information used to generate JWT
         self._token_duration = token_duration
-        self._token_duration_error_margin = token_duration_error_margin
         self._key = api_key
         # JWT properties
         self._algorithm = algorithm
@@ -96,10 +94,10 @@ class JsonWebTokenManager(StringConverterMixin):
 
         try:
             payload = self._decode_payload(token)
-            expiration_timestamp: int = payload['exp']  # type: ignore
+            expiration_timestamp = int(payload['exp'])
             expires_at = datetime.fromtimestamp(expiration_timestamp)
             issuer_id = payload['iss']
-        except (TypeError, KeyError, jwt.InvalidTokenError):
+        except (ValueError, TypeError, KeyError, jwt.InvalidTokenError):
             self._revoke_disk_cache()
             raise ValueError('Cached token is invalid', self._key.identifier)
 
@@ -124,9 +122,9 @@ class JsonWebTokenManager(StringConverterMixin):
         token = self._encode_token(payload)
         return JWT(self._key.identifier, self._str(token), payload, expires_at)
 
-    def _is_expired(self, expires_at: datetime) -> bool:
-        delta = timedelta(seconds=self._token_duration_error_margin)
-        return datetime.now() - delta > expires_at
+    @classmethod
+    def _is_expired(cls, expires_at: datetime) -> bool:
+        return datetime.now() > expires_at
 
     def get_jwt(self) -> JWT:
         if self._jwt and not self._is_expired(self._jwt.expires_at):
