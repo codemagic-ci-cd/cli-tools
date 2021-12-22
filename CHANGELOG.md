@@ -7,6 +7,9 @@ Version 0.15.0
 **Development**
 - `AppStoreConnect`, `AppStoreConnectApiClient` and `AppStoreConnectApiSession` classes take new optional keyword argument `unauthorized_request_retries` which defines how many times request with unauthorized response should be retried. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
 
+**Docs**
+- Create docs for `app-store-connect` actions and include information about `--api-unauthorized-retries` option.
+
 Version 0.14.1
 -------------
 
