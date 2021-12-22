@@ -1,3 +1,13 @@
+Version 0.15.0
+-------------
+
+**Features**
+- Improve error messages for CLI invocations in case invalid value is provided to CLI argument that can be specified using an environment variable. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
+
+**Development**
+
+- Use custom abstract metaclass for `TypedCliArgument` that enables class name transformation during CLI argument parsing. Pretty class name can be defined using `type_name_in_argparse_error` attribute on classes that inherit from `TypedCliArgument`. In case pretty name is not defined, then basic types are mapped to string representation, and otherwise `CamelCase` names are converted `camel case`.
+
 Version 0.14.1
 -------------
 
