@@ -50,7 +50,7 @@ def sample_jwt(api_key) -> JWT:
 @mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.jwt')
 @mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.datetime')
 def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
-    mock_datetime.now.return_value = datetime(2021, 12, 20, 12, 10, 0, 0)
+    mock_datetime.now.return_value = sample_jwt.expires_at - timedelta(minutes=10)
     mock_datetime.fromtimestamp = datetime.fromtimestamp
     mock_jwt.decode.return_value = sample_jwt.payload
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
