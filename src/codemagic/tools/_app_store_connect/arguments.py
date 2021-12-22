@@ -366,11 +366,11 @@ class AppStoreConnectArgument(cli.Argument):
         flags=('--api-unauthorized-retries', '-r'),
         type=Types.ApiUnauthorizedRetries,
         description=(
-            'Specify how many times should the App Store Connect API request '
-            'be retried in case the called request fails due to an '
+            'Specify how many times the App Store Connect API request '
+            'should be retried in case the called request fails due to an '
             'authentication error (401 Unauthorized response from the server). '
-            'In case unauthorized response is returned, then the new request '
-            'is attempted with a new JSON Web Token until number of attempts '
+            'In case of the above authentication error, the request is retried using'
+            'a new JSON Web Token as many times until the number of retries '
             'is exhausted.'
         ),
         argparse_kwargs={
