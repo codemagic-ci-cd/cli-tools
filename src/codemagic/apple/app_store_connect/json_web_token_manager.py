@@ -122,10 +122,9 @@ class JsonWebTokenManager(StringConverterMixin):
         token = self._encode_token(payload)
         return JWT(self._key.identifier, self._str(token), payload, expires_at)
 
-    def _is_expired(self, expires_at: datetime) -> bool:
-        now = datetime.now()
-        self._logger.debug('Check if expiration date is exceeded: %r >? %r', now, expires_at)
-        return now > expires_at
+    @classmethod
+    def _is_expired(cls, expires_at: datetime) -> bool:
+        return datetime.now() > expires_at
 
     def get_jwt(self) -> JWT:
         if self._jwt and not self._is_expired(self._jwt.expires_at):
