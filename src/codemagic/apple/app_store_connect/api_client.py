@@ -17,6 +17,7 @@ from .provisioning import Devices
 from .provisioning import Profiles
 from .provisioning import SigningCertificates
 from .testflight import BetaGroups
+from .type_declarations import ApiKey
 from .type_declarations import IssuerId
 from .type_declarations import KeyIdentifier
 from .type_declarations import PaginateResult
@@ -42,11 +43,13 @@ class AppStoreConnectApiClient:
         """
         self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
         self._logger = log.get_logger(self.__class__)
-        self._jwt_manager = JsonWebTokenManager(key_identifier, issuer_id, private_key)
+        self._api_key = ApiKey(key_identifier, issuer_id, private_key)
+        self._jwt_manager = JsonWebTokenManager(self._api_key)
 
     @property
     def jwt(self) -> str:
-        return self._jwt_manager.get_jwt()
+        jwt = self._jwt_manager.get_jwt()
+        return jwt.token
 
     def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
