@@ -1,6 +1,6 @@
-from datetime import datetime
 import pathlib
 import textwrap
+from datetime import datetime
 from datetime import timedelta
 from unittest import mock
 from unittest.mock import PropertyMock
@@ -10,8 +10,8 @@ import pytest
 from codemagic.apple.app_store_connect import ApiKey
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
-from codemagic.apple.app_store_connect.json_web_token_manager import JsonWebTokenManager
 from codemagic.apple.app_store_connect.json_web_token_manager import JWT
+from codemagic.apple.app_store_connect.json_web_token_manager import JsonWebTokenManager
 
 
 @pytest.fixture
