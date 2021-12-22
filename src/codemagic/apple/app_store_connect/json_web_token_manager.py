@@ -1,6 +1,7 @@
+import pathlib
+import tempfile
 from datetime import datetime
 from datetime import timedelta
-from pathlib import Path
 from typing import Dict
 from typing import NamedTuple
 from typing import Optional
@@ -52,7 +53,8 @@ class JsonWebTokenManager(StringConverterMixin):
 
     @property
     def cache_path(self):
-        return Path.home() / '.codemagic-cli-tools' / 'cache' / 'app_store_connect_jwt' / self._key.identifier
+        temp_dir = pathlib.Path(tempfile.gettempdir())
+        return temp_dir / '.codemagic-cli-tools' / 'cache' / 'app_store_connect_jwt' / self._key.identifier
 
     def revoke(self):
         self._jwt = None
