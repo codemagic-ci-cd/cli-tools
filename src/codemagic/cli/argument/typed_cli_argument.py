@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Callable
+from typing import Dict
 from typing import Generic
 from typing import Optional
 from typing import Type
@@ -40,13 +41,14 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
             raise
 
     def _get_type_name(cls) -> Optional[str]:
-        return {
+        known_types: Dict[Union[Type, Callable[[str], T]], str] = {
             int: 'integer',
             float: 'number',
             bool: 'boolean',
             str: 'string',
             datetime: 'datetime',
-        }.get(cls.argument_type)
+        }
+        return known_types.get(cls.argument_type)
 
     def _transform_class_name(cls):  # noqa: N805
         """
