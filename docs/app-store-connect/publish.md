@@ -90,7 +90,7 @@ Enable submission of an app for Testflight beta app review to allow external tes
 ##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
 
 
-Name of your Beta group. Multiple arguments
+Name(s) of your **external** beta test group. Internal test groups have access to all buils and thus this arguments cannot be used with them. If you use this for internal teams it will upload correctly, but the command will fail to make the group assignment. Multiple arguments accepted.
 ### Optional arguments to submit build to App Store review
 
 ##### `--app-store, -a`
