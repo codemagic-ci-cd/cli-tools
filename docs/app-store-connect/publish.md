@@ -8,6 +8,7 @@ publish
 ```bash
 app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -176,6 +177,10 @@ Show verbose log output when launching Application Loader tool. That is add `--v
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
 ##### `--disable-jwt-cache`
 
 

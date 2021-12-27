@@ -14,6 +14,7 @@ Version 0.15.0
 - `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
 **Docs**
+- Update docs for `app-store-connect` actions and include information about `--api-unauthorized-retries` option. [PR #179](https://github.com/codemagic-ci-cd/cli-tools/pull/179)
 - Update docs for `app-store-connect` actions and include information about `--disable-jwt-cache` option. [PR #183](https://github.com/codemagic-ci-cd/cli-tools/pull/183)
 
 Version 0.14.1
