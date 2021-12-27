@@ -2,11 +2,16 @@ Version 0.15.0
 -------------
 
 **Features**
+
 - Improve error messages for CLI invocations in case invalid value is provided to CLI argument that can be specified using an environment variable. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
+- Add option to cache App Store Connect JSON Web Token to disk so that the same token could be reused between subsequent `app-store-connect` command invocations to avoid false positive authentication errors from App Store Connect API. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- All `app-store-connect` actions have new option `--disable-jwt-cache` to turn off caching App Store Connect JWT to disk. The default behaviour is to have disk cache enabled. That is JWT is loaded from disk if present and not expired, and generated tokens are cached to disk unless this feature is turned off. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
 **Development**
 
 - Use custom abstract metaclass for `TypedCliArgument` that enables class name transformation during CLI argument parsing. Pretty class name can be defined using `type_name_in_argparse_error` attribute on classes that inherit from `TypedCliArgument`. In case pretty name is not defined, then basic types are mapped to string representation, and otherwise `CamelCase` names are converted `camel case`. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
+- Extract logic that deals with App Store Connect JWT generation and lifespan from `AppStoreConnectApiClient` to standalone `JsonWebTokenManager` class. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
 Version 0.14.1
 -------------
