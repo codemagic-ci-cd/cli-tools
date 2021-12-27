@@ -56,7 +56,7 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
 
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key).get_jwt()
+        jwt = JsonWebTokenManager(api_key, use_disk_cache=True).get_jwt()
 
     # Check that correct JWT is loaded from cache
     assert jwt == sample_jwt
@@ -75,6 +75,41 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
 
 @mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.jwt')
 @mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.datetime')
+def test_disk_cache_is_disabled(mock_datetime, mock_jwt, api_key):
+    now = datetime(2021, 12, 20, 12, 19)
+    mock_datetime.now.return_value = now
+    mock_jwt.encode.return_value = '<token>'
+    mock_cache_path = mock.Mock(spec=pathlib.Path)
+
+    with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
+        jwt_manager = JsonWebTokenManager(api_key, token_duration=10*60, use_disk_cache=False)
+        jwt = jwt_manager.get_jwt()
+
+    expected_expires_at = now + timedelta(minutes=10)
+    expected_payload = {
+        'iss': api_key.issuer_id,
+        'exp': expected_expires_at.timestamp(),
+        'aud': 'appstoreconnect-v1',
+    }
+
+    # Check that expected JWT is generated
+    assert jwt.token == '<token>'
+    assert jwt.expires_at == expected_expires_at
+    assert jwt.key_id == api_key.identifier
+    assert jwt.payload == expected_payload
+
+    mock_datetime.fromtimestamp.assert_not_called()
+
+    # Check that cache file has not been interacted with
+    mock_cache_path.assert_not_called()
+
+    # Check that token is encoded and nothing is decoded from cache
+    mock_jwt.decode.assert_not_called()
+    mock_jwt.encode.assert_called()
+
+
+@mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.jwt')
+@mock.patch('codemagic.apple.app_store_connect.json_web_token_manager.datetime')
 def test_cache_expired(mock_datetime, mock_jwt, api_key, sample_jwt):
     now = sample_jwt.expires_at + timedelta(days=1)
     mock_datetime.now.return_value = now
@@ -83,7 +118,7 @@ def test_cache_expired(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = '<token>'
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key, token_duration=60*10).get_jwt()
+        jwt = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True).get_jwt()
 
     expected_expires_at = now + timedelta(minutes=10)
     expected_payload = {
@@ -114,7 +149,7 @@ def test_cache_not_found(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = sample_jwt.token
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(side_effect=FileNotFoundError))
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key, token_duration=60*10).get_jwt()
+        jwt = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True).get_jwt()
 
     mock_cache_path.read_text.assert_called()  # There should be an attempt to read from cache
     mock_cache_path.write_text.assert_called()  # New token should be written to cache
@@ -138,7 +173,7 @@ def test_token_expiration(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = '<token>'
 
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        manager = JsonWebTokenManager(api_key, token_duration=60*10)
+        manager = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True)
         manager._jwt = sample_jwt
         jwt = manager.get_jwt()
 
@@ -184,4 +219,5 @@ def test_is_expired(mock_datetime, expected_is_expired, time_difference, api_key
     now = datetime(year=2019, month=8, day=20)
     mock_datetime.now.return_value = now
     expires_at = now + time_difference
-    assert JsonWebTokenManager(api_key)._is_expired(expires_at) is expected_is_expired
+    jwt_manager = JsonWebTokenManager(api_key, use_disk_cache=True)
+    assert jwt_manager._is_expired(expires_at) is expected_is_expired

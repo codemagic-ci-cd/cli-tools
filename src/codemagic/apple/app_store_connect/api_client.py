@@ -34,7 +34,14 @@ class AppStoreConnectApiClient:
     API_KEYS_DOCS_URL = \
         'https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api'
 
-    def __init__(self, key_identifier: KeyIdentifier, issuer_id: IssuerId, private_key: str, log_requests=False):
+    def __init__(
+            self,
+            key_identifier: KeyIdentifier,
+            issuer_id: IssuerId,
+            private_key: str,
+            log_requests: bool = False,
+            cache_jwt: bool = False,
+    ):
         """
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
         :param issuer_id: Your issuer ID from the API Keys page in
@@ -44,7 +51,7 @@ class AppStoreConnectApiClient:
         self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
         self._logger = log.get_logger(self.__class__)
         self._api_key = ApiKey(key_identifier, issuer_id, private_key)
-        self._jwt_manager = JsonWebTokenManager(self._api_key)
+        self._jwt_manager = JsonWebTokenManager(self._api_key, use_disk_cache=cache_jwt)
 
     @property
     def jwt(self) -> str:

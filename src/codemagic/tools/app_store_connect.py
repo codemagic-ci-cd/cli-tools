@@ -105,6 +105,7 @@ class AppStoreConnect(
                  issuer_id: Optional[IssuerId],
                  private_key: Optional[str],
                  log_requests: bool = False,
+                 cache_jwt: bool = False,
                  json_output: bool = False,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
                  certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
@@ -117,6 +118,7 @@ class AppStoreConnect(
         self._issuer_id = issuer_id
         self._private_key = private_key
         self._log_requests = log_requests
+        self._cache_jwt = cache_jwt
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
@@ -129,6 +131,7 @@ class AppStoreConnect(
             issuer_id=issuer_id_argument.value if issuer_id_argument else None,
             private_key=private_key_argument.value if private_key_argument else None,
             log_requests=cli_args.log_requests,
+            cache_jwt=True,
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,
             certificates_directory=cli_args.certificates_directory,
