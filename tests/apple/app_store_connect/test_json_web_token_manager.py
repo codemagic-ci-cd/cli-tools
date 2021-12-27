@@ -56,7 +56,7 @@ def test_load_from_file_cache(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
 
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key, use_disk_cache=True).get_jwt()
+        jwt = JsonWebTokenManager(api_key, enable_cache=True).get_jwt()
 
     # Check that correct JWT is loaded from cache
     assert jwt == sample_jwt
@@ -82,7 +82,7 @@ def test_disk_cache_is_disabled(mock_datetime, mock_jwt, api_key):
     mock_cache_path = mock.Mock(spec=pathlib.Path)
 
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt_manager = JsonWebTokenManager(api_key, token_duration=10*60, use_disk_cache=False)
+        jwt_manager = JsonWebTokenManager(api_key, token_duration=10*60, enable_cache=False)
         jwt = jwt_manager.get_jwt()
 
     expected_expires_at = now + timedelta(minutes=10)
@@ -118,7 +118,7 @@ def test_cache_expired(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = '<token>'
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(return_value=sample_jwt.token))
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True).get_jwt()
+        jwt = JsonWebTokenManager(api_key, token_duration=60*10, enable_cache=True).get_jwt()
 
     expected_expires_at = now + timedelta(minutes=10)
     expected_payload = {
@@ -149,7 +149,7 @@ def test_cache_not_found(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = sample_jwt.token
     mock_cache_path = mock.Mock(spec=pathlib.Path, read_text=mock.Mock(side_effect=FileNotFoundError))
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        jwt = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True).get_jwt()
+        jwt = JsonWebTokenManager(api_key, token_duration=60*10, enable_cache=True).get_jwt()
 
     mock_cache_path.read_text.assert_called()  # There should be an attempt to read from cache
     mock_cache_path.write_text.assert_called()  # New token should be written to cache
@@ -173,7 +173,7 @@ def test_token_expiration(mock_datetime, mock_jwt, api_key, sample_jwt):
     mock_jwt.encode.return_value = '<token>'
 
     with mock.patch.object(JsonWebTokenManager, 'cache_path', new_callable=PropertyMock(return_value=mock_cache_path)):
-        manager = JsonWebTokenManager(api_key, token_duration=60*10, use_disk_cache=True)
+        manager = JsonWebTokenManager(api_key, token_duration=60*10, enable_cache=True)
         manager._jwt = sample_jwt
         jwt = manager.get_jwt()
 
@@ -219,5 +219,5 @@ def test_is_expired(mock_datetime, expected_is_expired, time_difference, api_key
     now = datetime(year=2019, month=8, day=20)
     mock_datetime.now.return_value = now
     expires_at = now + time_difference
-    jwt_manager = JsonWebTokenManager(api_key, use_disk_cache=True)
+    jwt_manager = JsonWebTokenManager(api_key, enable_cache=True)
     assert jwt_manager._is_expired(expires_at) is expected_is_expired

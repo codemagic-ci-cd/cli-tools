@@ -40,18 +40,21 @@ class AppStoreConnectApiClient:
             issuer_id: IssuerId,
             private_key: str,
             log_requests: bool = False,
-            cache_jwt: bool = False,
+            enable_jwt_cache: bool = False,
     ):
         """
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
         :param issuer_id: Your issuer ID from the API Keys page in
                           App Store Connect (Ex: 57246542-96fe-1a63-e053-0824d011072a)
         :param private_key: Private key associated with the key_identifier you specified
+        :param log_requests: Whether or not to log App Store Connect API requests and responses to STDOUT
+        :param enable_jwt_cache: Whether or not to allow loading and writing generated App Store Connect
+                                 JSON Web Token from or to a file cache.
         """
         self.session = AppStoreConnectApiSession(self.generate_auth_headers, log_requests=log_requests)
         self._logger = log.get_logger(self.__class__)
         self._api_key = ApiKey(key_identifier, issuer_id, private_key)
-        self._jwt_manager = JsonWebTokenManager(self._api_key, use_disk_cache=cache_jwt)
+        self._jwt_manager = JsonWebTokenManager(self._api_key, enable_cache=enable_jwt_cache)
 
     @property
     def jwt(self) -> str:

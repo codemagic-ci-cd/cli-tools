@@ -42,10 +42,10 @@ class JsonWebTokenManager(StringConverterMixin):
         token_duration: Seconds = 19*60,
         audience='appstoreconnect-v1',
         algorithm='ES256',
-        use_disk_cache: bool = False,
+        enable_cache: bool = False,
     ):
         self._logger = log.get_logger(self.__class__)
-        self._use_disk_cache = use_disk_cache
+        self._enable_cache = enable_cache
         # Authentication and expiration information used to generate JWT
         self._token_duration = token_duration
         self._key = api_key
@@ -65,7 +65,7 @@ class JsonWebTokenManager(StringConverterMixin):
         self._revoke_disk_cache()
 
     def _revoke_disk_cache(self):
-        if not self._use_disk_cache:
+        if not self._enable_cache:
             return
 
         try:
@@ -74,7 +74,7 @@ class JsonWebTokenManager(StringConverterMixin):
             pass
 
     def _write_disk_cache(self, token: str):
-        if not self._use_disk_cache:
+        if not self._enable_cache:
             return
         self.cache_path.parent.mkdir(exist_ok=True, parents=True)
         self.cache_path.write_text(token)
@@ -97,7 +97,7 @@ class JsonWebTokenManager(StringConverterMixin):
         )
 
     def _load_jwt_from_disk(self) -> JWT:
-        if not self._use_disk_cache:
+        if not self._enable_cache:
             raise JwtCacheError('Disk cache is disabled')
         self._logger.debug('Load JWT for App Store Connect from disk cache')
         try:
