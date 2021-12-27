@@ -68,9 +68,9 @@ def test_unauthorized_retrying_success(mock_session, mock_successful_response, m
     final_response = session.get('https://example.com')
 
     # Check that only first call does not require JWT refresh
-    assert [call[0] for call in mock_auth_headers_factory.call_args_list] == [(False,), (True,), (True,)]
-    assert len(mock_unauthorized_response.method_calls) > 0
-    assert len(mock_successful_response.method_calls) > 0
+    assert mock_auth_headers_factory.mock_calls == [((False,),), ((True,),), ((True,),)]
+    mock_unauthorized_response.assert_not_called()
+    mock_successful_response.assert_has_calls([('json', (), {})])
 
     # After unauthorized requests finally authentication passes and successful response is returned
     assert final_response is mock_successful_response
@@ -90,14 +90,14 @@ def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response)
     assert mock_session.call_count == retries_count
 
     # Check that only first call does not require JWT refresh
-    assert [call[0] for call in mock_auth_headers_factory.call_args_list] == [(False,), (True,), (True,)]
+    assert mock_auth_headers_factory.mock_calls == [((False,),), ((True,),), ((True,),)]
 
     # Finally when retries are exhausted the unauthorized error is still thrown
     assert error_info.value.response is mock_unauthorized_response
 
 
 @mock.patch.object(Session, 'request')
-def test_non_authentication_error(mock_session, mock_successful_response, mock_not_found_response):
+def test_http_error_not_found(mock_session, mock_successful_response, mock_not_found_response):
     mock_session.side_effect = (mock_not_found_response, mock_successful_response)
 
     mock_auth_headers_factory = mock.Mock(return_value={})
@@ -107,11 +107,15 @@ def test_non_authentication_error(mock_session, mock_successful_response, mock_n
 
     # Fail hard on first attempt on non-authorization error
     assert mock_session.call_count == 1
-    assert mock_auth_headers_factory.call_count == 1
-    assert mock_auth_headers_factory.call_args[0] == (False,)
-    assert mock_successful_response.called is False
+
+    mock_auth_headers_factory.assert_called_once_with(False)
+    assert mock_auth_headers_factory.method_calls == []
+
+    mock_successful_response.assert_not_called()
     assert mock_successful_response.method_calls == []
-    assert len(mock_not_found_response.method_calls) > 0
+
+    mock_not_found_response.assert_not_called()
+    assert mock_not_found_response.method_calls == [('json', (), {}), ('json', (), {})]
 
     # Original error is raised
     assert error_info.value.response is mock_not_found_response
