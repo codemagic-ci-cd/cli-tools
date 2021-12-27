@@ -2,10 +2,14 @@ Version 0.15.0
 -------------
 
 **Features**
+- Add `--api-unauthorized-retries` option to `app-store-connect` actions to gracefully handle invalid `401 Unauthorized` responses from App Store Connect API. In case HTTP request to App Store Connect API fails with authentication error, generate new JSON Web Token, and try to do the request again until retries are exhausted. Retry count default to `3` for CLI invocations. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+- Improve error messages for CLI invocations in case invalid value is provided to CLI argument that can be specified using an environment variable. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
 - Add option to cache App Store Connect JSON Web Token to disk so that the same token could be reused between subsequent `app-store-connect` command invocations to avoid false positive authentication errors from App Store Connect API. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 - All `app-store-connect` actions have new option `--disable-jwt-cache` to turn off caching App Store Connect JWT to disk. The default behaviour is to have disk cache enabled. That is JWT is loaded from disk if present and not expired, and generated tokens are cached to disk unless this feature is turned off. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
 **Development**
+- `AppStoreConnect`, `AppStoreConnectApiClient` and `AppStoreConnectApiSession` classes take new optional keyword argument `unauthorized_request_retries` which defines how many times request with unauthorized response should be retried. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+- Use custom abstract metaclass for `TypedCliArgument` that enables class name transformation during CLI argument parsing. Pretty class name can be defined using `type_name_in_argparse_error` attribute on classes that inherit from `TypedCliArgument`. In case pretty name is not defined, then basic types are mapped to string representation, and otherwise `CamelCase` names are converted `camel case`. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
 - Extract logic that deals with App Store Connect JWT generation and lifespan from `AppStoreConnectApiClient` to standalone `JsonWebTokenManager` class. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 - `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
