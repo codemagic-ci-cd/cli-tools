@@ -27,6 +27,7 @@ def namespace_kwargs():
         AppStoreConnectArgument.ISSUER_ID.key: Types.IssuerIdArgument('issuer-id'),
         AppStoreConnectArgument.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument('key-identifier'),
         AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),
+        AppStoreConnectArgument.DISABLE_JWT_CACHE.key: True,
     }
     for arg in AppStoreConnect.CLASS_ARGUMENTS:
         if not hasattr(arg.type, 'environment_variable_key'):
