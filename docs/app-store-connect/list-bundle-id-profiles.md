@@ -8,6 +8,7 @@ list-bundle-id-profiles
 ```bash
 app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -50,6 +51,10 @@ Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_D
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--disable-jwt-cache`
+
+
+Turn off caching App Store Connect JSON Web Tokens to disk to be reused between individual process invocations. Caching tokens can help with reducing of false positive authentication errors from App Store Connect API. By default generated tokens are cached to disk. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 
