@@ -9,6 +9,9 @@ Version 0.15.0
 - Extract logic that deals with App Store Connect JWT generation and lifespan from `AppStoreConnectApiClient` to standalone `JsonWebTokenManager` class. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 - `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
+**Docs**
+- Update docs for `app-store-connect` actions and include information about `--disable-jwt-cache` option.
+
 Version 0.14.1
 -------------
 
