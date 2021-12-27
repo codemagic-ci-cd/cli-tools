@@ -3,10 +3,14 @@ from __future__ import annotations
 
 import abc
 import argparse
+import contextlib
 import os
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Callable
+from typing import Dict
 from typing import Generic
 from typing import Optional
 from typing import Type
@@ -23,10 +27,59 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
+class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
+    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
+    enable_name_transformation: bool = False
+    type_name_in_argparse_error: Optional[str] = None
+
+    def __call__(cls, *args, **kwargs):  # noqa: N805
+        try:
+            return super().__call__(*args, **kwargs)
+        except Exception:
+            if cls.enable_name_transformation:
+                cls._transform_class_name()
+            raise
+
+    def _get_type_name(cls) -> Optional[str]:
+        known_types: Dict[Union[Type, Callable[[str], T]], str] = {
+            int: 'integer',
+            float: 'number',
+            bool: 'boolean',
+            str: 'string',
+            datetime: 'datetime',
+        }
+        return known_types.get(cls.argument_type)
+
+    def _transform_class_name(cls):  # noqa: N805
+        """
+        Transform CamelCase class name 'ClassName' to more
+        readable 'class name', which appears prettier in argparse error messages.
+        """
+        type_name = cls.type_name_in_argparse_error or cls._get_type_name()
+        if type_name is not None:
+            cls.__name__ = type_name
+        else:
+            formatted_name = re.sub(r'([A-Z])', lambda m: f' {m.group(1).lower()}', cls.__name__)
+            cls.__name__ = formatted_name.strip()
+
+    @staticmethod
+    @contextlib.contextmanager
+    def cli_arguments_parsing_mode():
+        original_enable_name_transformation = TypedCliArgumentMeta.enable_name_transformation
+
+        # Enable name transformation to obtain pretty argparse error messages
+        TypedCliArgumentMeta.enable_name_transformation = True
+        try:
+            yield
+        finally:
+            TypedCliArgumentMeta.enable_name_transformation = original_enable_name_transformation
+
+
+class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
     default_value: Optional[T] = None
+    type_name_in_argparse_error: Optional[str] = None
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
@@ -115,7 +168,7 @@ class TypedCliArgument(Generic[T], metaclass=abc.ABCMeta):
         return repr(str(self))
 
 
-class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=abc.ABCMeta):
+class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=TypedCliArgumentMeta):
 
     def _is_from_environment(self) -> bool:
         return self._raw_value.startswith('@env:')
