@@ -1,7 +1,13 @@
 Version 0.15.0
 -------------
 
-**TODO**
+**Features**
+- Add option to cache App Store Connect JSON Web Token to disk so that the same token could be reused between subsequent `app-store-connect` command invocations to avoid false positive authentication errors from App Store Connect API. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- All `app-store-connect` actions have new option `--disable-jwt-cache` to turn off caching App Store Connect JWT to disk. The default behaviour is to have disk cache enabled. That is JWT is loaded from disk if present and not expired, and generated tokens are cached to disk unless this feature is turned off. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+
+**Development**
+- Extract logic that deals with App Store Connect JWT generation and lifespan from `AppStoreConnectApiClient` to standalone `JsonWebTokenManager` class. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
 
 Version 0.14.1
 -------------
