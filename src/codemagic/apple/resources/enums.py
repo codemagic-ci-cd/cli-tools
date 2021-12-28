@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import contextlib
 import enum
+import re
+from typing import Tuple
 
 from codemagic.utilities import log
 
@@ -18,12 +20,14 @@ class ResourceEnumMeta(enum.EnumMeta):
     """
 
     graceful_fallback = True
+    enable_name_transformation = False
 
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
         try:
             return super().__call__(value, *args, **kwargs)
         except ValueError as ve:
             if not cls.graceful_fallback:
+                cls._transform_class_name()
                 raise
             logger = log.get_logger(cls, log_to_stream=False)
             logger.warning('Undefined Resource enumeration: %s', ve)
@@ -32,6 +36,32 @@ class ResourceEnumMeta(enum.EnumMeta):
                 return enum_class(value)
             except TypeError:
                 raise ve
+
+    def _transform_class_name(cls):  # noqa: N805
+        """
+        If enabled, transform CamelCase class name 'ClassName' to more
+        readable 'class name', which appears prettier in argparse error messages.
+        """
+        if not cls.enable_name_transformation:
+            return
+        formatted_name = re.sub(r'([A-Z])', lambda m: f' {m.group(1).lower()}', cls.__name__)
+        cls.__name__ = formatted_name.strip()
+
+    @staticmethod
+    @contextlib.contextmanager
+    def cli_arguments_parsing_mode():
+        original_graceful_fallback = ResourceEnumMeta.graceful_fallback
+        original_enable_name_transformation = ResourceEnumMeta.enable_name_transformation
+
+        # Turn off graceful enumeration fallback to get proper error messages
+        ResourceEnumMeta.graceful_fallback = False
+        # Enable name transformation to obtain pretty argparse error messages
+        ResourceEnumMeta.enable_name_transformation = True
+        try:
+            yield
+        finally:
+            ResourceEnumMeta.graceful_fallback = original_graceful_fallback
+            ResourceEnumMeta.enable_name_transformation = original_enable_name_transformation
 
     @staticmethod
     @contextlib.contextmanager
@@ -68,6 +98,17 @@ class AppStoreState(ResourceEnum):
     WAITING_FOR_EXPORT_COMPLIANCE = 'WAITING_FOR_EXPORT_COMPLIANCE'
     WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
     REPLACED_WITH_NEW_VERSION = 'REPLACED_WITH_NEW_VERSION'
+
+    @classmethod
+    def editable_states(cls) -> Tuple[AppStoreState, ...]:
+        return (
+            AppStoreState.DEVELOPER_REJECTED,
+            AppStoreState.INVALID_BINARY,
+            AppStoreState.METADATA_REJECTED,
+            AppStoreState.PREPARE_FOR_SUBMISSION,
+            AppStoreState.REJECTED,
+            AppStoreState.WAITING_FOR_REVIEW,
+        )
 
 
 class BetaReviewState(ResourceEnum):
@@ -244,6 +285,7 @@ class ReleaseType(ResourceEnum):
 class ResourceType(ResourceEnum):
     APPS = 'apps'
     APP_STORE_VERSIONS = 'appStoreVersions'
+    APP_STORE_VERSION_LOCALIZATIONS = 'appStoreVersionLocalizations'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BETA_APP_LOCALIZATIONS = 'betaAppLocalizations'
     BETA_APP_REVIEW_DETAILS = 'betaAppReviewDetails'

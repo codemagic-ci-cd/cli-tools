@@ -27,7 +27,7 @@ class BetaAppReviewSubmissions(ResourceManager[BetaAppReviewSubmission]):
         beta_review_state: Optional[BetaReviewState] = None
         build: Optional[ResourceId] = None
 
-    def create(self, build: Union[ResourceId, Build]):
+    def create(self, build: Union[ResourceId, Build]) -> BetaAppReviewSubmission:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/submit_an_app_for_beta_review
         """

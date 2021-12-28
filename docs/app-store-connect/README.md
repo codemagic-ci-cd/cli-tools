@@ -8,6 +8,8 @@ app-store-connect
 ```bash
 app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -22,6 +24,14 @@ app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--disable-jwt-cache`
+
+
+Turn off caching App Store Connect JSON Web Tokens to disk. By default generated tokens are cached to disk to be reused between separate processes, which can can reduce number of false positive authentication errors from App Store Connect API. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 
@@ -101,7 +111,9 @@ Enable verbose logging for commands
 
 |Action group|Description|
 | :--- | :--- |
+|[`app-store-version-localizations`](app-store-version-localizations.md)|Create and maintain version-specific App Store metadata that is localized.|
 |[`app-store-version-submissions`](app-store-version-submissions.md)|Manage your application's App Store version review process|
+|[`app-store-versions`](app-store-versions.md)|Manage the information related to an App Store version of your app|
 |[`apps`](apps.md)|Manage your apps in App Store Connect|
 |[`beta-app-review-submissions`](beta-app-review-submissions.md)|Manage your application's TestFlight submissions|
 |[`beta-build-localizations`](beta-build-localizations.md)|Manage your beta builds localizations in App Store Connect|

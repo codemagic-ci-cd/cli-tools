@@ -1,3 +1,176 @@
+Version 0.15.0
+-------------
+
+**Features**
+- Add `--api-unauthorized-retries` option to `app-store-connect` actions to gracefully handle invalid `401 Unauthorized` responses from App Store Connect API. In case HTTP request to App Store Connect API fails with authentication error, generate new JSON Web Token, and try to do the request again until retries are exhausted. Retry count default to `3` for CLI invocations. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+- Improve error messages for CLI invocations in case invalid value is provided to CLI argument that can be specified using an environment variable. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
+- Add option to cache App Store Connect JSON Web Token to disk so that the same token could be reused between subsequent `app-store-connect` command invocations to avoid false positive authentication errors from App Store Connect API. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- All `app-store-connect` actions have new option `--disable-jwt-cache` to turn off caching App Store Connect JWT to disk. The default behaviour is to have disk cache enabled. That is JWT is loaded from disk if present and not expired, and generated tokens are cached to disk unless this feature is turned off. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+
+**Development**
+- `AppStoreConnect`, `AppStoreConnectApiClient` and `AppStoreConnectApiSession` classes take new optional keyword argument `unauthorized_request_retries` which defines how many times request with unauthorized response should be retried. [PR #178](https://github.com/codemagic-ci-cd/cli-tools/pull/178)
+- Use custom abstract metaclass for `TypedCliArgument` that enables class name transformation during CLI argument parsing. Pretty class name can be defined using `type_name_in_argparse_error` attribute on classes that inherit from `TypedCliArgument`. In case pretty name is not defined, then basic types are mapped to string representation, and otherwise `CamelCase` names are converted `camel case`. [PR #180](https://github.com/codemagic-ci-cd/cli-tools/pull/180)
+- Extract logic that deals with App Store Connect JWT generation and lifespan from `AppStoreConnectApiClient` to standalone `JsonWebTokenManager` class. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+- `AppStoreConnect` and `AppStoreConnectApiClient` classes take new optional keyword argument `enable_jwt_cache` which configures whether the JSON web token is cached to file or not. [PR #181](https://github.com/codemagic-ci-cd/cli-tools/pull/181)
+
+**Docs**
+- Update docs for `app-store-connect` actions and include information about `--api-unauthorized-retries` option. [PR #179](https://github.com/codemagic-ci-cd/cli-tools/pull/179)
+- Update docs for `app-store-connect` actions and include information about `--disable-jwt-cache` option. [PR #183](https://github.com/codemagic-ci-cd/cli-tools/pull/183)
+
+Version 0.14.1
+-------------
+
+**Fixes**
+- In case updating or creating localized App Store version meta information fails for any of the provided languages, do not fail the calling action, but log the error instead. Has an effect on `app-store-connect publish` and `app-store-connect builds submit-to-app-store`. [PR #175](https://github.com/codemagic-ci-cd/cli-tools/pull/175)
+
+Version 0.14.0
+-------------
+
+**Deprecations**
+- Option `--skip-package-validation` of `app-store-connect publish` is ignored and shows a deprecation warning. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
+
+**Features**
+- Change `app-store-connect publish` not to run package validation by default before uploading it to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
+- Add new option `--enable-package-validation` to action `app-store-connect publish` that turns on package validation before it is uploaded to App Store Connect. [PR #174](https://github.com/codemagic-ci-cd/cli-tools/pull/174)
+
+Version 0.13.2
+-------------
+
+**Features**
+- Improve error messages for CLI invocations in case invalid value was provided for argument with `Enum` type. [PR #170](https://github.com/codemagic-ci-cd/cli-tools/pull/170)
+
+**Fixes**
+
+- Use correct package type for `altool` commands when publishing tvOS apps using `app-store-connect publish`. [PR #173](https://github.com/codemagic-ci-cd/cli-tools/pull/173)
+
+Version 0.13.1
+-------------
+
+This is an enhancement release to further streamline the App Store review submission automation capabilities.
+
+Additions and changes from [pull request #172](https://github.com/codemagic-ci-cd/cli-tools/pull/172).
+
+**Features**
+- Support setting localized meta information for App Store versions when submitting build to App Store review.
+- Add new actions group `app-store-version-localizations` to `app-store-connect`.
+- Add new action `app-store-connect app-store-version-localizations create` to add localized metadata to an App Store version.
+- Add new action `app-store-connect app-store-version-localizations delete` to remove localized metadata from an App Store version.
+- Add new action `app-store-connect app-store-version-localizations get` to read App Store version localized metadata.
+- Add new action `app-store-connect app-store-version-localizations modify` to edit App Store version localized metadata.
+- Add new action `app-store-connect app-store-versions localizations` to list App Store version localizations for an App Store version.
+- Change `app-store-connect publish` to support adding or updating localized version metadata when submitting build to App Store review.
+- Change `app-store-connect builds submit-to-app-store` to support adding or updating localized version metadata for App Store version.
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.create` to create App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.read` to obtain App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_localization_information).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.modify` to edit existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersionLocalizations.delete` to remove existing App Store version localization meta information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_localization).
+- Add new App Store Connect API client method `AppStoreVersions.list_app_store_version_localizations` to list all App Store version localizations for given App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version).
+- Show more informative error messages in case CLI arguments from environment variables or files are invalid.
+- Add new options to actions `app-store-connect publish` and `app-store-connect builds submit-to-app-store`:
+  - `--app-store-version-info`,
+  - `--description`,
+  - `--keywords`,
+  - `--marketing-url`,
+  - `--promotional-text`,
+  - `--support-url`,
+  - `--app-store-version-localizations`.
+
+**Docs**
+
+- Create docs for `app-store-connect` actions group `app-store-version-localizations`.
+- Create docs for action `app-store-connect app-store-version-localizations create`.
+- Create docs for action `app-store-connect app-store-version-localizations delete`.
+- Create docs for action `app-store-connect app-store-version-localizations get`.
+- Create docs for action `app-store-connect app-store-version-localizations modify`.
+- Update docs for `app-store-connect` actions group `app-store-versions`.
+- Create docs for action `app-store-connect app-store-versions localizations`.
+- Update docs for action `app-store-connect app-store-versions create`.
+- Update docs for action `app-store-connect app-store-versions modify`.
+- Update docs for action `app-store-connect builds submit-to-app-store`.
+- Update docs for action `app-store-connect publish`.
+- Remove backticks from terminal help messages and keep them only for markdown documentation formatting.
+
+**Development**
+
+- Add option to limit number of responses in App Store Connect API client pagination method.
+- Change type of `App.Attributes.locale` from plain `str` to `Locale` enumeration.
+- Add definition for `AppStoreVersionLocalization` resource. See official resource [documentation](https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization).
+- Reorder method signatures in `AbstractBaseAction` and unify indentation for method arguments.
+- Add references to implementing methods to `AbstractBaseAction` interface.
+
+Version 0.13.0
+-------------
+
+Additions and changes from [pull request #164](https://github.com/codemagic-ci-cd/cli-tools/pull/164).
+
+**Features**
+
+- Add new App Store Connect API client method `AppStoreVersions.create` to create an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.read_build` to read associated build from an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.read_app_store_version_submission` to read associated App Store version submission from an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_submission_information_of_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.modify` to edit existing App Store version details. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version).
+- Add new App Store Connect API client method `AppStoreVersions.delete` to delete an App Store version. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version).
+- Add ability to group optional CLI action arguments into named argument groups.
+- Add new actions group `app-store-versions` to `app-store-connect`.
+- Add new action `app-store-connect app-store-versions create` to create a new App Store version using specified build to an app.
+- Add new action `app-store-connect app-store-versions modify` to update existing App Store version details.
+- Add new action `app-store-connect app-store-versions delete` to remove App Store version.
+- Add option to specify build filters for action `app-store-connect apps builds`.
+- Add new action `app-store-connect builds app-store-version` to get the App Store version of a specific build.
+- Add new action `app-store-connect builds submit-to-app-store` to submit specified build to App Store review. Optionally specify version details and release type.
+- Update `app-store-connect publish` action to allow automatic App Store review submission after binary upload.
+- Use grouped CLI arguments in action `app-store-connect publish` for better help messages and documentation. 
+- Add new option `--skip-package-upload` to `app-store-connect publish`.
+- Add short aliases for CLI flags:
+  - `-su` for `--skip-package-upload`,
+  - `-sv` for `--skip-package-validation`,
+  - `-w` for `--max-build-processing-wait`.
+
+**Fixes**
+
+- Fix creating `Resource` objects that do not have any attributes.
+- Fix `--max-build-processing-wait` CLI option validation.
+- Allow non-integer version numbers for `--build-version-number`.
+
+**Docs**
+
+- Update docs for tool `app-store-connect`.
+- Create docs for `app-store-connect` actions group `app-store-versions`.
+- Create docs for action `app-store-connect app-store-versions create`.
+- Create docs for action `app-store-connect app-store-versions delete`.
+- Create docs for action `app-store-connect app-store-versions modify`.
+- Create docs for `app-store-connect` actions group `apps`.
+- Update docs for action `app-store-connect apps app-store-versions`.
+- Update docs for action `app-store-connect apps builds`.
+- Update docs for action `app-store-connect apps list`.
+- Create docs for `app-store-connect` actions group `builds`.
+- Create docs for action `app-store-connect builds app-store-version`.
+- Create docs for action `app-store-connect builds submit-to-app-store`.
+- Update docs for action `app-store-connect builds submit-to-testflight`.
+- Update docs for action `app-store-connect list-builds`.
+- Update docs for action `app-store-connect publish`.
+
+**Development**
+
+- Support filtering by multiple values for one parameter in `ResourceManager.filter`.
+- Change `ResourceManager._get_update_payload` to accept `relationships` in addition to `attributes`. Make `attributes` and `relationships` arguments keyword-only.
+- Add missing return type hints to resource manger methods that did not have them.
+- Extract argument parser setup from `CliApp` class into separate module under `ArgumentParserBuilder` class.
+- Move `create_app_store_version_submission` and `delete_app_store_version_submission` methods from `AppStoreConnect` class to `AppStoreVersionSubmissionsActionGroup`.
+- Collect `app-store-connect` actions arguments that are used number of times under argument groups to reduce duplication.
+- Refactor `PublishAction` class:
+  - extract `publish` action arguments validation into separate method,
+  - move decorator arguments into separate tuple, 
+  - add dataclasses for subaction options, 
+  - support App Store review submission.
+
+Version 0.12.1
+-------------
+
+**Fixes**
+
+- Show appropriate error messages when invalid values are passed to CLI actions using environment variables. [PR #168](https://github.com/codemagic-ci-cd/cli-tools/pull/168)
+
 Version 0.12.0
 -------------
 

@@ -8,6 +8,8 @@ submit-to-testflight
 ```bash
 app-store-connect builds submit-to-testflight [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -25,16 +27,24 @@ app-store-connect builds submit-to-testflight [-h] [--log-stream STREAM] [--no-c
 Alphanumeric ID value of the Build
 ### Optional arguments for action `submit-to-testflight`
 
-##### `--max-build-processing-wait=MAX_BUILD_PROCESSING_WAIT`
+##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
 
 
-Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for beta review. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
+Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--disable-jwt-cache`
+
+
+Turn off caching App Store Connect JSON Web Tokens to disk. By default generated tokens are cached to disk to be reused between separate processes, which can can reduce number of false positive authentication errors from App Store Connect API. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 

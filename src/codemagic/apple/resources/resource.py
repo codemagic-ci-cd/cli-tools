@@ -190,12 +190,20 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     def _create_attributes(cls, api_response):
-        defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
+        if cls.Attributes is Resource.Attributes:
+            # In case the resource does not have attributes
+            defined_fields = {}
+        else:
+            defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
         return cls.Attributes(**defined_fields)
 
     @classmethod
     def _create_relationships(cls, api_response):
-        defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
+        if cls.Relationships is Resource.Relationships:
+            # In case the resource does not have relationships
+            defined_fields = {}
+        else:
+            defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
         return cls.Relationships(**defined_fields)
 
     def __init__(self, api_response: Dict, created: bool = False):
@@ -234,26 +242,26 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
 
     @classmethod
     @overload
-    def to_iso_8601(cls, dt: None) -> None:
+    def to_iso_8601(cls, dt: None, with_fractional_seconds: bool = True) -> None:
         ...
 
     @classmethod
     @overload
-    def to_iso_8601(cls, dt: datetime) -> str:
+    def to_iso_8601(cls, dt: datetime, with_fractional_seconds: bool = True) -> str:
         ...
 
     @classmethod
-    def to_iso_8601(cls, dt: Optional[datetime]):
+    def to_iso_8601(cls, dt: Optional[datetime], with_fractional_seconds: bool = True):
         if dt is None:
             return None
-        if dt.tzinfo == timezone.utc:
+        if dt.tzinfo == timezone.utc and with_fractional_seconds:
             # while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
             # resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
             # /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'
             # resolved to datetime.datetime(
             #   2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))
             # ).
-            # So need to convert it to the initial form based on the presense of the explicit utc timezone
+            # So need to convert it to the initial form based on the presence of the explicit utc timezone
             return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
         return dt.isoformat()
 

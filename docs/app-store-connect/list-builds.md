@@ -8,6 +8,8 @@ list-builds
 ```bash
 app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -15,12 +17,12 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-version-number BUILD_VERSION_NUMBER]
     [--expired]
     [--not-expired]
-    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
-    [--build-version-number BUILD_VERSION_NUMBER]
 ```
 ### Optional arguments for action `list-builds`
 
@@ -28,18 +30,22 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-##### `--expired`
-
-
-List only expired builds
-##### `--not-expired`
-
-
-List only not expired builds
 ##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
 
 
 Alphanumeric ID value of the Build
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build. For example `46` or `1.0.13.5`.
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
 ##### `--pre-release-version=PRE_RELEASE_VERSION`
 
 
@@ -48,16 +54,20 @@ Version of the build published to Testflight that identifies an iteration of the
 
 
 Build processing state
-##### `--build-version-number=BUILD_VERSION_NUMBER`
-
-
-Build version number is the version number of the uploaded build. For example `46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--disable-jwt-cache`
+
+
+Turn off caching App Store Connect JSON Web Tokens to disk. By default generated tokens are cached to disk to be reused between separate processes, which can can reduce number of false positive authentication errors from App Store Connect API. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 

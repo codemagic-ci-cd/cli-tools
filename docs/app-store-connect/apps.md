@@ -8,6 +8,8 @@ apps
 ```bash
 app-store-connect apps [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
+    [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
     [--key-id KEY_IDENTIFIER]
@@ -22,6 +24,14 @@ app-store-connect apps [-h] [--log-stream STREAM] [--no-color] [--version] [-s] 
 
 
 Turn on logging for App Store Connect API HTTP requests
+##### `--api-unauthorized-retries, -r=UNAUTHORIZED_REQUEST_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--disable-jwt-cache`
+
+
+Turn off caching App Store Connect JSON Web Tokens to disk. By default generated tokens are cached to disk to be reused between separate processes, which can can reduce number of false positive authentication errors from App Store Connect API. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 
@@ -77,7 +87,7 @@ Enable verbose logging for commands
 |Action|Description|
 | :--- | :--- |
 |[`get`](apps/get.md)|Get information about a specific app|
-|[`builds`](apps/builds.md)|Get a list of builds associated with a specific app|
+|[`builds`](apps/builds.md)|Get a list of builds associated with a specific app matching given constrains|
 |[`pre-release-versions`](apps/pre-release-versions.md)|Get a list of prerelease versions associated with a specific app|
 |[`app-store-versions`](apps/app-store-versions.md)|Get a list of App Store versions associated with a specific app|
 |[`list`](apps/list.md)|Find and list apps added in App Store Connect|

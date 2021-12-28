@@ -20,7 +20,6 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
-from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -41,8 +40,10 @@ from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
 
-from ._app_store_connect.action_group import AppStoreConnectActionGroup
 from ._app_store_connect.action_groups import AppsActionGroup
+from ._app_store_connect.action_groups import AppStoreVersionLocalizationsActionGroup
+from ._app_store_connect.action_groups import AppStoreVersionsActionGroup
+from ._app_store_connect.action_groups import AppStoreVersionSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGroup
 from ._app_store_connect.action_groups import BetaBuildLocalizationsActionGroup
 from ._app_store_connect.action_groups import BetaGroupsActionGroup
@@ -51,6 +52,9 @@ from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
 from ._app_store_connect.arguments import AppStoreVersionArgument
+from ._app_store_connect.arguments import AppStoreVersionInfo  # noqa: F401
+from ._app_store_connect.arguments import AppStoreVersionLocalizationInfo  # noqa: F401
+from ._app_store_connect.arguments import ArgumentGroups
 from ._app_store_connect.arguments import BetaBuildInfo  # noqa: F401
 from ._app_store_connect.arguments import BuildArgument
 from ._app_store_connect.arguments import BundleIdArgument
@@ -78,15 +82,20 @@ def _get_certificate_key(
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
-class AppStoreConnect(cli.CliApp,
-                      PublishAction,
-                      AppsActionGroup,
-                      BuildsActionGroup,
-                      BetaAppReviewSubmissionsActionGroup,
-                      BetaBuildLocalizationsActionGroup,
-                      BetaGroupsActionGroup,
-                      ResourceManagerMixin,
-                      PathFinderMixin):
+class AppStoreConnect(
+    cli.CliApp,
+    AppStoreVersionSubmissionsActionGroup,
+    AppStoreVersionsActionGroup,
+    AppStoreVersionLocalizationsActionGroup,
+    AppsActionGroup,
+    BetaAppReviewSubmissionsActionGroup,
+    BetaBuildLocalizationsActionGroup,
+    BetaGroupsActionGroup,
+    BuildsActionGroup,
+    PublishAction,
+    ResourceManagerMixin,
+    PathFinderMixin,
+):
     """
     Interact with Apple services via App Store Connect API
     """
@@ -96,6 +105,8 @@ class AppStoreConnect(cli.CliApp,
                  issuer_id: Optional[IssuerId],
                  private_key: Optional[str],
                  log_requests: bool = False,
+                 unauthorized_request_retries: int = 1,
+                 enable_jwt_cache: bool = False,
                  json_output: bool = False,
                  profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
                  certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
@@ -108,18 +119,24 @@ class AppStoreConnect(cli.CliApp,
         self._issuer_id = issuer_id
         self._private_key = private_key
         self._log_requests = log_requests
+        self._unauthorized_request_retries = unauthorized_request_retries
+        self._enable_jwt_cache = enable_jwt_cache
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
         key_identifier_argument = AppStoreConnectArgument.KEY_IDENTIFIER.from_args(cli_args)
         issuer_id_argument = AppStoreConnectArgument.ISSUER_ID.from_args(cli_args)
         private_key_argument = AppStoreConnectArgument.PRIVATE_KEY.from_args(cli_args)
+        unauthorized_request_retries = Types.ApiUnauthorizedRetries.resolve_value(cli_args.unauthorized_request_retries)
+        disable_jwt_cache = AppStoreConnectArgument.DISABLE_JWT_CACHE.from_args(cli_args)
 
         app_store_connect = AppStoreConnect(
             key_identifier=key_identifier_argument.value if key_identifier_argument else None,
             issuer_id=issuer_id_argument.value if issuer_id_argument else None,
             private_key=private_key_argument.value if private_key_argument else None,
             log_requests=cli_args.log_requests,
+            unauthorized_request_retries=unauthorized_request_retries,
+            enable_jwt_cache=not disable_jwt_cache,
             json_output=cli_args.json_output,
             profiles_directory=cli_args.profiles_directory,
             certificates_directory=cli_args.certificates_directory,
@@ -186,6 +203,8 @@ class AppStoreConnect(cli.CliApp,
             self._issuer_id,
             self._private_key,
             log_requests=self._log_requests,
+            unauthorized_request_retries=self._unauthorized_request_retries,
+            enable_jwt_cache=self._enable_jwt_cache,
         )
 
     @property
@@ -194,12 +213,7 @@ class AppStoreConnect(cli.CliApp,
 
     @cli.action('list-builds',
                 AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
-                BuildArgument.EXPIRED,
-                BuildArgument.NOT_EXPIRED,
-                BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
-                BuildArgument.PRE_RELEASE_VERSION,
-                BuildArgument.PROCESSING_STATE,
-                BuildArgument.BUILD_VERSION_NUMBER)
+                *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS)
     def list_builds(self,
                     application_id: Optional[ResourceId] = None,
                     expired: Optional[bool] = None,
@@ -215,7 +229,7 @@ class AppStoreConnect(cli.CliApp,
         try:
             expired_value = Argument.resolve_optional_two_way_switch(expired, not_expired)
         except ValueError:
-            flags = f'{BuildArgument.EXPIRED.flags!r} and {BuildArgument.NOT_EXPIRED.flags!r}'
+            flags = f'{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}'
             raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
 
         builds_filter = self.api_client.builds.Filter(
@@ -517,37 +531,6 @@ class AppStoreConnect(cli.CliApp,
             self._save_certificates(certificates, private_key, p12_container_password)
 
         return certificates
-
-    @cli.action('create',
-                AppStoreVersionArgument.APP_STORE_VERSION_ID,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def create_app_store_version_submission(self,
-                                            app_store_version_id: ResourceId,
-                                            should_print: bool = True) -> AppStoreVersionSubmission:
-        """
-        Submit an App Store Version to App Review
-        """
-        return self._create_resource(
-            self.api_client.app_store_version_submissions,
-            should_print,
-            app_store_version=app_store_version_id,
-        )
-
-    @cli.action('delete',
-                AppStoreVersionArgument.APP_STORE_VERSION_SUBMISSION_ID,
-                CommonArgument.IGNORE_NOT_FOUND,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def delete_app_store_version_submission(self,
-                                            app_store_version_submission_id: ResourceId,
-                                            ignore_not_found: bool = False) -> None:
-        """
-        Remove a version submission from App Store review
-        """
-        self._delete_resource(
-            self.api_client.app_store_version_submissions,
-            app_store_version_submission_id,
-            ignore_not_found=ignore_not_found,
-        )
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
