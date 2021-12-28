@@ -385,10 +385,10 @@ class AppStoreConnectArgument(cli.Argument):
         key='disable_jwt_cache',
         flags=('--disable-jwt-cache',),
         description=(
-            'Turn off caching App Store Connect JSON Web Tokens to disk to be '
-            'reused between individual process invocations. Caching tokens can help '
-            'with reducing of false positive authentication errors from '
-            'App Store Connect API. By default generated tokens are cached to disk.'
+            'Turn off caching App Store Connect JSON Web Tokens to disk. '
+            'By default generated tokens are cached to disk to be reused between '
+            'separate processes, which can can reduce number of '
+            'false positive authentication errors from App Store Connect API.'
         ),
         type=Types.AppStoreConnectDisableJwtCache,
         argparse_kwargs={'required': False, 'action': 'store_true'},

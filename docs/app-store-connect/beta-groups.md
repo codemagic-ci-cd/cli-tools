@@ -31,7 +31,7 @@ Specify how many times the App Store Connect API request should be retried in ca
 ##### `--disable-jwt-cache`
 
 
-Turn off caching App Store Connect JSON Web Tokens to disk to be reused between individual process invocations. Caching tokens can help with reducing of false positive authentication errors from App Store Connect API. By default generated tokens are cached to disk. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
+Turn off caching App Store Connect JSON Web Tokens to disk. By default generated tokens are cached to disk to be reused between separate processes, which can can reduce number of false positive authentication errors from App Store Connect API. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DISABLE_JWT_CACHE`.
 ##### `--json`
 
 
