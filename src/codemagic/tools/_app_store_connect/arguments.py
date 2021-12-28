@@ -106,6 +106,10 @@ class Types:
         argument_type = bool
         environment_variable_key = 'APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD'
 
+    class AppStoreConnectDisableJwtCache(cli.TypedCliArgument[bool]):
+        argument_type = bool
+        environment_variable_key = 'APP_STORE_CONNECT_DISABLE_JWT_CACHE'
+
     class AltoolRetriesCount(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = 'APP_STORE_CONNECT_ALTOOL_RETRIES'
@@ -136,6 +140,15 @@ class Types:
         @classmethod
         def _is_valid(cls, value: int) -> bool:
             return value >= 0
+
+    class ApiUnauthorizedRetries(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES'
+        default_value = 3
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
 
     class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
         argument_type = datetime
@@ -350,6 +363,34 @@ class AppStoreConnectArgument(cli.Argument):
         flags=('--log-api-calls',),
         type=bool,
         description='Turn on logging for App Store Connect API HTTP requests',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    UNAUTHORIZED_REQUEST_RETRIES = cli.ArgumentProperties(
+        key='unauthorized_request_retries',
+        flags=('--api-unauthorized-retries', '-r'),
+        type=Types.ApiUnauthorizedRetries,
+        description=(
+            'Specify how many times the App Store Connect API request '
+            'should be retried in case the called request fails due to an '
+            'authentication error (401 Unauthorized response from the server). '
+            'In case of the above authentication error, the request is retried using'
+            'a new JSON Web Token as many times until the number of retries '
+            'is exhausted.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    DISABLE_JWT_CACHE = cli.ArgumentProperties(
+        key='disable_jwt_cache',
+        flags=('--disable-jwt-cache',),
+        description=(
+            'Turn off caching App Store Connect JSON Web Tokens to disk. '
+            'By default generated tokens are cached to disk to be reused between '
+            'separate processes, which can can reduce number of '
+            'false positive authentication errors from App Store Connect API.'
+        ),
+        type=Types.AppStoreConnectDisableJwtCache,
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
