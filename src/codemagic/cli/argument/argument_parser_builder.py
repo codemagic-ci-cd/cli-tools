@@ -32,8 +32,10 @@ class ArgumentParserBuilder:
             Colors.UNDERLINE(f'Optional arguments for command {Colors.BOLD(cli_action.action_name)}'))
         self._custom_arguments_groups: Dict[str, argparse._ArgumentGroup] = {}
 
-    def _create_action_parser(self, parent_parser: argparse._SubParserAction, for_legacy_alias: bool):
+    def _create_action_parser(self, parent_parser: argparse._SubParsersAction, for_legacy_alias: bool):
         if for_legacy_alias:
+            if self._cli_action.legacy_alias is None:
+                raise RuntimeError(f'Legacy alias requested for {self._cli_action.action_name} without alias')
             deprecation_message = Colors.YELLOW(Colors.BOLD(f'Deprecated alias for `{self._full_action_name}`.'))
             return parent_parser.add_parser(
                 self._cli_action.legacy_alias,

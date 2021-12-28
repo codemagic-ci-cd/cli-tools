@@ -149,7 +149,7 @@ class CliApp(metaclass=abc.ABCMeta):
             return cli_actions[action_key]
         except KeyError:
             aliased_cli_actions = {ac.legacy_alias: ac for ac in self.iter_cli_actions_with_aliases()}
-            return cli_actions[aliased_cli_actions]
+            return aliased_cli_actions[action_key]
 
     def _invoke_action(self, args: argparse.Namespace):
         cli_action = self._get_invoked_cli_action(args)

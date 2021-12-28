@@ -2,12 +2,13 @@ import argparse
 import re
 import shutil
 import sys
+from typing import Set
 
 from .colors import Colors
 
 
 class CliHelpFormatter(argparse.HelpFormatter):
-    _suppressed_actions = set()
+    _suppressed_actions: Set[str] = set()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
