@@ -24,25 +24,25 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip pipenv 'setuptools<60'
-        python -m pipenv install --dev
+        pipenv install --dev
 
     - name: Pipenv checks
       run: |
-        python -m pipenv check
+        pipenv check
 
     - name: Check code formatting
       run: |
-        python -m pipenv run flake8 src/codemagic tests
+        pipenv run flake8 src/codemagic tests
 
     - name: Check imports sort order
       run: |
-        python -m pipenv run isort src/codemagic tests --check-only
+        pipenv run isort src/codemagic tests --check-only
 
     - name: Static type checks with mypy
       env:
         MYPYPATH: stubs
       run: |
-        python -m pipenv run mypy src/codemagic
+        pipenv run mypy src/codemagic
 
     - name: Test with pytest
       env:
@@ -50,4 +50,4 @@ jobs:
         TEST_APPLE_KEY_IDENTIFIER: ${{ secrets.TEST_APPLE_KEY_IDENTIFIER }}
         TEST_APPLE_PRIVATE_KEY_CONTENT: ${{ secrets.TEST_APPLE_PRIVATE_KEY_CONTENT }}
       run: |
-        python -m pipenv run pytest
+        pipenv run pytest
