@@ -506,11 +506,11 @@ class AppStoreConnect(
             raise AppStoreConnectError('Cannot create or save resource without certificate private key')
 
         if profile_type:
-            certificate_type = CertificateType.from_profile_type(profile_type)
+            profile_certificate_type = CertificateType.from_profile_type(profile_type)
             if certificate_types is None:
-                certificate_types = [certificate_type]
-            elif certificate_type not in certificate_types:
-                certificate_types.append(certificate_type)
+                certificate_types = [profile_certificate_type]
+            elif profile_certificate_type not in certificate_types:
+                certificate_types.append(profile_certificate_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
             certificate_type=certificate_types,
