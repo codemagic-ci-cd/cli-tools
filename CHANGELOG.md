@@ -1,3 +1,9 @@
+UNRELEASED
+-------------
+
+**Dependencies**
+- Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)  
+
 Version 0.15.0
 -------------
 
