@@ -22,7 +22,7 @@ types-requests = "*"
 
 [packages]
 pyopenssl = "~=19.0"
-pyjwt = "~=2.0"
+pyjwt = "~=2.3.0"
 requests = "~=2.25"
 cryptography = "~=3.3"
 oauth2client = "~=4.1.3"
