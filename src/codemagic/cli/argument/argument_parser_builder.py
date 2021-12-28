@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 from typing import TYPE_CHECKING
 from typing import Dict
@@ -16,23 +18,43 @@ if TYPE_CHECKING:
 class ArgumentParserBuilder:
     def __init__(
             self,
-            cli_app: Type['CliApp'],
-            cli_action: 'ActionCallable',
+            cli_app: Type[CliApp],
+            cli_action: ActionCallable,
             parent_parser: argparse._SubParsersAction,
+            for_legacy_alias: bool = False,
     ):
         self._cli_app = cli_app
         self._cli_action = cli_action
-        self._action_parser = parent_parser.add_parser(
-            cli_action.action_name,
-            formatter_class=CliHelpFormatter,
-            help=cli_action.__doc__,
-            description=Colors.BOLD(cli_action.__doc__),
-        )
+        self._action_parser = self._create_action_parser(parent_parser, for_legacy_alias)
         self._required_arguments = self._action_parser.add_argument_group(
             Colors.UNDERLINE(f'Required arguments for command {Colors.BOLD(cli_action.action_name)}'))
         self._optional_arguments = self._action_parser.add_argument_group(
             Colors.UNDERLINE(f'Optional arguments for command {Colors.BOLD(cli_action.action_name)}'))
         self._custom_arguments_groups: Dict[str, argparse._ArgumentGroup] = {}
+
+    def _create_action_parser(self, parent_parser: argparse._SubParserAction, for_legacy_alias: bool):
+        if for_legacy_alias:
+            deprecation_message = Colors.YELLOW(Colors.BOLD(f'Deprecated alias for `{self._full_action_name}`.'))
+            return parent_parser.add_parser(
+                self._cli_action.legacy_alias,
+                formatter_class=CliHelpFormatter,
+                description=f'{deprecation_message} {Colors.BOLD(self._cli_action.__doc__)}',
+            )
+        else:
+            return parent_parser.add_parser(
+                self._cli_action.action_name,
+                formatter_class=CliHelpFormatter,
+                description=Colors.BOLD(self._cli_action.__doc__),
+                help=self._cli_action.__doc__,
+            )
+
+    @property
+    def _full_action_name(self) -> str:
+        executable = self._cli_app.get_executable_name()
+        if self._cli_action.action_group:
+            return f'{executable} {self._cli_action.action_group.name} {self._cli_action.action_name}'
+        else:
+            return f'{executable} {self._cli_action.action_name}'
 
     @classmethod
     def set_default_cli_options(cls, cli_options_parser):

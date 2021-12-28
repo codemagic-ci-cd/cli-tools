@@ -1,4 +1,5 @@
 import argparse
+import re
 import shutil
 import sys
 
@@ -6,6 +7,8 @@ from .colors import Colors
 
 
 class CliHelpFormatter(argparse.HelpFormatter):
+    _suppressed_actions = set()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Fix help width
@@ -14,14 +17,28 @@ class CliHelpFormatter(argparse.HelpFormatter):
         else:
             self._width = sys.maxsize
 
+    @classmethod
+    def suppress_action(cls, action_name: str):
+        cls._suppressed_actions.add(action_name)
+
+    def _exclude_suppressed_actions(self, message: str) -> str:
+        for suppressed_action in self._suppressed_actions:
+            message = re.sub(f'[^ ]{suppressed_action},?', '', message)
+        return message
+
     def _format_args(self, *args, **kwargs):
         # Set custom color for arguments
         fmt = super()._format_args(*args, **kwargs)
         return Colors.CYAN(fmt)
 
     def _format_action_invocation(self, action):
-        # Color optional arguments as blue and mandatory as green
+        # Omit suppressed actions from help output and color
+        # optional arguments as blue and mandatory as green
         fmt = super()._format_action_invocation(action)
+
+        if action.dest == 'action':
+            fmt = self._exclude_suppressed_actions(fmt)
+
         parts = fmt.split(', ')
         color = Colors.BRIGHT_BLUE if action.option_strings else Colors.GREEN
         return ', '.join(map(color, parts))
@@ -76,3 +93,7 @@ class CliHelpFormatter(argparse.HelpFormatter):
 
         # return a single string
         return self._join_parts(parts)
+
+    def _format_usage(self, *args, **kwargs) -> str:
+        usage = super()._format_usage(*args, **kwargs)
+        return self._exclude_suppressed_actions(usage)
