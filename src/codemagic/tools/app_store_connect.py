@@ -482,11 +482,6 @@ class AppStoreConnect(
 
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
 
-    @cli.action('kana')
-    def kana(self):
-        """docstring"""
-        self.list_certificates(certificate_type=CertificateType.DEVELOPER_ID_KEXT)
-
     @cli.action('list-certificates',
                 CertificateArgument.CERTIFICATE_TYPES_OPTIONAL,
                 CertificateArgument.PROFILE_TYPE_OPTIONAL,
