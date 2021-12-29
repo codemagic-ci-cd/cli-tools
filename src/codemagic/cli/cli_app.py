@@ -429,12 +429,31 @@ def action(
         func.action_options = action_options or {}
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+        def wrapper(self: CliApp, *args, **kwargs):
+            if legacy_alias and legacy_alias in sys.argv:
+                _notify_deprecated_action_usage(self, action_name, action_group, legacy_alias)
+            return func(self, *args, **kwargs)
 
         return wrapper
 
     return decorator
+
+
+def _notify_deprecated_action_usage(
+        cli_app: CliApp,
+        action_name: str,
+        action_group: Optional[ActionGroup],
+        legacy_alias: str,
+):
+    executable = cli_app.get_executable_name()
+    name_parts = (executable, action_group.name if action_group else None, action_name)
+    full_action_name = ' '.join(p for p in name_parts if p)
+    legacy_action_name = f'{executable} {legacy_alias}'
+    deprecation_message = (
+        f'Using `{legacy_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n'
+        f'Use `{full_action_name}` instead as `{legacy_action_name}` is subject for removal in future releases.\n'
+    )
+    cli_app.echo(Colors.apply(deprecation_message, Colors.YELLOW, Colors.BOLD))
 
 
 def common_arguments(*class_arguments: Argument):
