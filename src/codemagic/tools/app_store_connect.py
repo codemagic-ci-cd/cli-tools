@@ -524,7 +524,7 @@ class AppStoreConnect(
             ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
             for c in certificates:
-                self.logger.info(f'{c.attributes.name} ({c.id})')
+                self.logger.info(f'- {c.attributes.name} ({c.id})')
 
         if save:
             assert private_key is not None  # Make mypy happy
@@ -698,9 +698,23 @@ class AppStoreConnect(
             create_resource,
             bundle_id_identifier_strict_match,
         )
+        self.echo('')
+
         certificates = self._get_or_create_certificates(
-            profile_type, certificate_key, certificate_key_password, create_resource)
-        profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource, platform)
+            profile_type,
+            certificate_key,
+            certificate_key_password,
+            create_resource,
+        )
+        self.echo('')
+
+        profiles = self._get_or_create_profiles(
+            bundle_ids,
+            certificates,
+            profile_type,
+            create_resource,
+            platform,
+        )
 
         self._save_certificates(certificates, private_key, p12_container_password)
         self._save_profiles(profiles)
@@ -723,7 +737,7 @@ class AppStoreConnect(
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
         else:
             for bundle_id in bundle_ids:
-                self.logger.info(f'{bundle_id.attributes.name} ({bundle_id.attributes.identifier})')
+                self.logger.info(f'- {bundle_id.attributes.name} ({bundle_id.attributes.identifier})')
         return bundle_ids
 
     def _get_or_create_certificates(self,
@@ -733,6 +747,9 @@ class AppStoreConnect(
                                     create_resource: bool) -> List[SigningCertificate]:
         certificate_types = [CertificateType.from_profile_type(profile_type)]
         if profile_type is ProfileType.IOS_APP_STORE:
+            # Include iOS distribution certificate type too for backwards compatibility.
+            # In the past iOS App Store profiles used to map to iOS distribution certificates
+            # and we want to keep using existing certificates for as long as possible.
             certificate_types.append(CertificateType.IOS_DISTRIBUTION)
 
         certificates = self.list_certificates(
@@ -803,14 +820,15 @@ class AppStoreConnect(
             [bundle_id.id for bundle_id in bundle_ids],
             profile_type=profile_type,
             profile_state=ProfileState.ACTIVE,
-            should_print=False)
+            should_print=False,
+        )
         profiles = list(filter(has_certificate, profiles))
 
-        certificate_names = (f'{c.attributes.displayName} [{c.attributes.serialNumber}]' for c in certificates)
-        message = f'that contain certificate(s) {", ".join(certificate_names)}'
+        certificate_names = (f'{c.attributes.displayName} ({c.id})' for c in certificates)
+        message = f'that contain {SigningCertificate.plural(len(certificates))} {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
         for p in profiles:
-            self.logger.info(f'{p.attributes.profileType} {p.attributes.name} ({p.attributes.uuid})')
+            self.logger.info(f'- {p.attributes.profileType} {p.attributes.name} ({p.id})')
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
