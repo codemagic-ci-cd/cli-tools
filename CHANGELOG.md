@@ -19,6 +19,9 @@ UNRELEASED
 **Development**
 - Behaviour of `CertificateType.from_profile_type` was changed. It returns `CertificateType.DISTRIBUTION` for `ProfileType.IOS_APP_STORE` instead of `CertificateType.IOS_DISTRIBUTION` now.
 
+**Docs**
+- Update documentation for `app-store-connect list-certificates` to reflect the possibility of multiple `--type` arguments.
+
 Version 0.15.0
 -------------
 

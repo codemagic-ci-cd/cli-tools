@@ -16,7 +16,7 @@ app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--v
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type CERTIFICATE_TYPE_OPTIONAL]
+    [--type CERTIFICATE_TYPES_OPTIONAL]
     [--profile-type PROFILE_TYPE_OPTIONAL]
     [--display-name DISPLAY_NAME]
     [--certificate-key PRIVATE_KEY]
@@ -29,7 +29,7 @@ app-store-connect list-certificates [-h] [--log-stream STREAM] [--no-color] [--v
 ##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | DEVELOPMENT | DISTRIBUTION | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
 
 
-Type of the certificate
+Type of the certificate. Multiple arguments
 ##### `--profile-type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 
