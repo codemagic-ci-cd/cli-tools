@@ -1,9 +1,6 @@
 UNRELEASED
 -------------
 
-**Breaking**
-- Python API for `AppStoreConnect.list_certificates` was changed. Argument `certificate_type: Optional[CertificateType] = None` was changed to `certificate_types: Optional[Sequence[CertificateType]] = None`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
-
 **Features**
 - Use certificates with type `DISTRIBUTION` instead of `IOS_DISTRIBUTION` for provisioning profiles with type `IOS_APP_STORE` by default. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
   - `app-store-connect fetch-signing-files`,
@@ -18,6 +15,7 @@ UNRELEASED
 
 **Development**
 - Behaviour of `CertificateType.from_profile_type` was changed. It returns `CertificateType.DISTRIBUTION` for `ProfileType.IOS_APP_STORE` instead of `CertificateType.IOS_DISTRIBUTION` now.
+- Python API for `AppStoreConnect.list_certificates` was updated. Argument `certificate_type: Optional[CertificateType] = None` was deprecated and replaced by `certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None`. This change is backwards compatible, that is `certificate_type` can still be passed both as a positional and keyword argument. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Docs**
 - Update documentation for `app-store-connect list-certificates` to reflect the possibility of multiple `--type` arguments.

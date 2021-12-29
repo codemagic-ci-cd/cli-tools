@@ -13,7 +13,9 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -480,6 +482,11 @@ class AppStoreConnect(
 
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
 
+    @cli.action('kana')
+    def kana(self):
+        """docstring"""
+        self.list_certificates(certificate_type=CertificateType.DEVELOPER_ID_KEXT)
+
     @cli.action('list-certificates',
                 CertificateArgument.CERTIFICATE_TYPES_OPTIONAL,
                 CertificateArgument.PROFILE_TYPE_OPTIONAL,
@@ -488,15 +495,18 @@ class AppStoreConnect(
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
-    def list_certificates(self,
-                          certificate_types: Optional[Sequence[CertificateType]] = None,
-                          profile_type: Optional[ProfileType] = None,
-                          display_name: Optional[str] = None,
-                          certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                          certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                          p12_container_password: str = '',
-                          save: bool = False,
-                          should_print: bool = True) -> List[SigningCertificate]:
+    def list_certificates(
+            self,
+            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
+            profile_type: Optional[ProfileType] = None,
+            display_name: Optional[str] = None,
+            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+            p12_container_password: str = '',
+            save: bool = False,
+            should_print: bool = True,
+            **_deprecated_kwargs,
+    ) -> List[SigningCertificate]:
         """
         List Signing Certificates from Apple Developer Portal matching given constraints
         """
@@ -505,18 +515,11 @@ class AppStoreConnect(
         if save and private_key is None:
             raise AppStoreConnectError('Cannot create or save resource without certificate private key')
 
-        if profile_type:
-            profile_certificate_types = {CertificateType.from_profile_type(profile_type)}
-            if profile_type is ProfileType.IOS_APP_STORE:
-                # Include iOS distribution certificate type too for backwards compatibility.
-                # In the past iOS App Store profiles used to map to iOS distribution certificates
-                # and consequently they can be used with those profiles too.
-                profile_certificate_types.add(CertificateType.IOS_DISTRIBUTION)
-            requested_certificate_types = set(certificate_types or [])
-            certificate_types = list(profile_certificate_types | requested_certificate_types)
+        _certificate_type: Optional[CertificateType] = _deprecated_kwargs.get('certificate_type')
+        certificate_types_filter = self._resolve_certificate_types(_certificate_type, certificate_types, profile_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
-            certificate_type=certificate_types,
+            certificate_type=certificate_types_filter,
             display_name=display_name,
         )
         certificates = self._list_resources(
@@ -539,6 +542,39 @@ class AppStoreConnect(
             self._save_certificates(certificates, private_key, p12_container_password)
 
         return certificates
+
+    def _resolve_certificate_types(
+            self,
+            certificate_type: Optional[CertificateType],
+            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]],
+            profile_type: Optional[ProfileType],
+    ) -> Optional[List[CertificateType]]:
+        types: Set[CertificateType] = set()
+
+        if isinstance(certificate_types, CertificateType):
+            types.add(certificate_types)
+        elif certificate_types is not None:
+            types.update(certificate_types)
+
+        if isinstance(certificate_type, CertificateType):
+            warning = (
+                'Deprecation warning! Keyword argument '
+                '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
+                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None", '
+                'and is subject for removal.'
+            )
+            self.logger.warning(Colors.RED(warning))
+            types.add(certificate_type)
+
+        if profile_type:
+            types.add(CertificateType.from_profile_type(profile_type))
+            if profile_type is ProfileType.IOS_APP_STORE:
+                # Include iOS distribution certificate type too for backwards compatibility.
+                # In the past iOS App Store profiles used to map to iOS distribution certificates
+                # and consequently they can be used with those profiles too.
+                types.add(CertificateType.IOS_DISTRIBUTION)
+
+        return list(types) if types else None
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
