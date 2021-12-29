@@ -5,10 +5,19 @@ UNRELEASED
 - Python API for `AppStoreConnect.list_certificates` was changed. Argument `certificate_type: Optional[CertificateType] = None` was changed to `certificate_types: Optional[Sequence[CertificateType]] = None`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Features**
+- Use certificates with type `DISTRIBUTION` instead of `IOS_DISTRIBUTION` for provisioning profiles with type `IOS_APP_STORE` by default. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
+  - `app-store-connect fetch-signing-files`,
+  - `app-store-connect list-certificates`.
+  This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` certificates are still used for `IOS_APP_STORE` provisioning profiles if found. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - Unify formatting for signing certificates, profiles and bundle IDs in `app-store-connect fetch-signing-files` log output. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- Multiple `--type` arguments are now supported for `app-store-connect list-certificates` action. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- When either signing certificate or provisioning profile is saved to disk (for example as part of `app-store-connect fetch-signing-files`), then the save path will include resource ID and type, which makes it possible to easily match process output to file on disk. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Dependencies**
 - Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)  
+
+**Development**
+- Behaviour of `CertificateType.from_profile_type` was changed. It returns `CertificateType.DISTRIBUTION` for `ProfileType.IOS_APP_STORE` instead of `CertificateType.IOS_DISTRIBUTION` now.
 
 Version 0.15.0
 -------------
