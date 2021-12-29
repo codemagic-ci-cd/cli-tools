@@ -199,7 +199,7 @@ class CertificateType(ResourceEnum):
         elif profile_type is profile_type.MAC_APP_DEVELOPMENT:
             return CertificateType.MAC_APP_DEVELOPMENT
         elif profile_type is profile_type.MAC_APP_STORE:
-            return CertificateType.MAC_APP_DISTRIBUTION
+            return CertificateType.DISTRIBUTION
         elif profile_type is profile_type.TVOS_APP_DEVELOPMENT:
             return CertificateType.DEVELOPMENT
         elif profile_type is profile_type.TVOS_APP_STORE:

@@ -563,11 +563,13 @@ class AppStoreConnect(
 
         if profile_type:
             types.add(CertificateType.from_profile_type(profile_type))
+            # Include iOS and Mac App distribution certificate types backwards compatibility.
+            # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
+            # certificates and consequently they too can be used with those profiles.
             if profile_type is ProfileType.IOS_APP_STORE:
-                # Include iOS distribution certificate type too for backwards compatibility.
-                # In the past iOS App Store profiles used to map to iOS distribution certificates
-                # and consequently they can be used with those profiles too.
                 types.add(CertificateType.IOS_DISTRIBUTION)
+            elif profile_type is ProfileType.MAC_APP_STORE:
+                types.add(CertificateType.MAC_APP_DISTRIBUTION)
 
         return list(types) if types else None
 
@@ -786,11 +788,13 @@ class AppStoreConnect(
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
         certificate_types = [CertificateType.from_profile_type(profile_type)]
-        if profile_type is ProfileType.IOS_APP_STORE:
-            # Include iOS distribution certificate type too for backwards compatibility.
-            # In the past iOS App Store profiles used to map to iOS distribution certificates
-            # and we want to keep using existing certificates for as long as possible.
+        # Include iOS and Mac App distribution certificate types backwards compatibility.
+        # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
+        # certificates, and we want to keep using existing certificates for as long as possible.
+        if profile_type in ProfileType.IOS_APP_STORE:
             certificate_types.append(CertificateType.IOS_DISTRIBUTION)
+        elif profile_type is ProfileType.MAC_APP_STORE:
+            certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
 
         certificates = self.list_certificates(
             certificate_types=certificate_types,
