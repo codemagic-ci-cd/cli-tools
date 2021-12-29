@@ -2,7 +2,7 @@ UNRELEASED
 -------------
 
 **Breaking**
-- Python API for `AppStoreConnect.list_certificates` was changed: argument `certificate_type: Optional[CertificateType] = None` was changed to `certificate_types: Optional[List[CertificateType]] = None`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- Python API for `AppStoreConnect.list_certificates` was changed. Argument `certificate_type: Optional[CertificateType] = None` was changed to `certificate_types: Optional[Sequence[CertificateType]] = None`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Features**
 - TODO

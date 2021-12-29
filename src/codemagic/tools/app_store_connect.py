@@ -489,7 +489,7 @@ class AppStoreConnect(
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
     def list_certificates(self,
-                          certificate_types: Optional[List[CertificateType]] = None,
+                          certificate_types: Optional[Sequence[CertificateType]] = None,
                           profile_type: Optional[ProfileType] = None,
                           display_name: Optional[str] = None,
                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
