@@ -831,7 +831,7 @@ class AppStoreConnect(
         )
         profiles = list(filter(has_certificate, profiles))
 
-        certificate_names = (f'{c.attributes.displayName} ({c.id})' for c in certificates)
+        certificate_names = (c.get_display_info() for c in certificates)
         message = f'that contain {SigningCertificate.plural(len(certificates))} {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
         for profile in profiles:
