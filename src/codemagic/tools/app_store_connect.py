@@ -506,16 +506,24 @@ class AppStoreConnect(
             raise AppStoreConnectError('Cannot create or save resource without certificate private key')
 
         if profile_type:
-            profile_certificate_type = CertificateType.from_profile_type(profile_type)
-            if certificate_types is None:
-                certificate_types = [profile_certificate_type]
-            elif profile_certificate_type not in certificate_types:
-                certificate_types = [*certificate_types, profile_certificate_type]
+            profile_certificate_types = {CertificateType.from_profile_type(profile_type)}
+            if profile_type is ProfileType.IOS_APP_STORE:
+                # Include iOS distribution certificate type too for backwards compatibility.
+                # In the past iOS App Store profiles used to map to iOS distribution certificates
+                # and consequently they can be used with those profiles too.
+                profile_certificate_types.add(CertificateType.IOS_DISTRIBUTION)
+            requested_certificate_types = set(certificate_types or [])
+            certificate_types = list(profile_certificate_types | requested_certificate_types)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
             certificate_type=certificate_types,
-            display_name=display_name)
-        certificates = self._list_resources(certificate_filter, self.api_client.signing_certificates, should_print)
+            display_name=display_name,
+        )
+        certificates = self._list_resources(
+            certificate_filter,
+            self.api_client.signing_certificates,
+            should_print,
+        )
 
         if private_key:
             certificates = [
@@ -523,8 +531,8 @@ class AppStoreConnect(
                 if Certificate.from_ans1(certificate.asn1_content).is_signed_with(private_key)
             ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
-            for c in certificates:
-                self.logger.info(f'- {c.attributes.name} ({c.id})')
+            for certificate in certificates:
+                self.logger.info(f'- {certificate.attributes.name} ({certificate.id})')
 
         if save:
             assert private_key is not None  # Make mypy happy
@@ -760,10 +768,8 @@ class AppStoreConnect(
 
         if not certificates:
             if not create_resource:
-                if len(certificate_types) > 1:
-                    raise AppStoreConnectError(f'Did not find {SigningCertificate.s} with type {certificate_types}')
-                else:
-                    raise AppStoreConnectError(f'Did not find {certificate_types[0]} {SigningCertificate.s}')
+                _certificate_types = ', '.join(map(str, certificate_types))
+                raise AppStoreConnectError(f'Did not find {SigningCertificate.s} with type {_certificate_types}')
             certificates.append(self.create_certificate(
                 certificate_types[0],
                 certificate_key=certificate_key,
@@ -827,8 +833,8 @@ class AppStoreConnect(
         certificate_names = (f'{c.attributes.displayName} ({c.id})' for c in certificates)
         message = f'that contain {SigningCertificate.plural(len(certificates))} {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
-        for p in profiles:
-            self.logger.info(f'- {p.attributes.profileType} {p.attributes.name} ({p.id})')
+        for profile in profiles:
+            self.logger.info(f'- {profile.attributes.profileType} {profile.attributes.name} ({profile.id})')
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
