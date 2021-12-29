@@ -18,7 +18,7 @@ UNRELEASED
 - Behaviour of `CertificateType.from_profile_type` was changed:
   - calling it with `ProfileType.IOS_APP_STORE` returns `CertificateType.DISTRIBUTION` instead of `CertificateType.IOS_DISTRIBUTION` as before,
   - and calling it with `ProfileType.MAC_APP_STORE` returns `CertificateType.DISTRIBUTION` instead of `CertificateType.MAC_APP_DISTRIBUTION`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
-- Signature of `AppStoreConnect.list_certificates` was updated. Method argument `certificate_type: Optional[CertificateType] = None` was deprecated and replaced by `certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None`. This change is backwards compatible, that is `certificate_type` can still be passed both as a positional and keyword argument. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- Signature of `AppStoreConnect.list_certificates` was updated. Method argument `certificate_type: Optional[CertificateType] = None` was deprecated and replaced by `certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None`. This change is fully backwards compatible in the sense that as of now both the positional usage of the argument still works, and `certificate_type` can still also be used as a keyword argument. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Docs**
 - Update documentation for `app-store-connect list-certificates` to reflect the possibility of multiple `--type` arguments. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)

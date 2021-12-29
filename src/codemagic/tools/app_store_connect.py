@@ -791,7 +791,7 @@ class AppStoreConnect(
         # Include iOS and Mac App distribution certificate types backwards compatibility.
         # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
         # certificates, and we want to keep using existing certificates for as long as possible.
-        if profile_type in ProfileType.IOS_APP_STORE:
+        if profile_type is ProfileType.IOS_APP_STORE:
             certificate_types.append(CertificateType.IOS_DISTRIBUTION)
         elif profile_type is ProfileType.MAC_APP_STORE:
             certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
