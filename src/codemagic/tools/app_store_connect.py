@@ -532,7 +532,7 @@ class AppStoreConnect(
             ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
             for certificate in certificates:
-                self.logger.info(f'- {certificate.attributes.name} ({certificate.id})')
+                self.logger.info(f'- {certificate.get_display_info()}')
 
         if save:
             assert private_key is not None  # Make mypy happy
@@ -723,6 +723,7 @@ class AppStoreConnect(
             create_resource,
             platform,
         )
+        self.echo('')
 
         self._save_certificates(certificates, private_key, p12_container_password)
         self._save_profiles(profiles)
@@ -745,7 +746,7 @@ class AppStoreConnect(
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
         else:
             for bundle_id in bundle_ids:
-                self.logger.info(f'- {bundle_id.attributes.name} ({bundle_id.attributes.identifier})')
+                self.logger.info(f'- {bundle_id.attributes.name} {bundle_id.attributes.identifier} ({bundle_id.id})')
         return bundle_ids
 
     def _get_or_create_certificates(self,
@@ -834,7 +835,7 @@ class AppStoreConnect(
         message = f'that contain {SigningCertificate.plural(len(certificates))} {", ".join(certificate_names)}'
         self.printer.log_filtered(Profile, profiles, message)
         for profile in profiles:
-            self.logger.info(f'- {profile.attributes.profileType} {profile.attributes.name} ({profile.id})')
+            self.logger.info(f'- {profile.get_display_info()}')
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
@@ -860,7 +861,9 @@ class AppStoreConnect(
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(
-            f'{profile.get_display_info()}{profile.profile_extension}', self.profiles_directory)
+            f'{profile.attributes.profileType}_{profile.id}{profile.profile_extension}',
+            self.profiles_directory,
+        )
         profile_path.write_bytes(profile.profile_content)
         self.printer.log_saved(profile, profile_path)
         return profile_path
@@ -869,7 +872,10 @@ class AppStoreConnect(
                           certificate: SigningCertificate,
                           private_key: PrivateKey,
                           p12_container_password: str) -> pathlib.Path:
-        certificate_path = self._get_unique_path(f'{certificate.get_display_info()}.p12', self.certificates_directory)
+        certificate_path = self._get_unique_path(
+            f'{certificate.attributes.certificateType}_{certificate.id}.p12',
+            self.certificates_directory,
+        )
         try:
             p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
                 private_key,

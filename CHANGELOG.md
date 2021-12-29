@@ -5,7 +5,7 @@ UNRELEASED
 - Python API for `AppStoreConnect.list_certificates` was changed. Argument `certificate_type: Optional[CertificateType] = None` was changed to `certificate_types: Optional[Sequence[CertificateType]] = None`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Features**
-- TODO
+- Unify formatting for signing certificates, profiles and bundle IDs in `app-store-connect fetch-signing-files` log output. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Dependencies**
 - Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)  
