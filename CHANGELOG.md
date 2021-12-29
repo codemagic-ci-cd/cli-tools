@@ -2,10 +2,11 @@ UNRELEASED
 -------------
 
 **Features**
-- Use certificates with type `DISTRIBUTION` instead of `IOS_DISTRIBUTION` for provisioning profiles with type `IOS_APP_STORE` by default. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
+- Change default behaviour for resolving certificate type from provisioning profile type. Map both `IOS_APP_STORE` and `MAC_APP_STORE` provisioning profile types to `DISTRIBUTION` certificate type instead of the old approach where `IOS_DISTRIBUTION` and `MAC_APP_DISTRIBUTION` certificate types were used respectively. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
   - `app-store-connect fetch-signing-files`,
   - `app-store-connect list-certificates`.
-  This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` certificates are still used for `IOS_APP_STORE` provisioning profiles if found. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+  
+  This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` and `MAC_APP_DISTRIBUTION` certificates are still used for `IOS_APP_STORE` and `MAC_APP_STORE` provisioning profiles if found. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - Unify formatting for signing certificates, profiles and bundle IDs in `app-store-connect fetch-signing-files` log output. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - Multiple `--type` arguments are now supported for `app-store-connect list-certificates` action. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - When either signing certificate or provisioning profile is saved to disk (for example as part of `app-store-connect fetch-signing-files`), then the save path will include resource ID and type, which makes it possible to easily match process output to file on disk. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
@@ -14,8 +15,10 @@ UNRELEASED
 - Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)  
 
 **Development**
-- Behaviour of `CertificateType.from_profile_type` was changed. It returns `CertificateType.DISTRIBUTION` for `ProfileType.IOS_APP_STORE` instead of `CertificateType.IOS_DISTRIBUTION` now. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
-- Python API for `AppStoreConnect.list_certificates` was updated. Argument `certificate_type: Optional[CertificateType] = None` was deprecated and replaced by `certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None`. This change is backwards compatible, that is `certificate_type` can still be passed both as a positional and keyword argument. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- Behaviour of `CertificateType.from_profile_type` was changed:
+  - calling it with `ProfileType.IOS_APP_STORE` returns `CertificateType.DISTRIBUTION` instead of `CertificateType.IOS_DISTRIBUTION` as before,
+  - and calling it with `ProfileType.MAC_APP_STORE` returns `CertificateType.DISTRIBUTION` instead of `CertificateType.MAC_APP_DISTRIBUTION`. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
+- Signature of `AppStoreConnect.list_certificates` was updated. Method argument `certificate_type: Optional[CertificateType] = None` was deprecated and replaced by `certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None`. This change is backwards compatible, that is `certificate_type` can still be passed both as a positional and keyword argument. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Docs**
 - Update documentation for `app-store-connect list-certificates` to reflect the possibility of multiple `--type` arguments. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
