@@ -510,7 +510,7 @@ class AppStoreConnect(
             if certificate_types is None:
                 certificate_types = [profile_certificate_type]
             elif profile_certificate_type not in certificate_types:
-                certificate_types.append(profile_certificate_type)
+                certificate_types = [*certificate_types, profile_certificate_type]
 
         certificate_filter = self.api_client.signing_certificates.Filter(
             certificate_type=certificate_types,
