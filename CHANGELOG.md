@@ -1,4 +1,4 @@
-UNRELEASED
+Version 0.16.0
 -------------
 
 **Features**
