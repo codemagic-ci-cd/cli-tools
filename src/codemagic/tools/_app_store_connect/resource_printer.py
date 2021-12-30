@@ -80,15 +80,28 @@ class ResourcePrinter:
     def log_get_related(self, related_resource_type: Type[R], resource_type: Type[R2], resource_id: ResourceId):
         self.logger.info(f'Get {related_resource_type.s} for {resource_type} {resource_id}')
 
-    def log_found(self,
-                  resource_type: Type[R],
-                  resources: Sequence[R],
-                  resource_filter: Optional[ResourceManager.Filter] = None,
-                  related_resource_type: Optional[Type[R2]] = None):
+    def log_found(
+            self,
+            resource_type: Type[R],
+            resources: Sequence[R],
+            resource_filter: Optional[ResourceManager.Filter] = None,
+            related_resource_type: Optional[Type[R2]] = None,
+            related_resource_id: Optional[ResourceId] = None,
+      ):
+        if related_resource_type is not None and related_resource_id:
+            related = f' for {related_resource_type} {related_resource_id}'
+        elif related_resource_type is not None:
+            related = f' for {related_resource_type}'
+        else:
+            related = ''
+
+        if resource_filter is not None:
+            suffix = f' matching specified filters: {resource_filter}.'
+        else:
+            suffix = ''
+
         count = len(resources)
         name = resource_type.plural(count)
-        suffix = f' matching specified filters: {resource_filter}.' if resource_filter is not None else ''
-        related = f' for {related_resource_type}' if related_resource_type is not None else ''
         if count == 0:
             self.logger.info(Colors.YELLOW(f'Did not find any {name}{related}{suffix}'))
         else:

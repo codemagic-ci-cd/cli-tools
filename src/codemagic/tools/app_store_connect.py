@@ -13,7 +13,9 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -481,22 +483,25 @@ class AppStoreConnect(
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
 
     @cli.action('list-certificates',
-                CertificateArgument.CERTIFICATE_TYPE_OPTIONAL,
+                CertificateArgument.CERTIFICATE_TYPES_OPTIONAL,
                 CertificateArgument.PROFILE_TYPE_OPTIONAL,
                 CertificateArgument.DISPLAY_NAME,
                 CertificateArgument.PRIVATE_KEY,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
                 CommonArgument.SAVE)
-    def list_certificates(self,
-                          certificate_type: Optional[CertificateType] = None,
-                          profile_type: Optional[ProfileType] = None,
-                          display_name: Optional[str] = None,
-                          certificate_key: Optional[Types.CertificateKeyArgument] = None,
-                          certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-                          p12_container_password: str = '',
-                          save: bool = False,
-                          should_print: bool = True) -> List[SigningCertificate]:
+    def list_certificates(
+            self,
+            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
+            profile_type: Optional[ProfileType] = None,
+            display_name: Optional[str] = None,
+            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+            p12_container_password: str = '',
+            save: bool = False,
+            should_print: bool = True,
+            **_deprecated_kwargs,
+    ) -> List[SigningCertificate]:
         """
         List Signing Certificates from Apple Developer Portal matching given constraints
         """
@@ -505,13 +510,18 @@ class AppStoreConnect(
         if save and private_key is None:
             raise AppStoreConnectError('Cannot create or save resource without certificate private key')
 
-        if profile_type:
-            certificate_type = CertificateType.from_profile_type(profile_type)
+        _certificate_type: Optional[CertificateType] = _deprecated_kwargs.get('certificate_type')
+        certificate_types_filter = self._resolve_certificate_types(_certificate_type, certificate_types, profile_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
-            certificate_type=certificate_type,
-            display_name=display_name)
-        certificates = self._list_resources(certificate_filter, self.api_client.signing_certificates, should_print)
+            certificate_type=certificate_types_filter,
+            display_name=display_name,
+        )
+        certificates = self._list_resources(
+            certificate_filter,
+            self.api_client.signing_certificates,
+            should_print,
+        )
 
         if private_key:
             certificates = [
@@ -519,12 +529,49 @@ class AppStoreConnect(
                 if Certificate.from_ans1(certificate.asn1_content).is_signed_with(private_key)
             ]
             self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
+            for certificate in certificates:
+                self.logger.info(f'- {certificate.get_display_info()}')
 
         if save:
             assert private_key is not None  # Make mypy happy
             self._save_certificates(certificates, private_key, p12_container_password)
 
         return certificates
+
+    def _resolve_certificate_types(
+            self,
+            certificate_type: Optional[CertificateType],
+            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]],
+            profile_type: Optional[ProfileType],
+    ) -> Optional[List[CertificateType]]:
+        types: Set[CertificateType] = set()
+
+        if isinstance(certificate_types, CertificateType):
+            types.add(certificate_types)
+        elif certificate_types is not None:
+            types.update(certificate_types)
+
+        if isinstance(certificate_type, CertificateType):
+            warning = (
+                'Deprecation warning! Keyword argument '
+                '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
+                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None", '
+                'and is subject for removal.'
+            )
+            self.logger.warning(Colors.RED(warning))
+            types.add(certificate_type)
+
+        if profile_type:
+            types.add(CertificateType.from_profile_type(profile_type))
+            # Include iOS and Mac App distribution certificate types backwards compatibility.
+            # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
+            # certificates and consequently they too can be used with those profiles.
+            if profile_type is ProfileType.IOS_APP_STORE:
+                types.add(CertificateType.IOS_DISTRIBUTION)
+            elif profile_type is ProfileType.MAC_APP_STORE:
+                types.add(CertificateType.MAC_APP_DISTRIBUTION)
+
+        return list(types) if types else None
 
     @cli.action('create-profile',
                 BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
@@ -692,9 +739,24 @@ class AppStoreConnect(
             create_resource,
             bundle_id_identifier_strict_match,
         )
+        self.echo('')
+
         certificates = self._get_or_create_certificates(
-            profile_type, certificate_key, certificate_key_password, create_resource)
-        profiles = self._get_or_create_profiles(bundle_ids, certificates, profile_type, create_resource, platform)
+            profile_type,
+            certificate_key,
+            certificate_key_password,
+            create_resource,
+        )
+        self.echo('')
+
+        profiles = self._get_or_create_profiles(
+            bundle_ids,
+            certificates,
+            profile_type,
+            create_resource,
+            platform,
+        )
+        self.echo('')
 
         self._save_certificates(certificates, private_key, p12_container_password)
         self._save_profiles(profiles)
@@ -715,6 +777,9 @@ class AppStoreConnect(
             if not create_resource:
                 raise AppStoreConnectError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
+        else:
+            for bundle_id in bundle_ids:
+                self.logger.info(f'- {bundle_id.attributes.name} {bundle_id.attributes.identifier} ({bundle_id.id})')
         return bundle_ids
 
     def _get_or_create_certificates(self,
@@ -722,18 +787,27 @@ class AppStoreConnect(
                                     certificate_key: Optional[Types.CertificateKeyArgument],
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
-        certificate_type = CertificateType.from_profile_type(profile_type)
+        certificate_types = [CertificateType.from_profile_type(profile_type)]
+        # Include iOS and Mac App distribution certificate types backwards compatibility.
+        # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
+        # certificates, and we want to keep using existing certificates for as long as possible.
+        if profile_type is ProfileType.IOS_APP_STORE:
+            certificate_types.append(CertificateType.IOS_DISTRIBUTION)
+        elif profile_type is ProfileType.MAC_APP_STORE:
+            certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
+
         certificates = self.list_certificates(
-            certificate_type=certificate_type,
+            certificate_types=certificate_types,
             certificate_key=certificate_key,
             certificate_key_password=certificate_key_password,
             should_print=False)
 
         if not certificates:
             if not create_resource:
-                raise AppStoreConnectError(f'Did not find {certificate_type} {SigningCertificate.s}')
+                _certificate_types = ', '.join(map(str, certificate_types))
+                raise AppStoreConnectError(f'Did not find {SigningCertificate.s} with type {_certificate_types}')
             certificates.append(self.create_certificate(
-                certificate_type,
+                certificate_types[0],
                 certificate_key=certificate_key,
                 certificate_key_password=certificate_key_password,
                 should_print=False))
@@ -788,12 +862,15 @@ class AppStoreConnect(
             [bundle_id.id for bundle_id in bundle_ids],
             profile_type=profile_type,
             profile_state=ProfileState.ACTIVE,
-            should_print=False)
+            should_print=False,
+        )
         profiles = list(filter(has_certificate, profiles))
 
-        certificate_names = (f'{c.attributes.displayName} [{c.attributes.serialNumber}]' for c in certificates)
-        message = f'that contain certificate(s) {", ".join(certificate_names)}'
+        certificate_names = ', '.join(c.get_display_info() for c in certificates)
+        message = f'that contain {SigningCertificate.plural(len(certificates))} {certificate_names}'
         self.printer.log_filtered(Profile, profiles, message)
+        for profile in profiles:
+            self.logger.info(f'- {profile.get_display_info()}')
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
@@ -819,7 +896,9 @@ class AppStoreConnect(
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(
-            f'{profile.get_display_info()}{profile.profile_extension}', self.profiles_directory)
+            f'{profile.attributes.profileType}_{profile.id}{profile.profile_extension}',
+            self.profiles_directory,
+        )
         profile_path.write_bytes(profile.profile_content)
         self.printer.log_saved(profile, profile_path)
         return profile_path
@@ -828,7 +907,10 @@ class AppStoreConnect(
                           certificate: SigningCertificate,
                           private_key: PrivateKey,
                           p12_container_password: str) -> pathlib.Path:
-        certificate_path = self._get_unique_path(f'{certificate.get_display_info()}.p12', self.certificates_directory)
+        certificate_path = self._get_unique_path(
+            f'{certificate.attributes.certificateType}_{certificate.id}.p12',
+            self.certificates_directory,
+        )
         try:
             p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
                 private_key,

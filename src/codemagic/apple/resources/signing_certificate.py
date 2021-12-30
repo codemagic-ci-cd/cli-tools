@@ -45,7 +45,7 @@ class SigningCertificate(Resource):
         passTypeId: Optional[Relationship] = None
 
     def get_display_info(self) -> str:
-        return f'{self.attributes.certificateType} certificate {self.attributes.serialNumber}'
+        return f'{self.attributes.name} ({self.id})'
 
     @property
     def asn1_content(self) -> bytes:

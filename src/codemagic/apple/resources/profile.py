@@ -48,7 +48,7 @@ class Profile(Resource):
         bundleId: Relationship
 
     def get_display_info(self) -> str:
-        return f'{self.attributes.profileType} profile {self.attributes.uuid}'
+        return f'{self.attributes.profileType} {self.attributes.name} ({self.id})'
 
     @property
     def profile_extension(self) -> str:

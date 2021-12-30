@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Type
 from typing import Union
 
@@ -25,7 +26,7 @@ class SigningCertificates(ResourceManager[SigningCertificate]):
     @dataclass
     class Filter(ResourceManager.Filter):
         serial_number: Optional[str] = None
-        certificate_type: Optional[CertificateType] = None
+        certificate_type: Optional[Union[CertificateType, Sequence[CertificateType]]] = None
         display_name: Optional[str] = None
 
     class Ordering(ResourceManager.Ordering):

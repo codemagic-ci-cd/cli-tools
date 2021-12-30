@@ -1143,6 +1143,17 @@ class CertificateArgument(cli.Argument):
             'choices': list(CertificateType),
         },
     )
+    CERTIFICATE_TYPES_OPTIONAL = cli.ArgumentProperties(
+        key='certificate_types',
+        flags=('--type',),
+        type=CertificateType,
+        description='Type of the certificate',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(CertificateType),
+            'nargs': '+',
+        },
+    )
     PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
         key='profile_type',
         flags=('--profile-type',),
