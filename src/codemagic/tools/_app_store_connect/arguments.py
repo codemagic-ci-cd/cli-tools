@@ -649,7 +649,11 @@ class PublishArgument(cli.Argument):
         key='submit_to_testflight',
         flags=('--testflight', '-t'),
         type=bool,
-        description='Enable submission of an app for Testflight beta app review to allow external testing.',
+        description=(
+            'Enable submission of an app for Testflight beta app review to allow '
+            'external testing. NOTE: Requires an API key with `App Manager` or '
+            'greater access. '
+        ),
         argparse_kwargs={
             'required': False,
             'action': 'store_true',
@@ -939,7 +943,13 @@ class BuildArgument(cli.Argument):
         key='beta_group_names',
         flags=('--beta-group',),
         type=str,
-        description='Name of your Beta group',
+        description=(
+            'Name(s) of your **external** beta test group. Internal test '
+            'groups have access to all builds so this arguments cannot '
+            'be used with them. If you use this for internal teams it will '
+            'upload correctly, but the command will fail to make the group '
+            'assignment. Multiple arguments accepted.'
+        ),
         argparse_kwargs={
             'nargs': '+',
             'metavar': 'beta-group',
