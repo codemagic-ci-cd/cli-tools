@@ -1,4 +1,4 @@
-UNRELEASED
+Version 0.16.1
 -------------
 
 **Fixes**
