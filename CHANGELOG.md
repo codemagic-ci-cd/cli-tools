@@ -1,3 +1,14 @@
+UNRELEASED
+-------------
+
+**Fixes**
+- Revoke cached App Store Connect API JSON web token when unauthorized request retry attempts are exhausted. [PR #188](https://github.com/codemagic-ci-cd/cli-tools/pull/188)
+
+**Development**
+- Log for which App Store Connect API key JWT is generated or loaded from disk cache. [PR #188](https://github.com/codemagic-ci-cd/cli-tools/pull/188)
+- Remove `reset_token` parameter from `AppStoreConnectApiClient.generate_auth_headers`. [PR #188](https://github.com/codemagic-ci-cd/cli-tools/pull/188)
+- Add optional `revoke_auth_info: Callable[[], None]` parameter to `AppStoreConnectApiSession` to reset App Store Connect API authentication information in case of unauthorized requests. [PR #188](https://github.com/codemagic-ci-cd/cli-tools/pull/188)
+
 Version 0.16.0
 -------------
 
