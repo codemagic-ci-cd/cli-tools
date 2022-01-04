@@ -52,23 +52,22 @@ class AppStoreConnectApiClient:
         :param enable_jwt_cache: Whether or not to allow loading and writing generated App Store Connect
                                  JSON Web Token from or to a file cache.
         """
+        self._logger = log.get_logger(self.__class__)
+        self._api_key = ApiKey(key_identifier, issuer_id, private_key)
+        self._jwt_manager = JsonWebTokenManager(self._api_key, enable_cache=enable_jwt_cache)
         self.session = AppStoreConnectApiSession(
             self.generate_auth_headers,
             log_requests=log_requests,
             unauthorized_request_retries=unauthorized_request_retries,
+            revoke_auth_info=self._jwt_manager.revoke,
         )
-        self._logger = log.get_logger(self.__class__)
-        self._api_key = ApiKey(key_identifier, issuer_id, private_key)
-        self._jwt_manager = JsonWebTokenManager(self._api_key, enable_cache=enable_jwt_cache)
 
     @property
     def jwt(self) -> str:
         jwt = self._jwt_manager.get_jwt()
         return jwt.token
 
-    def generate_auth_headers(self, reset_token: bool = False) -> Dict[str, str]:
-        if reset_token:
-            self._jwt_manager.revoke()
+    def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
     @classmethod
