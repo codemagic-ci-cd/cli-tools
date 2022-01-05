@@ -405,13 +405,13 @@ class Writer:
                 return f'{flag}={arg.name}'
             return arg.name if arg.name else flag
 
-        def _process_description(arg: SerializedArgument) -> str:
-            description = arg.description.replace('*', r'\*')
-            description += '. Multiple arguments' if arg.nargs else ''
-            if arg.default and '[Default:' not in description:
-                return f'{description}. Default:&nbsp;`{arg.default}`'
+        def _process_description(argument: SerializedArgument) -> str:
+            _description = argument.description.replace('*', r'\*').replace(r'\*\*', '**')
+            _description += '. Multiple arguments' if argument.nargs else ''
+            if argument.default and '[Default:' not in _description:
+                return f'{_description}. Default:&nbsp;`{argument.default}`'
             else:
-                return description
+                return _description
 
         if not args:
             return
@@ -424,7 +424,14 @@ class Writer:
 
 
 def str_plain(string: str) -> str:
-    return re.compile(r'(\x1b\[\d*m|\x1b\[\d*m|\t)').sub('', string).replace('\n', ' ').strip()
+    bold = re.escape(cli.Colors.BOLD.value)
+    blue = re.escape(cli.Colors.BRIGHT_BLUE.value)
+    reset = re.escape(cli.Colors.RESET.value)
+
+    string = re.sub(f'{bold}([^\x1b]+){reset}', r'**\1**', string)  # Convert ANSI bold to markdown bold
+    string = re.sub(f'([^`]){blue}([^\x1b]+){reset}([^`])', r'\1`\2`\3', string)  # Convert ANSI blue to backticks
+    string = re.sub(r'\x1b\[\d*m', '', string)  # Remove all other ANSI formatting
+    return re.sub(r'\n|\t', ' ', string).strip()  # Remove newlines and tabs
 
 
 def main():

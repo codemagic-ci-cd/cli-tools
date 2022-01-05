@@ -1,3 +1,10 @@
+UNRELEASED
+-------------
+
+**Docs**
+- Apply bold style to Markdown docs that are shown using ANSI bold in terminal help messages. 
+- Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages.
+
 Version 0.16.1
 -------------
 
