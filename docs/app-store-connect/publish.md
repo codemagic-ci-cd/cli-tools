@@ -66,7 +66,7 @@ Validate package before uploading it to App Store Connect. Use this switch to en
 ##### `--skip-package-validation, -sv`
 
 
-Deprecated. Starting from version `0.14.0` package validation before uploading it to App Store Connect is disabled by default. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
+**Deprecated**. Starting from version `0.14.0` package validation before uploading it to App Store Connect is disabled by default. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
 ##### `--skip-package-upload, -su`
 
 
