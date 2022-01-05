@@ -425,9 +425,11 @@ class Writer:
 
 def str_plain(string: str) -> str:
     bold = re.escape(cli.Colors.BOLD.value)
+    blue = re.escape(cli.Colors.BRIGHT_BLUE.value)
     reset = re.escape(cli.Colors.RESET.value)
 
     string = re.sub(f'{bold}([^\x1b]+){reset}', r'**\1**', string)  # Convert ANSI bold to markdown bold
+    string = re.sub(f'([^`]){blue}([^\x1b]+){reset}([^`])', r'\1`\2`\3', string)  # Convert blue to backticks
     string = re.sub(r'(\x1b\[\d*m|\t)', '', string)  # Remove all other ANSI formatting
     return string.replace('\n', ' ').strip()  # Remove newlines
 
