@@ -2,8 +2,8 @@ UNRELEASED
 -------------
 
 **Docs**
-- Apply bold style to Markdown docs that are shown using ANSI bold in terminal help messages. 
-- Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages.
+- Apply bold style to Markdown docs that are shown using ANSI bold in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
+- Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
 
 Version 0.16.1
 -------------
