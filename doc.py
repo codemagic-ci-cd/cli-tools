@@ -429,9 +429,9 @@ def str_plain(string: str) -> str:
     reset = re.escape(cli.Colors.RESET.value)
 
     string = re.sub(f'{bold}([^\x1b]+){reset}', r'**\1**', string)  # Convert ANSI bold to markdown bold
-    string = re.sub(f'([^`]){blue}([^\x1b]+){reset}([^`])', r'\1`\2`\3', string)  # Convert blue to backticks
-    string = re.sub(r'(\x1b\[\d*m|\t)', '', string)  # Remove all other ANSI formatting
-    return string.replace('\n', ' ').strip()  # Remove newlines
+    string = re.sub(f'([^`]){blue}([^\x1b]+){reset}([^`])', r'\1`\2`\3', string)  # Convert ANSI blue to backticks
+    string = re.sub(r'\x1b\[\d*m', '', string)  # Remove all other ANSI formatting
+    return re.sub(r'\n|\t', ' ', string).strip()  # Remove newlines and tabs
 
 
 def main():
