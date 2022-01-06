@@ -372,7 +372,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         Run unit or UI tests for given Xcode project or workspace
         """
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
-        simulators = self._get_test_destinations(devices)
+        simulators = self._get_test_destinations(test_sdk, devices)
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
@@ -554,16 +554,19 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
                 f'File "{export_options_plist}" is not a valid property list')
 
-    def _get_test_destinations(self, requested_devices: Optional[List[str]]) -> List[Simulator]:
-        if not requested_devices:
-            simulators = [self.get_default_test_destination(should_print=False)]
-        else:
+    def _get_test_destinations(self, test_sdk: str, requested_devices: Optional[List[str]]) -> List[Simulator]:
+        if requested_devices:
             try:
                 simulators = Simulator.find_simulators(requested_devices)
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
+        elif 'macos' in test_sdk:
+            # macOS tests are run on the host machine and no test destinations are required
+            simulators = []
+        else:
+            simulators = [self.get_default_test_destination(should_print=False)]
 
-        self.echo(Colors.BLUE('Running tests on simulators:'))
+        self.echo(Colors.BLUE(f'Running tests on {"simulators:" if simulators else "macOS"}'))
         for s in simulators:
             self.echo('- %s %s (%s)', s.runtime, s.name, s.udid)
         self.echo('')

@@ -227,8 +227,9 @@ class TestArgument(cli.Argument):
             '"iPad Pro (9.7-inch)", '
             '"tvOS 14.1 Apple TV 4K (at 1080p)", '
             '"Apple TV 4K". '
-            'If no devices are specified, then the default destination will be chosen (see '
-            '`xcode-project default-test-destination` for more information about default destination).'
+            'Default test destination will be chosen if no devices are specified and test SDK is not'
+            'targeting macOS. For macOS tests no destination are specified. '
+            '(See `xcode-project default-test-destination` for more information about default destination).'
         ),
         argparse_kwargs={
             'required': False,
