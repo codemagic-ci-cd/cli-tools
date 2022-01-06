@@ -460,6 +460,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise XcodeProjectException('Did not find any Xcode test results for given patterns')
 
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
     def _clean(self, xcodebuild: Xcodebuild):

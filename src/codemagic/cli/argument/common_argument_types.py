@@ -8,6 +8,13 @@ from typing import Dict
 class CommonArgumentTypes:
 
     @staticmethod
+    def maybe_dir(path_str: str) -> pathlib.Path:
+        path = pathlib.Path(path_str).expanduser()
+        if path.is_dir() or not path.exists():
+            return path
+        raise argparse.ArgumentTypeError(f'Path "{path}" is not a directory')
+
+    @staticmethod
     def existing_dir(path_str: str) -> pathlib.Path:
         path = pathlib.Path(path_str).expanduser()
         if path.is_dir():

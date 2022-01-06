@@ -289,7 +289,7 @@ class TestResultArgument(cli.Argument):
     OUTPUT_DIRECTORY = cli.ArgumentProperties(
         key='output_dir',
         flags=('-o', '--output-dir'),
-        type=cli.CommonArgumentTypes.existing_dir,
+        type=cli.CommonArgumentTypes.maybe_dir,
         description='Directory where the Junit XML results will be saved.',
         argparse_kwargs={
             'required': False,
