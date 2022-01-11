@@ -9,10 +9,12 @@ class CommonArgumentTypes:
 
     @staticmethod
     def maybe_dir(path_str: str) -> pathlib.Path:
-        path = pathlib.Path(path_str).expanduser()
-        if path.is_dir() or not path.exists():
+        path = pathlib.Path(path_str).expanduser().absolute().resolve()
+        if path.is_dir():
             return path
-        raise argparse.ArgumentTypeError(f'Path "{path}" is not a directory')
+        if any(p.exists() and not p.is_dir() for p in path.parents):
+            raise argparse.ArgumentTypeError(f'Path "{path}" is not a directory')
+        return path
 
     @staticmethod
     def existing_dir(path_str: str) -> pathlib.Path:
