@@ -1,3 +1,13 @@
+UNRELEASED
+-------------
+
+**Fixes**
+- Value of test output directory, specified by argument `--output-dir`, for actions [`xcode-project junit-test-results`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/junit-test-results.md#junit-test-results) and [`xcode-project run-tests`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/run-tests.md#run-tests) had to point to existing directory, which is too restrictive. Change it so that the specified test output directory can be either created, or it has to exist. File paths are still considered to be invalid inputs. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
+- Fix default test destination for `xcode-project run-tests` when tests are run for macOS SDK. Omit test destination for these cases as the tests will be launched on the host machine directly. Otherwise, the default simulator obtained by [`xcode-project default-test-destination`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/default-test-destination.md) is still used as before if no devices are specified. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
+
+**Docs**
+- Update docs for `xcode-project run-tests` action. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
+
 Version 0.16.1
 -------------
 
