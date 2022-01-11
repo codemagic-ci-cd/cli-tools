@@ -561,7 +561,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 simulators = Simulator.find_simulators(requested_devices)
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
-        elif 'macos' in test_sdk:
+        elif 'macos' in test_sdk.lower():
             # macOS tests are run on the host machine and no test destinations are required
             simulators = []
         else:
