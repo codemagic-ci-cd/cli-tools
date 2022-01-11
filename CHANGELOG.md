@@ -6,6 +6,8 @@ UNRELEASED
 - Fix default test destination for `xcode-project run-tests` when tests are run for macOS SDK. Omit test destination for these cases as the tests will be launched on the host machine directly. Otherwise, the default simulator obtained by [`xcode-project default-test-destination`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/default-test-destination.md) is still used as before if no devices are specified. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
 
 **Docs**
+- Apply bold style to Markdown docs that are shown using ANSI bold in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
+- Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
 - Update docs for `xcode-project run-tests` action. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
 
 Version 0.16.1
