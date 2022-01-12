@@ -16,6 +16,9 @@ UNRELEASED
 **Development**
 - Add function `codemagic.cli.environment.is_ci_environment() -> bool` which checks whether current process is being run in a CI environment. Check is being performed based on the value of `CI` environment variable. [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
 
+**Dependencies**
+- Add [`psutil`](https://pypi.org/project/psutil/) Python dependency (version `5.8.0+`) to manage ongoing system processes in a platform-agnostic way. [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
+
 Version 0.16.1
 -------------
 
