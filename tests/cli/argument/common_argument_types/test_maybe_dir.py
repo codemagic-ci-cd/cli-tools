@@ -1,56 +1,74 @@
 import argparse
+import pathlib
+from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
 
 from codemagic.cli.argument import CommonArgumentTypes
-from codemagic.cli.argument.common_argument_types import pathlib
+from codemagic.cli.argument import common_argument_types
 
 
-@mock.patch.object(pathlib.Path, 'exists')
-@mock.patch.object(pathlib.Path, 'is_dir')
-def test_path_does_not_exist(mock_is_dir, mock_exists):
-    # TODO: parametrize return values for mocks
-    mock_exists.return_value = False
-    mock_is_dir.return_value = False
-    dir_path = CommonArgumentTypes.maybe_dir('/this/path/does/not/exist')
-    assert isinstance(dir_path, pathlib.Path)
-    assert mock_exists.called is True
-    assert mock_exists.call_count == 5
-    assert mock_is_dir.called is True
-    assert mock_is_dir.call_count == 1
+@mock.patch.object(common_argument_types.pathlib.Path, 'exists')
+@mock.patch.object(common_argument_types.pathlib.Path, 'is_dir')
+def test_path_and_parents_do_not_exist(mock_is_dir, mock_exists):
+    given_path = '/this/path/does/not/exist'
+    mock_exists.return_value = False  # No path exists
+    mock_is_dir.return_value = False  # No path is a directory
+    dir_path = CommonArgumentTypes.maybe_dir(given_path)
+    assert str(dir_path) == given_path
 
 
-@mock.patch.object(pathlib.Path, 'is_dir')
+@mock.patch.object(common_argument_types.pathlib.Path, 'is_dir')
 def test_dir_exists(mock_is_dir):
-    mock_is_dir.return_value = True
-    dir_path = CommonArgumentTypes.maybe_dir('/this/path/exist_and_is_dir')
-    assert isinstance(dir_path, pathlib.Path)
-    assert mock_is_dir.called is True
-    assert mock_is_dir.call_count == 1
+    given_path = '/this/path/exist_and_is_dir'
+    mock_is_dir.return_value = True  # All paths are directories
+    dir_path = CommonArgumentTypes.maybe_dir(given_path)
+    assert str(dir_path) == given_path
 
 
-@mock.patch.object(pathlib.Path, 'exists')
-@mock.patch.object(pathlib.Path, 'is_dir')
+@mock.patch.object(common_argument_types.pathlib.Path, 'exists')
+@mock.patch.object(common_argument_types.pathlib.Path, 'is_dir')
 def test_not_dir_but_exists(mock_is_dir, mock_exists):
-    mock_is_dir.return_value = False
-    mock_exists.return_value = True
+    mock_is_dir.return_value = False  # No paths are directories
+    mock_exists.return_value = True  # But paths exists
     with pytest.raises(argparse.ArgumentTypeError):
         CommonArgumentTypes.maybe_dir('/this/path/exists/and/is/not/a/directory')
 
 
-@mock.patch.object(pathlib.Path, 'exists')
-@mock.patch.object(pathlib.Path, 'is_dir')
-def test_path_contains_file(mock_is_dir, mock_exists):
+@pytest.mark.parametrize('path_suffixes', [
+    ('d1',),
+    ('d1', 'd2'),
+    ('d1', 'd2', 'd3'),
+])
+def test_given_path_contains_existing_file(path_suffixes):
     """
     Test for cases when directory structure is as
     dir/
         file
     and given path is dir/file/another_dir
     """
-    mock_is_dir.return_value = False
-    mock_exists.return_value = False
-    # TODO
-    # with mock.patch(pathlib) as mock_path
-    # with pytest.raises(argparse.ArgumentTypeError):
-    #     CommonArgumentTypes.maybe_dir('/existing_dir/existing_file/subdir')
+    with TemporaryDirectory() as td:
+        with NamedTemporaryFile(dir=td) as tf:
+            invalid_dir_path = pathlib.Path(tf.name, *path_suffixes).resolve()
+            with pytest.raises(argparse.ArgumentTypeError):
+                CommonArgumentTypes.maybe_dir(str(invalid_dir_path))
+
+
+@pytest.mark.parametrize('path_suffixes', [
+    ('invalid_dir',),
+    ('d1', 'd2'),
+    ('d1', 'd2', 'd3'),
+])
+def test_given_path_contains_existing_dir(path_suffixes):
+    """
+    Test for cases when directory structure is as
+    dir1/
+        dir2
+    and given path is dir1/dir2/dir3
+    """
+    with TemporaryDirectory() as td:
+        valid_dir_path = pathlib.Path(td, *path_suffixes).resolve()
+        dir_path = CommonArgumentTypes.maybe_dir(str(valid_dir_path))
+    assert str(dir_path) == str(valid_dir_path)
