@@ -197,16 +197,15 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             return  # Skip killing Xcodes if not running in CI environment
 
         for process in psutil.process_iter():
-            pid, name = process.pid, process.name()
-            if 'xcode' not in name.lower():
-                continue
-
             try:
+                process_name = process.name()
+                if 'xcode' not in process_name.lower():
+                    continue
                 process.kill()
             except psutil.Error as error:
                 self.logger.debug('Failed to kill Xcode process: %s', error)
             else:
-                self.logger.debug('Killed Xcode process (pid=%d, name=%s)', pid, name)
+                self.logger.debug('Killed Xcode process (pid=%d, name=%s)', process.pid, process_name)
 
     def _run_command(
             self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp]) -> Optional[AltoolResult]:
