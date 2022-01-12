@@ -33,8 +33,9 @@ def test_dir_exists(mock_is_dir):
 def test_not_dir_but_exists(mock_is_dir, mock_exists):
     mock_is_dir.return_value = False  # No paths are directories
     mock_exists.return_value = True  # But paths exists
-    with pytest.raises(argparse.ArgumentTypeError):
+    with pytest.raises(argparse.ArgumentTypeError) as error_info:
         CommonArgumentTypes.maybe_dir('/this/path/exists/and/is/not/a/directory')
+    assert 'exists but is not a directory' in str(error_info.value)
 
 
 @pytest.mark.parametrize('path_suffixes', [
@@ -52,8 +53,10 @@ def test_given_path_contains_existing_file(path_suffixes):
     with TemporaryDirectory() as td:
         with NamedTemporaryFile(dir=td) as tf:
             invalid_dir_path = pathlib.Path(tf.name, *path_suffixes).resolve()
-            with pytest.raises(argparse.ArgumentTypeError):
+            with pytest.raises(argparse.ArgumentTypeError) as error_info:
                 CommonArgumentTypes.maybe_dir(str(invalid_dir_path))
+    expected_error = 'cannot be used as a directory as it contains a path to an existing file'
+    assert expected_error in str(error_info.value)
 
 
 @pytest.mark.parametrize('path_suffixes', [
