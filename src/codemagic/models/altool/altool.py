@@ -16,6 +16,9 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
+import psutil
+
+from codemagic.cli import environment
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
@@ -178,6 +181,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                         print_fn(f'Failed to {action_name} archive, but this might be a temporary issue, retrying...')
                     else:
                         print_fn(f'Attempt #{attempt} to {action_name} failed, retrying...')
+                    self._kill_xcode_processes_for_retrying()
                 else:
                     if initial_retry_count > retries + 1:  # Only print this in case retrying was used
                         print_fn(f'Attempt #{attempt} to {action_name} failed.')
@@ -187,6 +191,22 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             self.logger.debug(f'Wait {retry_delay:.1f}s after failed attempt #{attempt}, {retries} tries remaining')
             time.sleep(retry_delay)
         raise RuntimeError('Did not return')
+
+    def _kill_xcode_processes_for_retrying(self):
+        if not environment.is_ci_environment():
+            return  # Skip killing Xcodes if not running in CI environment
+
+        for process in psutil.process_iter():
+            name, pid = process.pid, process.name()
+            if 'xcode' not in name.lower():
+                continue
+
+            try:
+                process.kill()
+            except psutil.Error as error:
+                self.logger.debug('Failed to kill Xcode process: %s', error)
+            else:
+                self.logger.debug('Killed Xcode process (pid=%d, name=%s)', pid, name)
 
     def _run_command(
             self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp]) -> Optional[AltoolResult]:

@@ -32,6 +32,7 @@ setup(
         'PyJWT>=2.3.0,<3',
         'pyopenssl>=19.0',
         'requests>=2.25.1',
+        'psutil>=5.8.0',
     ],
     extras_require={
         'dev': ['pytest'],
