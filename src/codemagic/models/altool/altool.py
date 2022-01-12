@@ -197,7 +197,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             return  # Skip killing Xcodes if not running in CI environment
 
         for process in psutil.process_iter():
-            name, pid = process.pid, process.name()
+            pid, name = process.pid, process.name()
             if 'xcode' not in name.lower():
                 continue
 
