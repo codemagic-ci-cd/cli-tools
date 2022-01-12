@@ -8,6 +8,25 @@ from typing import Dict
 class CommonArgumentTypes:
 
     @staticmethod
+    def maybe_dir(path_str: str) -> pathlib.Path:
+        path = pathlib.Path(path_str).expanduser().absolute().resolve()
+        if path.is_dir():
+            # Existing directory
+            return path
+        elif path.exists():
+            # Existing path that is not a directory
+            raise argparse.ArgumentTypeError(f'Path "{path}" exists but is not a directory')
+        elif any(parent.exists() and not parent.is_dir() for parent in path.parents):
+            # Some of the parents is a file, directory cannot be created to this path
+            raise argparse.ArgumentTypeError((
+                f'Path "{path}" cannot be used as a directory as '
+                'it contains a path to an existing file'
+            ))
+        else:
+            # Either none of the parents exist, or some of them are directories
+            return path
+
+    @staticmethod
     def existing_dir(path_str: str) -> pathlib.Path:
         path = pathlib.Path(path_str).expanduser()
         if path.is_dir():
