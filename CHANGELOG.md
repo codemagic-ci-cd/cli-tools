@@ -1,6 +1,9 @@
 UNRELEASED
 -------------
 
+**Features**
+- When retrying `altool` commands as part of `app-store-connect publish` action, kill open Xcode processes before another attempt is made. It is applicable only if the action is launched in CI environment (environment variable `CI` is set to _truthy_ value). [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
+
 **Fixes**
 - Value of test output directory, specified by argument `--output-dir`, for actions [`xcode-project junit-test-results`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/junit-test-results.md#junit-test-results) and [`xcode-project run-tests`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/run-tests.md#run-tests) had to point to existing directory, which is too restrictive. Change it so that the specified test output directory can be either created, or it has to exist. File paths are still considered to be invalid inputs. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
 - Fix default test destination for `xcode-project run-tests` when tests are run for macOS SDK. Omit test destination for these cases as the tests will be launched on the host machine directly. Otherwise, the default simulator obtained by [`xcode-project default-test-destination`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.16.1/docs/xcode-project/default-test-destination.md) is still used as before if no devices are specified. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
@@ -10,7 +13,11 @@ UNRELEASED
 - Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
 - Update docs for `xcode-project run-tests` action. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
 
+**Development**
+- Add function `codemagic.cli.environment.is_ci_environment() -> bool` which checks whether current process is being run in a CI environment. Check is being performed based on the value of `CI` environment variable. [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
+
 **Dependencies**
+- Add [`psutil`](https://pypi.org/project/psutil/) Python dependency (version `5.8.0+`) to manage ongoing system processes in a platform-agnostic way. [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
 - Bumps `pipenv` dependency from version `2021.11.23` to `2022.1.8` (development only). [PR #193](https://github.com/codemagic-ci-cd/cli-tools/pull/193)
 
 Version 0.16.1

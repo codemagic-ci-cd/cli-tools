@@ -19,6 +19,7 @@ def mock_altool():
         password='xxxx-yyyy-zzzz-wwww',
     )
     mock_echo = mock.MagicMock()
+    altool._kill_xcode_processes_for_retrying = mock.Mock()
     altool.get_current_cli_app = lambda: SimpleNamespace(echo=mock_echo)
     return altool
 
@@ -66,6 +67,8 @@ def test_retrying_command_exhaustion(mock_altool, mock_auth_error_stdout, retrie
     assert mock_echo.call_count == retries + 1  # One for each retry, and final stdout logging
     final_echo_call = mock_echo.call_args_list[-1]
     assert final_echo_call[0][0] == json.dumps(json.loads(mock_auth_error_stdout), indent=4)
+    mock_kill_xcodes: mock.Mock = mock_altool._kill_xcode_processes_for_retrying  # type: ignore
+    mock_kill_xcodes.assert_called()
 
 
 @mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
@@ -102,6 +105,8 @@ def test_retrying_command_failure(mock_altool, mock_auth_error_stdout, mock_othe
     )
     for call, expected_output in zip(mock_echo.call_args_list, expected_outputs):
         assert call[0][0] == expected_output
+    mock_kill_xcodes: mock.Mock = mock_altool._kill_xcode_processes_for_retrying  # type: ignore
+    assert mock_kill_xcodes.call_count == 2
 
 
 @mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
@@ -123,6 +128,8 @@ def test_retrying_command_success(mock_altool, mock_auth_error_stdout, mock_succ
     )
     for call, expected_output in zip(mock_echo.call_args_list, expected_outputs):
         assert call[0][0] == expected_output
+    mock_kill_xcodes: mock.Mock = mock_altool._kill_xcode_processes_for_retrying  # type: ignore
+    assert mock_kill_xcodes.call_count == 2
 
 
 @mock.patch.object(PlatformType, 'from_path', lambda _artifact_path: PlatformType.IOS)
