@@ -18,6 +18,7 @@ UNRELEASED
 
 **Dependencies**
 - Add [`psutil`](https://pypi.org/project/psutil/) Python dependency (version `5.8.0+`) to manage ongoing system processes in a platform-agnostic way. [PR #192](https://github.com/codemagic-ci-cd/cli-tools/pull/192)
+- Bumps `pipenv` dependency from version `2021.11.23` to `2022.1.8` (development only). [PR #193](https://github.com/codemagic-ci-cd/cli-tools/pull/193)
 
 Version 0.16.1
 -------------
