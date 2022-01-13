@@ -10,6 +10,9 @@ UNRELEASED
 - Apply pre style to Markdown docs that are shown in bright blue color in terminal help messages. [PR #190](https://github.com/codemagic-ci-cd/cli-tools/pull/190)
 - Update docs for `xcode-project run-tests` action. [PR #191](https://github.com/codemagic-ci-cd/cli-tools/pull/191)
 
+**Dependencies**
+- Bumps `pipenv` dependency from version `2021.11.23` to `2022.1.8` (development only). [PR #193](https://github.com/codemagic-ci-cd/cli-tools/pull/193)
+
 Version 0.16.1
 -------------
 
