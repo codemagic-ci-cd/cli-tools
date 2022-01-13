@@ -1,4 +1,4 @@
-UNRELEASED
+0.16.2
 -------------
 
 **Features**
