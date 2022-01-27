@@ -55,13 +55,29 @@ def test_missing_arg_from_env(mock_appstore_api_client, namespace_kwargs, argume
     assert client_arg == argument.type.argument_type('environment-value')
 
 
-def test_invalid_private_key_from_env(namespace_kwargs):
-    os.environ[Types.PrivateKeyArgument.environment_variable_key] = 'this is not a private key'
+@pytest.mark.parametrize('invalid_private_key', (
+    'this is not a private key',
+    (  # Note the lack of newlines
+            '-----BEGIN PRIVATE KEY-----'
+            'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgfxGj0TlD8myo/YiA'
+            'lvhAWg05J0sTHa+HDGsdOiMHTFqgCgYIKoZIzj0DAQehRANCAAT9RChXSoIeFn7L'
+            'Ht2+k7pcfdfhZHt23WJuqDgFapNutGTDC1zSK+USyF7C8bjkVC4Fv/opeFXHMxi5'
+            'pmJunkXh'
+            '-----END PRIVATE KEY-----'
+    ),
+    (
+            '-----BEGIN PRIVATE KEY-----\n'
+            'gibberish'
+            '\n-----END PRIVATE KEY-----'
+    ),
+))
+def test_invalid_private_key_from_env(namespace_kwargs, invalid_private_key):
+    os.environ[Types.PrivateKeyArgument.environment_variable_key] = invalid_private_key
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
     cli_args = argparse.Namespace(**{k: v for k, v in namespace_kwargs.items()})
     with pytest.raises(argparse.ArgumentError) as exception_info:
         AppStoreConnect.from_cli_args(cli_args)
-    expected_error = 'argument --private-key: Provided value "this is not a private key" is not valid'
+    expected_error = 'argument --private-key: Provided value is not a valid PEM encoded private key'
     assert str(exception_info.value) == expected_error
 
 
@@ -77,7 +93,7 @@ def test_invalid_private_key_from_file(namespace_kwargs):
 
         assert str(exception_info.value) == (
             f'argument --private-key: Provided value in file "{tf.name}" is not valid. '
-            f'Provided value "not a valid private key" is not valid'
+            'Provided value is not a valid PEM encoded private key'
         )
 
 
@@ -91,8 +107,8 @@ def test_private_key_invalid_path(namespace_kwargs):
 
 
 @mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
-def test_read_private_key(mock_appstore_api_client, namespace_kwargs):
-    pk = '-----BEGIN PRIVATE KEY-----\n...'
+def test_read_private_key(mock_appstore_api_client, namespace_kwargs, mock_auth_key):
+    pk = mock_auth_key.read_text()
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = Types.PrivateKeyArgument(pk)
     _do_private_key_assertions(pk, mock_appstore_api_client, namespace_kwargs)
 
@@ -104,8 +120,8 @@ def test_read_private_key(mock_appstore_api_client, namespace_kwargs):
         {AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument(f'@file:{filename}')}),
 ])
 @mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
-def test_private_key_path_arg(mock_appstore_api_client, configure_variable, namespace_kwargs):
-    pk = '-----BEGIN PRIVATE KEY-----\n...'
+def test_private_key_path_arg(mock_appstore_api_client, configure_variable, namespace_kwargs, mock_auth_key):
+    pk = mock_auth_key.read_text()
     with NamedTemporaryFile(mode='w') as tf:
         tf.write(pk)
         tf.flush()
@@ -121,17 +137,17 @@ def test_private_key_path_arg(mock_appstore_api_client, configure_variable, name
         {AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument('@env:PK_VALUE')}),
 ])
 @mock.patch('codemagic.tools.app_store_connect.AppStoreConnectApiClient')
-def test_private_key_env_arg(mock_appstore_api_client, configure_variable, namespace_kwargs):
-    pk = '-----BEGIN PRIVATE KEY-----\n...'
+def test_private_key_env_arg(mock_appstore_api_client, configure_variable, namespace_kwargs, mock_auth_key):
+    pk = mock_auth_key.read_text()
     os.environ['PK_VALUE'] = pk
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = None
     configure_variable(namespace_kwargs)
     _do_private_key_assertions(pk, mock_appstore_api_client, namespace_kwargs)
 
 
-def _do_private_key_assertions(private_key_value, moc_appstore_api_client, cli_namespace):
+def _do_private_key_assertions(private_key_value, mock_appstore_api_client, cli_namespace):
     cli_args = argparse.Namespace(**cli_namespace)
     _ = AppStoreConnect.from_cli_args(cli_args).api_client
-    _, _, private_key_arg = moc_appstore_api_client.call_args[0]
+    _, _, private_key_arg = mock_appstore_api_client.call_args[0]
     assert isinstance(private_key_arg, str)
     assert private_key_arg == private_key_value
