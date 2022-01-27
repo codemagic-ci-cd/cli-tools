@@ -65,7 +65,7 @@ class JsonWebTokenManager(StringConverterMixin):
         self._revoke_disk_cache()
 
     def _revoke_disk_cache(self):
-        self._logger.info('Revoke JWT disk cache for App Store Connect key %r', self._key.identifier)
+        self._logger.debug('Revoke JWT disk cache for App Store Connect key %r', self._key.identifier)
         if not self._enable_cache:
             return
 
