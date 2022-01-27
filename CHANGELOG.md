@@ -1,3 +1,9 @@
+UNRELEASED
+-------------
+
+**Fixes**
+- Validate that App Store Connect API private key specified for `app-store-connect` tool by argument `--private-key` is a valid PEM encoded key.
+
 0.17.0
 -------------
 
