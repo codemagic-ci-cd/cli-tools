@@ -1,3 +1,4 @@
+import argparse
 import json
 import pathlib
 import re
@@ -9,6 +10,8 @@ from datetime import datetime
 from datetime import timezone
 from typing import List
 from typing import Optional
+
+from OpenSSL import crypto
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
@@ -75,8 +78,13 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
 
         @classmethod
-        def _is_valid(cls, value: str) -> bool:
-            return value.startswith('-----BEGIN ')
+        def _apply_type(cls, non_typed_value: str) -> str:
+            pem_private_key = cls.argument_type(non_typed_value)
+            try:
+                crypto.load_privatekey(crypto.FILETYPE_PEM, pem_private_key.encode())
+            except crypto.Error:
+                raise argparse.ArgumentTypeError('Provided value is not a valid PEM encoded private key')
+            return pem_private_key
 
     class CertificateKeyArgument(PrivateKeyArgument):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
