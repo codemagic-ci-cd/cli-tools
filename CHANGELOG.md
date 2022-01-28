@@ -1,10 +1,10 @@
-UNRELEASED
+Version 0.17.1
 -------------
 
 **Fixes**
 - Validate that App Store Connect API private key specified for `app-store-connect` tool by argument `--private-key` is a valid PEM encoded key. [PR #196](https://github.com/codemagic-ci-cd/cli-tools/pull/196)
 
-0.17.0
+Version 0.17.0
 -------------
 
 **Features**
