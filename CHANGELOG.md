@@ -1,7 +1,7 @@
 Version 0.17.2
 -------------
 
-This is a bugfix release to fix the regression introduced in v0.17.2.
+This is a bugfix release to fix the regression introduced in v0.17.1.
 
 **Fixes**
 - Consider OpenSSH private keys for `app-store-connect` argument `--certificate-key` valid again. Due to changes in [PR #196](https://github.com/codemagic-ci-cd/cli-tools/pull/196) only PEM encoded keys were accepted as certificate keys, but OpenSSH keys are not fully compatible with the PEM standard, and should be allowed too. [PR #197](https://github.com/codemagic-ci-cd/cli-tools/pull/197)
