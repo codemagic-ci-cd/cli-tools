@@ -86,8 +86,12 @@ class Types:
                 raise argparse.ArgumentTypeError('Provided value is not a valid PEM encoded private key')
             return pem_private_key
 
-    class CertificateKeyArgument(PrivateKeyArgument):
+    class CertificateKeyArgument(cli.EnvironmentArgumentValue[str]):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
+
+        @classmethod
+        def _is_valid(cls, value: str) -> bool:
+            return value.startswith('-----BEGIN ')
 
     class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
