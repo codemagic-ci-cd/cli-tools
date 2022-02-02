@@ -191,7 +191,7 @@ class CertificateType(ResourceEnum):
     @classmethod
     def from_profile_type(cls, profile_type: ProfileType) -> CertificateType:
         if profile_type is profile_type.IOS_APP_ADHOC:
-            return CertificateType.IOS_DISTRIBUTION
+            return CertificateType.DISTRIBUTION
         elif profile_type is profile_type.IOS_APP_DEVELOPMENT:
             return CertificateType.IOS_DEVELOPMENT
         elif profile_type is profile_type.IOS_APP_STORE:

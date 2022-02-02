@@ -568,6 +568,8 @@ class AppStoreConnect(
             # certificates and consequently they too can be used with those profiles.
             if profile_type is ProfileType.IOS_APP_STORE:
                 types.add(CertificateType.IOS_DISTRIBUTION)
+            elif profile_type is ProfileType.IOS_APP_ADHOC:
+                types.add(CertificateType.IOS_DISTRIBUTION)
             elif profile_type is ProfileType.MAC_APP_STORE:
                 types.add(CertificateType.MAC_APP_DISTRIBUTION)
 
@@ -792,6 +794,8 @@ class AppStoreConnect(
         # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
         # certificates, and we want to keep using existing certificates for as long as possible.
         if profile_type is ProfileType.IOS_APP_STORE:
+            certificate_types.append(CertificateType.IOS_DISTRIBUTION)
+        elif profile_type is ProfileType.IOS_APP_ADHOC:
             certificate_types.append(CertificateType.IOS_DISTRIBUTION)
         elif profile_type is ProfileType.MAC_APP_STORE:
             certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
