@@ -828,7 +828,7 @@ class AppStoreConnect(
             yield self.create_profile(
                 bundle_id.id,
                 [certificate.id for certificate in certificates],
-                [device.id for device in devices],
+                [device.id for device in devices if device.attributes.deviceClass.is_compatible(profile_type)],
                 profile_type=profile_type,
                 should_print=False,
             )
