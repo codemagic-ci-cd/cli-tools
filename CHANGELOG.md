@@ -1,4 +1,4 @@
-UNRELEASED
+Version 0.18.0
 -------------
 
 **Fixes**
