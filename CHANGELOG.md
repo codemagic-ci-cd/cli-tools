@@ -4,6 +4,17 @@ UNRELEASED
 **Fixes**
 - When creating new provisioning profiles as part of action `app-store-connect fetch-signing-files` include only eligible devices when creating the profiles. Before the action could fail for example in case when iOS development or Ad Hoc provisioning profile was created, but an Apple TV device was included as a create parameter. [PR #200](https://github.com/codemagic-ci-cd/cli-tools/pull/200)
 
+**Features**
+- Change default behaviour for resolving certificate type from provisioning profile type. Map `IOS_APP_ADHOC` provisioning profile type to `DISTRIBUTION` certificate type instead of `IOS_DISTRIBUTION`. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
+  - `app-store-connect fetch-signing-files`,
+  - `app-store-connect list-certificates`.
+  
+  This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` certificates are still used for `IOS_APP_ADHOC` provisioning profiles if found. [PR #198](https://github.com/codemagic-ci-cd/cli-tools/pull/198)
+
+**Development**
+- Behaviour of `CertificateType.from_profile_type` was changed:
+  - calling it with `ProfileType.IOS_APP_STORE` returns `CertificateType.DISTRIBUTION` instead of `CertificateType.IOS_DISTRIBUTION` as before. [PR #198](https://github.com/codemagic-ci-cd/cli-tools/pull/198)
+
 Version 0.17.2
 -------------
 
