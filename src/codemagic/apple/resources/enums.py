@@ -223,6 +223,19 @@ class DeviceClass(ResourceEnum):
     IPOD = 'IPOD'
     MAC = 'MAC'
 
+    def is_compatible(self, profile_type: ProfileType) -> bool:
+        if profile_type.is_tvos_profile:
+            return self is DeviceClass.APPLE_TV
+        elif profile_type.is_macos_profile:
+            return self is DeviceClass.MAC
+        else:
+            return self in (
+                DeviceClass.APPLE_WATCH,
+                DeviceClass.IPAD,
+                DeviceClass.IPOD,
+                DeviceClass.IPHONE,
+            )
+
 
 class DeviceStatus(ResourceEnum):
     DISABLED = 'DISABLED'
@@ -268,6 +281,10 @@ class ProfileType(ResourceEnum):
     @property
     def is_macos_profile(self) -> bool:
         return self.value.startswith('MAC_')
+
+    @property
+    def is_tvos_profile(self) -> bool:
+        return self.value.startswith('TVOS_')
 
     def devices_not_allowed(self) -> bool:
         return not self.devices_allowed()
