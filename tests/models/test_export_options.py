@@ -38,7 +38,7 @@ def test_export_options_initialize(export_options_dict):
     assert export_options.dict() == export_options_dict
 
 
-    @pytest.mark.parametrize('field_name, value', [
+@pytest.mark.parametrize('field_name, value', [
     ('manageAppVersionAndBuildNumber', True),
     ('manageAppVersionAndBuildNumber', False),
     ('signingCertificate', 'Certificate name'),
