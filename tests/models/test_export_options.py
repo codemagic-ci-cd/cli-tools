@@ -39,6 +39,30 @@ def test_export_options_initialize(export_options_dict):
 
 
 @pytest.mark.parametrize('field_name, value', [
+    ('manageAppVersionAndBuildNumber', True),
+    ('manageAppVersionAndBuildNumber', False),
+    ('signingCertificate', 'Certificate name'),
+    ('iCloudContainerEnvironment', 'environment'),
+])
+def test_export_options_initialize_extra_values(field_name, value, export_options_dict):
+    given_export_options = {**export_options_dict, field_name: value}
+    export_options = ExportOptions(**given_export_options)
+    assert export_options.dict() == given_export_options
+
+
+@pytest.mark.parametrize('field_name, value', [
+    ('manageAppVersionAndBuildNumber', True),
+    ('manageAppVersionAndBuildNumber', False),
+    ('signingCertificate', 'Certificate name'),
+    ('iCloudContainerEnvironment', 'environment'),
+])
+def test_export_options_set_valid_values(field_name, value, export_options_dict):
+    export_options = ExportOptions(**export_options_dict)
+    export_options.set_value(field_name=field_name, value=value)
+    assert export_options.dict() == {**export_options_dict, field_name: value}
+
+
+@pytest.mark.parametrize('field_name, value', [
     ('manifest', ''),
     ('manifest', 1),
     ('manifest', 3.4),

@@ -1,3 +1,9 @@
+Version 0.18.1
+-------------
+
+**Fixes**
+- Allow using `manageAppVersionAndBuildNumber` as an export option when building with `xcode-project build-ipa`. [PR #201](https://github.com/codemagic-ci-cd/cli-tools/pull/201)
+
 Version 0.18.0
 -------------
 
