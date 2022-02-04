@@ -93,6 +93,7 @@ class ExportOptions(StringConverterMixin):
     iCloudContainerEnvironment: Optional[str] = None
     installerSigningCertificate: Optional[str] = None
     manifest: Optional[Manifest] = None
+    manageAppVersionAndBuildNumber: Optional[bool] = None
     method: Optional[ArchiveMethod] = None
     onDemandResourcesAssetPacksBaseURL: Optional[str] = None
     provisioningProfiles: Optional[List[ProvisioningProfileInfo]] = None
