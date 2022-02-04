@@ -1,3 +1,9 @@
+Version 0.18.1
+-------------
+
+**Fixes**
+- Allow using `manageAppVersionAndBuildNumber` as an export option when building with `xcode-project build-ipa`.
+
 Version 0.18.0
 -------------
 
