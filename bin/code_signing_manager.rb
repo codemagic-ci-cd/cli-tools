@@ -451,22 +451,25 @@ class CodeSigningManager
   end
 
   def track_target_info(profile, target, build_configuration, bundle_id)
+    profile_uuid = profile ? profile['specifier'] : nil
     target_info = {
       :bundle_id => bundle_id,
       :target_name => target.name,
       :build_configuration => build_configuration.name,
-      :project_name => @project.root_object.name
+      :project_name => @project.root_object.name,
+      :provisioning_profile_uuid => profile_uuid
     }
+
     if profile
-      target_info[:provisioning_profile_uuid] = profile['specifier']
       Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
-      Log.info "\ttarget '#{target.name}'"
-      Log.info "\tbuild configuration '#{build_configuration.name}'"
-      Log.info "\tbundle id '#{bundle_id}'"
-      Log.info "\tspecifier '#{profile['specifier']}'"
     else
-      Log.info "Did not find suitable provisioning profile for target with bundle identifier '#{bundle_id}'"
+      Log.info "Did not find suitable provisioning profile for"
     end
+    Log.info "\ttarget '#{target.name}'"
+    Log.info "\tbuild configuration '#{build_configuration.name}'"
+    Log.info "\tbundle id '#{bundle_id}'"
+    Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
+
     @target_infos.push(target_info)
   end
 
