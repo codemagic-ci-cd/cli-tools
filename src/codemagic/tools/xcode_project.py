@@ -91,7 +91,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         ExportIpaArgument.EXPORT_OPTIONS_PATH,
         ExportIpaArgument.CUSTOM_EXPORT_OPTIONS,
         XcodeProjectArgument.WARN_ONLY,
-        XcodeProjectArgument.CODE_SIGNING_VERBOSE_LOGGING,
+        XcodeProjectArgument.CODE_SIGNING_SETUP_VERBOSE_LOGGING,
     )
     def use_profiles(
             self,
@@ -100,7 +100,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
             custom_export_options: Optional[Dict] = None,
             warn_only: bool = False,
-            code_signing_verbose_logging: bool = False,
+            code_signing_setup_verbose_logging: bool = False,
     ):
         """
         Set up code signing settings on specified Xcode projects
@@ -123,7 +123,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         for xcode_project in xcode_projects:
             try:
-                code_signing_settings_manager.use_profiles(xcode_project, verbose_logging=code_signing_verbose_logging)
+                code_signing_settings_manager.use_profiles(
+                    xcode_project,
+                    verbose_logging=code_signing_setup_verbose_logging,
+                )
             except (ValueError, IOError) as error:
                 if warn_only:
                     self.logger.warning(Colors.YELLOW(f'Using profiles on {xcode_project} failed'))

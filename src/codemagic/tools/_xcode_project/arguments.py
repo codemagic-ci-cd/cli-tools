@@ -6,9 +6,9 @@ from codemagic.models import ProvisioningProfile
 from codemagic.models.simulator import Runtime
 
 
-class CodeSigningVerboseLogging(cli.TypedCliArgument[bool]):
+class CodeSigningSetupVerboseLogging(cli.TypedCliArgument[bool]):
     argument_type = bool
-    environment_variable_key = 'XCODE_PROJECT_SIGNING_CONFIGURATION_VERBOSE_LOGGING'
+    environment_variable_key = 'XCODE_PROJECT_CODE_SIGNING_SETUP_VERBOSE_LOGGING'
 
 
 class XcodeProjectArgument(cli.Argument):
@@ -101,10 +101,10 @@ class XcodeProjectArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
-    CODE_SIGNING_VERBOSE_LOGGING = cli.ArgumentProperties(
-        key='code_signing_verbose_logging',
-        flags=('--code-signing-verbose-logging',),
-        type=CodeSigningVerboseLogging,
+    CODE_SIGNING_SETUP_VERBOSE_LOGGING = cli.ArgumentProperties(
+        key='code_signing_setup_verbose_logging',
+        flags=('--code-signing-setup-verbose-logging',),
+        type=CodeSigningSetupVerboseLogging,
         description='Show verbose log output when configuring code signing settings for Xcode project.',
         argparse_kwargs={
             'required': False,
