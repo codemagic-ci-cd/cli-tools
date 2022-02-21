@@ -84,18 +84,24 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             self.echo(bundle_id)
         return bundle_id
 
-    @cli.action('use-profiles',
-                XcodeProjectArgument.XCODE_PROJECT_PATTERN,
-                XcodeProjectArgument.PROFILE_PATHS,
-                ExportIpaArgument.EXPORT_OPTIONS_PATH,
-                ExportIpaArgument.CUSTOM_EXPORT_OPTIONS,
-                XcodeProjectArgument.WARN_ONLY)
-    def use_profiles(self,
-                     xcode_project_patterns: Sequence[pathlib.Path],
-                     profile_path_patterns: Sequence[pathlib.Path],
-                     export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
-                     custom_export_options: Optional[Dict] = None,
-                     warn_only: bool = False):
+    @cli.action(
+        'use-profiles',
+        XcodeProjectArgument.XCODE_PROJECT_PATTERN,
+        XcodeProjectArgument.PROFILE_PATHS,
+        ExportIpaArgument.EXPORT_OPTIONS_PATH,
+        ExportIpaArgument.CUSTOM_EXPORT_OPTIONS,
+        XcodeProjectArgument.WARN_ONLY,
+        XcodeProjectArgument.CODE_SIGNING_VERBOSE_LOGGING,
+    )
+    def use_profiles(
+            self,
+            xcode_project_patterns: Sequence[pathlib.Path],
+            profile_path_patterns: Sequence[pathlib.Path],
+            export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
+            custom_export_options: Optional[Dict] = None,
+            warn_only: bool = False,
+            code_signing_verbose_logging: bool = False,
+    ):
         """
         Set up code signing settings on specified Xcode projects
         to use given provisioning profiles
@@ -117,7 +123,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         for xcode_project in xcode_projects:
             try:
-                code_signing_settings_manager.use_profiles(xcode_project)
+                code_signing_settings_manager.use_profiles(xcode_project, verbose_logging=code_signing_verbose_logging)
             except (ValueError, IOError) as error:
                 if warn_only:
                     self.logger.warning(Colors.YELLOW(f'Using profiles on {xcode_project} failed'))

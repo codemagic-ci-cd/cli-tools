@@ -150,7 +150,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             message = 'Did not find matching provisioning profiles for code signing!'
             self.logger.warning(Colors.YELLOW(message))
 
-    def _apply(self, xcode_project, result_file_name):
+    def _apply(self, xcode_project, result_file_name, verbose_logging: bool):
         cmd = [
             self._code_signing_manager,
             '--xcode-project', xcode_project,
@@ -163,7 +163,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         cli_app = self.get_current_cli_app()
         try:
             if cli_app:
-                process = cli_app.execute(cmd, show_output=cli_app.verbose)
+                process = cli_app.execute(cmd, show_output=verbose_logging or cli_app.verbose)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)
@@ -171,9 +171,9 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             xcode_project = shlex.quote(str(xcode_project))
             raise IOError(f'Failed to set code signing settings for {xcode_project}', process)
 
-    def use_profiles(self, xcode_project: pathlib.Path):
+    def use_profiles(self, xcode_project: pathlib.Path, verbose_logging: bool = False):
         with NamedTemporaryFile(mode='r', prefix='use_profiles_result_', suffix='.json') as results_file:
-            self._apply(xcode_project, results_file.name)
+            self._apply(xcode_project, results_file.name, verbose_logging=verbose_logging)
             try:
                 target_infos = json.load(results_file)
             except ValueError:
