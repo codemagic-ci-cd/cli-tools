@@ -1,3 +1,25 @@
+Version 0.19.0
+-------------
+
+This release includes changes from [PR #203](https://github.com/codemagic-ci-cd/cli-tools/pull/203) to improve usability and feedback from `xcode-project use-profiles`.
+
+**Features**
+- Improve `xcode-project use-profiles` log output. Highlight Xcode targets for which code signing settings were not configured, but are likely necessary for successful build.
+- Add `--code-signing-setup-verbose-logging` option to action `xcode-project use-profiles` which turns on detailed log output for code signing settings configuration.
+
+**Docs**
+- Update docs for `xcode-project use-profiles` action. Add documentation for option `--code-signing-verbose-logging`.
+
+**Development**
+- **Breaking.** Remove dataclass `codemagic.models.matched_profiles.MatchedProfile` and all its usages.
+- **Breaking.** Replace `ExportOptions.from_matched_profiles` with `ExportOptions.from_used_profiles`. Old method was relying on the removed `MatchedProfile` class, while new method has more generic interface requiring only sequence of `ProvisioningProfiles` as arguments.
+- **Breaking.** Change command line interface for `code_signing_manager.rb`:
+  - Replace command line option `-u` / `--used-profiles` with `-r` / `--result-path` to better reflect the updated contents of result file.
+  - Results saved into file specified by `--result-path` will now include all found Xcode targets, including those that were not assigned provisioning profile. The targets for which matching provisioning profile was found and configured, the reference also includes the used provisioning profile `uuid`.
+  - The saved JSON file structure what used to be `{profile_uuid: [<target_info>, ...]}` is now `[<target_info>, ...]`.
+- Always multiplex `code_signing_manager.rb` verbose log output to main file log.
+- `CodeSigningManager.use_profiles` logs Xcode project targets for which provisioning profiles were not found, but are likely necessary for building `ipa`.
+
 Version 0.18.1
 -------------
 
