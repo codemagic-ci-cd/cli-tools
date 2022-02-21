@@ -8,7 +8,7 @@ This release includes changes from [PR #203](https://github.com/codemagic-ci-cd/
 - Add `--code-signing-setup-verbose-logging` option to action `xcode-project use-profiles` which turns on detailed log output for code signing settings configuration.
 
 **Docs**
-- Update docs for `xcode-project use-profiles` action. Add documentation for option `--code-signing-verbose-logging`.
+- Update docs for `xcode-project use-profiles` action. Add documentation for option `--code-signing-setup-verbose-logging`.
 
 **Development**
 - **Breaking.** Remove dataclass `codemagic.models.matched_profiles.MatchedProfile` and all its usages.
