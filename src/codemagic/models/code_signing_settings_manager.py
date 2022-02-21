@@ -5,12 +5,15 @@ import pathlib
 import shlex
 import shutil
 import subprocess
+from dataclasses import dataclass
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from typing import Counter
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Tuple
 
 from codemagic.cli import Colors
 from codemagic.mixins import RunningCliAppMixin
@@ -19,8 +22,24 @@ from codemagic.utilities import log
 
 from .certificate import Certificate
 from .export_options import ExportOptions
-from .matched_profile import MatchedProfile
 from .provisioning_profile import ProvisioningProfile
+
+
+@dataclass
+class TargetInfo:
+    build_configuration: str
+    bundle_id: str
+    project_name: str
+    target_name: str
+    provisioning_profile_uuid: Optional[str] = None
+
+    @classmethod
+    def sort_key(cls, target_info: TargetInfo) -> Tuple[str, str, str]:
+        return (
+            target_info.project_name,
+            target_info.target_name,
+            target_info.build_configuration,
+        )
 
 
 class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
@@ -28,7 +47,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
     def __init__(self, profiles: List[ProvisioningProfile], keychain_certificates: List[Certificate]):
         self.profiles: Dict[str, ProvisioningProfile] = {profile.uuid: profile for profile in profiles}
         self._certificates = keychain_certificates
-        self._matched_profiles: List[MatchedProfile] = []
+        self._target_infos: List[TargetInfo] = []
         self.logger = log.get_logger(self.__class__)
 
     @lru_cache()
@@ -70,33 +89,81 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             f'for target "{target}" [{config}] from project "{project}"',
         )
 
+    def _notify_target_profile_usage(self, targets_with_profile: Sequence[TargetInfo]):
+        for target_info in targets_with_profile:
+            if target_info.provisioning_profile_uuid is None:
+                continue
+            profile = self.profiles[target_info.provisioning_profile_uuid]
+            message = (
+                f' - Using profile "{profile.name}" [{profile.uuid}] '
+                f'for target "{target_info.target_name}" [{target_info.build_configuration}] '
+                f'from project "{target_info.project_name}"'
+            )
+            self.logger.info(Colors.BLUE(message))
+
+    def _notify_target_missing_profiles(
+            self,
+            targets_with_profile: Sequence[TargetInfo],
+            targets_without_profile: Sequence[TargetInfo],
+    ):
+        """
+        Show warning only for targets that have the same bundle id prefix, configuration and project
+        as some target for which provisioning profile was matched.
+        For example, if target with bundle id "com.example.app" from project "ProjectName"
+        with config "Debug" was assigned a profile. Then
+        - target with bundle identifier "com.example.app.specifier" from "ProjectName" with
+          config "Debug" would trigger a warning, since both project and configuration match with
+          the target for which profile was assigned to, and bundle identifier inherits from the
+          matched target identifier.
+        - however target with bundle identifier "com.example.otherApp" from the same project
+          would not trigger a warning as bundle id does not inherit from a target for which a
+          was profile was assigned to.
+        """
+
+        for target_info in targets_without_profile:
+            for matched_target_info in targets_with_profile:
+                project_name_match = target_info.project_name == matched_target_info.project_name
+                configuration_match = target_info.build_configuration == matched_target_info.build_configuration
+                bundle_id_prefix_match = \
+                    target_info.bundle_id == matched_target_info.bundle_id or \
+                    target_info.bundle_id.startswith(f'{matched_target_info.bundle_id}.')
+
+                if project_name_match and configuration_match and bundle_id_prefix_match:
+                    message = (
+                        f' - Did not find provisioning profile matching bundle identifier "{target_info.bundle_id}" '
+                        f'for target "{target_info.target_name}" [{target_info.build_configuration}] '
+                        f'from project "{target_info.project_name}"'
+                    )
+                    self.logger.info(Colors.YELLOW(message))
+                    break
+
     def notify_profile_usage(self):
         self.logger.info(Colors.GREEN('Completed configuring code signing settings'))
 
-        if not self._matched_profiles:
+        targets_with_profile = [ti for ti in self._target_infos if ti.provisioning_profile_uuid is not None]
+        targets_without_profile = [ti for ti in self._target_infos if ti.provisioning_profile_uuid is None]
+
+        if targets_with_profile:
+            self._notify_target_profile_usage(targets_with_profile)
+            self._notify_target_missing_profiles(targets_with_profile, targets_without_profile)
+        else:
             message = 'Did not find matching provisioning profiles for code signing!'
             self.logger.warning(Colors.YELLOW(message))
-            return
-
-        for info in sorted(self._matched_profiles, key=lambda i: i.sort_key()):
-            self.logger.info(Colors.BLUE(info.format()))
 
     def _apply(self, xcode_project, result_file_name):
         cmd = [
             self._code_signing_manager,
             '--xcode-project', xcode_project,
-            '--used-profiles', result_file_name,
+            '--result-path', result_file_name,
             '--profiles', self._get_json_serialized_profiles(),
+            '--verbose',
         ]
 
-        cli_app = self.get_current_cli_app()
-        if cli_app and cli_app.verbose:
-            cmd.append('--verbose')
-
         process = None
+        cli_app = self.get_current_cli_app()
         try:
             if cli_app:
-                process = cli_app.execute(cmd)
+                process = cli_app.execute(cmd, show_output=cli_app.verbose)
                 process.raise_for_returncode()
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)
@@ -105,20 +172,22 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             raise IOError(f'Failed to set code signing settings for {xcode_project}', process)
 
     def use_profiles(self, xcode_project: pathlib.Path):
-        with NamedTemporaryFile(mode='r', prefix='used_profiles_', suffix='.json') as used_profiles:
-            self._apply(xcode_project, used_profiles.name)
+        with NamedTemporaryFile(mode='r', prefix='use_profiles_result_', suffix='.json') as results_file:
+            self._apply(xcode_project, results_file.name)
             try:
-                used_profiles_info = json.load(used_profiles)
+                target_infos = json.load(results_file)
             except ValueError:
-                used_profiles_info = {}
+                target_infos = []
 
-        self._matched_profiles.extend(
-            MatchedProfile(profile=self.profiles[profile_uuid], **xcode_build_config)
-            for profile_uuid, xcode_build_configs in used_profiles_info.items()
-            for xcode_build_config in xcode_build_configs
-        )
+        self._target_infos.extend(TargetInfo(**target_info) for target_info in target_infos)
+        self._target_infos.sort(key=TargetInfo.sort_key)
 
     def generate_export_options(self, custom_options: Optional[Dict]) -> ExportOptions:
-        export_options = ExportOptions.from_matched_profiles(self._matched_profiles)
+        used_profiles = [
+            self.profiles[target_info.provisioning_profile_uuid]
+            for target_info in self._target_infos
+            if target_info.provisioning_profile_uuid is not None
+        ]
+        export_options = ExportOptions.from_used_profiles(used_profiles)
         export_options.update(custom_options or {})
         return export_options
