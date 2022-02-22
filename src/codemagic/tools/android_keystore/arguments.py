@@ -1,5 +1,3 @@
-from typing import Optional
-
 from codemagic import cli
 
 from .argument_types import KeyAlias
@@ -8,7 +6,7 @@ from .argument_types import KeystorePassword
 from .argument_types import KeystorePath
 
 
-class AndroidKeystoreArgument(cli.Argument):
+class CreateAndroidKeystoreArgument(cli.Argument):
     KEYSTORE_PATH = cli.ArgumentProperties(
         key='keystore_path',
         flags=('-k', '--ks', '--keystore'),
@@ -32,12 +30,19 @@ class AndroidKeystoreArgument(cli.Argument):
     KEY_PASSWORD = cli.ArgumentProperties(
         key='key_password',
         flags=('-l', '--ks-key-pass', '--key-pass'),
-        type=Optional[KeyPassword],
+        type=KeyPassword,
         description=(
             'Secure password for your keystore key. '
             'Keystore password will be used in case it is not given.'
         ),
         argparse_kwargs={'required': False, 'default': None},
+    )
+    OVERWRITE_EXISTING = cli.ArgumentProperties(
+        key='overwrite_existing',
+        flags=('-o', '--overwrite-existing'),
+        type=bool,
+        description='Overwrite keystore at specified path in case it exists',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
 
 
