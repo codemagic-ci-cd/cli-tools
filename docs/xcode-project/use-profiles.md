@@ -12,6 +12,7 @@ xcode-project use-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [
     [--export-options-plist EXPORT_OPTIONS_PATH]
     [--custom-export-options CUSTOM_EXPORT_OPTIONS]
     [--warn-only]
+    [--code-signing-setup-verbose-logging]
 ```
 ### Optional arguments for action `use-profiles`
 
@@ -35,6 +36,10 @@ Custom options for generated export options as JSON string. For example '{"uploa
 
 
 Show warning when profiles cannot be applied to any of the Xcode projects instead of fully failing the action
+##### `--code-signing-setup-verbose-logging`
+
+
+Show verbose log output when configuring code signing settings for Xcode project. If not given, the value will be checked from the environment variable `XCODE_PROJECT_CODE_SIGNING_SETUP_VERBOSE_LOGGING`.
 ### Common options
 
 ##### `-h, --help`

@@ -8,7 +8,7 @@ require "tmpdir"
 require "xcodeproj"
 
 
-USAGE = "Usage: #{File.basename(__FILE__)} [options] -x XCODEPROJ_PATH -u USED_PROFILES_PATH -p [{...}, ...]
+USAGE = "Usage: #{File.basename(__FILE__)} [options] -x XCODEPROJ_PATH -r RESULT_PATH -p [{...}, ...]
 
 Example provisioning profile in JSON format:
 {
@@ -218,12 +218,12 @@ class CodeSigningManager
       "com.apple.product-type.bundle.unit-test", # Product type Unit Test
   ]
 
-  def initialize(project_path:, used_profiles_path:, profiles:)
+  def initialize(project_path:, result_path:, profiles:)
     @project_path = project_path
-    @used_profiles_json_path = used_profiles_path
+    @results_json_path = result_path
     @project = Xcodeproj::Project.open(File.realpath(project_path))
     @profiles = profiles
-    @used_provisioning_profiles = Hash.new
+    @target_infos = []
   end
 
   def set_code_signing_settings
@@ -237,23 +237,19 @@ class CodeSigningManager
       # https://github.com/CocoaPods/Xcodeproj/issues/691
       if e.message.include? "Consistency issue: no parent for object"
         Log.info "Ignore error, this is open xcodeproj issue"
-        @used_provisioning_profiles = Hash.new
+        @target_infos = []
       else
         raise  # Unknown error, panic
       end
     end
-    save_used_provisioning_profiles
+    save_use_profiles_result
   end
 
   private
 
-  def save_used_provisioning_profiles
-    used_profiles = Hash.new
-    @used_provisioning_profiles.each do |profile_specifier, bundle_ids|
-      used_profiles[profile_specifier] = bundle_ids.to_a
-    end
-    File.open(@used_profiles_json_path, 'w') do |f|
-      f.write(JSON.pretty_generate(used_profiles))
+  def save_use_profiles_result
+    File.open(@results_json_path, 'w') do |f|
+      f.write(JSON.pretty_generate(@target_infos))
     end
   end
 
@@ -448,32 +444,33 @@ class CodeSigningManager
       end
     end
 
-    unless profile
-      Log.info "Did not find suitable provisioning profile for target with bundle identifier '#{bundle_id}'"
-      return
+    track_target_info(profile, build_target, build_configuration, bundle_id)
+    if profile
+      set_build_settings(build_target, build_configuration, profile)
     end
-
-    mark_profile_as_used(profile, build_target, build_configuration, bundle_id)
-    set_build_settings(build_target, build_configuration, profile)
   end
 
-  def mark_profile_as_used(profile, target, build_configuration, bundle_id)
-    Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
+  def track_target_info(profile, target, build_configuration, bundle_id)
+    profile_uuid = profile ? profile['specifier'] : nil
+    target_info = {
+      :bundle_id => bundle_id,
+      :target_name => target.name,
+      :build_configuration => build_configuration.name,
+      :project_name => @project.root_object.name,
+      :provisioning_profile_uuid => profile_uuid
+    }
+
+    if profile
+      Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
+    else
+      Log.info "Did not find suitable provisioning profile for"
+    end
     Log.info "\ttarget '#{target.name}'"
     Log.info "\tbuild configuration '#{build_configuration.name}'"
     Log.info "\tbundle id '#{bundle_id}'"
-    Log.info "\tspecifier '#{profile['specifier']}'"
+    Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
 
-    if @used_provisioning_profiles[profile['specifier']].nil?
-      @used_provisioning_profiles[profile['specifier']] = []
-    end
-    target_info = {
-        :bundle_id => bundle_id,
-        :target_name => target.name,
-        :build_configuration => build_configuration.name,
-        :project_name => @project.root_object.name
-    }
-    @used_provisioning_profiles[profile['specifier']].push target_info
+    @target_infos.push(target_info)
   end
 
   def set_target_build_settings(target)
@@ -519,12 +516,12 @@ def parse_args
       options[:project_path] = project_path
     end
 
-    used_profiles_help = 'Used profiles will be saved as JSON object to file at USED_PROFILES_PATH. REQUIRED.'
-    parser.on('-u', '--used-profiles USED_PROFILES_PATH', String, help = used_profiles_help) do |used_profiles_path|
-      unless used_profiles_path.end_with?('.json')
-        raise OptionParser::InvalidArgument.new(": '#{used_profiles_path}' is not JSON file")
+    result_path_help = 'Profiles usage result will be saved as JSON object to file at RESULT_PATH. REQUIRED.'
+    parser.on('-r', '--result-path RESULT_PATH', String, help = result_path_help) do |result_path|
+      unless result_path.end_with?('.json')
+        raise OptionParser::InvalidArgument.new(": '#{result_path}' is not JSON file")
       end
-      options[:used_profiles_path] = used_profiles_path
+      options[:result_path] = result_path
     end
 
     profiles_help = 'Apply code signing settings from JSON encoded list PROFILES. REQUIRED.'
@@ -542,7 +539,7 @@ def parse_args
   end.parse!
 
   raise OptionParser::MissingArgument.new("Missing required argument --xcode-project") unless options[:project_path]
-  raise OptionParser::MissingArgument.new("Missing required argument --used-profiles") unless options[:used_profiles_path]
+  raise OptionParser::MissingArgument.new("Missing required argument --result-path") unless options[:result_path]
   raise OptionParser::MissingArgument.new("Missing required argument --profiles") unless options[:profiles]
 
   options
@@ -553,7 +550,7 @@ def main(args)
   Log.set_verbose args[:verbose]
   code_signing_manager = CodeSigningManager.new(
       project_path: args[:project_path],
-      used_profiles_path: args[:used_profiles_path],
+      result_path: args[:result_path],
       profiles: args[:profiles])
   code_signing_manager.set_code_signing_settings
 end
