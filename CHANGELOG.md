@@ -1,6 +1,8 @@
 Version 20.0.0
 -------------
 
+This release contains improvements from [PR #205](https://github.com/codemagic-ci-cd/cli-tools/pull/205).
+
 **Features**
 - Add option `--p12-path` for `app-store-connect` actions `create-certificate` and `get-certificate` to specify PKCS#12 container save path that can be used together with `--save` to specify exact file path where the container is saved. It overrides default save location, which is configured by `--certificates-dir`.
 
