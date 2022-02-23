@@ -72,8 +72,10 @@ from ._app_store_connect.resource_printer import ResourcePrinter
 
 
 def _get_certificate_key(
-        certificate_key: Optional[Types.CertificateKeyArgument] = None,
+        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None) -> Optional[PrivateKey]:
+    if isinstance(certificate_key, PrivateKey):
+        return certificate_key
     password = certificate_key_password.value if certificate_key_password else None
     if certificate_key is not None:
         try:
@@ -418,7 +420,7 @@ class AppStoreConnect(
                 CommonArgument.SAVE)
     def create_certificate(self,
                            certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
-                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                           certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                            p12_container_password: str = '',
                            save: bool = False,
@@ -449,7 +451,7 @@ class AppStoreConnect(
                 CommonArgument.SAVE)
     def get_certificate(self,
                         certificate_resource_id: ResourceId,
-                        certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                         p12_container_password: str = '',
                         save: bool = False,
@@ -495,7 +497,7 @@ class AppStoreConnect(
             certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
             profile_type: Optional[ProfileType] = None,
             display_name: Optional[str] = None,
-            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+            certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
             p12_container_password: str = '',
             save: bool = False,
@@ -719,7 +721,7 @@ class AppStoreConnect(
                 CommonArgument.CREATE_RESOURCE)
     def fetch_signing_files(self,
                             bundle_id_identifier: str,
-                            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                            certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                             p12_container_password: str = '',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
