@@ -1214,6 +1214,18 @@ class CertificateArgument(cli.Argument):
         ),
         argparse_kwargs={'required': False, 'default': ''},
     )
+    P12_CONTAINER_SAVE_PATH = cli.ArgumentProperties(
+        key='p12_container_save_path',
+        flags=('--p12-path',),
+        type=cli.CommonArgumentTypes.non_existing_path,
+        description=(
+            'If provided, the exported p12 container will saved at this path. '
+            'Otherwise it will be saved with a random name in the directory specified '
+            f'by {Colors.BRIGHT_BLUE("--certificates-dir")}. '
+            f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
+        ),
+        argparse_kwargs={'required': False},
+    )
 
 
 class ProfileArgument(cli.Argument):

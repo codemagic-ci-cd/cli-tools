@@ -41,6 +41,13 @@ class CommonArgumentTypes:
         raise argparse.ArgumentTypeError(f'Path "{path}" does not exist')
 
     @staticmethod
+    def non_existing_path(path_str: str) -> pathlib.Path:
+        path = pathlib.Path(path_str).expanduser()
+        if not path.exists():
+            return path
+        raise argparse.ArgumentTypeError(f'Path "{path}" already exists')
+
+    @staticmethod
     def json_dict(json_dict: str) -> Dict:
         try:
             d = json.loads(json_dict)
