@@ -14,6 +14,7 @@ This release contains improvements from [PR #205](https://github.com/codemagic-c
 - PKCS#12 support in `pyOpenSSL` is deprecated and `cryptography` APIs should be used instead. Replace the deprecated `crypto.load_pkcs12` in `Certificate.from_p12` with `cryptography`'s `pkcs12.load_key_and_certificates`.
 - Add new factory method `PricateKey.from_p12` to load private key from PKCS#12 container.
 - Allow using `PrivateKey` instances for `AppStoreConnect` methods that take `certificate_key` argument. Before only instances of `Types.CertificateKeyArgument` were supported.
+- Support `DSA` and elliptic curve private keys for `PrivateKey`.
 
 Version 0.19.1
 -------------
