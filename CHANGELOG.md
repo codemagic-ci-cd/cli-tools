@@ -1,3 +1,15 @@
+Version 0.19.1
+-------------
+
+This is a bugfix release from [PR #204](https://github.com/codemagic-ci-cd/cli-tools/pull/204) to address the regression introduced in [PR #203](https://github.com/codemagic-ci-cd/cli-tools/pull/203).
+
+**Fixes**
+- Fix export options plist generation with `xcode-project use-profiles` in case provisioning profiles with wildcard identifiers (such as `*` or `com.example.*`) were used.
+
+**Development**
+- Add new data container class `ProvisioningProfileAssignment` which can be used to track the Xcode project target onto which certain provisioning profile was assigned to.
+- Change `ExportOptions` factory method `from_used_profiles(cls, used_profiles: Sequence[ProvisioningProfile]) -> ExportOptions` to `from_profile_assignments(cls, profile_assignments: Sequence[ProvisioningProfileAssignment])`. This will persist the actual bundle identifiers of the Xcode targets when the property list constructed, instead of possibly using wildcard identifiers from provisioning profiles.
+
 Version 0.19.0
 -------------
 
