@@ -20,6 +20,7 @@ app-store-connect create-certificate [-h] [--log-stream STREAM] [--no-color] [--
     [--certificate-key PRIVATE_KEY]
     [--certificate-key-password PRIVATE_KEY_PASSWORD]
     [--p12-password P12_CONTAINER_PASSWORD]
+    [--p12-path P12_CONTAINER_SAVE_PATH]
     [--save]
 ```
 ### Optional arguments for action `create-certificate`
@@ -40,6 +41,10 @@ Password of the private key used to generate the certificate. Used together with
 
 
 If provided, the saved p12 container will be encrypted using this password. Used together with `--save` option.
+##### `--p12-path=P12_CONTAINER_SAVE_PATH`
+
+
+If provided, the exported p12 container will saved at this path. Otherwise it will be saved with a random name in the directory specified by `--certificates-dir`. Used together with `--save` option.
 ##### `--save`
 
 
