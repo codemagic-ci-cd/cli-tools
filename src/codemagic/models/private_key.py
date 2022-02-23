@@ -9,6 +9,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKeyWithSerialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
+from cryptography.hazmat.primitives.serialization import pkcs12
 from OpenSSL import crypto
 
 from codemagic.mixins import StringConverterMixin
@@ -51,6 +52,12 @@ class PrivateKey(StringConverterMixin):
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
         pkey = cls._get_pkey(pem_key, cls._bytes(password) if password else b'')
         return PrivateKey(pkey.to_cryptography_key())
+
+    @classmethod
+    def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> PrivateKey:
+        password_encoded = None if password is None else cls._bytes(password)
+        rsa_key, _, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
+        return PrivateKey(rsa_key)
 
     def as_pem(self, password: Optional[AnyStr] = None) -> str:
         key_format = serialization.PrivateFormat.TraditionalOpenSSL
