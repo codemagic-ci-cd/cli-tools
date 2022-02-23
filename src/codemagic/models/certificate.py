@@ -139,7 +139,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, 'PEM')])
         csr_builder = x509.CertificateSigningRequestBuilder() \
             .subject_name(subject_name)
-        csr = csr_builder.sign(private_key.rsa_key, hashes.SHA256(), default_backend())
+        csr = csr_builder.sign(private_key.cryptography_private_key, hashes.SHA256(), default_backend())
         return csr
 
     @classmethod
@@ -169,7 +169,6 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()
-        rsa_key_public_key = private_key.public_key
         certificate_public_numbers = certificate_public_key.public_numbers()
-        rsa_key_public_numbers = rsa_key_public_key.public_numbers()
-        return certificate_public_numbers == rsa_key_public_numbers
+        private_key_public_numbers = private_key.public_key.public_numbers()
+        return certificate_public_numbers == private_key_public_numbers

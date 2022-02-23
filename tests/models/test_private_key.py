@@ -31,7 +31,7 @@ def test_pem_to_rsa_with_encrypted_key_wrong_password(encrypted_pem):
 def test_pem_to_rsa_with_unencrypted_key_wrong_password(unencrypted_pem):
     pk = PrivateKey.from_pem(unencrypted_pem.content, b'wrong password')
     # Unencrypted keys can be opened with any password
-    assert pk.rsa_key.key_size == unencrypted_pem.key_size
+    assert pk.cryptography_private_key.key_size == unencrypted_pem.key_size
 
 
 @pytest.mark.parametrize('mock_file_name, expected_fingerprint', [
