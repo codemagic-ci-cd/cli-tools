@@ -22,6 +22,7 @@ from codemagic.utilities import log
 
 from .certificate import Certificate
 from .export_options import ExportOptions
+from .export_options import ProvisioningProfileAssignment
 from .provisioning_profile import ProvisioningProfile
 
 
@@ -183,11 +184,14 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         self._target_infos.sort(key=TargetInfo.sort_key)
 
     def generate_export_options(self, custom_options: Optional[Dict]) -> ExportOptions:
-        used_profiles = [
-            self.profiles[target_info.provisioning_profile_uuid]
+        profile_assignments = [
+            ProvisioningProfileAssignment(
+                target_info.bundle_id,
+                self.profiles[target_info.provisioning_profile_uuid],
+            )
             for target_info in self._target_infos
             if target_info.provisioning_profile_uuid is not None
         ]
-        export_options = ExportOptions.from_used_profiles(used_profiles)
+        export_options = ExportOptions.from_profile_assignments(profile_assignments)
         export_options.update(custom_options or {})
         return export_options

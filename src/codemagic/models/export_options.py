@@ -9,6 +9,7 @@ from typing import AnyStr
 from typing import Counter
 from typing import Dict
 from typing import List
+from typing import NamedTuple
 from typing import NoReturn
 from typing import Optional
 from typing import Sequence
@@ -64,6 +65,11 @@ class SigningStyle(enum.Enum):
             return SigningStyle.AUTOMATIC
         else:
             return SigningStyle.MANUAL
+
+
+class ProvisioningProfileAssignment(NamedTuple):
+    target_bundle_id: str
+    provisioning_profile: ProvisioningProfile
 
 
 @dataclass
@@ -195,7 +201,8 @@ class ExportOptions(StringConverterMixin):
         return ExportOptions(**data)
 
     @classmethod
-    def from_used_profiles(cls, used_profiles: Sequence[ProvisioningProfile]) -> ExportOptions:
+    def from_profile_assignments(cls, profile_assignments: Sequence[ProvisioningProfileAssignment]) -> ExportOptions:
+        used_profiles = tuple(assignment.provisioning_profile for assignment in profile_assignments)
         certificates = (certificate for profile in used_profiles for certificate in profile.certificates)
         team_ids = Counter[str](profile.team_identifier for profile in used_profiles)
         common_names = Counter[str](c.common_name.split(':')[0] for c in certificates)
@@ -204,7 +211,10 @@ class ExportOptions(StringConverterMixin):
             method=ArchiveMethod.from_profiles(used_profiles),
             signingStyle=SigningStyle.from_profiles(used_profiles),
             teamID=team_ids.most_common(1)[0][0] if team_ids else '',
-            provisioningProfiles=[ProvisioningProfileInfo(p.bundle_id, p.name) for p in used_profiles],
+            provisioningProfiles=[
+                ProvisioningProfileInfo(a.target_bundle_id, a.provisioning_profile.name)
+                for a in profile_assignments
+            ],
             signingCertificate=common_names.most_common(1)[0][0] if common_names else '',
         )
 
