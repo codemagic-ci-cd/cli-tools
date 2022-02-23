@@ -792,7 +792,7 @@ class AppStoreConnect(
 
     def _get_or_create_certificates(self,
                                     profile_type: ProfileType,
-                                    certificate_key: Optional[Types.CertificateKeyArgument],
+                                    certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]],
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
         certificate_types = [CertificateType.from_profile_type(profile_type)]
