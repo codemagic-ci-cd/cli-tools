@@ -14,6 +14,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
 from OpenSSL import crypto
 from OpenSSL.crypto import X509
 
@@ -56,8 +57,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @classmethod
     def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> Certificate:
         password_encoded = None if password is None else cls._bytes(password)
-        p12_archive = crypto.load_pkcs12(p12, password_encoded)
-        x509_certificate = p12_archive.get_certificate()
+        _, certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
+        x509_certificate = X509.from_cryptography(certificate)
         return Certificate(x509_certificate)
 
     @property
@@ -72,7 +73,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def common_name(self) -> str:
-        return self.subject['CN']
+        return self.subject.get('CN', '')
 
     @property
     def not_after(self) -> str:
