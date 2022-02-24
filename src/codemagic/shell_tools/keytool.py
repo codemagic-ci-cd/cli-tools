@@ -1,6 +1,5 @@
+import shlex
 import subprocess
-from typing import Optional
-from typing import Sequence
 
 from codemagic.models import Keystore
 
@@ -20,26 +19,53 @@ class Keytool(AbstractShellTool):
             '-keyalg', 'RSA',
             '-dname', keystore.certificate_attributes.get_distinguished_name(),
             '-validity', str(keystore.validity),
-            '-keypass', keystore.key_password,
+            '-keypass:env', 'KEY_PASSWORD',
             '-keystore', str(keystore.store_path),
-            '-storepass', keystore.store_password,
+            '-storepass:env', 'STORE_PASSWORD',
         )
 
-        self._run_command(
-            command,
-            obfuscate_patterns=(keystore.store_password, keystore.key_password),
-        )
+        command_env = {
+            'STORE_PASSWORD': keystore.store_password,
+            'KEY_PASSWORD': keystore.key_password,
+        }
 
-    def _run_command(
-            self,
-            command: Sequence[str],
-            obfuscate_patterns: Optional[Sequence[str]] = None,
-    ):
         cli_app = self.get_current_cli_app()
-        if cli_app:
-            cli_process = cli_app.execute(command, obfuscate_patterns)
-            cli_process.raise_for_returncode()
-        else:
-            _completed_process = subprocess.run(command, capture_output=True)
-            _completed_process
-        # TODO: return some common object
+        try:
+            if cli_app:
+                cli_process = cli_app.execute(command, env=command_env)
+                cli_process.raise_for_returncode()
+            else:
+                completed_process = subprocess.run(command, capture_output=True, env=command_env)
+                completed_process.check_returncode()
+        except subprocess.CalledProcessError as cpe:
+            raise IOError('Failed to create keystore') from cpe
+
+    def validate_keystore(self, keystore: Keystore):
+        command = (
+            self.executable, '-list',
+            '-rfc',
+            '-alias', keystore.key_alias,
+            '-keystore', str(keystore.store_path),
+            '-storepass:env', 'STORE_PASSWORD',
+        )
+
+        command_env = {'STORE_PASSWORD': keystore.store_password}
+
+        cli_app = self.get_current_cli_app()
+        try:
+            if cli_app:
+                cli_process = cli_app.execute(command, suppress_output=True, env=command_env)
+                cli_process.raise_for_returncode()
+            else:
+                completed_process = subprocess.run(command, capture_output=True, env=command_env)
+                completed_process.check_returncode()
+        except subprocess.CalledProcessError as cpe:
+            stdout = self._str(cpe.stdout)
+            if f'<{keystore.key_alias}> does not exist' in stdout:
+                raise ValueError(f'Alias {shlex.quote(keystore.key_alias)} does not exist in keystore') from cpe
+            elif 'keystore password was incorrect' in stdout:
+                raise ValueError('Invalid keystore password') from cpe
+            elif 'file does not exist' in stdout:
+                raise ValueError('Keystore does not exist') from cpe
+            else:
+                raise ValueError(stdout.strip()) from cpe

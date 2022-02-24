@@ -6,9 +6,9 @@ from .certificate_attributes import CertificateAttributes
 
 @dataclass
 class Keystore:
-    certificate_attributes: CertificateAttributes
     key_alias: str
     key_password: str
     store_password: str
     store_path: pathlib.Path
+    certificate_attributes: CertificateAttributes = CertificateAttributes()
     validity: int = 10000  # Validity duration in days

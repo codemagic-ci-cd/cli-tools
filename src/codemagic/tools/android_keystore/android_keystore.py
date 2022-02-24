@@ -124,16 +124,20 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             store_path=KeystorePath.resolve_value(keystore_path),
             store_password=store_password,
         )
-        self.logger.info(Colors.GREEN(f'Create Android debug keystore at {keystore.store_path}'))
+        self.logger.info(Colors.GREEN(f'Create Android keystore at {keystore.store_path}'))
         if keystore.store_path.exists():
             if overwrite_existing:
                 self.logger.info(f'Remove existing keystore from {keystore.store_path}')
                 keystore.store_path.unlink()
             else:
-                raise AndroidKeystoreError(f'Keystore already exists at {keystore.store_path}')
+                error = f'Keystore already exists at {keystore.store_path}'
+                raise AndroidKeystoreArgument.KEYSTORE_PATH.raise_argument_error(error)
 
         keystore.store_path.parent.mkdir(parents=True, exist_ok=True)
-        Keytool().generate_keystore(keystore)
+        try:
+            Keytool().generate_keystore(keystore)
+        except IOError:
+            raise AndroidKeystoreError('Creating keystore failed')
         return keystore
 
     @cli.action(
@@ -156,6 +160,51 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             issuer_country='US',
             overwrite_existing=overwrite_existing,
         )
+
+    @cli.action(
+        'verify',
+        AndroidKeystoreArgument.KEYSTORE_PATH,
+        AndroidKeystoreArgument.KEYSTORE_PASSWORD,
+        AndroidKeystoreArgument.KEY_ALIAS,
+        AndroidKeystoreArgument.KEY_PASSWORD,
+    )
+    def verify(
+            self,
+            keystore_path: Union[pathlib.Path, KeystorePath],
+            keystore_password: Union[str, KeystorePassword],
+            key_alias: Union[str, KeyAlias],
+            key_password: Optional[Union[str, KeyPassword]] = None,
+    ):
+        """
+        Check that the keystore password, key password and key alias are correct
+        for specified keystore
+        """
+        store_password: str = KeystorePassword.resolve_value(keystore_password)
+        if key_password is None:
+            _key_password: str = store_password
+        else:
+            _key_password = KeyPassword.resolve_value(key_password)
+
+        keystore = Keystore(
+            key_alias=KeyAlias.resolve_value(key_alias),
+            key_password=_key_password,
+            store_path=KeystorePath.resolve_value(keystore_path),
+            store_password=store_password,
+        )
+
+        self.logger.info(f'Verify Android keystore at "{keystore.store_path}"')
+        if not keystore.store_path.is_file():
+            error = f'Keystore does not exists at {keystore.store_path}'
+            raise AndroidKeystoreArgument.KEYSTORE_PATH.raise_argument_error(error)
+
+        try:
+            Keytool().validate_keystore(keystore)
+        except ValueError as ve:
+            raise AndroidKeystoreError(str(ve)) from ve
+        self.logger.info((
+            f'Keystore "{keystore.store_path}" has alias "{keystore.key_alias}" '
+            f'and can be unlocked with given passwords'
+        ))
 
 
 if __name__ == '__main__':
