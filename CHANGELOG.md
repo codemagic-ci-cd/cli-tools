@@ -1,4 +1,4 @@
-Version 21.0.0
+Version 0.21.0
 -------------
 
 This release contains updates from [PR #206](https://github.com/codemagic-ci-cd/cli-tools/pull/206).
@@ -23,7 +23,7 @@ This release contains updates from [PR #206](https://github.com/codemagic-ci-cd/
 - Add documentation for action `android-keystore create-debug-keystore`. 
 - Add documentation for action `android-keystore verify`. 
 
-Version 20.0.0
+Version 0.20.0
 -------------
 
 This release contains improvements from [PR #205](https://github.com/codemagic-ci-cd/cli-tools/pull/205).
