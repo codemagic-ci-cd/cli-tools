@@ -12,9 +12,16 @@ This release contains updates from [PR #206](https://github.com/codemagic-ci-cd/
 **Development**
 - Add optional `env` keyword argument to `CliProcess.execute` method to specify process specific environment variables.
 - Add dataclass `CertificateAttributes` to store certificate issuer information.
-- Add dataclass `Keychain` to store keychain information.
+- Add dataclass `Keystore` to store keystore information.
 - Add new module `codemagic.shell_tools` to contain Python wrappers for command line utilities.
 - Add minimal Python wrapper for `keytool` command line utility in `codemagic.shell_tools.Keytool`.
+
+
+**Docs**
+- Add documentation for tool `android-keystore`.
+- Add documentation for action `android-keystore create`. 
+- Add documentation for action `android-keystore create-debug-keystore`. 
+- Add documentation for action `android-keystore verify`. 
 
 Version 20.0.0
 -------------
