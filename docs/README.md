@@ -5,6 +5,7 @@ CLI tools
 |Tool name|Description|
 | :--- | :--- |
 |[`android-app-bundle`](android-app-bundle/README.md)|Manage Android App Bundles using     [Bundletool](https://developer.android.com/studio/command-line/bundletool)|
+|[`android-keystore`](android-keystore/README.md)|Manage your Android app code signing Keystores|
 |[`app-store-connect`](app-store-connect/README.md)|Interact with Apple services via App Store Connect API|
 |[`codemagic-cli-tools`](codemagic-cli-tools/README.md)|Show general information of installed Codemagic CLI tools|
 |[`git-changelog`](git-changelog/README.md)|Generate a changelog text from git history|
