@@ -1,3 +1,5 @@
+import pathlib
+
 from codemagic import cli
 from codemagic.cli import Colors
 
@@ -8,7 +10,7 @@ class AndroidKeystoreArgument(cli.Argument):
     KEYSTORE_PATH = cli.ArgumentProperties(
         key='keystore_path',
         flags=('-k', '--ks', '--keystore'),
-        type=argument_types.KeystorePath,
+        type=pathlib.Path,
         description='Path where your keystore should be created or read from',
     )
     KEYSTORE_PASSWORD = cli.ArgumentProperties(
@@ -21,7 +23,6 @@ class AndroidKeystoreArgument(cli.Argument):
     KEY_ALIAS = cli.ArgumentProperties(
         key='key_alias',
         flags=('-a', '--ks-key-alias', '--alias'),
-        type=argument_types.KeyAlias,
         description='An identifying name for your keystore key',
         argparse_kwargs={'required': True},
     )
@@ -52,34 +53,40 @@ class CreateAndroidKeystoreArgument(cli.Argument):
             'action': 'store_true',
         },
     )
+    VALIDITY_DAYS = cli.ArgumentProperties(
+        key='validity_days',
+        flags=('--validity',),
+        type=int,
+        description='How long will the keystore be valid in days',
+        argparse_kwargs={
+            'required': False,
+            'default': 10000,
+        },
+    )
 
 
 class AndroidKeystoreIssuerArgument(cli.Argument):
     COMMON_NAME = cli.ArgumentProperties(
         key='issuer_common_name',
         flags=('-CN', '--common-name'),
-        type=argument_types.CommonName,
         description='Common name of the keystore issuer. Either first and last name or company name',
         argparse_kwargs={'required': False},
     )
     ORGANIZATION = cli.ArgumentProperties(
         key='issuer_organization',
         flags=('-O', '--organization'),
-        type=argument_types.Organization,
         description='Organization of the keystore issuer',
         argparse_kwargs={'required': False},
     )
     ORGANIZATION_UNIT = cli.ArgumentProperties(
         key='issuer_organization_unit',
         flags=('-OU', '--organization-unit'),
-        type=argument_types.OrganizationUnit,
         description=f'Organizational unit of the keystore issuer. For example `{Colors.WHITE("engineering")}`',
         argparse_kwargs={'required': False},
     )
     LOCALITY = cli.ArgumentProperties(
         key='issuer_locality',
         flags=('-L', '--locality'),
-        type=argument_types.Locality,
         description=(
             'Identifies the place where the keystore issuer resides. '
             'Locality can be a city, county, township, or other geographic region'
@@ -89,21 +96,19 @@ class AndroidKeystoreIssuerArgument(cli.Argument):
     STATE_OR_PROVINCE = cli.ArgumentProperties(
         key='issuer_state_or_province',
         flags=('-ST', '--state'),
-        type=argument_types.StateOrProvince,
         description='Identifies the state or province in which the keystore issuer resides',
         argparse_kwargs={'required': False},
     )
     COUNTRY = cli.ArgumentProperties(
         key='issuer_country',
         flags=('-C', '--country'),
-        type=argument_types.Country,
+        type=argument_types.two_letter_country_code,
         description='Two-letter code of the country in which the keystore issuer resides',
         argparse_kwargs={'required': False},
     )
     DISTINGUISHED_NAME = cli.ArgumentProperties(
         key='issuer_distinguished_name',
         flags=('-DN', '--distinguished-name'),
-        type=argument_types.DistinguishedName,
         description=(
             'Instead of individually defining all keystore issuer attributes, it is possible to '
             'just define the distinguished name or the certificate that is included in the keystore. '

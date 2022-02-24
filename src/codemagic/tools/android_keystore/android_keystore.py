@@ -11,17 +11,8 @@ from codemagic.models import CertificateAttributes
 from codemagic.models import Keystore
 from codemagic.shell_tools import Keytool
 
-from .argument_types import CommonName
-from .argument_types import Country
-from .argument_types import DistinguishedName
-from .argument_types import KeyAlias
 from .argument_types import KeyPassword
 from .argument_types import KeystorePassword
-from .argument_types import KeystorePath
-from .argument_types import Locality
-from .argument_types import Organization
-from .argument_types import OrganizationUnit
-from .argument_types import StateOrProvince
 from .arguments import AndroidKeystoreArgument
 from .arguments import AndroidKeystoreIssuerArgument
 from .arguments import CreateAndroidKeystoreArgument
@@ -39,31 +30,30 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     @classmethod
     def _get_certificate_attributes(
             cls,
-            issuer_common_name: Optional[Union[str, CommonName]],
-            issuer_organization: Optional[Union[str, Organization]],
-            issuer_organization_unit: Optional[Union[str, OrganizationUnit]],
-            issuer_locality: Optional[Union[str, Locality]],
-            issuer_state_or_province: Optional[Union[str, StateOrProvince]],
-            issuer_country: Optional[Union[str, Country]],
-            issuer_distinguished_name: Optional[Union[str, DistinguishedName]],
+            issuer_common_name: Optional[str],
+            issuer_organization: Optional[str],
+            issuer_organization_unit: Optional[str],
+            issuer_locality: Optional[str],
+            issuer_state_or_province: Optional[str],
+            issuer_country: Optional[str],
+            issuer_distinguished_name: Optional[str],
     ) -> CertificateAttributes:
         if issuer_distinguished_name is None:
             certificate_attributes = CertificateAttributes(
-                common_name=CommonName.resolve_optional_value(issuer_common_name),
-                organizational_unit=OrganizationUnit.resolve_optional_value(issuer_organization_unit),
-                organization=Organization.resolve_optional_value(issuer_organization),
-                locality=Locality.resolve_optional_value(issuer_locality),
-                state_or_province=StateOrProvince.resolve_optional_value(issuer_state_or_province),
-                country=Country.resolve_optional_value(issuer_country),
+                common_name=issuer_common_name,
+                organizational_unit=issuer_organization_unit,
+                organization=issuer_organization,
+                locality=issuer_locality,
+                state_or_province=issuer_state_or_province,
+                country=issuer_country,
             )
             if not certificate_attributes.is_valid():
                 raise AndroidKeystoreIssuerArgument.COMMON_NAME.raise_argument_error('Missing issuer information')
         else:
-            distinguished_name = DistinguishedName.resolve_value(issuer_distinguished_name)
             try:
-                certificate_attributes = CertificateAttributes.from_distinguished_name(distinguished_name)
+                certificate_attributes = CertificateAttributes.from_distinguished_name(issuer_distinguished_name)
             except ValueError:
-                error = f'Invalid distinguished name "{distinguished_name}"'
+                error = f'Invalid distinguished name "{issuer_distinguished_name}"'
                 raise AndroidKeystoreIssuerArgument.DISTINGUISHED_NAME.raise_argument_error(error)
             if not certificate_attributes.is_valid():
                 error = 'Missing issuer information'
@@ -78,6 +68,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         AndroidKeystoreArgument.KEY_ALIAS,
         AndroidKeystoreArgument.KEY_PASSWORD,
         CreateAndroidKeystoreArgument.OVERWRITE_EXISTING,
+        CreateAndroidKeystoreArgument.VALIDITY_DAYS,
         *AndroidKeystoreIssuerArgument.with_custom_argument_group(
             'set keystore issuer information. At least one is required',
             *AndroidKeystoreIssuerArgument,
@@ -85,18 +76,19 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     )
     def create(
             self,
-            keystore_path: Union[pathlib.Path, KeystorePath],
+            keystore_path: pathlib.Path,
             keystore_password: Union[str, KeystorePassword],
-            key_alias: Union[str, KeyAlias],
+            key_alias: str,
             key_password: Optional[Union[str, KeyPassword]] = None,
-            issuer_common_name: Optional[Union[str, CommonName]] = None,
-            issuer_organization: Optional[Union[str, Organization]] = None,
-            issuer_organization_unit: Optional[Union[str, OrganizationUnit]] = None,
-            issuer_locality: Optional[Union[str, Locality]] = None,
-            issuer_state_or_province: Optional[Union[str, StateOrProvince]] = None,
-            issuer_country: Optional[Union[str, Country]] = None,
-            issuer_distinguished_name: Optional[Union[str, DistinguishedName]] = None,
+            issuer_common_name: Optional[str] = None,
+            issuer_organization: Optional[str] = None,
+            issuer_organization_unit: Optional[str] = None,
+            issuer_locality: Optional[str] = None,
+            issuer_state_or_province: Optional[str] = None,
+            issuer_country: Optional[str] = None,
+            issuer_distinguished_name: Optional[str] = None,
             overwrite_existing: bool = False,
+            validity_days: int = CreateAndroidKeystoreArgument.VALIDITY_DAYS.get_default(),
     ) -> Keystore:
         """
         Create an Android keystore
@@ -119,10 +111,11 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
 
         keystore = Keystore(
             certificate_attributes=certificate_attributes,
-            key_alias=KeyAlias.resolve_value(key_alias),
+            key_alias=key_alias,
             key_password=_key_password,
-            store_path=KeystorePath.resolve_value(keystore_path),
+            store_path=keystore_path,
             store_password=store_password,
+            validity=validity_days,
         )
         self.logger.info(Colors.GREEN(f'Create Android keystore at {keystore.store_path}'))
         if keystore.store_path.exists():
@@ -143,10 +136,12 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     @cli.action(
         'create-debug-keystore',
         CreateAndroidKeystoreArgument.OVERWRITE_EXISTING,
+        CreateAndroidKeystoreArgument.VALIDITY_DAYS,
     )
     def create_debug_keystore(
             self,
             overwrite_existing: bool = False,
+            validity_days: int = CreateAndroidKeystoreArgument.VALIDITY_DAYS.get_default(),
     ) -> Keystore:
         """
         Create Android debug keystore at ~/.android/debug.keystore
@@ -159,6 +154,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             issuer_organization='Android',
             issuer_country='US',
             overwrite_existing=overwrite_existing,
+            validity_days=validity_days,
         )
 
     @cli.action(
@@ -170,9 +166,9 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     )
     def verify(
             self,
-            keystore_path: Union[pathlib.Path, KeystorePath],
+            keystore_path: pathlib.Path,
             keystore_password: Union[str, KeystorePassword],
-            key_alias: Union[str, KeyAlias],
+            key_alias: str,
             key_password: Optional[Union[str, KeyPassword]] = None,
     ):
         """
@@ -186,9 +182,9 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             _key_password = KeyPassword.resolve_value(key_password)
 
         keystore = Keystore(
-            key_alias=KeyAlias.resolve_value(key_alias),
+            key_alias=key_alias,
             key_password=_key_password,
-            store_path=KeystorePath.resolve_value(keystore_path),
+            store_path=keystore_path,
             store_password=store_password,
         )
 
