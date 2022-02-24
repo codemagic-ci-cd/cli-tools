@@ -3,7 +3,7 @@ android-keystore
 ================
 
 
-**Manage your Android app code signing Keystores**
+**Manage your Android app code signing keystores**
 ### Usage
 ```bash
 android-keystore [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

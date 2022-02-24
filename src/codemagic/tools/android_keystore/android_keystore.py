@@ -24,7 +24,7 @@ class AndroidKeystoreError(cli.CliAppException):
 
 class AndroidKeystore(cli.CliApp, PathFinderMixin):
     """
-    Manage your Android app code signing Keystores
+    Manage your Android app code signing keystores
     """
 
     @classmethod
