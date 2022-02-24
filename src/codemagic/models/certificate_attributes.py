@@ -26,16 +26,21 @@ class CertificateAttributes:
         """
         certificate_attributes = cls()
         for part in distinguished_name.split(','):
+            if not part.strip():
+                continue
             short_name, value = part.strip().split('=')
             for class_field in fields(cls):
                 if class_field.metadata['abbr'] == short_name:
                     setattr(certificate_attributes, class_field.name, value)
                     break
             else:
-                raise ValueError('Unknown attribute name in certificate distinguished name', short_name)
+                raise ValueError(f'Unknown attribute name {short_name!r} in certificate distinguished name')
         return certificate_attributes
 
     def is_valid(self) -> bool:
+        """
+        Verify that at least one attribute is specified
+        """
         return bool(self.get_components())
 
     def get_components(self) -> Iterable[Tuple[str, str]]:

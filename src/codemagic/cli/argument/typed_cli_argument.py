@@ -103,6 +103,12 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
         return cls.default_value
 
     @classmethod
+    def resolve_optional_value(cls, argument_instance: Optional[Union[T, TypedCliArgument]]) -> Optional[T]:
+        if argument_instance is None and cls.default_value is None:
+            return None
+        return cls.resolve_value(argument_instance)
+
+    @classmethod
     def from_environment_variable_default(cls) -> Optional['TypedCliArgument[T]']:
         if cls.environment_variable_key is None:
             return None
