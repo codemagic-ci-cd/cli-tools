@@ -1,3 +1,21 @@
+Version 20.0.0
+-------------
+
+This release contains improvements from [PR #205](https://github.com/codemagic-ci-cd/cli-tools/pull/205).
+
+**Features**
+- Add option `--p12-path` for `app-store-connect` actions `create-certificate` and `get-certificate` to specify PKCS#12 container save path that can be used together with `--save` to specify exact file path where the container is saved. It overrides default save location, which is configured by `--certificates-dir`.
+
+**Fixes**
+- Support certificates that do not have common name defined in subject.
+
+**Development**
+- Describe new common argument type `CommonArgumentType.non_existing_path` which asserts that specified file does not exist.
+- PKCS#12 support in `pyOpenSSL` is deprecated and `cryptography` APIs should be used instead. Replace the deprecated `crypto.load_pkcs12` in `Certificate.from_p12` with `cryptography`'s `pkcs12.load_key_and_certificates`.
+- Add new factory method `PricateKey.from_p12` to load private key from PKCS#12 container.
+- Allow using `PrivateKey` instances for `AppStoreConnect` methods that take `certificate_key` argument. Before only instances of `Types.CertificateKeyArgument` were supported.
+- Support `DSA` and elliptic curve private keys for `PrivateKey`.
+
 Version 0.19.1
 -------------
 

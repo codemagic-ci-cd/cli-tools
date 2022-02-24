@@ -72,8 +72,10 @@ from ._app_store_connect.resource_printer import ResourcePrinter
 
 
 def _get_certificate_key(
-        certificate_key: Optional[Types.CertificateKeyArgument] = None,
+        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None) -> Optional[PrivateKey]:
+    if isinstance(certificate_key, PrivateKey):
+        return certificate_key
     password = certificate_key_password.value if certificate_key_password else None
     if certificate_key is not None:
         try:
@@ -415,12 +417,14 @@ class AppStoreConnect(
                 CertificateArgument.PRIVATE_KEY,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
+                CertificateArgument.P12_CONTAINER_SAVE_PATH,
                 CommonArgument.SAVE)
     def create_certificate(self,
                            certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
-                           certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                           certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                            p12_container_password: str = '',
+                           p12_container_save_path: Optional[pathlib.Path] = None,
                            save: bool = False,
                            should_print: bool = True) -> SigningCertificate:
         """
@@ -438,7 +442,7 @@ class AppStoreConnect(
         certificate = self._create_resource(self.api_client.signing_certificates, should_print, **create_params)
 
         if save:
-            self._save_certificate(certificate, private_key, p12_container_password)
+            self._save_certificate(certificate, private_key, p12_container_password, p12_container_save_path)
         return certificate
 
     @cli.action('get-certificate',
@@ -446,12 +450,14 @@ class AppStoreConnect(
                 CertificateArgument.PRIVATE_KEY,
                 CertificateArgument.PRIVATE_KEY_PASSWORD,
                 CertificateArgument.P12_CONTAINER_PASSWORD,
+                CertificateArgument.P12_CONTAINER_SAVE_PATH,
                 CommonArgument.SAVE)
     def get_certificate(self,
                         certificate_resource_id: ResourceId,
-                        certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                         p12_container_password: str = '',
+                        p12_container_save_path: Optional[pathlib.Path] = None,
                         save: bool = False,
                         should_print: bool = True) -> SigningCertificate:
         """
@@ -467,7 +473,7 @@ class AppStoreConnect(
         certificate = self._get_resource(certificate_resource_id, self.api_client.signing_certificates, should_print)
 
         if save:
-            self._save_certificate(certificate, private_key, p12_container_password)
+            self._save_certificate(certificate, private_key, p12_container_password, p12_container_save_path)
         return certificate
 
     @cli.action('delete-certificate',
@@ -495,7 +501,7 @@ class AppStoreConnect(
             certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
             profile_type: Optional[ProfileType] = None,
             display_name: Optional[str] = None,
-            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+            certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
             p12_container_password: str = '',
             save: bool = False,
@@ -719,7 +725,7 @@ class AppStoreConnect(
                 CommonArgument.CREATE_RESOURCE)
     def fetch_signing_files(self,
                             bundle_id_identifier: str,
-                            certificate_key: Optional[Types.CertificateKeyArgument] = None,
+                            certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
                             certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
                             p12_container_password: str = '',
                             platform: BundleIdPlatform = BundleIdPlatform.IOS,
@@ -786,7 +792,7 @@ class AppStoreConnect(
 
     def _get_or_create_certificates(self,
                                     profile_type: ProfileType,
-                                    certificate_key: Optional[Types.CertificateKeyArgument],
+                                    certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]],
                                     certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
                                     create_resource: bool) -> List[SigningCertificate]:
         certificate_types = [CertificateType.from_profile_type(profile_type)]
@@ -907,14 +913,20 @@ class AppStoreConnect(
         self.printer.log_saved(profile, profile_path)
         return profile_path
 
-    def _save_certificate(self,
-                          certificate: SigningCertificate,
-                          private_key: PrivateKey,
-                          p12_container_password: str) -> pathlib.Path:
-        certificate_path = self._get_unique_path(
-            f'{certificate.attributes.certificateType}_{certificate.id}.p12',
-            self.certificates_directory,
-        )
+    def _save_certificate(
+            self,
+            certificate: SigningCertificate,
+            private_key: PrivateKey,
+            p12_container_password: str,
+            certificate_save_path: Optional[pathlib.Path] = None,
+    ) -> pathlib.Path:
+        if certificate_save_path is None:
+            certificate_path = self._get_unique_path(
+                f'{certificate.attributes.certificateType}_{certificate.id}.p12',
+                self.certificates_directory,
+            )
+        else:
+            certificate_path = certificate_save_path
         try:
             p12_path = Certificate.from_ans1(certificate.asn1_content).export_p12(
                 private_key,
