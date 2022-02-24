@@ -8,6 +8,7 @@ create-debug-keystore
 ```bash
 android-keystore create-debug-keystore [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [-o]
+    [--validity VALIDITY_DAYS]
 ```
 ### Optional arguments for action `create-debug-keystore`
 
@@ -15,6 +16,10 @@ android-keystore create-debug-keystore [-h] [--log-stream STREAM] [--no-color] [
 
 
 Overwrite keystore at specified path in case it exists
+##### `--validity=VALIDITY_DAYS`
+
+
+How long will the keystore be valid in days. Default:&nbsp;`10000`
 ### Common options
 
 ##### `-h, --help`

@@ -41,3 +41,4 @@ Enable verbose logging for commands
 | :--- | :--- |
 |[`create`](create.md)|Create an Android keystore|
 |[`create-debug-keystore`](create-debug-keystore.md)|Create Android debug keystore at ~/.android/debug.keystore|
+|[`verify`](verify.md)|Check that the keystore password, key password and key alias are correct         for specified keystore|
