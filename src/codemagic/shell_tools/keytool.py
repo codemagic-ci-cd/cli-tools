@@ -14,20 +14,23 @@ class Keytool(AbstractShellTool):
     _executable_name = 'keytool'
 
     def generate_keystore(self, keystore: Keystore):
+        if keystore.key_password:
+            key_password: str = keystore.key_password
+        else:
+            key_password = keystore.store_password
+
         command = (
             self.executable, '-genkey',
             '-alias', keystore.key_alias,
             '-keyalg', 'RSA',
             '-dname', keystore.certificate_attributes.get_distinguished_name(),
             '-validity', str(keystore.validity),
-            '-keypass', keystore.key_password,
+            '-keypass', key_password,
             '-keystore', str(keystore.path),
             '-storepass', keystore.store_password,
         )
-        self._run_command(
-            command,
-            obfuscate_patterns=(keystore.store_password, keystore.key_password),
-        )
+
+        self._run_command(command, obfuscate_patterns=(keystore.store_password, key_password))
 
     def _run_command(
             self,
