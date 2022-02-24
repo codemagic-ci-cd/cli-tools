@@ -14,6 +14,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
 from OpenSSL import crypto
 from OpenSSL.crypto import X509
 
@@ -56,8 +57,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @classmethod
     def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> Certificate:
         password_encoded = None if password is None else cls._bytes(password)
-        p12_archive = crypto.load_pkcs12(p12, password_encoded)
-        x509_certificate = p12_archive.get_certificate()
+        _, certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
+        x509_certificate = X509.from_cryptography(certificate)
         return Certificate(x509_certificate)
 
     @property
@@ -72,7 +73,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def common_name(self) -> str:
-        return self.subject['CN']
+        return self.subject.get('CN', '')
 
     @property
     def not_after(self) -> str:
@@ -138,7 +139,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, 'PEM')])
         csr_builder = x509.CertificateSigningRequestBuilder() \
             .subject_name(subject_name)
-        csr = csr_builder.sign(private_key.rsa_key, hashes.SHA256(), default_backend())
+        csr = csr_builder.sign(private_key.cryptography_private_key, hashes.SHA256(), default_backend())
         return csr
 
     @classmethod
@@ -168,7 +169,6 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.x509.to_cryptography().public_key()
-        rsa_key_public_key = private_key.public_key
         certificate_public_numbers = certificate_public_key.public_numbers()
-        rsa_key_public_numbers = rsa_key_public_key.public_numbers()
-        return certificate_public_numbers == rsa_key_public_numbers
+        private_key_public_numbers = private_key.public_key.public_numbers()
+        return certificate_public_numbers == private_key_public_numbers

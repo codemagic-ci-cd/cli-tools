@@ -1,3 +1,55 @@
+Version 20.0.0
+-------------
+
+This release contains improvements from [PR #205](https://github.com/codemagic-ci-cd/cli-tools/pull/205).
+
+**Features**
+- Add option `--p12-path` for `app-store-connect` actions `create-certificate` and `get-certificate` to specify PKCS#12 container save path that can be used together with `--save` to specify exact file path where the container is saved. It overrides default save location, which is configured by `--certificates-dir`.
+
+**Fixes**
+- Support certificates that do not have common name defined in subject.
+
+**Development**
+- Describe new common argument type `CommonArgumentType.non_existing_path` which asserts that specified file does not exist.
+- PKCS#12 support in `pyOpenSSL` is deprecated and `cryptography` APIs should be used instead. Replace the deprecated `crypto.load_pkcs12` in `Certificate.from_p12` with `cryptography`'s `pkcs12.load_key_and_certificates`.
+- Add new factory method `PricateKey.from_p12` to load private key from PKCS#12 container.
+- Allow using `PrivateKey` instances for `AppStoreConnect` methods that take `certificate_key` argument. Before only instances of `Types.CertificateKeyArgument` were supported.
+- Support `DSA` and elliptic curve private keys for `PrivateKey`.
+
+Version 0.19.1
+-------------
+
+This is a bugfix release from [PR #204](https://github.com/codemagic-ci-cd/cli-tools/pull/204) to address the regression introduced in [PR #203](https://github.com/codemagic-ci-cd/cli-tools/pull/203).
+
+**Fixes**
+- Fix export options plist generation with `xcode-project use-profiles` in case provisioning profiles with wildcard identifiers (such as `*` or `com.example.*`) were used.
+
+**Development**
+- Add new data container class `ProvisioningProfileAssignment` which can be used to track the Xcode project target onto which certain provisioning profile was assigned to.
+- Change `ExportOptions` factory method `from_used_profiles(cls, used_profiles: Sequence[ProvisioningProfile]) -> ExportOptions` to `from_profile_assignments(cls, profile_assignments: Sequence[ProvisioningProfileAssignment])`. This will persist the actual bundle identifiers of the Xcode targets when the property list constructed, instead of possibly using wildcard identifiers from provisioning profiles.
+
+Version 0.19.0
+-------------
+
+This release includes changes from [PR #203](https://github.com/codemagic-ci-cd/cli-tools/pull/203) to improve usability and feedback from `xcode-project use-profiles`.
+
+**Features**
+- Improve `xcode-project use-profiles` log output. Highlight Xcode targets for which code signing settings were not configured, but are likely necessary for successful build.
+- Add `--code-signing-setup-verbose-logging` option to action `xcode-project use-profiles` which turns on detailed log output for code signing settings configuration.
+
+**Docs**
+- Update docs for `xcode-project use-profiles` action. Add documentation for option `--code-signing-setup-verbose-logging`.
+
+**Development**
+- **Breaking.** Remove dataclass `codemagic.models.matched_profiles.MatchedProfile` and all its usages.
+- **Breaking.** Replace `ExportOptions.from_matched_profiles` with `ExportOptions.from_used_profiles`. Old method was relying on the removed `MatchedProfile` class, while new method has more generic interface requiring only sequence of `ProvisioningProfiles` as arguments.
+- **Breaking.** Change command line interface for `code_signing_manager.rb`:
+  - Replace command line option `-u` / `--used-profiles` with `-r` / `--result-path` to better reflect the updated contents of result file.
+  - Results saved into file specified by `--result-path` will now include all found Xcode targets, including those that were not assigned provisioning profile. The targets for which matching provisioning profile was found and configured, the reference also includes the used provisioning profile `uuid`.
+  - The saved JSON file structure what used to be `{profile_uuid: [<target_info>, ...]}` is now `[<target_info>, ...]`.
+- Always multiplex `code_signing_manager.rb` verbose log output to main file log.
+- `CodeSigningManager.use_profiles` logs Xcode project targets for which provisioning profiles were not found, but are likely necessary for building `ipa`.
+
 Version 0.18.1
 -------------
 
