@@ -1,4 +1,5 @@
 from .android_app_bundle import AndroidAppBundle
+from .android_keystore import AndroidKeystore
 from .app_store_connect import AppStoreConnect
 from .codemagic_cli_tools import CodemagicCliTools
 from .git_changelog import GitChangelog

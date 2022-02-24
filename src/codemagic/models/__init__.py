@@ -2,11 +2,13 @@ from .altool import Altool
 from .android_signing_info import AndroidSigningInfo
 from .bundle_id_detector import BundleIdDetector
 from .certificate import Certificate
+from .certificate_attributes import CertificateAttributes
 from .code_sign_entitlements import CodeSignEntitlements
 from .code_signing_settings_manager import CodeSigningSettingsManager
 from .export_options import ExportOptions
 from .json_serializable import JsonSerializable
 from .json_serializable import JsonSerializableMeta
+from .keystore import Keystore
 from .pbx_project import PbxProject
 from .private_key import PrivateKey
 from .provisioning_profile import ProvisioningProfile

@@ -43,7 +43,9 @@ class Argument(ArgumentProperties, enum.Enum):
                 argument.__class__.__name__,
                 {argument.name: updated_properties},  # type: ignore
             )
-            yield argument_class[argument.name]
+            new_argument = argument_class[argument.name]
+            new_argument.register = argument.register  # type: ignore
+            yield new_argument
 
     @classmethod
     def resolve_optional_two_way_switch(cls,

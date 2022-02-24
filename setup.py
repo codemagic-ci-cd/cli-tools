@@ -39,8 +39,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'app-store-connect = codemagic.tools:AppStoreConnect.invoke_cli',
             'android-app-bundle = codemagic.tools:AndroidAppBundle.invoke_cli',
+            'android-keystore = codemagic.tools:AndroidKeystore.invoke_cli',
+            'app-store-connect = codemagic.tools:AppStoreConnect.invoke_cli',
             'codemagic-cli-tools = codemagic.tools:CodemagicCliTools.invoke_cli',
             'git-changelog = codemagic.tools:GitChangelog.invoke_cli',
             'google-play = codemagic.tools:GooglePlay.invoke_cli',
