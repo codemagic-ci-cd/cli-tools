@@ -2,7 +2,7 @@ Version 0.22.0
 -------------
 
 **Development**
-- [PEP 561](https://www.python.org/dev/peps/pep-0561/) compliance. Include `py.typed` marker file to indicate that this package has inline type hints.
+- [PEP 561](https://www.python.org/dev/peps/pep-0561/) compliance. Include `py.typed` marker file to indicate that this package has inline type hints. [PR #207](https://github.com/codemagic-ci-cd/cli-tools/pull/207)
 
 Version 0.21.0
 -------------
