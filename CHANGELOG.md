@@ -1,3 +1,9 @@
+Version 0.22.0
+-------------
+
+**Development**
+- [PEP 561](https://www.python.org/dev/peps/pep-0561/) compliance. Include `py.typed` marker file to indicate that this package has inline type hints.
+
 Version 0.21.0
 -------------
 
