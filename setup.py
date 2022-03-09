@@ -21,6 +21,7 @@ setup(
     long_description_content_type='text/markdown',
     packages=find_packages('src'),
     package_dir={'': 'src'},
+    package_data={'codemagic': ['py.typed']},
     include_package_data=True,
     scripts=['bin/code_signing_manager.rb'],
     python_requires='>=3.7',
