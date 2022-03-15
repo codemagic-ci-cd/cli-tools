@@ -4,10 +4,12 @@ import pathlib
 import plistlib
 import shutil
 import subprocess
+from distutils.version import LooseVersion
 from typing import Any
 from typing import AnyStr
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -33,9 +35,32 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
         return CodeSignEntitlements(parsed_plist)
 
     @classmethod
+    def _get_codesign_command(cls, app_path: pathlib.Path) -> Tuple[str, ...]:
+        from codemagic.models import Xcode
+        if Xcode.get_selected().version < LooseVersion('13.3'):
+            # The "--entitlements" option of codesign takes "path" parameter to specify where the
+            # entitlements should be displayed. In order to send the output to stdout instead
+            # of file, "-" needs to be specified. Until Xcode 13.2 it had the following
+            # behaviour according to manpage:
+            # > By default, the binary "blob" header is returned intact;
+            # > prefix the path with a colon ":" to automatically strip it off.
+            # Hence entitlements path needs to be given as ":-".
+            command = ('codesign', '--display', '--entitlements', ':-', str(app_path))
+        else:
+            # Starting from Xcode 13.3 codesign command line API changed a little.
+            # By default the displayed information is not in plist/xml format any more:
+            # > The format is designed to be moderately easy to parse by simple
+            # > scripts while still making sense to human eyes.
+            # Hence the need for additional "--xml" option. Additionally
+            # specifying ':' in the path was deprecated and when xml formatting is requested,
+            # then binary blob header is automatically removed.
+            command = ('codesign', '--display', '--entitlements', '-', '--xml', str(app_path))
+        return command
+
+    @classmethod
     def from_app(cls, app_path: pathlib.Path) -> CodeSignEntitlements:
         cls._ensure_codesign()
-        cmd = ('codesign', '-d', '--entitlements', ':-', str(app_path))
+        cmd = cls._get_codesign_command(app_path)
         cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
@@ -47,7 +72,10 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
         except subprocess.CalledProcessError as cpe:
             raise IOError(f'Failed to obtain entitlements from {app_path}, {cls._str(cpe.stderr)}')
 
-        return cls.from_plist(output)
+        # With Xcode 13.3+ codesign adds a 0 byte to the end of the XML formatted plist
+        plist = cls._bytes(output).rstrip(b'\x00')
+
+        return cls.from_plist(plist)
 
     @classmethod
     def from_ipa(cls, ipa_path: pathlib.Path) -> CodeSignEntitlements:
