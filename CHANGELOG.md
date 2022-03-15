@@ -1,4 +1,4 @@
-Version 0.22.1
+Version 0.22.2
 -------------
 
 This is a bugfix release from [PR #209](https://github.com/codemagic-ci-cd/cli-tools/pull/209).
