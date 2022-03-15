@@ -1,6 +1,14 @@
 Version 0.22.1
 -------------
 
+This is a bugfix release from [PR #209](https://github.com/codemagic-ci-cd/cli-tools/pull/209).
+
+**Fixes**
+- Fix loading code signing entitlements from Xcode archives and iOS App Store Packages (`*.xcarchive` and `*.ipa` files respectively) with Xcode 13.3+. A tool called `codesign` which is bundled with Xcode is used to extract code signing entitlements information from application packages. The version of `codesign` included in Xcode 13.3 came with some modifications that broke the flow which is used to collect code signing entitlements.
+
+Version 0.22.1
+-------------
+
 **Development**
 - [PEP 561](https://www.python.org/dev/peps/pep-0561/) compliance. Include `py.typed` marker file to indicate that this package has inline type hints. [PR #207](https://github.com/codemagic-ci-cd/cli-tools/pull/207)
 
