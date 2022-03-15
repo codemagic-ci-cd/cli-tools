@@ -45,7 +45,7 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
             # > By default, the binary "blob" header is returned intact;
             # > prefix the path with a colon ":" to automatically strip it off.
             # Hence entitlements path needs to be given as ":-".
-            command = ('codesign', '--display', '--entitlements', ':-', str(app_path))
+            command: Tuple[str, ...] = ('codesign', '--display', '--entitlements', ':-', str(app_path))
         else:
             # Starting from Xcode 13.3 codesign command line API changed a little.
             # By default the displayed information is not in plist/xml format any more:
