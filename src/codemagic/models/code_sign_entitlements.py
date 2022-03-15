@@ -4,6 +4,7 @@ import pathlib
 import plistlib
 import shutil
 import subprocess
+import tempfile
 from distutils.version import LooseVersion
 from typing import Any
 from typing import AnyStr
@@ -79,11 +80,12 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
 
     @classmethod
     def from_ipa(cls, ipa_path: pathlib.Path) -> CodeSignEntitlements:
-        try:
-            app_path = Ipa(ipa_path).extract_app()
-        except IOError:
-            raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
-        return cls.from_app(app_path)
+        with tempfile.TemporaryDirectory() as td:
+            try:
+                app_path = Ipa(ipa_path).extract_app(pathlib.Path(td))
+            except IOError:
+                raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
+            return cls.from_app(app_path)
 
     @classmethod
     def from_xcarchive(cls, xcarchive_path: pathlib.Path) -> CodeSignEntitlements:

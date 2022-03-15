@@ -1,7 +1,6 @@
 import pathlib
 import plistlib
 import subprocess
-import tempfile
 import zipfile
 from functools import lru_cache
 from typing import Any
@@ -57,8 +56,8 @@ class Ipa(AbstractPackage):
         filename_filter.__name__ = f'Payload/*.app/{filename}'
         return self._extract_file(filename_filter)
 
-    def extract_app(self) -> pathlib.Path:
-        with zipfile.ZipFile(self.path) as zf, tempfile.TemporaryDirectory() as td:
+    def extract_app(self, target_directory: pathlib.Path) -> pathlib.Path:
+        with zipfile.ZipFile(self.path) as zf:
             for zi in zf.filelist:
                 path = pathlib.Path(zi.filename)
                 try:
@@ -66,10 +65,10 @@ class Ipa(AbstractPackage):
                 except ValueError:
                     continue
                 if p1 == 'Payload' and p2.endswith('.app'):
-                    zf.extract(zi, path=td)
+                    zf.extract(zi, path=target_directory)
 
             try:
-                return next(pathlib.Path(td).glob('Payload/*.app'))
+                return next(pathlib.Path(target_directory).glob('Payload/*.app'))
             except StopIteration:
                 raise IOError(f'Failed to extract Payload/*.app from {self.path}')
 
