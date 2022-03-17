@@ -12,6 +12,7 @@ class AndroidKeystoreArgument(cli.Argument):
         flags=('-k', '--ks', '--keystore'),
         type=pathlib.Path,
         description='Path where your keystore should be created or read from',
+        argparse_kwargs={'required': True},
     )
     KEYSTORE_PASSWORD = cli.ArgumentProperties(
         key='keystore_password',

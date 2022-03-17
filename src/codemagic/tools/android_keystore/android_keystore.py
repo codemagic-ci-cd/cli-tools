@@ -149,7 +149,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         return self.create(
             keystore_path=pathlib.Path('~/.android/debug.keystore').expanduser(),
             key_alias='androiddebugkey',
-            store_password='android',
+            keystore_password='android',
             issuer_common_name='Android Debug',
             issuer_organization='Android',
             issuer_country='US',
