@@ -1,3 +1,15 @@
+Version 0.22.3
+-------------
+
+This is a bugfix release from [PR #210](https://github.com/codemagic-ci-cd/cli-tools/pull/210) to fix problems with tool `android-keystore` that was first added in [version 0.21.0](https://github.com/codemagic-ci-cd/cli-tools/releases/tag/v0.21.0).
+
+**Improvements**
+- Use better error message for keystore validation in case non-keystore file is passed for validation.
+
+**Fixes**
+- Fix debug keystore creation using action `android-keystore create-debug-keysotre`. It was using invalid keyword argument to specify keystore path.
+- Make keystore path argument `--keystore` required for `android-keystore create` and `android-keystore verify` actions.
+
 Version 0.22.2
 -------------
 

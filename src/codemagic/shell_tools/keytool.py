@@ -1,4 +1,3 @@
-import shlex
 import subprocess
 
 from codemagic.models import Keystore
@@ -62,10 +61,12 @@ class Keytool(AbstractShellTool):
         except subprocess.CalledProcessError as cpe:
             stdout = self._str(cpe.stdout)
             if f'<{keystore.key_alias}> does not exist' in stdout:
-                raise ValueError(f'Alias {shlex.quote(keystore.key_alias)} does not exist in keystore') from cpe
+                raise ValueError(f'Alias "{keystore.key_alias}" does not exist in keystore') from cpe
             elif 'keystore password was incorrect' in stdout:
                 raise ValueError('Invalid keystore password') from cpe
             elif 'file does not exist' in stdout:
                 raise ValueError('Keystore does not exist') from cpe
+            elif 'Unrecognized keystore format' in stdout:
+                raise ValueError('Unrecognized keystore format') from cpe
             else:
                 raise ValueError(stdout.strip()) from cpe
