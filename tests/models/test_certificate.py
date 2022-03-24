@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from unittest import mock
+from unittest.mock import PropertyMock
 
 import pytest
 from cryptography.hazmat.primitives import hashes
@@ -144,3 +145,21 @@ def test_certificate_sha256_fingerprint(certificate_asn1):
     expected_fingerprint = \
         '42 FD E9 13 4E 92 B3 FC 2C 60 47 A9 6F B3 31 38 8F B4 60 85 BC B3 7C 67 0F 5D 78 76 1F DE E5 E3'
     assert certificate.get_fingerprint(hashes.SHA256()) == expected_fingerprint.replace(' ', '')
+
+
+@pytest.mark.parametrize('is_development_cert, certificate_common_name', [
+    (False, '3rd Party Mac Developer Application: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (False, '3rd Party Mac Developer Installer: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (False, 'Apple Distribution: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (False, 'Developer ID Application: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (False, 'iPhone Distribution: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (True, 'Apple Development: NEVERCODE LTD (X8NNQ9CYL2)'),
+    (True, 'Mac Developer: Created via API (83G8YPW74M)'),
+    (True, 'iPhone Developer: Created via API (83G8YPW74M)'),
+])
+def test_is_development_certificate(is_development_cert, certificate_common_name, certificate_asn1):
+    patched_common_name = PropertyMock(return_value=certificate_common_name)
+    with mock.patch.object(Certificate, 'common_name', new_callable=patched_common_name):
+        certificate = Certificate.from_ans1(certificate_asn1)
+        assert certificate.common_name == certificate_common_name
+        assert certificate.is_development_certificate is is_development_cert
