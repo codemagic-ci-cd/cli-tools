@@ -5,39 +5,39 @@ from typing import Union
 import pytest
 
 
-def _export_options_plist_path():
-    return pathlib.Path(__file__).parent / 'mocks' / 'export_options.plist'
+@pytest.fixture
+def _models_mocks_dir():
+    return pathlib.Path(__file__).parent / 'mocks'
 
 
 @pytest.fixture
-def mock_ipa_path():
-    return pathlib.Path(__file__).parent / 'mocks' / 'mock.ipa'
+def mock_ipa_path(_models_mocks_dir):
+    return _models_mocks_dir / 'mock.ipa'
 
 
 @pytest.fixture
-def mock_certificate_p12():
-    return pathlib.Path(__file__).parent / 'mocks' / 'certificate.p12'
+def mock_certificate_p12(_models_mocks_dir):
+    return _models_mocks_dir / 'certificate.p12'
 
 
 @pytest.fixture
-def mock_certificate_p12_no_password():
-    return pathlib.Path(__file__).parent / 'mocks' / 'certificate-no-password.p12'
+def mock_certificate_p12_no_password(_models_mocks_dir):
+    return _models_mocks_dir / 'certificate-no-password.p12'
 
 
 @pytest.fixture
-def mock_xcarchive_path():
-    return pathlib.Path(__file__).parent / 'mocks' / 'mock.xcarchive'
+def mock_xcarchive_path(_models_mocks_dir):
+    return _models_mocks_dir / 'mock.xcarchive'
 
 
 @pytest.fixture
-def export_options_list_path() -> pathlib.Path:
-    return _export_options_plist_path()
+def export_options_list_path(_models_mocks_dir) -> pathlib.Path:
+    return _models_mocks_dir / 'export_options.plist'
 
 
 @pytest.fixture
-def export_options_list_bytes() -> bytes:
-    path = _export_options_plist_path()
-    return path.read_bytes()
+def export_options_list_bytes(export_options_list_path) -> bytes:
+    return export_options_list_path.read_bytes()
 
 
 @pytest.fixture
@@ -53,3 +53,8 @@ def export_options_dict() -> Dict[str, Union[bool, str, Dict[str, str]]]:
         'uploadBitcode': False,
         'uploadSymbols': False,
     }
+
+
+@pytest.fixture
+def mock_provisioning_profile_path(_models_mocks_dir):
+    return _models_mocks_dir / 'codemagic_io_wildcard_development.mobileprovision'
