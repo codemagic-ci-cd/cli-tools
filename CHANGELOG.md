@@ -1,3 +1,9 @@
+Version 0.22.4
+-------------
+
+**Development**
+- Add properties `creation_date` and `expiration_date` to `ProvisioningProfile` object. [PR #211](https://github.com/codemagic-ci-cd/cli-tools/pull/211)
+
 Version 0.22.3
 -------------
 
