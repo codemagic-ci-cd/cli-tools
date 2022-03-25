@@ -1,3 +1,9 @@
+Version 0.22.5
+-------------
+
+**Fixes**
+- Return `True` from `Certificate.is_development_certificate` property if the certificate is _Mac Development_ code signing certificates, as those certificates are used to sign development versions of Mac apps. [PR #212](https://github.com/codemagic-ci-cd/cli-tools/pull/212)
+
 Version 0.22.4
 -------------
 

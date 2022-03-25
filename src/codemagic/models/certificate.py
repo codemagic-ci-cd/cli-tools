@@ -104,7 +104,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @property
     def is_development_certificate(self) -> bool:
         development_certificate_pattern = re.compile(
-            r'^((Apple Development)|(iPhone Developer)):.*$')
+            r'^((Apple Development)|(iPhone Developer)|(Mac Developer)):.*$',
+        )
         return development_certificate_pattern.match(self.common_name) is not None
 
     def is_code_signing_certificate(self) -> bool:
