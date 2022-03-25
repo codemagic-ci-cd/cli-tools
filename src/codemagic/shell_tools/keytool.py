@@ -100,10 +100,7 @@ class Keytool(AbstractShellTool):
         keystore_password: str,
         key_alias: Optional[str] = None,
     ) -> List[Certificate]:
-        if key_alias is not None:
-            alias_command_arguments = ('-alias', key_alias)
-        else:
-            alias_command_arguments = tuple()
+        alias_command_arguments = ('-alias', key_alias) if key_alias is not None else tuple()
 
         command = (
             self.executable,
@@ -150,7 +147,7 @@ class Keytool(AbstractShellTool):
         for line in lines:
             if line.startswith('-----BEGIN '):
                 pem = line
-            elif line.startswith('-----END '):
+            elif pem is not None and line.startswith('-----END '):
                 yield Certificate.from_pem(pem + line)
                 pem = None
             elif pem is not None:
