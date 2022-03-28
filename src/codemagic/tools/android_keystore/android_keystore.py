@@ -214,7 +214,11 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         """
         store_password: str = KeystorePassword.resolve_value(keystore_password)
 
-        self.logger.info(f'List certificates in Android keystore "{keystore_path}"')
+        if key_alias is None:
+            self.logger.info(f'List certificates in Android keystore "{keystore_path}"')
+        else:
+            self.logger.info(f'List certificates in Android keystore "{keystore_path}" for alias "{key_alias}"')
+
         self._assert_keystore_exists(keystore_path)
 
         try:
