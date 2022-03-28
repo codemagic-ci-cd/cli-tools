@@ -173,3 +173,35 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         certificate_public_numbers = certificate_public_key.public_numbers()
         private_key_public_numbers = private_key.public_key.public_numbers()
         return certificate_public_numbers == private_key_public_numbers
+
+    def get_summary(self) -> Dict[str, Union[str, int, Dict[str, str]]]:
+        return {
+            'common_name': self.common_name,
+            'serial_number': self.serial,
+            'issuer': self.issuer,
+            'expires_at': self.expires_at.isoformat(),
+            'has_expired': self.has_expired,
+            'sha1': self.get_fingerprint(hashes.SHA1()),
+            'sha256': self.get_fingerprint(hashes.SHA256()),
+        }
+
+    def get_text_summary(self) -> str:
+        issuer_name_transformation = {
+            'CN': 'Common name',
+            'OU': 'Organizational unit',
+            'O': 'Organization',
+            'L': 'Locality',
+            'S': 'State or province',
+            'C': 'Country',
+        }
+        return '\n'.join([
+            '-- Certificate --',
+            f'Common name: {self.common_name}',
+            'Issuer:',
+            *(f'    {issuer_name_transformation[k]}: {v}' for k, v in self.issuer.items()),
+            f'Expires at: {self.expires_at}',
+            f'Has expired: {self.has_expired}',
+            f'Serial number: {self.serial}',
+            f'SHA1: {self.get_fingerprint(hashes.SHA1())}',
+            f'SHA256: {self.get_fingerprint(hashes.SHA256())}',
+        ])

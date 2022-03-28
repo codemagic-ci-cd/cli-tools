@@ -1,3 +1,27 @@
+Version 0.23.0
+-------------
+
+This release includes changes from [PR #213](https://github.com/codemagic-ci-cd/cli-tools/pull/213) to improve command line usage and Python client usability for managing Android keystores.
+
+**Breaking**
+- Remove key password option (specified by `-l`, `--ks-key-pass` or `--key-pass`) from action `android-keystore verify` as it is not used.
+
+**Features**
+- Add new action `android-keystore certificates` to list information about certificates included in the keystore.
+
+**Development**
+- **Breaking.** Remove `key_password` keyword argument from `AndroidKeystore.verify`.
+- **Breaking.** Change signature of `Keytool.validate_keystore`. Instead of taking `keystore: Keystore` as the argument, now `keystore_path: pathlib.Path`, `keystore_password: str` and, `key_alias: str` are taken. Method functionality remains intact.
+- Add new method `Keytool.get_certificates -> List[Certificate]` to extract certificates from specified android keystore.
+- Add new convenience methods to `codemagic.models.Certificate`:
+  - `get_summary() -> Dict` to generate JSON serializable dictionary containing information about the certificate.
+  - `get_text_summary() -> str` that generates a printable and user-readable string representation of the certificate's information.
+
+**Docs**
+- Update documentation for tool `android-keystore`.
+- Update documentation for action `android-keystore verify`.
+- Add documentation for action `android-keystore certificates`.
+
 Version 0.22.5
 -------------
 

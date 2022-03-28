@@ -21,12 +21,12 @@ class AndroidKeystoreArgument(cli.Argument):
         description='Secure password for your keystore',
         argparse_kwargs={'required': True},
     )
-    KEY_ALIAS = cli.ArgumentProperties(
+    KEY_ALIAS_OPTIONAL = cli.ArgumentProperties(
         key='key_alias',
         flags=('-a', '--ks-key-alias', '--alias'),
         description='An identifying name for your keystore key',
-        argparse_kwargs={'required': True},
     )
+    KEY_ALIAS = KEY_ALIAS_OPTIONAL.duplicate(argparse_kwargs={'required': True})
     KEY_PASSWORD = cli.ArgumentProperties(
         key='key_password',
         flags=('-l', '--ks-key-pass', '--key-pass'),
@@ -40,6 +40,13 @@ class AndroidKeystoreArgument(cli.Argument):
             'required': False,
             'default': None,
         },
+    )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key='json_output',
+        flags=('--json',),
+        type=bool,
+        description='Whether to show the information in JSON format',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
     )
 
 
