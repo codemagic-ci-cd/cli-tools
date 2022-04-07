@@ -2,7 +2,7 @@ Version 0.23.1
 -------------
 
 **Fixes**
-- Action `google-play get-latest-build-number` crashed when response from Google's APIs did specify `includeRestOfWorld` field for [`CountryTargeting`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#countrytargeting). [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Action `google-play get-latest-build-number` crashed when response from Google's APIs did specify `includeRestOfWorld` field for [`CountryTargeting`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#countrytargeting). [PR #214](https://github.com/codemagic-ci-cd/cli-tools/pull/214)
 
 Version 0.23.0
 -------------
