@@ -33,6 +33,10 @@ class CountryTargeting(Resource):
 
 @dataclass
 class Release(Resource):
+    """
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#release
+    """
+
     _OMIT_IF_NONE_KEYS = (
         'name',
         'userFraction',
