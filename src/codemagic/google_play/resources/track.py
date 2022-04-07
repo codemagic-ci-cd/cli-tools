@@ -62,7 +62,7 @@ class Release(Resource):
 @dataclass
 class Track(Resource):
     """
-    https://developers.google.com/android-publisher/api-ref/rest/v3/edits
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#Track
     """
     _OMIT_IF_NONE_KEYS = ('releases',)
 
