@@ -1,3 +1,9 @@
+Version 0.23.1
+-------------
+
+**Fixes**
+- Action `google-play get-latest-build-number` crashed when [`Track`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks) response from Google Play Developer API did not specify `includeRestOfWorld` field for [`CountryTargeting`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#countrytargeting). [PR #214](https://github.com/codemagic-ci-cd/cli-tools/pull/214)
+
 Version 0.23.0
 -------------
 

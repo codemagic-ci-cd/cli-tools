@@ -28,11 +28,15 @@ class CountryTargeting(Resource):
     """
 
     countries: List[str]
-    includeRestOfWorld: bool
+    includeRestOfWorld: Optional[bool] = None
 
 
 @dataclass
 class Release(Resource):
+    """
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#release
+    """
+
     _OMIT_IF_NONE_KEYS = (
         'name',
         'userFraction',
@@ -62,7 +66,7 @@ class Release(Resource):
 @dataclass
 class Track(Resource):
     """
-    https://developers.google.com/android-publisher/api-ref/rest/v3/edits
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#Track
     """
     _OMIT_IF_NONE_KEYS = ('releases',)
 
