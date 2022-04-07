@@ -28,7 +28,7 @@ class CountryTargeting(Resource):
     """
 
     countries: List[str]
-    includeRestOfWorld: bool
+    includeRestOfWorld: Optional[bool] = None
 
 
 @dataclass
