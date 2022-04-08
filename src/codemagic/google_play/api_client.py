@@ -1,19 +1,29 @@
+import contextlib
 import json
+from functools import lru_cache
+from typing import AnyStr
+from typing import List
 from typing import Optional
+from typing import Union
 
 import httplib2
 from googleapiclient import discovery
 from googleapiclient import errors
 from oauth2client.service_account import ServiceAccountCredentials
 
+from codemagic.utilities import log
+
 from .api_error import AuthorizationError
-from .api_error import CredentialsError
 from .api_error import EditError
-from .api_error import VersionCodeFromTrackError
-from .resource_printer import ResourcePrinter
+from .api_error import GetResourceError
+from .api_error import GooglePlayDeveloperAPIClientError
+from .api_error import ListResourcesError
 from .resources import Edit
 from .resources import Track
-from .resources import TrackName
+
+CredentialsJson = Union[AnyStr, dict]
+EditId = Union[str, Edit]
+MaybeEditId = Optional[EditId]
 
 
 class GooglePlayDeveloperAPIClient:
@@ -21,78 +31,124 @@ class GooglePlayDeveloperAPIClient:
     SCOPE_URI = f'https://www.googleapis.com/auth/{SCOPE}'
     API_VERSION = 'v3'
 
-    _service_instance: Optional[discovery.Resource] = None
-
-    def __init__(self,
-                 credentials: str,
-                 package_name: str,
-                 resource_printer: ResourcePrinter):
+    def __init__(self, service_account_json_keyfile: CredentialsJson):
         """
-        :param credentials: Your Gloud Service account credentials with JSON key type
-        :param package_name: package name of the app in Google Play Console (Ex: com.google.example)
-        :param resource_printer: printer initialized in google-play tool
+        :param service_account_json_keyfile: Your Gcloud Service account credentials with JSON key type
         """
-        self._credentials = credentials
-        self.package_name = package_name
-        self.resource_printer = resource_printer
+        self._service_account_json_keyfile = service_account_json_keyfile
+        self._logger = log.get_logger(self.__class__)
 
-    def get_edit_resource(self):
-        return self.service.edits()  # type: ignore
+    @classmethod
+    def _edit_id(cls, edit: EditId) -> str:
+        if isinstance(edit, Edit):
+            return edit.id
+        return edit
+
+    def _get_json_keyfile_dict(self) -> dict:
+        if isinstance(self._service_account_json_keyfile, dict):
+            return self._service_account_json_keyfile
+        try:
+            return json.loads(self._service_account_json_keyfile)
+        except ValueError as ve:
+            message = 'Unable to parse service account credentials, must be a valid json'
+            raise GooglePlayDeveloperAPIClientError(message) from ve
+
+    @lru_cache(1)
+    def _get_android_publisher_service(self):
+        json_keyfile = self._get_json_keyfile_dict()
+        http = httplib2.Http()
+        try:
+            service_account_credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+                json_keyfile,
+                scopes=self.SCOPE_URI,
+            )
+            http = service_account_credentials.authorize(http)
+            return discovery.build(
+                self.SCOPE,
+                self.API_VERSION,
+                http=http,
+                cache_discovery=False,
+            )
+        except (errors.Error, errors.HttpError) as e:
+            raise AuthorizationError(e) from e
 
     @property
-    def service(self) -> discovery.Resource:
-        if self._service_instance is None:
-            try:
-                json_credentials = json.loads(str(self._credentials))
-            except json.decoder.JSONDecodeError:
-                raise CredentialsError()
+    def android_publishing_service(self):
+        return self._get_android_publisher_service()
 
-            http = httplib2.Http()
-            try:
-                service_account_credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-                    json_credentials, scopes=self.SCOPE_URI)
-                http = service_account_credentials.authorize(http)
-                self._service_instance = discovery.build(self.SCOPE, self.API_VERSION, http=http, cache_discovery=False)
-            except errors.HttpError as e:
-                raise AuthorizationError(e._get_reason() or 'Http Error')
-            except errors.Error as e:
-                raise AuthorizationError(str(e))
-        return self._service_instance
+    @property
+    def edits_service(self):
+        return self.android_publishing_service.edits()
 
-    def create_edit(self) -> Edit:
-        self.resource_printer.log_request(f'Create an edit for the package "{self.package_name}"')
+    def create_edit(self, package_name: str) -> Edit:
+        self._logger.debug(f'Create an edit for the package {package_name!r}')
         try:
-            edit_response = self.get_edit_resource().insert(body={}, packageName=self.package_name).execute()
-            resource = Edit(**edit_response)
-            self.resource_printer.print_resource(resource)
-            return resource
-        except errors.HttpError as e:
-            raise EditError('create', self.package_name, e._get_reason() or 'Http Error')
-        except errors.Error as e:
-            raise EditError('create', self.package_name, str(e))
+            edit_request = self.edits_service.insert(body={}, packageName=package_name)
+            edit_response = edit_request.execute()
+            self._logger.debug(f'Created edit {edit_response} for package {package_name!r}')
+        except (errors.Error, errors.HttpError) as e:
+            raise EditError('create', package_name, e) from e
+        else:
+            return Edit(**edit_response)
 
-    def delete_edit(self, edit_id: str) -> None:
-        self.resource_printer.log_request(f'Delete the edit "{edit_id}" for the package "{self.package_name}"')
+    def delete_edit(self, edit: EditId, package_name: str) -> None:
+        edit_id = self._edit_id(edit)
+        self._logger.debug(f'Delete the edit {edit_id!r} for the package {package_name!r}')
         try:
-            self.get_edit_resource().delete(packageName=self.package_name, editId=edit_id).execute()
-            self._service_instance = None
-        except errors.HttpError as e:
-            raise EditError('delete', self.package_name, e._get_reason() or 'Http Error')
-        except errors.Error as e:
-            raise EditError('delete', self.package_name, str(e))
+            delete_request = self.edits_service.delete(
+                packageName=package_name,
+                editId=edit_id,
+            )
+            delete_request.execute()
+            self._logger.debug(f'Deleted edit {edit_id} for package {package_name!r}')
+        except (errors.Error, errors.HttpError) as e:
+            raise EditError('delete', package_name, e) from e
 
-    def get_track_information(self, edit_id: str, track_name: TrackName) -> Track:
-        self.resource_printer.log_request(
-            f'Get information about the track "{track_name.value}" '
-            f'for the package "{self.package_name}"',
-        )
+    @contextlib.contextmanager
+    def use_app_edit(self, package_name: str) -> Edit:
+        edit = self.create_edit(package_name)
         try:
-            track_response = self.get_edit_resource().tracks().get(
-                packageName=self.package_name, editId=edit_id, track=track_name.value).execute()
-            resource = Track(**track_response)
-            self.resource_printer.print_resource(resource)
-            return resource
-        except errors.HttpError as e:
-            raise VersionCodeFromTrackError(track_name.value, e._get_reason() or 'Http Error')
-        except errors.Error as e:
-            raise VersionCodeFromTrackError(track_name.value, str(e))
+            yield edit
+        finally:
+            self.delete_edit(edit, package_name)
+
+    def get_track(self, package_name: str, track_name: str, edit: MaybeEditId = None) -> Track:
+        if edit is not None:
+            return self._get_track(package_name, track_name, self._edit_id(edit))
+        with self.use_app_edit(package_name) as edit:
+            return self._get_track(package_name, track_name, edit.id)
+
+    def _get_track(self, package_name: str, track_name: str, edit_id: str) -> Track:
+        self._logger.debug(f'Get track {track_name!r} for package {package_name!r} using edit {edit_id}')
+        try:
+            track_request = self.edits_service.tracks().get(
+                packageName=package_name,
+                editId=edit_id,
+                track=track_name,
+            )
+            track_response = track_request.execute()
+            self._logger.debug(f'Got track {track_name!r} for package {package_name!r}: {track_response}')
+        except (errors.Error, errors.HttpError) as e:
+            raise GetResourceError('track', package_name, e) from e
+        else:
+            return Track(**track_response)
+
+    def list_tracks(self, package_name: str, edit_id: MaybeEditId = None) -> List[Track]:
+        if edit_id is not None:
+            return self._list_tracks(package_name, self._edit_id(edit_id))
+        with self.use_app_edit(package_name) as edit:
+            return self._list_tracks(package_name, edit.id)
+
+    def _list_tracks(self, package_name: str, edit_id: str) -> List[Track]:
+        self._logger.debug(f'List tracks for package {package_name!r} using edit {edit_id}')
+        try:
+            tracks_request = self.edits_service.tracks().list(
+                packageName=package_name,
+                editId=edit_id,
+            )
+            tracks_response = tracks_request.execute()
+            self._logger.debug(f'Got tracks for package {package_name!r}: {tracks_response}')
+        except (errors.Error, errors.HttpError) as e:
+            raise ListResourcesError('tracks', package_name, e) from e
+        else:
+            return [Track(**track) for track in tracks_response['tracks']]

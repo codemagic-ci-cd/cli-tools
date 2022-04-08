@@ -9,6 +9,7 @@ import pytest
 
 from codemagic.tools.google_play import GooglePlay
 from codemagic.tools.google_play import GooglePlayArgument
+from codemagic.tools.google_play import TracksArgument
 from codemagic.tools.google_play import Types
 
 credentials_argument = GooglePlayArgument.GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
@@ -24,9 +25,6 @@ def register_args(cli_argument_group):
 def namespace_kwargs():
     ns_kwargs = {
         credentials_argument.key: Types.CredentialsArgument('{"type":"service_account"}'),
-        GooglePlayArgument.PACKAGE_NAME.key: Types.PackageName('package.name'),
-        GooglePlayArgument.LOG_REQUESTS.key: False,
-        GooglePlayArgument.JSON_OUTPUT.key: False,
     }
     for arg in GooglePlay.CLASS_ARGUMENTS:
         if not hasattr(arg.type, 'environment_variable_key'):
@@ -48,7 +46,7 @@ def _test_missing_argument(argument, _namespace_kwargs):
 
 @pytest.mark.parametrize('argument', [
     credentials_argument,
-    GooglePlayArgument.PACKAGE_NAME,
+    TracksArgument.PACKAGE_NAME,
 ])
 def test_missing_arg(cli_argument_group, namespace_kwargs, argument):
     namespace_kwargs[argument.key] = None

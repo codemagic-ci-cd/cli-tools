@@ -1,4 +1,5 @@
 import os
+import pathlib
 import unittest
 
 import pytest
@@ -29,3 +30,10 @@ class ApiTests(unittest.TestCase):
 
         self.api_client.delete_edit(edit.id)
         assert not self._service_exists()
+
+
+def test_google_play_api_client():
+    credentials = pathlib.Path('~/google_play_service_account_credentials.json').expanduser().read_text()
+    client = GooglePlayDeveloperAPIClient(credentials, package_name='io.codemagic.artemii.capybara')
+    print()
+    print(client)
