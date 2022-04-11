@@ -2,7 +2,6 @@ import contextlib
 import json
 from functools import lru_cache
 from typing import AnyStr
-from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Union
@@ -38,7 +37,7 @@ class GooglePlayDeveloperAPIClient:
         self._logger = log.get_logger(self.__class__)
 
     @classmethod
-    def _edit_id(cls, edit: Union[str, Edit]) -> str:
+    def _get_edit_id(cls, edit: Union[str, Edit]) -> str:
         if isinstance(edit, Edit):
             return edit.id
         return edit
@@ -91,7 +90,7 @@ class GooglePlayDeveloperAPIClient:
             return Edit(**edit_response)
 
     def delete_edit(self, edit: Union[str, Edit], package_name: str) -> None:
-        edit_id = self._edit_id(edit)
+        edit_id = self._get_edit_id(edit)
         self._logger.debug(f'Delete the edit {edit_id!r} for the package {package_name!r}')
         try:
             delete_request = self.edits_service.delete(
@@ -104,7 +103,7 @@ class GooglePlayDeveloperAPIClient:
             raise EditError('delete', package_name, e) from e
 
     @contextlib.contextmanager
-    def use_app_edit(self, package_name: str) -> Generator[Edit, None, None]:
+    def use_app_edit(self, package_name: str):
         edit = self.create_edit(package_name)
         try:
             yield edit
@@ -118,9 +117,10 @@ class GooglePlayDeveloperAPIClient:
         edit: Optional[Union[str, Edit]] = None,
     ) -> Track:
         if edit is not None:
-            return self._get_track(package_name, track_name, self._edit_id(edit))
-        with self.use_app_edit(package_name) as edit:
-            return self._get_track(package_name, track_name, edit.id)
+            edit_id = self._get_edit_id(edit)
+            return self._get_track(package_name, track_name, edit_id)
+        with self.use_app_edit(package_name) as _edit:
+            return self._get_track(package_name, track_name, _edit.id)
 
     def _get_track(self, package_name: str, track_name: str, edit_id: str) -> Track:
         self._logger.debug(f'Get track {track_name!r} for package {package_name!r} using edit {edit_id}')
@@ -140,12 +140,13 @@ class GooglePlayDeveloperAPIClient:
     def list_tracks(
         self,
         package_name: str,
-        edit_id: Optional[Union[str, Edit]] = None,
+        edit: Optional[Union[str, Edit]] = None,
     ) -> List[Track]:
-        if edit_id is not None:
-            return self._list_tracks(package_name, self._edit_id(edit_id))
-        with self.use_app_edit(package_name) as edit:
-            return self._list_tracks(package_name, edit.id)
+        if edit is not None:
+            edit_id = self._get_edit_id(edit)
+            return self._list_tracks(package_name, edit_id)
+        with self.use_app_edit(package_name) as _edit:
+            return self._list_tracks(package_name, _edit.id)
 
     def _list_tracks(self, package_name: str, edit_id: str) -> List[Track]:
         self._logger.debug(f'List tracks for package {package_name!r} using edit {edit_id}')

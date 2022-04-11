@@ -91,7 +91,7 @@ class _WindowsCliProcessStream(CliProcessStream):
     def read(self, buffer_size=1024) -> bytes:
         # https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile
         try:
-            chunk, _result = winapi.ReadFile(self._pipe_handle, buffer_size, 0)
+            chunk, _result = winapi.ReadFile(self._pipe_handle, buffer_size, 0)  # type: ignore
         except BrokenPipeError:
             chunk = b''
         return self._bytes(chunk or b'')
@@ -100,7 +100,7 @@ class _WindowsCliProcessStream(CliProcessStream):
         # https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-peeknamedpipe
         # Check how much is there still remaining in the pipe to be read and use that as the final buffer size
         try:
-            _data, buffer_size, *_rest = winapi.PeekNamedPipe(self._pipe_handle, 1)
+            _data, buffer_size, *_rest = winapi.PeekNamedPipe(self._pipe_handle, 1)  # type: ignore
         except BrokenPipeError:
             # The pipe has already been ended
             return b''
