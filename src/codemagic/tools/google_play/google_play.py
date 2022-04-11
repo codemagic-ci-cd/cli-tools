@@ -36,3 +36,7 @@ class GooglePlay(
             credentials=credentials_argument.value,
             **cls._parent_class_kwargs(cli_args),
         )
+
+
+if __name__ == '__main__':
+    GooglePlay.invoke_cli()
