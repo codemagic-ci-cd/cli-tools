@@ -17,7 +17,7 @@ class GooglePlayArgument(cli.Argument):
     )
     JSON_OUTPUT = cli.ArgumentProperties(
         key='json_output',
-        flags=('--json',),
+        flags=('--json', '-j'),
         type=bool,
         description='Whether to show the request response in JSON format',
         argparse_kwargs={'required': False, 'action': 'store_true'},
@@ -27,14 +27,14 @@ class GooglePlayArgument(cli.Argument):
 class TracksArgument(cli.Argument):
     PACKAGE_NAME = cli.ArgumentProperties(
         key='package_name',
-        flags=('-p', '--package-name'),
+        flags=('--package-name', '-p'),
         type=PackageName,
-        description='Package name of the app in Google Play Console (Ex: com.google.example)',
+        description='Package name of the app in Google Play Console. For example `com.example.app`',
         argparse_kwargs={'required': True},
     )
     TRACK_NAME = cli.ArgumentProperties(
         key='track_name',
-        flags=('-t', '--track'),
+        flags=('--track', '-t'),
         description='Release track name. For example `alpha` or `production`',
         argparse_kwargs={'required': True},
     )
@@ -43,7 +43,7 @@ class TracksArgument(cli.Argument):
 class LatestBuildNumberArgument(cli.Argument):
     TRACKS = cli.ArgumentProperties(
         key='tracks',
-        flags=('-t', '--tracks'),
+        flags=('--tracks', '-t'),
         description=(
             'Get the build number from the specified track(s). '
             'If not specified, the highest build number across all tracks is returned'
