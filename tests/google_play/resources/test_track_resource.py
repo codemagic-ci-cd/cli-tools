@@ -20,7 +20,7 @@ def test_max_version_code_error_no_releases(api_track):
     track = Track(**api_track)
     with pytest.raises(ValueError) as e:
         track.get_max_version_code()
-    assert 'No release information' in str(e.value)
+    assert str(e.value) == 'Failed to get version code from "internal" track: track has no releases'
 
 
 def test_max_version_code_error_no_version_codes(api_track):
@@ -29,4 +29,4 @@ def test_max_version_code_error_no_version_codes(api_track):
     track = Track(**api_track)
     with pytest.raises(ValueError) as e:
         track.get_max_version_code()
-    assert 'No releases with uploaded App bundles or APKs' in str(e.value)
+    assert str(e.value) == 'Failed to get version code from "internal" track: releases with version code do not exist'

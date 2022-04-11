@@ -76,10 +76,10 @@ class Track(Resource):
             self.releases = [Release(**release) for release in self.releases]
 
     def get_max_version_code(self) -> int:
-        error_prefix = f'Failed to get version code from Google Play from {self.track} track'
+        error_prefix = f'Failed to get version code from "{self.track}" track'
         if not self.releases:
-            raise ValueError(f'{error_prefix}. No release information')
+            raise ValueError(f'{error_prefix}: track has no releases')
         version_codes = [release.versionCodes for release in self.releases if release.versionCodes]
         if not version_codes:
-            raise ValueError(f'{error_prefix}. No releases with uploaded App bundles or APKs')
+            raise ValueError(f'{error_prefix}: releases with version code do not exist')
         return max(map(int, chain(*version_codes)))
