@@ -9,17 +9,17 @@ list
 google-play tracks list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
     [--json]
-    -p PACKAGE_NAME
+    --package-name PACKAGE_NAME
 ```
 ### Required arguments for action `list`
 
-##### `-p, --package-name=PACKAGE_NAME`
+##### `--package-name, -p=PACKAGE_NAME`
 
 
-Package name of the app in Google Play Console (Ex: com.google.example)
+Package name of the app in Google Play Console. For example `com.example.app`
 ### Optional arguments for action `list`
 
-##### `--json`
+##### `--json, -j`
 
 
 Whether to show the request response in JSON format

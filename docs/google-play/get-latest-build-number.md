@@ -8,18 +8,18 @@ get-latest-build-number
 ```bash
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
-    [-t TRACKS]
-    -p PACKAGE_NAME
+    [--tracks TRACKS]
+    --package-name PACKAGE_NAME
 ```
 ### Required arguments for action `get-latest-build-number`
 
-##### `-p, --package-name=PACKAGE_NAME`
+##### `--package-name, -p=PACKAGE_NAME`
 
 
-Package name of the app in Google Play Console (Ex: com.google.example)
+Package name of the app in Google Play Console. For example `com.example.app`
 ### Optional arguments for action `get-latest-build-number`
 
-##### `-t, --tracks=TRACKS`
+##### `--tracks, -t=TRACKS`
 
 
 Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments

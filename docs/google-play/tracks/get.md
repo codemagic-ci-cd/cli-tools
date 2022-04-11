@@ -9,22 +9,22 @@ get
 google-play tracks get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
     [--json]
-    -p PACKAGE_NAME
-    -t TRACK_NAME
+    --package-name PACKAGE_NAME
+    --track TRACK_NAME
 ```
 ### Required arguments for action `get`
 
-##### `-p, --package-name=PACKAGE_NAME`
+##### `--package-name, -p=PACKAGE_NAME`
 
 
-Package name of the app in Google Play Console (Ex: com.google.example)
-##### `-t, --track=TRACK_NAME`
+Package name of the app in Google Play Console. For example `com.example.app`
+##### `--track, -t=TRACK_NAME`
 
 
 Release track name. For example `alpha` or `production`
 ### Optional arguments for action `get`
 
-##### `--json`
+##### `--json, -j`
 
 
 Whether to show the request response in JSON format
