@@ -1,0 +1,46 @@
+[
+    {
+        "track": "production",
+        "releases": [
+            {
+                "status": "draft"
+            }
+        ]
+    },
+    {
+        "track": "beta",
+        "releases": [
+            {
+                "status": "completed",
+                "name": "66 (0.0.42)",
+                "versionCodes": [
+                    "66"
+                ]
+            }
+        ]
+    },
+    {
+        "track": "alpha",
+        "releases": [
+            {
+                "status": "completed",
+                "name": "65 (0.0.42)",
+                "versionCodes": [
+                    "65"
+                ]
+            }
+        ]
+    },
+    {
+        "track": "internal",
+        "releases": [
+            {
+                "status": "completed",
+                "name": "67 (0.0.42)",
+                "versionCodes": [
+                    "67"
+                ]
+            }
+        ]
+    }
+]

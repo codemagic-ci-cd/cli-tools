@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from typing import Union
 
 from codemagic import cli
 from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
@@ -22,7 +23,7 @@ class GooglePlay(
     Utility to get the latest build numbers from Google Play using Google Play Developer API
     """
 
-    def __init__(self, credentials: str, **kwargs):
+    def __init__(self, credentials: Union[str, dict], **kwargs):
         super().__init__(**kwargs)
         self.api_client = GooglePlayDeveloperAPIClient(credentials)
 
