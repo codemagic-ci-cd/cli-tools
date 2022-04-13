@@ -1,3 +1,56 @@
+Version 0.24.0
+-------------
+
+Changes in this release improve usability of tool `google-play`. Updates are from [PR #215](https://github.com/codemagic-ci-cd/cli-tools/pull/215) and [PR #216](https://github.com/codemagic-ci-cd/cli-tools/pull/216).
+
+**Breaking**
+
+**None of the breaking changes have an effect on command line usage**, only the Python API of is affected.
+
+- Method signature changes:
+  - Signature of `GooglePlay` (tool `google-play`) initialization was changed:
+    - positional argument `package_name` was removed,
+    - keyword argument `log_requests` was removed,
+    - keyword argument `json_output` was removed,
+    - positional argument `credentials` accepts now Google Play service account credentials both as JSON `str` and parsed `dict`.
+  - Signature of `GooglePlayDeveloperAPIClient` initialization was changed and simplified:
+    - positional argument `resource_printer` was removed,
+    - positional argument `package_name` was removed.
+  - `GooglePlay` method `get_latest_build_number` requires `package_name` argument,
+  - `GooglePlayDeveloperAPIClient` methods `create_edit` and `delete_edit` require `package_name` argument,
+  - property `max_version_code` of `Track` was converted into a method `get_max_version_code()`.
+- CLI argument definitions for `google-play` were updated and moved from `codemagic.tools.google_play` to `codemagic.tools.google_play.arguments`.
+- Removed definitions:
+  - enumeration `codemagic.google_play.resources.TrackName` was removed.
+  - class `codemagic.google_play.ResourcePrinter` was removed.
+  - exception `codemagic.google_play.VersionCodeFromTrackError` was removed.
+  - removals in `GooglePlayDeveloperAPIClient`:
+    - method `get_track_information` was removed,
+    - property `service` was removed.
+
+**Features**
+
+- Update tool `google-play`:
+  - Allow using custom release tracks with action `google-play get-latest-build-number`.
+  - Add new action `google-play tracks get` to get information about specific release track for given package name.
+  - Add new action `google-play tracks list` to get information about all available release tracks for given package name.
+
+**Development**
+
+- Module `codemagic.tools.google_play` was refactored by splitting single source file into a subpackage.
+  - Define actions group `TracksActionGroup` for working with tracks.
+  - Move `get_latest_build_number` action / method implementation into separate subclass `GetLatestBuildNumberAction`.
+- Rework the internals of `GooglePlayDeveloperAPIClient`:
+  - add context manager to handle `edit` lifecycle so that callers don't have to take care of deletion afterwards,
+  - add new methods `get_track` and `list_tracks`,
+  - service resource instance was removed from class instance as it wasn't thread safe.
+- Update `mypy` version.
+- Add more tests for `GooglePlay` tool.
+
+**Docs**
+
+- TBD
+
 Version 0.23.1
 -------------
 

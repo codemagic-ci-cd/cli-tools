@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import pathlib
@@ -18,7 +19,6 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: 
 from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
 from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
 from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient  # noqa: E402
-from codemagic.google_play.api_client import ResourcePrinter  # noqa: E402
 from codemagic.utilities import log  # noqa: E402
 
 log.initialize_logging(
@@ -71,8 +71,8 @@ def _appstore_api_client() -> AppStoreConnectApiClient:
     )
 
 
-@lru_cache()
-def _google_play_api_client() -> GooglePlayDeveloperAPIClient:
+@lru_cache(1)
+def _google_play_api_credentials() -> dict:
     if 'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
         credentials_path = pathlib.Path(os.environ['TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
         credentials = credentials_path.expanduser().read_text()
@@ -83,11 +83,7 @@ def _google_play_api_client() -> GooglePlayDeveloperAPIClient:
             'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH',
             'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT',
         )
-    return GooglePlayDeveloperAPIClient(
-        credentials,
-        os.environ['TEST_GCLOUD_PACKAGE_NAME'],
-        ResourcePrinter(False, False),
-    )
+    return json.loads(credentials)
 
 
 def _logger():
@@ -113,7 +109,8 @@ def app_store_api_client() -> AppStoreConnectApiClient:
 
 @pytest.fixture
 def google_play_api_client() -> GooglePlayDeveloperAPIClient:
-    return _google_play_api_client()
+    credentials = _google_play_api_credentials()
+    return GooglePlayDeveloperAPIClient(credentials)
 
 
 @pytest.fixture()
@@ -124,11 +121,6 @@ def app_store_connect_api_client() -> AppStoreConnectApiClient:
 @pytest.fixture(scope='class')
 def class_appstore_api_client(request):
     request.cls.api_client = _appstore_api_client()
-
-
-@pytest.fixture(scope='class')
-def class_google_play_api_client(request):
-    request.cls.api_client = _google_play_api_client()
 
 
 @pytest.fixture

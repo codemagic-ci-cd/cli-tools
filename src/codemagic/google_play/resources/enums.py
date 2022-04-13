@@ -6,13 +6,6 @@ class ResourceEnum(enum.Enum):
         return str(self.value)
 
 
-class TrackName(ResourceEnum):
-    INTERNAL = 'internal'
-    ALPHA = 'alpha'
-    BETA = 'beta'
-    PRODUCTION = 'production'
-
-
 class ReleaseStatus(ResourceEnum):
     STATUS_UNSPECIFIED = 'statusUnspecified'
     DRAFT = 'draft'
