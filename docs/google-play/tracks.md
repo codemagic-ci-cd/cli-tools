@@ -1,28 +1,15 @@
 
-get-latest-build-number
-=======================
+tracks
+======
 
 
-**Get latest build number from Google Play Developer API matching given constraints**
+**Manage your Google Play release tracks**
 ### Usage
 ```bash
-google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+google-play tracks [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
-    [--tracks TRACKS]
-    --package-name PACKAGE_NAME
+    ACTION
 ```
-### Required arguments for action `get-latest-build-number`
-
-##### `--package-name, -p=PACKAGE_NAME`
-
-
-Package name of the app in Google Play Console. For example `com.example.app`
-### Optional arguments for action `get-latest-build-number`
-
-##### `--tracks, -t=TRACKS`
-
-
-Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments
 ### Optional arguments for command `google-play`
 
 ##### `--credentials=GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`
@@ -55,3 +42,9 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`get`](tracks/get.md)|Get information about specified track from Google Play Developer API|
+|[`list`](tracks/list.md)|Get information about specified track from Google Play Developer API|

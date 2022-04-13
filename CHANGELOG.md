@@ -49,7 +49,11 @@ Changes in this release improve usability of tool `google-play`. Updates are fro
 
 **Docs**
 
-- TBD
+- Update docs for tool `google-play`.
+- Update docs for action `google-play get-latest-build-number`.
+- Add docs for action group `google-play tracks`.
+- Add docs for action `google-play tracks get`.
+- Add docs for action `google-play tracks list`.
 
 Version 0.23.1
 -------------
