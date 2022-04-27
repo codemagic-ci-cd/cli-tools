@@ -2,7 +2,7 @@ Version 0.24.1
 -------------
 
 **Dependencies**
-- Add upper bound to [`cryptography`](https://cryptography.io/en/latest/) Python dependency (version `<37.0.0`) to persist compatibility with currently available `pyOpenSSL` version. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Add upper bound to [`cryptography`](https://cryptography.io/en/latest/) Python dependency (version `<37.0.0`) to persist compatibility with currently available `pyOpenSSL` version. [PR #217](https://github.com/codemagic-ci-cd/cli-tools/pull/217)
 
 Version 0.24.0
 -------------
