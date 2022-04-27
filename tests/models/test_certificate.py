@@ -15,19 +15,19 @@ from codemagic.models import PrivateKey
 def certificate_signing_request_pem() -> bytes:
     return (
         b'-----BEGIN CERTIFICATE REQUEST-----\n'
-        b'MIICZDCCAUwCAQAwDjEMMAoGA1UEAwwDUEVNMIIBIjANBgkqhkiG9w0BAQEFAAOC\n'
+        b'MIICUzCCATsCAQAwDjEMMAoGA1UEAwwDUEVNMIIBIjANBgkqhkiG9w0BAQEFAAOC\n'
         b'AQ8AMIIBCgKCAQEA0L+h5RVDhRpTjNttmXX5n0gNOVYTvSNPYRcNFlSISboQStDm\n'
         b'I65Ncv3Snsun7pzZfCSo+si/JFYw/C8hrwHTEmHS2AbK94w1oSYiQ1fiSKszmtc7\n'
         b'khw0vRUPJyzr+Ib8otXsdAgzpCoFYe6nQn3I/QWufLb3EOiul5R5yq6dMhhs0Fgc\n'
         b'y9hKA74ADk3TEk2cxz/9FyaNoc2MiQmkKX1WPWM74LVMKo0HXtp2xYZKVmX4hLaK\n'
         b'5w2fHP7qvm0wVTt5B3IJrgDEvg25/irYudIuy4T6gWOvhvUfJYDCqZ0N2kdGi3kQ\n'
-        b'uguGTABIjdB54/9FN/ZyX3UL7fqRg9jG7P4i4QIDAQABoBEwDwYJKoZIhvcNAQkO\n'
-        b'MQIwADANBgkqhkiG9w0BAQsFAAOCAQEAv2/0ny9h+I/vikx88yyRGM8P6M7/tf85\n'
-        b'/74pVXF29IcZQp7znL+U+n9A8dNT1oQXZoTgX6wdkm3s5ICPJ++o9nrbEhtfmidq\n'
-        b'S5FayCrBUdHYBTjctn9twbAk8fH1rYseJpV4IMgoLM6tsfdKsPAzSC3TXLjcfi2/\n'
-        b'hm71Rcn+dc4U90D4VS+SHXlkhIgzCQ0/Z3s1+C8ivZH4xg3KpcBlWd/a38tpbVqe\n'
-        b'2eaWoUwyRzv3cDOOGbxecHnohTVV4Ck7afAPoGnkobN9jUz51PFHFYBBMu0c/bWI\n'
-        b'B6TOwQ+xSyp1ZMFenb75fp6hzZmoPY+OMvVbO49YJuv3AHioZ3d1Cg==\n'
+        b'uguGTABIjdB54/9FN/ZyX3UL7fqRg9jG7P4i4QIDAQABoAAwDQYJKoZIhvcNAQEL\n'
+        b'BQADggEBAAFhNwzZqthXp3NqGiCWARGTzV23bAIPAb3gT+usjw7KO4UgtQg/kerT\n'
+        b'QflsOPX4i1wH+T2qTmYkXqvbrrxKtQaB/iKZgkuzDr6nZQROMDg9FOnMGmfoTjW7\n'
+        b'jNCOCUyN3yMsN2SPD1HHVt3Yr0ZVtjC16hBiqhcFOsqdR4rPFul7frUaOFoDB+gX\n'
+        b'jO1z5h+rKiWSm2cKPNi+d5YdsLZhpqeVTCzAdL6G44fmoyuEAcu9fpNoOvGJfGaG\n'
+        b'eWxKc1lwqTa9JjSa/UUn/AHKRZBmEmCsA3j76um7bLEQmuGUeM8GxRFdjbt0vJak\n'
+        b'NdSfE3CyTZIjFlFI/OXH9i1iqKI5DTE=\n'
         b'-----END CERTIFICATE REQUEST-----\n'
     )
 
