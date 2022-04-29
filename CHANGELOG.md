@@ -1,3 +1,9 @@
+Version 0.24.2
+-------------
+
+**Fixes**
+- Allow defining `distributionBundleIdentifier` export option by `--custom-export-options` for `xcode-project use-profiles`. [PR #218](https://github.com/codemagic-ci-cd/cli-tools/pull/218)
+
 Version 0.24.1
 -------------
 
