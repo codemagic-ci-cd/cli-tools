@@ -31,7 +31,7 @@ Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.
 ##### `--custom-export-options=CUSTOM_EXPORT_OPTIONS`
 
 
-Custom options for generated export options as JSON string. For example '{"uploadBitcode": false, "uploadSymbols": false}'.
+Custom options for generated export options as JSON string. For example `{"uploadBitcode": false, "uploadSymbols": false}`.
 ##### `--warn-only`
 
 

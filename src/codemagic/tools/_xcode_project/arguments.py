@@ -2,6 +2,7 @@ import pathlib
 import re
 
 from codemagic import cli
+from codemagic.cli import Colors
 from codemagic.models import ProvisioningProfile
 from codemagic.models.simulator import Runtime
 
@@ -139,8 +140,8 @@ class ExportIpaArgument(cli.Argument):
         flags=('--custom-export-options',),
         type=cli.CommonArgumentTypes.json_dict,
         description=(
-            'Custom options for generated export options as JSON string. '
-            'For example \'{"uploadBitcode": false, "uploadSymbols": false}\'.'
+            'Custom options for generated export options as JSON string. For example '
+            f'`{Colors.WHITE("""{"uploadBitcode": false, "uploadSymbols": false}""")}`.'
         ),
         argparse_kwargs={'required': False},
     )
