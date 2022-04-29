@@ -89,10 +89,21 @@ class Manifest:
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
+ExportOptionValue = Union[
+    Dict[str, str],
+    List[ProvisioningProfileInfo],
+    Manifest,
+    bool,
+    enum.Enum,
+    str,
+]
+
+
 @dataclass
 class ExportOptions(StringConverterMixin):
     compileBitcode: Optional[bool] = None
     destination: Optional[Destination] = None
+    distributionBundleIdentifier: Optional[str] = None
     embedOnDemandResourcesAssetPacksInBundle: Optional[bool] = None
     generateAppStoreInformation: Optional[bool] = None
     iCloudContainerEnvironment: Optional[str] = None
@@ -164,10 +175,7 @@ class ExportOptions(StringConverterMixin):
         else:
             raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
 
-    def set_value(self,
-                  field_name: str,
-                  value: Union[enum.Enum, bool, str, Dict[str, str], List[ProvisioningProfileInfo], Manifest]):
-
+    def set_value(self, field_name: str, value: ExportOptionValue):
         if field_name not in self.__dict__:
             raise ValueError(f'Invalid filed {field_name}')
 
