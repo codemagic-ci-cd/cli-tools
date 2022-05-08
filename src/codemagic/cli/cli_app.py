@@ -15,6 +15,7 @@ import time
 from functools import wraps
 from itertools import chain
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -23,6 +24,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
+from typing import TypeVar
 from typing import Union
 
 from codemagic import __version__
@@ -377,10 +379,13 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute(**execute_kwargs)
 
 
+_Fn = TypeVar('_Fn', bound=Callable[..., object])
+
+
 def action(action_name: str,
            *arguments: Argument,
            action_group: Optional[ActionGroup] = None,
-           action_options: Optional[Dict[str, Any]] = None):
+           action_options: Optional[Dict[str, Any]] = None) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
