@@ -14,6 +14,8 @@ class Device(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/device
     """
 
+    attributes: Attributes
+
     @dataclass
     class Attributes(Resource.Attributes):
         deviceClass: DeviceClass

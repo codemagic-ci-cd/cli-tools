@@ -14,6 +14,9 @@ class App(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/app
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         bundleId: str

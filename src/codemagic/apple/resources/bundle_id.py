@@ -12,6 +12,9 @@ class BundleId(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/bundleid
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         identifier: str
