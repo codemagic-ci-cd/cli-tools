@@ -189,7 +189,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
                     setattr(self, field, Relationship(**value))
 
     @classmethod
-    def _create_attributes(cls, api_response):
+    def _create_attributes(cls, api_response) -> Attributes:
         if cls.Attributes is Resource.Attributes:
             # In case the resource does not have attributes
             defined_fields = {}
@@ -198,7 +198,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         return cls.Attributes(**defined_fields)
 
     @classmethod
-    def _create_relationships(cls, api_response):
+    def _create_relationships(cls, api_response) -> Relationships:
         if cls.Relationships is Resource.Relationships:
             # In case the resource does not have relationships
             defined_fields = {}
