@@ -6,7 +6,6 @@ import subprocess
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -49,11 +48,11 @@ class XcResultTool(RunningCliAppMixin):
         return output_path
 
     @classmethod
-    def _run_command(cls, command_args: Sequence[CommandArg], error_message: str) -> AnyStr:
+    def _run_command(cls, command_args: Sequence[CommandArg], error_message: str) -> str:
         cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
-                return cls._run_command_with_cli_app(cli_app, command_args)
+                return cls._run_command_with_cli_app(cli_app, command_args).decode()
             else:
                 return subprocess.check_output(command_args).decode()
         except subprocess.CalledProcessError:
