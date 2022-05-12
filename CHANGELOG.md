@@ -1,3 +1,20 @@
+Version 0.25.0
+-------------
+
+This release includes changes from [PR #224](https://github.com/codemagic-ci-cd/cli-tools/pull/224).
+
+**Features**
+- Add option `--archive-method` to action `xcode-project use-profiles` to limit code signing setup for specific profile type only. If archive method is not given, the action will attempt to use all profiles as it worked before.
+
+**Development**
+- **Breaking**: Definitions of enumeration base classes `ResourceEnum` and `ResourceEnumMeta` were moved from module `codemagic.apple.resources.enums` to `codemagic.models.enums`.
+- `ArchiveMethod` enumeration parent class was changed from plain `enum.Enum` to `ResourceEnum`.
+- `ArchiveMethod` class has new factory method `from_profile(profile: ProvisioningProfile)`.
+- Method `XcodeProject.use_profiles` has new optional keyword argument `archive_method: Optional[ArchiveMethod] = None`. 
+
+**Docs**
+- Update docs for action `xcode-project use-profiles`.
+
 Version 0.24.3
 -------------
 

@@ -18,6 +18,7 @@ from typing import TypeVar
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.mixins import PathFinderMixin
+from codemagic.models import ArchiveMethod
 from codemagic.models import BundleIdDetector
 from codemagic.models import CodeSignEntitlements
 from codemagic.models import CodeSigningSettingsManager
@@ -92,6 +93,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         ExportIpaArgument.CUSTOM_EXPORT_OPTIONS,
         XcodeProjectArgument.WARN_ONLY,
         XcodeProjectArgument.CODE_SIGNING_SETUP_VERBOSE_LOGGING,
+        XcodeProjectArgument.USE_PROFILE_ARCHIVE_METHOD,
     )
     def use_profiles(
             self,
@@ -101,6 +103,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             custom_export_options: Optional[Dict] = None,
             warn_only: bool = False,
             code_signing_setup_verbose_logging: bool = False,
+            archive_method: Optional[ArchiveMethod] = None,
     ):
         """
         Set up code signing settings on specified Xcode projects
@@ -117,6 +120,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             profiles = [ProvisioningProfile.from_path(p) for p in profile_paths]
         except (ValueError, IOError) as error:
             raise XcodeProjectException(*error.args)
+
+        if archive_method is not None:
+            profiles = [p for p in profiles if ArchiveMethod.from_profile(p) is archive_method]
 
         available_certs = Keychain().list_code_signing_certificates(should_print=False)
         code_signing_settings_manager = CodeSigningSettingsManager(profiles, available_certs)
