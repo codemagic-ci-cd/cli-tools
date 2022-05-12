@@ -4,7 +4,7 @@ Version 0.24.3
 **Improvements**
 - Speed up `xcresult` parsing for `xcode-project` actions `run-tests`, `junit-test-results` and `test-summary`. [PR #223](https://github.com/codemagic-ci-cd/cli-tools/pull/223)
 
-- Version 0.24.2
+Version 0.24.2
 -------------
 
 **Fixes**
