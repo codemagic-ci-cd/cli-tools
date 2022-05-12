@@ -1,9 +1,4 @@
-import enum
-
-
-class ResourceEnum(enum.Enum):
-    def __str__(self):
-        return str(self.value)
+from codemagic.models.enums import ResourceEnum
 
 
 class ReleaseStatus(ResourceEnum):

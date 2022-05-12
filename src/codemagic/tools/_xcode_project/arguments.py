@@ -3,6 +3,7 @@ import re
 
 from codemagic import cli
 from codemagic.cli import Colors
+from codemagic.models import ArchiveMethod
 from codemagic.models import ProvisioningProfile
 from codemagic.models.simulator import Runtime
 
@@ -91,6 +92,16 @@ class XcodeProjectArgument(cli.Argument):
                 ProvisioningProfile.DEFAULT_LOCATION / '*.provisionprofile',
             ),
         },
+    )
+    USE_PROFILE_ARCHIVE_METHOD = cli.ArgumentProperties(
+        key='archive_method',
+        flags=('--archive-method',),
+        type=ArchiveMethod,
+        description=(
+            'Use only the profiles that are eligible for given archive method '
+            'for code signing setup. If not specified, all found profiles will be used.'
+        ),
+        argparse_kwargs={'required': False, 'choices': list(ArchiveMethod)},
     )
     WARN_ONLY = cli.ArgumentProperties(
         key='warn_only',

@@ -6,7 +6,7 @@ from argparse import ArgumentTypeError
 import pytest
 
 from codemagic.apple.resources import Locale
-from codemagic.apple.resources.enums import ResourceEnumMeta
+from codemagic.models.enums import ResourceEnumMeta
 from codemagic.tools.app_store_connect import BetaBuildInfo
 from codemagic.tools.app_store_connect import Types
 

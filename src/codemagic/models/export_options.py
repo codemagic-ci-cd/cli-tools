@@ -21,6 +21,8 @@ from codemagic.cli import Colors
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
+from .enums import ResourceEnum
+from .enums import ResourceEnumMeta
 from .provisioning_profile import ProvisioningProfile
 
 
@@ -29,11 +31,15 @@ class Destination(enum.Enum):
     UPLOAD = 'upload'
 
 
-class ArchiveMethod(enum.Enum):
+class ArchiveMethod(ResourceEnum):
     AD_HOC = 'ad-hoc'
-    DEVELOPMENT = 'development'
     APP_STORE = 'app-store'
+    DEVELOPMENT = 'development'
     ENTERPRISE = 'enterprise'
+
+    @classmethod
+    def from_profile(cls, profile: ProvisioningProfile) -> ArchiveMethod:
+        return cls.from_profiles([profile])
 
     @classmethod
     def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> ArchiveMethod:
@@ -187,7 +193,8 @@ class ExportOptions(StringConverterMixin):
         elif field_name == 'provisioningProfiles':
             self._set_provisioning_profiles(value)
         elif not isinstance(value, field_type):
-            setattr(self, field_name, field_type(value))
+            with ResourceEnumMeta.without_graceful_fallback():
+                setattr(self, field_name, field_type(value))
         else:
             setattr(self, field_name, value)
 

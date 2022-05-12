@@ -75,6 +75,5 @@ def test_export_options_set_valid_values(field_name, value, export_options_dict)
 ])
 def test_export_options_set_invalid_values(field_name, value, export_options_dict):
     export_options = ExportOptions(**export_options_dict)
-    with pytest.raises(ValueError) as error_info:
+    with pytest.raises(ValueError):
         export_options.set_value(field_name=field_name, value=value)
-    print(error_info)

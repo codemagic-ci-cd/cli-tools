@@ -168,8 +168,8 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _resolve_cli_invocation_arg(cls):
-        from codemagic.apple.resources.enums import ResourceEnumMeta
         from codemagic.cli.argument.typed_cli_argument import TypedCliArgumentMeta
+        from codemagic.models.enums import ResourceEnumMeta
 
         parser = cls._setup_cli_options()
         with ResourceEnumMeta.cli_arguments_parsing_mode(), \

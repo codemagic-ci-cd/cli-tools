@@ -1,7 +1,7 @@
 import pytest
 
-from codemagic.apple.resources.enums import ResourceEnum
-from codemagic.apple.resources.enums import ResourceEnumMeta
+from codemagic.models.enums import ResourceEnum
+from codemagic.models.enums import ResourceEnumMeta
 
 
 class MockEnum(ResourceEnum):
