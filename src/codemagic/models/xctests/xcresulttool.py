@@ -48,13 +48,13 @@ class XcResultTool(RunningCliAppMixin):
         return output_path
 
     @classmethod
-    def _run_command(cls, command_args: Sequence[CommandArg], error_message: str) -> str:
+    def _run_command(cls, command_args: Sequence[CommandArg], error_message: str) -> bytes:
         cli_app = cls.get_current_cli_app()
         try:
             if cli_app:
-                return cls._run_command_with_cli_app(cli_app, command_args).decode()
+                return cls._run_command_with_cli_app(cli_app, command_args)
             else:
-                return subprocess.check_output(command_args).decode()
+                return subprocess.check_output(command_args)
         except subprocess.CalledProcessError:
             raise IOError(error_message)
 
