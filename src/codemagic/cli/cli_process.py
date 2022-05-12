@@ -85,6 +85,7 @@ class CliProcess:
             stdout: Union[int, IO] = subprocess.PIPE,
             stderr: Union[int, IO] = subprocess.PIPE,
             env: Optional[Dict[str, str]] = None,
+            poll_interval: float = 0.01,
     ) -> CliProcess:
         self._log_exec_started()
         start = time.time()
@@ -99,7 +100,7 @@ class CliProcess:
                 self._configure_process_streams()
                 while self._process.poll() is None:
                     self._handle_streams(self._buffer_size)
-                    time.sleep(0.1)
+                    time.sleep(poll_interval)
                 self._handle_streams()
         finally:
             self.duration = time.time() - start
