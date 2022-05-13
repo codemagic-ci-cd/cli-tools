@@ -241,6 +241,26 @@ class ResourceType(ResourceEnum):
     DEVICES = 'devices'
     PRE_RELEASE_VERSIONS = 'preReleaseVersions'
     PROFILES = 'profiles'
+    REVIEW_SUBMISSIONS = 'reviewSubmissions'
+    REVIEW_SUBMISSION_ITEMS = 'reviewSubmissionItems'
+
+
+class ReviewSubmissionState(ResourceEnum):
+    CANCELING = 'CANCELING'
+    COMPLETE = 'COMPLETE'
+    COMPLETING = 'COMPLETING'
+    IN_REVIEW = 'IN_REVIEW'
+    READY_FOR_REVIEW = 'READY_FOR_REVIEW'
+    UNRESOLVED_ISSUES = 'UNRESOLVED_ISSUES'
+    WAITING_FOR_REVIEW = 'WAITING_FOR_REVIEW'
+
+
+class ReviewSubmissionItemState(ResourceEnum):
+    ACCEPTED = 'ACCEPTED'
+    APPROVED = 'APPROVED'
+    READY_FOR_REVIEW = 'READY_FOR_REVIEW'
+    REJECTED = 'REJECTED'
+    REMOVED = 'REMOVED'
 
 
 class Locale(ResourceEnum):

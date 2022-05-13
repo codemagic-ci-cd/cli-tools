@@ -30,10 +30,14 @@ from .enums import ProfileState
 from .enums import ProfileType
 from .enums import ReleaseType
 from .enums import ResourceType
+from .enums import ReviewSubmissionItemState
+from .enums import ReviewSubmissionState
 from .error_response import ErrorResponse
 from .pre_release_version import PreReleaseVersion
 from .profile import Profile
 from .resource import LinkedResourceData
 from .resource import Resource
 from .resource import ResourceId
+from .review_submission import ReviewSubmission
+from .review_submission_item import ReviewSubmissionItem
 from .signing_certificate import SigningCertificate

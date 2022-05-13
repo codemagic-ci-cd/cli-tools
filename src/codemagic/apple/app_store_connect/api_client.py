@@ -27,6 +27,8 @@ from .versioning import AppStoreVersionSubmissions
 from .versioning import BetaAppReviewSubmissions
 from .versioning import BetaBuildLocalizations
 from .versioning import PreReleaseVersions
+from .versioning import ReviewSubmissionItems
+from .versioning import ReviewSubmissions
 
 
 class AppStoreConnectApiClient:
@@ -158,6 +160,14 @@ class AppStoreConnectApiClient:
     @property
     def profiles(self) -> Profiles:
         return Profiles(self)
+
+    @property
+    def review_submissions(self) -> ReviewSubmissions:
+        return ReviewSubmissions(self)
+
+    @property
+    def review_submissions_items(self) -> ReviewSubmissionItems:
+        return ReviewSubmissionItems(self)
 
     @property
     def signing_certificates(self) -> SigningCertificates:
