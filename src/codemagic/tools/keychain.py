@@ -346,7 +346,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
                     raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
                         f'Application "{application}" does not exist or is not in PATH')
             else:
-                yield resolved_path
+                yield str(resolved_path)
 
     def _add_certificate(self,
                          certificate_path: pathlib.Path,
