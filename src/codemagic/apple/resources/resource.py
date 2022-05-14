@@ -176,6 +176,8 @@ class PrettyNameMeta(JsonSerializableMeta):
 
 
 class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
+    relationships: Optional[Relationships]
+
     @dataclass
     class Attributes(DictSerializable, GracefulDataclassMixin):
         pass
@@ -213,6 +215,8 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         self.attributes = self._create_attributes(api_response)
         if 'relationships' in api_response:
             self.relationships = self._create_relationships(api_response)
+        else:
+            self.relationships = None
 
     @property
     def created(self) -> bool:
