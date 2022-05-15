@@ -421,7 +421,7 @@ def action(action_name: str,
     return decorator
 
 
-def common_arguments(*class_arguments: Argument):
+def common_arguments(*class_arguments: Argument) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
     :param class_arguments: CLI arguments that are required to initialize the class
