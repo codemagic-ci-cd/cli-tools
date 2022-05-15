@@ -97,8 +97,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     )
     def use_profiles(
             self,
-            xcode_project_patterns: Sequence[pathlib.Path],
-            profile_path_patterns: Sequence[pathlib.Path],
+            xcode_project_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.XCODE_PROJECT_PATTERN.get_default(),
+            profile_path_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.PROFILE_PATHS.get_default(),
             export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
             custom_export_options: Optional[Dict] = None,
             warn_only: bool = False,
