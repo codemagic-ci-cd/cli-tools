@@ -38,6 +38,25 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
+        'get',
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
+    def get_review_submission(
+        self,
+        review_submission_id: ResourceId,
+        should_print: bool = True,
+    ):
+        """
+        Read Review Submission information
+        """
+        return self._get_resource(
+            review_submission_id,
+            self.api_client.review_submissions,
+            should_print,
+        )
+
+    @cli.action(
         'cancel',
         ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,

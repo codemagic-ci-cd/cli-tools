@@ -7,6 +7,7 @@ Apple has deprecated the [Create an App Store Version Submission](https://develo
 
 **Features**
 - Add new action `app-store-connect review-submissions create` to create new review submission request for application's latest App Store Version.
+- Add new action `app-store-connect review-submissions get` to show review submission information.
 - Add new action `app-store-connect review-submission-items create` to add contents to review submission for App Store review request.
 - Add new action `app-store-connect review-submissions confirm` to confirm pending review submission for App Review.
 - Add new action `app-store-connect review-submissions cancel` to discard review submission from App Review.
