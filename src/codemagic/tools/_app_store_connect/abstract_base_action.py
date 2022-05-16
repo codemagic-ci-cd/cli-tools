@@ -26,6 +26,8 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
 from codemagic.mixins import PathFinderMixin
 
 from .arguments import AppStoreVersionInfo
@@ -85,6 +87,26 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ):
         from .action_groups import BetaGroupsActionGroup
         _ = BetaGroupsActionGroup.add_build_to_beta_groups  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_review_submission(
+        self,
+        review_submission_id: ResourceId,
+        should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.cancel_review_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def confirm_review_submission(
+        self,
+        review_submission_id: ResourceId,
+        should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.confirm_review_submission  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -149,6 +171,31 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ) -> BetaBuildLocalization:
         from .action_groups import BetaBuildLocalizationsActionGroup
         _ = BetaBuildLocalizationsActionGroup.create_beta_build_localization  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_review_submission(
+            self,
+            application_id: ResourceId,
+            platform: Platform,
+            should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.create_review_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_review_submission_item(
+        self,
+        review_submission_id: ResourceId,
+        app_custom_product_page_version_id: Optional[ResourceId] = None,
+        app_event_id: Optional[ResourceId] = None,
+        app_store_version_id: Optional[ResourceId] = None,
+        app_store_version_experiment_id: Optional[ResourceId] = None,
+        should_print: bool = True,
+    ) -> ReviewSubmissionItem:
+        from .action_groups import ReviewSubmissionItemsActionGroup
+        _ = ReviewSubmissionItemsActionGroup.create_review_submission_item  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

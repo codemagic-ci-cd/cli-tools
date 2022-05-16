@@ -569,6 +569,38 @@ class AppStoreVersionArgument(cli.Argument):
     )
 
 
+class ReviewSubmissionArgument(cli.Argument):
+    APP_CUSTOM_PRODUCT_PAGE_VERSION_ID = cli.ArgumentProperties(
+        key='app_custom_product_page_version_id',
+        flags=('--app-custom-product-page-version-id',),
+        description='UUID value of custom product page',
+        type=ResourceId,
+    )
+    APP_EVENT_ID = cli.ArgumentProperties(
+        key='app_event_id',
+        flags=('--app-event-id',),
+        description='UUID value of app event',
+        type=ResourceId,
+    )
+    APP_STORE_VERSION_ID = cli.ArgumentProperties(
+        key='app_store_version_id',
+        flags=('--version-id', '--app-store-version-id'),
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+    )
+    APP_STORE_VERSION_EXPERIMENT_ID = cli.ArgumentProperties(
+        key='app_store_version_experiment_id',
+        flags=('--app-store-version-experiment-id',),
+        type=ResourceId,
+        description='UUID value of the App Store Version experiment',
+    )
+    REVIEW_SUBMISSION_ID = cli.ArgumentProperties(
+        key='review_submission_id',
+        type=ResourceId,
+        description='UUID value of the review submission',
+    )
+
+
 class AppStoreVersionLocalizationArgument(cli.Argument):
     APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
         key='app_store_version_localization_id',

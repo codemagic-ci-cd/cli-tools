@@ -21,5 +21,5 @@ class ReviewSubmissionItemsTest(ResourceManagerTestsBase):
         assert review_submission_item.type is ResourceType.REVIEW_SUBMISSION_ITEMS
 
     def test_delete(self):
-        review_submission_item_id = ResourceId('6e2682ef-873d-4ced-985a-787b6bd6bd7c')
+        review_submission_item_id = ResourceId('NmUyNjgyZWYtODczZC00Y2VkLTk4NWEtNzg3YjZiZDZiZDdjfDZ8ODMyOTAzMTI0')
         self.api_client.review_submissions_items.delete(review_submission_item_id)

@@ -1,3 +1,4 @@
+from typing import Optional
 from typing import Type
 from typing import Union
 
@@ -52,4 +53,29 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
         """
         review_submission_id = self._get_resource_id(review_submission)
         response = self.client.session.get(f'{self.client.API_URL}/reviewSubmissions/{review_submission_id}').json()
+        return ReviewSubmission(response['data'])
+
+    def modify(
+        self,
+        review_submission: Union[LinkedResourceData, ResourceId],
+        canceled: Optional[bool] = None,
+        submitted: Optional[bool] = None,
+    ) -> ReviewSubmission:
+        review_submission_id = self._get_resource_id(review_submission)
+
+        attributes = {}
+        if canceled is not None:
+            attributes['canceled'] = canceled
+        if submitted is not None:
+            attributes['submitted'] = submitted
+
+        payload = self._get_update_payload(
+            review_submission_id,
+            ResourceType.REVIEW_SUBMISSIONS,
+            attributes=attributes,
+        )
+        response = self.client.session.patch(
+            f'{self.client.API_URL}/reviewSubmissions/{review_submission_id}',
+            json=payload,
+        ).json()
         return ReviewSubmission(response['data'])

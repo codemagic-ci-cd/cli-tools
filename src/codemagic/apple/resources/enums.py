@@ -226,7 +226,10 @@ class ReleaseType(ResourceEnum):
 
 class ResourceType(ResourceEnum):
     APPS = 'apps'
+    APP_CUSTOM_PRODUCT_PAGE_VERSIONS = 'appCustomProductPageVersions'
+    APP_EVENTS = 'appEvents'
     APP_STORE_VERSIONS = 'appStoreVersions'
+    APP_STORE_VERSION_EXPERIMENTS = 'appStoreVersionExperiments'
     APP_STORE_VERSION_LOCALIZATIONS = 'appStoreVersionLocalizations'
     APP_STORE_VERSION_SUBMISSIONS = 'appStoreVersionSubmissions'
     BETA_APP_LOCALIZATIONS = 'betaAppLocalizations'

@@ -1,4 +1,6 @@
+from typing import Dict
 from typing import Optional
+from typing import Tuple
 from typing import Type
 from typing import Union
 
@@ -24,7 +26,10 @@ class ReviewSubmissionItems(ResourceManager[ReviewSubmissionItem]):
     def create(
         self,
         review_submission: Union[ResourceId, ReviewSubmission],
+        app_custom_product_page_version: Optional[ResourceId] = None,
+        app_event: Optional[ResourceId] = None,
         app_store_version: Optional[Union[ResourceId, AppStoreVersion]] = None,
+        app_store_version_experiment: Optional[ResourceId] = None,
     ) -> ReviewSubmissionItem:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/post_v1_reviewsubmissionitems
@@ -34,10 +39,23 @@ class ReviewSubmissionItems(ResourceManager[ReviewSubmissionItem]):
                 'data': self._get_attribute_data(review_submission, ResourceType.REVIEW_SUBMISSIONS),
             },
         }
-        if app_store_version is not None:
-            relationships['appStoreVersion'] = {
-                'data': self._get_attribute_data(app_store_version, ResourceType.APP_STORE_VERSIONS),
-            }
+
+        optional_relationships: Dict[str, Tuple[Optional[Union[ResourceId, LinkedResourceData]], ResourceType]] = {
+            'appCustomProductPageVersion': (
+                app_custom_product_page_version,
+                ResourceType.APP_CUSTOM_PRODUCT_PAGE_VERSIONS,
+            ),
+            'appEvent': (app_event, ResourceType.APP_EVENTS),
+            'appStoreVersion': (app_store_version, ResourceType.APP_STORE_VERSIONS),
+            'appStoreVersionExperiment': (
+                app_store_version_experiment,
+                ResourceType.APP_STORE_VERSION_EXPERIMENTS,
+            ),
+        }
+
+        for relationship_name, (resource, resource_type) in optional_relationships.items():
+            if resource is not None:
+                relationships[relationship_name] = {'data': self._get_attribute_data(resource, resource_type)}
 
         payload = self._get_create_payload(
             ResourceType.REVIEW_SUBMISSION_ITEMS,

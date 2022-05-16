@@ -50,6 +50,8 @@ from ._app_store_connect.action_groups import BetaAppReviewSubmissionsActionGrou
 from ._app_store_connect.action_groups import BetaBuildLocalizationsActionGroup
 from ._app_store_connect.action_groups import BetaGroupsActionGroup
 from ._app_store_connect.action_groups import BuildsActionGroup
+from ._app_store_connect.action_groups import ReviewSubmissionItemsActionGroup
+from ._app_store_connect.action_groups import ReviewSubmissionsActionGroup
 from ._app_store_connect.actions import PublishAction
 from ._app_store_connect.arguments import AppArgument
 from ._app_store_connect.arguments import AppStoreConnectArgument
@@ -94,6 +96,8 @@ class AppStoreConnect(
     AppsActionGroup,
     BetaAppReviewSubmissionsActionGroup,
     BetaBuildLocalizationsActionGroup,
+    ReviewSubmissionsActionGroup,
+    ReviewSubmissionItemsActionGroup,
     BetaGroupsActionGroup,
     BuildsActionGroup,
     PublishAction,

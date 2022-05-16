@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shlex
 import time
 from abc import ABCMeta
@@ -8,6 +9,7 @@ from distutils.version import LooseVersion
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from codemagic import cli
@@ -16,7 +18,6 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
-from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import Build
@@ -26,6 +27,8 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
 from codemagic.cli import Colors
 
 from ..abstract_base_action import AbstractBaseAction
@@ -187,7 +190,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             support_url: Optional[str] = None,
             whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
             app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
-    ) -> AppStoreVersionSubmission:
+    ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         """
         Submit build to App Store review
         """
@@ -211,6 +214,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
         return self._submit_to_app_store(
             build_id,
+            platform,
             Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             app_store_version_info,
             app_store_version_localization_infos,
@@ -219,10 +223,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def _submit_to_app_store(
         self,
         build_id: ResourceId,
+        platform: Platform,
         max_processing_minutes: int,
         app_store_version_info: AppStoreVersionInfo,
         app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
-    ) -> AppStoreVersionSubmission:
+    ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
         try:
@@ -251,13 +256,46 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_version_localization_infos,
         )
 
-        app_store_version_submission = self.create_app_store_version_submission(app_store_version.id)
+        review_submission = self._create_review_submission(app, platform)
+        review_submission_item = self.create_review_submission_item(
+            review_submission_id=review_submission.id,
+            app_store_version_id=app_store_version.id,
+        )
 
-        platform_slug = app_store_version_info.platform.value.lower().replace('_', '')
-        submission_url = f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/{platform_slug}/version/inflight'
-        self.logger.info(f'\nCheck App Store submission details from\n{submission_url}\n')
+        self.echo(Colors.BLUE('\nSubmit to App Review\n'))
+        self.confirm_review_submission(review_submission.id)
 
-        return app_store_version_submission
+        submission_url = \
+            f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/reviewsubmissions/details/{review_submission.id}'
+        self.logger.info(f'\nCheck App Store review submission details from\n{submission_url}\n')
+
+        return review_submission, review_submission_item
+
+    def _create_review_submission(self, app: App, platform: Platform) -> ReviewSubmission:
+        self.printer.log_creating(ReviewSubmission, platform=platform, app=app.id)
+        try:
+            review_submission = self.api_client.review_submissions.create(platform, app)
+        except AppStoreConnectApiError as api_error:
+            existing_submission_error_patt = re.compile(
+                r'There is another reviewSubmissions with id ([\w-]+) still in progress',
+            )
+            existing_submission_matches = [
+                existing_submission_error_patt.search(error.detail)
+                for error in api_error.error_response.errors
+            ]
+            if not existing_submission_matches:
+                raise AppStoreConnectError(str(api_error)) from api_error
+
+            self.logger.warning('Review submission already exists, reuse it')
+            existing_review_submission_id = ResourceId(existing_submission_matches[0].group(1))
+            review_submission = self.api_client.review_submissions.read(existing_review_submission_id)
+
+        self.printer.print_resource(review_submission, True)
+        if review_submission.created:
+            self.printer.log_created(review_submission)
+        self.echo('')
+
+        return review_submission
 
     def wait_until_build_is_processed(
         self,
