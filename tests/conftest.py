@@ -57,16 +57,31 @@ def _unencrypted_pem() -> PEM:
 
 @lru_cache()
 def _appstore_api_client() -> AppStoreConnectApiClient:
-    if 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
+    if 0 and 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
         key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
         private_key = key_path.expanduser().read_text()
-    elif 'TEST_APPLE_PRIVATE_KEY_CONTENT' in os.environ:
+        key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
+        issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
+    elif 0 and 'TEST_APPLE_PRIVATE_KEY_CONTENT' in os.environ:
         private_key = os.environ['TEST_APPLE_PRIVATE_KEY_CONTENT']
+        key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
+        issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
     else:
-        raise KeyError('TEST_APPLE_PRIVATE_KEY_PATH', 'TEST_APPLE_PRIVATE_KEY_CONTENT')
+        _logger().warning('Using mock App Store Connect private key')
+        private_key = (
+            '-----BEGIN PRIVATE KEY-----\n'
+            'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgg57UZZvJPP2RSVnb\n'
+            'z09v3WoH9SPgoZW9Aa9zLVAIVQGgCgYIKoZIzj0DAQehRANCAAQOmjqG2uAvOmx3\n'
+            '8cXoNHDaAD9aDiNDqG2LcsOloIKgBRTLwcQPkTd/emZZndx0a0gDtviu2UDQ4l2/\n'
+            'ngq1dJ3d\n'
+            '-----END PRIVATE KEY-----\n'
+        )
+        key_identifier = '6NMHPUB3G8'
+        issuer_id = 'def71228-a8db-74ca-792d-763bded762de'  # Random non functional issuer
+
     return AppStoreConnectApiClient(
-        KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
-        IssuerId(os.environ['TEST_APPLE_ISSUER_ID']),
+        KeyIdentifier(key_identifier),
+        IssuerId(issuer_id),
         private_key,
     )
 
@@ -111,11 +126,6 @@ def app_store_api_client() -> AppStoreConnectApiClient:
 def google_play_api_client() -> GooglePlayDeveloperAPIClient:
     credentials = _google_play_api_credentials()
     return GooglePlayDeveloperAPIClient(credentials)
-
-
-@pytest.fixture()
-def app_store_connect_api_client() -> AppStoreConnectApiClient:
-    return _appstore_api_client()
 
 
 @pytest.fixture(scope='class')

@@ -3,6 +3,7 @@ import os
 import pytest
 
 from codemagic.apple import AppStoreConnectApiError
+from codemagic.apple.app_store_connect.apps import Apps
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import ResourceId
@@ -70,6 +71,6 @@ class AppsTest(ResourceManagerTestsBase):
     ('app_store_versions_app_store_state', 'appStoreVersions.appStoreState'),
     ('sku', 'sku'),
 ])
-def test_apps_filter(app_store_connect_api_client, python_field_name, apple_filter_name):
-    get_apple_filter_name = app_store_connect_api_client.apps.Filter._get_field_name
+def test_apps_filter(python_field_name, apple_filter_name):
+    get_apple_filter_name = Apps.Filter._get_field_name
     assert get_apple_filter_name(python_field_name) == apple_filter_name
