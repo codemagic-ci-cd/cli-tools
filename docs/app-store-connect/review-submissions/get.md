@@ -1,12 +1,12 @@
 
-review-submissions
-==================
+get
+===
 
 
-**Manage your App Store version review submissions**
+**Read Review Submission information**
 ### Usage
 ```bash
-app-store-connect review-submissions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect review-submissions get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--disable-jwt-cache]
@@ -16,8 +16,14 @@ app-store-connect review-submissions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    REVIEW_SUBMISSION_ID
 ```
+### Required arguments for action `get`
+
+##### `REVIEW_SUBMISSION_ID`
+
+
+UUID value of the review submission
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -82,11 +88,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`cancel`](review-submissions/cancel.md)|Discard review submission from App Review|
-|[`confirm`](review-submissions/confirm.md)|Confirm pending review submission for App Review|
-|[`create`](review-submissions/create.md)|Create a review submission request for application's latest App Store Version|
-|[`get`](review-submissions/get.md)|Read Review Submission information|
