@@ -10,15 +10,17 @@ from codemagic.apple.resources import ReviewSubmissionItem
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
+from ..arguments import ReviewSubmissionArgument
 
 
 class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-    ...
-
     @cli.action(
         'create',
-
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        ReviewSubmissionArgument.APP_CUSTOM_PRODUCT_PAGE_VERSION_ID,
+        ReviewSubmissionArgument.APP_EVENT_ID,
+        ReviewSubmissionArgument.APP_STORE_VERSION_ID,
+        ReviewSubmissionArgument.APP_STORE_VERSION_EXPERIMENT_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSION_ITEMS,
     )
     def create_review_submission_item(
