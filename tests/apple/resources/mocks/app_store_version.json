@@ -26,10 +26,6 @@
         }
       },
       "build": {
-        "data": {
-          "type": "builds",
-          "id": "be235c1c-abe7-4884-a4f5-d67d97e41aa6"
-        },
         "links": {
           "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/build",
           "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/build"
@@ -63,6 +59,18 @@
         "links": {
           "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/idfaDeclaration",
           "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/idfaDeclaration"
+        }
+      },
+      "appClipDefaultExperience": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appClipDefaultExperience",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appClipDefaultExperience"
+        }
+      },
+      "appStoreVersionExperiments": {
+        "links": {
+          "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/relationships/appStoreVersionExperiments",
+          "related": "https://api.appstoreconnect.apple.com/v1/appStoreVersions/33c63053-09a9-4112-86cf-bb1539379896/appStoreVersionExperiments"
         }
       }
     },
