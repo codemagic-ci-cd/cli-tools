@@ -1,3 +1,36 @@
+Version 0.26.0
+-------------
+
+This release includes changes from [PR #227](https://github.com/codemagic-ci-cd/cli-tools/pull/227).
+
+Apple has deprecated the [Create an App Store Version Submission](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission) and replaced it by [Review Submissions](https://developer.apple.com/documentation/appstoreconnectapi/review_submissions) API. Changes included in this release update logic driving App Store publishing as part of actions `app-store-connect publish` and `app-store-connect builds submit-to-app-store`. 
+
+**Features**
+- Add new action `app-store-connect review-submissions create` to create new review submission request for application's latest App Store Version.
+- Add new action `app-store-connect review-submission-items create` to add contents to review submission for App Store review request.
+- Add new action `app-store-connect review-submissions confirm` to confirm pending review submission for App Review.
+- Add new action `app-store-connect review-submissions cancel` to discard review submission from App Review.
+
+**Development**
+- **Breaking**: Return type for `AppStoreConnect.submit_to_app_store` changed. Instead of `AppStoreVersionSubmission` it now returns tuple `(ReviewSubmission, ReviewSubmissionItem)`.
+- Add new resource manager properties `review_submissions` and `review_submissions_items` to `AppStoreConnectApiClient`.
+- Update `AppStoreVersion` model with optional relationships `appClipDefaultExperience` and `appStoreVersionExperiments`.
+- Define new `ReviewSubmissionState` and `ReviewSubmissionItemState` enumerations for App Store Connect API resources.
+- Add model definition for resource [`ReviewSubmission`](https://developer.apple.com/documentation/appstoreconnectapi/reviewsubmission).
+- Add model definition for resource [`ReviewSubmissionItem`](https://developer.apple.com/documentation/appstoreconnectapi/reviewsubmissionitem).
+- Add method new methods to `AppStoreConnect`:
+  - `cancel_review_submission`,
+  - `confirm_review_submission`,
+  - `create_review_submission`,
+  - `create_review_submission_item`.
+
+
+**Tests**
+- Update mock for `AppStoreVersion` resource test.
+
+**Docs**
+- TBD
+
 Version 0.25.0
 -------------
 
