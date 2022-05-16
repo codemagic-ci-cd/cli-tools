@@ -57,12 +57,12 @@ def _unencrypted_pem() -> PEM:
 
 @lru_cache()
 def _appstore_api_client() -> AppStoreConnectApiClient:
-    if 0 and 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
+    if 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
         key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
         private_key = key_path.expanduser().read_text()
         key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
         issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
-    elif 0 and 'TEST_APPLE_PRIVATE_KEY_CONTENT' in os.environ:
+    elif 'TEST_APPLE_PRIVATE_KEY_CONTENT' in os.environ:
         private_key = os.environ['TEST_APPLE_PRIVATE_KEY_CONTENT']
         key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
         issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
