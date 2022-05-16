@@ -90,16 +90,6 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
-    def cancel_review_submission(
-        self,
-        review_submission_id: ResourceId,
-        should_print: bool = True,
-    ) -> ReviewSubmission:
-        from .action_groups import ReviewSubmissionsActionGroup
-        _ = ReviewSubmissionsActionGroup.cancel_review_submission  # Implementation
-        raise NotImplementedError()
-
-    @abstractmethod
     def confirm_review_submission(
         self,
         review_submission_id: ResourceId,
