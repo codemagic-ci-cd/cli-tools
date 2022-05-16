@@ -37,7 +37,11 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             platform=platform,
         )
 
-    @cli.action('cancel', ReviewSubmissionArgument.REVIEW_SUBMISSION_ID)
+    @cli.action(
+        'cancel',
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
     def cancel_review_submission(
         self,
         review_submission_id: ResourceId,
@@ -53,7 +57,11 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             canceled=True,
         )
 
-    @cli.action('confirm', ReviewSubmissionArgument.REVIEW_SUBMISSION_ID)
+    @cli.action(
+        'confirm',
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
     def confirm_review_submission(
         self,
         review_submission_id: ResourceId,
