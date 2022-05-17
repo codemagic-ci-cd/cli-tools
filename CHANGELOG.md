@@ -30,7 +30,11 @@ Apple has deprecated the [Create an App Store Version Submission](https://develo
 - Update mock for `AppStoreVersion` resource test.
 
 **Docs**
-- TBD
+- Add docs for app-store-connect `review-submission-items create`
+- Add docs for app-store-connect `app-store-connect review-submissions cancel`
+- Add docs for app-store-connect `app-store-connect review-submissions confirm`
+- Add docs for app-store-connect `app-store-connect review-submissions create`
+- Add docs for app-store-connect `app-store-connect review-submissions get`
 
 Version 0.25.0
 -------------
