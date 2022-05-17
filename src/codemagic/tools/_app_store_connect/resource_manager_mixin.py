@@ -21,7 +21,7 @@ class ResourceManagerMixin:
         try:
             resource = resource_manager.create(**create_params)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(str(api_error)) from api_error
 
         self.printer.print_resource(resource, should_print)
         self.printer.log_created(resource)

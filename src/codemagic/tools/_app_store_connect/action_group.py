@@ -34,3 +34,11 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name='beta-groups',
         description='Manage your groups of beta testers in App Store Connect',
     )
+    REVIEW_SUBMISSIONS = cli.ActionGroupProperties(
+        name='review-submissions',
+        description='Manage your App Store version review submissions',
+    )
+    REVIEW_SUBMISSION_ITEMS = cli.ActionGroupProperties(
+        name='review-submission-items',
+        description='Manage the contents of your review submission',
+    )

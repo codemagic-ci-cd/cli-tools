@@ -54,4 +54,6 @@ class AppStoreVersion(Resource):
         routingAppCoverage: Relationship
 
         app: Optional[Relationship] = None
+        appClipDefaultExperience: Optional[Relationship] = None
+        appStoreVersionExperiments: Optional[Relationship] = None
         appVersionExperiments: Optional[Relationship] = None
