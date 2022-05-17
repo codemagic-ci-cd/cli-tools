@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import ResourceId
@@ -41,6 +42,6 @@ class BuildsTest(ResourceManagerTestsBase):
     ('version', 'version'),
     ('pre_release_version_version', 'preReleaseVersion.version'),
 ])
-def test_builds_filter(app_store_connect_api_client, python_field_name, apple_filter_name):
-    get_apple_filter_name = app_store_connect_api_client.builds.Filter._get_field_name
+def test_builds_filter(python_field_name, apple_filter_name):
+    get_apple_filter_name = Builds.Filter._get_field_name
     assert get_apple_filter_name(python_field_name) == apple_filter_name
