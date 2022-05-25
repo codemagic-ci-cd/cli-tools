@@ -23,7 +23,7 @@ setuptools = "<60"
 
 [packages]
 pyopenssl = "~=22.0"
-pyjwt = "~=2.3.0"
+pyjwt = "~=2.4.0"
 requests = "~=2.25"
 cryptography = "<37,>=3.3"
 oauth2client = "~=4.1.3"
