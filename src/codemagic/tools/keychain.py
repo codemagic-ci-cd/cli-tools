@@ -307,7 +307,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
                 KeychainArgument.DISALLOW_ALL_APPLICATIONS)
     def add_certificates(
             self,
-            certificate_path_patterns: Sequence[pathlib.Path],
+            certificate_path_patterns: Sequence[pathlib.Path] = KeychainArgument.CERTIFICATE_PATHS.get_default(),
             certificate_password: Password = Password(''),
             allowed_applications: Sequence[pathlib.Path] = KeychainArgument.ALLOWED_APPLICATIONS.get_default(),
             allow_all_applications: Optional[bool] = KeychainArgument.ALLOW_ALL_APPLICATIONS.get_default(),
