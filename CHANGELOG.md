@@ -4,6 +4,9 @@ Unreleased
 **Development**
 - Use default values for all arguments in `Keychain.add_certificates` and `XcodeProject.use_profiles`. [PR #226](https://github.com/codemagic-ci-cd/cli-tools/pull/226)
 
+**Dependencies**
+- Update [`PyJWT`](https://pyjwt.readthedocs.io/en/stable/) dependency minimum required version from `2.3.0` to `2.4.0`. [PR #231](https://github.com/codemagic-ci-cd/cli-tools/pull/231)
+
 Version 0.26.0
 -------------
 
