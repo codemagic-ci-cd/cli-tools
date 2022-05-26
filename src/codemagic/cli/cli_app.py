@@ -421,13 +421,16 @@ def action(action_name: str,
     return decorator
 
 
-def common_arguments(*class_arguments: Argument) -> Callable[[_Fn], _Fn]:
+_CliApp = TypeVar('_CliApp', bound=Type[CliApp])
+
+
+def common_arguments(*class_arguments: Argument) -> Callable[[_CliApp], _CliApp]:
     """
     Decorator to mark that the method is usable from CLI
     :param class_arguments: CLI arguments that are required to initialize the class
     """
 
-    def decorator(cli_app_type: Type[CliApp]):
+    def decorator(cli_app_type: _CliApp) -> _CliApp:
         if not issubclass(cli_app_type, CliApp):
             raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
         for class_argument in class_arguments:
