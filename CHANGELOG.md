@@ -1,7 +1,8 @@
 Unreleased
 -------------
+
 **Development**
-- Use default values for all arguments in `Keychain.add_certificates` and `XcodeProject.use_profiles`
+- Use default values for all arguments in `Keychain.add_certificates` and `XcodeProject.use_profiles`. [PR #226](https://github.com/codemagic-ci-cd/cli-tools/pull/226)
 
 Version 0.26.0
 -------------
