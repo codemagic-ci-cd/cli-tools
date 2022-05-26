@@ -1,3 +1,8 @@
+Unreleased
+-------------
+**Development**
+- Use default values for all arguments in `Keychain.add_certificates` and `XcodeProject.use_profiles`
+
 Version 0.26.0
 -------------
 
