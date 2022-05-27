@@ -1,4 +1,4 @@
-Unreleased
+Version 0.27.0
 -------------
 
 **Fixes**
