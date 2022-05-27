@@ -1,6 +1,9 @@
 Unreleased
 -------------
 
+**Fixes**
+- Action `xcode-project use-profiles` failed to assign code signing information to build configurations that inherited build settings from `xcconfig` files. Reported in [issue #220](https://github.com/codemagic-ci-cd/cli-tools/issues/220). [PR #232](https://github.com/codemagic-ci-cd/cli-tools/pull/232)
+
 **Development**
 - Use default values for all arguments in `Keychain.add_certificates` and `XcodeProject.use_profiles`. [PR #226](https://github.com/codemagic-ci-cd/cli-tools/pull/226)
 
