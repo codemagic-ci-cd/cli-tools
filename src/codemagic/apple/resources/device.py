@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 from .bundle_id import BundleIdPlatform
 from .enums import DeviceClass
@@ -15,6 +16,7 @@ class Device(Resource):
     """
 
     attributes: Attributes
+    relationships: Optional[Resource.Relationships] = None
 
     @dataclass
     class Attributes(Resource.Attributes):

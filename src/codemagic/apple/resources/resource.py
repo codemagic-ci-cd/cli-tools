@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import enum
 import re
+from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timezone
@@ -176,8 +177,6 @@ class PrettyNameMeta(JsonSerializableMeta):
 
 
 class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
-    relationships: Optional[Relationships]
-
     @dataclass
     class Attributes(DictSerializable, GracefulDataclassMixin):
         pass
@@ -217,6 +216,24 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
             self.relationships = self._create_relationships(api_response)
         else:
             self.relationships = None
+
+    @property
+    @abstractmethod
+    def attributes(self) -> Attributes:
+        ...
+
+    @attributes.setter
+    def attributes(self, value: Attributes) -> None:
+        ...
+
+    @property
+    @abstractmethod
+    def relationships(self) -> Optional[Relationships]:
+        ...
+
+    @relationships.setter
+    def relationships(self, value: Optional[Relationships]) -> None:
+        ...
 
     @property
     def created(self) -> bool:
