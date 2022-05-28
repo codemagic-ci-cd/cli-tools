@@ -183,6 +183,8 @@ class PrettyNameAbcMeta(PrettyNameMeta, ABCMeta):
 
 
 class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
+    _OMIT_IF_NONE_KEYS = ('relationships',)
+
     def __init_subclass__(cls) -> None:
         """
         hack to work around the fact that we are overriding the `attributes` and ``relationships`` properties with
