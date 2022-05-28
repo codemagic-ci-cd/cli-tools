@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 from typing import Union
 
 from codemagic.apple import AppStoreConnectApiClient
@@ -252,7 +253,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         support_url: Optional[str] = None,
         whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
-    ) -> AppStoreVersionSubmission:
+    ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_app_store  # Implementation
         raise NotImplementedError()
