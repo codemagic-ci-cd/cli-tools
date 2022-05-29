@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import enum
 import re
+from abc import ABCMeta
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
@@ -176,7 +177,23 @@ class PrettyNameMeta(JsonSerializableMeta):
         return f'{singular}s'
 
 
-class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
+# workaround for Inconsistent metaclass structure for "Resource" error
+class PrettyNameAbcMeta(PrettyNameMeta, ABCMeta):
+    pass
+
+
+class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
+    def __init_subclass__(cls) -> None:
+        """
+        hack to work around the fact that we are overriding the `attributes` and ``relationships`` properties with
+        variables instead of properties
+
+        they are always given values in ``__init__``, but that runs after the check in ``ABCMeta``
+        """
+        cls.attributes = None  # type:ignore[assignment]
+        cls.relationships = None  # type:ignore[assignment]
+        super().__init_subclass__()
+
     @dataclass
     class Attributes(DictSerializable, GracefulDataclassMixin):
         pass
