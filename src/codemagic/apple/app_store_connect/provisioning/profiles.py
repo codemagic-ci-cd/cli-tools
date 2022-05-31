@@ -135,8 +135,7 @@ class Profiles(ResourceManager[Profile]):
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
-            # TODO: fix this method when passing it a Profile
-            url = profile.relationships.profiles.links.related  # type:ignore[attr-defined]
+            url = profile.relationships.certificates.links.self
         if url is None:
             url = f'{self.client.API_URL}/profiles/{profile}/certificates'
         return [SigningCertificate(certificate) for certificate in self.client.paginate(url)]
@@ -147,7 +146,7 @@ class Profiles(ResourceManager[Profile]):
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
-            url = profile.relationships.certificates.links.self
+            url = profile.relationships.certificates.links.related
         if url is None:
             url = f'{self.client.API_URL}/profiles/{profile}/relationships/certificates'
         return [LinkedResourceData(certificate) for certificate in self.client.paginate(url)]
@@ -158,8 +157,7 @@ class Profiles(ResourceManager[Profile]):
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
-            # TODO: fix this method when passing it a Profile
-            url = profile.relationships.profiles.links.related  # type:ignore[attr-defined]
+            url = profile.relationships.devices.links.self
         if url is None:
             url = f'{self.client.API_URL}/profiles/{profile}/devices'
         return [Device(device) for device in self.client.paginate(url)]
@@ -170,8 +168,7 @@ class Profiles(ResourceManager[Profile]):
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
-            # TODO: fix this method when passing it a Profile
-            url = profile.relationships.profiles.links.self  # type:ignore[attr-defined]
+            url = profile.relationships.devices.links.related
         if url is None:
             url = f'{self.client.API_URL}/profiles/{profile}/relationships/devices'
         return [LinkedResourceData(device) for device in self.client.paginate(url)]
