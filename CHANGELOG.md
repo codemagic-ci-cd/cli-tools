@@ -5,6 +5,9 @@ Version UNRELEASED
 - Make type interface more strict for App Store Connect API client and resource definitions. [PR #221](https://github.com/codemagic-ci-cd/cli-tools/pull/221)
 - Improve `ResourceManagerMixin` type interface. [PR #235](https://github.com/codemagic-ci-cd/cli-tools/pull/235)
 
+**Bugfixes**:
+- Fix `AttributeError` exceptions when constructing URLs for App Store Connect API requests to list certificates, certificate IDs, devices or device IDs for given `Profile` instance. [PR #221](https://github.com/codemagic-ci-cd/cli-tools/pull/221)
+
 Version 0.27.0
 -------------
 
