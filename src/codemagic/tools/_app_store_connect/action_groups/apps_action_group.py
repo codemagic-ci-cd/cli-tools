@@ -117,7 +117,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             version_string: Optional[str] = None,
             platform: Optional[Platform] = None,
             app_store_state: Optional[AppStoreState] = None,
-            should_print: bool = True) -> List[PreReleaseVersion]:
+            should_print: bool = True) -> List[AppStoreVersion]:
         """
         Get a list of App Store versions associated with a specific app
         """

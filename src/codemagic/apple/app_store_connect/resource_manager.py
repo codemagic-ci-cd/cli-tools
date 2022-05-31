@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from codemagic.apple import AppStoreConnectApiClient
 
 R = TypeVar('R', bound=Resource)
+R2 = TypeVar('R2', bound=Resource)
 
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
