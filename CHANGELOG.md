@@ -1,3 +1,9 @@
+Version UNRELEASED
+-------------
+
+**Development**
+- Make type interface more strict for App Store Connect API client and resource definitions. [PR #221](https://github.com/codemagic-ci-cd/cli-tools/pull/221)
+
 Version 0.27.0
 -------------
 
