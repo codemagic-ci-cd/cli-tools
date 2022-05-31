@@ -135,7 +135,7 @@ class ResourceManagerMixin:
         ignore_not_found: bool,
     ):
         try:
-            delete_resource: Callable[..., None] = getattr(resource_manager, 'delete')
+            delete_resource: Callable[[ResourceId], None] = getattr(resource_manager, 'delete')
         except AttributeError:
             raise RuntimeError('Resource manager cannot delete resources', resource_manager)
 
