@@ -13,6 +13,9 @@ class ReviewSubmissionItem(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/reviewsubmissionitem
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         state: ReviewSubmissionItemState

@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import copy
 from dataclasses import dataclass
+from typing import Optional
 
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources.resource import Relationship
 
 
 class MockResource(Resource):
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         name: str

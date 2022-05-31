@@ -15,6 +15,9 @@ class ReviewSubmission(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/reviewsubmission
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         platform: Platform

@@ -26,6 +26,9 @@ class Build(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/build
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         expired: bool

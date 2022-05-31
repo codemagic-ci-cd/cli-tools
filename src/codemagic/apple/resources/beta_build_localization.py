@@ -13,6 +13,9 @@ class BetaBuildLocalization(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalization
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         locale: Locale

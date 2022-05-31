@@ -105,15 +105,18 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
         from .android_app_bundle import AndroidAppBundleTypes
 
         self._deprecation_notice()
-        signing_info_kwargs = {}
+        android_app_bundle = AndroidAppBundle()
         if self.android_signing_info:
-            signing_info_kwargs = {
-                'keystore_path': self.android_signing_info.store_path,
-                'keystore_password': AndroidAppBundleTypes.KeystorePassword(self.android_signing_info.store_pass),
-                'key_alias': AndroidAppBundleTypes.KeyAlias(self.android_signing_info.key_alias),
-                'key_password': AndroidAppBundleTypes.KeyPassword(self.android_signing_info.key_pass),
-            }
-        return AndroidAppBundle().build_universal_apks(self.pattern, **signing_info_kwargs)
+            apk_paths = android_app_bundle.build_universal_apks(
+                self.pattern,
+                keystore_path=self.android_signing_info.store_path,
+                keystore_password=AndroidAppBundleTypes.KeystorePassword(self.android_signing_info.store_pass),
+                key_alias=AndroidAppBundleTypes.KeyAlias(self.android_signing_info.key_alias),
+                key_password=AndroidAppBundleTypes.KeyPassword(self.android_signing_info.key_pass),
+            )
+        else:
+            apk_paths = android_app_bundle.build_universal_apks(self.pattern)
+        return apk_paths
 
     def _deprecation_notice(self):
         from .android_app_bundle import AndroidAppBundle

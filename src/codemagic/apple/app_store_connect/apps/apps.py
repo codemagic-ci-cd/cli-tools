@@ -77,9 +77,10 @@ class Apps(ResourceManager[App]):
         Warning! As of 11.08.21 pagination does not work as expected for this API endpoint. See
         https://github.com/codemagic-ci-cd/cli-tools/pull/140 for more information.
         """
-        if isinstance(app, App):
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.builds.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/apps/{app}/builds'
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
 
@@ -87,9 +88,10 @@ class Apps(ResourceManager[App]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_prerelease_versions_for_an_app
         """
-        if isinstance(app, App):
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.preReleaseVersions.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/apps/{app}/preReleaseVersions'
         return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
 
@@ -102,9 +104,10 @@ class Apps(ResourceManager[App]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
-        if isinstance(app, App):
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.appStoreVersions.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/apps/{app}/appStoreVersions'
         params = resource_filter.as_query_params() if resource_filter else None
         app_store_versions = self.client.paginate(url, params=params, limit=limit)
@@ -114,9 +117,10 @@ class Apps(ResourceManager[App]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_beta_app_localizations_of_an_app
         """
-        if isinstance(app, App):
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.betaAppLocalizations.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/apps/{app}/betaAppLocalizations'
         response = self.client.session.get(url).json()
         return [BetaAppLocalization(bal) for bal in response['data']]
@@ -125,9 +129,10 @@ class Apps(ResourceManager[App]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_beta_app_review_details_resource_of_an_app
         """
-        if isinstance(app, App):
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.betaAppReviewDetail.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/apps/{app}/betaAppReviewDetail'
         response = self.client.session.get(url).json()
         return BetaAppReviewDetail(response['data'])

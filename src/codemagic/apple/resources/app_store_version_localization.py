@@ -13,6 +13,9 @@ class AppStoreVersionLocalization(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         description: str

@@ -16,6 +16,9 @@ class AppStoreVersion(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         platform: Platform

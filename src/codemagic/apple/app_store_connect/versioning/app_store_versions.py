@@ -100,9 +100,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.build.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/build'
         response = self.client.session.get(url).json()
 
@@ -117,9 +118,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_submission_information_of_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.appStoreVersionSubmission.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionSubmission'
         response = self.client.session.get(url).json()
         return AppStoreVersionSubmission(response['data'])
@@ -131,9 +133,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.appStoreVersionLocalizations.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionLocalizations'
         return [
             AppStoreVersionLocalization(app_store_version_localization)

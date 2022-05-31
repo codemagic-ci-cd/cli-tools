@@ -12,6 +12,9 @@ class BetaAppReviewDetail(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/betaapplocalization
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         contactEmail: Optional[str]

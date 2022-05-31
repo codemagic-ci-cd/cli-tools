@@ -49,6 +49,9 @@ class BundleIdCapability(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/bundleidcapability
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         capabilityType: CapabilityType

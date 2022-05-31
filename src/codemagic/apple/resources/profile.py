@@ -18,6 +18,9 @@ class Profile(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/profile
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         name: str
