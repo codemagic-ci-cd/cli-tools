@@ -3,6 +3,7 @@ Version UNRELEASED
 
 **Development**
 - Make type interface more strict for App Store Connect API client and resource definitions. [PR #221](https://github.com/codemagic-ci-cd/cli-tools/pull/221)
+- Improve `ResourceManagerMixin` type interface. [PR #235](https://github.com/codemagic-ci-cd/cli-tools/pull/235)
 
 Version 0.27.0
 -------------
