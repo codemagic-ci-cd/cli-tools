@@ -1,4 +1,4 @@
-Version UNRELEASED
+Version 0.27.1
 -------------
 
 **Development**
