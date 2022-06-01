@@ -7,6 +7,7 @@ from abc import ABCMeta
 from datetime import datetime
 from distutils.version import LooseVersion
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -280,13 +281,13 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 r'There is another reviewSubmissions with id ([\w-]+) still in progress',
             )
 
-            existing_submission_matches = (
+            existing_submission_matches: Iterator[Optional[re.Match]] = (
                 existing_submission_error_patt.search(error.detail)
                 for error in api_error.error_response.errors
             )
 
             try:
-                existing_submission_match = next(filter(bool, existing_submission_matches))
+                existing_submission_match: re.Match = next(filter(bool, existing_submission_matches))
             except StopIteration:
                 raise AppStoreConnectError(str(api_error)) from api_error
 
