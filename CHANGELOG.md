@@ -1,3 +1,9 @@
+Version 0.27.2
+-------------
+
+**Bugfixes**:
+- Fix `AttributeError` that can occur on review submission creation error handling as part of action `app-store-connect builds submit-to-app-store`. [PR #236](https://github.com/codemagic-ci-cd/cli-tools/pull/236)
+
 Version 0.27.1
 -------------
 

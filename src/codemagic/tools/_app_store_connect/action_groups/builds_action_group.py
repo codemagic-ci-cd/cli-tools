@@ -7,6 +7,7 @@ from abc import ABCMeta
 from datetime import datetime
 from distutils.version import LooseVersion
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -279,15 +280,19 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             existing_submission_error_patt = re.compile(
                 r'There is another reviewSubmissions with id ([\w-]+) still in progress',
             )
-            existing_submission_matches = [
+
+            existing_submission_matches: Iterator[Optional[re.Match]] = (
                 existing_submission_error_patt.search(error.detail)
                 for error in api_error.error_response.errors
-            ]
-            if not existing_submission_matches:
+            )
+
+            try:
+                existing_submission_match: re.Match = next(filter(bool, existing_submission_matches))
+            except StopIteration:
                 raise AppStoreConnectError(str(api_error)) from api_error
 
             self.logger.warning('Review submission already exists, reuse it')
-            existing_review_submission_id = ResourceId(existing_submission_matches[0].group(1))
+            existing_review_submission_id = ResourceId(existing_submission_match.group(1))
             review_submission = self.api_client.review_submissions.read(existing_review_submission_id)
 
         self.printer.print_resource(review_submission, True)
