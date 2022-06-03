@@ -226,15 +226,42 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                     stderr=subprocess.STDOUT,
                 ).decode()
         except subprocess.CalledProcessError as cpe:
-            stdout = cpe.stdout
+            stdout = self._hide_environment_variable_values(cpe.stdout)
             result = self._get_action_result(cpe.stdout)
             if result and result.product_errors:
                 product_errors = '\n'.join(pe.message for pe in result.product_errors)
                 error_message = f'{error_message}:\n{product_errors}'
             raise AltoolCommandError(error_message, self._str(stdout or ''))
 
+        stdout = self._hide_environment_variable_values(stdout)
         self._log_process_output(stdout, cli_app)
         return self._get_action_result(stdout)
+
+    @classmethod
+    def _hide_environment_variable_values(cls, stdout: Optional[AnyStr]) -> Optional[str]:
+        """
+        With certain Xcode versions all defined environment variables
+        are printed out by ipatool as Ruby mapping in case an error occurs.
+        Since environment variables can contain all kinds of secrets
+        it is not desirable to have them in the publishing output.
+        """
+        if stdout is None:
+            return None
+
+        stdout = cls._str(stdout)
+        env_match = re.search(r'ENV: \{(.*)\}', stdout)
+
+        if env_match is not None:
+            environment_variables = env_match.group(1).split('", "')
+            environment_variable_names = (variable.split('"=>"')[0].strip('"') for variable in environment_variables)
+            sanitized_environment = ', '.join(f'"{name}"=>"..."' for name in environment_variable_names)
+            stdout = (
+                f'{stdout[:env_match.span()[0]]}'
+                f'ENV: {{{sanitized_environment}}}'
+                f'{stdout[env_match.span()[1]:]}'
+            )
+
+        return stdout
 
     @classmethod
     def _should_retry_command(cls, process_output: str):
