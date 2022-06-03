@@ -45,8 +45,8 @@ class Argument(ArgumentProperties, enum.Enum):
             )
             new_argument = argument_class[argument.name]
             new_argument.register = argument.register  # type: ignore
-            new_argument._get_parser_argument = argument._get_parser_argument
-            new_argument._set_parser_argument = argument._set_parser_argument
+            new_argument._get_parser_argument = argument._get_parser_argument  # type: ignore
+            new_argument._set_parser_argument = argument._set_parser_argument  # type: ignore
             yield new_argument
 
     @classmethod
