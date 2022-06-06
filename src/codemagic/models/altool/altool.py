@@ -253,7 +253,9 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         env_match = re.search(r'ENV: \{(.*)\}', output)
 
         if env_match is not None:
-            environment_variable_names = re.findall(r',?"([^"]+)"\s?=>\s?"', env_match.group(1))
+            # Ruby hashes are represented as `{ "name" => "value", "key" => "other value", ... }
+            # This pattern captures the variable name before `=>`.
+            environment_variable_names = re.findall(r',?"([^"]+)"\s?=>', env_match.group(1))
             sanitized_environment = ', '.join(f'"{name}"=>"..."' for name in environment_variable_names)
             output = (
                 f'{output[:env_match.span()[0]]}'
