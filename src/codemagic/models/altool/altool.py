@@ -234,9 +234,9 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 error_message,
                 self._hide_environment_variable_values(cpe.stdout),
             )
-        else:
-            self._log_process_output(stdout, cli_app)
-            return self._get_action_result(stdout)
+
+        self._log_process_output(stdout, cli_app)
+        return self._get_action_result(stdout)
 
     @classmethod
     def _hide_environment_variable_values(cls, altool_output: Optional[AnyStr]) -> str:
