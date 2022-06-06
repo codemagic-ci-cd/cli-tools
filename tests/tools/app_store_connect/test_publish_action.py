@@ -240,7 +240,13 @@ def test_skip_package_upload_or_validation_argument_from_env(argument, environme
     assert parsed_value.value is True
 
 
-@pytest.mark.parametrize('argument', (PublishArgument.SKIP_PACKAGE_VALIDATION, PublishArgument.SKIP_PACKAGE_UPLOAD))
+@pytest.mark.parametrize(
+    'argument',
+    (
+        PublishArgument.SKIP_PACKAGE_VALIDATION,
+        PublishArgument.SKIP_PACKAGE_UPLOAD,
+    ),
+)
 def test_no_skip_package_upload_or_validation_argument_from_env(cli_argument_group, argument):
     """
     Non "truthy" value is not valid as this action just turns the switch on.
@@ -250,7 +256,7 @@ def test_no_skip_package_upload_or_validation_argument_from_env(cli_argument_gro
     os.environ[argument.type.environment_variable_key] = ''
     with pytest.raises(argparse.ArgumentError) as error_info:
         argument.from_args(args)
-    assert str(error_info.value) == f'argument {"/".join(argument.flags)}: Provided value "False" is not valid'
+    assert str(error_info.value) == f'argument {"/".join(argument.flags)}: Provided value "" is not valid'
 
 
 def test_add_build_to_beta_groups(publishing_namespace_kwargs):

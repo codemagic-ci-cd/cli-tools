@@ -30,10 +30,8 @@ class ArgumentProperties(NamedTuple):
 
         return ArgumentProperties(**kwargs)
 
-    @property
-    def _parser_argument(self):
+    def _get_parser_argument(self):
         return getattr(self, '__parser_argument')
 
-    @_parser_argument.setter
-    def _parser_argument(self, parser_argument):
+    def _set_parser_argument(self, parser_argument):
         setattr(self, '__parser_argument', parser_argument)

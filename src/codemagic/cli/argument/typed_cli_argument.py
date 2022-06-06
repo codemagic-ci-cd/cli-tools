@@ -121,7 +121,7 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     def _apply_type(cls, non_typed_value: str) -> T:
         value = cls.argument_type(non_typed_value)
         if not cls._is_valid(value):
-            raise argparse.ArgumentTypeError(f'Provided value "{value}" is not valid')
+            raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
         return value
 
     def _parse_value(self) -> T:

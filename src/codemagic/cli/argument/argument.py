@@ -45,6 +45,8 @@ class Argument(ArgumentProperties, enum.Enum):
             )
             new_argument = argument_class[argument.name]
             new_argument.register = argument.register  # type: ignore
+            new_argument._get_parser_argument = argument._get_parser_argument  # type: ignore
+            new_argument._set_parser_argument = argument._set_parser_argument  # type: ignore
             yield new_argument
 
     @classmethod
@@ -67,11 +69,14 @@ class Argument(ArgumentProperties, enum.Enum):
         kwargs = self.value.argparse_kwargs or {}
         if 'action' not in kwargs:
             kwargs['type'] = self.value.type
-        self._parser_argument = argument_group.add_argument(
-            *self.value.flags,
-            help=self.get_description().replace('`', ''),
-            dest=self.value.key,
-            **kwargs)
+        if self.argument_group_name is None:
+            parser_argument = argument_group.add_argument(
+                *self.value.flags,
+                help=self.get_description().replace('`', ''),
+                dest=self.value.key,
+                **kwargs,
+            )
+            self._set_parser_argument(parser_argument)
 
     def is_required(self) -> bool:
         return (self.value.argparse_kwargs or {}).get('required', True)
@@ -122,7 +127,7 @@ class Argument(ArgumentProperties, enum.Enum):
         """
         if message is None:
             message = self.get_missing_value_error_message()
-        raise argparse.ArgumentError(self._parser_argument, message)
+        raise argparse.ArgumentError(self._get_parser_argument(), message)
 
     def _is_function_argument(self):
         return isinstance(self.value.type, (types.FunctionType, types.MethodType))
