@@ -1,6 +1,9 @@
 Version 0.27.3
 -------------
 
+**Features**:
+- Sanitize environment variable values in `altool` error logs when publishing to App Store Connect using `app-store-connect publish` fails. [PR #238](https://github.com/codemagic-ci-cd/cli-tools/pull/238)
+
 **Bugfixes**:
 - Fix handling invalid argument errors for grouped CLI arguments that are defined via environment variables. [PR #239](https://github.com/codemagic-ci-cd/cli-tools/pull/239)
 
