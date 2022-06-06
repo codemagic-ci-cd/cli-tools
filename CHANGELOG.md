@@ -1,3 +1,9 @@
+Version 0.27.3
+-------------
+
+**Bugfixes**:
+- Fix handling invalid argument errors for grouped CLI arguments that are defined via environment variables. [PR #239](https://github.com/codemagic-ci-cd/cli-tools/pull/239)
+
 Version 0.27.2
 -------------
 
