@@ -1,3 +1,9 @@
+Version 0.27.4
+-------------
+
+**Bugfixes**:
+- Fix `ProvisioningProfile.application_identifier` property for profiles that list associated application identifiers. [PR #240](https://github.com/codemagic-ci-cd/cli-tools/pull/240)
+
 Version 0.27.3
 -------------
 

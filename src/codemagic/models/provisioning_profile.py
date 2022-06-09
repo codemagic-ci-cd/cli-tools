@@ -113,7 +113,11 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
     def application_identifier(self) -> str:
         entitlements = self._plist.get('Entitlements', dict())
         for key, value in entitlements.items():
-            if 'application-identifier' in key:
+            if 'application-identifier' not in key:
+                continue
+            elif 'associated-application-identifier' in key:
+                continue
+            elif isinstance(value, str):
                 return value
         return ''
 
