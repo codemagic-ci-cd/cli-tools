@@ -26,8 +26,8 @@ setup(
     scripts=['bin/code_signing_manager.rb'],
     python_requires='>=3.7',
     install_requires=[
-        'cryptography>=3.3,<37',
-        'google-api-python-client>=1.7.12,<2',
+        'cryptography>=3.3',
+        'google-api-python-client>=1.7.12',
         'httplib2>=0.19.0',
         'oauth2client>=4.1.3',
         'PyJWT>=2.4.0,<3',
