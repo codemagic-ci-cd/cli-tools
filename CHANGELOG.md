@@ -1,3 +1,10 @@
+Version 0.27.5
+-------------
+
+**Dependencies**:
+- Remove upper bound version limit `<37` from [`cryptograp`](https://cryptography.io/) dependency, but exclude version [`37.0.0`](https://cryptography.io/en/latest/changelog/#v37-0-1) as it conflicts with `pyOpenSSL`. [PR #241](https://github.com/codemagic-ci-cd/cli-tools/pull/241)
+- Remove upper bound version limit from [`google-api-python-client`](https://github.com/googleapis/google-api-python-client) as all used functionality works also with recent versions. [PR #241](https://github.com/codemagic-ci-cd/cli-tools/pull/241)
+
 Version 0.27.4
 -------------
 
