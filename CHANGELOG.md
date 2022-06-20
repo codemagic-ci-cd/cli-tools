@@ -1,3 +1,9 @@
+Version 0.27.6
+-------------
+
+**Features**:
+- Action `xcode-project run-tests` will now respect retried testcase outcome. In case the initial testcase execution fails, but retrying is turned on (by `-retry-tests-on-failure` Xcode testing flag) and subsequent testcase run turns out to be successful, then this testcase will not be considered as _failed_ in the context of whole test suite. [PR #242](https://github.com/codemagic-ci-cd/cli-tools/pull/242)
+
 Version 0.27.5
 -------------
 

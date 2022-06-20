@@ -433,8 +433,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
         if not graceful_exit:
-            has_failing_tests = test_suites and (test_suites.failures or test_suites.errors)
-            if testing_failed or has_failing_tests:
+            if testing_failed or (test_suites and test_suites.has_failed_tests()):
                 raise XcodeProjectException('Tests failed')
 
     @cli.action('test-summary',
