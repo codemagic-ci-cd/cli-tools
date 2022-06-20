@@ -1,6 +1,12 @@
 Version 0.27.5
 -------------
 
+**Features**:
+- Action `xcode-project run-tests` will now respect retried testcase outcome. In case the initial testcase execution fails, but retrying is turned on (by `-retry-tests-on-failure` Xcode testing flag) and subsequent testcase run turns out to be successful, then this testcase will not be considered as _failed_ in the context of whole test suite. [PR #242](https://github.com/codemagic-ci-cd/cli-tools/pull/242)
+
+Version 0.27.5
+-------------
+
 **Dependencies**:
 - Remove upper bound version limit `<37` from [`cryptography`](https://cryptography.io/) dependency, but exclude version [`37.0.0`](https://cryptography.io/en/latest/changelog/#v37-0-1) as it conflicts with `pyOpenSSL`. [PR #241](https://github.com/codemagic-ci-cd/cli-tools/pull/241)
 - Remove upper bound version limit from [`google-api-python-client`](https://github.com/googleapis/google-api-python-client) as all used functionality works also with recent versions. [PR #241](https://github.com/codemagic-ci-cd/cli-tools/pull/241)
