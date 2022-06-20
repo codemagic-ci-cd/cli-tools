@@ -8,6 +8,7 @@ from __future__ import annotations
 import pathlib
 from dataclasses import dataclass
 from dataclasses import field
+from itertools import chain
 from typing import List
 from typing import Optional
 from xml.dom import minidom
@@ -52,6 +53,12 @@ class TestSuites:
     def time(self) -> float:
         """ Time in seconds to execute all test suites. """
         return sum(suite.time for suite in self.test_suites if suite.time)
+
+    def has_failed_tests(self) -> bool:
+        for test_suite in self.test_suites:
+            if test_suite.has_failed_tests():
+                return True
+        return False
 
     def as_xml(self) -> Element:
         extras = {
@@ -99,6 +106,14 @@ class TestSuite:
     def get_skipped_test_cases(self) -> List[TestCase]:
         return [tc for tc in self.testcases if tc.skipped]
 
+    def has_failed_tests(self) -> bool:
+        for failed_testcase in chain(self.get_errored_test_cases(), self.get_failed_test_cases()):
+            if failed_testcase.has_successful_retry(self.testcases):
+                pass  # Testcase had a successful retry, hence it was successful in the end
+            else:
+                return True  # Testcase did not have successful retry, hence it failed
+        return False
+
     def as_xml(self) -> Element:
         extras = {
             'disabled': self.disabled,
@@ -142,6 +157,17 @@ class TestCase:
     skipped: Optional[Skipped] = None
 
     __test__ = False  # Tell Pytest not to collect this class as test
+
+    def _is_successful_retry(self, testcase: TestCase) -> bool:
+        return (
+            testcase.name == self.name
+            and testcase.classname == self.classname
+            and not testcase.error
+            and not testcase.failure
+        )
+
+    def has_successful_retry(self, testcases: List[TestCase]) -> bool:
+        return next((True for tc in testcases if self._is_successful_retry(tc)), False)
 
     def as_xml(self) -> Element:
         extras = {
