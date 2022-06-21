@@ -97,6 +97,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def has_expired(self) -> bool:
+        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        return self.expires_at < current_time
         return self.expires_at < datetime.utcnow().replace(tzinfo=timezone.utc)
 
     @property
