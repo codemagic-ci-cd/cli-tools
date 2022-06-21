@@ -90,7 +90,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @property
     def expires_at(self) -> datetime:
         naive_dt = datetime.strptime(self.not_after, '%Y%m%d%H%M%SZ')
-        return naive_dt.astimezone(timezone.utc)
+        return naive_dt.replace(tzinfo=timezone.utc)
 
     @property
     def serial(self) -> int:

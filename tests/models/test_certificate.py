@@ -207,7 +207,7 @@ def test_not_after(certificate):
 
 
 def test_expires_at(certificate):
-    expected_expires_at = datetime(2020, 11, 28, 9, 37, 45, tzinfo=timezone.utc)
+    expected_expires_at = datetime(2020, 11, 28, 11, 37, 45, tzinfo=timezone.utc)
     assert certificate.expires_at == expected_expires_at
 
 
