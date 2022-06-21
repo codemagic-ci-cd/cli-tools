@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from datetime import timezone
+from distutils.version import LooseVersion
 from unittest import mock
 from unittest.mock import PropertyMock
 
+import cryptography
 import pytest
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
@@ -96,6 +98,14 @@ def certificate(certificate_asn1) -> Certificate:
     return Certificate.from_ans1(certificate_asn1)
 
 
+@pytest.mark.skipif(
+    LooseVersion(cryptography.__version__) < LooseVersion('36.0.0'),
+    reason=(
+        f'Cryptography {cryptography.__version__} < 36.0.0 generates '
+        f'slightly different CSR public bytes for certificate request '
+        f'than is expected here.'
+    ),
+)
 def test_create_certificate_signing_request(unencrypted_pem, certificate_signing_request_pem):
     pk = PrivateKey.from_pem(unencrypted_pem.content)
     csr = Certificate.create_certificate_signing_request(pk)
@@ -211,13 +221,17 @@ def test_expires_at(certificate):
     assert certificate.expires_at == expected_expires_at
 
 
+def test_has_expired(certificate):
+    assert certificate.has_expired is True
+
+
 def test_serial(certificate):
     assert certificate.serial == 5308349992945343936
 
 
 def test_extensions(certificate):
     expected_extensions = [
-        'UNDEF',
+        'Unknown OID',
         'authorityInfoAccess',
         'authorityKeyIdentifier',
         'basicConstraints',
