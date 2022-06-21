@@ -24,6 +24,7 @@ from codemagic.utilities import log
 
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
+from .private_key import SUPPORTED_PUBLIC_KEY_TYPES
 from .private_key import PrivateKey
 
 
@@ -65,14 +66,14 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @property
     def subject(self) -> Dict[str, str]:
         return {
-            self._get_rfc_4514_attribute_name(name_attribute): name_attribute.value
+            self._get_rfc_4514_attribute_name(name_attribute): self._str(name_attribute.value)
             for name_attribute in self.certificate.subject
         }
 
     @property
     def issuer(self) -> Dict[str, str]:
         return {
-            self._get_rfc_4514_attribute_name(name_attribute): name_attribute.value
+            self._get_rfc_4514_attribute_name(name_attribute): self._str(name_attribute.value)
             for name_attribute in self.certificate.issuer
         }
 
@@ -178,6 +179,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.certificate.public_key()
+        if not isinstance(certificate_public_key, SUPPORTED_PUBLIC_KEY_TYPES):
+            raise TypeError('Public key type is not supported', type(certificate_public_key))
         certificate_public_numbers = certificate_public_key.public_numbers()
         private_key_public_numbers = private_key.public_key.public_numbers()
         return certificate_public_numbers == private_key_public_numbers
@@ -216,12 +219,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @staticmethod
     def _get_rfc_4514_attribute_name(name_attribute: x509.NameAttribute) -> str:
-        try:
+        # Attribute rfc4514_attribute_name was introduced in cryptography version 35.0.0.
+        # Use this if possible, otherwise resolve it from full RFC 4514 string which
+        # also contains value.
+        # https://cryptography.io/en/latest/x509/reference/#cryptography.509.NameAttribute.rfc4514_attribute_name
+        if hasattr(name_attribute, 'rfc4514_attribute_name'):
             return name_attribute.rfc4514_attribute_name
-        except AttributeError:
-            # Attribute rfc4514_attribute_name was introduced in version 35.0
-            # https://cryptography.io/en/latest/x509/reference/#cryptography.509.NameAttribute.rfc4514_attribute_name
-            pass
-
-        rfc4514_string = name_attribute.rfc4514_string()
-        return rfc4514_string.split('=', maxsplit=1)[0]
+        else:
+            rfc4514_string = name_attribute.rfc4514_string()
+            return rfc4514_string.split('=', maxsplit=1)[0]
