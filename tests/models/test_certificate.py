@@ -217,7 +217,7 @@ def test_serial(certificate):
 
 def test_extensions(certificate):
     expected_extensions = [
-        'Unknown OID',
+        'UNDEF',
         'authorityInfoAccess',
         'authorityKeyIdentifier',
         'basicConstraints',
