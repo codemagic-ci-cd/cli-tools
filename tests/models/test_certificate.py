@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+from datetime import timezone
 from unittest import mock
 from unittest.mock import PropertyMock
 
@@ -173,3 +175,55 @@ def test_is_development_certificate(is_development_cert, cert_common_name, certi
     patched_common_name = PropertyMock(return_value=cert_common_name)
     with mock.patch.object(Certificate, 'common_name', new_callable=patched_common_name):
         assert certificate.is_development_certificate is is_development_cert
+
+
+def test_subject(certificate):
+    expected_subject = {
+        'C': 'US',
+        'CN': 'iPhone Developer: Created via API (6HQ443353U)',
+        'O': 'NEVERCODE LTD',
+        'OU': 'X8NNQ9CYL2',
+        'UID': '6HQ443353U',
+    }
+    assert certificate.subject == expected_subject
+
+
+def test_issuer(certificate):
+    expected_issuer = {
+        'C': 'US',
+        'CN': 'Apple Worldwide Developer Relations Certification Authority',
+        'O': 'Apple Inc.',
+        'OU': 'Apple Worldwide Developer Relations',
+    }
+    assert certificate.issuer == expected_issuer
+
+
+def test_not_before(certificate):
+    assert certificate.not_before == '20191129113745Z'
+
+
+def test_not_after(certificate):
+    assert certificate.not_after == '20201128113745Z'
+
+
+def test_expires_at(certificate):
+    expected_expires_at = datetime(2020, 11, 28, 9, 37, 45, tzinfo=timezone.utc)
+    assert certificate.expires_at == expected_expires_at
+
+
+def test_serial(certificate):
+    assert certificate.serial == 5308349992945343936
+
+
+def test_extensions(certificate):
+    expected_extensions = [
+        'Unknown OID',
+        'authorityInfoAccess',
+        'authorityKeyIdentifier',
+        'basicConstraints',
+        'certificatePolicies',
+        'extendedKeyUsage',
+        'keyUsage',
+        'subjectKeyIdentifier',
+    ]
+    assert sorted(certificate.extensions) == expected_extensions
