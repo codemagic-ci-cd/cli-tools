@@ -24,6 +24,7 @@ from codemagic.utilities import log
 
 from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
+from .private_key import SUPPORTED_PUBLIC_KEY_TYPES
 from .private_key import PrivateKey
 
 
@@ -32,6 +33,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     def __init__(self, x509_certificate: X509):
         self.x509 = x509_certificate
+        self.certificate: x509.Certificate = x509_certificate.to_cryptography()
 
     @classmethod
     def _get_x509_certificate(cls, buffer: AnyStr, buffer_type: int):
@@ -63,13 +65,17 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def subject(self) -> Dict[str, str]:
-        subject = self.x509.get_subject()
-        return {self._str(k): self._str(v) for k, v in subject.get_components()}
+        return {
+            self._get_rfc_4514_attribute_name(name_attribute): self._str(name_attribute.value)
+            for name_attribute in self.certificate.subject
+        }
 
     @property
     def issuer(self) -> Dict[str, str]:
-        issuer = self.x509.get_issuer()
-        return {self._str(k): self._str(v) for k, v in issuer.get_components()}
+        return {
+            self._get_rfc_4514_attribute_name(name_attribute): self._str(name_attribute.value)
+            for name_attribute in self.certificate.issuer
+        }
 
     @property
     def common_name(self) -> str:
@@ -77,29 +83,35 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def not_after(self) -> str:
-        return self._str(self.x509.get_notAfter())
+        """
+        Get the timestamp at which the certificate stops being valid
+        as an ASN.1 TIME YYYYMMDDhhmmssZ
+        """
+        not_after = self.certificate.not_valid_after
+        return not_after.strftime('%Y%m%d%H%M%SZ')
 
     @property
     def not_before(self) -> str:
-        return self._str(self.x509.get_notBefore())
+        not_before = self.certificate.not_valid_before
+        return not_before.strftime('%Y%m%d%H%M%SZ')
 
     @property
     def has_expired(self) -> bool:
-        return self.x509.has_expired()
+        current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        return self.expires_at < current_time
+        return self.expires_at < datetime.utcnow().replace(tzinfo=timezone.utc)
 
     @property
     def expires_at(self) -> datetime:
-        naive_dt = datetime.strptime(self.not_after, '%Y%m%d%H%M%SZ')
-        return naive_dt.astimezone(timezone.utc)
+        return self.certificate.not_valid_after.replace(tzinfo=timezone.utc)
 
     @property
     def serial(self) -> int:
-        return self.x509.get_serial_number()
+        return self.certificate.serial_number
 
     @property
     def extensions(self) -> List[str]:
-        extensions_count = self.x509.get_extension_count()
-        return [self._str(self.x509.get_extension(i).get_short_name()) for i in range(extensions_count)]
+        return [self._str(e.oid._name) for e in self.certificate.extensions]
 
     @property
     def is_development_certificate(self) -> bool:
@@ -132,7 +144,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         }
 
     def as_pem(self) -> str:
-        pem = self.x509.to_cryptography().public_bytes(serialization.Encoding.PEM)
+        pem = self.certificate.public_bytes(serialization.Encoding.PEM)
         return self._str(pem)
 
     @classmethod
@@ -149,8 +161,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return cls._str(public_bytes)
 
     def get_fingerprint(self, algorithm: hashes.HashAlgorithm) -> str:
-        x509_certificate = self.x509.to_cryptography()
-        fingerprint = x509_certificate.fingerprint(algorithm)
+        fingerprint = self.certificate.fingerprint(algorithm)
         return fingerprint.hex().upper()
 
     def export_p12(self,
@@ -169,7 +180,9 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         return exporter.export(_export_path)
 
     def is_signed_with(self, private_key: PrivateKey) -> bool:
-        certificate_public_key = self.x509.to_cryptography().public_key()
+        certificate_public_key = self.certificate.public_key()
+        if not isinstance(certificate_public_key, SUPPORTED_PUBLIC_KEY_TYPES):
+            raise TypeError('Public key type is not supported', type(certificate_public_key))
         certificate_public_numbers = certificate_public_key.public_numbers()
         private_key_public_numbers = private_key.public_key.public_numbers()
         return certificate_public_numbers == private_key_public_numbers
@@ -205,3 +218,15 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
             f'SHA1: {self.get_fingerprint(hashes.SHA1())}',
             f'SHA256: {self.get_fingerprint(hashes.SHA256())}',
         ])
+
+    @staticmethod
+    def _get_rfc_4514_attribute_name(name_attribute: x509.NameAttribute) -> str:
+        # Attribute rfc4514_attribute_name was introduced in cryptography version 35.0.0.
+        # Use this if possible, otherwise resolve it from full RFC 4514 string which
+        # also contains value.
+        # https://cryptography.io/en/latest/x509/reference/#cryptography.509.NameAttribute.rfc4514_attribute_name
+        if hasattr(name_attribute, 'rfc4514_attribute_name'):
+            return name_attribute.rfc4514_attribute_name
+        else:
+            rfc4514_string = name_attribute.rfc4514_string()
+            return rfc4514_string.split('=', maxsplit=1)[0]

@@ -1,3 +1,16 @@
+Version 0.28.0
+-------------
+
+This release includes changes and fixes from [PR #243](https://github.com/codemagic-ci-cd/cli-tools/pull/243).
+
+**Bugfixes**
+- Fix properties `not_after` and `not_before` of `codemagic.models.Certificate` to work with `pyOpenSSL` versions `<=19.1.0`.
+
+**Development**
+- Remove type stubs for package `cryptography`.
+- Add tuple `SUPPORTED_PUBLIC_KEY_TYPES` to module `codemagic.models.private_key`.
+- Remove [`OpenSSL.crypto.X509`](https://www.pyopenssl.org/en/stable/api/crypto.html?highlight=X509#x509-objects) usages from `codemagic.models.Certificate` internals by replacing them with functionality from [`cryptography.x509.Certificate`](https://cryptography.io/en/latest/x509/reference/#x-509-certificate-object).
+
 Version 0.27.6
 -------------
 

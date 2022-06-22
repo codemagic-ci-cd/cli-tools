@@ -20,7 +20,7 @@ from OpenSSL import crypto
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
-_SUPPORTED_PRIVATE_KEY_TYPES = (
+SUPPORTED_PRIVATE_KEY_TYPES = (
     DSAPrivateKey,
     EllipticCurvePrivateKey,
     RSAPrivateKey,
@@ -31,6 +31,12 @@ CryptographyPrivateKey = Union[
     EllipticCurvePrivateKey,
     RSAPrivateKey,
 ]
+
+SUPPORTED_PUBLIC_KEY_TYPES = (
+    DSAPublicKey,
+    EllipticCurvePublicKey,
+    RSAPublicKey,
+)
 
 CryptographyPublicKey = Union[
     DSAPublicKey,
@@ -87,7 +93,7 @@ class PrivateKey(StringConverterMixin):
         cryptography_private_key, _, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
         if cryptography_private_key is None:
             raise ValueError('Private key is missing from PKCS#12')
-        elif not isinstance(cryptography_private_key, _SUPPORTED_PRIVATE_KEY_TYPES):
+        elif not isinstance(cryptography_private_key, SUPPORTED_PRIVATE_KEY_TYPES):
             raise TypeError('Private key type is not supported', type(cryptography_private_key))
         return PrivateKey(cryptography_private_key)
 
