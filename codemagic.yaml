@@ -1,3 +1,28 @@
+definitions:
+  cache: &cache
+    cache_paths:
+      - .venv
+  scripts:
+    - &install_dependencies
+      name: Install dependencies
+      script: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+    - &check_code_formatting
+      name: Check code formatting
+      script: poetry run flake8 .
+    - &check_imports_ordering
+      name: Check imports ordering
+      script: poetry run isort --check-only .
+    - &static_type_checks
+      name: Static type checks with mypy
+      script: poetry run mypy src/codemagic
+    - &run_tests
+      name: Run tests
+      script: poetry run pytest --junitxml="test-report.xml"
+      test_report: test-report.xml
+
 workflows:
   tests:
     instance_type: linux
@@ -5,25 +30,17 @@ workflows:
       events:
         - push
       cancel_previous_builds: true
-    cache:
-      cache_paths:
-        - .venv
+    cache: *cache
     scripts:
-      - name: Install dependencies
-        script: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry config virtualenvs.in-project true
-          poetry install --no-interaction
-      - name: Check code formatting
-        script: poetry run flake8 .
-      - name: Check imports sort order
-        script: poetry run isort --check-only .
-      - name: Static type checks with mypy
-        script: poetry run mypy src/codemagic
-      - name: Test with pytest
-        script: poetry run pytest
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
 
   release:
+    instance_type: linux
+    cache: *cache
     environment:
       groups:
         - pypi

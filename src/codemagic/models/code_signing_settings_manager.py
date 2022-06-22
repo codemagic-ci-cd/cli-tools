@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import pathlib
 import shlex
-import shutil
 import subprocess
 from dataclasses import dataclass
 from functools import lru_cache
@@ -74,9 +73,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     @property
     def _code_signing_manager(self) -> str:
-        if shutil.which('code_signing_manager.rb'):
-            return 'code_signing_manager.rb'
-        executable = pathlib.Path(__file__) / '..' / '..' / '..' / '..' / 'bin' / 'code_signing_manager.rb'
+        executable = pathlib.Path(__file__) / '..' / '..' / 'scripts' / 'code_signing_manager.rb'
         return str(executable.resolve())
 
     @classmethod
