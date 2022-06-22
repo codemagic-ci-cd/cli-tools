@@ -30,10 +30,10 @@ setup(
         'google-api-python-client>=1.7.12',
         'httplib2>=0.19.0',
         'oauth2client>=4.1.3',
+        'psutil>=5.8.0',
         'PyJWT>=2.4.0,<3',
         'pyopenssl>=19.0',
         'requests>=2.25.1',
-        'psutil>=5.8.0',
     ],
     extras_require={
         'dev': ['pytest'],
