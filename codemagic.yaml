@@ -1,7 +1,7 @@
 definitions:
   cache: &cache
     cache_paths:
-      - .venv
+      - $CM_BUILD_DIR/.venv
   scripts:
     - &install_dependencies
       name: Install dependencies
