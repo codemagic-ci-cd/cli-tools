@@ -48,7 +48,7 @@ definitions:
         SRC_PATH=$(find dist -name "*.whl" | tail -n1)
         gsutil -h "Content-Type:application/x-wheel+zip" \
                -h "Cache-Control:no-cache,max-age=0" \
-               cp -a public-read "$SRC_PATH" "${DST_URL:?}"
+               cp -a public-read "$SRC_PATH" "${GCP_DST_URL:?}"
 
 workflows:
   tests:
