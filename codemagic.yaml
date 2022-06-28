@@ -36,9 +36,7 @@ definitions:
           src/codemagic/__version__.py
     - &build_wheels
       name: Build wheels
-      script: |
-        poetry build --format sdist
-        poetry build --format wheel
+      script: poetry build
     - &upload_wheel_to_gcp
       name: Upload wheel to GCP
       script: |
