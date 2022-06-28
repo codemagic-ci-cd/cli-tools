@@ -1,8 +1,27 @@
 Version 0.29.0
 -------------
 
+This release includes changes from [PR #244](https://github.com/codemagic-ci-cd/cli-tools/pull/244). The goal of this release is to migrate to [PEP 518](https://peps.python.org/pep-0518/) compliant build system by using [Poetry](https://python-poetry.org/) dependency management and packaging tool.
+
 **Development**
-- TODO: TBD
+- Migrate project dependency management from [Pipenv](https://pipenv.pypa.io/) to [Poetry](https://python-poetry.org/).
+- Add `pyproject.toml` project file to specify dependencies, project packaging information and code style requirements. Flake8 configuration remains in `.flake8` as it does not support `pyproject.toml` yet.
+- Changes to GitHub actions:
+  - Update caching configuration.
+  - Replace `pipenv` usages in GitHub action with Poetry.
+- Changes to Codemagic workflows:
+  - In `release` workflow run CI checks before building wheels and distribution. Use Poetry for building and PyPI releases.
+  - Use Poetry in `test` workflow instead of Pipenv.
+  - Define `release-test` workflow to build and release binary to [PyPI test mirror](https://test.pypi.org/).
+- Project files `setup.cfg`, `setup.py`, `Pipfile` and `Pipfile.lock` were removed.
+- Add `.pre-commit-config.yaml` which defines [`pre-commit`](https://pre-commit.com/) hooks.
+- Move Ruby script `bin/code_signing_manager.rb` to `src/codemagic/scripts/code_signing_manager.rb`. This script will not be added to system `$PATH` at the time of package installation anymore. Consequence of this is that the action `xcode-project use-profiles` will now use the script which is bundled with installation, instead of what is available globally in the system.
+
+**Docs**
+- Update `README.md`:
+  - update example code snippets that are out of date,
+  - include all installed CLI tools to installed tools list,
+  - add instructions for setting up development environment.
 
 Version 0.28.0
 -------------
