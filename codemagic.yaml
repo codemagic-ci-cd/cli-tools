@@ -25,11 +25,11 @@ definitions:
       name: Run tests
       script: poetry run pytest --junitxml="test-report.xml"
       test_report: test-report.xml
-    - &set_version
-      name: Set build version
+    - &update_version_in_source
+      name: Update version number in source code
       script: |
         set -e
-        VERSION=$(cat .version.txt)
+        VERSION=$(poetry version --short)
         echo "Using version $VERSION"
         sed -i -e \
           "s/__version__ = .*/__version__ = '${VERSION}'/g" \
@@ -81,9 +81,9 @@ workflows:
       - *check_imports_ordering
       - *static_type_checks
       - *run_tests
-      - name: Resolve version
-        script: echo "$(poetry version --short).${BUILD_NUMBER}" > .version.txt
-      - *set_version
+      - name: Bump version number for development build
+        script: poetry version "$(poetry version --short).${BUILD_NUMBER:?}"
+      - *update_version_in_source
       - *build_wheels
       - *upload_wheel_to_gcp
       - name: Publish release to PyPI Test environment
@@ -112,9 +112,7 @@ workflows:
       - *check_imports_ordering
       - *static_type_checks
       - *run_tests
-      - name: Resolve version
-        script: poetry version --short > .version.txt
-      - *set_version
+      - *update_version_in_source
       - *build_wheels
       - name: Draft GitHub release
         script: |
