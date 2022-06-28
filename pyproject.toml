@@ -22,7 +22,6 @@ documentation = "https://github.com/codemagic-ci-cd/cli-tools/tree/master/docs#c
 "Issue Tracker" = "https://github.com/codemagic-ci-cd/cli-tools/issues"
 
 [tool.poetry.scripts]
-#code_signing_manager.rb = { path = "bin/code_signing_manager.rb" }
 android-app-bundle = "codemagic.tools:AndroidAppBundle.invoke_cli"
 android-keystore = "codemagic.tools:AndroidKeystore.invoke_cli"
 app-store-connect = "codemagic.tools:AppStoreConnect.invoke_cli"
