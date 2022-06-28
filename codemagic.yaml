@@ -89,7 +89,7 @@ workflows:
       - name: Publish release to PyPI Test environment
         script: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
-          poetry config pypi-token.test-pypi "${POETRY_PYPI_TOKEN:?}"
+          poetry config pypi-token.test-pypi "${PYPI_TOKEN:?}"
           poetry publish --repository test-pypi
     artifacts: *artifacts
 
@@ -101,7 +101,7 @@ workflows:
       groups:
         - gcp
         - github
-        - pypi-production
+        - pypi
       vars:
         GCP_DST_URL: "gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
     scripts:
@@ -129,6 +129,6 @@ workflows:
       - *upload_wheel_to_gcp
       - name: Publish release to PyPI
         script: |
-          poetry config pypi-token.pypi "${POETRY_PYPI_TOKEN:?}"
+          poetry config pypi-token.pypi "${PYPI_TOKEN:?}"
           poetry publish
     artifacts: *artifacts
