@@ -52,7 +52,7 @@ definitions:
 
 workflows:
   tests:
-    instance_type: linux
+    instance_type: mac_mini
     triggering:
       events:
         - push
