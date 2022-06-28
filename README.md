@@ -155,6 +155,35 @@ Tests can be started by running the following command from repository root
 poetry run pytest
 ```
 
+Note that tests which target [App Store Connect API](https://developer.apple.com/documentation/appstoreconnectapi) or
+[Google Play Developer API](https://developers.google.com/android-publisher) live endpoints
+are skipped by default for obvious reasons. They can be enabled (either for TDD or other reasons)
+by setting environment variable `RUN_LIVE_API_TESTS` to any nonempty value.
+
+Note that for the tests to run successfully, you'd have to define the following environment variables:
+- For App Store Connect:
+    ```shell
+    export TEST_APPLE_KEY_IDENTIFIER=...  # Key ID
+    export TEST_APPLE_ISSUER_ID=...  # Issued ID
+    ```
+    And one of either
+    ```bash
+    export TEST_APPLE_PRIVATE_KEY_PATH=...  # Path to private key in .p8 format
+    export TEST_APPLE_PRIVATE_KEY_CONTENT=...  # Content of .p8 private key
+    ```
+  Those can be obtained from [App Store Connect -> Users and Access -> Keys](https://appstoreconnect.apple.com/access/api).
+  For more information follow Apple's official documentation about [Creating API Keys for App Store Connect API](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api).
+
+- For Google Play:
+    ```shell
+    export TEST_GCLOUD_PACKAGE_NAME=... # Package name (Ex: com.google.example)'
+    ```
+    And one of either
+    ```shell
+    export TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH=... # Path to gcloud service account creedentials with `JSON` key type
+    export TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT=... # Content of gcloud service account creedentials with `JSON` key type
+    ```
+
 ### Pre-commit hooks
 
 Optionally [pre-commit](https://pre-commit.com/) framework can be used to ensure that
