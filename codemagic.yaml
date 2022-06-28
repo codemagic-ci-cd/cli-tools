@@ -105,6 +105,13 @@ workflows:
       vars:
         GCP_DST_URL: "gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
     scripts:
+      - name: Verify branch
+        script: |
+          if [ "${CM_BRANCH:?}" != "master" ];
+          then
+            echo "Not on master branch, cannot release from branch $CM_BRANCH"
+            exit 1
+          fi
       - *install_dependencies
       - *check_code_formatting
       - *check_imports_ordering
