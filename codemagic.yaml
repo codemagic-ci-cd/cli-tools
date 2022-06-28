@@ -20,7 +20,7 @@ definitions:
       script: poetry run isort --check-only .
     - &static_type_checks
       name: Static type checks with mypy
-      script: poetry run mypy src/codemagic
+      script: poetry run mypy src
     - &run_tests
       name: Run tests
       script: poetry run pytest --junitxml="test-report.xml"

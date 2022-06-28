@@ -36,7 +36,7 @@ jobs:
       run: poetry run isort --check-only .
 
     - name: Static type checks with mypy
-      run: poetry run mypy src/codemagic
+      run: poetry run mypy src
 
     - name: Test with pytest
       run: poetry run pytest
