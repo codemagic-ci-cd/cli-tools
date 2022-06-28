@@ -11,7 +11,7 @@ packages = [
     { include = "codemagic", from = "src" },
 ]
 include = [
-     { path = "tests", format = "sdist" },
+    { path = "tests", format = "sdist" },
 ]
 
 homepage = "https://github.com/codemagic-ci-cd/cli-tools"
@@ -72,3 +72,6 @@ mypy_path = "stubs"
 pretty = true
 error_summary = true
 show_error_context = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
