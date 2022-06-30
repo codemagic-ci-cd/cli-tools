@@ -1,7 +1,7 @@
 # Codemagic CLI Tools
 
-Codemagic CLI Tools are a set of command line utilities for managing mobile app builds,
-code signing, and deployment. These power mobile app builds at [codemagic.io](https://codemagic.io).
+Codemagic CLI Tools are a set of command-line utilities for managing Android and iOS app builds,
+code signing, and deployment. The tools are used to power mobile app builds at [codemagic.io](https://codemagic.io) but can be also used in other virtual environments or locally.
 
 # Installing
 
@@ -75,9 +75,9 @@ Optional arguments for keychain:
 In addition to the command line interface, the package also provides a mirroring Python API.
 All utilities that are available as CLI tools are accessible from Python in package
 [`codemagic.tools`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.28.0/src/codemagic/tools/__init__.py).
-The CLI actions are instance methods which are decorated by [`action`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.28.0/src/codemagic/cli/cli_app.py#L385)
-decorator. For example using [`Keychain`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.28.0/src/codemagic/tools/keychain.py#L111)
-tool from Python source is as follows:
+The CLI actions are instance methods that are decorated by the [`action`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.28.0/src/codemagic/cli/cli_app.py#L385)
+decorator. For example, you can use the [`Keychain`](https://github.com/codemagic-ci-cd/cli-tools/blob/v0.28.0/src/codemagic/tools/keychain.py#L111)
+tool from Python source as follows:
 
 ```python
 In [1]: from pathlib import Path
@@ -100,12 +100,12 @@ Out[7]: PosixPath('/private/tmp/new.keychain')
 
 # Development
 
-This project uses [Poetry](https://python-poetry.org/) to manage dependencies. So first ensure that your
-machine has Poetry available. Installation instruction can be found from their
+This project uses [Poetry](https://python-poetry.org/) to manage dependencies. Before starting development, please ensure that your
+machine has Poetry available. Installation instructions can be found from their
 [docs](https://python-poetry.org/docs/#installation).
 
 Assuming you've already cloned the [repository](https://github.com/codemagic-ci-cd/cli-tools/)
-itself, or a fork of it, you can get started by
+itself, or a fork of it, you can get started by running
 
 ```shell
 poetry install
@@ -113,8 +113,8 @@ poetry install
 
 This will install all required dependencies specified in the `poetry.lock` file.
 
-Source code of the project lives inside the `src` directory and tests are
-implemented in `tests` directory.
+The source code of the project lives inside the `src` directory and tests are
+implemented in the `tests` directory.
 
 ### Code style and formatting
 
@@ -127,7 +127,7 @@ Invoke Flake8 checks from repository root directory with
 poetry run flake8 .
 ```
 
-Ensure that all imports are ordered as expected using isort from repository root with
+Ensure that all imports are ordered as expected using isort from the repository root with
 
 ```shell
 poetry run isort --check-only .
@@ -135,9 +135,9 @@ poetry run isort --check-only .
 
 ### Static type checks
 
-Huge portion of the Python source code has type hints, and all public methods or functions
+A huge portion of the Python source code has type hints, and all public methods or functions
 are expected to have type hints. Static type checks of the source code are performed using
-[Mypy](http://mypy-lang.org/) from repository root by running
+[Mypy](http://mypy-lang.org/) from the repository root by running
 
 ```shell
 poetry run mypy src
@@ -145,20 +145,20 @@ poetry run mypy src
 
 ### Running tests
 
-[Pytest](https://docs.pytest.org/en/stable/) is used as a framework. As mentioned above,
-tests are stored in `tests` directory, separated from package source code. Test code layout
-mirrors the same package structure which is present in source directory under `codemagic` package.
+[Pytest](https://docs.pytest.org/en/stable/) is used as the framework. As mentioned above,
+tests are stored in the `tests` directory, separated from package source code. Test code layout
+mirrors the structure of the `codemagic` package in the source directory.
 
-Tests can be started by running the following command from repository root
+Tests can be started by running the following command from the repository root:
 
 ```shell
 poetry run pytest
 ```
 
-Note that tests which target [App Store Connect API](https://developer.apple.com/documentation/appstoreconnectapi) or
+Note that tests that target [App Store Connect API](https://developer.apple.com/documentation/appstoreconnectapi) or
 [Google Play Developer API](https://developers.google.com/android-publisher) live endpoints
 are skipped by default for obvious reasons. They can be enabled (either for TDD or other reasons)
-by setting environment variable `RUN_LIVE_API_TESTS` to any nonempty value.
+by setting the environment variable `RUN_LIVE_API_TESTS` to any non-empty value.
 
 Note that for the tests to run successfully, you'd have to define the following environment variables:
 - For App Store Connect:
@@ -166,7 +166,7 @@ Note that for the tests to run successfully, you'd have to define the following 
     export TEST_APPLE_KEY_IDENTIFIER=...  # Key ID
     export TEST_APPLE_ISSUER_ID=...  # Issued ID
     ```
-    And one of either
+    And either of the two:
     ```bash
     export TEST_APPLE_PRIVATE_KEY_PATH=...  # Path to private key in .p8 format
     export TEST_APPLE_PRIVATE_KEY_CONTENT=...  # Content of .p8 private key
@@ -178,7 +178,7 @@ Note that for the tests to run successfully, you'd have to define the following 
     ```shell
     export TEST_GCLOUD_PACKAGE_NAME=... # Package name (Ex: com.google.example)'
     ```
-    And one of either
+    And either of the two:
     ```shell
     export TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH=... # Path to gcloud service account creedentials with `JSON` key type
     export TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT=... # Content of gcloud service account creedentials with `JSON` key type
@@ -186,10 +186,10 @@ Note that for the tests to run successfully, you'd have to define the following 
 
 ### Pre-commit hooks
 
-Optionally [pre-commit](https://pre-commit.com/) framework can be used to ensure that
-source code updates are compliant with all the rules mentioned above.
+Optionally, the [pre-commit](https://pre-commit.com/) framework can be used to ensure that
+the source code updates are compliant with all the rules mentioned above.
 
-Installation instructions are available from their [docs](https://pre-commit.com/#installation).
+Installation instructions are available in their [docs](https://pre-commit.com/#installation).
 
 The repository already contains pre-configured `.pre-commit-config.yaml`, so to enable
 the hooks, just run
