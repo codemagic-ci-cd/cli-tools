@@ -13,13 +13,11 @@ from typing import Optional
 
 import pytest
 
-sys.path.append('src')
-
-from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: E402
-from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
-from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
-from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient  # noqa: E402
-from codemagic.utilities import log  # noqa: E402
+from codemagic.apple.app_store_connect import AppStoreConnectApiClient
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
+from codemagic.utilities import log
 
 log.initialize_logging(
     stream=open(os.devnull, 'w'),
@@ -44,7 +42,8 @@ def _get_pem(filename: str, password: str = '', key_size: int = 2048) -> PEM:
         pem_path.read_bytes().rstrip(b'\n'),
         pub_key_path.read_bytes().rstrip(b'\n'),
         key_size,
-        password.encode())
+        password.encode(),
+    )
 
 
 def _encrypted_pem() -> PEM:

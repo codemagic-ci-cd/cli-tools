@@ -1,9 +1,6 @@
-[isort]
-line_length=120
-force_single_line=True
-
 [flake8]
 max_line_length=120
+exclude = .venv
 per-file-ignores =
     # E402 module level import not at top of file
     doc.py:E402

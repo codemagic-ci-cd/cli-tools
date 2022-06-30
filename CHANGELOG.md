@@ -1,3 +1,28 @@
+Version 0.29.0
+-------------
+
+This release includes changes from [PR #244](https://github.com/codemagic-ci-cd/cli-tools/pull/244). The goal of this release is to migrate to [PEP 518](https://peps.python.org/pep-0518/) compliant build system by using [Poetry](https://python-poetry.org/) dependency management and packaging tool.
+
+**Development**
+- Migrate project dependency management from [Pipenv](https://pipenv.pypa.io/) to [Poetry](https://python-poetry.org/).
+- Add `pyproject.toml` project file to specify dependencies, project packaging information and code style requirements. Flake8 configuration remains in `.flake8` as it does not support `pyproject.toml` yet.
+- Changes to GitHub actions:
+  - Update caching configuration.
+  - Replace `pipenv` usages in GitHub action with Poetry.
+- Changes to Codemagic workflows:
+  - In `release` workflow run CI checks before building wheels and distribution. Use Poetry for building and PyPI releases.
+  - Use Poetry in `test` workflow instead of Pipenv.
+  - Define `release-test` workflow to build and release binary to [PyPI test mirror](https://test.pypi.org/).
+- Project files `setup.cfg`, `setup.py`, `Pipfile` and `Pipfile.lock` were removed.
+- Add `.pre-commit-config.yaml` which defines [`pre-commit`](https://pre-commit.com/) hooks.
+- Move Ruby script `bin/code_signing_manager.rb` to `src/codemagic/scripts/code_signing_manager.rb`. This script will not be added to system `$PATH` at the time of package installation anymore. Consequence of this is that the action `xcode-project use-profiles` will now use the script which is bundled with installation, instead of what is available globally in the system.
+
+**Docs**
+- Update `README.md`:
+  - update example code snippets that are out of date,
+  - include all installed CLI tools to installed tools list,
+  - add instructions for setting up development environment.
+
 Version 0.28.0
 -------------
 
@@ -72,7 +97,7 @@ Version 0.26.0
 
 This release includes changes from [PR #227](https://github.com/codemagic-ci-cd/cli-tools/pull/227).
 
-Apple has deprecated the [Create an App Store Version Submission](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission) and replaced it by [Review Submissions](https://developer.apple.com/documentation/appstoreconnectapi/review_submissions) API. Changes included in this release update logic driving App Store publishing as part of actions `app-store-connect publish` and `app-store-connect builds submit-to-app-store`. 
+Apple has deprecated the [Create an App Store Version Submission](https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission) and replaced it by [Review Submissions](https://developer.apple.com/documentation/appstoreconnectapi/review_submissions) API. Changes included in this release update logic driving App Store publishing as part of actions `app-store-connect publish` and `app-store-connect builds submit-to-app-store`.
 
 **Features**
 - Add new action `app-store-connect review-submissions create` to create new review submission request for application's latest App Store Version.
@@ -117,7 +142,7 @@ This release includes changes from [PR #224](https://github.com/codemagic-ci-cd/
 - **Breaking**: Definitions of enumeration base classes `ResourceEnum` and `ResourceEnumMeta` were moved from module `codemagic.apple.resources.enums` to `codemagic.models.enums`.
 - `ArchiveMethod` enumeration parent class was changed from plain `enum.Enum` to `ResourceEnum`.
 - `ArchiveMethod` class has new factory method `from_profile(profile: ProvisioningProfile)`.
-- Method `XcodeProject.use_profiles` has new optional keyword argument `archive_method: Optional[ArchiveMethod] = None`. 
+- Method `XcodeProject.use_profiles` has new optional keyword argument `archive_method: Optional[ArchiveMethod] = None`.
 
 **Docs**
 - Update docs for action `xcode-project use-profiles`.
@@ -286,9 +311,9 @@ This release contains updates from [PR #206](https://github.com/codemagic-ci-cd/
 
 **Docs**
 - Add documentation for tool `android-keystore`.
-- Add documentation for action `android-keystore create`. 
-- Add documentation for action `android-keystore create-debug-keystore`. 
-- Add documentation for action `android-keystore verify`. 
+- Add documentation for action `android-keystore create`.
+- Add documentation for action `android-keystore create-debug-keystore`.
+- Add documentation for action `android-keystore verify`.
 
 Version 0.20.0
 -------------
@@ -358,7 +383,7 @@ Version 0.18.0
 - Change default behaviour for resolving certificate type from provisioning profile type. Map `IOS_APP_ADHOC` provisioning profile type to `DISTRIBUTION` certificate type instead of `IOS_DISTRIBUTION`. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
   - `app-store-connect fetch-signing-files`,
   - `app-store-connect list-certificates`.
-  
+
   This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` certificates are still used for `IOS_APP_ADHOC` provisioning profiles if found. [PR #198](https://github.com/codemagic-ci-cd/cli-tools/pull/198)
 
 **Development**
@@ -419,14 +444,14 @@ Version 0.16.0
 - Change default behaviour for resolving certificate type from provisioning profile type. Map both `IOS_APP_STORE` and `MAC_APP_STORE` provisioning profile types to `DISTRIBUTION` certificate type instead of the old approach where `IOS_DISTRIBUTION` and `MAC_APP_DISTRIBUTION` certificate types were used respectively. "Apple Distribution" certificates can be used to sign any type of application (iOS, tvOS, Mac, Universal, etc.) and as a result fewer certificates are required. Applies to the following actions:
   - `app-store-connect fetch-signing-files`,
   - `app-store-connect list-certificates`.
-  
+
   This change is backwards compatible in the sense that existing matching `IOS_DISTRIBUTION` and `MAC_APP_DISTRIBUTION` certificates are still used for `IOS_APP_STORE` and `MAC_APP_STORE` provisioning profiles if found. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - Unify formatting for signing certificates, profiles and bundle IDs in `app-store-connect fetch-signing-files` log output. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - Multiple `--type` arguments are now supported for `app-store-connect list-certificates` action. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 - When either signing certificate or provisioning profile is saved to disk (for example as part of `app-store-connect fetch-signing-files`), then the save path will include resource ID and type, which makes it possible to easily match process output to file on disk. [PR #185](https://github.com/codemagic-ci-cd/cli-tools/pull/185)
 
 **Dependencies**
-- Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)  
+- Update required [PyJWT](https://pyjwt.readthedocs.io/en/stable/index.html) version from `2.0.0` to `2.3.0`.  [#186](https://github.com/codemagic-ci-cd/cli-tools/pull/186)
 
 **Development**
 - Behaviour of `CertificateType.from_profile_type` was changed:
@@ -558,7 +583,7 @@ Additions and changes from [pull request #164](https://github.com/codemagic-ci-c
 - Add new action `app-store-connect builds app-store-version` to get the App Store version of a specific build.
 - Add new action `app-store-connect builds submit-to-app-store` to submit specified build to App Store review. Optionally specify version details and release type.
 - Update `app-store-connect publish` action to allow automatic App Store review submission after binary upload.
-- Use grouped CLI arguments in action `app-store-connect publish` for better help messages and documentation. 
+- Use grouped CLI arguments in action `app-store-connect publish` for better help messages and documentation.
 - Add new option `--skip-package-upload` to `app-store-connect publish`.
 - Add short aliases for CLI flags:
   - `-su` for `--skip-package-upload`,
@@ -599,8 +624,8 @@ Additions and changes from [pull request #164](https://github.com/codemagic-ci-c
 - Collect `app-store-connect` actions arguments that are used number of times under argument groups to reduce duplication.
 - Refactor `PublishAction` class:
   - extract `publish` action arguments validation into separate method,
-  - move decorator arguments into separate tuple, 
-  - add dataclasses for subaction options, 
+  - move decorator arguments into separate tuple,
+  - add dataclasses for subaction options,
   - support App Store review submission.
 
 Version 0.12.1
@@ -628,7 +653,6 @@ Version 0.12.0
 
 - Do not use line wrapping when generating docs (new feature in [`mdutils` version 1.3.1](https://github.com/didix21/mdutils/blob/master/CHANGELOG.md#v131-2021-07-10)). [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
 - Generate new docs for action `app-store-connect publish`. [PR #163](https://github.com/codemagic-ci-cd/cli-tools/pull/163)
-- 
 
 Version 0.11.4
 -------------
@@ -710,7 +734,7 @@ Version 0.10.1
 
 **Fixes**
 
-- Fix `codemagic.models.application_package.Ipa` initialization for packages that are compressed using [`LZFSE`](https://github.com/lzfse/lzfse) compression algorithm. Fix requires `unzip` to be available in system `$PATH`. 
+- Fix `codemagic.models.application_package.Ipa` initialization for packages that are compressed using [`LZFSE`](https://github.com/lzfse/lzfse) compression algorithm. Fix requires `unzip` to be available in system `$PATH`.
 
 Version 0.10.0
 -------------
@@ -730,7 +754,7 @@ Version 0.9.8
 **Fixes**
 
 - Fail action `app-store-connect builds subtmit-to-testflight` properly using error handling in case the application is missing required test information in App Store Connect.
-- Support `links` field in App Store Connect API [error responses](https://developer.apple.com/documentation/appstoreconnectapi/errorresponse/errors). 
+- Support `links` field in App Store Connect API [error responses](https://developer.apple.com/documentation/appstoreconnectapi/errorresponse/errors).
 
 Version 0.9.7
 -------------
@@ -759,7 +783,7 @@ Version 0.9.5
 
 **Improvements**
 
-- Add missing `submittedDate` to Beta App Review Submission attributes 
+- Add missing `submittedDate` to Beta App Review Submission attributes
 
 **Fixes**
 
@@ -875,7 +899,7 @@ Version 0.8.3
 - Show default values for arguments of type `TypedCliArgument`.
 - Add documentation for action `app-store-connect builds get`.
 - Document `--max-build-processing-wait` option in `app-store-connect publish` action.
-- Show default values for arguments of type `TypedCliArgument`. 
+- Show default values for arguments of type `TypedCliArgument`.
 - Show the long version of CLI flag first in help messages and online documentation to reduce ambiguity. For example use `--testflight` instead of `-t` in help messages.
 
 Version 0.8.2
@@ -899,10 +923,10 @@ Version 0.8.0
 
 - Add option to submit "What's new" information along with Testflight build via `--locale` and `--whats-new` arguments in `app-store-connect publish` command.
 - Add a set of actions for managing "What's new" information for Testflight builds `app-store-connect beta-build-localizations`
-- Add action `app-store-connect beta-build-localizations create` to create localized "What's new" notes for a given beta build 
+- Add action `app-store-connect beta-build-localizations create` to create localized "What's new" notes for a given beta build
 - Add action `app-store-connect beta-build-localizations delete` to delete localized "What's new" notes by its ID
 - Add action `app-store-connect beta-build-localizations modify` to update "What's new" content by its ID
-- Add action `app-store-connect beta-build-localizations list` to list localized "What's new" notes filtered by Build ID and locale code 
+- Add action `app-store-connect beta-build-localizations list` to list localized "What's new" notes filtered by Build ID and locale code
 - Add action `app-store-connect beta-build-localizations get` to retrieve localized "What's new" notes by its ID
 
 Version 0.7.7
@@ -910,14 +934,14 @@ Version 0.7.7
 
 **Fixes**
 
-- Before creating Beta App Review Submission (submitting build to TestFlight) as part of `app-store-connect publish`, wait until the uploaded build processing completes. 
+- Before creating Beta App Review Submission (submitting build to TestFlight) as part of `app-store-connect publish`, wait until the uploaded build processing completes.
 
 Version 0.7.6
 -------------
 
 **Fixes**
 
-- Make `altool` output parsing less strict. Do not fail `app-store-connect publish` action invocation if `altool` output cannot be interpreted. 
+- Make `altool` output parsing less strict. Do not fail `app-store-connect publish` action invocation if `altool` output cannot be interpreted.
 
 Version 0.7.5
 -------------
@@ -935,7 +959,7 @@ Version 0.7.4
 
 **Fixes**
 
-- Do not fail actions `app-store-connect get-latest-app-store-build-number` and `app-store-connect get-latest-testflight-build-number` in case no builds were found for specified constraints. 
+- Do not fail actions `app-store-connect get-latest-app-store-build-number` and `app-store-connect get-latest-testflight-build-number` in case no builds were found for specified constraints.
 
 **Development / Docs**
 
@@ -1233,7 +1257,7 @@ Version 0.2.12
 
 **Improvements**
 
-- Improvement: Fail gracefully with appropriate error message when non-existent export options plist path is passed to `xcode-project build-ipa`. 
+- Improvement: Fail gracefully with appropriate error message when non-existent export options plist path is passed to `xcode-project build-ipa`.
 
 Version 0.2.11
 -------------
