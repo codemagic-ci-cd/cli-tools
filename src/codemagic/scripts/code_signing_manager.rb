@@ -25,6 +25,73 @@ Example: #{File.basename(__FILE__)} -x Project.xcodeproj -u used-profiles.json -
 Arguments:
 "
 
+class BundleIdentifierNotFound < StandardError
+end
+
+class VariableResolver
+
+  ENVIRONMENT_VARIABLE_REGEX = /(\$[{(]([^})]+)[})]|\$([^\W]+))/
+
+  def initialize(build_configuration)
+    @build_configuration = build_configuration
+  end
+
+  def keys_and_modifiers(unresolved_value)
+    # Parses environment variables from value and extracts key name and specified modifiers.
+    # For example:
+    #   Variable.new('$FIRST_VAR.something.${SECOND_VAR}').keys_and_modifiers
+    #     => [
+    #          ["$FIRST_VAR", "FIRST_VAR", []],
+    #          ["${SECOND_VAR}", "SECOND_VAR", []]
+    #        ]
+    #   Variable.new('${FIRST-VAR:my-modifier}.something.$(SECOND_VAR:mod1:mod2)').keys_and_modifiers
+    #     => [
+    #          ["${FIRST-VAR:my-modifier}", "FIRST-VAR", ["my-modifier"]],
+    #          ["$(SECOND_VAR:mod1:mod2)", "SECOND_VAR", ["mod1", "mod2"]]
+    #        ]
+    unresolved_value.scan(ENVIRONMENT_VARIABLE_REGEX).map do |match|
+      cleaned_variable = match[1] || match[2]
+      parts = cleaned_variable.split(":")
+      key, modifiers = parts[0], parts[1..-1]
+      [match[0], key, modifiers]
+    end
+  end
+
+  def apply_modifiers(value, modifiers)
+    return unless value
+
+    modifiers.each do |modifier|
+      value = case modifier
+              when "identifier" then
+                value.gsub(/\W/, "_")
+              when "rfc1034identifier" then
+                value.gsub(/[\W_]/, "-")
+              when "lower" then
+                value.downcase
+              when "upper" then
+                value.upcase
+              else
+                value
+              end
+    end
+    value
+  end
+
+  def resolve(unresolved_value)
+    value = unresolved_value
+    keys_and_modifiers(unresolved_value).each do |variable, key, modifiers|
+      variable_value = @build_configuration.resolve_build_setting(key)
+      unless variable_value.nil?
+        variable_value = apply_modifiers(variable_value, modifiers)
+        value = value.sub(variable, variable_value)
+      end
+    end
+
+    is_resolved = value == unresolved_value
+    is_resolved ? value : resolve(value)
+  end
+end
+
 class Log
 
   @verbose = false
@@ -190,16 +257,42 @@ class CodeSigningManager
     end
   end
 
-  def set_configuration_build_settings(build_target, build_configuration)
-    Log.info "\n#{'-' * 50}\n"
-    bundle_id = build_configuration.resolve_build_setting("PRODUCT_BUNDLE_IDENTIFIER")
-    if bundle_id.nil? || bundle_id == ''
-      Log.info "No bundle id found for build configuration '#{build_configuration.name}'"
-      return
-    else
-      Log.info "Resolved bundle id '#{bundle_id}' for build configuration '#{build_configuration.name}'"
+  def get_bundle_id_from_infoplist(build_configuration)
+    infoplist_file = build_configuration.resolve_build_setting('INFOPLIST_FILE')
+    return nil unless infoplist_file
+    infoplist_path = File.join(File.dirname(@project_path), infoplist_file)
+    return nil unless File.file? infoplist_path
+    begin
+      info_plist = Xcodeproj::Plist.read_from_path(infoplist_path)
+    rescue Exception
+      return nil
+    end
+    unresolved_bundle_id = info_plist["CFBundleIdentifier"]
+    VariableResolver.new(build_configuration).resolve(unresolved_bundle_id)
+  end
+
+  def get_build_configuration_bundle_id(build_configuration)
+    def is_valid(bundle_identifier)
+      not (bundle_identifier.nil? || bundle_identifier == '')
     end
 
+    build_settings_bundle_id = build_configuration.resolve_build_setting("PRODUCT_BUNDLE_IDENTIFIER")
+    return [build_settings_bundle_id, 'build settings'] if is_valid(build_settings_bundle_id)
+    infoplist_bundle_id = get_bundle_id_from_infoplist(build_configuration)
+    return [infoplist_bundle_id, 'info plist file'] if is_valid(infoplist_bundle_id)
+    raise BundleIdentifierNotFound.new build_configuration
+  end
+
+  def set_configuration_build_settings(build_target, build_configuration)
+    Log.info "\n#{'-' * 50}\n"
+    begin
+      bundle_id, source = get_build_configuration_bundle_id(build_configuration)
+    rescue BundleIdentifierNotFound
+      Log.info "No bundle id found for build configuration '#{build_configuration.name}'"
+      return
+    end
+
+    Log.info "Resolved bundle id '#{bundle_id}' from #{source} for build configuration '#{build_configuration.name}'"
     profile = nil
     @profiles.each do |prov_profile|
       if File.fnmatch(prov_profile["bundle_id"], bundle_id)
@@ -254,6 +347,7 @@ class CodeSigningManager
   end
 
   def set_xcodeproj_build_settings
+    Log.info "\nConfigure code signing settings for project '#{@project_path}'\n"
     @project.targets.each do |target|
       set_target_build_settings(target)
     end
