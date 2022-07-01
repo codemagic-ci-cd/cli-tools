@@ -1,3 +1,11 @@
+Version 0.29.1
+-------------
+
+This is a bugfix release including changes from [PR #245](https://github.com/codemagic-ci-cd/cli-tools/pull/245).
+
+**Bugfixes**
+- Fix `xcode-project use-profiles` for cases when bundle identifier is defined in information property list files. Add fallback bundle identifier detection from Info.plist file to code signing setup script if `PRODUCT_BUNDLE_IDENTIFIER` is not resolved from build configuration.
+
 Version 0.29.0
 -------------
 
