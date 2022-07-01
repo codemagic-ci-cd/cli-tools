@@ -37,14 +37,14 @@ class VariableResolver
   end
 
   def keys_and_modifiers(unresolved_value)
-    # Parses environment variables from value and extracts key name and specified modifiers.
+    # Parse environment variables from value and extract key name and specified modifiers.
     # For example:
-    #   Variable.new('$FIRST_VAR.something.${SECOND_VAR}').keys_and_modifiers
+    #   variable_resolver.keys_and_modifiers '$FIRST_VAR.something.${SECOND_VAR}'
     #     => [
     #          ["$FIRST_VAR", "FIRST_VAR", []],
     #          ["${SECOND_VAR}", "SECOND_VAR", []]
     #        ]
-    #   Variable.new('${FIRST-VAR:my-modifier}.something.$(SECOND_VAR:mod1:mod2)').keys_and_modifiers
+    #   variable_resolver.keys_and_modifiers '${FIRST-VAR:my-modifier}.something.$(SECOND_VAR:mod1:mod2)'
     #     => [
     #          ["${FIRST-VAR:my-modifier}", "FIRST-VAR", ["my-modifier"]],
     #          ["$(SECOND_VAR:mod1:mod2)", "SECOND_VAR", ["mod1", "mod2"]]
