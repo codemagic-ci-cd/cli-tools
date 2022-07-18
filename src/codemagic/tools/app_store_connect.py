@@ -582,6 +582,8 @@ class AppStoreConnect(
                 types.add(CertificateType.IOS_DISTRIBUTION)
             elif profile_type is ProfileType.MAC_APP_STORE:
                 types.add(CertificateType.MAC_APP_DISTRIBUTION)
+            elif profile_type is ProfileType.MAC_APP_DIRECT:
+                types.add(CertificateType.DEVELOPER_ID_APPLICATION)
 
         return list(types) if types else None
 
@@ -809,6 +811,8 @@ class AppStoreConnect(
             certificate_types.append(CertificateType.IOS_DISTRIBUTION)
         elif profile_type is ProfileType.MAC_APP_STORE:
             certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
+        elif profile_type is ProfileType.MAC_APP_DIRECT:
+            certificate_types.append(CertificateType.DEVELOPER_ID_APPLICATION)
 
         certificates = self.list_certificates(
             certificate_types=certificate_types,
