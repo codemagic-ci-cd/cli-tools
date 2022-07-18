@@ -1,3 +1,11 @@
+Version 0.29.2
+-------------
+
+This is a bugfix release including changes from [PR #246](https://github.com/codemagic-ci-cd/cli-tools/pull/246).
+
+**Bugfixes**
+- Fix matching a profile in `app-store-connect fetch-signing-files` for cases where `type` is defined as `MAC_APP_DIRECT`.
+
 Version 0.29.1
 -------------
 
