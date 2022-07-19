@@ -2,7 +2,7 @@ Version 0.29.3
 -------------
 
 **Docs**
-- Add the changelog URL to the `pyproject.toml` file.
+- Add the changelog URL to the `pyproject.toml` project file so that the changelog reference is included under project links in PyPI.
 
 Version 0.29.2
 -------------
