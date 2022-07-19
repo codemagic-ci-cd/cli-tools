@@ -1,3 +1,9 @@
+Version 0.29.3
+-------------
+
+**Docs**
+- Add the changelog URL to the `pyproject.toml` file.
+
 Version 0.29.2
 -------------
 
