@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.29.2"
+version = "0.29.3"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
@@ -20,6 +20,7 @@ documentation = "https://github.com/codemagic-ci-cd/cli-tools/tree/master/docs#c
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/codemagic-ci-cd/cli-tools/issues"
+"Changelog" = "https://github.com/codemagic-ci-cd/cli-tools/blob/master/CHANGELOG.md"
 
 [tool.poetry.scripts]
 android-app-bundle = "codemagic.tools:AndroidAppBundle.invoke_cli"
