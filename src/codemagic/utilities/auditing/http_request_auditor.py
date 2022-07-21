@@ -16,41 +16,44 @@ class HttpRequestAuditor(BaseAuditor):
         audit_directory_name: str = 'http-requests',
     ):
         super().__init__(audit_directory_name=audit_directory_name)
-        self.response = response
-        self.request = response.request
+        self._response = response
+
+    @property
+    def _request(self):
+        return self._response.request
 
     def _parse_request_url(self):
-        return urllib.parse.urlparse(self.request.url)
+        return urllib.parse.urlparse(self._request.url)
 
     def _get_audit_filename(self) -> str:
         parsed_url = self._parse_request_url()
         sanitized_path = re.sub(r'[^\w_-]', '-', parsed_url.path)
         timestamp = datetime.now().strftime('%d-%m-%y-%H-%M-%S')
-        return f'http-{self.request.method}-{self.response.status_code}-{sanitized_path}-{timestamp}.json'
+        return f'http-{self._request.method}-{self._response.status_code}-{sanitized_path}-{timestamp}.json'
 
     def _serialize_request_body(self) -> Optional[str]:
-        if self.request.body is None:
+        if self._request.body is None:
             return None
-        if isinstance(self.request.body, str):
-            return self.request.body
+        if isinstance(self._request.body, str):
+            return self._request.body
 
         try:
-            return self.request.body.decode()
+            return self._request.body.decode()
         except ValueError:
             return '<binary_blob>'
 
     def _serialize_response_content(self) -> Optional[str]:
-        if not self.response.content:
+        if not self._response.content:
             return None
 
         try:
-            return self.response.content.decode()
+            return self._response.content.decode()
         except ValueError:
             return '<binary_blob>'
 
     def _serialize_request_headers(self) -> Dict[str, str]:
-        serialized_headers = dict(self.request.headers)
-        if 'Authorization' in self.request.headers:
+        serialized_headers = dict(self._request.headers)
+        if 'Authorization' in self._request.headers:
             serialized_headers['Authorization'] = 'Bearer <token>'
         return serialized_headers
 
@@ -58,18 +61,18 @@ class HttpRequestAuditor(BaseAuditor):
         parsed_url = self._parse_request_url()
         return {
             'request': {
-                'method': self.request.method,
-                'url': self.request.url,
+                'method': self._request.method,
+                'url': self._request.url,
                 'path': parsed_url.path,
                 'headers': self._serialize_request_headers(),
                 'body': self._serialize_request_body(),
                 'query': urllib.parse.parse_qs(parsed_url.query),
             },
             'response': {
-                'status_code': self.response.status_code,
-                'headers': dict(self.response.headers),
+                'status_code': self._response.status_code,
+                'headers': dict(self._response.headers),
                 'content': self._serialize_response_content(),
-                'elapsed': self.response.elapsed.total_seconds(),
+                'elapsed': self._response.elapsed.total_seconds(),
             },
         }
 
