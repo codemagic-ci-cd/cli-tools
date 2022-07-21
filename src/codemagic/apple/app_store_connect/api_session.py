@@ -5,6 +5,7 @@ from typing import Dict
 
 import requests
 
+from codemagic.utilities import auditing
 from codemagic.utilities import log
 
 from .api_error import AppStoreConnectApiError
@@ -52,7 +53,9 @@ class AppStoreConnectApiSession(requests.Session):
 
             if response.ok:
                 return response
-            elif response.status_code != 401:  # Not an authorization failure, fail immediately
+            elif response.status_code != 401:
+                # Not an authorization failure, save request audit log and fail immediately
+                auditing.save_http_request_audit(response, audit_directory_name='failed-http-requests')
                 raise AppStoreConnectApiError(response)
             elif attempt == self._unauthorized_retries:
                 self._logger.info('Unauthorized request retries are exhausted with %d attempts, stop trying', attempt)
