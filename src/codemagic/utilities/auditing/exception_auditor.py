@@ -8,8 +8,6 @@ from datetime import datetime
 from types import TracebackType
 from typing import Type
 
-from tblib import Traceback
-
 from .base_auditor import BaseAuditor
 
 
@@ -50,10 +48,7 @@ class ExceptionAuditor(BaseAuditor):
             'command': shlex.join(sys.argv),
             'exception_type': self._exception_type.__name__,
             'exception_arguments': self._serialize_exception_arguments(),
-            'traceback': {
-                'stacktrace': ''.join(traceback.format_tb(self._traceback)),
-                'dict': Traceback(self._traceback).as_dict(),
-            },
+            'stacktrace': ''.join(traceback.format_tb(self._traceback)),
             'timestamp': datetime.utcnow().isoformat(),
         }
 
