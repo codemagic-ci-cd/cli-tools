@@ -6,7 +6,14 @@ import sys
 import traceback
 from datetime import datetime
 from types import TracebackType
+from typing import Optional
 from typing import Type
+
+try:
+    import tblib
+except ImportError:
+    tblib = None
+
 
 from .base_auditor import BaseAuditor
 
@@ -43,12 +50,20 @@ class ExceptionAuditor(BaseAuditor):
 
         return self._exception.args
 
+    def _get_serialized_traceback(self) -> Optional[dict]:
+        if tblib is None:
+            return None
+        return tblib.Traceback(self._traceback).as_dict()
+
     def _serialize_audit_info(self):
         return {
             'command': shlex.join(sys.argv),
             'exception_type': self._exception_type.__name__,
             'exception_arguments': self._serialize_exception_arguments(),
-            'traceback': ''.join(traceback.format_tb(self._traceback)),
+            'traceback': {
+                'stacktrace': ''.join(traceback.format_tb(self._traceback)),
+                'dict': self._get_serialized_traceback(),
+            },
             'timestamp': datetime.utcnow().isoformat(),
         }
 
