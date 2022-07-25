@@ -18,7 +18,7 @@ class BaseAuditor(ABC):
             tempfile.gettempdir(),
             'codemagic-cli-tools',
             self._audit_directory_name,
-            datetime.now().strftime('%y-%m-%d'),
+            datetime.now().strftime('%Y-%m-%d'),
         )
         requests_audit_dir.mkdir(parents=True, exist_ok=True)
         return requests_audit_dir
