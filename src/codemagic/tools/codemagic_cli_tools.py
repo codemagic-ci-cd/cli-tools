@@ -27,17 +27,6 @@ class CodemagicCliTools(cli.CliApp):
             executable = tool_class.get_executable_name()
             self.echo(f'{executable} installed at {shutil.which(executable) or executable}')
 
-    @cli.action(
-        'evaluate',
-        cli.Argument('A', {'c': cli.ArgumentProperties(key='c', description='...')}).c,  # type: ignore
-    )
-    def evaluate(self, c: str):
-        """
-        Dummy action for testing purposes evaluates given Python command
-        """
-        # TODO: Remove this!
-        eval(c)
-
 
 if __name__ == '__main__':
     CodemagicCliTools.invoke_cli()
