@@ -28,7 +28,7 @@ class HttpRequestAuditor(BaseAuditor):
     def _get_audit_filename(self) -> str:
         parsed_url = self._parse_request_url()
         sanitized_path = re.sub(r'[^\w_-]', '-', parsed_url.path)
-        timestamp = datetime.now().strftime('%d-%m-%y-%H-%M-%S')
+        timestamp = datetime.now().strftime('%H-%M-%S')
         return f'http-{self._request.method}-{self._response.status_code}-{sanitized_path}-{timestamp}.json'
 
     def _serialize_request_body(self) -> Optional[str]:

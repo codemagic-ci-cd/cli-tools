@@ -4,6 +4,7 @@ import pathlib
 import tempfile
 from abc import ABC
 from abc import abstractmethod
+from datetime import datetime
 
 from codemagic.utilities import log
 
@@ -13,8 +14,12 @@ class BaseAuditor(ABC):
         self._audit_directory_name = audit_directory_name
 
     def _get_audit_dir(self) -> pathlib.Path:
-        tempdir = pathlib.Path(tempfile.gettempdir())
-        requests_audit_dir = tempdir / 'codemagic-cli-tools' / self._audit_directory_name
+        requests_audit_dir = pathlib.Path(
+            tempfile.gettempdir(),
+            'codemagic-cli-tools',
+            self._audit_directory_name,
+            datetime.now().strftime('%y-%m-%d'),
+        )
         requests_audit_dir.mkdir(parents=True, exist_ok=True)
         return requests_audit_dir
 

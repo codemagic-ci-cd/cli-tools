@@ -25,12 +25,11 @@ class ExceptionAuditor(BaseAuditor):
         self._traceback = exception_traceback
 
     def _get_audit_filename(self) -> str:
-        timestamp = datetime.now().strftime('%d-%m-%y-%H-%M-%S')
         if self._exception_type:
             exception_name = self._exception_type.__name__
         else:
             exception_name = 'UnknownException'
-        return f'error-{exception_name}-{timestamp}.json'
+        return f'error-{exception_name}-{datetime.now().strftime("%H-%M-%S")}.json'
 
     def _serialize_exception_arguments(self):
         try:
