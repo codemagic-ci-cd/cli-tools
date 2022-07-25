@@ -2,8 +2,8 @@ Version 0.29.4
 -------------
 
 **Development**
-- Save unexpected exception information and stacktrace to `$TMPDIR/codemagic-cli-tools/exceptions/yyyy-mm-dd/`.
-- Save unsuccessful App Store Connect HTTP request and response information to `$TMPDIR/codemagic-cli-tools/failed-http-requests/yyyy-mm-dd/`.
+- Save unexpected exception information and stacktrace to `$TMPDIR/codemagic-cli-tools/exceptions/yyyy-mm-dd/`. [PR #248](https://github.com/codemagic-ci-cd/cli-tools/pull/248)
+- Save unsuccessful App Store Connect HTTP request and response information to `$TMPDIR/codemagic-cli-tools/failed-http-requests/yyyy-mm-dd/`. [PR #248](https://github.com/codemagic-ci-cd/cli-tools/pull/248)
 
 Version 0.29.3
 -------------
