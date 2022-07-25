@@ -8,6 +8,8 @@ from datetime import datetime
 from types import TracebackType
 from typing import Type
 
+from codemagic import __version__
+
 from .base_auditor import BaseAuditor
 
 
@@ -45,10 +47,11 @@ class ExceptionAuditor(BaseAuditor):
     def _serialize_audit_info(self):
         return {
             'command': shlex.join(sys.argv),
-            'exception_type': self._exception_type.__name__,
             'exception_arguments': self._serialize_exception_arguments(),
+            'exception_type': self._exception_type.__name__,
             'stacktrace': ''.join(traceback.format_tb(self._traceback)),
             'timestamp': datetime.utcnow().isoformat(),
+            'version': __version__,
         }
 
 

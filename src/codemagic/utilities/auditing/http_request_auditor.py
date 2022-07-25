@@ -6,6 +6,8 @@ from typing import Optional
 
 from requests import Response
 
+from codemagic import __version__
+
 from .base_auditor import BaseAuditor
 
 
@@ -74,6 +76,7 @@ class HttpRequestAuditor(BaseAuditor):
                 'content': self._serialize_response_content(),
                 'elapsed': self._response.elapsed.total_seconds(),
             },
+            'version': __version__,
         }
 
 
