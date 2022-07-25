@@ -39,6 +39,25 @@ def mock_unauthorized_response():
 
 
 @pytest.fixture
+def mock_server_error_response():
+    server_error_payload = {
+        'errors': [
+            {
+                'status': '500',
+                'code': 'UNEXPECTED_ERROR',
+                'title': 'An unexpected error occurred.',
+                'detail': (
+                    'An unexpected error occurred on the server side. '
+                    'If this issue continues, contact us at '
+                    'https://developer.apple.com/contact/.'
+                ),
+            },
+        ],
+    }
+    return _get_failed_response_mock(server_error_payload, 500)
+
+
+@pytest.fixture
 def mock_not_found_response():
     not_found_payload = {
         'errors': [
@@ -83,6 +102,29 @@ def test_unauthorized_retrying_success(mock_session, mock_successful_response, m
 
 
 @mock.patch.object(Session, 'request')
+def test_server_error_retrying_success(mock_session, mock_successful_response, mock_server_error_response):
+    mock_session.side_effect = (mock_server_error_response, mock_server_error_response, mock_successful_response)
+
+    mock_auth_headers_factory = mock.Mock(return_value={})
+    mock_revoke_auth_info = mock.Mock()
+    session = AppStoreConnectApiSession(
+        mock_auth_headers_factory,
+        server_error_retries=3,
+        revoke_auth_info=mock_revoke_auth_info,
+    )
+    final_response = session.get('https://example.com')
+
+    # Check that JWT refresh is not performed
+    assert mock_auth_headers_factory.mock_calls == [(), (), ()]
+    assert mock_revoke_auth_info.mock_calls == []
+    mock_server_error_response.assert_not_called()
+    mock_successful_response.assert_has_calls([('json', (), {})])
+
+    # After unauthorized requests finally authentication passes and successful response is returned
+    assert final_response is mock_successful_response
+
+
+@mock.patch.object(Session, 'request')
 def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response):
     retries_count = 3
 
@@ -109,6 +151,32 @@ def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response)
 
 
 @mock.patch.object(Session, 'request')
+def test_server_error_retrying_failure(mock_session, mock_server_error_response):
+    retries_count = 3
+
+    mock_session.side_effect = [mock_server_error_response for _ in range(retries_count + 1)]
+    mock_auth_headers_factory = mock.Mock(return_value={})
+    mock_revoke_auth_info = mock.Mock()
+    session = AppStoreConnectApiSession(
+        mock_auth_headers_factory,
+        server_error_retries=retries_count,
+        revoke_auth_info=mock_revoke_auth_info,
+    )
+    with pytest.raises(AppStoreConnectApiError) as error_info:
+        session.get('https://example.com')
+
+    assert session._server_error_retries == retries_count
+    assert mock_session.call_count == retries_count
+
+    # Check that JWT refresh is not performed
+    assert mock_auth_headers_factory.mock_calls == [(), (), ()]
+    assert mock_revoke_auth_info.mock_calls == []
+
+    # Finally when retries are exhausted the unauthorized error is still thrown
+    assert error_info.value.response is mock_server_error_response
+
+
+@mock.patch.object(Session, 'request')
 def test_http_error_not_found(mock_session, mock_successful_response, mock_not_found_response):
     mock_session.side_effect = (mock_not_found_response, mock_successful_response)
 
@@ -117,6 +185,7 @@ def test_http_error_not_found(mock_session, mock_successful_response, mock_not_f
     session = AppStoreConnectApiSession(
         mock_auth_headers_factory,
         unauthorized_request_retries=3,
+        server_error_retries=3,
         revoke_auth_info=mock_revoke_auth_info,
     )
     with pytest.raises(AppStoreConnectApiError) as error_info:

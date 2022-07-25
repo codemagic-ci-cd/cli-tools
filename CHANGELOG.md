@@ -1,5 +1,8 @@
-Version 0.29.4
+Version 0.30.0
 -------------
+
+**Features**:
+- Tool `app-store-connect` can now retry App Store Connect API requests that fail with status 5xx (server error). Number of retries can be configured by command line option `--api-server-error-retries`, or respective environment variable `APP_STORE_CONNECT_API_SERVER_ERROR_RETRIES`.
 
 **Development**
 - Save unexpected exception information and stacktrace to `$TMPDIR/codemagic-cli-tools/exceptions/yyyy-mm-dd/`.
