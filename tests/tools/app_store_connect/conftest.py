@@ -34,6 +34,7 @@ def namespace_kwargs(mock_auth_key):
         AppStoreConnectArgument.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument('key-identifier'),
         AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument(mock_auth_key.read_text()),
         AppStoreConnectArgument.UNAUTHORIZED_REQUEST_RETRIES.key: 1,
+        AppStoreConnectArgument.SERVER_ERROR_RETRIES.key: 1,
         AppStoreConnectArgument.DISABLE_JWT_CACHE.key: True,
     }
     for arg in AppStoreConnect.CLASS_ARGUMENTS:
