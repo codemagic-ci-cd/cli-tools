@@ -43,6 +43,7 @@ class AppStoreConnectApiClient:
             private_key: str,
             log_requests: bool = False,
             unauthorized_request_retries: int = 1,
+            server_error_retries: int = 1,
             enable_jwt_cache: bool = False,
     ):
         """
@@ -61,6 +62,7 @@ class AppStoreConnectApiClient:
             self.generate_auth_headers,
             log_requests=log_requests,
             unauthorized_request_retries=unauthorized_request_retries,
+            server_error_retries=server_error_retries,
             revoke_auth_info=self._jwt_manager.revoke,
         )
 

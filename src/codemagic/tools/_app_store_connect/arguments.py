@@ -162,6 +162,15 @@ class Types:
         def _is_valid(cls, value: int) -> bool:
             return value > 0
 
+    class ApiServerErrorRetries(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_API_SERVER_ERROR_RETRIES'
+        default_value = 3
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
+
     class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
         argument_type = datetime
 
@@ -393,6 +402,21 @@ class AppStoreConnectArgument(cli.Argument):
             'required': False,
         },
     )
+    SERVER_ERROR_RETRIES = cli.ArgumentProperties(
+        key='server_error_retries',
+        flags=('--api-server-error-retries',),
+        type=Types.ApiServerErrorRetries,
+        description=(
+            'Specify how many times the App Store Connect API request '
+            'should be retried in case the called request fails due to a '
+            'server error (response with status code 5xx). '
+            'In case of server error, the request is retried until '
+            'the number of retries is exhausted.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
     DISABLE_JWT_CACHE = cli.ArgumentProperties(
         key='disable_jwt_cache',
         flags=('--disable-jwt-cache',),
@@ -537,10 +561,12 @@ class AppStoreVersionArgument(cli.Argument):
             'default': Platform.IOS,
         },
     )
-    PLATFORM_OPTIONAL = PLATFORM.duplicate(argparse_kwargs={
-        'required': False,
-        'choices': list(Platform),
-    })
+    PLATFORM_OPTIONAL = PLATFORM.duplicate(
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
+    )
     RELEASE_TYPE = cli.ArgumentProperties(
         key='release_type',
         flags=('--release-type',),
