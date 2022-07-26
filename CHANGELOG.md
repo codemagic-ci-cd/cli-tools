@@ -8,11 +8,9 @@ Version 0.30.0
 - Save unexpected exception information and stacktrace to `$TMPDIR/codemagic-cli-tools/exceptions/yyyy-mm-dd/`. [PR #248](https://github.com/codemagic-ci-cd/cli-tools/pull/248)
 - Save unsuccessful App Store Connect HTTP request and response information to `$TMPDIR/codemagic-cli-tools/failed-http-requests/yyyy-mm-dd/`. [PR #248](https://github.com/codemagic-ci-cd/cli-tools/pull/248)
 
-Version 0.29.3
--------------
-
 **Docs**
-- Add the changelog URL to the `pyproject.toml` project file so that the changelog reference is included under project links in PyPI.
+- Update tool `app-store-connect` docs with `--api-server-error-retries` option. [PR #250](https://github.com/codemagic-ci-cd/cli-tools/pull/250)
+- Add the changelog URL to the `pyproject.toml` project file so that the changelog reference is included under project links in PyPI. [PR #247](https://github.com/codemagic-ci-cd/cli-tools/pull/247)
 
 Version 0.29.2
 -------------

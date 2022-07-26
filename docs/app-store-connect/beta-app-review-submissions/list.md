@@ -9,6 +9,7 @@ list
 app-store-connect beta-app-review-submissions list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--api-server-error-retries SERVER_ERROR_RETRIES]
     [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -34,6 +35,10 @@ Turn on logging for App Store Connect API HTTP requests
 
 
 Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--api-server-error-retries=SERVER_ERROR_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to a server error (response with status code 5xx). In case of server error, the request is retried until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_SERVER_ERROR_RETRIES`. [Default: 3]
 ##### `--disable-jwt-cache`
 
 
