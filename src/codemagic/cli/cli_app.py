@@ -28,6 +28,7 @@ from typing import TypeVar
 from typing import Union
 
 from codemagic import __version__
+from codemagic.utilities import auditing
 from codemagic.utilities import log
 
 from .action_group import ActionGroup
@@ -113,6 +114,7 @@ class CliApp(metaclass=abc.ABCMeta):
         logger.warning(Colors.RED(message))
         file_logger = log.get_file_logger(cls)
         file_logger.exception('Exception traceback:')
+        auditing.save_exception_audit()
         return 9
 
     @classmethod
@@ -263,7 +265,10 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def iter_class_cli_actions(
-            cls, action_group: Optional[ActionGroup] = None, include_all: bool = False) -> Iterable[ActionCallable]:
+        cls,
+        action_group: Optional[ActionGroup] = None,
+        include_all: bool = False,
+    ) -> Iterable[ActionCallable]:
         for attr_name in dir(cls):
             attr = getattr(cls, attr_name)
             if not callable(attr) or not getattr(attr, 'is_cli_action', False):
@@ -327,8 +332,10 @@ class CliApp(metaclass=abc.ABCMeta):
 
         return main_parser
 
-    def _obfuscate_command(self, command_args: Sequence[CommandArg],
-                           obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None) -> ObfuscatedCommand:
+    def _obfuscate_command(
+        self, command_args: Sequence[CommandArg],
+        obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None,
+    ) -> ObfuscatedCommand:
 
         all_obfuscate_patterns = set(chain((obfuscate_patterns or []), self.default_obfuscation))
 
@@ -361,11 +368,13 @@ class CliApp(metaclass=abc.ABCMeta):
 
         return [expand(command_arg) for command_arg in command_args]
 
-    def execute(self, command_args: Sequence[CommandArg],
-                obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
-                show_output: bool = True,
-                suppress_output: bool = False,
-                **execute_kwargs) -> CliProcess:
+    def execute(
+        self, command_args: Sequence[CommandArg],
+        obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
+        show_output: bool = True,
+        suppress_output: bool = False,
+        **execute_kwargs,
+    ) -> CliProcess:
         if suppress_output:
             print_streams = False
         else:
@@ -382,10 +391,12 @@ class CliApp(metaclass=abc.ABCMeta):
 _Fn = TypeVar('_Fn', bound=Callable[..., object])
 
 
-def action(action_name: str,
-           *arguments: Argument,
-           action_group: Optional[ActionGroup] = None,
-           action_options: Optional[Dict[str, Any]] = None) -> Callable[[_Fn], _Fn]:
+def action(
+    action_name: str,
+    *arguments: Argument,
+    action_group: Optional[ActionGroup] = None,
+    action_options: Optional[Dict[str, Any]] = None,
+) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
     :param action_name: Name of the CLI parameter
