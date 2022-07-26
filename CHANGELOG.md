@@ -10,12 +10,7 @@ Version 0.30.0
 
 **Docs**
 - Update tool `app-store-connect` docs with `--api-server-error-retries` option. [PR #250](https://github.com/codemagic-ci-cd/cli-tools/pull/250)
-
-Version 0.29.3
--------------
-
-**Docs**
-- Add the changelog URL to the `pyproject.toml` project file so that the changelog reference is included under project links in PyPI.
+- Add the changelog URL to the `pyproject.toml` project file so that the changelog reference is included under project links in PyPI. [PR #247](https://github.com/codemagic-ci-cd/cli-tools/pull/247)
 
 Version 0.29.2
 -------------
