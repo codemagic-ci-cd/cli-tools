@@ -1,3 +1,9 @@
+Version 0.31.0
+-------------
+
+**Features**:
+- Add new action `android-keystore certificate` to show certificate information for specific alias in the keystore. [PR #253](https://github.com/codemagic-ci-cd/cli-tools/pull/253)
+
 Version 0.30.0
 -------------
 
