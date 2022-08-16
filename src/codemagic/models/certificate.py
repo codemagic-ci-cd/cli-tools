@@ -164,10 +164,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         fingerprint = self.certificate.fingerprint(algorithm)
         return fingerprint.hex().upper()
 
-    def export_p12(self,
-                   private_key: PrivateKey,
-                   container_password: str,
-                   export_path: Optional[Union[pathlib.Path, AnyStr]] = None) -> pathlib.Path:
+    def export_p12(
+        self,
+        private_key: PrivateKey,
+        container_password: str,
+        export_path: Optional[Union[pathlib.Path, AnyStr]] = None,
+    ) -> pathlib.Path:
         """
         :raises: IOError, ValueError
         """
@@ -205,6 +207,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
             'O': 'Organization',
             'L': 'Locality',
             'S': 'State or province',
+            'ST': 'State',
             'C': 'Country',
         }
         return '\n'.join([

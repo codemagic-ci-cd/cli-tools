@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+from tempfile import NamedTemporaryFile
 from typing import AnyStr
 from typing import Dict
 from typing import Iterable
@@ -93,6 +94,34 @@ class Keytool(AbstractShellTool):
         except subprocess.CalledProcessError as cpe:
             self._handle_keystore_list_error(cpe, key_alias=key_alias)
         return True
+
+    def get_certificate(
+        self,
+        keystore_path: pathlib.Path,
+        keystore_password: str,
+        key_alias: str,
+    ) -> Certificate:
+        with NamedTemporaryFile(mode='wb') as tf:
+            command = (
+                self.executable,
+                '-exportcert',
+                '-storepass:env', 'STORE_PASSWORD',
+                '-keystore', str(keystore_path),
+                '-alias', key_alias,
+                '-file', tf.name,
+            )
+
+            try:
+                self._run_command(
+                    command,
+                    command_env={'STORE_PASSWORD': keystore_password},
+                    suppress_output=True,
+                )
+            except subprocess.CalledProcessError as cpe:
+                self._handle_keystore_list_error(cpe, key_alias=key_alias)
+            else:
+                asn1_certificate = pathlib.Path(tf.name).read_bytes()
+                return Certificate.from_ans1(asn1_certificate)
 
     def get_certificates(
         self,

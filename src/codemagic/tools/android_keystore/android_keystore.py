@@ -195,6 +195,47 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         ))
 
     @cli.action(
+        'certificate',
+        AndroidKeystoreArgument.KEYSTORE_PATH,
+        AndroidKeystoreArgument.KEYSTORE_PASSWORD,
+        AndroidKeystoreArgument.KEY_ALIAS,
+        AndroidKeystoreArgument.JSON_OUTPUT,
+    )
+    def get_certificate(
+        self,
+        keystore_path: pathlib.Path,
+        keystore_password: Union[str, KeystorePassword],
+        key_alias: str,
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> Certificate:
+        """
+        Extract certificate for specified alias from the keystore
+        """
+        store_password: str = KeystorePassword.resolve_value(keystore_password)
+
+        self.logger.info(f'Get certificate in Android keystore "{keystore_path}" for alias "{key_alias}"')
+        self._assert_keystore_exists(keystore_path)
+
+        try:
+            certificate = Keytool().get_certificate(
+                keystore_path=keystore_path,
+                keystore_password=store_password,
+                key_alias=key_alias,
+            )
+        except ValueError as ve:
+            raise AndroidKeystoreError(str(ve)) from ve
+
+        if should_print:
+            if json_output:
+                summary = json.dumps(certificate.get_summary(), indent=4)
+            else:
+                summary = certificate.get_text_summary()
+            self.echo(summary)
+
+        return certificate
+
+    @cli.action(
         'certificates',
         AndroidKeystoreArgument.KEYSTORE_PATH,
         AndroidKeystoreArgument.KEYSTORE_PASSWORD,
