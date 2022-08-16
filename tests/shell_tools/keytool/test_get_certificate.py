@@ -29,4 +29,3 @@ def test_get_certificate(keystore_name, keystore_password, key_alias, expected_s
         key_alias=key_alias,
     )
     assert certificate.serial == expected_serial
-    print(certificate.get_text_summary())
