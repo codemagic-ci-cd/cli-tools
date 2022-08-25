@@ -76,6 +76,7 @@ class HttpRequestAuditor(BaseAuditor):
                 'content': self._serialize_response_content(),
                 'elapsed': self._response.elapsed.total_seconds(),
             },
+            'timestamp': datetime.utcnow().isoformat(),
             'version': __version__,
         }
 
