@@ -1,8 +1,14 @@
+Version 0.31.2
+-------------
+
+**Development**:
+- Support file-like objects for `codemagic.utilities.backwards_file_reader.iter_backwards` in addition to file paths. [PR #255](https://github.com/codemagic-ci-cd/cli-tools/pull/255)
+
 Version 0.31.1
 -------------
 
 **Development**:
-- Save timestamp along with other failed App Store Connect HTTP request info. [PR #253](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Save timestamp along with other failed App Store Connect HTTP request info. [PR #254](https://github.com/codemagic-ci-cd/cli-tools/pull/254)
 
 Version 0.31.0
 -------------
