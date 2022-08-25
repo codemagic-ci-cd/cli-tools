@@ -1,3 +1,9 @@
+Version 0.31.1
+-------------
+
+**Development**:
+- Save timestamp along with other failed App Store Connect HTTP request info. [PR #253](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+
 Version 0.31.0
 -------------
 
