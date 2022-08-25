@@ -36,7 +36,19 @@ def test_backwards_file_reader_with_path(buffer_size, random_lines):
 
 
 @pytest.mark.parametrize('buffer_size', [2**i for i in range(5, 15)])
-def test_backwards_file_reader_with_io(buffer_size, random_lines):
+def test_backwards_file_reader_with_in_memory_file(buffer_size, random_lines):
+    with tempfile.TemporaryFile(mode='r+') as tf:
+        _write_file_contents(tf, random_lines)
+        tf.flush()
+
+        iterator = iter_backwards(tf, buffer_size)
+        backwards_lines = list(iterator)
+
+    assert list(reversed(backwards_lines)) == random_lines
+
+
+@pytest.mark.parametrize('buffer_size', [2**i for i in range(5, 15)])
+def test_backwards_file_reader_with_stringio(buffer_size, random_lines):
     sio = io.StringIO()
     _write_file_contents(sio, random_lines)
 
