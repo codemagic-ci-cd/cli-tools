@@ -69,7 +69,7 @@ class Profiles(ResourceManager[Profile]):
 
             raise ValueError(
                 f'Cannot create profile: Apple requires that you register at least one {device_type} '
-                f'testing device on the Apple Developer Portal to create a {profile_type} profile'
+                f'testing device on the Apple Developer Portal to create a {profile_type} profile',
             )
 
         if devices is None:
