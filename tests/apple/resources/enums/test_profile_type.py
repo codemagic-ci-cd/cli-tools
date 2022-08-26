@@ -3,7 +3,7 @@ import pytest
 from codemagic.apple.resources import ProfileType
 
 
-@pytest.mark.parametrize('profile_type, should_be_allowed', [
+@pytest.mark.parametrize('profile_type, should_be_required', [
     (ProfileType.IOS_APP_ADHOC, True),
     (ProfileType.IOS_APP_DEVELOPMENT, True),
     (ProfileType.IOS_APP_INHOUSE, False),
