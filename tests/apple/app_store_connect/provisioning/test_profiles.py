@@ -39,6 +39,28 @@ def test_create_profile_success_with_devices(profile_type, profile_response, app
     app_store_api_client.session.post.assert_called_once()
 
 
+@pytest.mark.parametrize('profile_type, device_type', [
+    (ProfileType.IOS_APP_DEVELOPMENT, 'iOS'),
+    (ProfileType.IOS_APP_ADHOC, 'iOS'),
+    (ProfileType.MAC_APP_DEVELOPMENT, 'macOS'),
+    (ProfileType.MAC_CATALYST_APP_DEVELOPMENT, 'macOS'),
+    (ProfileType.TVOS_APP_DEVELOPMENT, 'tvOS'),
+    (ProfileType.TVOS_APP_ADHOC, 'tvOS'),
+])
+def test_create_profile_failure_without_devices(profile_type, device_type, app_store_api_client):
+    with pytest.raises(ValueError) as error_info:
+        app_store_api_client.profiles.create(
+            name='test profile',
+            profile_type=profile_type,
+            bundle_id=ResourceId('bundle_id_resource_id'),
+            certificates=[ResourceId('certificate_resource_id')],
+            devices=None,
+        )
+    expected_error_msg = f'Cannot create profile: Apple requires that you register at least one {device_type} ' \
+                         f'testing device on the Apple Developer Portal to create a {profile_type} profile'
+    assert str(error_info.value) == expected_error_msg
+
+
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class ProfilesTest(ResourceManagerTestsBase):
 
@@ -58,6 +80,23 @@ class ProfilesTest(ResourceManagerTestsBase):
         assert isinstance(profile, Profile)
         assert profile.attributes.name == name
         assert profile.attributes.profileType is profile_type
+
+    def test_create_fail_if_no_devices_but_devices_are_required(self):
+        name = 'test profile'
+        profile_type = ProfileType.IOS_APP_DEVELOPMENT
+        bundle_id_resource_id = ResourceId('F88J43FA9J')
+        certificate_id = ResourceId('29NU422CRF')
+        device_ids = None
+
+        with pytest.raises(ValueError) as error_info:
+            self.api_client.profiles.create(
+                name=name,
+                profile_type=profile_type,
+                bundle_id=bundle_id_resource_id,
+                certificates=[certificate_id],
+                devices=device_ids,
+            )
+        assert str(error_info.value) == 'gaga'
 
     def test_delete(self):
         profile_id = ResourceId('ZK3RZ4B465')

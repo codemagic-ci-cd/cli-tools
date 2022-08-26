@@ -206,6 +206,10 @@ class ProfileType(ResourceEnum):
         return self.value.endswith('_DEVELOPMENT')
 
     @property
+    def is_ios_profile(self) -> bool:
+        return self.value.startswith('IOS_')
+
+    @property
     def is_macos_profile(self) -> bool:
         return self.value.startswith('MAC_')
 
@@ -214,9 +218,9 @@ class ProfileType(ResourceEnum):
         return self.value.startswith('TVOS_')
 
     def devices_not_allowed(self) -> bool:
-        return not self.devices_allowed()
+        return not self.devices_required()
 
-    def devices_allowed(self) -> bool:
+    def devices_required(self) -> bool:
         return self.is_development_type or self.is_ad_hoc_type
 
 

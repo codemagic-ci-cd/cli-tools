@@ -1,3 +1,9 @@
+Version 0.31.3
+-------------
+
+**Development**:
+- Show error message when no matching test device is found in the Apple Developer Portal when creating an Ad Hoc or development provisioning profile.
+
 Version 0.31.2
 -------------
 

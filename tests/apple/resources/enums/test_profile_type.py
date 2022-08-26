@@ -19,5 +19,5 @@ from codemagic.apple.resources import ProfileType
     (ProfileType.TVOS_APP_INHOUSE, False),
     (ProfileType.TVOS_APP_STORE, False),
 ])
-def test_devices_allowed(profile_type, should_be_allowed):
-    assert profile_type.devices_allowed() is should_be_allowed
+def test_devices_required(profile_type, should_be_required):
+    assert profile_type.devices_required() is should_be_required
