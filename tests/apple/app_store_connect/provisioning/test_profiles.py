@@ -81,23 +81,6 @@ class ProfilesTest(ResourceManagerTestsBase):
         assert profile.attributes.name == name
         assert profile.attributes.profileType is profile_type
 
-    def test_create_fail_if_no_devices_but_devices_are_required(self):
-        name = 'test profile'
-        profile_type = ProfileType.IOS_APP_DEVELOPMENT
-        bundle_id_resource_id = ResourceId('F88J43FA9J')
-        certificate_id = ResourceId('29NU422CRF')
-        device_ids = None
-
-        with pytest.raises(ValueError) as error_info:
-            self.api_client.profiles.create(
-                name=name,
-                profile_type=profile_type,
-                bundle_id=bundle_id_resource_id,
-                certificates=[certificate_id],
-                devices=device_ids,
-            )
-        assert str(error_info.value) == 'gaga'
-
     def test_delete(self):
         profile_id = ResourceId('ZK3RZ4B465')
         self.api_client.profiles.delete(profile_id)
