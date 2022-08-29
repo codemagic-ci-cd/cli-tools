@@ -682,7 +682,7 @@ class AppStoreConnect(
             devices=[],
             omit_keys=['devices'],
         )
-        if profile_type.devices_allowed():
+        if profile_type.devices_required():
             create_params['devices'] = device_resource_ids
         profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
 

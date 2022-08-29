@@ -57,6 +57,22 @@ class Profiles(ResourceManager[Profile]):
         """
         if profile_type.devices_not_allowed() and devices:
             raise ValueError(f'Cannot assign devices to profile with type {profile_type}')
+        elif profile_type.devices_required() and not devices:
+            if profile_type.is_tvos_profile:
+                device_type = 'tvOS'
+            elif profile_type.is_macos_profile:
+                device_type = 'macOS'
+            elif profile_type.is_ios_profile:
+                device_type = 'iOS'
+            else:
+                raise ValueError(f'Device type for profile type {profile_type} is unknown')
+
+            raise ValueError(
+                f'Cannot create profile: the request does not include any {device_type} testing devices '
+                f'while they are required for creating a {profile_type} profile. If the profile creation is automatic, '
+                'ensure that at least one suitable testing device is registered on the Apple Developer Portal.',
+            )
+
         if devices is None:
             devices = []
         attributes = {
