@@ -70,7 +70,7 @@ class Profiles(ResourceManager[Profile]):
             raise ValueError(
                 f'Cannot create profile: the request does not include any {device_type} testing devices '
                 f'while they are required for creating a {profile_type} profile. If the profile creation is automatic, '
-                'ensure that at least one suitable testing device is registered on the Apple Developer Portal.'
+                'ensure that at least one suitable testing device is registered on the Apple Developer Portal.',
             )
 
         if devices is None:

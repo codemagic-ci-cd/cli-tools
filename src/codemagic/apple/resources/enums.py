@@ -228,7 +228,7 @@ class ProfileType(ResourceEnum):
             '"devices_allowed" is deprecated in favor of "devices_required" in version 0.31.3 '
             'and is subject for removal in future releases.'
         )
-        log.get_logger(self.__class__).warning(Colors.RED(warning))
+        log.get_logger(self.__class__).warning(Colors.YELLOW(warning))
         return self.devices_required()
 
     def devices_required(self) -> bool:
