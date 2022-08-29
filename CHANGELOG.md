@@ -1,8 +1,8 @@
 Version 0.31.3
 -------------
 
-**Development**:
-- Show error message when no matching test device is found in the Apple Developer Portal when creating an Ad Hoc or development provisioning profile.
+**Bugfixes**
+- Show error message when no matching test device is found in the Apple Developer Portal when creating an Ad Hoc or development provisioning profile. [PR #256](https://github.com/codemagic-ci-cd/cli-tools/pull/256)
 
 Version 0.31.2
 -------------

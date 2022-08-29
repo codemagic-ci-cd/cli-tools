@@ -56,8 +56,11 @@ def test_create_profile_failure_without_devices(profile_type, device_type, app_s
             certificates=[ResourceId('certificate_resource_id')],
             devices=None,
         )
-    expected_error_msg = f'Cannot create profile: Apple requires that you register at least one {device_type} ' \
-                         f'testing device on the Apple Developer Portal to create a {profile_type} profile'
+    expected_error_msg = (
+        f'Cannot create profile: the request does not include any {device_type} testing devices '
+        f'while they are required for creating a {profile_type} profile. If the profile creation is automatic, '
+        'ensure that at least one suitable testing device is registered on the Apple Developer Portal.'
+    )
     assert str(error_info.value) == expected_error_msg
 
 

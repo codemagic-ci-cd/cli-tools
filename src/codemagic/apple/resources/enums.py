@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from typing import Tuple
 
+from codemagic.cli import Colors
 from codemagic.models.enums import ResourceEnum
+from codemagic.utilities import log
 
 
 class AppStoreState(ResourceEnum):
@@ -219,6 +221,15 @@ class ProfileType(ResourceEnum):
 
     def devices_not_allowed(self) -> bool:
         return not self.devices_required()
+
+    def devices_allowed(self) -> bool:
+        warning = (
+            'Deprecation warning! Method '
+            '"devices_allowed" is deprecated in favor of "devices_required" in version 0.31.3 '
+            'and is subject for removal in future releases.'
+        )
+        log.get_logger(self.__class__).warning(Colors.RED(warning))
+        return self.devices_required()
 
     def devices_required(self) -> bool:
         return self.is_development_type or self.is_ad_hoc_type

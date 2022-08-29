@@ -68,8 +68,9 @@ class Profiles(ResourceManager[Profile]):
                 raise ValueError(f'Device type for profile type {profile_type} is unknown')
 
             raise ValueError(
-                f'Cannot create profile: Apple requires that you register at least one {device_type} '
-                f'testing device on the Apple Developer Portal to create a {profile_type} profile',
+                f'Cannot create profile: the request does not include any {device_type} testing devices '
+                f'while they are required for creating a {profile_type} profile. If the profile creation is automatic, '
+                'ensure that at least one suitable testing device is registered on the Apple Developer Portal.'
             )
 
         if devices is None:
