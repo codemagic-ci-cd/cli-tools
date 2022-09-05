@@ -50,7 +50,7 @@ definitions:
 
 workflows:
   tests:
-    instance_type: mac_mini
+    instance_type: mac_mini_m1
     triggering:
       events:
         - push
@@ -65,7 +65,7 @@ workflows:
 
   release-test:
     name: Release [Test]
-    instance_type: linux
+    instance_type: mac_mini_m1
     cache: *cache
     environment:
       groups:
@@ -95,7 +95,7 @@ workflows:
 
   release:
     name: Release
-    instance_type: linux
+    instance_type: mac_mini_m1
     cache: *cache
     environment:
       groups:
