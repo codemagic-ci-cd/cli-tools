@@ -9,6 +9,7 @@ import tempfile
 import time
 from distutils.version import LooseVersion
 from functools import lru_cache
+from itertools import chain
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -923,7 +924,7 @@ class AppStoreConnect(
     def _create_missing_profiles(
         self,
         bundle_ids_without_profiles: Sequence[BundleId],
-        certificates: Sequence[SigningCertificate],
+        seed_certificates: Sequence[SigningCertificate],
         profile_type: ProfileType,
         platform: Optional[BundleIdPlatform] = None,
     ) -> Iterator[Profile]:
@@ -933,11 +934,15 @@ class AppStoreConnect(
             platform = bundle_ids_without_profiles[0].attributes.platform
 
         devices = self.list_devices(platform=platform, device_status=DeviceStatus.ENABLED, should_print=False)
+        certificates = self.list_certificates(profile_type=profile_type, should_print=False)
+        certificate_ids = list({c.id for c in chain(seed_certificates, certificates)})
+        device_ids = [d.id for d in devices if d.attributes.deviceClass.is_compatible(profile_type)]
+
         for bundle_id in bundle_ids_without_profiles:
             yield self.create_profile(
                 bundle_id.id,
-                [certificate.id for certificate in certificates],
-                [device.id for device in devices if device.attributes.deviceClass.is_compatible(profile_type)],
+                certificate_ids,
+                device_ids,
                 profile_type=profile_type,
                 should_print=False,
             )
