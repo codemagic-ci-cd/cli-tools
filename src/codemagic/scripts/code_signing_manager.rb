@@ -114,10 +114,11 @@ end
 
 class CodeSigningManager
 
+  UI_TESTING_PRODUCT_TYPE = "com.apple.product-type.bundle.ui-testing"
+
   SKIP_SIGNING_PRODUCT_TYPES = [
     "com.apple.product-type.bundle", # Product type Bundle
     "com.apple.product-type.framework", # Product type Framework
-    "com.apple.product-type.bundle.ui-testing", # Product type UI test
     "com.apple.product-type.bundle.unit-test", # Product type Unit Test
   ]
 
@@ -292,6 +293,13 @@ class CodeSigningManager
       return
     end
 
+    if build_target.product_type == UI_TESTING_PRODUCT_TYPE
+      # Xcode 11+ appends `.xctrunner` suffix to UI testing target bundle identifier
+      # This shows an error in Xcode user interface, but is required for building
+      # tests bundle for on-device testing.
+      bundle_id = "#{bundle_id}.xctrunner"
+    end
+
     Log.info "Resolved bundle id '#{bundle_id}' from #{source} for build configuration '#{build_configuration.name}'"
     profile = nil
     @profiles.each do |prov_profile|
@@ -336,7 +344,7 @@ class CodeSigningManager
 
     handle_target_dependencies(target)
     if SKIP_SIGNING_PRODUCT_TYPES.include? target.product_type
-      Log.info("Will use empty code signing build settings for target '#{target}'")
+      Log.info("Will use empty code signing build settings for target '#{target}' or type #{target.product_type}")
       skip_code_signing(target)
       return
     end

@@ -4,6 +4,9 @@ Version 0.32.0
 **Features**
 - Action `app-store-connect fetch-signing-files` will create missing provisioning profiles so that all eligible team code signing certificates are included in it. [PR #257](https://github.com/codemagic-ci-cd/cli-tools/pull/257)
 
+**Bugfixes**
+- Configure proper signing info settings for Xcode UI testing targets with action `xcode-project use-profiles` provided that suitable signing files exist. [PR #258](https://github.com/codemagic-ci-cd/cli-tools/pull/258)
+
 **Docs**
 - Replace dead docstrings for `Profiles Profiles.list_device_ids`, `Profiles.list_certificate_ids`, `Profiles.get_bundle_id_resource_id` with pointers to the resources. Reported in [issue #237](https://github.com/codemagic-ci-cd/cli-tools/issues/237). [PR #259](https://github.com/codemagic-ci-cd/cli-tools/pull/259)
 
