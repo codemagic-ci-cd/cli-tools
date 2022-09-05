@@ -2,7 +2,7 @@ Version 0.32.0
 -------------
 
 **Bugfixes**
-- Configure proper signing info settings for Xcode UI testing targets with action `xcode-project use-profiles` provided that suitable signing files exist.  [PR #258](https://github.com/codemagic-ci-cd/cli-tools/pull/258)
+- Configure proper signing info settings for Xcode UI testing targets with action `xcode-project use-profiles` provided that suitable signing files exist. [PR #258](https://github.com/codemagic-ci-cd/cli-tools/pull/258)
 
 Version 0.31.3
 -------------
