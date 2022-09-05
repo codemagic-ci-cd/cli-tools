@@ -135,7 +135,7 @@ class Profiles(ResourceManager[Profile]):
 
     def get_bundle_id_resource_id(self, profile: Union[Profile, ResourceId]) -> LinkedResourceData:
         """
-        https://developer.apple.com/documentation/appstoreconnectapi/get_the_bundle_resource_id_in_a_profile
+        https://developer.apple.com/documentation/appstoreconnectapi/profile/relationships/bundleid
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
@@ -158,7 +158,7 @@ class Profiles(ResourceManager[Profile]):
 
     def list_certificate_ids(self, profile: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
-        https://developer.apple.com/documentation/appstoreconnectapi/get_all_certificate_ids_in_a_profile
+        https://developer.apple.com/documentation/appstoreconnectapi/profile/relationships/certificates
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:
@@ -180,7 +180,7 @@ class Profiles(ResourceManager[Profile]):
 
     def list_device_ids(self, profile: Union[Profile, ResourceId]) -> List[LinkedResourceData]:
         """
-        https://developer.apple.com/documentation/appstoreconnectapi/get_all_device_resource_ids_in_a_profile
+        https://developer.apple.com/documentation/appstoreconnectapi/profile/relationships/devices
         """
         url = None
         if isinstance(profile, Profile) and profile.relationships is not None:

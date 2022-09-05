@@ -1,3 +1,9 @@
+Version 0.31.4
+-------------
+
+**Docs**
+- Replace dead docstrings for `Profiles Profiles.list_device_ids`, `Profiles.list_certificate_ids`, `Profiles.get_bundle_id_resource_id` with pointers to the resources. Reported in [issue #237](https://github.com/codemagic-ci-cd/cli-tools/issues/237). [PR #259](https://github.com/codemagic-ci-cd/cli-tools/pull/259)
+
 Version 0.31.3
 -------------
 
