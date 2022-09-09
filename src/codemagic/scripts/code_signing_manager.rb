@@ -120,7 +120,6 @@ class CodeSigningManager
   SKIP_SIGNING_PRODUCT_TYPES = [
     "com.apple.product-type.bundle", # Product type Bundle
     "com.apple.product-type.framework", # Product type Framework
-    # "com.apple.product-type.bundle.unit-test", # Product type Unit Test
   ]
 
   def initialize(project_path:, result_path:, profiles:)
