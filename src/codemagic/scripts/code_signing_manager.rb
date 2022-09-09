@@ -159,7 +159,7 @@ class CodeSigningManager
   end
 
   def handle_target_dependencies(target)
-    Log.info "Handling dependencies for target '#{target}'"
+    Log.info "Handling dependencies for target '#{target}' of type #{target.product_type}"
     if target.dependencies.length == 0
       Log.info "\tTarget #{target} has no dependencies"
       return
@@ -244,12 +244,16 @@ class CodeSigningManager
   def set_manual_build_settings(target, build_configuration, profile)
     target_attributes ||= @project.root_object.attributes["TargetAttributes"] || {}
     target_attributes[target.uuid] ||= {}
-    target_attributes[target.uuid]["ProvisioningStyle"] = "Manual"
     target_attributes[target.uuid]["DevelopmentTeam"] = profile["team_id"]
 
     build_configuration.build_settings["DEVELOPMENT_TEAM"] = profile["team_id"]
     build_configuration.build_settings["CODE_SIGN_STYLE"] = "Manual"
-    build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
+    if target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      puts "Skip setting PROVISIONING_PROFILE_SPECIFIER!"
+    else
+      target_attributes[target.uuid]["ProvisioningStyle"] = "Manual"
+      build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
+    end
 
     build_configuration.build_settings["CODE_SIGN_IDENTITY"] = profile["certificate_common_name"]
     build_configuration.build_settings.each do |build_setting, _value|
@@ -313,11 +317,14 @@ class CodeSigningManager
     track_target_info(profile, build_target, build_configuration, bundle_id)
     if profile
       set_build_settings(build_target, build_configuration, profile)
+    elsif build_target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      skip_code_signing(build_target)
     end
   end
 
   def track_target_info(profile, target, build_configuration, bundle_id)
-    profile_uuid = profile ? profile['specifier'] : nil
+    is_unit_test_target = target.product_type == UNIT_TESTING_PRODUCT_TYPE
+    profile_uuid = (profile and not is_unit_test_target) ? profile['specifier'] : nil
     target_info = {
       :bundle_id => bundle_id,
       :target_name => target.name,
@@ -326,17 +333,22 @@ class CodeSigningManager
       :provisioning_profile_uuid => profile_uuid
     }
 
-    if profile
+    if is_unit_test_target
+      Log.info "Not using profile for unit testing target"
+    elsif profile
       Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
     else
       Log.info "Did not find suitable provisioning profile for"
     end
+
     Log.info "\ttarget '#{target.name}'"
     Log.info "\tbuild configuration '#{build_configuration.name}'"
     Log.info "\tbundle id '#{bundle_id}'"
     Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
 
-    @target_infos.push(target_info)
+    unless target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      @target_infos.push(target_info)
+    end
   end
 
   def set_target_build_settings(target)
