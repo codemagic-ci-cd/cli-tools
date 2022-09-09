@@ -115,11 +115,12 @@ end
 class CodeSigningManager
 
   UI_TESTING_PRODUCT_TYPE = "com.apple.product-type.bundle.ui-testing"
+  UNIT_TESTING_PRODUCT_TYPE = "com.apple.product-type.bundle.unit-test"
 
   SKIP_SIGNING_PRODUCT_TYPES = [
     "com.apple.product-type.bundle", # Product type Bundle
     "com.apple.product-type.framework", # Product type Framework
-    "com.apple.product-type.bundle.unit-test", # Product type Unit Test
+    # "com.apple.product-type.bundle.unit-test", # Product type Unit Test
   ]
 
   def initialize(project_path:, result_path:, profiles:)
