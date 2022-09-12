@@ -419,7 +419,7 @@ class CodeSigningManager
     end
     Log.info "\tdevelopment team '#{development_team || "N/A"}'"
 
-    unless target.product_type == UNIT_TESTING_PRODUCT_TYPE
+    unless target.product_type == UNIT_TESTING_PRODUCT_TYPE or target.product_type == UI_TESTING_PRODUCT_TYPE
       @target_infos.push(target_info)
     end
   end
