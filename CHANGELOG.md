@@ -2,7 +2,7 @@ Version 0.32.1
 -------------
 
 **Bugfix**
-- TBD
+- Set proper code signing settings on Xcode unit testing targets (targets with product type `com.apple.product-type.bundle.unit-test`) using `xcode-project use-profiles` when appropriate code signing information is present. [PR #261](https://github.com/codemagic-ci-cd/cli-tools/pull/261)
 
 Version 0.32.0
 -------------
