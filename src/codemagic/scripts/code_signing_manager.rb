@@ -411,7 +411,9 @@ class CodeSigningManager
     Log.info "\tbuild configuration '#{build_configuration.name}'"
     Log.info "\tbundle id '#{bundle_id}'"
     Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
-    if profile["xcode_managed"]
+    if profile.nil?
+      Log.info "\tcode sign style 'N/A'"
+    elsif profile["xcode_managed"]
       Log.info "\tcode sign style 'Automatic'"
     else
       Log.info "\tcode sign style 'Manual'"
