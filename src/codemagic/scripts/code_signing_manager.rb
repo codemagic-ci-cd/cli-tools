@@ -308,7 +308,7 @@ class CodeSigningManager
   end
 
   def get_app_build_configuration_for_unit_test(app_target, unit_test_build_configuration)
-    app_target_build_configurations = app_targe.nil? ? [] : app_target.build_configurations
+    app_target_build_configurations = app_target.nil? ? [] : app_target.build_configurations
     app_target_build_configurations.find { |build_configuration|
       build_configuration.name == unit_test_build_configuration.name
     }
@@ -356,11 +356,13 @@ class CodeSigningManager
       # Xcode 11+ appends `.xctrunner` suffix to UI testing target bundle identifier
       # This shows an error in Xcode user interface, but is required for building
       # tests bundle for on-device testing.
-      bundle_id = "#{bundle_id}.xctrunner"
+      profile_bundle_id = "#{bundle_id}.xctrunner"
+    else
+      profile_bundle_id = bundle_id
     end
 
     Log.info "Resolved bundle id '#{bundle_id}' from #{source} for build configuration '#{build_configuration.name}'"
-    profile = get_profile(bundle_id, build_configuration, build_target)
+    profile = get_profile(profile_bundle_id, build_configuration, build_target)
 
     track_target_info(profile, build_target, build_configuration, bundle_id)
     if profile
@@ -378,7 +380,17 @@ class CodeSigningManager
 
   def track_target_info(profile, target, build_configuration, bundle_id)
     is_unit_test_target = target.product_type == UNIT_TESTING_PRODUCT_TYPE
-    profile_uuid = (profile and not is_unit_test_target) ? profile['specifier'] : nil
+    profile_uuid = nil
+    code_sign_identity = nil
+    development_team = nil
+
+    if profile
+      profile_uuid = profile['specifier'] unless is_unit_test_target
+      code_sign_identity = profile["certificate_common_name"]
+      _team_name = profile["team_name"] || ""
+      development_team = _team_name.empty? ? profile["team_id"] : "#{_team_name} (#{profile["team_id"]})"
+    end
+
     target_info = {
       :bundle_id => bundle_id,
       :target_name => target.name,
@@ -399,6 +411,13 @@ class CodeSigningManager
     Log.info "\tbuild configuration '#{build_configuration.name}'"
     Log.info "\tbundle id '#{bundle_id}'"
     Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
+    if profile["xcode_managed"]
+      Log.info "\tcode sign style 'Automatic'"
+    else
+      Log.info "\tcode sign style 'Manual'"
+      Log.info "\tcode sign identity '#{code_sign_identity || "N/A"}'"
+    end
+    Log.info "\tdevelopment team '#{development_team || "N/A"}'"
 
     unless target.product_type == UNIT_TESTING_PRODUCT_TYPE
       @target_infos.push(target_info)
