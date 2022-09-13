@@ -1,3 +1,11 @@
+Version 0.32.2
+-------------
+
+This is a bugfix release to address regression from [PR #261](https://github.com/codemagic-ci-cd/cli-tools/pull/261).
+
+**Bugfix**
+- Fix setting code signing settings for unit test targets if matching host application target is not found. [PR #262](https://github.com/codemagic-ci-cd/cli-tools/pull/262)
+
 Version 0.32.1
 -------------
 
