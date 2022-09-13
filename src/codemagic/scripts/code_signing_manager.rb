@@ -284,6 +284,10 @@ class CodeSigningManager
       not (bundle_identifier.nil? || bundle_identifier == '')
     end
 
+    if build_configuration.nil?
+      raise BundleIdentifierNotFound.new build_configuration
+    end
+
     build_settings_bundle_id = build_configuration.resolve_build_setting("PRODUCT_BUNDLE_IDENTIFIER")
     if is_valid(build_settings_bundle_id)
       return [build_settings_bundle_id, 'build settings']
@@ -325,7 +329,11 @@ class CodeSigningManager
     if profile.nil? and build_target.product_type == UNIT_TESTING_PRODUCT_TYPE
       host_app_target = get_host_app_target_for_unit_tests(build_target)
       host_app_build_configuration = get_app_build_configuration_for_unit_test(host_app_target, build_configuration)
-      host_application_bundle_id, _ = get_build_configuration_bundle_id(host_app_build_configuration)
+      begin
+        host_application_bundle_id, _ = get_build_configuration_bundle_id(host_app_build_configuration)
+      rescue BundleIdentifierNotFound
+        host_application_bundle_id = nil
+      end
       profile = get_matching_profile(host_application_bundle_id)
     end
 
@@ -348,7 +356,8 @@ class CodeSigningManager
     begin
       bundle_id, source = get_build_configuration_bundle_id(build_configuration)
     rescue BundleIdentifierNotFound
-      Log.info "No bundle id found for build configuration '#{build_configuration.name}'"
+      build_config_name = build_configuration.nil? ? 'N/A' : build_configuration.name
+      Log.info "No bundle id found for build configuration '#{build_config_name}'"
       return
     end
 
