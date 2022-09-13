@@ -114,12 +114,13 @@ end
 
 class CodeSigningManager
 
+  APPLICATION_PRODUCT_TYPE = "com.apple.product-type.application"
   UI_TESTING_PRODUCT_TYPE = "com.apple.product-type.bundle.ui-testing"
+  UNIT_TESTING_PRODUCT_TYPE = "com.apple.product-type.bundle.unit-test"
 
   SKIP_SIGNING_PRODUCT_TYPES = [
     "com.apple.product-type.bundle", # Product type Bundle
     "com.apple.product-type.framework", # Product type Framework
-    "com.apple.product-type.bundle.unit-test", # Product type Unit Test
   ]
 
   def initialize(project_path:, result_path:, profiles:)
@@ -158,7 +159,7 @@ class CodeSigningManager
   end
 
   def handle_target_dependencies(target)
-    Log.info "Handling dependencies for target '#{target}'"
+    Log.info "Handling dependencies for target '#{target}' of type #{target.product_type}"
     if target.dependencies.length == 0
       Log.info "\tTarget #{target} has no dependencies"
       return
@@ -181,25 +182,25 @@ class CodeSigningManager
     end
   end
 
-  def get_real_target(dependency)
-    Log.info "\tDependency: #{dependency}"
+  def get_real_target(dependency, log=true)
+    Log.info "\tDependency: #{dependency}" if log
     real_target = nil
     if !dependency.target.nil?
-      Log.info "\t\tDependency has a target: #{dependency.target}"
+      Log.info "\t\tDependency has a target: #{dependency.target}" if log
       real_target = dependency.target
     elsif !dependency.target_proxy.nil?
       begin
-        Log.info "\t\tDependency has a target_proxy: #{dependency.target_proxy}"
+        Log.info "\t\tDependency has a target_proxy: #{dependency.target_proxy}" if log
         proxied_target = dependency.target_proxy.proxied_object
         real_target = proxied_target
         if proxied_target.nil?
-          Log.info "\t\tCannot modify dependency: proxied object was nil"
+          Log.info "\t\tCannot modify dependency: proxied object was nil" if log
         end
       rescue
-        Log.info "\t\tNo proxied objects found"
+        Log.info "\t\tNo proxied objects found" if log
       end
     else
-      Log.info "No dependency target nor target_proxy found for #{dependency}"
+      Log.info "No dependency target nor target_proxy found for #{dependency}" if log
     end
     real_target
   end
@@ -243,12 +244,18 @@ class CodeSigningManager
   def set_manual_build_settings(target, build_configuration, profile)
     target_attributes ||= @project.root_object.attributes["TargetAttributes"] || {}
     target_attributes[target.uuid] ||= {}
-    target_attributes[target.uuid]["ProvisioningStyle"] = "Manual"
     target_attributes[target.uuid]["DevelopmentTeam"] = profile["team_id"]
 
     build_configuration.build_settings["DEVELOPMENT_TEAM"] = profile["team_id"]
     build_configuration.build_settings["CODE_SIGN_STYLE"] = "Manual"
-    build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
+
+    # Setting provisioning profiles for unit test build targets is not allowed
+    # and if done so will make the project invalid. Set profiles only in case
+    # we are dealing with targets that are not unit testing targets.
+    unless target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      target_attributes[target.uuid]["ProvisioningStyle"] = "Manual"
+      build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
+    end
 
     build_configuration.build_settings["CODE_SIGN_IDENTITY"] = profile["certificate_common_name"]
     build_configuration.build_settings.each do |build_setting, _value|
@@ -278,10 +285,62 @@ class CodeSigningManager
     end
 
     build_settings_bundle_id = build_configuration.resolve_build_setting("PRODUCT_BUNDLE_IDENTIFIER")
-    return [build_settings_bundle_id, 'build settings'] if is_valid(build_settings_bundle_id)
+    if is_valid(build_settings_bundle_id)
+      return [build_settings_bundle_id, 'build settings']
+    end
+
     infoplist_bundle_id = get_bundle_id_from_infoplist(build_configuration)
-    return [infoplist_bundle_id, 'info plist file'] if is_valid(infoplist_bundle_id)
+    if is_valid(infoplist_bundle_id)
+      return [infoplist_bundle_id, 'info plist file']
+    end
+
     raise BundleIdentifierNotFound.new build_configuration
+  end
+
+  def get_host_app_target_for_unit_tests(unit_test_target)
+    dependency_targets = unit_test_target.dependencies.map { |d| get_real_target(d, log=false) }
+    native_dependency_targets = dependency_targets.filter { |dependency_target|
+      dependency_target.instance_of? Xcodeproj::Project::Object::PBXNativeTarget
+    }
+    native_dependency_targets.find { |native_dependency_target|
+      native_dependency_target.product_type == APPLICATION_PRODUCT_TYPE
+    }
+  end
+
+  def get_app_build_configuration_for_unit_test(app_target, unit_test_build_configuration)
+    app_target_build_configurations = app_target.nil? ? [] : app_target.build_configurations
+    app_target_build_configurations.find { |build_configuration|
+      build_configuration.name == unit_test_build_configuration.name
+    }
+  end
+
+  def get_profile(bundle_id, build_configuration, build_target)
+    profile = get_matching_profile(bundle_id)
+
+    # There is no reason to have a profile for unit test build configurations.
+    # However, to build for testing by targeting physical iOS devices, code
+    # signing is still required and the settings, certificate information in
+    # case of unit tests, come from suitable provisioning profile. Try to reuse
+    # profile from the application target that unit tests target as host.
+    if profile.nil? and build_target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      host_app_target = get_host_app_target_for_unit_tests(build_target)
+      host_app_build_configuration = get_app_build_configuration_for_unit_test(host_app_target, build_configuration)
+      host_application_bundle_id, _ = get_build_configuration_bundle_id(host_app_build_configuration)
+      profile = get_matching_profile(host_application_bundle_id)
+    end
+
+    profile
+  end
+
+  def get_matching_profile(bundle_id)
+    profile = nil
+    @profiles.each do |prov_profile|
+      if File.fnmatch(prov_profile["bundle_id"], bundle_id || '')
+        profile = prov_profile
+        break
+      end
+    end
+    profile
   end
 
   def set_configuration_build_settings(build_target, build_configuration)
@@ -297,26 +356,41 @@ class CodeSigningManager
       # Xcode 11+ appends `.xctrunner` suffix to UI testing target bundle identifier
       # This shows an error in Xcode user interface, but is required for building
       # tests bundle for on-device testing.
-      bundle_id = "#{bundle_id}.xctrunner"
+      profile_bundle_id = "#{bundle_id}.xctrunner"
+    else
+      profile_bundle_id = bundle_id
     end
 
     Log.info "Resolved bundle id '#{bundle_id}' from #{source} for build configuration '#{build_configuration.name}'"
-    profile = nil
-    @profiles.each do |prov_profile|
-      if File.fnmatch(prov_profile["bundle_id"], bundle_id)
-        profile = prov_profile
-        break
-      end
-    end
+    profile = get_profile(profile_bundle_id, build_configuration, build_target)
 
     track_target_info(profile, build_target, build_configuration, bundle_id)
     if profile
       set_build_settings(build_target, build_configuration, profile)
+    elsif build_target.product_type == UNIT_TESTING_PRODUCT_TYPE
+      # In case we don't have any provisioning profile for this target,
+      # that is neither the one which matches targeted host app build config
+      # nor the one that directly matches unit tests target bundle identifier,
+      # use empty code signing settings. This ensures that unit tests can be
+      # nicely compiled for use-cases where code signing is not relevalt,
+      # such as when running tests on simulator.
+      skip_code_signing(build_target)
     end
   end
 
   def track_target_info(profile, target, build_configuration, bundle_id)
-    profile_uuid = profile ? profile['specifier'] : nil
+    is_unit_test_target = target.product_type == UNIT_TESTING_PRODUCT_TYPE
+    profile_uuid = nil
+    code_sign_identity = nil
+    development_team = nil
+
+    if profile
+      profile_uuid = profile['specifier'] unless is_unit_test_target
+      code_sign_identity = profile["certificate_common_name"]
+      _team_name = profile["team_name"] || ""
+      development_team = _team_name.empty? ? profile["team_id"] : "#{_team_name} (#{profile["team_id"]})"
+    end
+
     target_info = {
       :bundle_id => bundle_id,
       :target_name => target.name,
@@ -325,17 +399,31 @@ class CodeSigningManager
       :provisioning_profile_uuid => profile_uuid
     }
 
-    if profile
+    if is_unit_test_target
+      Log.info "Not using profile for unit testing target"
+    elsif profile
       Log.info "Using profile '#{profile['name']}' (bundle id '#{profile['bundle_id']}') for"
     else
       Log.info "Did not find suitable provisioning profile for"
     end
+
     Log.info "\ttarget '#{target.name}'"
     Log.info "\tbuild configuration '#{build_configuration.name}'"
     Log.info "\tbundle id '#{bundle_id}'"
     Log.info "\tspecifier '#{profile_uuid || "N/A"}'"
+    if profile.nil?
+      Log.info "\tcode sign style 'N/A'"
+    elsif profile["xcode_managed"]
+      Log.info "\tcode sign style 'Automatic'"
+    else
+      Log.info "\tcode sign style 'Manual'"
+      Log.info "\tcode sign identity '#{code_sign_identity || "N/A"}'"
+    end
+    Log.info "\tdevelopment team '#{development_team || "N/A"}'"
 
-    @target_infos.push(target_info)
+    unless target.product_type == UNIT_TESTING_PRODUCT_TYPE or target.product_type == UI_TESTING_PRODUCT_TYPE
+      @target_infos.push(target_info)
+    end
   end
 
   def set_target_build_settings(target)
