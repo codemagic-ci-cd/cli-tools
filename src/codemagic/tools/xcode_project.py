@@ -214,6 +214,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals(), verbose=self.verbose)
         clean and self._clean(xcodebuild)
 
+        xcodebuild.show_build_settings()
+
         self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
             xcarchive = xcodebuild.archive(
@@ -224,8 +226,6 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
 
         self._update_export_options(xcarchive, export_options_plist, export_options)
-
-        xcodebuild.show_build_settings()
 
         self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
         try:
