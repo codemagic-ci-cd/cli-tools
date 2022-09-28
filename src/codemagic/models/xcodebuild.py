@@ -258,22 +258,22 @@ class Xcodebuild(RunningCliAppMixin):
 
     def show_build_settings(self):
         cmd = [*self._construct_base_command(None), '-showBuildSettings']
-        error_message = f'Failed to obtain build settings {self.workspace or self.project}'
+        error_message = f'Failed to show build settings {self.workspace or self.project}'
 
         cli_app = self.get_current_cli_app()
         print_streams = cli_app.verbose if cli_app else True
 
         # avoid formatting build settings output
-        self._run_command(cmd, error_message, print_streams=print_streams, format_streams=False)
+        self._run_command(cmd, error_message, print_streams=print_streams, allow_xcpretty_formatting=False)
 
     def _run_command(self,
                      command: List[str],
                      error_message: str,
                      print_streams: bool = True,
-                     format_streams: bool = True):
+                     allow_xcpretty_formatting: bool = True):
         process = None
         cli_app = self.get_current_cli_app()
-        xcpretty = self.xcpretty if format_streams else None
+        xcpretty = self.xcpretty if allow_xcpretty_formatting else None
         try:
             if cli_app:
                 process = XcodebuildCliProcess(command, xcpretty=xcpretty, print_streams=print_streams)
@@ -281,8 +281,8 @@ class Xcodebuild(RunningCliAppMixin):
                 process.execute().raise_for_returncode(include_logs=False)
             else:
                 subprocess.check_output(command)
-        except subprocess.CalledProcessError:
-            raise IOError(error_message, process)
+        except subprocess.CalledProcessError as cpe:
+            raise IOError(error_message, process) from cpe
         finally:
             self._log_process(process)
 

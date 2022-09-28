@@ -214,6 +214,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
+        self.logger.info(Colors.BLUE(f'Check {(xcodebuild.workspace or xcodebuild.xcode_project).name} build settings'))
         xcodebuild.show_build_settings()
 
         self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
