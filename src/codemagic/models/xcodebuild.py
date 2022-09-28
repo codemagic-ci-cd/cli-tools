@@ -36,7 +36,8 @@ class Xcodebuild(RunningCliAppMixin):
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
-                 xcpretty: Optional[Xcpretty] = None):
+                 xcpretty: Optional[Xcpretty] = None,
+                 verbose: bool = False):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
@@ -46,6 +47,7 @@ class Xcodebuild(RunningCliAppMixin):
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
         self.logs_path = self._get_logs_path()
+        self.verbose = verbose
 
     def _get_logs_path(self) -> pathlib.Path:
         tmp_dir = pathlib.Path('/tmp')
@@ -256,15 +258,21 @@ class Xcodebuild(RunningCliAppMixin):
         error_message = f'Failed to test {self.workspace or self.project}'
         self._run_command(cmd, error_message)
 
+    def show_build_settings(self):
+        cmd = [*self._construct_base_command(None), '-showBuildSettings']
+        error_message = f'Failed to obtain build settings {self.workspace or self.project}'
+        self._run_command(cmd, error_message, print_streams=self.verbose)
+
     def _run_command(self,
                      command: List[str],
                      error_message: str,
-                     ignore_error_code: Optional[int] = None):
+                     ignore_error_code: Optional[int] = None,
+                     print_streams: bool = True):
         process = None
         cli_app = self.get_current_cli_app()
         try:
             if cli_app:
-                process = XcodebuildCliProcess(command, xcpretty=self.xcpretty)
+                process = XcodebuildCliProcess(command, xcpretty=self.xcpretty, print_streams=print_streams)
                 cli_app.logger.info('Execute "%s"\n', process.safe_form)
                 process.execute().raise_for_returncode(include_logs=False)
             else:

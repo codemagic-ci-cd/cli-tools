@@ -211,7 +211,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
 
         export_options = self._get_export_options_from_path(export_options_plist)
-        xcodebuild = self._get_xcodebuild(**locals())
+        xcodebuild = self._get_xcodebuild(**locals(), verbose=self.verbose)
         clean and self._clean(xcodebuild)
 
         self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
@@ -224,6 +224,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
 
         self._update_export_options(xcarchive, export_options_plist, export_options)
+
+        xcodebuild.show_build_settings()
 
         self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
         try:
@@ -596,6 +598,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                         scheme_name: Optional[str] = None,
                         disable_xcpretty: bool = False,
                         xcpretty_options: str = '',
+                        verbose: bool = False,
                         **_) -> Xcodebuild:
         try:
             return Xcodebuild(
@@ -605,6 +608,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 target_name=target_name,
                 configuration_name=configuration_name,
                 xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None,
+                verbose=verbose,
             )
         except ValueError as error:
             raise XcodeProjectException(*error.args) from error
