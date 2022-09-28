@@ -36,8 +36,7 @@ class Xcodebuild(RunningCliAppMixin):
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
-                 xcpretty: Optional[Xcpretty] = None,
-                 verbose: bool = False):
+                 xcpretty: Optional[Xcpretty] = None):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
@@ -47,7 +46,6 @@ class Xcodebuild(RunningCliAppMixin):
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
         self.logs_path = self._get_logs_path()
-        self.verbose = verbose
 
     def _get_logs_path(self) -> pathlib.Path:
         tmp_dir = pathlib.Path('/tmp')
@@ -261,8 +259,12 @@ class Xcodebuild(RunningCliAppMixin):
     def show_build_settings(self):
         cmd = [*self._construct_base_command(None), '-showBuildSettings']
         error_message = f'Failed to obtain build settings {self.workspace or self.project}'
+
+        cli_app = self.get_current_cli_app()
+        print_streams = cli_app.verbose if cli_app else True
+
         # avoid formatting build settings output
-        self._run_command(cmd, error_message, print_streams=self.verbose, format_streams=False)
+        self._run_command(cmd, error_message, print_streams=print_streams, format_streams=False)
 
     def _run_command(self,
                      command: List[str],
