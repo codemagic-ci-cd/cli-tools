@@ -36,8 +36,7 @@ class Xcodebuild(RunningCliAppMixin):
                  target_name: Optional[str] = None,
                  configuration_name: Optional[str] = None,
                  scheme_name: Optional[str] = None,
-                 xcpretty: Optional[Xcpretty] = None,
-                 verbose: bool = False):
+                 xcpretty: Optional[Xcpretty] = None):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
@@ -47,7 +46,6 @@ class Xcodebuild(RunningCliAppMixin):
         self.configuration = configuration_name
         self._ensure_scheme_or_target()
         self.logs_path = self._get_logs_path()
-        self.verbose = verbose
 
     def _get_logs_path(self) -> pathlib.Path:
         tmp_dir = pathlib.Path('/tmp')
