@@ -1,3 +1,9 @@
+Version 0.32.3
+-------------
+
+**Features**:
+- `xcode-project build-ipa` command supports `--verbose` flag to output Xcode project build settings.
+
 Version 0.32.2
 -------------
 
