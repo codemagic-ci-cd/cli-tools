@@ -1,3 +1,10 @@
+Version 0.33.0
+-------------
+
+**Features**:
+- Add `xcode-project show-build-settings` action. It outputs Xcode project build setting using `xcodebuild -showBuildSettings` command.
+- Update `xcode-project build-ipa` action to run `xcodebuild -showBuildSettings` before `xcodebuild archive` to capture Xcode project build settings. The output of build settings is hidden by default, but shown if `--verbose` flag is set.
+
 Version 0.32.2
 -------------
 

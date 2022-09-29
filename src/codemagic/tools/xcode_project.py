@@ -171,48 +171,78 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
         self._clean(xcodebuild)
 
-    @cli.action('build-ipa',
-                XcodeProjectArgument.XCODE_PROJECT_PATH,
-                XcodeProjectArgument.XCODE_WORKSPACE_PATH,
-                XcodeProjectArgument.TARGET_NAME,
-                XcodeProjectArgument.CONFIGURATION_NAME,
-                XcodeProjectArgument.SCHEME_NAME,
-                XcodeProjectArgument.CLEAN,
-                ExportIpaArgument.ARCHIVE_DIRECTORY,
-                XcodeArgument.ARCHIVE_FLAGS,
-                XcodeArgument.ARCHIVE_XCARGS,
-                ExportIpaArgument.IPA_DIRECTORY,
-                ExportIpaArgument.EXPORT_OPTIONS_PATH,
-                XcodeArgument.EXPORT_FLAGS,
-                XcodeArgument.EXPORT_XCARGS,
-                ExportIpaArgument.REMOVE_XCARCHIVE,
-                XcprettyArgument.DISABLE,
-                XcprettyArgument.OPTIONS)
-    def build_ipa(self,
-                  xcode_project_path: Optional[pathlib.Path] = None,
-                  xcode_workspace_path: Optional[pathlib.Path] = None,
-                  target_name: Optional[str] = None,
-                  configuration_name: Optional[str] = None,
-                  scheme_name: Optional[str] = None,
-                  clean: bool = False,
-                  archive_directory: pathlib.Path = ExportIpaArgument.ARCHIVE_DIRECTORY.get_default(),
-                  archive_xcargs: Optional[str] = XcodeArgument.ARCHIVE_XCARGS.get_default(),
-                  archive_flags: Optional[str] = XcodeArgument.ARCHIVE_FLAGS.get_default(),
-                  ipa_directory: pathlib.Path = ExportIpaArgument.IPA_DIRECTORY.get_default(),
-                  export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
-                  export_xcargs: Optional[str] = XcodeArgument.EXPORT_XCARGS.get_default(),
-                  export_flags: Optional[str] = XcodeArgument.EXPORT_FLAGS.get_default(),
-                  remove_xcarchive: bool = False,
-                  disable_xcpretty: bool = False,
-                  xcpretty_options: str = XcprettyArgument.OPTIONS.get_default()) -> pathlib.Path:
+    @cli.action(
+        'show-build-settings',
+        XcodeProjectArgument.XCODE_PROJECT_PATH,
+        XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+        XcodeProjectArgument.TARGET_NAME,
+        XcodeProjectArgument.CONFIGURATION_NAME,
+        XcodeProjectArgument.SCHEME_NAME,
+    )
+    def show_build_settings(
+        self,
+        xcode_project_path: Optional[pathlib.Path] = None,
+        xcode_workspace_path: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+    ):
+        """
+        Show build settings for Xcode project
+        """
+        xcodebuild = self._get_xcodebuild(**locals())
+        self._show_build_settings(xcodebuild, show_output=True)
+
+    @cli.action(
+        'build-ipa',
+        XcodeProjectArgument.XCODE_PROJECT_PATH,
+        XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+        XcodeProjectArgument.TARGET_NAME,
+        XcodeProjectArgument.CONFIGURATION_NAME,
+        XcodeProjectArgument.SCHEME_NAME,
+        XcodeProjectArgument.CLEAN,
+        XcodeProjectArgument.DISABLE_SHOW_BUILD_SETTINGS,
+        ExportIpaArgument.ARCHIVE_DIRECTORY,
+        XcodeArgument.ARCHIVE_FLAGS,
+        XcodeArgument.ARCHIVE_XCARGS,
+        ExportIpaArgument.IPA_DIRECTORY,
+        ExportIpaArgument.EXPORT_OPTIONS_PATH,
+        XcodeArgument.EXPORT_FLAGS,
+        XcodeArgument.EXPORT_XCARGS,
+        ExportIpaArgument.REMOVE_XCARCHIVE,
+        XcprettyArgument.DISABLE,
+        XcprettyArgument.OPTIONS,
+    )
+    def build_ipa(
+        self,
+        xcode_project_path: Optional[pathlib.Path] = None,
+        xcode_workspace_path: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+        clean: bool = False,
+        disable_show_build_settings: bool = False,
+        archive_directory: pathlib.Path = ExportIpaArgument.ARCHIVE_DIRECTORY.get_default(),
+        archive_xcargs: Optional[str] = XcodeArgument.ARCHIVE_XCARGS.get_default(),
+        archive_flags: Optional[str] = XcodeArgument.ARCHIVE_FLAGS.get_default(),
+        ipa_directory: pathlib.Path = ExportIpaArgument.IPA_DIRECTORY.get_default(),
+        export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
+        export_xcargs: Optional[str] = XcodeArgument.EXPORT_XCARGS.get_default(),
+        export_flags: Optional[str] = XcodeArgument.EXPORT_FLAGS.get_default(),
+        remove_xcarchive: bool = False,
+        disable_xcpretty: bool = False,
+        xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
+    ) -> pathlib.Path:
         """
         Build ipa by archiving the Xcode project and then exporting it
         """
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
 
+        show_build_settings = not disable_show_build_settings
         export_options = self._get_export_options_from_path(export_options_plist)
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
+        show_build_settings and self._show_build_settings(xcodebuild, show_output=self.verbose)
 
         self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
@@ -484,6 +514,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except IOError as error:
             raise XcodeProjectException(*error.args)
         self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+
+    def _show_build_settings(self, xcodebuild: Xcodebuild, *, show_output: bool = True):
+        project_name = (xcodebuild.workspace or xcodebuild.xcode_project).name
+        self.logger.info(Colors.BLUE(f'Check {project_name} build settings'))
+        try:
+            xcodebuild.show_build_settings(show_output)
+        except IOError as error:
+            raise XcodeProjectException(*error.args)
 
     def _collect_xcresults(self,
                            xcresult_patterns: Optional[Sequence[pathlib.Path]],
