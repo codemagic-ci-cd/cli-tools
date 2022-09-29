@@ -256,12 +256,9 @@ class Xcodebuild(RunningCliAppMixin):
         error_message = f'Failed to test {self.workspace or self.project}'
         self._run_command(cmd, error_message)
 
-    def show_build_settings(self):
+    def show_build_settings(self, print_streams: bool = True):
         cmd = [*self._construct_base_command(None), '-showBuildSettings']
         error_message = f'Failed to show build settings {self.workspace or self.project}'
-
-        cli_app = self.get_current_cli_app()
-        print_streams = cli_app.verbose if cli_app else True
 
         # avoid formatting build settings output
         self._run_command(cmd, error_message, print_streams=print_streams, allow_xcpretty_formatting=False)

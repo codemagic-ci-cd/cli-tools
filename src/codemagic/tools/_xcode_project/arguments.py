@@ -13,12 +13,24 @@ class CodeSigningSetupVerboseLogging(cli.TypedCliArgument[bool]):
     environment_variable_key = 'XCODE_PROJECT_CODE_SIGNING_SETUP_VERBOSE_LOGGING'
 
 
+class NoShowBuildSettings(cli.TypedCliArgument[bool]):
+    argument_type = bool
+    environment_variable_key = 'XCODE_PROJECT_NO_SHOW_BUILD_SETTINGS'
+
+
 class XcodeProjectArgument(cli.Argument):
     CLEAN = cli.ArgumentProperties(
         key='clean',
         flags=('--clean',),
         type=bool,
         description='Whether to clean the project before building it',
+        argparse_kwargs={'required': False, 'action': 'store_true'},
+    )
+    DISABLE_SHOW_BUILD_SETTINGS = cli.ArgumentProperties(
+        key='disable_show_build_settings',
+        flags=('--no-show-build-settings',),
+        type=NoShowBuildSettings,
+        description='Do not show build settings for the project before building it',
         argparse_kwargs={'required': False, 'action': 'store_true'},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
