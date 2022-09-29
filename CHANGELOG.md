@@ -2,7 +2,7 @@ Version 0.32.3
 -------------
 
 **Features**:
-- `xcode-project build-ipa` command supports `--verbose` flag to output Xcode project build settings.
+- Run `xcodebuild -showBuildSettings` before `xcodebuild archive` as part of action `xcode-project build-ipa` to capture project settings. The output of build settings is hidden by default, but shown if `--verbose` flag is set. 
 
 Version 0.32.2
 -------------
