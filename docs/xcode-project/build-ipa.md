@@ -13,6 +13,7 @@ xcode-project build-ipa [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [--config CONFIGURATION_NAME]
     [--scheme SCHEME_NAME]
     [--clean]
+    [--no-show-build-settings]
     [--archive-directory ARCHIVE_DIRECTORY]
     [--archive-flags ARCHIVE_FLAGS]
     [--archive-xcargs ARCHIVE_XCARGS]
@@ -50,6 +51,10 @@ Name of the Xcode Scheme
 
 
 Whether to clean the project before building it
+##### `--no-show-build-settings`
+
+
+Do not show build settings for the project before building it. If not given, the value will be checked from the environment variable `XCODE_PROJECT_NO_SHOW_BUILD_SETTINGS`.
 ##### `--archive-directory=ARCHIVE_DIRECTORY`
 
 

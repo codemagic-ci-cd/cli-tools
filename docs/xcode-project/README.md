@@ -48,5 +48,6 @@ Enable verbose logging for commands
 |[`pkg-info`](pkg-info.md)|Show information about macOS Application Package file|
 |[`test-destinations`](test-destinations.md)|List available destinations for test runs|
 |[`run-tests`](run-tests.md)|Run unit or UI tests for given Xcode project or workspace|
+|[`show-build-settings`](show-build-settings.md)|Show build settings for Xcode project|
 |[`test-summary`](test-summary.md)|Show summary of Xcode Test Result|
 |[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|
