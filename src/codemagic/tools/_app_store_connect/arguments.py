@@ -10,6 +10,7 @@ from datetime import datetime
 from datetime import timezone
 from typing import List
 from typing import Optional
+from typing import Type
 
 from OpenSSL import crypto
 
@@ -172,7 +173,7 @@ class Types:
             return value > 0
 
     class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
-        argument_type = datetime
+        argument_type = Type[datetime]
 
         @classmethod
         def validate(cls, value: datetime):
