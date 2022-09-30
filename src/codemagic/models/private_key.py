@@ -75,8 +75,12 @@ class PrivateKey(StringConverterMixin):
         try:
             cryptography_private_key = serialization.load_pem_private_key(cls._bytes(pem_key), _password)
         except ValueError as ve:
-            log.get_file_logger(cls).exception('Failed to initialize private key: Invalid PEM contents')
-            raise ValueError('Invalid private key PEM content') from ve
+            if 'bad decrypt' in str(ve).lower():
+                log.get_file_logger(cls).exception('Failed to initialize private key: Invalid password')
+                raise ValueError('Invalid private key passphrase') from ve
+            else:
+                log.get_file_logger(cls).exception('Failed to initialize private key: Invalid PEM contents')
+                raise ValueError('Invalid private key PEM content') from ve
         except TypeError as te:
             log.get_file_logger(cls).exception('Failed to initialize private key: Invalid password')
             raise ValueError('Invalid private key passphrase') from te
