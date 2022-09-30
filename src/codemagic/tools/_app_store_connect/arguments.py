@@ -12,7 +12,7 @@ from typing import List
 from typing import Optional
 from typing import Type
 
-from OpenSSL import crypto
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
@@ -82,9 +82,9 @@ class Types:
         def _apply_type(cls, non_typed_value: str) -> str:
             pem_private_key = cls.argument_type(non_typed_value)
             try:
-                crypto.load_privatekey(crypto.FILETYPE_PEM, pem_private_key.encode())
-            except crypto.Error:
-                raise argparse.ArgumentTypeError('Provided value is not a valid PEM encoded private key')
+                _ = load_pem_private_key(pem_private_key.encode(), None)
+            except ValueError as ve:
+                raise argparse.ArgumentTypeError('Provided value is not a valid PEM encoded private key') from ve
             return pem_private_key
 
     class CertificateKeyArgument(cli.EnvironmentArgumentValue[str]):

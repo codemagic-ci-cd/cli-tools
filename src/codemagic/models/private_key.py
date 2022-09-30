@@ -15,7 +15,6 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.serialization import KeySerializationEncryption
 from cryptography.hazmat.primitives.serialization import pkcs12
-from OpenSSL import crypto
 
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
@@ -51,19 +50,6 @@ class PrivateKey(StringConverterMixin):
         self.cryptography_private_key = cryptography_private_key
 
     @classmethod
-    def _get_pkey(cls, buffer: AnyStr, passphrase: bytes):
-        try:
-            return crypto.load_privatekey(crypto.FILETYPE_PEM, cls._bytes(buffer), passphrase)
-        except crypto.Error as crypto_error:
-            file_logger = log.get_file_logger(cls)
-            for reason in crypto_error.args[0]:
-                if 'bad decrypt' in reason:
-                    file_logger.exception('Failed to initialize private key: Invalid password')
-                    raise ValueError('Invalid private key passphrase') from crypto_error
-            file_logger.exception('Failed to initialize private key: Invalid PEM contents')
-            raise ValueError('Invalid private key PEM content') from crypto_error
-
-    @classmethod
     def from_buffer(cls, buffer: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
         try:
             return cls.from_openssh_key(buffer, password)
@@ -84,8 +70,21 @@ class PrivateKey(StringConverterMixin):
 
     @classmethod
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
-        pkey = cls._get_pkey(pem_key, cls._bytes(password) if password else b'')
-        return PrivateKey(pkey.to_cryptography_key())
+        _password: Optional[bytes] = cls._bytes(password) if password is not None else password
+
+        try:
+            cryptography_private_key = serialization.load_pem_private_key(cls._bytes(pem_key), _password)
+        except ValueError as ve:
+            log.get_file_logger(cls).exception('Failed to initialize private key: Invalid PEM contents')
+            raise ValueError('Invalid private key PEM content') from ve
+        except TypeError as te:
+            log.get_file_logger(cls).exception('Failed to initialize private key: Invalid password')
+            raise ValueError('Invalid private key passphrase') from te
+
+        if not isinstance(cryptography_private_key, SUPPORTED_PRIVATE_KEY_TYPES):
+            raise TypeError('Private key type is not supported', type(cryptography_private_key))
+
+        return PrivateKey(cryptography_private_key)
 
     @classmethod
     def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> PrivateKey:
