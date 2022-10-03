@@ -20,16 +20,18 @@ class LogHandlers:
     _file_handler: Optional[logging.FileHandler] = None
 
     @classmethod
-    def configure_stream_handler(cls,
-                                 stream: IO = sys.stderr,
-                                 verbose: bool = False,
-                                 enable_logging: bool = True) -> logging.StreamHandler:
+    def configure_stream_handler(
+        cls,
+        stream: IO = sys.stderr,
+        verbose: bool = False,
+        enable_logging: bool = True,
+    ) -> logging.StreamHandler:
         fmt = cls.stream_fmt
         if verbose:
             fmt = cls.stream_fmt_verbose
             level = logging.DEBUG
         elif not enable_logging:
-            level = logging.ERROR
+            level = logging.WARNING
         else:
             level = logging.INFO
 
@@ -121,7 +123,8 @@ def get_file_logger(klass: Type) -> logging.Logger:
 def initialize_logging(
         stream: IO = sys.stderr,
         verbose: bool = False,
-        enable_logging: bool = True):
+        enable_logging: bool = True,
+):
     for logger_name in ('requests', 'urllib3'):
         requests_logger = logging.getLogger(logger_name)
         requests_logger.setLevel(logging.ERROR)

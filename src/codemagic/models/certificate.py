@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs12
 
+from codemagic.cli import Colors
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
@@ -30,7 +31,27 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), 'Library', 'MobileDevice', 'Certificates')
 
     def __init__(self, certificate: x509.Certificate):
-        self.certificate = certificate
+        if hasattr(certificate, 'to_cryptography'):
+            # Legacy OpenSSL.crypto.X509 instance
+            self._deprecation_warning()
+            self.certificate = certificate.to_cryptography()
+        else:
+            self.certificate = certificate
+
+    @classmethod
+    def _deprecation_warning(cls):
+        cli_app = cls.get_current_cli_app()
+        if cli_app is None:
+            logger = log.get_logger(cls, log_to_stream=True)
+        else:
+            logger = cli_app.logger
+        warning = (
+            'WARNING! Creating `codemagic.models.Certificate` instances from '
+            '`OpenSSL.crypto.X509` objects is deprecated and support for '
+            'it will be removed in future versions. Use '
+            '`cryptography.x509.Certificate` instances instead, or use factory methods.'
+        )
+        logger.warning(Colors.YELLOW(warning))
 
     # Factory methods #
 
