@@ -34,7 +34,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         if hasattr(certificate, 'to_cryptography'):
             # Legacy OpenSSL.crypto.X509 instance
             self._deprecation_warning()
-            self.certificate = certificate.to_cryptography()
+            self.certificate = certificate.to_cryptography()  # type: ignore
         else:
             self.certificate = certificate
 
