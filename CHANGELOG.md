@@ -1,3 +1,12 @@
+Version 0.34.0
+-------------
+
+**Dependencies**:
+- Remove [`pyOpenSSL`](https://www.pyopenssl.org/) dependency. [PR #269](https://github.com/codemagic-ci-cd/cli-tools/pull/269)
+
+**Development**:
+- **TODO**
+
 Version 0.33.1
 -------------
 
