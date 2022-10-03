@@ -1,8 +1,10 @@
 Version 0.34.0
 -------------
 
+This release includes updates from [PR #269](https://github.com/codemagic-ci-cd/cli-tools/pull/269).
+
 **Dependencies**:
-- Remove [`pyOpenSSL`](https://www.pyopenssl.org/) dependency. [PR #269](https://github.com/codemagic-ci-cd/cli-tools/pull/269)
+- Remove direct [`pyOpenSSL`](https://www.pyopenssl.org/) dependency.
 
 **Development**:
 - **TODO**
