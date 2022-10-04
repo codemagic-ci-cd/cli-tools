@@ -4,9 +4,10 @@ from base64 import b64decode
 from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
+from typing import List
 from typing import Optional
 
-from OpenSSL import crypto
+from cryptography import x509
 
 from .bundle_id import BundleIdPlatform
 from .enums import CertificateType
@@ -55,16 +56,19 @@ class SigningCertificate(Resource):
         return b64decode(self.attributes.certificateContent)
 
     @property
-    def _certificate(self) -> crypto.X509:
-        return crypto.load_certificate(crypto.FILETYPE_ASN1, self.asn1_content)
+    def _certificate(self) -> x509.Certificate:
+        return x509.load_der_x509_certificate(self.asn1_content)
 
     @property
     def common_name(self) -> str:
-        subject = self._certificate.get_subject()
-        for key, value in subject.get_components():
-            if key in (b'CN', 'CN'):
-                return value.decode() if isinstance(value, bytes) else value
-        return 'N/A'
+        subject = self._certificate.subject
+
+        common_names: List[x509.NameAttribute] = subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)
+        common_name: Optional[x509.NameAttribute] = next(iter(common_names), None)
+        if not common_name:
+            return 'N/A'
+
+        return common_name.value.decode() if isinstance(common_name.value, bytes) else common_name.value
 
     def __str__(self):
         return f'{super().__str__()}\nCommon name: {self.common_name}'

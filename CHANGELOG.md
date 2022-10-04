@@ -1,3 +1,18 @@
+Version 0.34.0
+-------------
+
+This release includes changes from [PR #269](https://github.com/codemagic-ci-cd/cli-tools/pull/269).
+
+**Bugfix**:
+- Previously non-encrypted private keys and PKCS#12 containers were treated equivalently to those that were encrypted with empty string. Now empty password for non-encrypted secret will yield an error, and vice-versa, not providing password for secret that is encrypted with empty string will also fail with encryption error.
+
+**Dependencies**:
+- Remove direct [`pyOpenSSL`](https://www.pyopenssl.org/) dependency.
+
+**Development**:
+- Replace `OpenSSL.crypto` usages with alternatives from `cryptography` library.
+- Deprecate initialization of `codemagic.models.Certificate` from `OpenSSL.crypto.X509` instances. For now this will issue a warning, but will be fully removed in future versions.
+
 Version 0.33.1
 -------------
 

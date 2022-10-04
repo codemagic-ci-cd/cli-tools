@@ -15,9 +15,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs12
-from OpenSSL import crypto
-from OpenSSL.crypto import X509
 
+from codemagic.cli import Colors
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
@@ -31,36 +30,54 @@ from .private_key import PrivateKey
 class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), 'Library', 'MobileDevice', 'Certificates')
 
-    def __init__(self, x509_certificate: X509):
-        self.x509 = x509_certificate
-        self.certificate: x509.Certificate = x509_certificate.to_cryptography()
+    def __init__(self, certificate: x509.Certificate):
+        if hasattr(certificate, 'to_cryptography'):
+            # Legacy OpenSSL.crypto.X509 instance
+            self._deprecation_warning()
+            self.certificate = certificate.to_cryptography()  # type: ignore
+        else:
+            self.certificate = certificate
 
     @classmethod
-    def _get_x509_certificate(cls, buffer: AnyStr, buffer_type: int):
-        try:
-            return crypto.load_certificate(buffer_type, cls._bytes(buffer))
-        except crypto.Error as crypto_error:
-            format_name = {crypto.FILETYPE_PEM: 'PEM', crypto.FILETYPE_ASN1: 'ASN1'}[buffer_type]
-            log.get_file_logger(cls).exception(f'Failed to initialize certificate: Invalid {format_name} contents')
-            raise ValueError(f'Not a valid {format_name} certificate content') from crypto_error
+    def _deprecation_warning(cls):
+        cli_app = cls.get_current_cli_app()
+        if cli_app is None:
+            logger = log.get_logger(cls, log_to_stream=True)
+        else:
+            logger = cli_app.logger
+        warning = (
+            'WARNING! Creating `codemagic.models.Certificate` instances from '
+            '`OpenSSL.crypto.X509` objects is deprecated and support for '
+            'it will be removed in future versions. Use '
+            '`cryptography.x509.Certificate` instances instead, or use factory methods.'
+        )
+        logger.warning(Colors.YELLOW(warning))
 
     # Factory methods #
 
     @classmethod
     def from_pem(cls, pem: AnyStr) -> Certificate:
-        x509_certificate = cls._get_x509_certificate(pem, crypto.FILETYPE_PEM)
+        try:
+            x509_certificate = x509.load_pem_x509_certificate(cls._bytes(pem))
+        except ValueError as ve:
+            log.get_file_logger(cls).exception('Failed to initialize certificate: Invalid PEM contents')
+            raise ValueError('Not a valid PEM certificate content') from ve
         return Certificate(x509_certificate)
 
     @classmethod
     def from_ans1(cls, asn1: AnyStr) -> Certificate:
-        x509_certificate = cls._get_x509_certificate(asn1, crypto.FILETYPE_ASN1)
+        try:
+            x509_certificate = x509.load_der_x509_certificate(cls._bytes(asn1))
+        except ValueError as ve:
+            log.get_file_logger(cls).exception('Failed to initialize certificate: Invalid ASN1 contents')
+            raise ValueError('Not a valid ASN1 certificate content') from ve
         return Certificate(x509_certificate)
 
     @classmethod
     def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> Certificate:
         password_encoded = None if password is None else cls._bytes(password)
-        _, certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
-        x509_certificate = X509.from_cryptography(certificate)
+        _, x509_certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
+        assert x509_certificate is not None  # make mypy happy
         return Certificate(x509_certificate)
 
     @property
@@ -99,7 +116,6 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def has_expired(self) -> bool:
         current_time = datetime.utcnow().replace(tzinfo=timezone.utc)
         return self.expires_at < current_time
-        return self.expires_at < datetime.utcnow().replace(tzinfo=timezone.utc)
 
     @property
     def expires_at(self) -> datetime:

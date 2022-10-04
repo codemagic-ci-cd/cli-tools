@@ -34,7 +34,7 @@ class PEM(NamedTuple):
 
 
 @lru_cache()
-def _get_pem(filename: str, password: str = '', key_size: int = 2048) -> PEM:
+def _get_pem(filename: str, password: Optional[str] = None, key_size: int = 2048) -> PEM:
     mocks_dir = pathlib.Path(__file__).parent / 'mocks'
     pem_path = mocks_dir / filename
     pub_key_path = mocks_dir / f'{filename}.pub'
@@ -42,7 +42,7 @@ def _get_pem(filename: str, password: str = '', key_size: int = 2048) -> PEM:
         pem_path.read_bytes().rstrip(b'\n'),
         pub_key_path.read_bytes().rstrip(b'\n'),
         key_size,
-        password.encode(),
+        password.encode() if password is not None else None,
     )
 
 
