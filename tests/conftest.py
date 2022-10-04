@@ -42,7 +42,7 @@ def _get_pem(filename: str, password: Optional[str] = None, key_size: int = 2048
         pem_path.read_bytes().rstrip(b'\n'),
         pub_key_path.read_bytes().rstrip(b'\n'),
         key_size,
-        password.encode() if password is not None else password,
+        password.encode() if password is not None else None,
     )
 
 

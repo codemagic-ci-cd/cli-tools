@@ -70,7 +70,7 @@ class PrivateKey(StringConverterMixin):
 
     @classmethod
     def from_pem(cls, pem_key: AnyStr, password: Optional[AnyStr] = None) -> PrivateKey:
-        _password: Optional[bytes] = cls._bytes(password) if password is not None else password
+        _password: Optional[bytes] = cls._bytes(password) if password is not None else None
 
         try:
             cryptography_private_key = serialization.load_pem_private_key(cls._bytes(pem_key), _password)

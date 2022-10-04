@@ -10,7 +10,7 @@ This release includes changes from [PR #269](https://github.com/codemagic-ci-cd/
 - Remove direct [`pyOpenSSL`](https://www.pyopenssl.org/) dependency.
 
 **Development**:
-- Replace `OpenSSL.crytp` usages with alternatives from `cryptography` library.
+- Replace `OpenSSL.crypto` usages with alternatives from `cryptography` library.
 - Deprecate initialization of `codemagic.models.Certificate` from `OpenSSL.crypto.X509` instances. For now this will issue a warning, but will be fully removed in future versions.
 
 Version 0.33.1
