@@ -164,7 +164,7 @@ class ExportIpaArgument(cli.Argument):
         type=cli.CommonArgumentTypes.json_dict,
         description=(
             'Custom options for generated export options as JSON string. For example '
-            f'`{Colors.WHITE("""{"uploadBitcode": false, "uploadSymbols": false}""")}`.'
+            f'`{Colors.WHITE(repr("""{"uploadBitcode": false, "uploadSymbols": false}"""))}`.'
         ),
         argparse_kwargs={'required': False},
     )
