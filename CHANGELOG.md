@@ -1,3 +1,11 @@
+Version 0.34.1
+-------------
+
+This release includes changes from [PR #271](https://github.com/codemagic-ci-cd/cli-tools/pull/271).
+
+**Docs**
+- Update documentation for action `xcode-project use-profiles` option `--custom-export-options`.
+
 Version 0.34.0
 -------------
 
