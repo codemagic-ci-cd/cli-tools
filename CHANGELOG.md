@@ -4,6 +4,9 @@ Version 0.34.2
 **Bugfix**:
 - Do not throw `AssertionError` from `Certificate.from_p12` in case the given PKCS#12 container does not contain a certificate. Raise a `ValueError` with appropriate error message instead. [PR #274](https://github.com/codemagic-ci-cd/cli-tools/pull/274).
 
+**Development**
+- Regenerate `poetry.lock` with updated dependencies for development environments. [PR #275](https://github.com/codemagic-ci-cd/cli-tools/pull/275)
+
 Version 0.34.1
 -------------
 
