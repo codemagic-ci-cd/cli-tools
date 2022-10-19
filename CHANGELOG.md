@@ -1,3 +1,9 @@
+Version 0.34.2
+-------------
+
+**Bugfix**:
+- Do not throw `AssertionError` from `Certificate.from_p12` in case the given PKCS#12 container does not contain a certificate. Raise a `ValueError` with appropriate error message instead.
+
 Version 0.34.1
 -------------
 
