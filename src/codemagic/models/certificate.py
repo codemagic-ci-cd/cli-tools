@@ -77,7 +77,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def from_p12(cls, p12: bytes, password: Optional[AnyStr] = None) -> Certificate:
         password_encoded = None if password is None else cls._bytes(password)
         _, x509_certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
-        assert x509_certificate is not None  # make mypy happy
+        if x509_certificate is None:
+            raise ValueError('Certificate was not found from PKCS#12 container')
         return Certificate(x509_certificate)
 
     @property
