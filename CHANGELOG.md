@@ -1,3 +1,9 @@
+Version 0.34.2
+-------------
+
+**Development**
+- Regenerate `poetry.lock` with updated dependencies for development environments. [PR #275](https://github.com/codemagic-ci-cd/cli-tools/pull/275)
+
 Version 0.34.1
 -------------
 
