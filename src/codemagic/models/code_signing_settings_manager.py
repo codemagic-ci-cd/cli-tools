@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 import pathlib
 import shlex
+import shutil
 import subprocess
 from dataclasses import dataclass
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 from typing import Counter
 from typing import Dict
 from typing import List
@@ -23,6 +25,9 @@ from .certificate import Certificate
 from .export_options import ExportOptions
 from .export_options import ProvisioningProfileAssignment
 from .provisioning_profile import ProvisioningProfile
+
+if TYPE_CHECKING:
+    from codemagic.cli import CliApp
 
 
 @dataclass
@@ -75,6 +80,23 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
     def _code_signing_manager(self) -> str:
         executable = pathlib.Path(__file__) / '..' / '..' / 'scripts' / 'code_signing_manager.rb'
         return str(executable.resolve())
+
+    @classmethod
+    def _is_xcodeproj_gem_installed(cls, cli_app: Optional[CliApp]) -> bool:
+        ruby = shutil.which('ruby')
+        if ruby is None:
+            return False
+
+        cmd = (ruby, '-e', 'require "xcodeproj"')
+        try:
+            if cli_app:
+                process = cli_app.execute(cmd, show_output=False)
+                process.raise_for_returncode()
+            else:
+                subprocess.check_output(cmd, stderr=subprocess.PIPE)
+        except subprocess.CalledProcessError:
+            return False
+        return True
 
     @classmethod
     def _format_build_config_meta(cls, build_config_info):
@@ -167,7 +189,10 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError:
             xcode_project = shlex.quote(str(xcode_project))
-            raise IOError(f'Failed to set code signing settings for {xcode_project}', process)
+            error_message = f'Failed to set code signing settings for {xcode_project}'
+            if not self._is_xcodeproj_gem_installed(cli_app):
+                error_message = f'{error_message}: Missing "xcodeproj" Ruby gem'
+            raise IOError(error_message, process)
 
     def use_profiles(self, xcode_project: pathlib.Path, verbose_logging: bool = False):
         with NamedTemporaryFile(mode='r', prefix='use_profiles_result_', suffix='.json') as results_file:
