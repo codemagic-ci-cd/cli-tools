@@ -1,8 +1,8 @@
 Version 0.34.3
 -------------
 
-**Bugfix**:
-...
+**Improvements**:
+- Action `xcode-project use-profiles` fails in case active Ruby installation does not have `xcodeproj` gem available. Should that happen, show appropriate and actionable error message. [PR #277](https://github.com/codemagic-ci-cd/cli-tools/pull/277)
 
 Version 0.34.2
 -------------
