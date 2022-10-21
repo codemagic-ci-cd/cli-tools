@@ -191,7 +191,11 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             xcode_project = shlex.quote(str(xcode_project))
             error_message = f'Failed to set code signing settings for {xcode_project}'
             if not self._is_xcodeproj_gem_installed(cli_app):
-                error_message = f'{error_message}: Missing "xcodeproj" Ruby gem'
+                error_message = '\n'.join([
+                    error_message,
+                    'Ruby gem "xcodeproj" is required to configure code signing settings',
+                    f'Install it with "{Colors.BOLD("gem install xcodeproj")}"',
+                ])
             raise IOError(error_message, process)
 
     def use_profiles(self, xcode_project: pathlib.Path, verbose_logging: bool = False):
