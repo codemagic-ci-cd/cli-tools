@@ -2,7 +2,7 @@ Version 0.34.3
 -------------
 
 **Bugfix**:
-- Fix action `xcode-project detect-bundle-id` for cases when `xcodebuild -showBuildSettings` output does not have `PRODUCT_BUNDLE_IDENTIFIER` entry for some build settings.
+- Fix action `xcode-project detect-bundle-id` for cases when `xcodebuild -showBuildSettings` output does not have `PRODUCT_BUNDLE_IDENTIFIER` entry for some build settings. [PR #280](https://github.com/codemagic-ci-cd/cli-tools/pull/280)
 
 Version 0.34.2
 -------------
