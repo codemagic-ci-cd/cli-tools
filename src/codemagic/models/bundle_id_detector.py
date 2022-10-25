@@ -80,6 +80,7 @@ class BundleIdDetector(RunningCliAppMixin, StringConverterMixin):
         return (
             build_setting['buildSettings']['PRODUCT_BUNDLE_IDENTIFIER']
             for build_setting in json.loads(stdout)
+            if build_setting['buildSettings'].get('PRODUCT_BUNDLE_IDENTIFIER')
         )
 
     def _get_project_configs(self, pbx_project: PbxProject, target: Dict[str, Any]):
