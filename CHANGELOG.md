@@ -1,3 +1,9 @@
+Version 0.34.3
+-------------
+
+**Bugfix**:
+- Fix action `xcode-project detect-bundle-id` for cases when `xcodebuild -showBuildSettings` output does not have `PRODUCT_BUNDLE_IDENTIFIER` entry for some build settings.
+
 Version 0.34.2
 -------------
 
