@@ -3,7 +3,7 @@ get-latest-build-number
 =======================
 
 
-**Find the highest build number used for given app considering         both TestFlight and App Store submissions**
+**Find the highest build number used for given app considering both TestFlight and App Store submissions**
 ### Usage
 ```bash
 app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
