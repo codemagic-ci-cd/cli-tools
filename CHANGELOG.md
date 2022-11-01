@@ -1,3 +1,9 @@
+Version 0.35.0
+-------------
+
+**Features**
+- Add action `app-store-connect get-latest-build-number` that finds the highest build number across both TestFlight and App Store builds.
+
 Version 0.34.3
 -------------
 
