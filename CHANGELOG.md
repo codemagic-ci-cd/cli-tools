@@ -1,3 +1,9 @@
+Version 0.35.0
+-------------
+
+**Features**
+- Add action `app-store-connect get-latest-build-number` that finds the highest build number across both TestFlight and App Store builds. [PR #281](https://github.com/codemagic-ci-cd/cli-tools/pull/281)
+
 Version 0.34.3
 -------------
 

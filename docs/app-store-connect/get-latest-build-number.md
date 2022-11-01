@@ -1,12 +1,12 @@
 
-get-latest-testflight-build-number
-==================================
+get-latest-build-number
+=======================
 
 
-**Get the latest Testflight build number for the given application**
+**Get the highest build number used for the given app considering both TestFlight and App Store submissions**
 ### Usage
 ```bash
-app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,22 +17,17 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--pre-release-version PRE_RELEASE_VERSION]
     [--platform PLATFORM]
     APPLICATION_ID_RESOURCE_ID
 ```
-### Required arguments for action `get-latest-testflight-build-number`
+### Required arguments for action `get-latest-build-number`
 
 ##### `APPLICATION_ID_RESOURCE_ID`
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-### Optional arguments for action `get-latest-testflight-build-number`
+### Optional arguments for action `get-latest-build-number`
 
-##### `--pre-release-version=PRE_RELEASE_VERSION`
-
-
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform=IOS | MAC_OS | TV_OS`
 
 
