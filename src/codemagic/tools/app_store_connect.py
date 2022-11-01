@@ -273,6 +273,35 @@ class AppStoreConnect(
         return version
 
     @cli.action(
+        'get-latest-build-number',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        CommonArgument.PLATFORM,
+    )
+    def get_latest_build_number(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform] = None,
+    ) -> Optional[str]:
+        """
+        Find the highest build number used for given app considering
+        both TestFlight and App Store submissions
+        """
+        try:
+            _testflight_versions, testflight_builds = self.api_client.pre_release_versions.list_with_include(
+                Build,
+                resource_filter=self.api_client.pre_release_versions.Filter(app=application_id, platform=platform),
+            )
+            _app_store_versions, app_store_builds = self.api_client.app_store_versions.list_with_include(
+                application_id,
+                Build,
+                resource_filter=self.api_client.app_store_versions.Filter(platform=platform),
+            )
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(str(api_error))
+
+        return self._get_latest_build_number([*testflight_builds, *app_store_builds])
+
+    @cli.action(
         'get-latest-app-store-build-number',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.VERSION_STRING,
@@ -286,7 +315,7 @@ class AppStoreConnect(
         should_print: bool = False,
     ) -> Optional[str]:
         """
-        Get latest App Store build number for the given application
+        Get the latest App Store build number for the given application
         """
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=version_string, platform=platform)
@@ -314,7 +343,7 @@ class AppStoreConnect(
         should_print: bool = False,
     ) -> Optional[str]:
         """
-        Get latest Testflight build number for the given application
+        Get the latest Testflight build number for the given application
         """
         versions_client = self.api_client.pre_release_versions
         versions_filter = versions_client.Filter(app=application_id, platform=platform, version=pre_release_version)
