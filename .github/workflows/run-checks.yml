@@ -1,3 +1,37 @@
+definitions:
+  steps:
+    - &cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - &install_dependencies
+      name: Install dependencies
+      run: |
+        curl -sSL https://install.python-poetry.org | python
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+
+    - &check_code_formatting
+      name: Check code formatting
+      run: poetry run flake8 .
+
+    - &check_imports_ordering
+      name: Check imports sort order
+      run: poetry run isort --check-only .
+
+    - &static_type_checks
+      name: Static type checks with mypy
+      run: poetry run mypy src
+
+    - &run_tests
+      name: Test with pytest
+      run: poetry run pytest
+
+
 name: Checks
 
 on:
@@ -5,38 +39,32 @@ on:
   pull_request:
 
 jobs:
-  test:
-
+  test-py-3-7:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - *cache
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
 
-    - uses: actions/cache@v1
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
-    - name: Install dependencies
-      run: |
-        curl -sSL https://install.python-poetry.org | python
-        poetry config virtualenvs.in-project true
-        poetry install --no-interaction
-
-    - name: Check code formatting
-      run: poetry run flake8 .
-
-    - name: Check imports sort order
-      run: poetry run isort --check-only .
-
-    - name: Static type checks with mypy
-      run: poetry run mypy src
-
-    - name: Test with pytest
-      run: poetry run pytest
+  test-py-3-11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.11
+      - *cache
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
