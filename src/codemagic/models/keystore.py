@@ -1,5 +1,6 @@
 import pathlib
 from dataclasses import dataclass
+from dataclasses import field
 
 from .certificate_attributes import CertificateAttributes
 
@@ -10,5 +11,5 @@ class Keystore:
     key_password: str
     store_password: str
     store_path: pathlib.Path
-    certificate_attributes: CertificateAttributes = CertificateAttributes()
+    certificate_attributes: CertificateAttributes = field(default_factory=CertificateAttributes)
     validity: int = 10000  # Validity duration in days
