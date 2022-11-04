@@ -32,7 +32,7 @@ Path to the generated export options plist. Default:&nbsp;`$HOME/export_options.
 ##### `--custom-export-options=CUSTOM_EXPORT_OPTIONS`
 
 
-Custom options for generated export options as JSON string. For example `'{"uploadBitcode": false, "uploadSymbols": false}'`.
+Custom options for generated export options as JSON string. For example, ``{`uploadBitcode`: false, `uploadSymbols`: false}``. If not given, the value will be checked from the environment variable `XCODE_PROJECT_CUSTOM_EXPORT_OPTIONS`. Alternatively to entering `CUSTOM_EXPORT_OPTIONS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--warn-only`
 
 
