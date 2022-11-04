@@ -1,3 +1,9 @@
+Version 0.36.1
+-------------
+
+**Bugfix**
+- Fix regression from [PR #283](https://github.com/codemagic-ci-cd/cli-tools/pull/283).
+
 Version 0.36.0
 -------------
 
