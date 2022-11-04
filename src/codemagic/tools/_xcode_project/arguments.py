@@ -195,7 +195,7 @@ class ExportIpaArgument(cli.Argument):
         type=CustomExportOptions,
         description=(
             'Custom options for generated export options as JSON string. '
-            f'For example, "`{Colors.WHITE(CustomExportOptions.example_value)}`".'
+            f'For example, "{Colors.WHITE(CustomExportOptions.example_value)}".'
         ),
         argparse_kwargs={'required': False},
     )
