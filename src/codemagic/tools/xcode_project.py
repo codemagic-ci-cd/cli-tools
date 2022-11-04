@@ -14,6 +14,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Type
 from typing import TypeVar
+from typing import Union
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -36,6 +37,7 @@ from codemagic.models.simulator import Simulator
 from codemagic.models.xctests import XcResultCollector
 from codemagic.models.xctests import XcResultConverter
 
+from ._xcode_project.arguments import CustomExportOptions
 from ._xcode_project.arguments import ExportIpaArgument
 from ._xcode_project.arguments import TestArgument
 from ._xcode_project.arguments import TestResultArgument
@@ -56,16 +58,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     code signing properties for builds, create IPAs and run tests
     """
 
-    @cli.action('detect-bundle-id',
-                XcodeProjectArgument.XCODE_PROJECT_PATTERN,
-                XcodeProjectArgument.TARGET_NAME,
-                XcodeProjectArgument.CONFIGURATION_NAME)
-    def detect_bundle_id(self,
-                         xcode_project_patterns: Sequence[pathlib.Path],
-                         target_name: Optional[str] = None,
-                         configuration_name: Optional[str] = None,
-                         include_pods: bool = False,
-                         should_print: bool = True) -> str:
+    @cli.action(
+        'detect-bundle-id',
+        XcodeProjectArgument.XCODE_PROJECT_PATTERN,
+        XcodeProjectArgument.TARGET_NAME,
+        XcodeProjectArgument.CONFIGURATION_NAME,
+    )
+    def detect_bundle_id(
+        self,
+        xcode_project_patterns: Sequence[pathlib.Path],
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        include_pods: bool = False,
+        should_print: bool = True,
+    ) -> str:
         """ Try to deduce the Bundle ID from specified Xcode project """
 
         xcode_projects = self.find_paths(*xcode_project_patterns)
@@ -73,7 +79,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             bundle_id
             for xcode_project in xcode_projects
             for bundle_id in self._detect_project_bundle_ids(
-                xcode_project, target_name, configuration_name, include_pods)
+                xcode_project, target_name, configuration_name, include_pods,
+            )
         )
 
         if not bundle_ids:
@@ -100,7 +107,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             xcode_project_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.XCODE_PROJECT_PATTERN.get_default(),
             profile_path_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.PROFILE_PATHS.get_default(),
             export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
-            custom_export_options: Optional[Dict] = None,
+            custom_export_options: Optional[Union[Dict, CustomExportOptions]] = None,
             warn_only: bool = False,
             code_signing_setup_verbose_logging: bool = False,
             archive_method: Optional[ArchiveMethod] = None,
@@ -110,6 +117,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         to use given provisioning profiles
         """
         from .keychain import Keychain
+
+        if isinstance(custom_export_options, CustomExportOptions):
+            custom_export_options = custom_export_options.value
+
+        print(custom_export_options)
+        return
 
         self.logger.info(Colors.BLUE('Configure code signing settings'))
 
@@ -147,22 +160,26 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))
         return export_options
 
-    @cli.action('clean',
-                XcodeProjectArgument.XCODE_PROJECT_PATH,
-                XcodeProjectArgument.XCODE_WORKSPACE_PATH,
-                XcodeProjectArgument.TARGET_NAME,
-                XcodeProjectArgument.CONFIGURATION_NAME,
-                XcodeProjectArgument.SCHEME_NAME,
-                XcprettyArgument.DISABLE,
-                XcprettyArgument.OPTIONS)
-    def clean(self,
-              xcode_project_path: Optional[pathlib.Path] = None,
-              xcode_workspace_path: Optional[pathlib.Path] = None,
-              target_name: Optional[str] = None,
-              configuration_name: Optional[str] = None,
-              scheme_name: Optional[str] = None,
-              disable_xcpretty: bool = False,
-              xcpretty_options: str = XcprettyArgument.OPTIONS.get_default()):
+    @cli.action(
+        'clean',
+        XcodeProjectArgument.XCODE_PROJECT_PATH,
+        XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+        XcodeProjectArgument.TARGET_NAME,
+        XcodeProjectArgument.CONFIGURATION_NAME,
+        XcodeProjectArgument.SCHEME_NAME,
+        XcprettyArgument.DISABLE,
+        XcprettyArgument.OPTIONS,
+    )
+    def clean(
+        self,
+        xcode_project_path: Optional[pathlib.Path] = None,
+        xcode_workspace_path: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+        disable_xcpretty: bool = False,
+        xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
+    ):
         """
         Clean Xcode project
         """
@@ -247,8 +264,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
         try:
             xcarchive = xcodebuild.archive(
-                export_options, archive_directory,
-                xcargs=archive_xcargs, custom_flags=archive_flags)
+                export_options,
+                archive_directory,
+                xcargs=archive_xcargs,
+                custom_flags=archive_flags,
+            )
         except IOError as error:
             raise XcodeProjectException(*error.args)
         self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
@@ -258,8 +278,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
         try:
             ipa = xcodebuild.export_archive(
-                xcarchive, export_options_plist, ipa_directory,
-                xcargs=export_xcargs, custom_flags=export_flags)
+                xcarchive,
+                export_options_plist,
+                ipa_directory,
+                xcargs=export_xcargs,
+                custom_flags=export_flags,
+            )
         except IOError as error:
             raise XcodeProjectException(*error.args)
         else:
@@ -272,13 +296,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
-    @cli.action('pkg-info',
-                XcodeProjectArgument.PKG_PATH,
-                XcodeProjectArgument.JSON_OUTPUT)
-    def get_pkg_info(self,
-                     pkg_path: pathlib.Path,
-                     json_output: bool = False,
-                     should_print: bool = True) -> MacOsPackage:
+    @cli.action(
+        'pkg-info',
+        XcodeProjectArgument.PKG_PATH,
+        XcodeProjectArgument.JSON_OUTPUT,
+    )
+    def get_pkg_info(
+        self,
+        pkg_path: pathlib.Path,
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> MacOsPackage:
         """
         Show information about macOS Application Package file
         """
@@ -290,13 +318,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             should_print,
         )
 
-    @cli.action('ipa-info',
-                XcodeProjectArgument.IPA_PATH,
-                XcodeProjectArgument.JSON_OUTPUT)
-    def get_ipa_info(self,
-                     ipa_path: pathlib.Path,
-                     json_output: bool = False,
-                     should_print: bool = True) -> Ipa:
+    @cli.action(
+        'ipa-info',
+        XcodeProjectArgument.IPA_PATH,
+        XcodeProjectArgument.JSON_OUTPUT,
+    )
+    def get_ipa_info(
+        self,
+        ipa_path: pathlib.Path,
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> Ipa:
         """
         Show information about iOS App Store Package file
         """
@@ -308,17 +340,21 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             should_print,
         )
 
-    @cli.action('test-destinations',
-                TestArgument.RUNTIMES,
-                TestArgument.SIMULATOR_NAME,
-                TestArgument.INCLUDE_UNAVAILABLE,
-                XcodeProjectArgument.JSON_OUTPUT)
-    def get_test_destinations(self,
-                              runtimes: Optional[Sequence[Runtime]] = None,
-                              simulator_name: Optional[re.Pattern] = None,
-                              include_unavailable: bool = False,
-                              json_output: bool = False,
-                              should_print: bool = True) -> List[Simulator]:
+    @cli.action(
+        'test-destinations',
+        TestArgument.RUNTIMES,
+        TestArgument.SIMULATOR_NAME,
+        TestArgument.INCLUDE_UNAVAILABLE,
+        XcodeProjectArgument.JSON_OUTPUT,
+    )
+    def get_test_destinations(
+        self,
+        runtimes: Optional[Sequence[Runtime]] = None,
+        simulator_name: Optional[re.Pattern] = None,
+        include_unavailable: bool = False,
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> List[Simulator]:
         """
         List available destinations for test runs
         """
@@ -350,9 +386,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         return simulators
 
     @cli.action('default-test-destination', XcodeProjectArgument.JSON_OUTPUT)
-    def get_default_test_destination(self,
-                                     json_output: bool = False,
-                                     should_print: bool = True) -> Simulator:
+    def get_default_test_destination(
+        self,
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> Simulator:
         """
         Show default test destination for the chosen Xcode version
         """
@@ -373,46 +411,50 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 self.echo(Colors.GREEN(f'{simulator.runtime} {simulator.name}'))
         return simulator
 
-    @cli.action('run-tests',
-                XcodeProjectArgument.XCODE_PROJECT_PATH,
-                XcodeProjectArgument.XCODE_WORKSPACE_PATH,
-                XcodeProjectArgument.TARGET_NAME,
-                XcodeProjectArgument.CONFIGURATION_NAME,
-                XcodeProjectArgument.SCHEME_NAME,
-                XcodeProjectArgument.CLEAN,
-                TestArgument.DISABLE_CODE_COVERAGE,
-                TestArgument.GRACEFUL_EXIT,
-                TestArgument.MAX_CONCURRENT_DEVICES,
-                TestArgument.MAX_CONCURRENT_SIMULATORS,
-                TestArgument.TEST_DEVICES,
-                TestArgument.TEST_ONLY,
-                TestArgument.TEST_SDK,
-                TestResultArgument.OUTPUT_DIRECTORY,
-                TestResultArgument.OUTPUT_EXTENSION,
-                XcodeArgument.TEST_FLAGS,
-                XcodeArgument.TEST_XCARGS,
-                XcprettyArgument.DISABLE,
-                XcprettyArgument.OPTIONS)
-    def run_test(self,
-                 xcode_project_path: Optional[pathlib.Path] = None,
-                 xcode_workspace_path: Optional[pathlib.Path] = None,
-                 target_name: Optional[str] = None,
-                 configuration_name: Optional[str] = None,
-                 scheme_name: Optional[str] = None,
-                 clean: bool = False,
-                 devices: Optional[List[str]] = None,
-                 disable_code_coverage: bool = False,
-                 max_concurrent_devices: Optional[int] = TestArgument.MAX_CONCURRENT_DEVICES.get_default(),
-                 max_concurrent_simulators: Optional[int] = TestArgument.MAX_CONCURRENT_SIMULATORS.get_default(),
-                 test_only: Optional[str] = TestArgument.TEST_ONLY.get_default(),
-                 test_sdk: str = TestArgument.TEST_SDK.get_default(),
-                 test_xcargs: Optional[str] = XcodeArgument.TEST_XCARGS.get_default(),
-                 test_flags: Optional[str] = XcodeArgument.TEST_FLAGS.get_default(),
-                 disable_xcpretty: bool = False,
-                 xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
-                 output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
-                 output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default(),
-                 graceful_exit: bool = False):
+    @cli.action(
+        'run-tests',
+        XcodeProjectArgument.XCODE_PROJECT_PATH,
+        XcodeProjectArgument.XCODE_WORKSPACE_PATH,
+        XcodeProjectArgument.TARGET_NAME,
+        XcodeProjectArgument.CONFIGURATION_NAME,
+        XcodeProjectArgument.SCHEME_NAME,
+        XcodeProjectArgument.CLEAN,
+        TestArgument.DISABLE_CODE_COVERAGE,
+        TestArgument.GRACEFUL_EXIT,
+        TestArgument.MAX_CONCURRENT_DEVICES,
+        TestArgument.MAX_CONCURRENT_SIMULATORS,
+        TestArgument.TEST_DEVICES,
+        TestArgument.TEST_ONLY,
+        TestArgument.TEST_SDK,
+        TestResultArgument.OUTPUT_DIRECTORY,
+        TestResultArgument.OUTPUT_EXTENSION,
+        XcodeArgument.TEST_FLAGS,
+        XcodeArgument.TEST_XCARGS,
+        XcprettyArgument.DISABLE,
+        XcprettyArgument.OPTIONS,
+    )
+    def run_test(
+        self,
+        xcode_project_path: Optional[pathlib.Path] = None,
+        xcode_workspace_path: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+        clean: bool = False,
+        devices: Optional[List[str]] = None,
+        disable_code_coverage: bool = False,
+        max_concurrent_devices: Optional[int] = TestArgument.MAX_CONCURRENT_DEVICES.get_default(),
+        max_concurrent_simulators: Optional[int] = TestArgument.MAX_CONCURRENT_SIMULATORS.get_default(),
+        test_only: Optional[str] = TestArgument.TEST_ONLY.get_default(),
+        test_sdk: str = TestArgument.TEST_SDK.get_default(),
+        test_xcargs: Optional[str] = XcodeArgument.TEST_XCARGS.get_default(),
+        test_flags: Optional[str] = XcodeArgument.TEST_FLAGS.get_default(),
+        disable_xcpretty: bool = False,
+        xcpretty_options: str = XcprettyArgument.OPTIONS.get_default(),
+        output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
+        output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default(),
+        graceful_exit: bool = False,
+    ):
         """
         Run unit or UI tests for given Xcode project or workspace
         """
@@ -450,7 +492,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise XcodeProjectException('Did not find any test results')
 
         test_suites, xcresult = self._get_test_suites(
-            xcresult_collector, show_found_result=True, save_xcresult_dir=output_dir)
+            xcresult_collector,
+            show_found_result=True,
+            save_xcresult_dir=output_dir,
+        )
 
         message = (
             f'Executed {test_suites.tests} tests with '
@@ -466,13 +511,16 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             if testing_failed or (test_suites and test_suites.has_failed_tests()):
                 raise XcodeProjectException('Tests failed')
 
-    @cli.action('test-summary',
-                TestResultArgument.XCRESULT_PATTERNS,
-                TestResultArgument.XCRESULT_DIRS)
+    @cli.action(
+        'test-summary',
+        TestResultArgument.XCRESULT_PATTERNS,
+        TestResultArgument.XCRESULT_DIRS,
+    )
     def show_test_report_summary(
-            self,
-            xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
-            xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default()):
+        self,
+        xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
+        xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default(),
+    ):
         """
         Show summary of Xcode Test Result
         """
@@ -484,17 +532,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
 
-    @cli.action('junit-test-results',
-                TestResultArgument.XCRESULT_PATTERNS,
-                TestResultArgument.XCRESULT_DIRS,
-                TestResultArgument.OUTPUT_DIRECTORY,
-                TestResultArgument.OUTPUT_EXTENSION)
+    @cli.action(
+        'junit-test-results',
+        TestResultArgument.XCRESULT_PATTERNS,
+        TestResultArgument.XCRESULT_DIRS,
+        TestResultArgument.OUTPUT_DIRECTORY,
+        TestResultArgument.OUTPUT_EXTENSION,
+    )
     def convert_xcresults_to_junit(
-            self,
-            xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
-            xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default(),
-            output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
-            output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default()):
+        self,
+        xcresult_patterns: Optional[Sequence[pathlib.Path]] = None,
+        xcresult_dirs: Sequence[pathlib.Path] = TestResultArgument.XCRESULT_DIRS.get_default(),
+        output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
+        output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default(),
+    ):
         """
         Convert Xcode Test Result Bundles (*.xcresult) to JUnit XML format
         """
@@ -523,9 +574,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except IOError as error:
             raise XcodeProjectException(*error.args)
 
-    def _collect_xcresults(self,
-                           xcresult_patterns: Optional[Sequence[pathlib.Path]],
-                           xcresult_dirs: Sequence[pathlib.Path]) -> XcResultCollector:
+    def _collect_xcresults(
+        self,
+        xcresult_patterns: Optional[Sequence[pathlib.Path]],
+        xcresult_dirs: Sequence[pathlib.Path],
+    ) -> XcResultCollector:
         glob_patterns: List[pathlib.Path] = []
 
         for xcresult_pattern in (xcresult_patterns or []):
@@ -560,11 +613,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             else:
                 self.logger.debug('Saved simulator %s logs to %s', simulator_description, destination_path)
 
-    def _detect_project_bundle_ids(self,
-                                   xcode_project: pathlib.Path,
-                                   target_name: Optional[str],
-                                   config_name: Optional[str],
-                                   include_pods: bool) -> List[str]:
+    def _detect_project_bundle_ids(
+        self,
+        xcode_project: pathlib.Path,
+        target_name: Optional[str],
+        config_name: Optional[str],
+        include_pods: bool,
+    ) -> List[str]:
 
         def group(bundle_ids):
             groups = defaultdict(list)
@@ -594,7 +649,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     def _ensure_project_or_workspace(cls, xcode_project, xcode_workspace):
         if xcode_project is None and xcode_workspace is None:
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(
-                'Workspace or project argument needs to be specified')
+                'Workspace or project argument needs to be specified',
+            )
 
     @classmethod
     def _get_export_options_from_path(cls, export_options_plist: pathlib.Path) -> ExportOptions:
@@ -602,10 +658,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             return ExportOptions.from_path(export_options_plist)
         except FileNotFoundError:
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
-                f'Path "{export_options_plist}" does not exist')
+                f'Path "{export_options_plist}" does not exist',
+            )
         except ValueError:
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
-                f'File "{export_options_plist}" is not a valid property list')
+                f'File "{export_options_plist}" is not a valid property list',
+            )
 
     def _get_test_destinations(self, test_sdk: str, requested_devices: Optional[List[str]]) -> List[Simulator]:
         if requested_devices:
@@ -626,15 +684,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         return simulators
 
     @classmethod
-    def _get_xcodebuild(cls,
-                        xcode_workspace_path: Optional[pathlib.Path] = None,
-                        xcode_project_path: Optional[pathlib.Path] = None,
-                        target_name: Optional[str] = None,
-                        configuration_name: Optional[str] = None,
-                        scheme_name: Optional[str] = None,
-                        disable_xcpretty: bool = False,
-                        xcpretty_options: str = '',
-                        **_) -> Xcodebuild:
+    def _get_xcodebuild(
+        cls,
+        xcode_workspace_path: Optional[pathlib.Path] = None,
+        xcode_project_path: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+        disable_xcpretty: bool = False,
+        xcpretty_options: str = '',
+        **_,
+    ) -> Xcodebuild:
         try:
             return Xcodebuild(
                 xcode_workspace=xcode_workspace_path,
@@ -647,10 +707,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except ValueError as error:
             raise XcodeProjectException(*error.args) from error
 
-    def _get_test_suites(self,
-                         xcresult_collector: XcResultCollector,
-                         show_found_result: bool = False,
-                         save_xcresult_dir: Optional[pathlib.Path] = None):
+    def _get_test_suites(
+        self,
+        xcresult_collector: XcResultCollector,
+        show_found_result: bool = False,
+        save_xcresult_dir: Optional[pathlib.Path] = None,
+    ):
         if show_found_result:
             self.logger.info(Colors.GREEN('Found test results at'))
             for xcresult in xcresult_collector.get_collected_results():
@@ -666,17 +728,23 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             xcresult_collector.forget_merged_result()
         return test_suites, xcresult
 
-    def _save_test_suite(self,
-                         xcresult: pathlib.Path,
-                         test_suites: TestSuites,
-                         output_dir: pathlib.Path,
-                         output_extension: str):
+    def _save_test_suite(
+        self,
+        xcresult: pathlib.Path,
+        test_suites: TestSuites,
+        output_dir: pathlib.Path,
+        output_extension: str,
+    ):
         result_path = output_dir / f'{xcresult.stem}.{output_extension}'
         test_suites.save_xml(result_path)
         self.echo(Colors.GREEN('Saved JUnit XML report to %s'), result_path)
 
     def _update_export_options(
-            self, xcarchive: pathlib.Path, export_options_path: pathlib.Path, export_options: ExportOptions):
+        self,
+        xcarchive: pathlib.Path,
+        export_options_path: pathlib.Path,
+        export_options: ExportOptions,
+    ):
         """
         For non-App Store exports, if the app is using either CloudKit or CloudDocuments
         extensions, then "com.apple.developer.icloud-container-environment" entitlement
@@ -702,11 +770,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
         export_options.save(export_options_path)
 
-    def _show_application_package_info(self,
-                                       application_package_type: Type[P],
-                                       application_package_path: pathlib.Path,
-                                       json_output: bool,
-                                       should_print: bool) -> P:
+    def _show_application_package_info(
+        self,
+        application_package_type: Type[P],
+        application_package_path: pathlib.Path,
+        json_output: bool,
+        should_print: bool,
+    ) -> P:
         try:
             application_package = application_package_type(application_package_path)
         except IOError as error:

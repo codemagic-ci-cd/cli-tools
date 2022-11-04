@@ -1,9 +1,14 @@
+import json
 import pathlib
 import re
+from argparse import ArgumentTypeError
+from dataclasses import fields
+from typing import Dict
 
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.models import ArchiveMethod
+from codemagic.models import ExportOptions
 from codemagic.models import ProvisioningProfile
 from codemagic.models.simulator import Runtime
 
@@ -16,6 +21,32 @@ class CodeSigningSetupVerboseLogging(cli.TypedCliArgument[bool]):
 class NoShowBuildSettings(cli.TypedCliArgument[bool]):
     argument_type = bool
     environment_variable_key = 'XCODE_PROJECT_NO_SHOW_BUILD_SETTINGS'
+
+
+class CustomExportOptions(cli.EnvironmentArgumentValue[dict]):
+    argument_type = dict
+    environment_variable_key = 'XCODE_PROJECT_CUSTOM_EXPORT_OPTIONS'
+    example_value = json.dumps({
+        'uploadBitcode': False,
+        'uploadSymbols': False,
+    })
+
+    @classmethod
+    def _apply_type(cls, non_typed_value: str) -> Dict:
+        try:
+            given_custom_export_options = json.loads(non_typed_value)
+            if not isinstance(given_custom_export_options, dict):
+                raise ValueError('Not a dict')
+        except ValueError:
+            raise ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON encoded object')
+
+        allowed_fields = {field.name for field in fields(ExportOptions)}
+        invalid_keys = given_custom_export_options.keys() - allowed_fields
+        if invalid_keys:
+            keys = ', '.join(map(str, invalid_keys))
+            raise ArgumentTypeError(f'Unknown export option(s): {keys}')
+
+        return given_custom_export_options
 
 
 class XcodeProjectArgument(cli.Argument):
@@ -161,10 +192,10 @@ class ExportIpaArgument(cli.Argument):
     CUSTOM_EXPORT_OPTIONS = cli.ArgumentProperties(
         key='custom_export_options',
         flags=('--custom-export-options',),
-        type=cli.CommonArgumentTypes.json_dict,
+        type=CustomExportOptions,
         description=(
-            'Custom options for generated export options as JSON string. For example '
-            f'`{Colors.WHITE(repr("""{"uploadBitcode": false, "uploadSymbols": false}"""))}`.'
+            'Custom options for generated export options as JSON string. '
+            f'For example, "{Colors.WHITE(CustomExportOptions.example_value)}".'
         ),
         argparse_kwargs={'required': False},
     )
