@@ -7,5 +7,9 @@ class ActionGroupProperties(NamedTuple):
     description: str
 
 
-class ActionGroup(ActionGroupProperties, enum.Enum):
+# mypy yields a false-positive type error on enums with multiple inheritance
+# https://github.com/python/mypy/issues/9319
+
+
+class ActionGroup(ActionGroupProperties, enum.Enum):  # type: ignore
     ...
