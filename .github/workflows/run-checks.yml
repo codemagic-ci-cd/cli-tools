@@ -1,5 +1,22 @@
-definitions:
-  steps:
+name: Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
     - &cache
       uses: actions/cache@v1
       with:
@@ -30,41 +47,3 @@ definitions:
     - &run_tests
       name: Test with pytest
       run: poetry run pytest
-
-
-name: Checks
-
-on:
-  push:
-  pull_request:
-
-jobs:
-  test-py-3-7:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - *cache
-      - *install_dependencies
-      - *check_code_formatting
-      - *check_imports_ordering
-      - *static_type_checks
-      - *run_tests
-
-  test-py-3-11:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.11
-      - *cache
-      - *install_dependencies
-      - *check_code_formatting
-      - *check_imports_ordering
-      - *static_type_checks
-      - *run_tests
