@@ -1,3 +1,9 @@
+Version 0.36.2
+-------------
+
+**Bugfix**
+- Remove mutable default value from `codemagic.models.Keystore` field `certificate_attributes`. [PR #284](https://github.com/codemagic-ci-cd/cli-tools/pull/284)
+
 Version 0.36.1
 -------------
 

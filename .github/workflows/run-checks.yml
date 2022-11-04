@@ -5,16 +5,52 @@ on:
   pull_request:
 
 jobs:
-  test:
-
+  test-py-3-7:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
+
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        curl -sSL https://install.python-poetry.org | python
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+
+    - name: Check code formatting
+      run: poetry run flake8 .
+
+    - name: Check imports sort order
+      run: poetry run isort --check-only .
+
+    - name: Static type checks with mypy
+      run: poetry run mypy src
+
+    - name: Test with pytest
+      run: poetry run pytest
+
+  test-py-3-11:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.11
 
     - uses: actions/cache@v1
       with:
