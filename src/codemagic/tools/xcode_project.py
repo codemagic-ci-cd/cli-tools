@@ -121,9 +121,6 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if isinstance(custom_export_options, CustomExportOptions):
             custom_export_options = custom_export_options.value
 
-        print(custom_export_options)
-        return
-
         self.logger.info(Colors.BLUE('Configure code signing settings'))
 
         profile_paths = self.find_paths(*profile_path_patterns)
