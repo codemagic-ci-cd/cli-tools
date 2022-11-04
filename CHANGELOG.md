@@ -1,3 +1,9 @@
+Version 0.36.0
+-------------
+
+**Features**
+- Update action `xcode-project use-profiles` argument `--custom-export-options` to accept export options definitions from file or environment variable references. If the value is not defined using CLI flag, it is automatically checked from environment variable `XCODE_PROJECT_CUSTOM_EXPORT_OPTIONS` by default. [PR #283](https://github.com/codemagic-ci-cd/cli-tools/pull/283)
+
 Version 0.35.0
 -------------
 
