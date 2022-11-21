@@ -1,6 +1,8 @@
 Version 0.36.3
 -------------
 
+This release updates the current version of `bundletool`, as it is outdated, and issues potentially concerning it have risen for users with newer projects. Reported in [issue #286](https://github.com/codemagic-ci-cd/cli-tools/issues/286).
+
 **Dependencies**
 - Update [`bundletool`](https://developer.android.com/studio/command-line/bundletool) version from [`0.15.0`](https://github.com/google/bundletool/releases/tag/0.15.0) to [`1.13.1`](https://github.com/google/bundletool/releases/tag/1.13.1). [PR #287](https://github.com/codemagic-ci-cd/cli-tools/pull/287)
 
