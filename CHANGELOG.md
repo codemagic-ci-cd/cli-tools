@@ -2,7 +2,7 @@ Version 0.36.3
 -------------
 
 **Dependencies**
-- Update [`bundletool`](https://developer.android.com/studio/command-line/bundletool) version from from [`0.15.0`](https://github.com/google/bundletool/releases/tag/0.15.0) to [`1.13.1`](https://github.com/google/bundletool/releases/tag/1.13.1). [PR #287](https://github.com/codemagic-ci-cd/cli-tools/pull/287)
+- Update [`bundletool`](https://developer.android.com/studio/command-line/bundletool) version from [`0.15.0`](https://github.com/google/bundletool/releases/tag/0.15.0) to [`1.13.1`](https://github.com/google/bundletool/releases/tag/1.13.1). [PR #287](https://github.com/codemagic-ci-cd/cli-tools/pull/287)
 
 Version 0.36.2
 -------------
