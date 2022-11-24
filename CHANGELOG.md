@@ -1,3 +1,11 @@
+Version 0.36.4
+-------------
+
+Add separator for better code signing information parsing.
+
+**Improvement**
+- Code signing manager outputs the separator after the last log output.
+
 Version 0.36.3
 -------------
 
