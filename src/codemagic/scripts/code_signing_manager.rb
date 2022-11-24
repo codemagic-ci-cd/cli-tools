@@ -456,6 +456,7 @@ class CodeSigningManager
     @project.targets.each do |target|
       set_target_build_settings(target)
     end
+    Log.info "\n#{'=' * 50}\n"
   end
 end
 
