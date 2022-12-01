@@ -92,15 +92,13 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
-    def cancel_review_submissions(
+    def cancel_review_submission(
         self,
-        application_id: Optional[ResourceId] = None,
-        platform: Optional[Platform] = None,
-        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        review_submission_id: ResourceId,
         should_print: bool = True,
-    ) -> List[ReviewSubmission]:
+    ) -> ReviewSubmission:
         from .action_groups import ReviewSubmissionsActionGroup
-        _ = ReviewSubmissionsActionGroup.cancel_review_submissions  # Implementation
+        _ = ReviewSubmissionsActionGroup.cancel_review_submission  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -253,6 +251,18 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ) -> List[Build]:
         from ..app_store_connect import AppStoreConnect
         _ = AppStoreConnect.list_builds  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def list_review_submissions(
+        self,
+        application_id: Optional[ResourceId] = None,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = True,
+    ) -> List[ReviewSubmission]:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.list_review_submissions  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

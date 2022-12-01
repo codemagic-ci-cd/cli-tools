@@ -376,11 +376,27 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             ReviewSubmissionState.UNRESOLVED_ISSUES,
         ]
 
-        self.cancel_review_submissions(
+        review_submissions = self.list_review_submissions(
             application_id=app_id,
             platform=Platform.IOS,
             review_submission_state=states_to_cancel,
+            should_print=False,
         )
+
+        for submission in review_submissions:
+            self.cancel_review_submission(submission.id)
+
+        # Wait and confirm that submissions are updated to canceled state
+        while review_submissions:
+            review_submissions = self.list_review_submissions(
+                application_id=app_id,
+                platform=Platform.IOS,
+                review_submission_state=states_to_cancel,
+                should_print=False,
+            )
+            if not review_submissions:
+                break
+            time.sleep(10)
 
     def _expire_previous_builds(self, app_id: ResourceId, build_id: ResourceId) -> None:
         builds = self.list_builds(application_id=app_id, expired=False, should_print=False)
