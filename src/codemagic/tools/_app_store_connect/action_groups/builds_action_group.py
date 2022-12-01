@@ -56,9 +56,11 @@ BetaBuildLocalizationsInfo = Union[
 
 class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
-    @cli.action('get',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BUILDS)
+    @cli.action(
+        'get',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def get_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
         """
         Get information about a specific build
@@ -66,9 +68,28 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         return self._get_resource(build_id, self.api_client.builds, should_print)
 
-    @cli.action('pre-release-version',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BUILDS)
+    @cli.action(
+        'expire',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def expire_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
+        """
+        Expire a specific build
+        """
+
+        return self._modify_resource(
+            self.api_client.builds,
+            build_id,
+            should_print,
+            expired=True,
+        )
+
+    @cli.action(
+        'pre-release-version',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def get_build_pre_release_version(
             self,
             build_id: ResourceId,
@@ -86,9 +107,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
         )
 
-    @cli.action('app-store-version',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BUILDS)
+    @cli.action(
+        'app-store-version',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def get_build_app_store_version(
             self,
             build_id: ResourceId,
@@ -110,13 +133,15 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         'add-beta-test-info',
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
-        action_group=AppStoreConnectActionGroup.BUILDS)
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def add_beta_test_info(
             self,
             build_id: ResourceId,
             beta_build_localizations: Optional[BetaBuildLocalizationsInfo] = None,
             locale: Optional[Locale] = None,
-            whats_new: Optional[Types.WhatsNewArgument] = None):
+            whats_new: Optional[Types.WhatsNewArgument] = None,
+    ):
         """
         Add localized What's new (what to test) information
         """
@@ -137,7 +162,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         'submit-to-testflight',
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
-        action_group=AppStoreConnectActionGroup.BUILDS)
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def submit_to_testflight(
             self,
             build_id: ResourceId,
@@ -170,7 +196,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         'submit-to-app-store',
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
-        action_group=AppStoreConnectActionGroup.BUILDS)
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
     def submit_to_app_store(
             self,
             build_id: ResourceId,
@@ -362,11 +389,13 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
 
         name = app.attributes.name
-        raise ValueError('\n'.join([
-            f'Complete test information is required to submit application {name} build for external testing.',
-            *error_lines,
-            f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
-        ]))
+        raise ValueError(
+            '\n'.join([
+                f'Complete test information is required to submit application {name} build for external testing.',
+                *error_lines,
+                f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
+            ]),
+        )
 
     def _get_missing_beta_app_information(self, app: App) -> List[str]:
         app_beta_localization = self._get_app_default_beta_localization(app)

@@ -29,6 +29,7 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.mixins import PathFinderMixin
 
 from .arguments import AppStoreVersionInfo
@@ -88,6 +89,18 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ):
         from .action_groups import BetaGroupsActionGroup
         _ = BetaGroupsActionGroup.add_build_to_beta_groups  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_review_submissions(
+        self,
+        application_id: Optional[ResourceId] = None,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = True,
+    ) -> List[ReviewSubmission]:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.cancel_review_submissions  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -187,6 +200,16 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ) -> ReviewSubmissionItem:
         from .action_groups import ReviewSubmissionItemsActionGroup
         _ = ReviewSubmissionItemsActionGroup.create_review_submission_item  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_build(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> Build:
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.expire_build  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

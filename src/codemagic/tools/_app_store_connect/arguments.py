@@ -29,6 +29,7 @@ from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
@@ -626,6 +627,17 @@ class ReviewSubmissionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the review submission',
     )
+    REVIEW_SUBMISSION_STATE = cli.ArgumentProperties(
+        key='review_submission_state',
+        flags=('--review-submission-state',),
+        type=ReviewSubmissionState,
+        description='String value of the review submission state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReviewSubmissionState),
+            'nargs': '+',
+        },
+    )
 
 
 class AppStoreVersionLocalizationArgument(cli.Argument):
@@ -882,6 +894,30 @@ class PublishArgument(cli.Argument):
             'within the specified timeframe, further submission will be terminated. '
             'Waiting will be skipped if the value is set to 0, further actions might fail '
             'if the build is not processed yet.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    EXPIRE_PREVIOUS_BUILDS = cli.ArgumentProperties(
+        key='expire_previous_builds',
+        flags=('--expire-previous-builds', '-eb'),
+        type=bool,
+        description=(
+            'Expires all previous builds for the application before submitting the '
+            'newly uploaded build to TestFlight.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
+    CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
+        key='cancel_previous_submissions',
+        flags=('--cancel-previous-submissions', '-cs'),
+        type=bool,
+        description=(
+            'Cancels previous submissions for the application in App Store Connect '
+            'before creating a new submission if the submissions are in a state where it is possible.'
         ),
         argparse_kwargs={
             'required': False,
@@ -1400,6 +1436,7 @@ class ArgumentGroups:
     )
     SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.CANCEL_PREVIOUS_SUBMISSIONS,
         # Generic App Store Version information arguments
         AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.COPYRIGHT,
@@ -1419,4 +1456,5 @@ class ArgumentGroups:
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.EXPIRE_PREVIOUS_BUILDS,
     )
