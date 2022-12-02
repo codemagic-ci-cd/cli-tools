@@ -15,6 +15,7 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceType
 
 IncludedResource = TypeVar('IncludedResource', bound=Resource)
 
@@ -57,10 +58,12 @@ class Builds(ResourceManager[Build]):
         response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
         return Build(response['data'])
 
-    def list(self,
-             resource_filter: Filter = Filter(),
-             ordering=Ordering.UPLOADED_DATE,
-             reverse=False) -> List[Build]:
+    def list(
+        self,
+        resource_filter: Filter = Filter(),
+        ordering=Ordering.UPLOADED_DATE,
+        reverse=False,
+    ) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
@@ -126,6 +129,28 @@ class Builds(ResourceManager[Build]):
         ).json()
 
         return Build(response['data']), include_type(response['included'][0])
+
+    def modify(
+        self,
+        build: Union[LinkedResourceData, ResourceId],
+        expired: Optional[bool] = None,
+    ) -> Build:
+        build_id = self._get_resource_id(build)
+
+        attributes = {}
+        if expired is not None:
+            attributes['expired'] = expired
+
+        payload = self._get_update_payload(
+            build_id,
+            ResourceType.BUILDS,
+            attributes=attributes,
+        )
+        response = self.client.session.patch(
+            f'{self.client.API_URL}/builds/{build_id}',
+            json=payload,
+        ).json()
+        return Build(response['data'])
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
