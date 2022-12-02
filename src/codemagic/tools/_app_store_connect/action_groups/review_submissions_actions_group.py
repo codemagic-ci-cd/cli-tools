@@ -73,7 +73,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         should_print: bool = True,
     ) -> ReviewSubmission:
         """
-        Discard review submission from App Review
+        Discard a specific review submission from App Review
         """
         return self._modify_resource(
             self.api_client.review_submissions,

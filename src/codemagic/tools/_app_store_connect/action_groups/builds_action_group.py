@@ -96,7 +96,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Expire all builds except the most recent
         """
 
-        builds = self.list_builds(application_id=application_id, expired=False, should_print=should_print)
+        builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
         return [self.expire_build(build_id=asc_build.id, should_print=should_print) for asc_build in builds[:-1]]
 
     @cli.action(
