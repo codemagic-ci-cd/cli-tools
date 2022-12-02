@@ -404,7 +404,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if asc_build.id == build_id:
                 continue
             self.expire_build(
-                build_id=build_id,
+                build_id=asc_build.id,
             )
 
     def _process_ipa_after_upload(
