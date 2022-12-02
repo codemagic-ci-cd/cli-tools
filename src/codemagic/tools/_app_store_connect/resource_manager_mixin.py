@@ -157,8 +157,6 @@ class ResourceManagerMixin:
         should_print: bool,
         **update_params,
     ) -> R:
-
-        print(resource_manager)
         try:
             modify_resource: Callable[..., R] = getattr(resource_manager, 'modify')
         except AttributeError:
