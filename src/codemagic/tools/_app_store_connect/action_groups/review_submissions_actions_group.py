@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from abc import ABCMeta
 from typing import List
 from typing import Optional
@@ -80,6 +81,47 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             canceled=True,
         )
+
+    @cli.action(
+        'cancel-review-submissions',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        AppStoreVersionArgument.PLATFORM,
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
+    def cancel_review_submissions(
+        self,
+        application_id: Optional[ResourceId] = None,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = False,
+    ) -> List[ReviewSubmission]:
+        """
+        Find and cancel review submissions in App Store Connect
+        """
+
+        review_submissions = self.list_review_submissions(
+            application_id,
+            platform,
+            review_submission_state,
+            should_print,
+        )
+
+        canceled_submissions = [self.cancel_review_submission(submission.id) for submission in review_submissions]
+
+        # Wait for submissions to be updated to canceled state
+        while review_submissions:
+            review_submissions = self.list_review_submissions(
+                application_id,
+                platform,
+                review_submission_state,
+                should_print,
+            )
+            if not review_submissions:
+                break
+            time.sleep(10)
+
+        return canceled_submissions
 
     @cli.action(
         'confirm',

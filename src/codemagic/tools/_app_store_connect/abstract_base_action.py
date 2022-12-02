@@ -201,13 +201,25 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
-    def expire_build(
+    def expire_previous_builds(
         self,
-        build_id: ResourceId,
+        application_id: ResourceId,
         should_print: bool = True,
-    ) -> Build:
+    ) -> List[Build]:
         from .action_groups import BuildsActionGroup
-        _ = BuildsActionGroup.expire_build  # Implementation
+        _ = BuildsActionGroup.expire_previous_builds  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_review_submissions(
+        self,
+        application_id: Optional[ResourceId] = None,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = True,
+    ) -> List[ReviewSubmission]:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.cancel_review_submissions  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

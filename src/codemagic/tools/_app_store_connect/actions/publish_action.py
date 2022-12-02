@@ -369,44 +369,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
 
-    def _cancel_previous_submissions(self, app_id: ResourceId) -> None:
-        states_to_cancel = [
-            ReviewSubmissionState.WAITING_FOR_REVIEW,
-            ReviewSubmissionState.IN_REVIEW,
-            ReviewSubmissionState.UNRESOLVED_ISSUES,
-        ]
-
-        review_submissions = self.list_review_submissions(
-            application_id=app_id,
-            platform=Platform.IOS,
-            review_submission_state=states_to_cancel,
-            should_print=False,
-        )
-
-        for submission in review_submissions:
-            self.cancel_review_submission(submission.id)
-
-        # Wait and confirm that submissions are updated to canceled state
-        while review_submissions:
-            review_submissions = self.list_review_submissions(
-                application_id=app_id,
-                platform=Platform.IOS,
-                review_submission_state=states_to_cancel,
-                should_print=False,
-            )
-            if not review_submissions:
-                break
-            time.sleep(10)
-
-    def _expire_previous_builds(self, app_id: ResourceId, build_id: ResourceId) -> None:
-        builds = self.list_builds(application_id=app_id, expired=False, should_print=False)
-        for asc_build in builds:
-            if asc_build.id == build_id:
-                continue
-            self.expire_build(
-                build_id=asc_build.id,
-            )
-
     def _process_ipa_after_upload(
             self,
             ipa: Ipa,
@@ -435,7 +397,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
             }
             if testflight_options.expire_previous_builds:
-                self._expire_previous_builds(app_id=app.id, build_id=build.id)
+                self.expire_previous_builds(application_id=app.id, should_print=False)
             self.submit_to_testflight(build.id, **testflight_submission_kwargs)
 
         if beta_group_options:
@@ -448,7 +410,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'version_string': app_store_options.version_string or ipa.version,
             }
             if app_store_options.cancel_previous_submissions:
-                self._cancel_previous_submissions(app_id=app.id)
+                states_to_cancel = [
+                    ReviewSubmissionState.WAITING_FOR_REVIEW,
+                    ReviewSubmissionState.IN_REVIEW,
+                    ReviewSubmissionState.UNRESOLVED_ISSUES,
+                ]
+                self.cancel_review_submissions(
+                    application_id=app.id,
+                    review_submission_state=states_to_cancel,
+                    should_print=False,
+                )
             self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
 
     def _find_build(

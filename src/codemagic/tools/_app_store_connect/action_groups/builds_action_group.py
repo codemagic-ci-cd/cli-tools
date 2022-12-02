@@ -34,6 +34,7 @@ from codemagic.cli import Colors
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
+from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionInfo
 from ..arguments import AppStoreVersionLocalizationInfo
@@ -84,6 +85,19 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             expired=True,
         )
+
+    @cli.action(
+        'expire-previous-builds',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def expire_previous_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
+        """
+        Expire all builds except the most recent
+        """
+
+        builds = self.list_builds(application_id=application_id, expired=False, should_print=should_print)
+        return [self.expire_build(build_id=asc_build.id, should_print=should_print) for asc_build in builds[:-1]]
 
     @cli.action(
         'pre-release-version',
