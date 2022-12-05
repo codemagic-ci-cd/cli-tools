@@ -214,7 +214,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     @abstractmethod
     def cancel_review_submissions(
         self,
-        application_id: Optional[ResourceId] = None,
+        application_id: ResourceId = None,
         platform: Optional[Platform] = None,
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = False,
