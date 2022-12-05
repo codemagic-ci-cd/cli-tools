@@ -56,13 +56,13 @@ class AddBuildToBetaGroupOptions:
 @dataclass
 class SubmitToTestFlightOptions:
     max_build_processing_wait: int
-    expire_previous_builds: Optional[bool] = None
+    expire_previous_builds: bool = False
 
 
 @dataclass
 class SubmitToAppStoreOptions:
     max_build_processing_wait: int
-    cancel_previous_submissions: Optional[bool] = None
+    cancel_previous_submissions: bool = False
     # App Store Version information arguments
     copyright: Optional[str] = None
     earliest_release_date: Optional[datetime] = None
@@ -178,7 +178,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
             max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
-            expire_previous_builds: Optional[bool] = None,
+            expire_previous_builds: bool = False,
             # Beta test info arguments
             beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
             locale: Optional[Locale] = None,
@@ -192,7 +192,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
             app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
-            cancel_previous_submissions: Optional[bool] = None,
+            cancel_previous_submissions: bool = False,
             # App Store Version Localization arguments
             description: Optional[str] = None,
             keywords: Optional[str] = None,
@@ -226,6 +226,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 app_store_version_localizations = app_store_version_localizations.value
             submit_to_app_store_options = SubmitToAppStoreOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+                cancel_previous_submissions=cancel_previous_submissions,
                 # Non localized app metadata
                 copyright=copyright,
                 earliest_release_date=earliest_release_date,
@@ -242,7 +243,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 support_url=support_url,
                 whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
                 app_store_version_localizations=app_store_version_localizations,
-                cancel_previous_submissions=cancel_previous_submissions,
             )
         if submit_to_testflight and beta_group_names:
             # Only builds submitted to TestFlight can be added to beta groups
@@ -282,8 +282,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
             altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
             altool_verbose_logging: Optional[bool] = None,
-            cancel_previous_submissions: Optional[bool] = None,
-            expire_previous_builds: Optional[bool] = None,
+            cancel_previous_submissions: bool = False,
+            expire_previous_builds: bool = False,
             **app_store_connect_submit_options,
     ) -> None:
         """
@@ -397,7 +397,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
             }
             if testflight_options.expire_previous_builds:
-                self.expire_previous_builds(application_id=app.id, should_print=False)
+                self.expire_previous_builds(application_id=app.id, build_id=build.id, should_print=False)
             self.submit_to_testflight(build.id, **testflight_submission_kwargs)
 
         if beta_group_options:
@@ -410,11 +410,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'version_string': app_store_options.version_string or ipa.version,
             }
             if app_store_options.cancel_previous_submissions:
-                states_to_cancel = [
+                states_to_cancel = (
                     ReviewSubmissionState.WAITING_FOR_REVIEW,
                     ReviewSubmissionState.IN_REVIEW,
                     ReviewSubmissionState.UNRESOLVED_ISSUES,
-                ]
+                )
                 self.cancel_review_submissions(
                     application_id=app.id,
                     review_submission_state=states_to_cancel,
@@ -475,14 +475,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
+        apps = self.list_apps(
+            bundle_id_identifier=bundle_id,
+            bundle_id_identifier_strict_match=True,
+            should_print=False,
+        )
         try:
-            app = self.list_apps(
-                bundle_id_identifier=bundle_id, bundle_id_identifier_strict_match=True, should_print=False,
-            )[0]
+            app = apps[0]
         except IndexError:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
-        else:
-            self.printer.print_resource(app, True)
+        self.printer.print_resource(app, True)
         return app
 
     def _get_uploaded_build(

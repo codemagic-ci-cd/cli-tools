@@ -135,6 +135,9 @@ class Builds(ResourceManager[Build]):
         build: Union[LinkedResourceData, ResourceId],
         expired: Optional[bool] = None,
     ) -> Build:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/modify_a_build
+        """
         build_id = self._get_resource_id(build)
 
         attributes = {}

@@ -76,7 +76,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def expire_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
         """
-        Expire a specific build
+        Expire a specific build, an expired build becomes unavailable for testing
         """
 
         return self._modify_resource(
@@ -89,15 +89,27 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'expire-previous-builds',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
+        BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
-    def expire_previous_builds(self, application_id: ResourceId, should_print: bool = True) -> List[Build]:
+    def expire_previous_builds(
+        self, application_id: ResourceId, build_id: ResourceId, should_print: bool = True,
+    ) -> List[Build]:
         """
-        Expire all builds except the most recent
+        Expire all builds except the given build
         """
 
         builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
-        return [self.expire_build(build_id=asc_build.id, should_print=should_print) for asc_build in builds[:-1]]
+        expired_builds = []
+        for asc_build in builds:
+            if asc_build.id == build_id:
+                continue
+            expired_builds.append(
+                self.expire_build(
+                    build_id=asc_build.id,
+                ),
+            )
+        return expired_builds
 
     @cli.action(
         'pre-release-version',

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import time
 from abc import ABCMeta
 from typing import List
 from typing import Optional
@@ -91,7 +90,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def cancel_review_submissions(
         self,
-        application_id: Optional[ResourceId] = None,
+        application_id: ResourceId = None,
         platform: Optional[Platform] = None,
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = False,
@@ -107,21 +106,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
         )
 
-        canceled_submissions = [self.cancel_review_submission(submission.id) for submission in review_submissions]
-
-        # Wait for submissions to be updated to canceled state
-        while review_submissions:
-            review_submissions = self.list_review_submissions(
-                application_id,
-                platform,
-                review_submission_state,
-                should_print,
-            )
-            if not review_submissions:
-                break
-            time.sleep(10)
-
-        return canceled_submissions
+        return [self.cancel_review_submission(submission.id) for submission in review_submissions]
 
     @cli.action(
         'confirm',
@@ -152,7 +137,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def list_review_submissions(
         self,
-        application_id: Optional[ResourceId] = None,
+        application_id: ResourceId = None,
         platform: Optional[Platform] = None,
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = True,

@@ -904,11 +904,12 @@ class PublishArgument(cli.Argument):
         flags=('--expire-previous-builds', '-eb'),
         type=bool,
         description=(
-            'Expires all previous builds for the application before submitting the '
-            'newly uploaded build to TestFlight.'
+            'Expires all builds other than the current for the application '
+            'before submitting the build to TestFlight.'
         ),
         argparse_kwargs={
             'required': False,
+            'action': 'store_true',
         },
     )
     CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
@@ -921,6 +922,7 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
+            'action': 'store_true',
         },
     )
     ALTOOL_VERBOSE_LOGGING = cli.ArgumentProperties(
