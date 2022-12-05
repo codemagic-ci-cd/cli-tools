@@ -27,7 +27,7 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
-        app: Union[ResourceId, None] = None
+        app: ResourceId
         platform: Optional[Platform] = None
         state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None
 
@@ -65,7 +65,7 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
         response = self.client.session.get(f'{self.client.API_URL}/reviewSubmissions/{review_submission_id}').json()
         return ReviewSubmission(response['data'])
 
-    def list(self, resource_filter: Filter = Filter()) -> List[ReviewSubmission]:
+    def list(self, resource_filter: Filter = Filter(app=ResourceId(''))) -> List[ReviewSubmission]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_v1_reviewsubmissions
         """
