@@ -8,6 +8,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionState
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
@@ -42,13 +43,14 @@ class ReviewSubmissionsTest(ResourceManagerTestsBase):
             assert submission.type is ResourceType.REVIEW_SUBMISSIONS
 
 
-@pytest.mark.parametrize(
-    'python_field_name, apple_filter_name', [
-        ('app', 'app'),
-        ('state', 'state'),
-        ('platform', 'platform'),
-    ],
-)
-def test_review_submissions_filter(python_field_name, apple_filter_name):
-    get_apple_filter_name = ReviewSubmissions.Filter._get_field_name
-    assert get_apple_filter_name(python_field_name) == apple_filter_name
+def test_review_submissions_filter():
+    review_submissions_filter = ReviewSubmissions.Filter(
+        app=ResourceId('1481211155'),
+        platform=Platform.IOS,
+        state=(ReviewSubmissionState.IN_REVIEW, ReviewSubmissionState.CANCELING),
+    )
+    assert review_submissions_filter.as_query_params() == {
+        'filter[app]': '1481211155',
+        'filter[platform]': 'IOS',
+        'filter[state]': 'IN_REVIEW,CANCELING',
+    }
