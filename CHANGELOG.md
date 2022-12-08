@@ -1,3 +1,10 @@
+Version 0.36.4
+-------------
+
+**CI**
+- Store releases only on PyPI and GitHub releases.
+- Include wheel with fixed name under GitHub release assets so that latest version could be accessed with permalink.
+
 Version 0.36.3
 -------------
 
