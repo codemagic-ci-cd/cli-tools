@@ -75,7 +75,7 @@ workflows:
         script: |
           set -e
           TAG_NAME=v$(poetry version --short)
-          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-py3-none-any.whl
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
               --notes "Test release of ${TAG_NAME}" \
@@ -83,7 +83,7 @@ workflows:
               --draft \
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
-          rm dist/codemagic_cli_tools-py3-none-any.whl
+          rm dist/codemagic_cli_tools-latest-py3-none-any.whl
       - name: Publish release to PyPI Test environment
         script: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
@@ -122,13 +122,13 @@ workflows:
           TAG_NAME=v$(poetry version --short)
           previous_version_line=$(grep -n "^Version " CHANGELOG.md | head -2 | tail -1 | cut -f1 -d:)
           head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.md
-          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-py3-none-any.whl
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
               --notes-file release_notes.md \
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
-          rm dist/codemagic_cli_tools-py3-none-any.whl
+          rm dist/codemagic_cli_tools-latest-py3-none-any.whl
       - name: Publish release to PyPI
         script: poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
     artifacts: *artifacts
