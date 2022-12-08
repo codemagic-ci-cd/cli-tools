@@ -74,6 +74,7 @@ workflows:
         script: |
           set -e
           TAG_NAME=v$(poetry version --short)
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
               --notes "Test release of ${TAG_NAME}" \
@@ -81,6 +82,7 @@ workflows:
               --draft \
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
+          rm dist/codemagic_cli_tools-py3-none-any.whl
       - name: Publish release to PyPI Test environment
         script: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
