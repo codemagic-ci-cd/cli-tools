@@ -37,16 +37,6 @@ definitions:
     - &build_wheels
       name: Build wheels
       script: poetry build
-    - &upload_wheel_to_gcp
-      name: Upload wheel to GCP
-      script: |
-        set -e
-        echo "${GOOGLE_CLIENT_SECRET:?}" > $HOME/google-client-secret.json
-        gcloud auth activate-service-account --key-file $HOME/google-client-secret.json
-        SRC_PATH=$(find dist -name "*.whl" | tail -n1)
-        gsutil -h "Content-Type:application/x-wheel+zip" \
-               -h "Cache-Control:no-cache,max-age=0" \
-               cp -a public-read "$SRC_PATH" "${GCP_DST_URL:?}"
 
 workflows:
   tests:
@@ -69,10 +59,8 @@ workflows:
     cache: *cache
     environment:
       groups:
-        - gcp
+        - github
         - pypi-test
-      vars:
-        GCP_DST_URL: "gs://static.codemagic.io/builder/test/codemagic_cli_tools-latest-py3-none-any.whl"
     scripts:
       - *install_dependencies
       - *check_code_formatting
@@ -83,7 +71,19 @@ workflows:
         script: poetry version "$(poetry version --short).${BUILD_NUMBER:?}"
       - *update_version_in_source
       - *build_wheels
-      - *upload_wheel_to_gcp
+      - name: Make GitHub prerelease
+        script: |
+          set -e
+          TAG_NAME=v$(poetry version --short)
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-py3-none-any.whl
+          gh release create "${TAG_NAME}" \
+              --title "${TAG_NAME}" \
+              --notes "Test release of ${TAG_NAME}" \
+              --prerelease \
+              --draft \
+              dist/codemagic*.whl \
+              dist/codemagic*.tar.gz
+          rm dist/codemagic_cli_tools-py3-none-any.whl
       - name: Publish release to PyPI Test environment
         script: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
@@ -99,11 +99,8 @@ workflows:
     cache: *cache
     environment:
       groups:
-        - gcp
         - github
         - pypi
-      vars:
-        GCP_DST_URL: "gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
     scripts:
       - name: Verify branch
         script: |
@@ -119,19 +116,19 @@ workflows:
       - *run_tests
       - *update_version_in_source
       - *build_wheels
-      - name: Draft GitHub release
+      - name: Make GitHub release
         script: |
           set -e
           TAG_NAME=v$(poetry version --short)
           previous_version_line=$(grep -n "^Version " CHANGELOG.md | head -2 | tail -1 | cut -f1 -d:)
           head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.md
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
               --notes-file release_notes.md \
-              --draft \
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
-      - *upload_wheel_to_gcp
+          rm dist/codemagic_cli_tools-py3-none-any.whl
       - name: Publish release to PyPI
         script: poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
     artifacts: *artifacts
