@@ -59,6 +59,7 @@ workflows:
     cache: *cache
     environment:
       groups:
+        - github
         - pypi-test
     scripts:
       - *install_dependencies
