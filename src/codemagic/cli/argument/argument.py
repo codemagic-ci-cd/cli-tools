@@ -38,7 +38,10 @@ class Argument(ArgumentProperties, enum.Enum):
         for argument in arguments:
             if argument in exclude:
                 continue
-            updated_properties = argument.duplicate(argument_group_name=argument_group_name)
+            updated_properties = cls.duplicate(
+                argument,
+                argument_group_name=argument_group_name,
+            )
             argument_class: Type[Argument] = Argument(  # type: ignore
                 argument.__class__.__name__,
                 {argument.name: updated_properties},  # type: ignore
@@ -50,9 +53,11 @@ class Argument(ArgumentProperties, enum.Enum):
             yield new_argument
 
     @classmethod
-    def resolve_optional_two_way_switch(cls,
-                                        is_switched_on: Optional[bool],
-                                        is_switched_off: Optional[bool]) -> Optional[bool]:
+    def resolve_optional_two_way_switch(
+        cls,
+        is_switched_on: Optional[bool],
+        is_switched_off: Optional[bool],
+    ) -> Optional[bool]:
         if {is_switched_on, is_switched_off} in ({True}, {False}):
             raise ValueError('Neither of the switches, or exactly one can be truthy at the time')
         if is_switched_on is True:
