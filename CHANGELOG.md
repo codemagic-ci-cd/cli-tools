@@ -1,3 +1,9 @@
+Version 0.36.5
+-------------
+
+**Bugfix**
+- Support Python 3.11.1 [PR #295](https://github.com/codemagic-ci-cd/cli-tools/pull/295).
+
 Version 0.36.4
 -------------
 
