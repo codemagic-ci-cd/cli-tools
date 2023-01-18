@@ -316,10 +316,10 @@ class AppStoreConnect(
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
-        versions_and_builds: List[Tuple[Union[PreReleaseVersion, AppStoreVersion], Build]] = [
-            *zip(testflight_versions, testflight_builds),
-            *zip(app_store_versions, app_store_builds),
-        ]
+        versions_and_builds: Iterable[Tuple[Union[PreReleaseVersion, AppStoreVersion], Build]] = chain(
+            zip(testflight_versions, testflight_builds),
+            zip(app_store_versions, app_store_builds),
+        )
         return self._get_latest_build_number(versions_and_builds)
 
     @cli.action(
