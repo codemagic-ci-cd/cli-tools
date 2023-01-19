@@ -266,9 +266,8 @@ class AppStoreConnect(
         )
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
-    @classmethod
     def _get_latest_build_number(
-        cls,
+        self,
         versions_and_builds: Iterable[Tuple[Union[PreReleaseVersion, AppStoreVersion], Build]],
     ) -> Optional[str]:
         def comparator(
@@ -283,12 +282,19 @@ class AppStoreConnect(
             return version_name, LooseVersion(build.attributes.version)
 
         try:
-            _version, most_recent_build = max(versions_and_builds, key=comparator)
+            version, most_recent_build = max(versions_and_builds, key=comparator)
         except ValueError:  # Cannot find maximum from empy sequence
             return None
 
-        cls.echo(most_recent_build.attributes.version)
-        return most_recent_build.attributes.version
+        build_number = most_recent_build.attributes.version
+        if isinstance(version, AppStoreVersion):
+            container_version = f'App Store version {version.attributes.versionString}'
+        else:
+            container_version = f'TestFlight version {version.attributes.version}'
+        self.logger.info(f'Found build number {build_number} from {container_version}')
+
+        self.echo(build_number)
+        return build_number
 
     @cli.action(
         'get-latest-build-number',
