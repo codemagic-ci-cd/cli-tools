@@ -16,8 +16,11 @@ from codemagic.tools.app_store_connect import AppStoreConnect
 R = TypeVar('R', bound=Resource)
 
 
-def _mock_echo(*_args, **_kwargs):
-    pass
+@pytest.fixture
+@mock.patch.object(AppStoreConnect, 'echo', lambda *_: None)
+@mock.patch.object(AppStoreConnect, '_get_api_client', lambda _: None)
+def app_store_connect() -> AppStoreConnect:
+    return AppStoreConnect(None, None, None)
 
 
 def _get_resource(version: str, resource_type: ResourceType, resource_class: Type[R]) -> R:
@@ -51,8 +54,7 @@ def _get_version_and_build(versions: Tuple[str, str]) -> Tuple[PreReleaseVersion
         ([('3.0.9', '1'), ('3.0.9', '2'), ('3.0.8', '3')], '2'),
     ],
 )
-@mock.patch.object(AppStoreConnect, 'echo', _mock_echo)
-def test_get_latest_build_number(version_pairs, expected_latest_build_number):
+def test_get_latest_build_number(version_pairs, expected_latest_build_number, app_store_connect):
     versions_and_builds = map(_get_version_and_build, version_pairs)
-    latest_build_number = AppStoreConnect._get_latest_build_number(versions_and_builds)
+    latest_build_number = app_store_connect._get_latest_build_number(versions_and_builds)
     assert latest_build_number == expected_latest_build_number
