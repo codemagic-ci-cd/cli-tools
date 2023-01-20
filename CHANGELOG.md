@@ -1,3 +1,11 @@
+Version 0.36.7
+-------------
+
+**Development**
+- Regenerate `poetry.lock` with updated dependencies for development environments. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+- Update type hints to be compatible with `mypy` version `0.991`. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+- Marginal code formatting changes. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+
 Version 0.36.6
 -------------
 
