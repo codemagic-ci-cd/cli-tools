@@ -224,7 +224,10 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 self.logger.debug('Killed Xcode process (pid=%d, name=%s)', process.pid, process_name)
 
     def _run_command(
-            self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp],
+        self,
+        command: Sequence[str],
+        error_message: str,
+        cli_app: Optional[CliApp],
     ) -> Optional[AltoolResult]:
         obfuscate_patterns = [self._password] if self._password else []
         try:
