@@ -1,3 +1,13 @@
+Version 0.36.6
+-------------
+
+This is a bugfix release including changes from [PR #300](https://github.com/codemagic-ci-cd/cli-tools/pull/300).
+
+- Fixes the actions that detect the latest build number from App Store Connect for App Store or Pre Release (TestFlight) versions:
+  - `app-store-connect get-latest-testflight-build-number`,
+  - `app-store-connect get-latest-app-store-build-number` and
+  - `app-store-connect get-latest-build-number`.
+
 Version 0.36.5
 -------------
 

@@ -10,6 +10,7 @@ import time
 from distutils.version import LooseVersion
 from functools import lru_cache
 from itertools import chain
+from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -23,6 +24,7 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -31,6 +33,7 @@ from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -263,14 +266,35 @@ class AppStoreConnect(
         )
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
-    @classmethod
-    def _get_latest_build_number(cls, builds: List[Build]) -> Optional[str]:
-        if not builds:
+    def _get_latest_build_number(
+        self,
+        versions_and_builds: Iterable[Tuple[Union[PreReleaseVersion, AppStoreVersion], Build]],
+    ) -> Optional[str]:
+        def comparator(
+            version_and_build: Tuple[Union[PreReleaseVersion, AppStoreVersion], Build],
+        ) -> Tuple[LooseVersion, LooseVersion]:
+            version, build = version_and_build
+            if isinstance(version, AppStoreVersion):
+                version_name = LooseVersion(version.attributes.versionString)
+            else:
+                version_name = LooseVersion(version.attributes.version)
+
+            return version_name, LooseVersion(build.attributes.version)
+
+        try:
+            version, most_recent_build = max(versions_and_builds, key=comparator)
+        except ValueError:  # Cannot find maximum from empy sequence
             return None
-        most_recent_build = max(builds, key=lambda b: LooseVersion(b.attributes.version))
-        version = most_recent_build.attributes.version
-        cls.echo(version)
-        return version
+
+        build_number = most_recent_build.attributes.version
+        if isinstance(version, AppStoreVersion):
+            container_version = f'App Store version {version.attributes.versionString}'
+        else:
+            container_version = f'TestFlight version {version.attributes.version}'
+        self.logger.info(f'Found build number {build_number} from {container_version}')
+
+        self.echo(build_number)
+        return build_number
 
     @cli.action(
         'get-latest-build-number',
@@ -286,11 +310,11 @@ class AppStoreConnect(
         Get the highest build number used for the given app considering both TestFlight and App Store submissions
         """
         try:
-            _testflight_versions, testflight_builds = self.api_client.pre_release_versions.list_with_include(
+            testflight_versions, testflight_builds = self.api_client.pre_release_versions.list_with_include(
                 Build,
                 resource_filter=self.api_client.pre_release_versions.Filter(app=application_id, platform=platform),
             )
-            _app_store_versions, app_store_builds = self.api_client.app_store_versions.list_with_include(
+            app_store_versions, app_store_builds = self.api_client.app_store_versions.list_with_include(
                 application_id,
                 Build,
                 resource_filter=self.api_client.app_store_versions.Filter(platform=platform),
@@ -298,7 +322,11 @@ class AppStoreConnect(
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
-        return self._get_latest_build_number([*testflight_builds, *app_store_builds])
+        versions_and_builds: Iterable[Tuple[Union[PreReleaseVersion, AppStoreVersion], Build]] = chain(
+            zip(testflight_versions, testflight_builds),
+            zip(app_store_versions, app_store_builds),
+        )
+        return self._get_latest_build_number(versions_and_builds)
 
     @cli.action(
         'get-latest-app-store-build-number',
@@ -319,14 +347,14 @@ class AppStoreConnect(
         versions_client = self.api_client.app_store_versions
         versions_filter = versions_client.Filter(version_string=version_string, platform=platform)
         try:
-            _versions, builds = versions_client.list_with_include(
+            versions, builds = versions_client.list_with_include(
                 application_id, Build, resource_filter=versions_filter,
             )
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Build, builds, versions_filter)
         self.printer.print_resources(builds, should_print)
-        return self._get_latest_build_number(builds)
+        return self._get_latest_build_number(zip(versions, builds))
 
     @cli.action(
         'get-latest-testflight-build-number',
@@ -347,12 +375,12 @@ class AppStoreConnect(
         versions_client = self.api_client.pre_release_versions
         versions_filter = versions_client.Filter(app=application_id, platform=platform, version=pre_release_version)
         try:
-            _versions, builds = versions_client.list_with_include(Build, resource_filter=versions_filter)
+            versions, builds = versions_client.list_with_include(Build, resource_filter=versions_filter)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
         self.printer.log_found(Build, builds, versions_filter)
         self.printer.print_resources(builds, should_print)
-        return self._get_latest_build_number(builds)
+        return self._get_latest_build_number(zip(versions, builds))
 
     @cli.action(
         'list-devices',
