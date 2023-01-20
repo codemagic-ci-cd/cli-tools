@@ -155,7 +155,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     [Bundletool](https://developer.android.com/studio/command-line/bundletool)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(AndroidAppBundle, self).__init__(*args, **kwargs)
         self.__bundletool_jar: Optional[pathlib.Path] = None
 

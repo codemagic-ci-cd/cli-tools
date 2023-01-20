@@ -11,6 +11,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Callable
+from typing import Generator
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -33,6 +34,9 @@ if TYPE_CHECKING:
     from codemagic.cli import CliApp
 
 
+StrTuple = Union[Tuple[()], Tuple[str, ...]]  # Empty or variable length tuple with str elements
+
+
 class AltoolCommandError(Exception):
     def __init__(self, error_message: str, process_output: str):
         super().__init__(error_message)
@@ -41,13 +45,15 @@ class AltoolCommandError(Exception):
 
 class Altool(RunningCliAppMixin, StringConverterMixin):
 
-    def __init__(self,
-                 key_identifier: Optional[KeyIdentifier] = None,
-                 issuer_id: Optional[IssuerId] = None,
-                 private_key: Optional[str] = None,
-                 username: Optional[str] = None,
-                 password: Optional[str] = None,
-                 verbose: bool = False):
+    def __init__(
+        self,
+        key_identifier: Optional[KeyIdentifier] = None,
+        issuer_id: Optional[IssuerId] = None,
+        private_key: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        verbose: bool = False,
+    ):
         # JWT authentication fields
         self._key_identifier = key_identifier
         self._issuer_id = issuer_id
@@ -71,14 +77,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         if self._authentication_method is AuthenticationMethod.NONE:
             raise ValueError(
                 'Missing authentication credentials. Either API key and issuer ID '
-                'or username and password are required.')
+                'or username and password are required.',
+            )
         elif self._authentication_method is AuthenticationMethod.USERNAME_AND_EMAIL:
             is_valid_app_specific_password = bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', self._password))
             if not is_valid_app_specific_password:
                 raise ValueError(
                     'Invalid App Store Connect password. Expected pattern "abcd-abcd-abcd-abcd". '
                     'Please use app-specific password generated at Apple ID account page. '
-                    'See https://support.apple.com/en-us/HT204397 for more information.')
+                    'See https://support.apple.com/en-us/HT204397 for more information.',
+                )
 
     @property
     def _authentication_method(self) -> AuthenticationMethod:
@@ -97,13 +105,17 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         return key_path
 
     @contextmanager
-    def _get_authentication_flags(self):
+    def _get_authentication_flags(self) -> Generator[StrTuple, None, None]:
         private_key_path: Optional[pathlib.Path] = None
         try:
             if self._authentication_method is AuthenticationMethod.JSON_WEB_TOKEN:
+                assert self._key_identifier is not None  # Make mypy happy
+                assert self._issuer_id is not None  # Make mypy happy
                 private_key_path = self._save_api_key_to_disk()
-                flags = ('--apiKey', self._key_identifier, '--apiIssuer', self._issuer_id)
+                flags: StrTuple = ('--apiKey', str(self._key_identifier), '--apiIssuer', str(self._issuer_id))
             elif self._authentication_method is AuthenticationMethod.USERNAME_AND_EMAIL:
+                assert isinstance(self._username, str)  # Make mypy happy
+                assert isinstance(self._password, str)  # Make mypy happy
                 flags = ('--username', self._username, '--password', '@env:APP_STORE_CONNECT_PASSWORD')
                 os.environ['APP_STORE_CONNECT_PASSWORD'] = self._password
             else:
@@ -118,7 +130,11 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 pass
 
     def _construct_action_command(
-            self, action_name: str, artifact_path: pathlib.Path, auth_flags: Sequence[str]) -> Tuple[str, ...]:
+        self,
+        action_name: str,
+        artifact_path: pathlib.Path,
+        auth_flags: Sequence[str],
+    ) -> Tuple[str, ...]:
         verbose_flags = ['--verbose'] if self.verbose else []
         return (
             'xcrun', 'altool', action_name,
@@ -208,7 +224,8 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 self.logger.debug('Killed Xcode process (pid=%d, name=%s)', process.pid, process_name)
 
     def _run_command(
-            self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp]) -> Optional[AltoolResult]:
+            self, command: Sequence[str], error_message: str, cli_app: Optional[CliApp],
+    ) -> Optional[AltoolResult]:
         obfuscate_patterns = [self._password] if self._password else []
         try:
             if cli_app:
