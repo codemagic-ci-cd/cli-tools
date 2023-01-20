@@ -255,6 +255,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         show_build_settings = not disable_show_build_settings
         export_options = self._get_export_options_from_path(export_options_plist)
         xcodebuild = self._get_xcodebuild(**locals())
+
+        xcode = Xcode.get_selected()
+        self.logger.info(Colors.BLUE(f'Using Xcode {xcode.version} ({xcode.build_version})'))
+
         clean and self._clean(xcodebuild)
         show_build_settings and self._show_build_settings(xcodebuild, show_output=self.verbose)
 
@@ -265,6 +269,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 archive_directory,
                 xcargs=archive_xcargs,
                 custom_flags=archive_flags,
+                xcode=xcode,
             )
         except IOError as error:
             raise XcodeProjectException(*error.args)
