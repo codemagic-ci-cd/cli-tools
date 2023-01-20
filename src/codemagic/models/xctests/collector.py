@@ -14,7 +14,7 @@ from .xcresulttool import XcResultTool
 
 class XcResultCollector:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = log.get_logger(self.__class__)
         self._ignore_xcresults: Set[pathlib.Path] = set()
         self._gathered_xcresults: Set[pathlib.Path] = set()
@@ -64,7 +64,9 @@ class XcResultCollector:
             self._xcresult_is_merged = False
         else:
             self._xcresult = XcResultTool.merge(
-                *self._gathered_xcresults, result_prefix=self._get_merged_result_prefix())
+                *self._gathered_xcresults,
+                result_prefix=self._get_merged_result_prefix(),
+            )
             self._xcresult_is_merged = True
         return self._xcresult
 
