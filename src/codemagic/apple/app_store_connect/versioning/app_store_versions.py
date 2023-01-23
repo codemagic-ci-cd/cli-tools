@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -143,28 +142,6 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             for app_store_version_localization in self.client.paginate(url, page_size=None)
         ]
 
-    def list_with_include(
-            self,
-            application_id: ResourceId,
-            include_type: Type[IncludedResource],
-            resource_filter: Filter = Filter()) -> Tuple[List[AppStoreVersion], List[IncludedResource]]:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
-        """
-
-        # TODO: Move this method under `Apps.list_app_store_versions`
-
-        params = {
-            'include': self._get_include_field_name(include_type),
-            **resource_filter.as_query_params(),
-        }
-        results = self.client.paginate_with_included(
-            f'{self.client.API_URL}/apps/{application_id}/appStoreVersions', params=params)
-        return (
-            [AppStoreVersion(app_store_version) for app_store_version in results.data],
-            [include_type(included) for included in results.included],
-        )
-
     def modify(
             self,
             app_store_version: Union[LinkedResourceData, ResourceId],
@@ -200,7 +177,8 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             relationships=relationships,
         )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}', json=payload).json()
+            f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}', json=payload,
+        ).json()
         return AppStoreVersion(response['data'])
 
     def delete(self, app_store_version: Union[LinkedResourceData, ResourceId]) -> None:

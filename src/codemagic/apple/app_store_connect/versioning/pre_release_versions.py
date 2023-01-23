@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
-from typing import Tuple
 from typing import Type
 from typing import TypeVar
+from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
@@ -37,20 +38,25 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
             return 'builds'
         raise ValueError(f'Unknown include type {include_type}')
 
-    def list_with_include(
-            self,
-            include_type: Type[IncludedResource],
-            resource_filter: Filter = Filter()) -> Tuple[List[PreReleaseVersion], List[IncludedResource]]:
+    def list(self, resource_filter: Filter = Filter()) -> List[PreReleaseVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """
-
-        params = {
-            'include': self._get_include_field_name(include_type),
-            **resource_filter.as_query_params(),
-        }
-        results = self.client.paginate_with_included(f'{self.client.API_URL}/preReleaseVersions', params=params)
-        return (
-            [PreReleaseVersion(prerelease_version) for prerelease_version in results.data],
-            [include_type(included) for included in results.included],
+        results = self.client.paginate_with_included(
+            f'{self.client.API_URL}/preReleaseVersions',
+            params=resource_filter.as_query_params(),
         )
+        return [PreReleaseVersion(prerelease_version) for prerelease_version in results.data]
+
+    def list_builds(self, pre_release_version: Union[LinkedResourceData, ResourceId]) -> List[Build]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_a_prerelease_version
+        """
+
+        url = None
+        if isinstance(pre_release_version, PreReleaseVersion) and pre_release_version.relationships is not None:
+            url = pre_release_version.relationships.builds.links.related
+        if url is None:
+            url = f'{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds'
+
+        return [Build(build) for build in self.client.paginate(url, page_size=None)]
