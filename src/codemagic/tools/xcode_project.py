@@ -257,7 +257,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
 
         xcode = Xcode.get_selected()
-        self.logger.info(Colors.BLUE(f'Using Xcode {xcode.version} ({xcode.build_version})'))
+        self.logger.info(Colors.BLUE(f'Using Xcode {xcode.version} ({xcode.build_version})\n'))
 
         clean and self._clean(xcodebuild)
         show_build_settings and self._show_build_settings(xcodebuild, show_output=self.verbose)
