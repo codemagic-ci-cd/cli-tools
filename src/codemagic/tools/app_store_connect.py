@@ -10,6 +10,8 @@ import time
 from distutils.version import LooseVersion
 from functools import lru_cache
 from itertools import chain
+from typing import Callable
+from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import NamedTuple
@@ -342,20 +344,36 @@ class AppStoreConnect(
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         BuildArgument.PRE_RELEASE_VERSION,
         CommonArgument.PLATFORM,
+        BuildArgument.EXPIRED,
+        BuildArgument.NOT_EXPIRED,
     )
     def get_latest_testflight_build_number(
         self,
         application_id: ResourceId,
         pre_release_version: Optional[str] = None,
         platform: Optional[Platform] = None,
+        expired: Optional[bool] = None,
+        not_expired: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the latest Testflight build number for the given application
         """
+        try:
+            expired_value: Optional[bool] = Argument.resolve_optional_two_way_switch(expired, not_expired)
+        except ValueError:
+            flags = f'{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}'
+            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
+
+        def builds_filter_predicate(build: Build) -> bool:
+            if expired_value is None:
+                return True
+            return expired_value is build.attributes.expired
+
         latest_build_info = self._get_max_testflight_version_and_build(
             application_id,
             pre_release_version=pre_release_version,
             platform=platform,
+            builds_filter_predicate=builds_filter_predicate,
         )
         if latest_build_info is None:
             self.logger.info(Colors.YELLOW(f'Did not find latest build for app {application_id}'))
@@ -378,6 +396,7 @@ class AppStoreConnect(
         application_id: ResourceId,
         pre_release_version: Optional[str] = None,
         platform: Optional[Platform] = None,
+        builds_filter_predicate: Optional[Callable[[Build], bool]] = None,
     ) -> Optional[_LatestBuildInfo]:
         versions_filter = self.api_client.pre_release_versions.Filter(
             app=application_id,
@@ -395,7 +414,9 @@ class AppStoreConnect(
         )
         try:
             for version in pre_release_versions:
-                version_builds = self.api_client.pre_release_versions.list_builds(version)
+                version_builds: Iterable[Build] = self.api_client.pre_release_versions.list_builds(version)
+                if builds_filter_predicate is not None:
+                    version_builds = (b for b in version_builds if builds_filter_predicate(b))
                 max_build = max(version_builds, key=lambda b: LooseVersion(b.attributes.version), default=None)
                 if max_build is not None:
                     return _LatestBuildInfo(version, max_build)

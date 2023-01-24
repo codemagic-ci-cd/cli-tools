@@ -91,8 +91,8 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_information
         """
-        app_id = self._get_resource_id(app_store_version)
-        response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_id}').json()
+        app_store_version_id = self._get_resource_id(app_store_version)
+        response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}').json()
         return AppStoreVersion(response['data'])
 
     def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Optional[Build]:
