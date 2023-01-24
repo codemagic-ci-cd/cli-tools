@@ -1,7 +1,10 @@
 Version 0.37.0
 -------------
 
-This is a bugfix release including changes from [PR #304](https://github.com/codemagic-ci-cd/cli-tools/pull/304).
+This release includes changes from [PR #304](https://github.com/codemagic-ci-cd/cli-tools/pull/304).
+
+**Features**
+- Add option to include only _expired_ or _not expired_ builds to the latest build number lookup with action `app-store-connect get-latest-testflight-build-number`.
 
 **Bugfixes**
 - Avoid using _included_ resources when listing data with App Store Connect API for actions that detect the latest build number. When listing App Store or Prerelease (TestFlight) versions with included builds, then not all existing builds were present in the response. Fixed actions:
