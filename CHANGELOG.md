@@ -2,10 +2,10 @@ Version 0.37.1
 -------------
 
 **Bugfixes**:
-- Make App Store and prerelease version comparisons more robust for `app-store-connect` actions. [PR #30x](https://github.com/codemagic-ci-cd/cli-tools/pull/30x)
+- Make App Store and prerelease version comparisons more robust for `app-store-connect` actions. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
 
 **Dependencies**
-- Declare direct Python dependency for package [`packaging`](https://packaging.pypa.io/en/stable/). Previously it was indirectly required by `setuptools`. [PR #30x](https://github.com/codemagic-ci-cd/cli-tools/pull/30x)
+- Declare direct Python dependency for package [`packaging`](https://packaging.pypa.io/en/stable/). Previously it was indirectly required by `setuptools`. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
 
 
 Version 0.37.0
