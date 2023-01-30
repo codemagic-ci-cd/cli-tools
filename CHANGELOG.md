@@ -1,8 +1,12 @@
 Version 0.37.1
 -------------
 
-**Bugfixes**
-- Update action `app-store-connect build-ipa` to use `CODE_SIGN_STYLE=Manual` xcarg for underlying `xcodebuild archive` command when building with Xcode 14+ and none of the signing files are managed by Xcode. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+**Bugfixes**:
+- Update action `app-store-connect build-ipa` to use `CODE_SIGN_STYLE=Manual` xcarg for underlying `xcodebuild archive` command when building with Xcode 14+ and none of the signing files are managed by Xcode. [PR #302](https://github.com/codemagic-ci-cd/cli-tools/pull/302)
+- Make App Store and prerelease version comparisons more robust for `app-store-connect` actions. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
+
+**Dependencies**
+- Declare direct Python dependency for package [`packaging`](https://packaging.pypa.io/en/stable/). Previously it was indirectly required by `setuptools`. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
 
 Version 0.37.0
 -------------

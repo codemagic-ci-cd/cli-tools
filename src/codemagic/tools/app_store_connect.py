@@ -7,7 +7,6 @@ import pathlib
 import re
 import tempfile
 import time
-from distutils.version import LooseVersion
 from functools import lru_cache
 from itertools import chain
 from typing import Callable
@@ -47,6 +46,7 @@ from codemagic.mixins import PathFinderMixin
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+from codemagic.utilities import versions
 
 from ._app_store_connect.action_groups import AppsActionGroup
 from ._app_store_connect.action_groups import AppStoreVersionLocalizationsActionGroup
@@ -98,10 +98,10 @@ class _LatestBuildInfo(NamedTuple):
     version: Union[AppStoreVersion, PreReleaseVersion]
     build: Build
 
-    def get_version(self) -> LooseVersion:
+    def get_version(self) -> versions.Version:
         if isinstance(self.version, AppStoreVersion):
-            return LooseVersion(self.version.attributes.versionString)
-        return LooseVersion(self.version.attributes.version)
+            return versions.parse_version(self.version.attributes.versionString)
+        return versions.parse_version(self.version.attributes.version)
 
 
 @cli.common_arguments(*AppStoreConnectArgument)
@@ -409,7 +409,7 @@ class AppStoreConnect(
             raise AppStoreConnectError(str(api_error))
 
         pre_release_versions.sort(
-            key=lambda v: LooseVersion(v.attributes.version),
+            key=lambda v: versions.sorting_key(v.attributes.version),
             reverse=True,
         )
         try:
@@ -417,7 +417,11 @@ class AppStoreConnect(
                 version_builds: Iterable[Build] = self.api_client.pre_release_versions.list_builds(version)
                 if builds_filter_predicate is not None:
                     version_builds = (b for b in version_builds if builds_filter_predicate(b))
-                max_build = max(version_builds, key=lambda b: LooseVersion(b.attributes.version), default=None)
+                max_build = max(
+                    version_builds,
+                    key=lambda b: versions.sorting_key(b.attributes.version),
+                    default=None,
+                )
                 if max_build is not None:
                     return _LatestBuildInfo(version, max_build)
         except AppStoreConnectApiError as api_error:
@@ -444,7 +448,7 @@ class AppStoreConnect(
             raise AppStoreConnectError(str(api_error))
 
         app_store_versions.sort(
-            key=lambda v: LooseVersion(v.attributes.versionString),
+            key=lambda v: versions.sorting_key(v.attributes.versionString),
             reverse=True,
         )
         try:
