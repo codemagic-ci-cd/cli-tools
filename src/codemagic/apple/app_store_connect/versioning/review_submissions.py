@@ -27,7 +27,7 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
 
     @dataclass
     class Filter(ResourceManager.Filter):
-        app: Union[ResourceId, None] = None
+        app: Optional[Union[ResourceId, str]] = None
         platform: Optional[Platform] = None
         state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None
 
