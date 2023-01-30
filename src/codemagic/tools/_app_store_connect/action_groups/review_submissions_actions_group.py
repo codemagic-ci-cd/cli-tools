@@ -90,7 +90,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def cancel_review_submissions(
         self,
-        application_id: ResourceId = None,
+        application_id: ResourceId,
         platform: Optional[Platform] = None,
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = False,
@@ -137,7 +137,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def list_review_submissions(
         self,
-        application_id: ResourceId = None,
+        application_id: ResourceId,
         platform: Optional[Platform] = None,
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = True,
