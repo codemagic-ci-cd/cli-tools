@@ -57,6 +57,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     # Define signatures for self-reference to other action groups
 
     @property
+    @abstractmethod
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 

@@ -19,6 +19,8 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--profiles-dir PROFILES_DIRECTORY]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--platform PLATFORM]
+    [--expired]
+    [--not-expired]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-testflight-build-number`
@@ -37,6 +39,14 @@ Version of the build published to Testflight that identifies an iteration of the
 
 
 Apple operating systems
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

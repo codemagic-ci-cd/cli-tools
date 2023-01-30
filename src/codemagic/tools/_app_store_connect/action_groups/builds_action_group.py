@@ -5,7 +5,6 @@ import shlex
 import time
 from abc import ABCMeta
 from datetime import datetime
-from distutils.version import LooseVersion
 from typing import Dict
 from typing import Iterator
 from typing import List
@@ -31,6 +30,7 @@ from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
 from codemagic.cli import Colors
+from codemagic.utilities import versions
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -98,18 +98,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         Expire all builds except the given build
         """
-
         builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
-        expired_builds = []
-        for asc_build in builds:
-            if asc_build.id == build_id:
-                continue
-            expired_builds.append(
-                self.expire_build(
-                    build_id=asc_build.id,
-                ),
+        return [
+            self.expire_build(
+                build_id=asc_build.id,
             )
-        return expired_builds
+            for asc_build in builds
+            if asc_build.id != build_id
+        ]
 
     @cli.action(
         'pre-release-version',
@@ -206,7 +202,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(str(api_error)) from api_error
 
         try:
             self._assert_app_has_testflight_information(app)
@@ -287,7 +283,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(str(api_error)) from api_error
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
@@ -586,13 +582,16 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         }
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
+        def sorting_key(app_store_version: Optional[AppStoreVersion]) -> versions.Version:
+            assert app_store_version is not None  # Make mypy happy
+            return versions.sorting_key(app_store_version.attributes.versionString)
+
         versions_filter = self.api_client.app_store_versions.Filter(
             app_store_state=AppStoreState.editable_states(),
             platform=platform,
         )
         app_store_versions = self.api_client.apps.list_app_store_versions(app, resource_filter=versions_filter)
-        app_store_versions.sort(key=lambda asv: LooseVersion(asv.attributes.versionString))
-        return app_store_versions[-1] if app_store_versions else None
+        return max(app_store_versions, default=None, key=sorting_key)
 
     @classmethod
     def _get_app_store_version_info(

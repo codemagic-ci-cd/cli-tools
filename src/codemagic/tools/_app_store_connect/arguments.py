@@ -563,7 +563,8 @@ class AppStoreVersionArgument(cli.Argument):
             'default': Platform.IOS,
         },
     )
-    PLATFORM_OPTIONAL = PLATFORM.duplicate(
+    PLATFORM_OPTIONAL = cli.ArgumentProperties.duplicate(
+        PLATFORM,
         argparse_kwargs={
             'required': False,
             'choices': list(Platform),
@@ -657,7 +658,8 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
-    LOCALE_DEFAULT = LOCALE.duplicate(
+    LOCALE_DEFAULT = cli.ArgumentProperties.duplicate(
+        LOCALE,
         flags=('--locale', '-l'),
         description=(
             'The locale code name for App Store metadata in different languages. '
@@ -959,7 +961,7 @@ class PublishArgument(cli.Argument):
             'For how long (in seconds) should the tool wait between the retries of package validation or '
             'upload action retries in case they failed due to a known `altool` issues '
             '(authentication failure or request timeout). '
-            f'See also {ALTOOL_RETRIES_COUNT.flags[0]} for more configuration options.'
+            f'See also {cli.ArgumentProperties.get_flag(ALTOOL_RETRIES_COUNT)} for more configuration options.'
         ),
         argparse_kwargs={
             'required': False,
@@ -1053,7 +1055,8 @@ class BuildArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
-    LOCALE_DEFAULT = LOCALE_OPTIONAL.duplicate(
+    LOCALE_DEFAULT = cli.ArgumentProperties.duplicate(
+        LOCALE_OPTIONAL,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
             "In case not provided, application's primary locale from test information is used instead. "
@@ -1079,7 +1082,7 @@ class BuildArgument(cli.Argument):
         description=(
             "Localized beta test info for what's new in the uploaded build as a JSON encoded list. "
             f'For example, "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
-            f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
+            f'See "{Colors.WHITE(cli.ArgumentProperties.get_flag(LOCALE_OPTIONAL))}" for possible locale options.'
         ),
         argparse_kwargs={
             'required': False,
@@ -1096,7 +1099,8 @@ class BuildArgument(cli.Argument):
             'required': True,
         },
     )
-    BETA_GROUP_NAMES_OPTIONAL = BETA_GROUP_NAMES_REQUIRED.duplicate(
+    BETA_GROUP_NAMES_OPTIONAL = cli.ArgumentProperties.duplicate(
+        BETA_GROUP_NAMES_REQUIRED,
         argparse_kwargs={
             'nargs': '+',
             'metavar': 'beta-group',
@@ -1193,7 +1197,8 @@ class DeviceArgument(cli.Argument):
         description='Name of the Device',
         argparse_kwargs={'required': True},
     )
-    DEVICE_NAME_OPTIONAL = DEVICE_NAME.duplicate(
+    DEVICE_NAME_OPTIONAL = cli.ArgumentProperties.duplicate(
+        DEVICE_NAME,
         argparse_kwargs={'required': False},
     )
     DEVICE_UDID = cli.ArgumentProperties(

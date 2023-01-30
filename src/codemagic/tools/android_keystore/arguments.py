@@ -26,7 +26,10 @@ class AndroidKeystoreArgument(cli.Argument):
         flags=('-a', '--ks-key-alias', '--alias'),
         description='An identifying name for your keystore key',
     )
-    KEY_ALIAS = KEY_ALIAS_OPTIONAL.duplicate(argparse_kwargs={'required': True})
+    KEY_ALIAS = cli.ArgumentProperties.duplicate(
+        KEY_ALIAS_OPTIONAL,
+        argparse_kwargs={'required': True},
+    )
     KEY_PASSWORD = cli.ArgumentProperties(
         key='key_password',
         flags=('-l', '--ks-key-pass', '--key-pass'),

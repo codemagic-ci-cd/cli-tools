@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import os
 import pathlib
 import re
@@ -8,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from distutils.version import LooseVersion
 from functools import reduce
 from operator import add
 from typing import IO
@@ -25,18 +27,21 @@ from codemagic.utilities.levenshtein_distance import levenshtein_distance
 from .export_options import ExportOptions
 from .simulator import CoreSimulatorService
 from .simulator import Simulator
+from .xcode import Xcode
 from .xcpretty import Xcpretty
 
 
 class Xcodebuild(RunningCliAppMixin):
 
-    def __init__(self,
-                 xcode_workspace: Optional[pathlib.Path] = None,
-                 xcode_project: Optional[pathlib.Path] = None,
-                 target_name: Optional[str] = None,
-                 configuration_name: Optional[str] = None,
-                 scheme_name: Optional[str] = None,
-                 xcpretty: Optional[Xcpretty] = None):
+    def __init__(
+        self,
+        xcode_workspace: Optional[pathlib.Path] = None,
+        xcode_project: Optional[pathlib.Path] = None,
+        target_name: Optional[str] = None,
+        configuration_name: Optional[str] = None,
+        scheme_name: Optional[str] = None,
+        xcpretty: Optional[Xcpretty] = None,
+    ):
         self.logger = log.get_logger(self.__class__)
         self.xcpretty = xcpretty
         self.workspace = xcode_workspace.expanduser() if xcode_workspace else None
@@ -53,9 +58,11 @@ class Xcodebuild(RunningCliAppMixin):
             tmp_dir = pathlib.Path(tempfile.gettempdir())
         logs_dir = tmp_dir / 'xcodebuild_logs'
         logs_dir.mkdir(exist_ok=True)
-        prefix = f'{self.xcode_project.stem}_'
-        with tempfile.NamedTemporaryFile(prefix=prefix, suffix='.log', dir=logs_dir) as tf:
-            return pathlib.Path(tf.name)
+        path_candidates = itertools.chain(
+            (logs_dir / f'{self.xcode_project.stem}.log',),
+            (logs_dir / f'{self.xcode_project.stem}_{i}.log' for i in itertools.count(1)),
+        )
+        return next(log_path for log_path in path_candidates if not log_path.exists())
 
     def _log_process(self, xcodebuild_cli_process: Optional[XcodebuildCliProcess]):
         if not xcodebuild_cli_process:
@@ -121,17 +128,22 @@ class Xcodebuild(RunningCliAppMixin):
             command.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
         return command
 
-    def _construct_archive_command(self,
-                                   archive_path: pathlib.Path,
-                                   export_options: ExportOptions,
-                                   xcargs: Optional[str],
-                                   custom_flags: Optional[str]) -> List[str]:
+    def _construct_archive_command(
+        self,
+        archive_path: pathlib.Path,
+        export_options: ExportOptions,
+        xcargs: Optional[str],
+        custom_flags: Optional[str],
+        xcode: Xcode,
+    ) -> List[str]:
         code_signing_options = []
         if not export_options.has_xcode_managed_profiles():
             if export_options.teamID:
                 code_signing_options.append(f'DEVELOPMENT_TEAM={export_options.teamID}')
             if export_options.signingCertificate:
                 code_signing_options.append(f'CODE_SIGN_IDENTITY={export_options.signingCertificate}')
+            if LooseVersion('14') <= xcode.version:
+                code_signing_options.append('CODE_SIGN_STYLE=Manual')
 
         return [
             *self._construct_base_command(custom_flags),
@@ -141,12 +153,14 @@ class Xcodebuild(RunningCliAppMixin):
             *code_signing_options,
         ]
 
-    def _construct_export_archive_command(self,
-                                          archive_path: pathlib.Path,
-                                          ipa_directory: pathlib.Path,
-                                          export_options_plist: pathlib.Path,
-                                          xcargs: Optional[str],
-                                          custom_flags: Optional[str]) -> List[str]:
+    def _construct_export_archive_command(
+        self,
+        archive_path: pathlib.Path,
+        ipa_directory: pathlib.Path,
+        export_options_plist: pathlib.Path,
+        xcargs: Optional[str],
+        custom_flags: Optional[str],
+    ) -> List[str]:
         return [
             'xcodebuild', '-exportArchive',
             '-archivePath', str(archive_path),
@@ -156,15 +170,17 @@ class Xcodebuild(RunningCliAppMixin):
             *shlex.split(xcargs or ''),
         ]
 
-    def _construct_test_command(self,
-                                sdk: str,
-                                simulators: List[Simulator],
-                                only_testing: Optional[str],
-                                enable_code_coverage: bool,
-                                max_devices: Optional[int],
-                                max_simulators: Optional[int],
-                                xcargs: Optional[str],
-                                custom_flags: Optional[str]) -> List[str]:
+    def _construct_test_command(
+        self,
+        sdk: str,
+        simulators: List[Simulator],
+        only_testing: Optional[str],
+        enable_code_coverage: bool,
+        max_devices: Optional[int],
+        max_simulators: Optional[int],
+        xcargs: Optional[str],
+        custom_flags: Optional[str],
+    ) -> List[str]:
         max_devices_flag = '-maximum-concurrent-test-device-destinations'
         max_sims_flag = '-maximum-concurrent-test-simulator-destinations'
 
@@ -190,12 +206,18 @@ class Xcodebuild(RunningCliAppMixin):
         cmd = [*self._construct_base_command(None), 'clean']
         self._run_command(cmd, f'Failed to clean {self.workspace or self.project}')
 
-    def archive(self,
-                export_options: ExportOptions,
-                archive_directory: pathlib.Path,
-                *,
-                xcargs: Optional[str] = None,
-                custom_flags: Optional[str] = None) -> pathlib.Path:
+    def archive(
+        self,
+        export_options: ExportOptions,
+        archive_directory: pathlib.Path,
+        *,
+        xcargs: Optional[str] = None,
+        custom_flags: Optional[str] = None,
+        xcode: Optional[Xcode] = None,
+    ) -> pathlib.Path:
+        if xcode is None:
+            xcode = Xcode.get_selected()
+
         CoreSimulatorService().ensure_clean_state()
 
         archive_directory.mkdir(parents=True, exist_ok=True)
@@ -206,7 +228,13 @@ class Xcodebuild(RunningCliAppMixin):
         )
         xcarchive = pathlib.Path(temp_dir)
 
-        cmd = self._construct_archive_command(xcarchive, export_options, xcargs, custom_flags)
+        cmd = self._construct_archive_command(
+            xcarchive,
+            export_options,
+            xcargs,
+            custom_flags,
+            xcode,
+        )
         try:
             self._run_command(cmd, f'Failed to archive {self.workspace or self.project}')
         except IOError as error:
@@ -220,17 +248,20 @@ class Xcodebuild(RunningCliAppMixin):
 
         return xcarchive
 
-    def export_archive(self,
-                       archive_path: pathlib.Path,
-                       export_options_plist: pathlib.Path,
-                       ipa_directory: pathlib.Path,
-                       *,
-                       xcargs: Optional[str] = None,
-                       custom_flags: Optional[str] = None) -> pathlib.Path:
+    def export_archive(
+        self,
+        archive_path: pathlib.Path,
+        export_options_plist: pathlib.Path,
+        ipa_directory: pathlib.Path,
+        *,
+        xcargs: Optional[str] = None,
+        custom_flags: Optional[str] = None,
+    ) -> pathlib.Path:
         ipa_directory.mkdir(parents=True, exist_ok=True)
 
         cmd = self._construct_export_archive_command(
-            archive_path, ipa_directory, export_options_plist, xcargs, custom_flags)
+            archive_path, ipa_directory, export_options_plist, xcargs, custom_flags,
+        )
         self._run_command(cmd, f'Failed to export archive {archive_path}')
 
         try:
@@ -238,21 +269,24 @@ class Xcodebuild(RunningCliAppMixin):
         except StopIteration:
             raise IOError(f'Ipa not found from {ipa_directory}')
 
-    def test(self,
-             sdk: str,
-             simulators: List[Simulator],
-             *,
-             enable_code_coverage: bool = False,
-             only_testing: Optional[str] = None,
-             max_concurrent_devices: Optional[int] = None,
-             max_concurrent_simulators: Optional[int] = None,
-             xcargs: Optional[str] = None,
-             custom_flags: Optional[str] = None):
+    def test(
+        self,
+        sdk: str,
+        simulators: List[Simulator],
+        *,
+        enable_code_coverage: bool = False,
+        only_testing: Optional[str] = None,
+        max_concurrent_devices: Optional[int] = None,
+        max_concurrent_simulators: Optional[int] = None,
+        xcargs: Optional[str] = None,
+        custom_flags: Optional[str] = None,
+    ):
         CoreSimulatorService().ensure_clean_state()
         cmd = self._construct_test_command(
             sdk, simulators, only_testing, enable_code_coverage,
             max_concurrent_devices, max_concurrent_simulators,
-            xcargs, custom_flags)
+            xcargs, custom_flags,
+        )
         error_message = f'Failed to test {self.workspace or self.project}'
         self._run_command(cmd, error_message)
 
@@ -263,11 +297,13 @@ class Xcodebuild(RunningCliAppMixin):
         # avoid formatting build settings output
         self._run_command(cmd, error_message, print_streams=print_streams, allow_xcpretty_formatting=False)
 
-    def _run_command(self,
-                     command: List[str],
-                     error_message: str,
-                     print_streams: bool = True,
-                     allow_xcpretty_formatting: bool = True):
+    def _run_command(
+        self,
+        command: List[str],
+        error_message: str,
+        print_streams: bool = True,
+        allow_xcpretty_formatting: bool = True,
+    ):
         process = None
         cli_app = self.get_current_cli_app()
         xcpretty = self.xcpretty if allow_xcpretty_formatting else None

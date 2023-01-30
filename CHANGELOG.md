@@ -1,4 +1,4 @@
-Version 0.37.0
+Version 0.38.0
 -------------
 
 This is an enhancement release to further streamline the App Store review submission automation capabilities.
@@ -12,6 +12,71 @@ Additions and changes from [pull request #289](https://github.com/codemagic-ci-c
 - Add new action `app-store-connect builds expire` to expire a specific build that has been uploaded to App Store Connect. Modifies the existing build resource to an expired status using `PATCH`. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_a_build).
 - Add new action `app-store-connect builds expire-previous-builds` to expire all builds uploaded to App Store Connect except the given build. Uses the aforementioned `app-store-connect builds expire` action internally.
 - Add flags `--cancel-previous-submissions` and `--expire-previous-builds` to the `app-store-connect publish` action.
+
+Version 0.37.1
+-------------
+
+**Bugfixes**:
+- Update action `app-store-connect build-ipa` to use `CODE_SIGN_STYLE=Manual` xcarg for underlying `xcodebuild archive` command when building with Xcode 14+ and none of the signing files are managed by Xcode. [PR #302](https://github.com/codemagic-ci-cd/cli-tools/pull/302)
+- Make App Store and prerelease version comparisons more robust for `app-store-connect` actions. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
+
+**Dependencies**
+- Declare direct Python dependency for package [`packaging`](https://packaging.pypa.io/en/stable/). Previously it was indirectly required by `setuptools`. [PR #306](https://github.com/codemagic-ci-cd/cli-tools/pull/306)
+
+Version 0.37.0
+-------------
+
+This release includes changes from [PR #304](https://github.com/codemagic-ci-cd/cli-tools/pull/304).
+
+**Features**
+- Add option to include only _expired_ or _not expired_ builds to the latest build number lookup with action `app-store-connect get-latest-testflight-build-number`.
+
+**Bugfixes**
+- Avoid using _included_ resources when listing data with App Store Connect API for actions that detect the latest build number. When listing App Store or Prerelease (TestFlight) versions with included builds, then not all existing builds were present in the response. Fixed actions:
+  - `app-store-connect get-latest-testflight-build-number`,
+  - `app-store-connect get-latest-app-store-build-number` and
+  - `app-store-connect get-latest-build-number`
+
+**Development**
+- Remove unused methods:
+  - `AppStoreVersions.list_with_include`,
+  - `PreReleaseVersions.list_with_include`.
+- New API methods:
+  - `PreReleaseVersions.list`,
+  - `PreReleaseVersions.list_builds`.
+
+Version 0.36.7
+-------------
+
+**Development**
+- Regenerate `poetry.lock` with updated dependencies for development environments. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+- Update type hints to be compatible with `mypy` version `0.991`. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+- Marginal code formatting changes. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
+
+Version 0.36.6
+-------------
+
+This is a bugfix release including changes from [PR #300](https://github.com/codemagic-ci-cd/cli-tools/pull/300).
+
+- Fixes the actions that detect the latest build number from App Store Connect for App Store or Pre Release (TestFlight) versions:
+  - `app-store-connect get-latest-testflight-build-number`,
+  - `app-store-connect get-latest-app-store-build-number` and
+  - `app-store-connect get-latest-build-number`.
+
+Version 0.36.5
+-------------
+
+**Bugfix**
+- Support Python 3.11.1 [PR #295](https://github.com/codemagic-ci-cd/cli-tools/pull/295).
+
+Version 0.36.4
+-------------
+
+This release contains changes from [PR #290](https://github.com/codemagic-ci-cd/cli-tools/pull/290).
+
+**CI**
+- Store releases only on PyPI and GitHub releases.
+- Include wheel with fixed name under GitHub release assets so that latest version could be accessed with permalink.
 
 Version 0.36.3
 -------------
