@@ -1,7 +1,8 @@
 Version 0.37.1
 -------------
 
-TBD
+**Bugfixes**
+- Update action `app-store-connect build-ipa` to use `CODE_SIGN_STYLE=Manual` xcarg for underlying `xcodebuild archive` command when building with Xcode 14+ and none of the signing files are managed by Xcode. [PR #301](https://github.com/codemagic-ci-cd/cli-tools/pull/301)
 
 Version 0.37.0
 -------------
