@@ -18,7 +18,7 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
-    [-]
+    [--cancel-previous-submissions]
     [--app-store-version-info APP_STORE_VERSION_INFO]
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
@@ -47,7 +47,7 @@ Alphanumeric ID value of the Build
 
 
 Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
-##### `-, -, c, a, n, c, e, l, -, p, r, e, v, i, o, u, s, -, s, u, b, m, i, s, s, i, o, n, s`
+##### `--cancel-previous-submissions`
 
 
 Cancels previous submissions for the application in App Store Connect before creating a new submission if the submissions are in a state where it is possible.
