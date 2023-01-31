@@ -26,9 +26,11 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
+    [-]
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--app-store]
     [--platform PLATFORM_OPTIONAL]
+    [-]
     [--app-store-version-info APP_STORE_VERSION_INFO]
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
@@ -88,6 +90,10 @@ Localized beta test info for what's new in the uploaded build as a JSON encoded 
 
 
 Enable submission of an app for Testflight beta app review to allow external testing.
+##### `-, -, e, x, p, i, r, e, -, b, u, i, l, d, s`
+
+
+Expires all builds other than the current for the application before submitting the build to TestFlight.
 ### Optional arguments to add build to Beta groups
 
 ##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
@@ -104,6 +110,10 @@ Enable submission of an app to App Store app review procedure.
 
 
 App Store Version platform
+##### `-, -, c, a, n, c, e, l, -, p, r, e, v, i, o, u, s, -, s, u, b, m, i, s, s, i, o, n, s`
+
+
+Cancels previous submissions for the application in App Store Connect before creating a new submission if the submissions are in a state where it is possible.
 ##### `--app-store-version-info, -vi=APP_STORE_VERSION_INFO`
 
 

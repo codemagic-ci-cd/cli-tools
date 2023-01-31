@@ -135,7 +135,7 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(
-            build.id, expire_previous_builds=False, max_build_processing_wait=0,
+            build.id, expire_builds=False, max_build_processing_wait=0,
         )
         mock_submit_to_app_store.assert_not_called()
         mock_add_beta_test_info.assert_called_with(
@@ -300,7 +300,7 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
         mock_submit_to_testflight.assert_called_with(
-            build.id, expire_previous_builds=False, max_build_processing_wait=0,
+            build.id, expire_builds=False, max_build_processing_wait=0,
         )
         mock_submit_to_app_store.assert_not_called()
         mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names=beta_group_names)

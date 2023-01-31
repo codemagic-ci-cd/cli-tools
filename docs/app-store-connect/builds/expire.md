@@ -1,12 +1,12 @@
 
-review-submissions
-==================
+expire
+======
 
 
-**Manage your App Store version review submissions**
+**Expire a specific build, an expired build becomes unavailable for testing**
 ### Usage
 ```bash
-app-store-connect review-submissions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds expire [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,14 @@ app-store-connect review-submissions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `expire`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,13 +93,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`cancel`](review-submissions/cancel.md)|Discard a specific review submission from App Review|
-|[`cancel-review-submissions`](review-submissions/cancel-review-submissions.md)|Find and cancel review submissions in App Store Connect|
-|[`confirm`](review-submissions/confirm.md)|Confirm pending review submission for App Review|
-|[`create`](review-submissions/create.md)|Create a review submission request for application's latest App Store Version|
-|[`get`](review-submissions/get.md)|Read Review Submission information|
-|[`list`](review-submissions/list.md)|Find and list review submissions in App Store Connect|

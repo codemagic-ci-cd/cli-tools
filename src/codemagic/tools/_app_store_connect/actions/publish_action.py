@@ -56,7 +56,7 @@ class AddBuildToBetaGroupOptions:
 @dataclass
 class SubmitToTestFlightOptions:
     max_build_processing_wait: int
-    expire_previous_builds: bool = False
+    expire_builds: bool = False
 
 
 @dataclass
@@ -178,7 +178,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
             max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
-            expire_previous_builds: bool = False,
+            expire_builds: bool = False,
             # Beta test info arguments
             beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
             locale: Optional[Locale] = None,
@@ -215,7 +215,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
-                expire_previous_builds=expire_previous_builds,
+                expire_builds=expire_builds,
             )
         if submit_to_app_store:
             if isinstance(earliest_release_date, Types.EarliestReleaseDate):
@@ -283,7 +283,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
             altool_verbose_logging: Optional[bool] = None,
             cancel_previous_submissions: bool = False,
-            expire_previous_builds: bool = False,
+            expire_builds: bool = False,
             **app_store_connect_submit_options,
     ) -> None:
         """
@@ -322,7 +322,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                             submit_to_testflight,
                             submit_to_app_store,
                             cancel_previous_submissions=cancel_previous_submissions,
-                            expire_previous_builds=expire_previous_builds,
+                            expire_builds=expire_builds,
                             **app_store_connect_submit_options,
                         ),
                     )
@@ -396,8 +396,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 **testflight_options.__dict__,
                 'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
             }
-            if testflight_options.expire_previous_builds:
-                self.expire_previous_builds(application_id=app.id, build_id=build.id, should_print=False)
+            if testflight_options.expire_builds:
+                self.expire_builds(application_id=app.id, build_ids=[build.id], should_print=False)
             self.submit_to_testflight(build.id, **testflight_submission_kwargs)
 
         if beta_group_options:

@@ -901,9 +901,9 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
-    EXPIRE_PREVIOUS_BUILDS = cli.ArgumentProperties(
-        key='expire_previous_builds',
-        flags=('--expire-previous-builds', '-eb'),
+    EXPIRE_BUILDS = cli.ArgumentProperties(
+        key='expire_builds',
+        flags=('--expire-builds',),
         type=bool,
         description=(
             'Expires all builds other than the current for the application '
@@ -916,7 +916,7 @@ class PublishArgument(cli.Argument):
     )
     CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
         key='cancel_previous_submissions',
-        flags=('--cancel-previous-submissions', '-cs'),
+        flags=('--cancel-previous-submissions',),
         type=bool,
         description=(
             'Cancels previous submissions for the application in App Store Connect '
@@ -1005,6 +1005,16 @@ class BuildArgument(cli.Argument):
         type=ResourceId,
         description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
+    )
+    BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL = cli.ArgumentProperties(
+        key='exclude_build_id',
+        flags=('--exclude-build-id',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build(s)',
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+        },
     )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
@@ -1463,5 +1473,5 @@ class ArgumentGroups:
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-        PublishArgument.EXPIRE_PREVIOUS_BUILDS,
+        PublishArgument.EXPIRE_BUILDS,
     )

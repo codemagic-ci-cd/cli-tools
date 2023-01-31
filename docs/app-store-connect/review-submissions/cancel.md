@@ -3,7 +3,7 @@ cancel
 ======
 
 
-**Discard review submission from App Review**
+**Discard a specific review submission from App Review**
 ### Usage
 ```bash
 app-store-connect review-submissions cancel [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

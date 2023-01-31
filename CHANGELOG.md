@@ -10,8 +10,8 @@ Additions and changes from [pull request #289](https://github.com/codemagic-ci-c
 - Add new action `app-store-connect review-submissions list` to list existing review submissions in the App Store. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/get_v1_reviewsubmissions).
 - Add new action `app-store-connect review-submissions cancel-review-submissions` to cancel existing review submissions in the App Store based on their type. Uses the already existing `app-store-connect review-submissions cancel` action internally that allows to set the submission status to `canceled` using `PATCH`. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/patch_v1_reviewsubmissions_id).
 - Add new action `app-store-connect builds expire` to expire a specific build that has been uploaded to App Store Connect. Modifies the existing build resource to an expired status using `PATCH`. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_a_build).
-- Add new action `app-store-connect builds expire-previous-builds` to expire all builds uploaded to App Store Connect except the given build. Uses the aforementioned `app-store-connect builds expire` action internally.
-- Add flags `--cancel-previous-submissions` and `--expire-previous-builds` to the `app-store-connect publish` action.
+- Add new action `app-store-connect builds expire-builds` to expire all builds uploaded to App Store Connect except the given build(s). Uses the aforementioned `app-store-connect builds expire` action internally.
+- Add flags `--cancel-previous-submissions` and `--expire-builds` to the `app-store-connect publish` action.
 
 Version 0.37.1
 -------------

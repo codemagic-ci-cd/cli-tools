@@ -9,6 +9,8 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -74,7 +76,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
-    def expire_build(self, build_id: ResourceId, should_print: bool = True) -> Build:
+    def expire_build(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> Build:
         """
         Expire a specific build, an expired build becomes unavailable for testing
         """
@@ -87,24 +93,34 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'expire-previous-builds',
+        'expire-builds',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        BuildArgument.BUILD_ID_RESOURCE_ID,
+        BuildArgument.BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
-    def expire_previous_builds(
-        self, application_id: ResourceId, build_id: ResourceId, should_print: bool = True,
+    def expire_builds(
+        self,
+        application_id: ResourceId,
+        build_ids: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
+        should_print: bool = False,
     ) -> List[Build]:
         """
-        Expire all builds except the given build
+        Expire all builds except the given build(s)
         """
+        builds_to_skip: Set[ResourceId] = set()
+
+        if isinstance(build_ids, ResourceId):
+            builds_to_skip.add(build_ids)
+        elif build_ids is not None:
+            builds_to_skip.update(build_ids)
+
         builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
         return [
             self.expire_build(
-                build_id=asc_build.id,
+                build_id=build.id,
             )
-            for asc_build in builds
-            if asc_build.id != build_id
+            for build in builds
+            if build.id not in builds_to_skip
         ]
 
     @cli.action(
