@@ -101,7 +101,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def expire_builds(
         self,
         application_id: ResourceId,
-        build_ids: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
+        excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
         should_print: bool = False,
     ) -> List[Build]:
         """
@@ -109,10 +109,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         builds_to_skip: Set[ResourceId] = set()
 
-        if isinstance(build_ids, ResourceId):
-            builds_to_skip.add(build_ids)
-        elif build_ids is not None:
-            builds_to_skip.update(build_ids)
+        if isinstance(excluded_build_id, ResourceId):
+            builds_to_skip.add(excluded_build_id)
+        elif excluded_build_id is not None:
+            builds_to_skip.update(excluded_build_id)
 
         builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
         return [

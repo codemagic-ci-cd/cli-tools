@@ -1007,7 +1007,7 @@ class BuildArgument(cli.Argument):
         argparse_kwargs={'required': False},
     )
     BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL = cli.ArgumentProperties(
-        key='exclude_build_id',
+        key='excluded_build_id',
         flags=('--exclude-build-id',),
         type=ResourceId,
         description='Alphanumeric ID value of the Build(s)',

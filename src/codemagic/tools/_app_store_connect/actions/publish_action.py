@@ -418,6 +418,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self.cancel_review_submissions(
                     application_id=app.id,
                     review_submission_state=states_to_cancel,
+                    platform=app_store_options.platform,
                     should_print=False,
                 )
             self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
