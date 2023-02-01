@@ -19,6 +19,7 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -914,6 +915,19 @@ class PublishArgument(cli.Argument):
             'action': 'store_true',
         },
     )
+    EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(
+        key='expire_build_submitted_for_review',
+        flags=('--expire-build-submitted-for-review',),
+        type=bool,
+        description=(
+            'Expires any previous build waiting for, or in, review '
+            'before submitting the build to TestFlight.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
         key='cancel_previous_submissions',
         flags=('--cancel-previous-submissions',),
@@ -1083,6 +1097,17 @@ class BuildArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
+        },
+    )
+    BETA_REVIEW_STATE = cli.ArgumentProperties(
+        key='beta_review_state',
+        flags=('--beta-review-state',),
+        type=BetaReviewState,
+        description='Build beta review state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BetaReviewState),
+            'nargs': '+',
         },
     )
     BETA_BUILD_LOCALIZATIONS = cli.ArgumentProperties(
@@ -1439,6 +1464,7 @@ class ArgumentGroups:
         PublishArgument.ALTOOL_VERBOSE_LOGGING,
     )
     LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BETA_REVIEW_STATE,
         BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
         BuildArgument.BUILD_VERSION_NUMBER,
         BuildArgument.EXPIRED,
@@ -1473,5 +1499,5 @@ class ArgumentGroups:
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
-        PublishArgument.EXPIRE_BUILDS,
+        PublishArgument.EXPIRE_BUILD_SUBMITTED_FOR_REVIEW,
     )

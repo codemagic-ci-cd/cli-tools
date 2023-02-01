@@ -3,10 +3,10 @@ expire-builds
 =============
 
 
-**Expire all builds except the given build(s)**
+**Expire all application builds except the given build(s)**
 ### Usage
 ```bash
-app-store-connect builds expire-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect apps expire-builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]

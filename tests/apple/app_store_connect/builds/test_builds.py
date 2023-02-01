@@ -37,11 +37,14 @@ class BuildsTest(ResourceManagerTestsBase):
         assert app_store_version is None
 
 
-@pytest.mark.parametrize('python_field_name, apple_filter_name', [
-    ('processing_state', 'processingState'),
-    ('version', 'version'),
-    ('pre_release_version_version', 'preReleaseVersion.version'),
-])
+@pytest.mark.parametrize(
+    'python_field_name, apple_filter_name', [
+        ('processing_state', 'processingState'),
+        ('version', 'version'),
+        ('beta_app_review_submission_beta_review_state', 'betaAppReviewSubmission.betaReviewState'),
+        ('pre_release_version_version', 'preReleaseVersion.version'),
+    ],
+)
 def test_builds_filter(python_field_name, apple_filter_name):
     get_apple_filter_name = Builds.Filter._get_field_name
     assert get_apple_filter_name(python_field_name) == apple_filter_name

@@ -3,7 +3,7 @@ cancel-review-submissions
 =========================
 
 
-**Find and cancel review submissions in App Store Connect**
+**Find and cancel review submissions in App Store Connect for the given application**
 ### Usage
 ```bash
 app-store-connect review-submissions cancel-review-submissions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

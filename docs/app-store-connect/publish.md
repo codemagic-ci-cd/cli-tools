@@ -26,7 +26,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
-    [--expire-builds]
+    [--expire-build-submitted-for-review]
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--app-store]
     [--platform PLATFORM_OPTIONAL]
@@ -90,10 +90,10 @@ Localized beta test info for what's new in the uploaded build as a JSON encoded 
 
 
 Enable submission of an app for Testflight beta app review to allow external testing.
-##### `--expire-builds`
+##### `--expire-build-submitted-for-review`
 
 
-Expires all builds other than the current for the application before submitting the build to TestFlight.
+Expires any previous build waiting for, or in, review before submitting the build to TestFlight.
 ### Optional arguments to add build to Beta groups
 
 ##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`

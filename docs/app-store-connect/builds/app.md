@@ -1,12 +1,12 @@
 
-apps
-====
+app
+===
 
 
-**Manage your apps in App Store Connect**
+**Get the App details for a specific build.**
 ### Usage
 ```bash
-app-store-connect apps [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds app [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,14 @@ app-store-connect apps [-h] [--log-stream STREAM] [--no-color] [--version] [-s] 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    BUILD_ID_RESOURCE_ID
 ```
+### Required arguments for action `app`
+
+##### `BUILD_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,13 +93,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`expire-builds`](apps/expire-builds.md)|Expire all application builds except the given build(s)|
-|[`get`](apps/get.md)|Get information about a specific app|
-|[`builds`](apps/builds.md)|Get a list of builds associated with a specific app matching given constrains|
-|[`pre-release-versions`](apps/pre-release-versions.md)|Get a list of prerelease versions associated with a specific app|
-|[`app-store-versions`](apps/app-store-versions.md)|Get a list of App Store versions associated with a specific app|
-|[`list`](apps/list.md)|Find and list apps added in App Store Connect|

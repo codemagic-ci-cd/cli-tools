@@ -96,7 +96,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         should_print: bool = False,
     ) -> List[ReviewSubmission]:
         """
-        Find and cancel review submissions in App Store Connect
+        Find and cancel review submissions in App Store Connect for the given application
         """
 
         review_submissions = self.list_review_submissions(
@@ -143,7 +143,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         should_print: bool = True,
     ) -> List[ReviewSubmission]:
         """
-        Find and list review submissions in App Store Connect
+        Find and list review submissions in App Store Connect for the given application
         """
 
         review_submissions_filter = self.api_client.review_submissions.Filter(

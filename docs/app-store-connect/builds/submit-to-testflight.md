@@ -18,7 +18,7 @@ app-store-connect builds submit-to-testflight [-h] [--log-stream STREAM] [--no-c
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
-    [--expire-builds]
+    [--expire-build-submitted-for-review]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `submit-to-testflight`
@@ -33,10 +33,10 @@ Alphanumeric ID value of the Build
 
 
 Maximum amount of minutes to wait for the freshly uploaded build to be processed by Apple and retry submitting the build for (beta) review. Works in conjunction with TestFlight beta review submission, or App Store review submission and operations that depend on either one of those. If the processing is not finished within the specified timeframe, further submission will be terminated. Waiting will be skipped if the value is set to 0, further actions might fail if the build is not processed yet. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT`. [Default: 20]
-##### `--expire-builds`
+##### `--expire-build-submitted-for-review`
 
 
-Expires all builds other than the current for the application before submitting the build to TestFlight.
+Expires any previous build waiting for, or in, review before submitting the build to TestFlight.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

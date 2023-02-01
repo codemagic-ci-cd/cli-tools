@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
@@ -9,6 +10,7 @@ from typing import Union
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import LinkedResourceData
@@ -36,6 +38,7 @@ class Builds(ResourceManager[Build]):
         expired: Optional[bool] = None
         id: Optional[ResourceId] = None
         processing_state: Optional[BuildProcessingState] = None
+        beta_app_review_submission_beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None
         version: Optional[Union[str, int]] = None
         pre_release_version_version: Optional[str] = None
 
@@ -43,12 +46,15 @@ class Builds(ResourceManager[Build]):
         def _get_field_name(cls, field_name) -> str:
             if field_name == 'pre_release_version_version':
                 field_name = 'pre_release_version.version'
+            elif field_name == 'beta_app_review_submission_beta_review_state':
+                field_name = 'beta_app_review_submission.beta_review_state'
             return super()._get_field_name(field_name)
 
     class Ordering(ResourceManager.Ordering):
         PRE_RELEASE_VERSION = 'preReleaseVersion'
         UPLOADED_DATE = 'uploadedDate'
         VERSION = 'version'
+        BETA_REVIEW_STATE = 'betaReviewState'
 
     def read(self, build: Union[LinkedResourceData, ResourceId]) -> Build:
         """

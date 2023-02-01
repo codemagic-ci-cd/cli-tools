@@ -3,7 +3,7 @@ list
 ====
 
 
-**Find and list review submissions in App Store Connect**
+**Find and list review submissions in App Store Connect for the given application**
 ### Usage
 ```bash
 app-store-connect review-submissions list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

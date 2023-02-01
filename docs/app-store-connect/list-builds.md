@@ -18,6 +18,7 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--beta-review-state BETA_REVIEW_STATE]
     [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
     [--build-version-number BUILD_VERSION_NUMBER]
     [--expired]
@@ -31,6 +32,10 @@ app-store-connect list-builds [-h] [--log-stream STREAM] [--no-color] [--version
 
 
 Application Apple ID. An automatically generated ID assigned to your app
+##### `--beta-review-state=APPROVED | IN_REVIEW | REJECTED | WAITING_FOR_REVIEW`
+
+
+Build beta review state. Multiple arguments
 ##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
 
 

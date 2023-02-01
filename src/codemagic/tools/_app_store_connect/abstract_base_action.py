@@ -21,6 +21,7 @@ from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
@@ -205,11 +206,31 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def expire_builds(
         self,
         application_id: ResourceId,
-        build_ids: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
+        excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
         should_print: bool = False,
     ) -> List[Build]:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.expire_builds  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_build_submitted_for_review(
+        self,
+        build_id: ResourceId,
+        should_print: bool = False,
+    ) -> Optional[Build]:
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.expire_build_submitted_for_review  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_build(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> Build:
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.expire_build  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -260,6 +281,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         build_id: Optional[ResourceId] = None,
         pre_release_version: Optional[str] = None,
         processing_state: Optional[BuildProcessingState] = None,
+        beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
         should_print: bool = True,
     ) -> List[Build]:
@@ -283,6 +305,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def submit_to_app_store(
         self,
         build_id: ResourceId,
+        cancel_previous_submissions: bool = False,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
         # App Store Version information arguments
         copyright: Optional[str] = None,
@@ -309,6 +332,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def submit_to_testflight(
         self,
         build_id: ResourceId,
+        expire_build_submitted_for_review: bool = False,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
     ) -> BetaAppReviewSubmission:
         from .action_groups import BuildsActionGroup

@@ -92,8 +92,8 @@ Enable verbose logging for commands
 |Action|Description|
 | :--- | :--- |
 |[`cancel`](review-submissions/cancel.md)|Discard a specific review submission from App Review|
-|[`cancel-review-submissions`](review-submissions/cancel-review-submissions.md)|Find and cancel review submissions in App Store Connect|
+|[`cancel-review-submissions`](review-submissions/cancel-review-submissions.md)|Find and cancel review submissions in App Store Connect for the given application|
 |[`confirm`](review-submissions/confirm.md)|Confirm pending review submission for App Review|
 |[`create`](review-submissions/create.md)|Create a review submission request for application's latest App Store Version|
 |[`get`](review-submissions/get.md)|Read Review Submission information|
-|[`list`](review-submissions/list.md)|Find and list review submissions in App Store Connect|
+|[`list`](review-submissions/list.md)|Find and list review submissions in App Store Connect for the given application|

@@ -18,7 +18,6 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
-from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
@@ -56,13 +55,13 @@ class AddBuildToBetaGroupOptions:
 @dataclass
 class SubmitToTestFlightOptions:
     max_build_processing_wait: int
-    expire_builds: bool = False
+    expire_build_submitted_for_review: bool
 
 
 @dataclass
 class SubmitToAppStoreOptions:
     max_build_processing_wait: int
-    cancel_previous_submissions: bool = False
+    cancel_previous_submissions: bool
     # App Store Version information arguments
     copyright: Optional[str] = None
     earliest_release_date: Optional[datetime] = None
@@ -178,7 +177,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
             max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
-            expire_builds: bool = False,
+            expire_build_submitted_for_review: bool = False,
             # Beta test info arguments
             beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
             locale: Optional[Locale] = None,
@@ -215,7 +214,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
-                expire_builds=expire_builds,
+                expire_build_submitted_for_review=expire_build_submitted_for_review,
             )
         if submit_to_app_store:
             if isinstance(earliest_release_date, Types.EarliestReleaseDate):
@@ -282,8 +281,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
             altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
             altool_verbose_logging: Optional[bool] = None,
-            cancel_previous_submissions: bool = False,
-            expire_builds: bool = False,
             **app_store_connect_submit_options,
     ) -> None:
         """
@@ -321,8 +318,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                             application_package,
                             submit_to_testflight,
                             submit_to_app_store,
-                            cancel_previous_submissions=cancel_previous_submissions,
-                            expire_builds=expire_builds,
                             **app_store_connect_submit_options,
                         ),
                     )
@@ -396,9 +391,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 **testflight_options.__dict__,
                 'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
             }
-            if testflight_options.expire_builds:
-                self.expire_builds(application_id=app.id, build_ids=[build.id], should_print=False)
-            self.submit_to_testflight(build.id, **testflight_submission_kwargs)
+            self.submit_to_testflight(build.id, **testflight_submission_kwargs)  # type: ignore
 
         if beta_group_options:
             self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)
@@ -409,18 +402,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
                 'version_string': app_store_options.version_string or ipa.version,
             }
-            if app_store_options.cancel_previous_submissions:
-                states_to_cancel = (
-                    ReviewSubmissionState.WAITING_FOR_REVIEW,
-                    ReviewSubmissionState.IN_REVIEW,
-                    ReviewSubmissionState.UNRESOLVED_ISSUES,
-                )
-                self.cancel_review_submissions(
-                    application_id=app.id,
-                    review_submission_state=states_to_cancel,
-                    platform=app_store_options.platform,
-                    should_print=False,
-                )
             self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
 
     def _find_build(

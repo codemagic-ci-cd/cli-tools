@@ -9,8 +9,6 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import Sequence
-from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -31,12 +29,13 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources.enums import BetaReviewState
+from codemagic.apple.resources.enums import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.utilities import versions
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
-from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionInfo
 from ..arguments import AppStoreVersionLocalizationInfo
@@ -93,35 +92,35 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'expire-builds',
-        AppArgument.APPLICATION_ID_RESOURCE_ID,
-        BuildArgument.BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL,
+        'expire-build-submitted-for-review',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
-    def expire_builds(
+    def expire_build_submitted_for_review(
         self,
-        application_id: ResourceId,
-        excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
+        build_id: ResourceId,
         should_print: bool = False,
-    ) -> List[Build]:
+    ) -> Optional[Build]:
         """
-        Expire all builds except the given build(s)
+        Based on the given build expires previous build waiting for review or in review for the application.
         """
-        builds_to_skip: Set[ResourceId] = set()
 
-        if isinstance(excluded_build_id, ResourceId):
-            builds_to_skip.add(excluded_build_id)
-        elif excluded_build_id is not None:
-            builds_to_skip.update(excluded_build_id)
+        states_to_cancel = (
+            BetaReviewState.WAITING_FOR_REVIEW,
+            BetaReviewState.IN_REVIEW,
+        )
 
-        builds = self.list_builds(application_id=application_id, not_expired=True, should_print=should_print)
-        return [
-            self.expire_build(
-                build_id=build.id,
-            )
-            for build in builds
-            if build.id not in builds_to_skip
-        ]
+        app = self.get_build_app(build_id, should_print)
+        builds = self.list_builds(
+            application_id=app.id,
+            not_expired=True,
+            beta_review_state=states_to_cancel,
+            should_print=should_print,
+        )
+        try:
+            return self.expire_build(builds[0].id)
+        except IndexError:
+            return None
 
     @cli.action(
         'pre-release-version',
@@ -168,6 +167,28 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
+        'app',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def get_build_app(
+            self,
+            build_id: ResourceId,
+            should_print: bool = True,
+    ) -> App:
+        """
+        Get the App details for a specific build.
+        """
+
+        return self._get_related_resource(
+            build_id,
+            Build,
+            App,
+            self.api_client.builds.read_app,
+            should_print,
+        )
+
+    @cli.action(
         'add-beta-test-info',
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
@@ -205,6 +226,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def submit_to_testflight(
             self,
             build_id: ResourceId,
+            expire_build_submitted_for_review: bool = False,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
     ) -> BetaAppReviewSubmission:
         """
@@ -228,6 +250,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
+        if expire_build_submitted_for_review:
+            self.logger.info(Colors.BLUE('\nExpire previous build before creating submission'))
+            self.expire_build_submitted_for_review(build_id=build.id, should_print=False)
+
         return self.create_beta_app_review_submission(build.id)
 
     @cli.action(
@@ -239,6 +265,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def submit_to_app_store(
             self,
             build_id: ResourceId,
+            cancel_previous_submissions: bool = False,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
             # App Store Version information arguments
             copyright: Optional[str] = None,
@@ -278,12 +305,35 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             support_url,
             whats_new,
         )
+        if cancel_previous_submissions:
+            self._cancel_previous_submissions(build_id=build_id, platform=platform)
+
         return self._submit_to_app_store(
             build_id,
             platform,
             Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             app_store_version_info,
             app_store_version_localization_infos,
+        )
+
+    def _cancel_previous_submissions(
+        self,
+        build_id: ResourceId,
+        platform: Platform,
+    ):
+        self.logger.info(Colors.BLUE('\nCancel previous submissions before creating new submission'))
+        states_to_cancel = (
+            ReviewSubmissionState.WAITING_FOR_REVIEW,
+            ReviewSubmissionState.IN_REVIEW,
+            ReviewSubmissionState.UNRESOLVED_ISSUES,
+        )
+
+        app = self.get_build_app(build_id, should_print=False)
+        self.cancel_review_submissions(
+            application_id=app.id,
+            review_submission_state=states_to_cancel,
+            platform=platform,
+            should_print=False,
         )
 
     def _submit_to_app_store(
