@@ -273,8 +273,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             support_url,
             whats_new,
         )
-        if cancel_previous_submissions:
-            self._cancel_previous_submissions(build_id=build_id, platform=platform)
 
         return self._submit_to_app_store(
             build_id,
@@ -282,11 +280,12 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             app_store_version_info,
             app_store_version_localization_infos,
+            cancel_previous_submissions,
         )
 
     def _cancel_previous_submissions(
         self,
-        build_id: ResourceId,
+        application_id: ResourceId,
         platform: Platform,
     ):
         self.logger.info(Colors.BLUE('\nCancel previous submissions before creating new submission'))
@@ -296,9 +295,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             ReviewSubmissionState.UNRESOLVED_ISSUES,
         )
 
-        app = self.get_build_app(build_id, should_print=False)
         self.cancel_review_submissions(
-            application_id=app.id,
+            application_id=application_id,
             review_submission_state=states_to_cancel,
             platform=platform,
             should_print=False,
@@ -311,6 +309,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         app_store_version_info: AppStoreVersionInfo,
         app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
+        cancel_previous_submissions: bool,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
@@ -318,6 +317,9 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error)) from api_error
+
+        if cancel_previous_submissions:
+            self._cancel_previous_submissions(application_id=app.id, platform=platform)
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
