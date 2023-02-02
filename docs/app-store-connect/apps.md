@@ -91,6 +91,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
+|[`cancel-review-submissions`](apps/cancel-review-submissions.md)|Find and cancel review submissions in App Store Connect for the given application|
 |[`expire-builds`](apps/expire-builds.md)|Expire all application builds except the given build(s)|
 |[`get`](apps/get.md)|Get information about a specific app|
 |[`builds`](apps/builds.md)|Get a list of builds associated with a specific app matching given constrains|

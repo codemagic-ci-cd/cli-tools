@@ -209,8 +209,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
         should_print: bool = False,
     ) -> List[Build]:
-        from .action_groups import BuildsActionGroup
-        _ = BuildsActionGroup.expire_builds  # Implementation
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.expire_builds  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -241,8 +241,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = False,
     ) -> List[ReviewSubmission]:
-        from .action_groups import ReviewSubmissionsActionGroup
-        _ = ReviewSubmissionsActionGroup.cancel_review_submissions  # Implementation
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.cancel_review_submissions  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

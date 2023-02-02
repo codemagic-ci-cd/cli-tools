@@ -15,6 +15,8 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionState
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -23,6 +25,7 @@ from ..arguments import AppStoreVersionArgument
 from ..arguments import ArgumentGroups
 from ..arguments import BuildArgument
 from ..arguments import BundleIdArgument
+from ..arguments import ReviewSubmissionArgument
 
 
 class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -183,3 +186,30 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             for build in builds
             if build.id not in builds_to_skip
         ]
+
+    @cli.action(
+        'cancel-review-submissions',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        AppStoreVersionArgument.PLATFORM,
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
+        action_group=AppStoreConnectActionGroup.APPS,
+    )
+    def cancel_review_submissions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = False,
+    ) -> List[ReviewSubmission]:
+        """
+        Find and cancel review submissions in App Store Connect for the given application
+        """
+
+        review_submissions = self.list_review_submissions(
+            application_id,
+            platform,
+            review_submission_state,
+            should_print,
+        )
+
+        return [self.cancel_review_submission(submission.id) for submission in review_submissions]
