@@ -17,6 +17,7 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionState
+from codemagic.apple.resources.enums import BetaReviewState
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -188,6 +189,36 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ]
 
     @cli.action(
+        'expire-build-submitted-for-review',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def expire_build_submitted_for_review(
+        self,
+        application_id: ResourceId,
+        should_print: bool = False,
+    ) -> Optional[Build]:
+        """
+        Expire application build that is currently waiting for review, or is currently in review
+        """
+
+        states_to_cancel = (
+            BetaReviewState.WAITING_FOR_REVIEW,
+            BetaReviewState.IN_REVIEW,
+        )
+
+        builds = self.list_builds(
+            application_id=application_id,
+            not_expired=True,
+            beta_review_state=states_to_cancel,
+            should_print=should_print,
+        )
+        try:
+            return self.expire_build(builds[0].id)
+        except IndexError:
+            return None
+
+    @cli.action(
         'cancel-review-submissions',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.PLATFORM,
@@ -213,3 +244,33 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
         return [self.cancel_review_submission(submission.id) for submission in review_submissions]
+
+    @cli.action(
+        'list-review-submissions',
+        AppArgument.APPLICATION_ID_RESOURCE_ID,
+        AppStoreVersionArgument.PLATFORM,
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
+    def list_review_submissions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = True,
+    ) -> List[ReviewSubmission]:
+        """
+        Find and list review submissions in App Store Connect for the given application
+        """
+
+        review_submissions_filter = self.api_client.review_submissions.Filter(
+            app=application_id,
+            platform=platform,
+            state=review_submission_state,
+        )
+
+        return self._list_resources(
+            review_submissions_filter,
+            self.api_client.review_submissions,
+            should_print,
+        )

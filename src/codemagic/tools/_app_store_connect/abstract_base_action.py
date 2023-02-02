@@ -216,11 +216,11 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     @abstractmethod
     def expire_build_submitted_for_review(
         self,
-        build_id: ResourceId,
+        application_id: ResourceId,
         should_print: bool = False,
     ) -> Optional[Build]:
-        from .action_groups import BuildsActionGroup
-        _ = BuildsActionGroup.expire_build_submitted_for_review  # Implementation
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.expire_build_submitted_for_review  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -297,8 +297,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
         should_print: bool = True,
     ) -> List[ReviewSubmission]:
-        from .action_groups import ReviewSubmissionsActionGroup
-        _ = ReviewSubmissionsActionGroup.list_review_submissions  # Implementation
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.list_review_submissions  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

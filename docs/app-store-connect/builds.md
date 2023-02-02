@@ -93,7 +93,7 @@ Enable verbose logging for commands
 | :--- | :--- |
 |[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
 |[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`expire-build-submitted-for-review`](builds/expire-build-submitted-for-review.md)|Based on the given build expires previous build waiting for review or in review for the application.|
+|[`expire-build-submitted-for-review`](builds/expire-build-submitted-for-review.md)|Expire application build that is currently waiting for review, or is currently in review|
 |[`get`](builds/get.md)|Get information about a specific build|
 |[`app`](builds/app.md)|Get the App details for a specific build.|
 |[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|

@@ -29,7 +29,6 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
-from codemagic.apple.resources.enums import BetaReviewState
 from codemagic.apple.resources.enums import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.utilities import versions
@@ -90,37 +89,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print,
             expired=True,
         )
-
-    @cli.action(
-        'expire-build-submitted-for-review',
-        BuildArgument.BUILD_ID_RESOURCE_ID,
-        action_group=AppStoreConnectActionGroup.BUILDS,
-    )
-    def expire_build_submitted_for_review(
-        self,
-        build_id: ResourceId,
-        should_print: bool = False,
-    ) -> Optional[Build]:
-        """
-        Based on the given build expires previous build waiting for review or in review for the application.
-        """
-
-        states_to_cancel = (
-            BetaReviewState.WAITING_FOR_REVIEW,
-            BetaReviewState.IN_REVIEW,
-        )
-
-        app = self.get_build_app(build_id, should_print)
-        builds = self.list_builds(
-            application_id=app.id,
-            not_expired=True,
-            beta_review_state=states_to_cancel,
-            should_print=should_print,
-        )
-        try:
-            return self.expire_build(builds[0].id)
-        except IndexError:
-            return None
 
     @cli.action(
         'pre-release-version',
@@ -252,7 +220,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         if expire_build_submitted_for_review:
             self.logger.info(Colors.BLUE('\nExpire previous build before creating submission'))
-            self.expire_build_submitted_for_review(build_id=build.id, should_print=False)
+            self.expire_build_submitted_for_review(application_id=app.id, should_print=False)
 
         return self.create_beta_app_review_submission(build.id)
 

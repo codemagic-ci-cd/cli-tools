@@ -1,12 +1,12 @@
 
-list
-====
+list-review-submissions
+=======================
 
 
 **Find and list review submissions in App Store Connect for the given application**
 ### Usage
 ```bash
-app-store-connect review-submissions list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect review-submissions list-review-submissions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -21,13 +21,13 @@ app-store-connect review-submissions list [-h] [--log-stream STREAM] [--no-color
     [--review-submission-state REVIEW_SUBMISSION_STATE]
     APPLICATION_ID_RESOURCE_ID
 ```
-### Required arguments for action `list`
+### Required arguments for action `list-review-submissions`
 
 ##### `APPLICATION_ID_RESOURCE_ID`
 
 
 Application Apple ID. An automatically generated ID assigned to your app
-### Optional arguments for action `list`
+### Optional arguments for action `list-review-submissions`
 
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 

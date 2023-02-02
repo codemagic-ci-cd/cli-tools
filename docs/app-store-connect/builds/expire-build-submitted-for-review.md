@@ -3,7 +3,7 @@ expire-build-submitted-for-review
 =================================
 
 
-**Based on the given build expires previous build waiting for review or in review for the application.**
+**Expire application build that is currently waiting for review, or is currently in review**
 ### Usage
 ```bash
 app-store-connect builds expire-build-submitted-for-review [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -17,14 +17,14 @@ app-store-connect builds expire-build-submitted-for-review [-h] [--log-stream ST
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    BUILD_ID_RESOURCE_ID
+    APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `expire-build-submitted-for-review`
 
-##### `BUILD_ID_RESOURCE_ID`
+##### `APPLICATION_ID_RESOURCE_ID`
 
 
-Alphanumeric ID value of the Build
+Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

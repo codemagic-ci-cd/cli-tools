@@ -1,16 +1,11 @@
 from __future__ import annotations
 
 from abc import ABCMeta
-from typing import List
-from typing import Optional
-from typing import Sequence
-from typing import Union
 
 from codemagic import cli
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
-from codemagic.apple.resources import ReviewSubmissionState
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -99,34 +94,4 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             review_submission_id,
             should_print,
             submitted=True,
-        )
-
-    @cli.action(
-        'list',
-        AppArgument.APPLICATION_ID_RESOURCE_ID,
-        AppStoreVersionArgument.PLATFORM,
-        ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
-        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
-    )
-    def list_review_submissions(
-        self,
-        application_id: ResourceId,
-        platform: Optional[Platform] = None,
-        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
-        should_print: bool = True,
-    ) -> List[ReviewSubmission]:
-        """
-        Find and list review submissions in App Store Connect for the given application
-        """
-
-        review_submissions_filter = self.api_client.review_submissions.Filter(
-            app=application_id,
-            platform=platform,
-            state=review_submission_state,
-        )
-
-        return self._list_resources(
-            review_submissions_filter,
-            self.api_client.review_submissions,
-            should_print,
         )
