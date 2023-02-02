@@ -17,7 +17,7 @@ app-store-connect apps cancel-review-submissions [-h] [--log-stream STREAM] [--n
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--platform PLATFORM]
+    [--platform PLATFORM_OPTIONAL]
     [--review-submission-state REVIEW_SUBMISSION_STATE]
     APPLICATION_ID_RESOURCE_ID
 ```
@@ -32,7 +32,7 @@ Application Apple ID. An automatically generated ID assigned to your app
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 
-App Store Version platform. Default:&nbsp;`IOS`
+App Store Version platform
 ##### `--review-submission-state=CANCELING | COMPLETE | COMPLETING | IN_REVIEW | READY_FOR_REVIEW | UNRESOLVED_ISSUES | WAITING_FOR_REVIEW`
 
 

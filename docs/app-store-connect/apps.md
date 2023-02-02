@@ -93,8 +93,10 @@ Enable verbose logging for commands
 | :--- | :--- |
 |[`cancel-review-submissions`](apps/cancel-review-submissions.md)|Find and cancel review submissions in App Store Connect for the given application|
 |[`expire-builds`](apps/expire-builds.md)|Expire all application builds except the given build(s)|
+|[`expire-build-submitted-for-review`](apps/expire-build-submitted-for-review.md)|Expire application build that is currently waiting for review, or is currently in review in TestFlight|
 |[`get`](apps/get.md)|Get information about a specific app|
 |[`builds`](apps/builds.md)|Get a list of builds associated with a specific app matching given constrains|
 |[`pre-release-versions`](apps/pre-release-versions.md)|Get a list of prerelease versions associated with a specific app|
 |[`app-store-versions`](apps/app-store-versions.md)|Get a list of App Store versions associated with a specific app|
 |[`list`](apps/list.md)|Find and list apps added in App Store Connect|
+|[`list-review-submissions`](apps/list-review-submissions.md)|Find and list review submissions in App Store Connect for the given application|

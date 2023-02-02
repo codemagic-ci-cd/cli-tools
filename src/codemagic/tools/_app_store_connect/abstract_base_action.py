@@ -332,8 +332,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def submit_to_testflight(
         self,
         build_id: ResourceId,
-        expire_build_submitted_for_review: bool = False,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_testflight  # Implementation
