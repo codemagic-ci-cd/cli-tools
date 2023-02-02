@@ -203,14 +203,14 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
-    def expire_builds(
+    def expire_app_builds(
         self,
         application_id: ResourceId,
         excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
         should_print: bool = False,
     ) -> List[Build]:
         from .action_groups import AppsActionGroup
-        _ = AppsActionGroup.expire_builds  # Implementation
+        _ = AppsActionGroup.expire_app_builds  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -305,8 +305,8 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def submit_to_app_store(
         self,
         build_id: ResourceId,
-        cancel_previous_submissions: bool = False,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        cancel_previous_submissions: bool = False,
         # App Store Version information arguments
         copyright: Optional[str] = None,
         earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,

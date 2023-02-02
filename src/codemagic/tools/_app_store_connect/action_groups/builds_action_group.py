@@ -233,8 +233,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def submit_to_app_store(
             self,
             build_id: ResourceId,
-            cancel_previous_submissions: bool = False,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            cancel_previous_submissions: bool = False,
             # App Store Version information arguments
             copyright: Optional[str] = None,
             earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,

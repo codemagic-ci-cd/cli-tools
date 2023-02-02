@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import pathlib
 import time
 from abc import ABCMeta
@@ -387,11 +388,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.wait_until_build_is_processed(build, app_store_options.max_build_processing_wait)
 
         if testflight_options:
-            testflight_submission_kwargs = {
-                **testflight_options.__dict__,
-                'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
-            }
-            self.submit_to_testflight(build.id, **testflight_submission_kwargs)  # type: ignore
+            # Overwrite waiting since we already waited above.
+            tf_options = dataclasses.replace(testflight_options, max_build_processing_wait=0)
+            self.submit_to_testflight(build.id, **tf_options.__dict__)
 
         if beta_group_options:
             self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)

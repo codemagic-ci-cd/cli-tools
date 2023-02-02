@@ -163,7 +163,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BuildArgument.BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL,
         action_group=AppStoreConnectActionGroup.APPS,
     )
-    def expire_builds(
+    def expire_app_builds(
         self,
         application_id: ResourceId,
         excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
@@ -191,7 +191,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'expire-build-submitted-for-review',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        action_group=AppStoreConnectActionGroup.BUILDS,
+        action_group=AppStoreConnectActionGroup.APPS,
     )
     def expire_build_submitted_for_review(
         self,
@@ -199,7 +199,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         should_print: bool = False,
     ) -> Optional[Build]:
         """
-        Expire application build that is currently waiting for review, or is currently in review
+        Expire application build that is currently waiting for review, or is currently in review in TestFlight
         """
 
         states_to_cancel = (
@@ -221,7 +221,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'cancel-review-submissions',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        AppStoreVersionArgument.PLATFORM,
+        AppStoreVersionArgument.PLATFORM_OPTIONAL,
         ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
         action_group=AppStoreConnectActionGroup.APPS,
     )
@@ -248,9 +248,9 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         'list-review-submissions',
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        AppStoreVersionArgument.PLATFORM,
+        AppStoreVersionArgument.PLATFORM_OPTIONAL,
         ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
-        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+        action_group=AppStoreConnectActionGroup.APPS,
     )
     def list_review_submissions(
         self,
