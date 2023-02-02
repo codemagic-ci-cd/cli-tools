@@ -902,19 +902,6 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
-    EXPIRE_BUILDS = cli.ArgumentProperties(
-        key='expire_builds',
-        flags=('--expire-builds',),
-        type=bool,
-        description=(
-            'Expires all builds other than the current for the application '
-            'before submitting the build to TestFlight.'
-        ),
-        argparse_kwargs={
-            'required': False,
-            'action': 'store_true',
-        },
-    )
     EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(
         key='expire_build_submitted_for_review',
         flags=('--expire-build-submitted-for-review',),
