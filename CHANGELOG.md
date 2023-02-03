@@ -1,3 +1,9 @@
+Version 0.38.1
+-------------
+
+**Bugfix**
+- Update flag `--cancel-previous-submissions` for the `app-store-connect builds submit-to-app-store` action to wait for Apple's confirmation that the submission is cancelled before attempting to submit a new build.
+
 Version 0.38.0
 -------------
 
