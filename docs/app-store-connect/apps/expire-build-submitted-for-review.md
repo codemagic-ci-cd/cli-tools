@@ -1,12 +1,12 @@
 
-cancel
-======
+expire-build-submitted-for-review
+=================================
 
 
-**Discard a specific review submission from App Review**
+**Expire application build that is currently waiting for review, or is currently in review in TestFlight**
 ### Usage
 ```bash
-app-store-connect review-submissions cancel [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect apps expire-build-submitted-for-review [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,14 +17,14 @@ app-store-connect review-submissions cancel [-h] [--log-stream STREAM] [--no-col
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    REVIEW_SUBMISSION_ID
+    APPLICATION_ID_RESOURCE_ID
 ```
-### Required arguments for action `cancel`
+### Required arguments for action `expire-build-submitted-for-review`
 
-##### `REVIEW_SUBMISSION_ID`
+##### `APPLICATION_ID_RESOURCE_ID`
 
 
-UUID value of the review submission
+Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

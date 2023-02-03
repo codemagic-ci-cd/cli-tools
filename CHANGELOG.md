@@ -1,3 +1,39 @@
+Version 0.38.0
+-------------
+
+This is an enhancement release to further streamline the App Store review submission automation capabilities.
+
+Additions and changes from [pull request #289](https://github.com/codemagic-ci-cd/cli-tools/pull/289). Resolves [issue #289](https://github.com/codemagic-ci-cd/cli-tools/issues/288).
+
+**Features**
+
+- Add new action `app-store-connect apps list-review-submissions` to list existing review submissions in the App Store for a specific application. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/get_v1_reviewsubmissions).
+- Add new action `app-store-connect apps cancel-review-submissions` to cancel existing review submissions in the App Store based on their type for a specific app. Uses the already existing `app-store-connect review-submissions cancel` action internally that allows to set the submission status to `canceled` using `PATCH`. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/patch_v1_reviewsubmissions_id).
+- Add new action `app-store-connect builds expire` to expire a specific build that has been uploaded to App Store Connect. Modifies the existing build resource to an expired status using `PATCH`. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/modify_a_build).
+- Add new action `app-store-connect apps expire-builds` to expire all builds uploaded to App Store Connect except the given build(s) for the specific application. Uses the aforementioned `app-store-connect builds expire` action internally.
+- Add new action `app-store-connect apps expire-build-submitted-for-review` to expire build in App Store Connect that has been submitted to review and has not been `Approved` for a specific application. Uses the aforementioned `app-store-connect builds expire` action internally.
+- Add new action `app-store-connect builds app` to get the application information based on the given build.
+- Add flags `--cancel-previous-submissions` and `--expire-build-submitted-for-review` to the `app-store-connect publish` action.
+- Add flag `--beta-review-state` to `app-store-connect apps builds` and `app-store-connect list-builds` actions for filtering builds based on their beta review state.
+- Add flag `--cancel-previous-submissions` to the `app-store-connect builds submit-to-app-store` action.
+- Add flag `--expire-build-submitted-for-review` to the `app-store-connect builds submit-to-testflight` action.
+
+**Docs**
+- Documentation updated for existing actions:
+  - new option `--beta-review-state` for the action `app-store-connect apps builds`
+  - new option `--cancel-previous-submissions` for the action `app-store-connect builds submit-to-app-store`
+  - new option `--expire-build-submitted-for-review` for the action `app-store-connect builds submit-to-testflight`
+  - new option `--beta-review-state` for the action `app-store-connect list-builds`
+  - new options `--expire-build-submitted-for-review` and `--cancel-previous-submissions` for the action `app-store-connect publish`
+  - description update for the `app-store-connect review-submissions cancel` action
+- Documentation added for new actions:
+  - `app-store-connect builds app`
+  - `app-store-connect builds expire`
+  - `app-store-connect apps expire-builds`
+  - `app-store-connect apps expire-build-submitted-for-review`
+  - `app-store-connect apps cancel-review-submissions`
+  - `app-store-connect apps list-review-submissions`
+
 Version 0.37.1
 -------------
 

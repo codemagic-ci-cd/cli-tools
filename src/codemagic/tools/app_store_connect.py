@@ -26,6 +26,7 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleId
@@ -256,6 +257,7 @@ class AppStoreConnect(
         build_id: Optional[ResourceId] = None,
         pre_release_version: Optional[str] = None,
         processing_state: Optional[BuildProcessingState] = None,
+        beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
         should_print: bool = True,
     ) -> List[Build]:
@@ -273,6 +275,7 @@ class AppStoreConnect(
             expired=expired_value,
             id=build_id,
             processing_state=processing_state,
+            beta_app_review_submission_beta_review_state=beta_review_state,
             version=build_version_number,
             pre_release_version_version=pre_release_version,
         )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import pathlib
 import time
 from abc import ABCMeta
@@ -55,11 +56,13 @@ class AddBuildToBetaGroupOptions:
 @dataclass
 class SubmitToTestFlightOptions:
     max_build_processing_wait: int
+    expire_build_submitted_for_review: bool
 
 
 @dataclass
 class SubmitToAppStoreOptions:
     max_build_processing_wait: int
+    cancel_previous_submissions: bool
     # App Store Version information arguments
     copyright: Optional[str] = None
     earliest_release_date: Optional[datetime] = None
@@ -136,14 +139,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     ) -> None:
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
-                'Either Apple ID and app specific password or App Store Connect API key information is required.')
+                'Either Apple ID and app specific password or App Store Connect API key information is required.',
+            )
         else:
             # Those need API key based authentication
             if submit_to_testflight:
                 self._assert_api_client_credentials('It is required for submitting an app to Testflight.')
             if beta_build_localizations:
                 self._assert_api_client_credentials(
-                    "It is required for submitting localized beta test info for what's new in the uploaded build.")
+                    "It is required for submitting localized beta test info for what's new in the uploaded build.",
+                )
             if submit_to_app_store:
                 self._assert_api_client_credentials('It is required for submitting an app to App Store review.')
 
@@ -173,6 +178,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             submit_to_app_store: Optional[bool],
             # Submit to TestFlight arguments
             max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
+            expire_build_submitted_for_review: bool = False,
             # Beta test info arguments
             beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
             locale: Optional[Locale] = None,
@@ -186,6 +192,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             release_type: Optional[ReleaseType] = None,
             version_string: Optional[str] = None,
             app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
+            cancel_previous_submissions: bool = False,
             # App Store Version Localization arguments
             description: Optional[str] = None,
             keywords: Optional[str] = None,
@@ -208,6 +215,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+                expire_build_submitted_for_review=expire_build_submitted_for_review,
             )
         if submit_to_app_store:
             if isinstance(earliest_release_date, Types.EarliestReleaseDate):
@@ -218,6 +226,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 app_store_version_localizations = app_store_version_localizations.value
             submit_to_app_store_options = SubmitToAppStoreOptions(
                 max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
+                cancel_previous_submissions=cancel_previous_submissions,
                 # Non localized app metadata
                 copyright=copyright,
                 earliest_release_date=earliest_release_date,
@@ -379,11 +388,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.wait_until_build_is_processed(build, app_store_options.max_build_processing_wait)
 
         if testflight_options:
-            testflight_submission_kwargs = {
-                **testflight_options.__dict__,
-                'max_build_processing_wait': 0,  # Overwrite waiting since we already waited above.
-            }
-            self.submit_to_testflight(build.id, **testflight_submission_kwargs)
+            # Overwrite waiting since we already waited above.
+            tf_options = dataclasses.replace(testflight_options, max_build_processing_wait=0)
+            self.submit_to_testflight(build.id, **tf_options.__dict__)
 
         if beta_group_options:
             self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)
@@ -435,29 +442,35 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             )
             time.sleep(retry_wait_seconds)
             return self._find_build(
-                app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds)
+                app_id, application_package, retries=retries - 1, retry_wait_seconds=retry_wait_seconds,
+            )
         else:
             # There are no more retries left, give up.
             raise IOError(
                 'The build was successfully uploaded to App Store Connect but processing the corresponding artifact '
                 f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
                 'What to test information or submitting the build to beta review could not be performed at the moment '
-                'but can be completed manually in TestFlight once the build has finished processing.')
+                'but can be completed manually in TestFlight once the build has finished processing.',
+            )
 
     def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
         self.logger.info(Colors.BLUE('\nFind application entry from App Store Connect for uploaded binary'))
+        apps = self.list_apps(
+            bundle_id_identifier=bundle_id,
+            bundle_id_identifier_strict_match=True,
+            should_print=False,
+        )
         try:
-            app = self.list_apps(
-                bundle_id_identifier=bundle_id, bundle_id_identifier_strict_match=True, should_print=False)[0]
+            app = apps[0]
         except IndexError:
             raise IOError(f'Did not find app with bundle identifier "{bundle_id}" from App Store Connect')
-        else:
-            self.printer.print_resource(app, True)
+        self.printer.print_resource(app, True)
         return app
 
     def _get_uploaded_build(
-            self, app: App, application_package: Union[Ipa, MacOsPackage]) -> Build:
+            self, app: App, application_package: Union[Ipa, MacOsPackage],
+    ) -> Build:
         self.logger.info(Colors.BLUE('\nFind uploaded build'))
         build = self._find_build(app.id, application_package)
         self.logger.info(Colors.GREEN('\nUploaded build is'))
@@ -465,7 +478,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         return build
 
     def _get_publishing_application_packages(
-            self, path_patterns: Sequence[pathlib.Path]) -> List[Union[Ipa, MacOsPackage]]:
+            self, path_patterns: Sequence[pathlib.Path],
+    ) -> List[Union[Ipa, MacOsPackage]]:
         _path_patterns = list(path_patterns)
         if len(_path_patterns) == 1 and _path_patterns[0].exists():
             # Add exempt for single path that exists to avoid unnecessary log output
@@ -499,14 +513,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         return application_packages
 
     def _validate_artifact_with_altool(
-            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float):
+            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float,
+    ):
         self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
         result = altool.validate_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
         message = result.success_message if result else f'No errors validating archive at "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
 
     def _upload_artifact_with_altool(
-            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float):
+            self, altool: Altool, artifact_path: pathlib.Path, retries: int, retry_wait: float,
+    ):
         self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
         result = altool.upload_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'

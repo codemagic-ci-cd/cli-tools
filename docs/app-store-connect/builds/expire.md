@@ -1,12 +1,12 @@
 
-cancel
+expire
 ======
 
 
-**Discard a specific review submission from App Review**
+**Expire a specific build, an expired build becomes unavailable for testing**
 ### Usage
 ```bash
-app-store-connect review-submissions cancel [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds expire [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,14 +17,14 @@ app-store-connect review-submissions cancel [-h] [--log-stream STREAM] [--no-col
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    REVIEW_SUBMISSION_ID
+    BUILD_ID_RESOURCE_ID
 ```
-### Required arguments for action `cancel`
+### Required arguments for action `expire`
 
-##### `REVIEW_SUBMISSION_ID`
+##### `BUILD_ID_RESOURCE_ID`
 
 
-UUID value of the review submission
+Alphanumeric ID value of the Build
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

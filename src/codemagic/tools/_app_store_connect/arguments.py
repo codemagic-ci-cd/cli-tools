@@ -19,6 +19,7 @@ from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -29,6 +30,7 @@ from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
@@ -627,6 +629,17 @@ class ReviewSubmissionArgument(cli.Argument):
         type=ResourceId,
         description='UUID value of the review submission',
     )
+    REVIEW_SUBMISSION_STATE = cli.ArgumentProperties(
+        key='review_submission_state',
+        flags=('--review-submission-state',),
+        type=ReviewSubmissionState,
+        description='String value of the review submission state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReviewSubmissionState),
+            'nargs': '+',
+        },
+    )
 
 
 class AppStoreVersionLocalizationArgument(cli.Argument):
@@ -889,6 +902,32 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
+    EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(
+        key='expire_build_submitted_for_review',
+        flags=('--expire-build-submitted-for-review',),
+        type=bool,
+        description=(
+            'Expires any previous build waiting for, or in, review '
+            'before submitting the build to TestFlight.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
+        key='cancel_previous_submissions',
+        flags=('--cancel-previous-submissions',),
+        type=bool,
+        description=(
+            'Cancels previous submissions for the application in App Store Connect '
+            'before creating a new submission if the submissions are in a state where it is possible.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     ALTOOL_VERBOSE_LOGGING = cli.ArgumentProperties(
         key='altool_verbose_logging',
         flags=('--altool-verbose-logging',),
@@ -968,6 +1007,16 @@ class BuildArgument(cli.Argument):
         description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
     )
+    BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL = cli.ArgumentProperties(
+        key='excluded_build_id',
+        flags=('--exclude-build-id',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build(s)',
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+        },
+    )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
         flags=('--pre-release-version',),
@@ -1035,6 +1084,17 @@ class BuildArgument(cli.Argument):
         ),
         argparse_kwargs={
             'required': False,
+        },
+    )
+    BETA_REVIEW_STATE = cli.ArgumentProperties(
+        key='beta_review_state',
+        flags=('--beta-review-state',),
+        type=BetaReviewState,
+        description='Build beta review state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BetaReviewState),
+            'nargs': '+',
         },
     )
     BETA_BUILD_LOCALIZATIONS = cli.ArgumentProperties(
@@ -1391,6 +1451,7 @@ class ArgumentGroups:
         PublishArgument.ALTOOL_VERBOSE_LOGGING,
     )
     LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BETA_REVIEW_STATE,
         BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
         BuildArgument.BUILD_VERSION_NUMBER,
         BuildArgument.EXPIRED,
@@ -1405,6 +1466,7 @@ class ArgumentGroups:
     )
     SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.CANCEL_PREVIOUS_SUBMISSIONS,
         # Generic App Store Version information arguments
         AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.COPYRIGHT,
@@ -1424,4 +1486,5 @@ class ArgumentGroups:
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.EXPIRE_BUILD_SUBMITTED_FOR_REVIEW,
     )

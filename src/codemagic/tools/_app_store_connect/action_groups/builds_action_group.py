@@ -29,6 +29,7 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources.enums import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.utilities import versions
 
@@ -67,6 +68,27 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._get_resource(build_id, self.api_client.builds, should_print)
+
+    @cli.action(
+        'expire',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def expire_build(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> Build:
+        """
+        Expire a specific build, an expired build becomes unavailable for testing
+        """
+
+        return self._modify_resource(
+            self.api_client.builds,
+            build_id,
+            should_print,
+            expired=True,
+        )
 
     @cli.action(
         'pre-release-version',
@@ -113,6 +135,28 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
+        'app',
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def get_build_app(
+            self,
+            build_id: ResourceId,
+            should_print: bool = True,
+    ) -> App:
+        """
+        Get the App details for a specific build.
+        """
+
+        return self._get_related_resource(
+            build_id,
+            Build,
+            App,
+            self.api_client.builds.read_app,
+            should_print,
+        )
+
+    @cli.action(
         'add-beta-test-info',
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
@@ -151,6 +195,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             build_id: ResourceId,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
         """
         Submit build to TestFlight
@@ -163,7 +208,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(str(api_error)) from api_error
 
         try:
             self._assert_app_has_testflight_information(app)
@@ -172,6 +217,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
+
+        if expire_build_submitted_for_review:
+            self.logger.info(Colors.BLUE('\nExpire previous build before creating submission'))
+            self.expire_build_submitted_for_review(application_id=app.id, should_print=False)
 
         return self.create_beta_app_review_submission(build.id)
 
@@ -185,6 +234,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self,
             build_id: ResourceId,
             max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+            cancel_previous_submissions: bool = False,
             # App Store Version information arguments
             copyright: Optional[str] = None,
             earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
@@ -223,12 +273,33 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             support_url,
             whats_new,
         )
+
         return self._submit_to_app_store(
             build_id,
             platform,
             Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             app_store_version_info,
             app_store_version_localization_infos,
+            cancel_previous_submissions,
+        )
+
+    def _cancel_previous_submissions(
+        self,
+        application_id: ResourceId,
+        platform: Platform,
+    ):
+        self.logger.info(Colors.BLUE('\nCancel previous submissions before creating new submission'))
+        states_to_cancel = (
+            ReviewSubmissionState.WAITING_FOR_REVIEW,
+            ReviewSubmissionState.IN_REVIEW,
+            ReviewSubmissionState.UNRESOLVED_ISSUES,
+        )
+
+        self.cancel_review_submissions(
+            application_id=application_id,
+            review_submission_state=states_to_cancel,
+            platform=platform,
+            should_print=False,
         )
 
     def _submit_to_app_store(
@@ -238,13 +309,17 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         max_processing_minutes: int,
         app_store_version_info: AppStoreVersionInfo,
         app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
+        cancel_previous_submissions: bool,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
 
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(str(api_error)) from api_error
+
+        if cancel_previous_submissions:
+            self._cancel_previous_submissions(application_id=app.id, platform=platform)
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)

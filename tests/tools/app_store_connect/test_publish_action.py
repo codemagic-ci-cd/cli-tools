@@ -35,11 +35,13 @@ def test_publish_action_without_app_store_connect_key(publishing_namespace_kwarg
     _ = AppStoreConnect.from_cli_args(cli_args)
 
 
-@pytest.mark.parametrize('missing_argument', [
-    AppStoreConnectArgument.ISSUER_ID,
-    AppStoreConnectArgument.KEY_IDENTIFIER,
-    AppStoreConnectArgument.PRIVATE_KEY,
-])
+@pytest.mark.parametrize(
+    'missing_argument', [
+        AppStoreConnectArgument.ISSUER_ID,
+        AppStoreConnectArgument.KEY_IDENTIFIER,
+        AppStoreConnectArgument.PRIVATE_KEY,
+    ],
+)
 def test_publish_action_without_app_store_connect_key_testflight_submit(missing_argument, publishing_namespace_kwargs):
     publishing_namespace_kwargs.update({missing_argument.key: None})
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
@@ -54,11 +56,13 @@ def test_publish_action_without_app_store_connect_key_testflight_submit(missing_
     assert missing_argument.flag in error_info.value.argument_name
 
 
-@pytest.mark.parametrize('missing_argument', [
-    AppStoreConnectArgument.ISSUER_ID,
-    AppStoreConnectArgument.KEY_IDENTIFIER,
-    AppStoreConnectArgument.PRIVATE_KEY,
-])
+@pytest.mark.parametrize(
+    'missing_argument', [
+        AppStoreConnectArgument.ISSUER_ID,
+        AppStoreConnectArgument.KEY_IDENTIFIER,
+        AppStoreConnectArgument.PRIVATE_KEY,
+    ],
+)
 def test_publish_action_without_app_store_connect_key_and_beta_locales(missing_argument, publishing_namespace_kwargs):
     publishing_namespace_kwargs.update({missing_argument.key: None})
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
@@ -130,7 +134,9 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
         mock_validate.assert_not_called()
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
-        mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
+        mock_submit_to_testflight.assert_called_with(
+            build.id, expire_build_submitted_for_review=False, max_build_processing_wait=0,
+        )
         mock_submit_to_app_store.assert_not_called()
         mock_add_beta_test_info.assert_called_with(
             build.id,
@@ -178,6 +184,7 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
         mock_submit_to_app_store.assert_called_with(
             build.id,
             max_build_processing_wait=0,
+            cancel_previous_submissions=False,
             # General App Store version info
             copyright=None,
             earliest_release_date=None,
@@ -199,11 +206,13 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
 
 
 @mock.patch('codemagic.tools._app_store_connect.actions.publish_action.Altool')
-@pytest.mark.parametrize('enable_package_validation, should_validate', [
-    (True, True),
-    (False, False),
-    (None, False),
-])
+@pytest.mark.parametrize(
+    'enable_package_validation, should_validate', [
+        (True, True),
+        (False, False),
+        (None, False),
+    ],
+)
 def test_publish_action_enable_validation(_mock_altool, namespace_kwargs, enable_package_validation, should_validate):
     asc = AppStoreConnect.from_cli_args(argparse.Namespace(**namespace_kwargs))
     with mock.patch.object(AppStoreConnect, 'find_paths') as mock_find_paths, \
@@ -290,6 +299,8 @@ def test_add_build_to_beta_groups(publishing_namespace_kwargs):
         mock_validate.assert_not_called()
         mock_upload.assert_called()
         mock_wait_until_build_is_processed.assert_called_with(build, Types.MaxBuildProcessingWait.default_value)
-        mock_submit_to_testflight.assert_called_with(build.id, max_build_processing_wait=0)
+        mock_submit_to_testflight.assert_called_with(
+            build.id, expire_build_submitted_for_review=False, max_build_processing_wait=0,
+        )
         mock_submit_to_app_store.assert_not_called()
         mock_add_build_to_beta_groups.assert_called_with(build.id, beta_group_names=beta_group_names)
