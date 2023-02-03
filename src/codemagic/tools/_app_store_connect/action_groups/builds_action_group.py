@@ -302,6 +302,34 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             should_print=False,
         )
 
+        self._wait_for_cancelled_review_submissions_to_complete(application_id, platform)
+
+    def _wait_for_cancelled_review_submissions_to_complete(
+        self,
+        application_id: ResourceId,
+        platform: Platform,
+        timeout=120,
+    ):
+        self.logger.info(Colors.BLUE('Wait until cancelled submissions are completed'))
+
+        review_submissions_filter = self.api_client.review_submissions.Filter(
+            app=application_id,
+            platform=platform,
+            state=ReviewSubmissionState.CANCELING,
+        )
+
+        waited_duration = 0
+        while timeout > waited_duration:
+            cancelling_submissions = self.api_client.review_submissions.list(review_submissions_filter)
+            if not cancelling_submissions:
+                self.logger.info(Colors.GREEN('Previous submissions are successfully cancelled'))
+                return
+            time.sleep(1)
+            waited_duration += 1
+
+        warning_message = f'Cancelling submissions was not completed in {timeout} seconds. Try to continue...'
+        self.logger.warning(Colors.YELLOW(warning_message))
+
     def _submit_to_app_store(
         self,
         build_id: ResourceId,
