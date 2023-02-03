@@ -295,14 +295,15 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             ReviewSubmissionState.UNRESOLVED_ISSUES,
         )
 
-        self.cancel_review_submissions(
+        cancelled_submissions = self.cancel_review_submissions(
             application_id=application_id,
             review_submission_state=states_to_cancel,
             platform=platform,
             should_print=False,
         )
 
-        self._wait_for_cancelled_review_submissions_to_complete(application_id, platform)
+        if cancelled_submissions:
+            self._wait_for_cancelled_review_submissions_to_complete(application_id, platform)
 
     def _wait_for_cancelled_review_submissions_to_complete(
         self,
