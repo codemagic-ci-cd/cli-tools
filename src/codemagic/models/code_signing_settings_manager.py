@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import itertools
 import json
 import pathlib
 import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
@@ -57,8 +61,35 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     @lru_cache()
     def _get_json_serialized_profiles(self) -> str:
-        profiles = [self._serialize_profile(p) for p in self.profiles.values()]
-        return json.dumps(profiles)
+        # Make sure profiles are serialized in a specific order so that different runs
+        # with the same profiles will always yield the same changeset to Xcode project settings.
+
+        now = datetime.now(timezone.utc)
+        max_separators = max((p.bundle_id.count('.') for p in self.profiles.values()), default=0)
+
+        def sort_key(profile: ProvisioningProfile) -> Tuple[int, str, timedelta]:
+            """
+            Order profiles so that:
+            - More specific bundle ids come first with higher priority:
+              - "com.example.app.extension" is more specific than "com.example.app and
+              - "com.example.app.*" is more specific than "com.example.*".
+              Detect this by counting namespace separators in bundle identifier.
+            - Otherwise order them alphabetically by comparing bundle identifiers.
+            - Finally in case of bundle identifier collision raise priority for more recent profile.
+            """
+            return (
+                max_separators - profile.bundle_id.count('.'),
+                profile.bundle_id,
+                now - profile.creation_date,
+            )
+
+        # Partition profiles into wildcard profiles and strict matching profiles
+        wildcard_profiles = sorted((p for p in self.profiles.values() if p.is_wildcard), key=sort_key)
+        specific_profiles = sorted((p for p in self.profiles.values() if not p.is_wildcard), key=sort_key)
+        # Non-wildcard profiles come first and have higher priority
+        profiles = itertools.chain(specific_profiles, wildcard_profiles)
+
+        return json.dumps([self._serialize_profile(p) for p in profiles])
 
     def _serialize_profile(self, profile):
         usable_certificates = profile.get_usable_certificates(self._certificates)

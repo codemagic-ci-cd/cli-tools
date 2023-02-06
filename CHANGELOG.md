@@ -1,3 +1,9 @@
+Version 0.38.2
+-------------
+
+**Bugfix**
+- Improve action `xcode-project use-profiles` stability so that different invocation with the same set  of provisioning profiles will always yield the same changeset to Xcode project settings. [PR #308](https://github.com/codemagic-ci-cd/cli-tools/pull/308)
+
 Version 0.38.1
 -------------
 
