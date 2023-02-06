@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import json
 import pathlib
 import shlex
@@ -7,7 +8,6 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime
-from datetime import timedelta
 from datetime import timezone
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
@@ -60,17 +60,42 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     @lru_cache()
     def _get_json_serialized_profiles(self) -> str:
+        # Make sure profiles are serialized in a specific order so that different runs
+        # with the same profiles will always yield the same changeset to Xcode project settings.
+
+        # Partition profiles into wildcard profiles and strict matching profiles
+        wildcard_profiles = [p for p in self.profiles.values() if p.is_wildcard]
+        other_profiles = [p for p in self.profiles.values() if not p.is_wildcard]
+
         now = datetime.now(timezone.utc)
 
-        def sort_key(profile: ProvisioningProfile) -> Tuple[bool, str, timedelta]:
-            profile_age = now - profile.creation_date
-            return (
-                profile.is_wildcard,  # Non-wildcard profiles have higher priority
-                profile.bundle_id,  # General ordering by alphabetically sorting bundle identifiers
-                profile_age,  # In case of bundle identifier collision, prefer more recent profile
-            )
+        # Order non-wildcard profiles alphabetically by bundle identifier values.
+        # In case of bundle identifier collision prefer more recent profile.
+        other_profiles.sort(
+            key=lambda p: (
+                p.bundle_id,
+                now - p.creation_date,
+            ),
+        )
 
-        profiles = sorted(self.profiles.values(), key=sort_key)
+        # Order wildcard profiles so that:
+        # - More specific bundle ids come first with higher priority
+        #   ("com.example.app.*" is more specific than "com.example.*").
+        #   Detect this by counting namespace separators in bundle identifier.
+        # - Otherwise order them alphabetically by comparing bundle identifiers.
+        # - Finally in case of bundle identifier collision raise priority for more recent profile.
+        max_separators = max((p.bundle_id.count('.') for p in wildcard_profiles), default=0)
+        wildcard_profiles.sort(
+            key=lambda p: (
+                max_separators - p.bundle_id.count('.'),
+                p.bundle_id,
+                now - p.creation_date,
+            ),
+        )
+
+        # Non-wildcard profiles come first and have higher priority
+        profiles = list(itertools.chain(other_profiles, wildcard_profiles))
+
         return json.dumps([self._serialize_profile(p) for p in profiles])
 
     def _serialize_profile(self, profile):
