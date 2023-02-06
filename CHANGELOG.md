@@ -1,4 +1,4 @@
-Version 0.38.1
+Version 0.38.2
 -------------
 
 **Bugfix**
