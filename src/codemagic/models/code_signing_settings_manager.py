@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 import json
 import pathlib
 import shlex
@@ -86,7 +87,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         wildcard_profiles = sorted((p for p in self.profiles.values() if p.is_wildcard), key=sort_key)
         specific_profiles = sorted((p for p in self.profiles.values() if not p.is_wildcard), key=sort_key)
         # Non-wildcard profiles come first and have higher priority
-        profiles = [*specific_profiles, *wildcard_profiles]
+        profiles = itertools.chain(specific_profiles, wildcard_profiles)
 
         return json.dumps([self._serialize_profile(p) for p in profiles])
 
