@@ -2,6 +2,12 @@ Version 0.38.1
 -------------
 
 **Bugfix**
+- Improve action `xcode-project use-profiles` stability so that different invocation with the same set  of provisioning profiles will always yield the same changeset to Xcode project settings. [PR #308](https://github.com/codemagic-ci-cd/cli-tools/pull/308)
+
+Version 0.38.1
+-------------
+
+**Bugfix**
 - Update flag `--cancel-previous-submissions` for the `app-store-connect builds submit-to-app-store` action to wait for Apple's confirmation that the submission is cancelled before attempting to submit a new build.
 
 Version 0.38.0
