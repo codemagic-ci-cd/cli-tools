@@ -6,6 +6,9 @@ import shlex
 import shutil
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
@@ -57,8 +60,18 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     @lru_cache()
     def _get_json_serialized_profiles(self) -> str:
-        profiles = [self._serialize_profile(p) for p in self.profiles.values()]
-        return json.dumps(profiles)
+        now = datetime.now(timezone.utc)
+
+        def sort_key(profile: ProvisioningProfile) -> Tuple[bool, str, timedelta]:
+            profile_age = now - profile.creation_date
+            return (
+                profile.is_wildcard,  # Non-wildcard profiles have higher priority
+                profile.bundle_id,  # General ordering by alphabetically sorting bundle identifiers
+                profile_age,  # In case of bundle identifier collision, prefer more recent profile
+            )
+
+        profiles = sorted(self.profiles.values(), key=sort_key)
+        return json.dumps([self._serialize_profile(p) for p in profiles])
 
     def _serialize_profile(self, profile):
         usable_certificates = profile.get_usable_certificates(self._certificates)
