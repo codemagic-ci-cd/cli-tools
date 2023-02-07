@@ -2,7 +2,7 @@ Version 0.38.3
 -------------
 
 **Dependencies**
-- Remove upper bound version limit from [`cryptography`](https://cryptography.io/) dependency. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Remove upper bound version limit from [`cryptography`](https://cryptography.io/) dependency. [PR #309](https://github.com/codemagic-ci-cd/cli-tools/pull/309)
 
 Version 0.38.2
 -------------
