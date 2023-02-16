@@ -292,7 +292,7 @@ class AppStoreConnect(
         platform: Optional[Platform] = None,
     ) -> Optional[str]:
         """
-        Get the highest build number of the highest version used for the given app considering both TestFlight and App Store submissions
+        Get the highest build number of the highest version used for the given app.
         """
         app_store_build_info = self._get_max_app_store_version_and_build(application_id, platform=platform)
         testflight_build_info = self._get_max_testflight_version_and_build(application_id, platform=platform)
