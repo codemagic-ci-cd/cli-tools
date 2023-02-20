@@ -12,7 +12,6 @@ Version 0.38.3
   - `app-store-connect get-latest-build-number`,
   - `app-store-connect get-latest-app-store-build-number`,
   - `app-store-connect get-latest-testflight-build-number`.
->>>>>>> 6a7bb43753ee6cff3338d7ab15cc7298e6ede90d
 
 Version 0.38.2
 -------------
