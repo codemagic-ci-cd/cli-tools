@@ -1,3 +1,12 @@
+Version 0.38.3
+-------------
+
+**Docs**
+- Documentation was updated for actions:
+  - `app-store-connect get-latest-build-number`,
+  - `app-store-connect get-latest-app-store-build-number`,
+  - `app-store-connect get-latest-testflight-build-number`.
+
 Version 0.38.2
 -------------
 
