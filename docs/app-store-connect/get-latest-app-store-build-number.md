@@ -3,7 +3,7 @@ get-latest-app-store-build-number
 =================================
 
 
-**Get the latest App Store build number for the given application**
+**Get the latest App Store build number of the highest version for the given application**
 ### Usage
 ```bash
 app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -100,9 +100,9 @@ Enable verbose logging for commands
 |[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
 |[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal|
 |[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal|
-|[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get the latest App Store build number for the given application|
-|[`get-latest-build-number`](get-latest-build-number.md)|Get the highest build number used for the given app considering both TestFlight and App Store submissions|
-|[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get the latest Testflight build number for the given application|
+|[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get the latest App Store build number of the highest version for the given application|
+|[`get-latest-build-number`](get-latest-build-number.md)|Get the highest build number of the highest version used for the given app.|
+|[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get the latest Testflight build number of the highest version for the given application|
 |[`get-profile`](get-profile.md)|Get specified Profile from Apple Developer portal|
 |[`list-builds`](list-builds.md)|List Builds from Apple Developer Portal matching given constraints|
 |[`list-bundle-id-profiles`](list-bundle-id-profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
