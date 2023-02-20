@@ -3,7 +3,7 @@ get-latest-testflight-build-number
 ==================================
 
 
-**Get the latest Testflight build number for the given application**
+**Get the latest Testflight build number of the highest version for the given application**
 ### Usage
 ```bash
 app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

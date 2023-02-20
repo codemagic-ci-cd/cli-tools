@@ -292,7 +292,7 @@ class AppStoreConnect(
         platform: Optional[Platform] = None,
     ) -> Optional[str]:
         """
-        Get the highest build number used for the given app considering both TestFlight and App Store submissions
+        Get the highest build number of the highest version used for the given app.
         """
         app_store_build_info = self._get_max_app_store_version_and_build(application_id, platform=platform)
         testflight_build_info = self._get_max_testflight_version_and_build(application_id, platform=platform)
@@ -327,7 +327,7 @@ class AppStoreConnect(
         platform: Optional[Platform] = None,
     ) -> Optional[str]:
         """
-        Get the latest App Store build number for the given application
+        Get the latest App Store build number of the highest version for the given application
         """
         latest_build_info = self._get_max_app_store_version_and_build(
             application_id,
@@ -359,7 +359,7 @@ class AppStoreConnect(
         not_expired: Optional[bool] = None,
     ) -> Optional[str]:
         """
-        Get the latest Testflight build number for the given application
+        Get the latest Testflight build number of the highest version for the given application
         """
         try:
             expired_value: Optional[bool] = Argument.resolve_optional_two_way_switch(expired, not_expired)
