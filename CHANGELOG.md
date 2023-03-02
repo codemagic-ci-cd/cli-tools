@@ -1,3 +1,9 @@
+Version 0.39.1
+-------------
+
+**Development**
+- Marginal changes to use timezone aware datetimes with `datetime.now(timezone.utc)` as recommended in the [documentation](https://docs.python.org/3/library/datetime.html#datetime.datetime.utcnow). [PR #310](https://github.com/codemagic-ci-cd/cli-tools/pull/310)
+
 Version 0.39.0
 -------------
 

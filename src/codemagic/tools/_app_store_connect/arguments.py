@@ -179,7 +179,7 @@ class Types:
 
         @classmethod
         def validate(cls, value: datetime):
-            if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
+            if value <= datetime.now(timezone.utc):
                 raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
             elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
                 raise ArgumentTypeError((
