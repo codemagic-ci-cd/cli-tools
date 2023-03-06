@@ -1,6 +1,7 @@
 import re
 import urllib.parse
 from datetime import datetime
+from datetime import timezone
 from typing import Dict
 from typing import Optional
 
@@ -76,7 +77,7 @@ class HttpRequestAuditor(BaseAuditor):
                 'content': self._serialize_response_content(),
                 'elapsed': self._response.elapsed.total_seconds(),
             },
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'version': __version__,
         }
 

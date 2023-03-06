@@ -1,3 +1,9 @@
+Version 0.39.1
+-------------
+
+**Development**
+- Marginal changes to start using timezone aware datetimes instead of timezone unaware datetimes. [PR #313](https://github.com/codemagic-ci-cd/cli-tools/pull/313)
+
 Version 0.39.0
 -------------
 
