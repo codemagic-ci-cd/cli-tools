@@ -5,6 +5,7 @@ import shlex
 import sys
 import traceback
 from datetime import datetime
+from datetime import timezone
 from types import TracebackType
 from typing import Type
 
@@ -50,7 +51,7 @@ class ExceptionAuditor(BaseAuditor):
             'exception_arguments': self._serialize_exception_arguments(),
             'exception_type': self._exception_type.__name__,
             'stacktrace': ''.join(traceback.format_tb(self._traceback)),
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'version': __version__,
         }
 

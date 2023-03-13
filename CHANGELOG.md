@@ -1,8 +1,14 @@
-Version 0.39.1
+Version 0.39.2
 -------------
 
 **Features**
 - Improve Python API for module `codemagic.tools.keychain`. Allow passing passwords as strings in addition to `codemagic.tools.keychain.Password` for `Keychain` methods. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+
+Version 0.39.1
+-------------
+
+**Development**
+- Marginal changes to start using timezone aware datetimes instead of timezone unaware datetimes. [PR #313](https://github.com/codemagic-ci-cd/cli-tools/pull/313)
 
 Version 0.39.0
 -------------
