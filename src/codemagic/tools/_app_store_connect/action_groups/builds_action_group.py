@@ -398,6 +398,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             existing_submission_matches: Iterator[Optional[re.Match]] = (
                 existing_submission_error_patt.search(error.detail)
                 for error in api_error.error_response.errors
+                if error.detail is not None
             )
 
             try:
