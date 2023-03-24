@@ -11,6 +11,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -124,15 +125,17 @@ class Keychain(cli.CliApp, PathFinderMixin):
         return self._path
 
     @cli.action('create', KeychainArgument.PASSWORD)
-    def create(self, password: Password = Password('')) -> pathlib.Path:
+    def create(self, password: Union[str, Password] = '') -> pathlib.Path:
         """
         Create a macOS keychain, add it to the search list
         """
+        _password: str = password.value if isinstance(password, Password) else password
 
         self.logger.info(f'Create keychain {self.path}')
         process = self.execute(
-            ('security', 'create-keychain', '-p', password.value, self.path),
-            obfuscate_patterns=[password.value])
+            ('security', 'create-keychain', '-p', _password, self.path),
+            obfuscate_patterns=[_password],
+        )
         if process.returncode != 0:
             raise KeychainError(f'Unable to create keychain {self.path}', process)
 
@@ -200,15 +203,17 @@ class Keychain(cli.CliApp, PathFinderMixin):
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
     @cli.action('unlock', KeychainArgument.PASSWORD)
-    def unlock(self, password: Password = Password('')):
+    def unlock(self, password: Union[str, Password] = ''):
         """
         Unlock the specified keychain
         """
+        _password: str = password.value if isinstance(password, Password) else password
 
         self.logger.info(f'Unlock keychain {self.path}')
         process = self.execute(
-            ('security', 'unlock-keychain', '-p', password.value, self.path),
-            obfuscate_patterns=[password.value])
+            ('security', 'unlock-keychain', '-p', _password, self.path),
+            obfuscate_patterns=[_password],
+        )
         if process.returncode != 0:
             raise KeychainError(f'Unable to unlock keychain {self.path}', process)
 
@@ -261,22 +266,27 @@ class Keychain(cli.CliApp, PathFinderMixin):
         return self
 
     @cli.action('initialize', KeychainArgument.PASSWORD, KeychainArgument.TIMEOUT)
-    def initialize(self, password: Password = Password(''), timeout: Optional[Seconds] = None) -> Keychain:
+    def initialize(
+        self,
+        password: Union[str, Password] = '',
+        timeout: Optional[Seconds] = None,
+    ) -> Keychain:
         """
         Set up the keychain to be used for code signing. Create the keychain
         at specified path with specified password with given timeout.
         Make it default and unlock it for upcoming use
         """
+        _password: str = password.value if isinstance(password, Password) else password
 
         if not self._path:
             self._generate_path()
 
         message = f'Initialize new keychain to store code signing certificates at {self.path}'
         self.logger.info(Colors.GREEN(message))
-        self.create(password)
+        self.create(_password)
         self.set_timeout(timeout=timeout)
         self.make_default()
-        self.unlock(password)
+        self.unlock(_password)
         return self
 
     @cli.action('list-certificates')
@@ -299,19 +309,22 @@ class Keychain(cli.CliApp, PathFinderMixin):
         with NamedTemporaryFile(prefix=f'{date}_', suffix='.keychain-db', dir=keychain_dir) as tf:
             self._path = pathlib.Path(tf.name)
 
-    @cli.action('add-certificates',
-                KeychainArgument.CERTIFICATE_PATHS,
-                KeychainArgument.CERTIFICATE_PASSWORD,
-                KeychainArgument.ALLOWED_APPLICATIONS,
-                KeychainArgument.ALLOW_ALL_APPLICATIONS,
-                KeychainArgument.DISALLOW_ALL_APPLICATIONS)
+    @cli.action(
+        'add-certificates',
+        KeychainArgument.CERTIFICATE_PATHS,
+        KeychainArgument.CERTIFICATE_PASSWORD,
+        KeychainArgument.ALLOWED_APPLICATIONS,
+        KeychainArgument.ALLOW_ALL_APPLICATIONS,
+        KeychainArgument.DISALLOW_ALL_APPLICATIONS,
+    )
     def add_certificates(
             self,
             certificate_path_patterns: Sequence[pathlib.Path] = KeychainArgument.CERTIFICATE_PATHS.get_default(),
-            certificate_password: Password = Password(''),
+            certificate_password: Union[str, Password] = '',
             allowed_applications: Sequence[pathlib.Path] = KeychainArgument.ALLOWED_APPLICATIONS.get_default(),
             allow_all_applications: Optional[bool] = KeychainArgument.ALLOW_ALL_APPLICATIONS.get_default(),
-            disallow_all_applications: Optional[bool] = KeychainArgument.DISALLOW_ALL_APPLICATIONS.get_default()):
+            disallow_all_applications: Optional[bool] = KeychainArgument.DISALLOW_ALL_APPLICATIONS.get_default(),
+    ):
         """
         Add p12 certificate to specified keychain
         """
@@ -322,7 +335,8 @@ class Keychain(cli.CliApp, PathFinderMixin):
             raise KeychainArgument.ALLOW_ALL_APPLICATIONS.raise_argument_error(
                 f'Using mutually exclusive options '
                 f'{KeychainArgument.ALLOWED_APPLICATIONS.flag!r} and '
-                f'{KeychainArgument.DISALLOW_ALL_APPLICATIONS.flag!r}')
+                f'{KeychainArgument.DISALLOW_ALL_APPLICATIONS.flag!r}',
+            )
         elif allow_all_applications:
             add_for_all_apps = True
         elif not disallow_all_applications:
@@ -332,42 +346,53 @@ class Keychain(cli.CliApp, PathFinderMixin):
         certificate_paths = list(self.find_paths(*certificate_path_patterns))
         if not certificate_paths:
             raise KeychainError('Did not find any certificates from specified locations')
+
+        if isinstance(certificate_password, Password):
+            _certificate_password = certificate_password.value
+        else:
+            _certificate_password = certificate_password
+
         for certificate_path in certificate_paths:
-            self._add_certificate(certificate_path, certificate_password, add_for_all_apps, add_for_apps)
+            self._add_certificate(certificate_path, _certificate_password, add_for_all_apps, add_for_apps)
 
     @classmethod
     def _get_certificate_allowed_applications(
-            cls, given_allowed_applications: Sequence[pathlib.Path]) -> Iterable[str]:
+        cls,
+        given_allowed_applications: Sequence[pathlib.Path],
+    ) -> Iterable[str]:
         for application in given_allowed_applications:
             resolved_path = shutil.which(application)
             if resolved_path is None:
                 # Only raise exception if user-specified path is not present
                 if application not in KeychainArgument.ALLOWED_APPLICATIONS.get_default():
                     raise KeychainArgument.ALLOWED_APPLICATIONS.raise_argument_error(
-                        f'Application "{application}" does not exist or is not in PATH')
+                        f'Application "{application}" does not exist or is not in PATH',
+                    )
             else:
                 yield str(resolved_path)
 
-    def _add_certificate(self,
-                         certificate_path: pathlib.Path,
-                         certificate_password: Optional[Password] = None,
-                         allow_for_all_apps: bool = False,
-                         allowed_applications: Sequence[str] = tuple()):
+    def _add_certificate(
+        self,
+        certificate_path: pathlib.Path,
+        certificate_password: Optional[str] = None,
+        allow_for_all_apps: bool = False,
+        allowed_applications: Sequence[str] = tuple(),
+    ):
         self.logger.info(f'Add certificate {certificate_path} to keychain {self.path}')
         # If case of no password, we need to explicitly set -P '' flag. Otherwise,
         # security tries to open an interactive dialog to prompt the user for a password,
         # which fails in non-interactive CI environment.
         if certificate_password is not None:
-            obfuscate_patterns = [certificate_password.value]
+            obfuscate_patterns = [certificate_password]
         else:
-            certificate_password = Password('')
+            certificate_password = ''
             obfuscate_patterns = []
 
         import_cmd = [
             'security', 'import', certificate_path,
             '-f', 'pkcs12',
             '-k', self.path,
-            '-P', certificate_password.value,
+            '-P', certificate_password,
         ]
         if allow_for_all_apps:
             import_cmd.append('-A')
