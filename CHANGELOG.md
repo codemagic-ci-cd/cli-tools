@@ -4,9 +4,6 @@ Version 0.39.2
 **Features**
 - Improve Python API for module `codemagic.tools.keychain`. Allow passing passwords as strings in addition to `codemagic.tools.keychain.Password` for `Keychain` methods. [PR #315](https://github.com/codemagic-ci-cd/cli-tools/pull/315)
 
-Version 0.39.1
--------------
-
 **Bugfixes**
 - Do not require `detail` attribute from App Store Connect API error responses. [PR #316](https://github.com/codemagic-ci-cd/cli-tools/pull/316)
 
