@@ -1,6 +1,12 @@
 Version 0.39.1
 -------------
 
+**Bugfixes**
+- Do not require `detail` attribute from App Store Connect API error responses. [PR #316](https://github.com/codemagic-ci-cd/cli-tools/pull/316)
+
+Version 0.39.1
+-------------
+
 **Development**
 - Marginal changes to start using timezone aware datetimes instead of timezone unaware datetimes. [PR #313](https://github.com/codemagic-ci-cd/cli-tools/pull/313)
 
