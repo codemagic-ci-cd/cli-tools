@@ -11,4 +11,5 @@ per-file-ignores =
     # N815 variable in class scope should not be mixedCase
     src/codemagic/apple/resources/*.py:N815
     src/codemagic/google_play/resources/*.py:N815
+    src/codemagic/firebase/resources/*.py:N815
     src/codemagic/models/export_options.py:N815
