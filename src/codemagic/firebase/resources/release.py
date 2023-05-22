@@ -8,7 +8,8 @@ from .abstract_resource import AbstractResource
 
 @dataclass
 class ReleaseResource(AbstractResource):
-    """https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#ReleaseNotes
+    """
+    https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#ReleaseNotes
     """
     @dataclass
     class ReleaseNotes:
