@@ -73,4 +73,4 @@ class ResourceManager(Generic[R, PI], ABC):
             if not page_token:
                 break
 
-        return items
+        return items[:limit]

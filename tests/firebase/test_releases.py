@@ -4,6 +4,8 @@ from datetime import datetime
 from datetime import timezone
 from pathlib import Path
 from unittest import mock
+from unittest.mock import PropertyMock
+from unittest.mock import patch
 
 import pytest
 
@@ -67,7 +69,7 @@ def test_release(mock_release_response_data, mock_release):
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases(project_id, app_id, keyfile, client, mock_release):
+def test_list_releases_live(project_id, app_id, keyfile, client, mock_release):
     order_by = FirebaseReleaseResourceManager.OrderBy.create_time_asc
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = client.releases.list(parent_identifier, order_by=order_by, page_size=2)
@@ -77,9 +79,57 @@ def test_list_releases(project_id, app_id, keyfile, client, mock_release):
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases_pagination(project_id, app_id, keyfile, client, mock_release):
+def test_list_releases_pagination_live(project_id, app_id, keyfile, client, mock_release):
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = client.releases.list(parent_identifier, page_size=1)
 
     assert releases[0].buildVersion == 71
     assert releases[1] == mock_release
+
+
+def mock_releases_api_resource_class(releases, next_page_token):
+    class MockList:
+        @staticmethod
+        def execute():
+            return {'releases': releases, 'nextPageToken': next_page_token}
+
+    class MockFirebaseReleaseResource:
+        @staticmethod
+        def list(**_kw):
+            return MockList()
+
+    return MockFirebaseReleaseResource
+
+
+@pytest.fixture
+def mock_client():
+    with patch.object(FirebaseAPIClient, '_service', new_callable=PropertyMock) as mock_service:
+        mock_service.return_value = None
+        yield FirebaseAPIClient({})
+
+
+@pytest.fixture
+def mock_releases_api_resource(mock_release_response_data):
+    release_0 = mock_release_response_data.copy()
+    release_1 = mock_release_response_data.copy()
+    release_1['buildVersion'] = '71'
+    api_resource_class_stub = mock_releases_api_resource_class([release_0, release_1], None)
+    with patch.object(FirebaseReleaseResourceManager, '_resource', new_callable=PropertyMock) as mock_resource:
+        mock_resource.return_value = api_resource_class_stub()
+        yield mock_resource
+
+
+def test_list_releases(project_id, app_id, mock_client, mock_release, mock_releases_api_resource):
+    order_by = FirebaseReleaseResourceManager.OrderBy.create_time_asc
+    parent_identifier = ReleaseParentIdentifier(project_id, app_id)
+    releases = mock_client.releases.list(parent_identifier, order_by=order_by, page_size=2)
+
+    assert releases[0] == mock_release
+    assert releases[1].buildVersion == 71
+
+
+def test_list_releases_limit(project_id, app_id, mock_client, mock_release, mock_releases_api_resource):
+    parent_identifier = ReleaseParentIdentifier(project_id, app_id)
+    releases = mock_client.releases.list(parent_identifier, limit=1)
+
+    assert len(releases) == 1
