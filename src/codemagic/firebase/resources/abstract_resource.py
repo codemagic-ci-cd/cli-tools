@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 
 @dataclass
-class AbstractFirebaseResource(ABC):
+class AbstractResource(ABC):
     label: str

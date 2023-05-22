@@ -3,11 +3,11 @@ from dataclasses import field
 from datetime import datetime
 from datetime import timezone
 
-from .abstract_base_resource import AbstractFirebaseResource
+from .abstract_resource import AbstractResource
 
 
 @dataclass
-class FirebaseReleaseResource(AbstractFirebaseResource):
+class ReleaseResource(AbstractResource):
     """https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#ReleaseNotes
     """
     @dataclass

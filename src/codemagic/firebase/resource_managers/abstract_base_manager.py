@@ -1,8 +1,7 @@
 from abc import ABC
 from abc import abstractmethod
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any
-from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -10,52 +9,68 @@ from typing import Tuple
 from typing import Type
 from typing import TypeVar
 
-from ..resources.abstract_base_resource import AbstractFirebaseResource
-
-R = TypeVar('R', bound=AbstractFirebaseResource)
+from ..resources.abstract_resource import AbstractResource
 
 
-class FirebaseResourceManager(Generic[R], ABC):
+@dataclass
+class AbstractParentIdentifier(ABC):
+    @property
+    @abstractmethod
+    def uri(self) -> str:
+        ...
+
+
+R = TypeVar('R', bound=AbstractResource)
+PI = TypeVar('PI', bound=AbstractParentIdentifier)
+
+
+class ResourceManager(Generic[R, PI], ABC):
     Resource: Type[R]
+    ParentIdentifier: Type[PI]
 
     class OrderBy(Enum):
         create_time_desc = 'createTimeDesc'
         create_time_asc = 'createTime'
 
-    @classmethod
-    def resource(cls, service) -> Any:
-        ...
+    def __init__(self, service):
+        self.service = service
 
     @property
     @abstractmethod
-    def query_parameters(self) -> Dict[str, str]:
+    def _resource(self):
         ...
 
-    def _list_page_resource_items(
-            self, service, order_by: OrderBy, page_size: int, page_token: Optional[str],
+    def _list_page(
+            self, parent_identifier: PI, order_by: OrderBy, page_size: int, page_token: Optional[str],
     ) -> Tuple[List[R], Optional[str]]:
-        resource = self.resource(service)
-        response = resource.list(
+        response = self._resource.list(
             orderBy=order_by.value,
             pageSize=page_size,
             pageToken=page_token,
-            **self.query_parameters,
+            parent=parent_identifier.uri,
         ).execute()
         return [self.Resource(**item) for item in response[self.Resource.label]], response.get('nextPageToken')
 
-    def iterate_resource_items(self, service, order_by: OrderBy, limit: Optional[int], page_size: int):
+    def list(
+        self,
+        parent_identifier: PI,
+        order_by: OrderBy = OrderBy.create_time_desc,
+        limit: Optional[int] = None,
+        page_size: int = 25,
+    ) -> List[R]:
         page_size = min(limit, page_size) if limit else page_size
 
+        items = []
         page_token = None
-        count = 0
         while True:
-            items, page_token = self._list_page_resource_items(service, order_by, page_size, page_token)
+            page_items, page_token = self._list_page(parent_identifier, order_by, page_size, page_token)
 
-            yield from items
+            items.extend(page_items)
 
-            count += len(items)
-            if limit and count > limit:
+            if limit and len(items) > limit:
                 break
 
             if not page_token:
                 break
+
+        return items

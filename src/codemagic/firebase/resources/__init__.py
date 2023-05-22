@@ -1,1 +1,1 @@
-from .release import FirebaseReleaseResource  # noqa: F401
+from .release import ReleaseResource  # noqa: F401

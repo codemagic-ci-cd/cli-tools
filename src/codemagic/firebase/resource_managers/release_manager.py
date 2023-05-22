@@ -1,19 +1,27 @@
-from codemagic.firebase.resource_managers.abstract_base_manager import FirebaseResourceManager
-from codemagic.firebase.resources import FirebaseReleaseResource
+from dataclasses import dataclass
+
+from codemagic.firebase.resource_managers.abstract_base_manager import AbstractParentIdentifier
+from codemagic.firebase.resource_managers.abstract_base_manager import ResourceManager
+from codemagic.firebase.resources import ReleaseResource
 
 
-class FirebaseReleaseResourceManager(FirebaseResourceManager[FirebaseReleaseResource]):
-    Resource = FirebaseReleaseResource
-
-    def __init__(self, project_id, app_id):
-        self.project_id = project_id
-        self.app_id = app_id
-
-    @classmethod
-    def resource(cls, service):
-        return service.projects().apps().releases()
+@dataclass
+class ReleaseParentIdentifier(AbstractParentIdentifier):
+    project_id: str
+    app_id: str
 
     @property
-    def query_parameters(self):
-        parent = f'projects/{self.project_id}/apps/{self.app_id}'
-        return {'parent': parent}
+    def uri(self):
+        return f'projects/{self.project_id}/apps/{self.app_id}'
+
+
+class FirebaseReleaseResourceManager(ResourceManager[ReleaseResource, ReleaseParentIdentifier]):
+    """
+    https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list
+    """
+    Resource = ReleaseResource
+    ParentIdentifier = ReleaseParentIdentifier
+
+    @property
+    def _resource(self):
+        return self.service.projects().apps().releases()
