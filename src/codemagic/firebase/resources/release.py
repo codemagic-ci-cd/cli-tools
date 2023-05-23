@@ -2,19 +2,24 @@ from dataclasses import dataclass
 from dataclasses import field
 from datetime import datetime
 from datetime import timezone
+from typing import ClassVar
 
-from .abstract_resource import AbstractResource
+from .resource import Resource
 
 
 @dataclass
-class ReleaseResource(AbstractResource):
+class ReleaseNotes:
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#ReleaseNotes
     """
-    @dataclass
-    class ReleaseNotes:
-        text: str
+    text: str
 
+
+@dataclass
+class Release(Resource):
+    """
+    https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases
+    """
     name: str
     releaseNotes: ReleaseNotes
     displayVersion: str
@@ -24,7 +29,7 @@ class ReleaseResource(AbstractResource):
     testingUri: str
     binaryDownloadUri: str
 
-    label: str = field(default='releases', init=False, repr=False)
+    label: ClassVar[str] = field(default='releases', init=False, repr=False)
 
     def __post_init__(self):
         if isinstance(self.createTime, str):
@@ -32,4 +37,4 @@ class ReleaseResource(AbstractResource):
         if isinstance(self.buildVersion, str):
             self.buildVersion = int(self.buildVersion)
         if isinstance(self.releaseNotes, dict):
-            self.releaseNotes = self.ReleaseNotes(self.releaseNotes['text'])
+            self.releaseNotes = ReleaseNotes(self.releaseNotes['text'])

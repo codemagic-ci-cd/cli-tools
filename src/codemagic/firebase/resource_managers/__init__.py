@@ -1,1 +1,1 @@
-from .release_manager import FirebaseReleaseResourceManager
+from .release_manager import FirebaseReleaseManager

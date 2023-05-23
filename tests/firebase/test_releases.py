@@ -9,10 +9,11 @@ from unittest.mock import patch
 
 import pytest
 
-from codemagic.firebase import FirebaseAPIClient
-from codemagic.firebase.resource_managers.release_manager import FirebaseReleaseResourceManager
+from codemagic.firebase import FirebaseApiClient
+from codemagic.firebase.resource_managers.release_manager import FirebaseReleaseManager
 from codemagic.firebase.resource_managers.release_manager import ReleaseParentIdentifier
-from codemagic.firebase.resources import ReleaseResource
+from codemagic.firebase.resources import Release
+from codemagic.firebase.resources import ReleaseNotes
 
 
 @pytest.fixture
@@ -31,9 +32,9 @@ def mock_release_response_data():
 
 @pytest.fixture
 def mock_release():
-    return ReleaseResource(
+    return Release(
         name='projects/228333310124/apps/1:228333310124:ios:5e439e0d0231a788ac8f09/releases/0fam13pr3rea0',
-        releaseNotes=ReleaseResource.ReleaseNotes('Something new :) :)'),
+        releaseNotes=ReleaseNotes('Something new :) :)'),
         displayVersion='0.0.42',
         buildVersion=70,
         createTime=datetime(2023, 5, 18, 12, 30, 17, 454581, tzinfo=timezone.utc),
@@ -61,16 +62,16 @@ def keyfile():
 
 @pytest.fixture
 def client(keyfile):
-    return FirebaseAPIClient(keyfile)
+    return FirebaseApiClient(keyfile)
 
 
 def test_release(mock_release_response_data, mock_release):
-    assert ReleaseResource(**mock_release_response_data) == mock_release
+    assert Release(**mock_release_response_data) == mock_release
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
 def test_list_releases_live(project_id, app_id, keyfile, client, mock_release):
-    order_by = FirebaseReleaseResourceManager.OrderBy.create_time_asc
+    order_by = FirebaseReleaseManager.OrderBy.create_time_asc
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = client.releases.list(parent_identifier, order_by=order_by, page_size=2)
 
@@ -103,9 +104,9 @@ def mock_releases_api_resource_class(releases, next_page_token):
 
 @pytest.fixture
 def mock_client():
-    with patch.object(FirebaseAPIClient, '_service', new_callable=PropertyMock) as mock_service:
+    with patch.object(FirebaseApiClient, '_discovery_service', new_callable=PropertyMock) as mock_service:
         mock_service.return_value = None
-        yield FirebaseAPIClient({})
+        yield FirebaseApiClient({})
 
 
 @pytest.fixture
@@ -114,13 +115,13 @@ def mock_releases_api_resource(mock_release_response_data):
     release_1 = mock_release_response_data.copy()
     release_1['buildVersion'] = '71'
     api_resource_class_stub = mock_releases_api_resource_class([release_0, release_1], None)
-    with patch.object(FirebaseReleaseResourceManager, '_resource', new_callable=PropertyMock) as mock_resource:
+    with patch.object(FirebaseReleaseManager, '_discovery_interface', new_callable=PropertyMock) as mock_resource:
         mock_resource.return_value = api_resource_class_stub()
         yield mock_resource
 
 
 def test_list_releases(project_id, app_id, mock_client, mock_release, mock_releases_api_resource):
-    order_by = FirebaseReleaseResourceManager.OrderBy.create_time_asc
+    order_by = FirebaseReleaseManager.OrderBy.create_time_asc
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = mock_client.releases.list(parent_identifier, order_by=order_by, page_size=2)
 
