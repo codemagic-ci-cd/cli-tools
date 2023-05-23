@@ -6,12 +6,12 @@ from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
-from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
 
 from googleapiclient import discovery
+from typing_extensions import Protocol
 
 from ..resources.resource import Resource
 

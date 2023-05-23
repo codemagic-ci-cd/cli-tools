@@ -44,6 +44,7 @@ packaging = ">=22.0"
 psutil = ">= 5.8.0"
 pyjwt = "^2.4.0"
 requests = ">= 2.25"
+typing-extensions = "^4.6.0"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "*"
