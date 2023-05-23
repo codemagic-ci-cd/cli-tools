@@ -2,6 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 from enum import Enum
 from typing import Any
+from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -26,7 +27,7 @@ class ParentResourceIdentifier(ABC):
 
 
 class PExecutableInterface(Protocol):
-    def execute(self, **kwargs) -> dict[str, Any]:
+    def execute(self) -> Dict[str, Any]:
         ...
 
 

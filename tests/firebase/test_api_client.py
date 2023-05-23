@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from datetime import timezone
+from functools import lru_cache
 from pathlib import Path
 from unittest import mock
 from unittest.mock import PropertyMock
@@ -55,14 +56,24 @@ def app_id():
 
 
 @pytest.fixture
-def keyfile():
-    content = Path(os.environ['FIREBASE_SERVICE_ACCOUNT_PATH']).read_text()
-    return json.loads(content)
+@lru_cache(1)
+def credentials() -> dict:
+    if 'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
+        credentials_path = Path(os.environ['TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
+        credentials = credentials_path.expanduser().read_text()
+    elif 'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT' in os.environ:
+        credentials = os.environ['TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT']
+    else:
+        raise KeyError(
+            'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH',
+            'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT',
+        )
+    return json.loads(credentials)
 
 
 @pytest.fixture
-def client(keyfile):
-    return FirebaseApiClient(keyfile)
+def client(credentials):
+    return FirebaseApiClient(credentials)
 
 
 def test_release(mock_release_response_data, mock_release):
@@ -70,7 +81,7 @@ def test_release(mock_release_response_data, mock_release):
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases_live(project_id, app_id, keyfile, client, mock_release):
+def test_list_releases_live(project_id, app_id, credentials, client, mock_release):
     order_by = FirebaseReleaseManager.OrderBy.create_time_asc
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = client.releases.list(parent_identifier, order_by=order_by, page_size=2)
@@ -80,7 +91,7 @@ def test_list_releases_live(project_id, app_id, keyfile, client, mock_release):
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases_pagination_live(project_id, app_id, keyfile, client, mock_release):
+def test_list_releases_pagination_live(project_id, app_id, credentials, client, mock_release):
     parent_identifier = ReleaseParentIdentifier(project_id, app_id)
     releases = client.releases.list(parent_identifier, page_size=1)
 

@@ -1,3 +1,9 @@
+Version 0.40.0
+-------------
+
+**Features**
+- Add tool `flutter` with action `get-latest-build-version`
+
 Version 0.39.2
 -------------
 
