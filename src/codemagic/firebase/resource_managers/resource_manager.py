@@ -25,13 +25,13 @@ class ParentResourceIdentifier(ABC):
         ...
 
 
-class ExecutableInterfaceProtocol(Protocol):
+class PExecutableInterface(Protocol):
     def execute(self, **kwargs) -> dict[str, Any]:
         ...
 
 
-class ListableInterfaceProtocol(Protocol):
-    def list(self, **kwargs) -> ExecutableInterfaceProtocol:
+class PListableInterface(Protocol):
+    def list(self, **kwargs) -> PExecutableInterface:
         ...
 
 
@@ -50,7 +50,7 @@ class ResourceManager(Generic[ResourceT, ParentResourceIdentifierT], ABC):
 
     @property
     @abstractmethod
-    def _discovery_interface(self) -> ListableInterfaceProtocol:
+    def _discovery_interface(self) -> PListableInterface:
         ...
 
     def _list_page(
