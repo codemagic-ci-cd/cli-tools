@@ -2,7 +2,7 @@ Version 0.40.0
 -------------
 
 **Features**
-- Add tool `flutter` with action `get-latest-build-version`
+- Add tool `flutter` with `list-releases` and `get-latest-build-version` actions.
 
 Version 0.39.2
 -------------

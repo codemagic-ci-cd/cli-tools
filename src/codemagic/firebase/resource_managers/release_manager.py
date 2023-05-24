@@ -7,10 +7,18 @@ from codemagic.firebase.resource_managers.resource_manager import ResourceManage
 from codemagic.firebase.resources import Release
 
 
+class ProjectId(str):
+    pass
+
+
+class AppId(str):
+    pass
+
+
 @dataclass
 class ReleaseParentIdentifier(ParentResourceIdentifier):
-    project_id: str
-    app_id: str
+    project_id: ProjectId
+    app_id: AppId
 
     @property
     def uri(self) -> str:

@@ -4,11 +4,12 @@ from datetime import datetime
 from datetime import timezone
 from typing import ClassVar
 
+from .resource import DictSerializable
 from .resource import Resource
 
 
 @dataclass
-class ReleaseNotes:
+class ReleaseNotes(DictSerializable):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#ReleaseNotes
     """

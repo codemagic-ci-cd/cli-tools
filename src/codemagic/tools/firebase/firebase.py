@@ -8,14 +8,15 @@ import json
 from codemagic import cli
 from codemagic.firebase.api_client import FirebaseApiClient
 
+from .action_groups import ReleasesActionGroup
 from .actions import GetLatestBuildVersionAction
 from .arguments import FirebaseArgument
 
 
 @cli.common_arguments(FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS)
-class Firebase(cli.CliApp, GetLatestBuildVersionAction):
+class Firebase(cli.CliApp, GetLatestBuildVersionAction, ReleasesActionGroup):
     """
-    Utility to get the latest build versions from Firebase using Firebase API
+    Utility to list releases and the latest release build version from Firebase using Firebase API
     """
 
     def __init__(self, credentials: dict, **kwargs):

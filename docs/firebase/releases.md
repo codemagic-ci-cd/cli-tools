@@ -1,12 +1,12 @@
 
-firebase
+releases
 ========
 
 
-**Utility to list releases and the latest release build version from Firebase using Firebase API**
+**Manage your Firebase releases**
 ### Usage
 ```bash
-firebase [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+firebase releases [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     ACTION
 ```
@@ -46,10 +46,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`get-latest-build-version`](get-latest-build-version.md)|Get latest build version from Firebase API|
-
-### Action groups
-
-|Action group|Description|
-| :--- | :--- |
-|[`releases`](releases.md)|Manage your Firebase releases|
+|[`list`](releases/list.md)|List releases for the specified project and application from Firebase API|

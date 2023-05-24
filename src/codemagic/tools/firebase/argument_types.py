@@ -3,14 +3,6 @@ import json
 from codemagic import cli
 
 
-class ProjectId(str):
-    pass
-
-
-class AppId(str):
-    pass
-
-
 class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
     environment_variable_key = 'FIREBASE_SERVICE_ACCOUNT_CREDENTIALS'
 

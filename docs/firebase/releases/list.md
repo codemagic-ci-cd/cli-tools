@@ -1,15 +1,33 @@
 
-firebase
-========
+list
+====
 
 
-**Utility to list releases and the latest release build version from Firebase using Firebase API**
+**List releases for the specified project and application from Firebase API**
 ### Usage
 ```bash
-firebase [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+firebase releases list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
-    ACTION
+    [--json]
+    --project-id PROJECT_ID
+    --app-id APP_ID
 ```
+### Required arguments for action `list`
+
+##### `--project-id, -p=PROJECT_ID`
+
+
+Project ID in Firebase. For example `228333310124`
+##### `--app-id, -a=APP_ID`
+
+
+Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`
+### Optional arguments for action `list`
+
+##### `--json, -j`
+
+
+Whether to show the request response in JSON format
 ### Optional arguments for command `firebase`
 
 ##### `--credentials=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`
@@ -42,14 +60,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`get-latest-build-version`](get-latest-build-version.md)|Get latest build version from Firebase API|
-
-### Action groups
-
-|Action group|Description|
-| :--- | :--- |
-|[`releases`](releases.md)|Manage your Firebase releases|

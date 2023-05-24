@@ -1,13 +1,13 @@
 from abc import ABCMeta
 
 from codemagic import cli
+from codemagic.firebase.resource_managers.release_manager import AppId
+from codemagic.firebase.resource_managers.release_manager import ProjectId
 from codemagic.firebase.resource_managers.release_manager import ReleaseParentIdentifier
 
-from ..arguments import AppId
-from ..arguments import ProjectId
 from ..arguments import ReleasesArgument
 from ..errors import FirebaseError
-from .firebase_action import FirebaseAction
+from ..firebase_action import FirebaseAction
 
 
 class GetLatestBuildVersionAction(FirebaseAction, metaclass=ABCMeta):

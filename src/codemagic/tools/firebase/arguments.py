@@ -1,8 +1,8 @@
 from codemagic import cli
+from codemagic.firebase.resource_managers.release_manager import AppId
+from codemagic.firebase.resource_managers.release_manager import ProjectId
 
-from .argument_types import AppId
 from .argument_types import CredentialsArgument
-from .argument_types import ProjectId
 
 
 class FirebaseArgument(cli.Argument):
