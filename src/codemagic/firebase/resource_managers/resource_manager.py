@@ -11,8 +11,12 @@ from typing import Type
 from typing import TypeVar
 
 from googleapiclient import discovery
+from googleapiclient.errors import Error as GoogleApiClientError
+from httplib2.error import HttpLib2Error
+from oauth2client.client import Error as OAuth2ClientError
 from typing_extensions import Protocol
 
+from ..api_error import FirebaseApiClientError
 from ..resources.resource import Resource
 
 ResourceT = TypeVar('ResourceT', bound=Resource)
@@ -61,12 +65,16 @@ class ResourceManager(Generic[ResourceT, ParentResourceIdentifierT], ABC):
         page_size: int,
         page_token: Optional[str],
     ) -> Tuple[List[ResourceT], Optional[str]]:
-        response = self._discovery_interface.list(
+        request = self._discovery_interface.list(
             orderBy=order_by.value,
             pageSize=page_size,
             pageToken=page_token,
             parent=parent_identifier.uri,
-        ).execute()
+        )
+        try:
+            response = request.execute()
+        except (HttpLib2Error, OAuth2ClientError, GoogleApiClientError) as e:
+            raise FirebaseApiClientError(str(e)) from e
         return (
             [self.resource_type(**item) for item in response[self.resource_type.label]],
             response.get('nextPageToken'),
