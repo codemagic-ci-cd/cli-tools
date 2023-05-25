@@ -1,6 +1,4 @@
 from codemagic import cli
-from codemagic.firebase.resource_managers.release_manager import AppId
-from codemagic.firebase.resource_managers.release_manager import ProjectId
 
 from .argument_types import CredentialsArgument
 
@@ -26,14 +24,12 @@ class ReleasesArgument(cli.Argument):
     PROJECT_ID = cli.ArgumentProperties(
         key='project_id',
         flags=('--project-id', '-p'),
-        type=ProjectId,
         description='Project ID in Firebase. For example `228333310124`',
         argparse_kwargs={'required': True},
     )
     APP_ID = cli.ArgumentProperties(
         key='app_id',
         flags=('--app-id', '-a'),
-        type=AppId,
         description='Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`',
         argparse_kwargs={'required': True},
     )

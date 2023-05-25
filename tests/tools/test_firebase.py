@@ -12,11 +12,9 @@ import pytest
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.firebase.resource_managers.release_manager import AppId
 from codemagic.firebase.resource_managers.release_manager import FirebaseReleaseManager
-from codemagic.firebase.resource_managers.release_manager import ProjectId
-from codemagic.firebase.resource_managers.release_manager import ReleaseParentIdentifier
 from codemagic.firebase.resources import Release
+from codemagic.firebase.resources.identifiers import AppIdentifier
 from codemagic.tools.firebase import Firebase
 from codemagic.tools.firebase.argument_types import CredentialsArgument
 from codemagic.tools.firebase.arguments import FirebaseArgument
@@ -132,18 +130,8 @@ def test_private_key_env_arg(mock_firebase_api_client, configure_variable, names
 
 
 @pytest.fixture
-def app_id():
-    return AppId('1:228333310124:ios:5e439e0d0231a788ac8f09')
-
-
-@pytest.fixture
-def project_id():
-    return ProjectId('228333310124')
-
-
-@pytest.fixture
-def release_parent_identifier(project_id, app_id):
-    return ReleaseParentIdentifier(project_id, app_id)
+def app_identifier():
+    return AppIdentifier('228333310124', '1:228333310124:ios:5e439e0d0231a788ac8f09')
 
 
 @pytest.fixture(autouse=True)
@@ -159,34 +147,34 @@ def mock_discovery_service():
 
 
 @pytest.fixture
-def mock_api_releases_list(mock_releases, release_parent_identifier):
+def mock_api_releases_list(mock_releases, app_identifier):
     with mock.patch.object(FirebaseReleaseManager, 'list', return_value=mock_releases) as mock_releases_list:
         yield mock_releases_list
 
 
-def test_list_releases(mock_api_releases_list, mock_releases, release_parent_identifier):
+def test_list_releases(mock_api_releases_list, mock_releases, app_identifier):
     firebase = Firebase({'type': 'service_account'})
-    releases = firebase.list_releases(release_parent_identifier.project_id, release_parent_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(release_parent_identifier)
+    releases = firebase.list_releases(app_identifier.project_id, app_identifier.app_id)
+    mock_api_releases_list.assert_called_once_with(app_identifier)
     assert releases == mock_releases
 
 
-def test_get_latest_build_version(mock_api_releases_list, release_parent_identifier):
+def test_get_latest_build_version(mock_api_releases_list, app_identifier):
     firebase = Firebase({'type': 'service_account'})
     build_number = firebase.get_latest_build_version(
-        release_parent_identifier.project_id,
-        release_parent_identifier.app_id,
+        app_identifier.project_id,
+        app_identifier.app_id,
     )
-    mock_api_releases_list.assert_called_once_with(release_parent_identifier, limit=1)
+    mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)
     assert build_number == 71
 
 
-def test_get_latest_build_version_no_releases(release_parent_identifier):
+def test_get_latest_build_version_no_releases(app_identifier):
     firebase = Firebase({'type': 'service_account'})
     with mock.patch.object(FirebaseReleaseManager, 'list', return_value=[]) as mock_api_releases_list:
         with pytest.raises(FirebaseError):
             firebase.get_latest_build_version(
-                release_parent_identifier.project_id,
-                release_parent_identifier.app_id,
+                app_identifier.project_id,
+                app_identifier.app_id,
             )
-    mock_api_releases_list.assert_called_once_with(release_parent_identifier, limit=1)
+    mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)

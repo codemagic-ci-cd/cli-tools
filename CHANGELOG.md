@@ -2,7 +2,15 @@ Version 0.40.0
 -------------
 
 **Features**
-- Add tool `flutter` with `list-releases` and `get-latest-build-version` actions.
+
+- New `firebase` tool
+  - `firebase releases list` action to list releases
+  - `firebase get-latest-build-version` to get a build version number for the latest release
+
+**Development**
+- New API methods:
+  - `Firebase.list_releases`
+  - `Firebase.get_latest_build_version`
 
 Version 0.39.2
 -------------

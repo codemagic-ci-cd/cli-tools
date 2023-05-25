@@ -1,9 +1,7 @@
 from abc import ABCMeta
 
 from codemagic import cli
-from codemagic.firebase.resource_managers.release_manager import AppId
-from codemagic.firebase.resource_managers.release_manager import ProjectId
-from codemagic.firebase.resource_managers.release_manager import ReleaseParentIdentifier
+from codemagic.firebase.resources.identifiers import AppIdentifier
 
 from ..arguments import ReleasesArgument
 from ..errors import FirebaseError
@@ -18,14 +16,14 @@ class GetLatestBuildVersionAction(FirebaseAction, metaclass=ABCMeta):
     )
     def get_latest_build_version(
         self,
-        project_id: ProjectId,
-        app_id: AppId,
+        project_id: str,
+        app_id: str,
     ) -> int:
         """
         Get latest build version from Firebase API
         """
-        parent_identifier = ReleaseParentIdentifier(project_id, app_id)
-        releases = self.api_client.releases.list(parent_identifier, limit=1)
+        app_identifier = AppIdentifier(project_id, app_id)
+        releases = self.api_client.releases.list(app_identifier, limit=1)
         if not releases:
             raise FirebaseError('No available releases')
 

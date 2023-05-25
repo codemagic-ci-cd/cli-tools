@@ -11,12 +11,10 @@ from unittest.mock import patch
 import pytest
 
 from codemagic.firebase import FirebaseApiClient
-from codemagic.firebase.resource_managers.release_manager import AppId
-from codemagic.firebase.resource_managers.release_manager import FirebaseReleaseManager
-from codemagic.firebase.resource_managers.release_manager import ProjectId
-from codemagic.firebase.resource_managers.release_manager import ReleaseParentIdentifier
+from codemagic.firebase.resource_managers import FirebaseReleaseManager
 from codemagic.firebase.resources import Release
 from codemagic.firebase.resources import ReleaseNotes
+from codemagic.firebase.resources.identifiers import AppIdentifier
 
 
 @pytest.fixture
@@ -48,18 +46,8 @@ def mock_release():
 
 
 @pytest.fixture
-def app_id():
-    return AppId('1:228333310124:ios:5e439e0d0231a788ac8f09')
-
-
-@pytest.fixture
-def project_id():
-    return ProjectId('228333310124')
-
-
-@pytest.fixture
-def release_parent_identifier(project_id, app_id):
-    return ReleaseParentIdentifier(project_id, app_id)
+def app_identifier():
+    return AppIdentifier('228333310124', '1:228333310124:ios:5e439e0d0231a788ac8f09')
 
 
 @pytest.fixture
@@ -88,17 +76,17 @@ def test_release(mock_release_response_data, mock_release):
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases_live(release_parent_identifier, credentials, client, mock_release):
+def test_list_releases_live(app_identifier, credentials, client, mock_release):
     order_by = FirebaseReleaseManager.OrderBy.create_time_asc
-    releases = client.releases.list(release_parent_identifier, order_by=order_by, page_size=2)
+    releases = client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release
     assert releases[1].buildVersion == 71
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
-def test_list_releases_pagination_live(release_parent_identifier, credentials, client, mock_release):
-    releases = client.releases.list(release_parent_identifier, page_size=1)
+def test_list_releases_pagination_live(app_identifier, credentials, client, mock_release):
+    releases = client.releases.list(app_identifier, page_size=1)
 
     assert releases[0].buildVersion == 71
     assert releases[1] == mock_release
@@ -120,8 +108,12 @@ def mock_releases_api_resource_class(releases, next_page_token):
 
 @pytest.fixture
 def mock_client():
-    with patch.object(FirebaseApiClient, '_discovery_service', new_callable=PropertyMock) as mock_service:
-        mock_service.return_value = None
+    with patch.object(
+        FirebaseApiClient,
+        '_firebase_app_distribution',
+        new_callable=PropertyMock,
+    ) as mock_firebase_app_distribution:
+        mock_firebase_app_distribution.return_value = None
         yield FirebaseApiClient({})
 
 
@@ -131,20 +123,20 @@ def mock_releases_api_resource(mock_release_response_data):
     release_1 = mock_release_response_data.copy()
     release_1['buildVersion'] = '71'
     api_resource_class_stub = mock_releases_api_resource_class([release_0, release_1], None)
-    with patch.object(FirebaseReleaseManager, '_discovery_interface', new_callable=PropertyMock) as mock_resource:
+    with patch.object(FirebaseReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
         mock_resource.return_value = api_resource_class_stub()
         yield mock_resource
 
 
-def test_list_releases(release_parent_identifier, mock_client, mock_release, mock_releases_api_resource):
+def test_list_releases(app_identifier, mock_client, mock_release, mock_releases_api_resource):
     order_by = FirebaseReleaseManager.OrderBy.create_time_asc
-    releases = mock_client.releases.list(release_parent_identifier, order_by=order_by, page_size=2)
+    releases = mock_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release
     assert releases[1].buildVersion == 71
 
 
-def test_list_releases_limit(release_parent_identifier, mock_client, mock_release, mock_releases_api_resource):
-    releases = mock_client.releases.list(release_parent_identifier, limit=1)
+def test_list_releases_limit(app_identifier, mock_client, mock_release, mock_releases_api_resource):
+    releases = mock_client.releases.list(app_identifier, limit=1)
 
     assert len(releases) == 1
