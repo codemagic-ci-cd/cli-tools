@@ -1,3 +1,4 @@
 from .release import Release
-from .release import ReleaseNotes
+from .release_notes import ReleaseNotes
 from .resource import Resource
+from .resource import ResourceT

@@ -1,97 +1,82 @@
+from __future__ import annotations
+
 from abc import ABC
 from abc import abstractmethod
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any
-from typing import Dict
+from typing import TYPE_CHECKING
 from typing import Generic
 from typing import List
 from typing import Optional
-from typing import Tuple
 from typing import Type
-from typing import TypeVar
 
-from googleapiclient import discovery
-from typing_extensions import Protocol
+from ..resources.identifiers import ResourceIdentifierT
+from ..resources.resource import ResourceT
 
-from ..resources.resource import Resource
-
-ResourceT = TypeVar('ResourceT', bound=Resource)
-ParentResourceIdentifierT = TypeVar('ParentResourceIdentifierT', bound='ParentResourceIdentifier')
+if TYPE_CHECKING:
+    from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
+    from googleapiclient.http import HttpRequest
 
 
-class ParentResourceIdentifier(ABC):
-    @property
-    @abstractmethod
-    def uri(self) -> str:
-        ...
+class ResourceManager(Generic[ResourceT], ABC):
+    class OrderBy(Enum):
+        create_time_desc = 'createTimeDesc'
+        create_time_asc = 'createTime'
 
+    def __init__(self, firebase_app_distribution: FirebaseAppDistributionResource):
+        self._firebase_app_distribution = firebase_app_distribution
 
-class PExecutableInterface(Protocol):
-    def execute(self) -> Dict[str, Any]:
-        ...
-
-
-class PListableInterface(Protocol):
-    def list(self, **kwargs) -> PExecutableInterface:
-        ...
-
-
-class ResourceManager(Generic[ResourceT, ParentResourceIdentifierT], ABC):
     @property
     @abstractmethod
     def resource_type(self) -> Type[ResourceT]:
         ...
 
-    class OrderBy(Enum):
-        create_time_desc = 'createTimeDesc'
-        create_time_asc = 'createTime'
 
-    def __init__(self, discovery_service: discovery.Resource):
-        self._discovery_service = discovery_service
+class ListableResourceManagerMixin(Generic[ResourceT, ResourceIdentifierT], ABC):
+    resource_type: Type[ResourceT]
 
-    @property
+    @dataclass
+    class PageRequestArguments:
+        order_by: ResourceManager.OrderBy
+        page_size: int
+        page_token: Optional[str]
+        parent_uri: str
+
+        def as_request_kwargs(self):
+            return {
+                'orderBy': self.order_by.value,
+                'pageSize': self.page_size,
+                'pageToken': self.page_token,
+                'parent': self.parent_uri,
+            }
+
     @abstractmethod
-    def _discovery_interface(self) -> PListableInterface:
-        ...
-
-    def _list_page(
-        self,
-        parent_identifier: ParentResourceIdentifierT,
-        order_by: OrderBy,
-        page_size: int,
-        page_token: Optional[str],
-    ) -> Tuple[List[ResourceT], Optional[str]]:
-        response = self._discovery_interface.list(
-            orderBy=order_by.value,
-            pageSize=page_size,
-            pageToken=page_token,
-            parent=parent_identifier.uri,
-        ).execute()
-        return (
-            [self.resource_type(**item) for item in response[self.resource_type.label]],
-            response.get('nextPageToken'),
-        )
+    def _get_resources_page_request(self, arguments: PageRequestArguments) -> HttpRequest:
+        raise NotImplementedError()
 
     def list(
         self,
-        parent_identifier: ParentResourceIdentifierT,
-        order_by: OrderBy = OrderBy.create_time_desc,
+        parent_identifier: ResourceIdentifierT,
+        order_by: ResourceManager.OrderBy = ResourceManager.OrderBy.create_time_desc,
         limit: Optional[int] = None,
         page_size: int = 25,
     ) -> List[ResourceT]:
-        page_size = min(limit, page_size) if limit else page_size
+        page_request_args = self.PageRequestArguments(
+            order_by=order_by,
+            page_size=min(limit, page_size) if limit else page_size,
+            page_token=None,
+            parent_uri=parent_identifier.uri,
+        )
 
-        items = []
-        page_token = None
+        resources = []
         while True:
-            page_items, page_token = self._list_page(parent_identifier, order_by, page_size, page_token)
+            response = self._get_resources_page_request(page_request_args).execute()
+            page_resources = [self.resource_type(**item) for item in response[self.resource_type.get_label()]]
+            resources.extend(page_resources)
+            page_request_args.page_token = response.get('nextPageToken')
 
-            items.extend(page_items)
-
-            if limit and len(items) > limit:
+            if limit and len(resources) > limit:
                 break
-
-            if not page_token:
+            if not page_request_args.page_token:
                 break
-
-        return items[:limit]
+        return resources[:limit]
