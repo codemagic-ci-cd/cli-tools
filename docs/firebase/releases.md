@@ -46,4 +46,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`list`](releases/list.md)|List releases for the specified project and application from Firebase API|
+|[`list`](releases/list.md)|List releases for the application from Firebase API|

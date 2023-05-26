@@ -3,7 +3,7 @@ list
 ====
 
 
-**List releases for the specified project and application from Firebase API**
+**List releases for the application from Firebase API**
 ### Usage
 ```bash
 firebase releases list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

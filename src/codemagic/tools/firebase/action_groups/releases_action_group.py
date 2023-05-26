@@ -30,7 +30,7 @@ class ReleasesActionGroup(FirebaseAction, metaclass=ABCMeta):
         should_print: bool = True,
     ) -> List[Release]:
         """
-        List releases for the specified project and application from Firebase API
+        List releases for the application from Firebase API
         """
 
         app_identifier = AppIdentifier(project_id, app_id)

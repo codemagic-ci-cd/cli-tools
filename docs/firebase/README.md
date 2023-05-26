@@ -3,7 +3,7 @@ firebase
 ========
 
 
-**Utility to list releases and the latest release build version from Firebase using Firebase API**
+**Utility to list releases and retrieve the latest release build version from Firebase using Firebase API**
 ### Usage
 ```bash
 firebase [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
