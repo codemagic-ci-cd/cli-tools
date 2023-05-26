@@ -45,28 +45,37 @@ pyjwt = "^2.4.0"
 requests = ">= 2.25"
 
 [tool.poetry.dev-dependencies]
-autopep8 = "*"
-flake8 = "*"
-flake8-commas = "*"
-flake8-quotes = "*"
+black = "*"
 ipdb = "*"
-isort = "*"
 mdutils = "*"
 mypy = "*"
-pep8-naming = "*"
-pylint = "*"
 pytest = "*"
 pytest-cov = "*"
+ruff = "*"
 types-requests = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.isort]
-line_length = 120
-force_single_line = true
-skip = [".venv", "stubs"]
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+select = ["E", "F", "I"]
+line-length = 120
+target-version = "py37"
+exclude = [".venv"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"doc.py" = ["E402"]
+"src/codemagic/apple/resources/*.py" = ["N815"]
+"src/codemagic/google_play/resources/*.py" = ["N815"]
+"src/codemagic/models/export_options.py" = ["N815"]
+
+[tool.ruff.isort]
+force-single-line = true
 
 [tool.mypy]
 mypy_path = "stubs"
