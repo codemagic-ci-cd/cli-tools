@@ -12,6 +12,10 @@ Version 0.40.0
   - `Firebase.list_releases`
   - `Firebase.get_latest_build_version`
 
+**Tests**
+- Coverage for the new Firebase API client `FirebaseApiClient`
+- Coverage for new API methods: `Firebase.list_releases` and `Firebase.get_latest_build_version`
+
 Version 0.39.2
 -------------
 

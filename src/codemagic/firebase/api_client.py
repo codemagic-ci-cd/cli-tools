@@ -10,10 +10,11 @@ from .resource_managers.release_manager import FirebaseReleaseManager
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
+    from typing_extensions import Final
 
 
 class FirebaseApiClient:
-    SERVICE_NAME = 'firebaseappdistribution'
+    SERVICE_NAME: Final[str] = 'firebaseappdistribution'
 
     def __init__(self, service_account_dict: dict):
         self.service_account_dict = service_account_dict

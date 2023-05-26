@@ -134,6 +134,11 @@ def app_identifier():
     return AppIdentifier('228333310124', '1:228333310124:ios:5e439e0d0231a788ac8f09')
 
 
+@pytest.fixture
+def mock_firebase():
+    return Firebase({'type': 'service_account'})
+
+
 @pytest.fixture(autouse=True)
 def mock_service_account():
     with mock.patch.object(ServiceAccountCredentials, 'from_json_keyfile_dict', return_value=None):
@@ -152,16 +157,14 @@ def mock_api_releases_list(mock_releases, app_identifier):
         yield mock_releases_list
 
 
-def test_list_releases(mock_api_releases_list, mock_releases, app_identifier):
-    firebase = Firebase({'type': 'service_account'})
-    releases = firebase.list_releases(app_identifier.project_id, app_identifier.app_id)
+def test_list_releases(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
+    releases = mock_firebase.list_releases(app_identifier.project_id, app_identifier.app_id)
     mock_api_releases_list.assert_called_once_with(app_identifier)
     assert releases == mock_releases
 
 
-def test_get_latest_build_version(mock_api_releases_list, app_identifier):
-    firebase = Firebase({'type': 'service_account'})
-    build_number = firebase.get_latest_build_version(
+def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_identifier):
+    build_number = mock_firebase.get_latest_build_version(
         app_identifier.project_id,
         app_identifier.app_id,
     )
@@ -169,11 +172,10 @@ def test_get_latest_build_version(mock_api_releases_list, app_identifier):
     assert build_number == 71
 
 
-def test_get_latest_build_version_no_releases(app_identifier):
-    firebase = Firebase({'type': 'service_account'})
+def test_get_latest_build_version_no_releases(mock_firebase, app_identifier):
     with mock.patch.object(FirebaseReleaseManager, 'list', return_value=[]) as mock_api_releases_list:
         with pytest.raises(FirebaseError):
-            firebase.get_latest_build_version(
+            mock_firebase.get_latest_build_version(
                 app_identifier.project_id,
                 app_identifier.app_id,
             )
