@@ -30,10 +30,9 @@ jobs:
         poetry install --no-interaction
 
     - name: Check code formatting
-      run: poetry run flake8 .
-
-    - name: Check imports sort order
-      run: poetry run isort --check-only .
+      run: |
+        poetry run black .
+        poetry run ruff check .
 
     - name: Static type checks with mypy
       run: poetry run mypy src
@@ -66,10 +65,9 @@ jobs:
         poetry install --no-interaction
 
     - name: Check code formatting
-      run: poetry run flake8 .
-
-    - name: Check imports sort order
-      run: poetry run isort --check-only .
+      run: |
+        poetry run black .
+        poetry run ruff check .
 
     - name: Static type checks with mypy
       run: poetry run mypy src
