@@ -13,4 +13,4 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
         except json.decoder.JSONDecodeError:
             return False
         else:
-            return json_content.get('type') == 'service_account'
+            return isinstance(json_content, dict) and json_content.get('type') == 'service_account'

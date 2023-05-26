@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import List
 
 from codemagic.firebase.api_client import FirebaseApiClient
+from codemagic.firebase.resource_managers.resource_manager import ResourceManager
 from codemagic.firebase.resources import Release
 
 
@@ -13,6 +14,11 @@ class FirebaseAction(metaclass=ABCMeta):
 
     # Define signatures for self-reference to other action groups
 
+    @property
+    @abstractmethod
+    def project_id(self):
+        ...
+
     @classmethod
     def echo(cls, message: str, *args, **kwargs) -> None:
         ...
@@ -20,11 +26,7 @@ class FirebaseAction(metaclass=ABCMeta):
     # Action signatures in alphabetical order
 
     @abstractmethod
-    def get_latest_build_version(
-        self,
-        project_id: str,
-        app_id: str,
-    ) -> int:
+    def get_latest_build_version(self, app_id: str) -> int:
         from .actions import GetLatestBuildVersionAction
         _ = GetLatestBuildVersionAction.get_latest_build_version  # Implementation
         raise NotImplementedError()
@@ -32,8 +34,9 @@ class FirebaseAction(metaclass=ABCMeta):
     @abstractmethod
     def list_releases(
         self,
-        project_id: str,
         app_id: str,
+        limit: int = 25,
+        order_by: ResourceManager.OrderBy = ResourceManager.OrderBy.create_time_desc,
         json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import traceback
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -13,6 +14,8 @@ from typing import Type
 from googleapiclient.errors import Error as GoogleApiClientError
 from httplib2.error import HttpLib2Error
 from oauth2client.client import Error as OAuth2ClientError
+
+from codemagic.utilities import log
 
 from ..api_error import FirebaseApiClientError
 from ..resources.identifiers import ResourceIdentifierT
@@ -39,6 +42,10 @@ class ResourceManager(Generic[ResourceT], ABC):
 
 class ListableResourceManagerMixin(Generic[ResourceT, ResourceIdentifierT], ABC):
     resource_type: Type[ResourceT]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._logger = log.get_logger(self.__class__)
 
     @dataclass
     class PageRequestArguments:
@@ -79,7 +86,10 @@ class ListableResourceManagerMixin(Generic[ResourceT, ResourceIdentifierT], ABC)
             try:
                 response = request.execute()
             except (HttpLib2Error, OAuth2ClientError, GoogleApiClientError) as e:
-                raise FirebaseApiClientError(str(e)) from e
+                message = f'Failed to list Firebase {self.resource_type.get_label()}: {e}'
+                traceback_str = traceback.format_exc()
+                self._logger.debug(f'{message}\n{traceback_str}')
+                raise FirebaseApiClientError(message) from e
 
             page_resources = [self.resource_type(**item) for item in response[self.resource_type.get_label()]]
             resources.extend(page_resources)

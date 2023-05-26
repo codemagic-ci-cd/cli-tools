@@ -21,6 +21,7 @@ from codemagic.tools.firebase.arguments import FirebaseArgument
 from codemagic.tools.firebase.errors import FirebaseError
 
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
+project_id_argument = FirebaseArgument.PROJECT_ID
 
 
 @pytest.fixture
@@ -40,6 +41,7 @@ def register_args(cli_argument_group):
 def namespace_kwargs():
     ns_kwargs = {
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
+        project_id_argument.key: '228333310124',
     }
     for arg in Firebase.CLASS_ARGUMENTS:
         if not hasattr(arg.type, 'environment_variable_key'):
@@ -135,8 +137,8 @@ def app_identifier():
 
 
 @pytest.fixture
-def mock_firebase():
-    return Firebase({'type': 'service_account'})
+def mock_firebase(app_identifier):
+    return Firebase({'type': 'service_account'}, app_identifier.project_id)
 
 
 @pytest.fixture(autouse=True)
@@ -158,16 +160,18 @@ def mock_api_releases_list(mock_releases, app_identifier):
 
 
 def test_list_releases(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
-    releases = mock_firebase.list_releases(app_identifier.project_id, app_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(app_identifier)
+    releases = mock_firebase.list_releases(app_identifier.app_id)
+    mock_api_releases_list.assert_called_once_with(app_identifier, FirebaseReleaseManager.OrderBy.create_time_desc, 25)
     assert releases == mock_releases
 
 
+def test_list_releases_with_limit(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
+    mock_firebase.list_releases(app_identifier.app_id, limit=1)
+    mock_api_releases_list.assert_called_once_with(app_identifier, FirebaseReleaseManager.OrderBy.create_time_desc, 1)
+
+
 def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_identifier):
-    build_number = mock_firebase.get_latest_build_version(
-        app_identifier.project_id,
-        app_identifier.app_id,
-    )
+    build_number = mock_firebase.get_latest_build_version(app_identifier.app_id)
     mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)
     assert build_number == 71
 
@@ -175,8 +179,5 @@ def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_ide
 def test_get_latest_build_version_no_releases(mock_firebase, app_identifier):
     with mock.patch.object(FirebaseReleaseManager, 'list', return_value=[]) as mock_api_releases_list:
         with pytest.raises(FirebaseError):
-            mock_firebase.get_latest_build_version(
-                app_identifier.project_id,
-                app_identifier.app_id,
-            )
+            mock_firebase.get_latest_build_version(app_identifier.app_id)
     mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)

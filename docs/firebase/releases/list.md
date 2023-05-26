@@ -7,27 +7,39 @@ list
 ### Usage
 ```bash
 firebase releases list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
-    [--json]
     --project-id PROJECT_ID
+    [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
+    [--limit LIMIT]
+    [--order-by ORDER_BY]
+    [--json]
     --app-id APP_ID
 ```
 ### Required arguments for action `list`
 
-##### `--project-id, -p=PROJECT_ID`
-
-
-Project ID in Firebase. For example `228333310124`
 ##### `--app-id, -a=APP_ID`
 
 
 Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`
 ### Optional arguments for action `list`
 
+##### `--limit, -l=LIMIT`
+
+
+The number of resources to list. Default:&nbsp;`25`
+##### `--order-by, -o=ORDER_BY`
+
+
+Sort resources in the specified order. Default:&nbsp;`OrderBy.create_time_desc`
 ##### `--json, -j`
 
 
 Whether to show the request response in JSON format
+### Required arguments for command `firebase`
+
+##### `--project-id, -p=PROJECT_ID`
+
+
+Project ID in Firebase. For example `228333310124`
 ### Optional arguments for command `firebase`
 
 ##### `--credentials=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`

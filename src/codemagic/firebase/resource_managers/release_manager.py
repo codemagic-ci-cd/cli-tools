@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 
 
 class FirebaseReleaseManager(
-    ResourceManager[Release],
     ListableResourceManagerMixin[Release, AppIdentifier],
+    ResourceManager[Release],
 ):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list

@@ -59,7 +59,6 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 types-requests = "*"
-typing-extensions = "*"
 google-api-python-client-stubs = "*"
 
 [build-system]

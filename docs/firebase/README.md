@@ -7,9 +7,16 @@ firebase
 ### Usage
 ```bash
 firebase [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    --project-id PROJECT_ID
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     ACTION
 ```
+### Required arguments for command `firebase`
+
+##### `--project-id, -p=PROJECT_ID`
+
+
+Project ID in Firebase. For example `228333310124`
 ### Optional arguments for command `firebase`
 
 ##### `--credentials=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`
@@ -52,4 +59,4 @@ Enable verbose logging for commands
 
 |Action group|Description|
 | :--- | :--- |
-|[`releases`](releases.md)|Manage your Firebase releases|
+|[`releases`](releases.md)|Manage your Firebase application releases|

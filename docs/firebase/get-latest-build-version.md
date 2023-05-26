@@ -7,20 +7,22 @@ get-latest-build-version
 ### Usage
 ```bash
 firebase get-latest-build-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     --project-id PROJECT_ID
+    [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     --app-id APP_ID
 ```
 ### Required arguments for action `get-latest-build-version`
+
+##### `--app-id, -a=APP_ID`
+
+
+Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`
+### Required arguments for command `firebase`
 
 ##### `--project-id, -p=PROJECT_ID`
 
 
 Project ID in Firebase. For example `228333310124`
-##### `--app-id, -a=APP_ID`
-
-
-Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`
 ### Optional arguments for command `firebase`
 
 ##### `--credentials=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`

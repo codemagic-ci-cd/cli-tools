@@ -10,12 +10,9 @@ from .resource_managers.release_manager import FirebaseReleaseManager
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
-    from typing_extensions import Final
 
 
 class FirebaseApiClient:
-    SERVICE_NAME: Final[str] = 'firebaseappdistribution'
-
     def __init__(self, service_account_dict: dict):
         self.service_account_dict = service_account_dict
 
@@ -27,7 +24,7 @@ class FirebaseApiClient:
     def _firebase_app_distribution(self) -> FirebaseAppDistributionResource:
         return cast(
             'FirebaseAppDistributionResource',
-            discovery.build(self.SERVICE_NAME, 'v1', credentials=self._credentials),
+            discovery.build('firebaseappdistribution', 'v1', credentials=self._credentials),
         )
 
     @property
