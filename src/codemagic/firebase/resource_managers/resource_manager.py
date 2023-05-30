@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
@@ -33,5 +34,5 @@ class ResourceManager(Generic[ResourceT], ABC):
         ...
 
     @property
-    def logger(self):
+    def logger(self) -> logging.Logger:
         return self._logger

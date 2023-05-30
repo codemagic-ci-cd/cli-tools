@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from codemagic.firebase.resources.identifiers import AppIdentifier
 
 from ..resources import Release
-from .mixins import ListableResourceManagerMixin
+from .mixins import ListingManagerMixin
 from .resource_manager import ResourceManager
 
 if TYPE_CHECKING:
@@ -14,10 +14,7 @@ if TYPE_CHECKING:
         GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest
 
 
-class FirebaseReleaseManager(
-    ResourceManager[Release],
-    ListableResourceManagerMixin[Release, AppIdentifier],
-):
+class ReleaseManager(ResourceManager[Release], ListingManagerMixin[Release, AppIdentifier]):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list
     """
@@ -32,7 +29,7 @@ class FirebaseReleaseManager(
 
     def _get_resources_page_request(
         self,
-        arguments: ListableResourceManagerMixin.PageRequestArguments,
+        arguments: ListingManagerMixin.PageRequestArguments,
     ) -> GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest:
         """
         https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list

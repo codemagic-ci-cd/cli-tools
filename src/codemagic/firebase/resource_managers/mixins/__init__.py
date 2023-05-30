@@ -1,1 +1,1 @@
-from .listable_resource_manager_mixin import ListableResourceManagerMixin
+from .listing_manager_mixin import ListingManagerMixin

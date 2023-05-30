@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import Generic
 from typing import List
 from typing import Optional
 from typing import TypeVar
@@ -10,7 +11,7 @@ from typing import TypeVar
 from googleapiclient.http import HttpRequest
 
 from ..resource_manager import ResourceManager
-from .abstract_resource_manager_mixin import AbstractResourceManagerMixin
+from .acting_manager_mixin import ActingManagerMixin
 
 if TYPE_CHECKING:
     from ...resources.identifiers import ResourceIdentifier
@@ -20,8 +21,8 @@ ResourceT = TypeVar('ResourceT', bound='Resource')
 ResourceIdentifierT = TypeVar('ResourceIdentifierT', bound='ResourceIdentifier')
 
 
-class ListableResourceManagerMixin(AbstractResourceManagerMixin[ResourceT, ResourceIdentifierT]):
-    action = 'list'
+class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManagerMixin[ResourceT]):
+    manager_action = 'list'
 
     @dataclass
     class PageRequestArguments:
@@ -40,7 +41,7 @@ class ListableResourceManagerMixin(AbstractResourceManagerMixin[ResourceT, Resou
 
     @abstractmethod
     def _get_resources_page_request(self, arguments: PageRequestArguments) -> HttpRequest:
-        raise NotImplementedError()
+        ...
 
     def list(
         self,

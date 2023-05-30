@@ -11,7 +11,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from .errors import ClientError
 from .errors import CredentialsError
 from .errors import FirebaseApiHttpError
-from .resource_managers.release_manager import FirebaseReleaseManager
+from .resource_managers.release_manager import ReleaseManager
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
@@ -43,5 +43,5 @@ class FirebaseClient:
             return cast('FirebaseAppDistributionResource', recourse)
 
     @property
-    def releases(self) -> FirebaseReleaseManager:
-        return FirebaseReleaseManager(self._firebase_app_distribution)
+    def releases(self) -> ReleaseManager:
+        return ReleaseManager(self._firebase_app_distribution)

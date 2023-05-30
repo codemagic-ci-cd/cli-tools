@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC
 from abc import abstractmethod
 from typing import TYPE_CHECKING
@@ -19,32 +20,34 @@ from ...errors import ClientError
 from ...errors import FirebaseApiHttpError
 
 if TYPE_CHECKING:
-    from ...resources.identifiers import ResourceIdentifier
     from ...resources.resource import Resource
 
 ResourceT = TypeVar('ResourceT', bound='Resource')
-ResourceIdentifierT = TypeVar('ResourceIdentifierT', bound='ResourceIdentifier')
 
 
-class AbstractResourceManagerMixin(Generic[ResourceT, ResourceIdentifierT], ABC):
-    action: ClassVar[str]
-    resource_type: Type[ResourceT]
+class ActingManagerMixin(Generic[ResourceT], ABC):
+    manager_action: ClassVar[str]
 
     @property
     @abstractmethod
-    def logger(self):
+    def resource_type(self) -> Type[ResourceT]:
+        ...
+
+    @property
+    @abstractmethod
+    def logger(self) -> logging.Logger:
         ...
 
     def _execute_request(self, request: HttpRequest) -> Dict[str, Any]:
         try:
             return request.execute()
         except OAuth2ClientError as e:
-            self.logger.exception(f'Failed to {self.action} Firebase {self.resource_type.get_label()}')
+            self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
             raise AuthenticationError(str(e)) from e
         except errors.HttpError as e:
-            self.logger.exception(f'Failed to {self.action} Firebase {self.resource_type.get_label()}')
+            self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
             reason = e.reason  # type: ignore
             raise FirebaseApiHttpError(reason) from e
         except errors.Error as e:
-            self.logger.exception(f'Failed to {self.action} Firebase {self.resource_type.get_label()}')
+            self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
             raise ClientError(str(e)) from e

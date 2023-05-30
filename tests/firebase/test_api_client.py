@@ -12,7 +12,7 @@ import pytest
 
 from codemagic.firebase import BaseError
 from codemagic.firebase import FirebaseClient
-from codemagic.firebase.resource_managers import FirebaseReleaseManager
+from codemagic.firebase.resource_managers import ReleaseManager
 from codemagic.firebase.resources import Release
 from codemagic.firebase.resources import ReleaseNotes
 from codemagic.firebase.resources.identifiers import AppIdentifier
@@ -78,7 +78,7 @@ def test_release(mock_release_response_data, mock_release):
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase access')
 def test_list_releases_live(app_identifier, credentials, client, mock_release):
-    order_by = FirebaseReleaseManager.OrderBy.create_time_asc
+    order_by = ReleaseManager.OrderBy.create_time_asc
     releases = client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release
@@ -140,13 +140,13 @@ def mock_releases_api_resource(mock_release_response_data):
     release_1 = mock_release_response_data.copy()
     release_1['buildVersion'] = '71'
     api_resource_class_stub = mock_releases_api_resource_class([release_0, release_1], None)
-    with patch.object(FirebaseReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
+    with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
         mock_resource.return_value = api_resource_class_stub()
         yield mock_resource
 
 
 def test_list_releases(app_identifier, mock_client, mock_release, mock_releases_api_resource):
-    order_by = FirebaseReleaseManager.OrderBy.create_time_asc
+    order_by = ReleaseManager.OrderBy.create_time_asc
     releases = mock_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release
