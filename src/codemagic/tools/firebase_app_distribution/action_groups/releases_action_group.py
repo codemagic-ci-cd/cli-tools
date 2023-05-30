@@ -1,9 +1,8 @@
-import json
 from abc import ABCMeta
 from typing import List
 
 from codemagic import cli
-from codemagic.firebase.api_error import FirebaseApiClientError
+from codemagic.firebase.errors import BaseError
 from codemagic.firebase.resource_managers.resource_manager import ResourceManager
 from codemagic.firebase.resources import Release
 from codemagic.firebase.resources.identifiers import AppIdentifier
@@ -13,6 +12,7 @@ from ..arguments import ReleasesArgument
 from ..arguments import ResourcesArgument
 from ..errors import FirebaseError
 from ..firebase_action import FirebaseAction
+from ..resource_printer import ResourcePrinter
 from .firebase_action_groups import FirebaseActionGroups
 
 
@@ -28,26 +28,21 @@ class ReleasesActionGroup(FirebaseAction, metaclass=ABCMeta):
     def list_releases(
         self,
         app_id: str,
-        limit: int = 25,
-        order_by: ResourceManager.OrderBy = ResourceManager.OrderBy.create_time_desc,
+        limit: int = ResourcesArgument.LIMIT.get_default(),
+        order_by: ResourceManager.OrderBy = ResourcesArgument.ORDER_BY.get_default(),
         json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:
         """
-        List releases for the application from Firebase API
+        List releases for the Firebase application
         """
 
         app_identifier = AppIdentifier(self.project_id, app_id)
         try:
-            releases = self.api_client.releases.list(app_identifier, order_by, limit)
-        except FirebaseApiClientError as e:
+            releases = self.client.releases.list(app_identifier, order_by, limit)
+        except BaseError as e:
             raise FirebaseError(str(e))
 
-        if should_print:
-            if json_output:
-                self.echo(json.dumps([t.dict() for t in releases], indent=4))
-            else:
-                for release in releases:
-                    self.echo(str(release))
-
+        printer = ResourcePrinter(json_output, self.echo)
+        printer.print_resources(releases, should_print)
         return releases

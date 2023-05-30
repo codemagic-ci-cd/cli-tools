@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 import pytest
 
-from codemagic.firebase import FirebaseApiClient
+from codemagic.firebase import BaseError
+from codemagic.firebase import FirebaseClient
 from codemagic.firebase.resource_managers import FirebaseReleaseManager
 from codemagic.firebase.resources import Release
 from codemagic.firebase.resources import ReleaseNotes
@@ -68,14 +69,14 @@ def credentials() -> dict:
 
 @pytest.fixture
 def client(credentials):
-    return FirebaseApiClient(credentials)
+    return FirebaseClient(credentials)
 
 
 def test_release(mock_release_response_data, mock_release):
     assert Release(**mock_release_response_data) == mock_release
 
 
-@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase access')
 def test_list_releases_live(app_identifier, credentials, client, mock_release):
     order_by = FirebaseReleaseManager.OrderBy.create_time_asc
     releases = client.releases.list(app_identifier, order_by=order_by, page_size=2)
@@ -84,12 +85,28 @@ def test_list_releases_live(app_identifier, credentials, client, mock_release):
     assert releases[1].buildVersion == 71
 
 
-@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase API access')
+@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase access')
 def test_list_releases_pagination_live(app_identifier, credentials, client, mock_release):
     releases = client.releases.list(app_identifier, page_size=1)
 
     assert releases[0].buildVersion == 71
     assert releases[1] == mock_release
+
+
+@pytest.mark.parametrize(
+    'credentials', [
+        {},
+        {'type': 'service_account'},
+        {'type': 'service_account', 'client_email': 'user@example.com'},
+        {
+            'type': 'service_account', 'client_email': 'user@example.com', 'client_id': 'client-id',
+            'private_key': 'invalid-private-key', 'private_key_id': 'private-key-id',
+        },
+    ],
+)
+def test_invalid_credentials(credentials, app_identifier):
+    with pytest.raises(BaseError):
+        FirebaseClient(credentials).releases.list(app_identifier)
 
 
 def mock_releases_api_resource_class(releases, next_page_token):
@@ -109,12 +126,12 @@ def mock_releases_api_resource_class(releases, next_page_token):
 @pytest.fixture
 def mock_client():
     with patch.object(
-        FirebaseApiClient,
+        FirebaseClient,
         '_firebase_app_distribution',
         new_callable=PropertyMock,
     ) as mock_firebase_app_distribution:
         mock_firebase_app_distribution.return_value = None
-        yield FirebaseApiClient({})
+        yield FirebaseClient({})
 
 
 @pytest.fixture

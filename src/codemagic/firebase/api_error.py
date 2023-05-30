@@ -1,2 +1,0 @@
-class FirebaseApiClientError(Exception):
-    pass

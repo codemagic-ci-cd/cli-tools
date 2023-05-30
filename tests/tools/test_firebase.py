@@ -15,10 +15,10 @@ from oauth2client.service_account import ServiceAccountCredentials
 from codemagic.firebase.resource_managers.release_manager import FirebaseReleaseManager
 from codemagic.firebase.resources import Release
 from codemagic.firebase.resources.identifiers import AppIdentifier
-from codemagic.tools.firebase import Firebase
-from codemagic.tools.firebase.argument_types import CredentialsArgument
-from codemagic.tools.firebase.arguments import FirebaseArgument
-from codemagic.tools.firebase.errors import FirebaseError
+from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
+from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
+from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
+from codemagic.tools.firebase_app_distribution.errors import FirebaseError
 
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_id_argument = FirebaseArgument.PROJECT_ID
@@ -33,7 +33,7 @@ def mock_releases() -> List[Release]:
 
 @pytest.fixture(autouse=True)
 def register_args(cli_argument_group):
-    for arg in Firebase.CLASS_ARGUMENTS:
+    for arg in FirebaseAppDistribution.CLASS_ARGUMENTS:
         arg.register(cli_argument_group)
 
 
@@ -43,7 +43,7 @@ def namespace_kwargs():
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
         project_id_argument.key: '228333310124',
     }
-    for arg in Firebase.CLASS_ARGUMENTS:
+    for arg in FirebaseAppDistribution.CLASS_ARGUMENTS:
         if not hasattr(arg.type, 'environment_variable_key'):
             continue
         os.environ.pop(arg.type.environment_variable_key, None)
@@ -55,7 +55,7 @@ def test_missing_credentials_arg(namespace_kwargs):
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
 
     with pytest.raises(argparse.ArgumentError) as exception_info:
-        Firebase.from_cli_args(cli_args)
+        FirebaseAppDistribution.from_cli_args(cli_args)
 
     message = str(exception_info.value)
     assert credentials_argument.key.upper() in message
@@ -69,8 +69,9 @@ def test_invalid_credentials_from_env(namespace_kwargs):
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
     with pytest.raises(argparse.ArgumentError) as exception_info:
-        Firebase.from_cli_args(cli_args)
-    assert str(exception_info.value) == 'argument --credentials: Provided value "invalid credentials" is not valid'
+        FirebaseAppDistribution.from_cli_args(cli_args)
+    assert str(exception_info.value) == \
+           "argument --credentials/-c: Provided value 'invalid credentials' is not a valid JSON encoded object"
 
 
 def test_credentials_invalid_path(namespace_kwargs):
@@ -78,14 +79,14 @@ def test_credentials_invalid_path(namespace_kwargs):
     namespace_kwargs[credentials_argument.key] = None
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
     with pytest.raises(argparse.ArgumentError) as exception_info:
-        Firebase.from_cli_args(cli_args)
-    assert str(exception_info.value) == 'argument --credentials: File "this-is-not-a-file" does not exist'
+        FirebaseAppDistribution.from_cli_args(cli_args)
+    assert str(exception_info.value) == 'argument --credentials/-c: File "this-is-not-a-file" does not exist'
 
 
-@mock.patch('codemagic.tools.firebase.firebase.FirebaseApiClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
 def test_read_private_key(mock_firebase_api_client, namespace_kwargs):
     namespace_kwargs[credentials_argument.key] = CredentialsArgument('{"type":"service_account"}')
-    _ = Firebase.from_cli_args(argparse.Namespace(**namespace_kwargs))
+    _ = FirebaseAppDistribution.from_cli_args(argparse.Namespace(**namespace_kwargs))
     mock_firebase_api_client.assert_called_once_with({'type': 'service_account'})
 
 
@@ -99,7 +100,7 @@ def test_read_private_key(mock_firebase_api_client, namespace_kwargs):
         ),
     ],
 )
-@mock.patch('codemagic.tools.firebase.firebase.FirebaseApiClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
 def test_private_key_path_arg(mock_firebase_api_client, configure_variable, namespace_kwargs):
     with NamedTemporaryFile(mode='w') as tf:
         tf.write('{"type":"service_account"}')
@@ -107,7 +108,7 @@ def test_private_key_path_arg(mock_firebase_api_client, configure_variable, name
         namespace_kwargs[credentials_argument.key] = None
         configure_variable(tf.name, namespace_kwargs)
 
-        _ = Firebase.from_cli_args(argparse.Namespace(**namespace_kwargs))
+        _ = FirebaseAppDistribution.from_cli_args(argparse.Namespace(**namespace_kwargs))
         mock_firebase_api_client.assert_called_once_with({'type': 'service_account'})
 
 
@@ -121,13 +122,13 @@ def test_private_key_path_arg(mock_firebase_api_client, configure_variable, name
         ),
     ],
 )
-@mock.patch('codemagic.tools.firebase.firebase.FirebaseApiClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
 def test_private_key_env_arg(mock_firebase_api_client, configure_variable, namespace_kwargs):
     os.environ['CREDENTIALS'] = '{"type":"service_account"}'
     namespace_kwargs[credentials_argument.key] = None
     configure_variable(namespace_kwargs)
 
-    _ = Firebase.from_cli_args(argparse.Namespace(**namespace_kwargs))
+    _ = FirebaseAppDistribution.from_cli_args(argparse.Namespace(**namespace_kwargs))
     mock_firebase_api_client.assert_called_once_with({'type': 'service_account'})
 
 
@@ -138,7 +139,7 @@ def app_identifier():
 
 @pytest.fixture
 def mock_firebase(app_identifier):
-    return Firebase({'type': 'service_account'}, app_identifier.project_id)
+    return FirebaseAppDistribution({'type': 'service_account'}, app_identifier.project_id)
 
 
 @pytest.fixture(autouse=True)

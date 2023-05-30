@@ -8,7 +8,7 @@ CLI tools
 |[`android-keystore`](android-keystore/README.md)|Manage your Android app code signing keystores|
 |[`app-store-connect`](app-store-connect/README.md)|Interact with Apple services via App Store Connect API|
 |[`codemagic-cli-tools`](codemagic-cli-tools/README.md)|Show general information of installed Codemagic CLI tools|
-|[`firebase`](firebase/README.md)|Utility to list releases and retrieve the latest release build version from Firebase using Firebase API|
+|[`firebase-app-distribution`](firebase-app-distribution/README.md)|Utility to list releases and retrieve the latest release build version number from Firebase|
 |[`git-changelog`](git-changelog/README.md)|Generate a changelog text from git history|
 |[`google-play`](google-play/README.md)|Utility to get the latest build numbers from Google Play using Google Play Developer API|
 |[`keychain`](keychain/README.md)|Utility to manage macOS keychains and certificates|

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+import re
 from abc import ABC
 from datetime import datetime
 from typing import ClassVar
 from typing import Dict
 from typing import Optional
-from typing import TypeVar
-
-ResourceT = TypeVar('ResourceT', bound='Resource')
 
 
 class Resource(ABC):
@@ -29,3 +27,20 @@ class Resource(ABC):
         if isinstance(obj, datetime):
             return obj.isoformat()
         return obj
+
+    @staticmethod
+    def _format_attribute_name(name: str) -> str:
+        name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
+        name = name.lower().capitalize()
+        return re.sub(r'uri', 'URI', name, flags=re.IGNORECASE)
+
+    def __str__(self) -> str:
+        s = ''
+        for attribute_name, value in self.__dict__.items():
+            if value is None:
+                continue
+            name = self._format_attribute_name(attribute_name)
+            s += f'\n{name}: {value}'
+            if isinstance(value, Resource):
+                s += '\n'
+        return s

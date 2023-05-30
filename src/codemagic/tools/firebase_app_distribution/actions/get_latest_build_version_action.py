@@ -1,7 +1,7 @@
 from abc import ABCMeta
 
 from codemagic import cli
-from codemagic.firebase.api_error import FirebaseApiClientError
+from codemagic.firebase.errors import BaseError
 from codemagic.firebase.resources.identifiers import AppIdentifier
 
 from ..arguments import ReleasesArgument
@@ -10,19 +10,22 @@ from ..firebase_action import FirebaseAction
 
 
 class GetLatestBuildVersionAction(FirebaseAction, metaclass=ABCMeta):
-    @cli.action('get-latest-build-version', ReleasesArgument.APP_ID)
-    def get_latest_build_version(self, app_id: str) -> int:
+    @cli.action(
+        'get-latest-build-version',
+        ReleasesArgument.APP_ID,
+    )
+    def get_latest_build_version(self, app_id: str, should_print: bool = True) -> int:
         """
-        Get latest build version from Firebase API
+        Get latest build version from Firebase
         """
         app_identifier = AppIdentifier(self.project_id, app_id)
         try:
-            releases = self.api_client.releases.list(app_identifier, limit=1)
-        except FirebaseApiClientError as e:
+            releases = self.client.releases.list(app_identifier, limit=1)
+        except BaseError as e:
             raise FirebaseError(str(e))
         if not releases:
-            raise FirebaseError('No available releases')
+            raise FirebaseError(f'No releases available for {app_identifier.app_id}')
 
         build_version = releases[0].buildVersion
-        self.echo(str(build_version))
+        self.echo(str(build_version)) if should_print else None
         return build_version

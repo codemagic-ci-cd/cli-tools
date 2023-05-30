@@ -3,13 +3,13 @@ from abc import ABCMeta
 from abc import abstractmethod
 from typing import List
 
-from codemagic.firebase.api_client import FirebaseApiClient
+from codemagic.firebase.client import FirebaseClient
 from codemagic.firebase.resource_managers.resource_manager import ResourceManager
 from codemagic.firebase.resources import Release
 
 
 class FirebaseAction(metaclass=ABCMeta):
-    api_client: FirebaseApiClient
+    client: FirebaseClient
     logger: logging.Logger
 
     # Define signatures for self-reference to other action groups
@@ -26,7 +26,7 @@ class FirebaseAction(metaclass=ABCMeta):
     # Action signatures in alphabetical order
 
     @abstractmethod
-    def get_latest_build_version(self, app_id: str) -> int:
+    def get_latest_build_version(self, app_id: str, should_print: bool = True) -> int:
         from .actions import GetLatestBuildVersionAction
         _ = GetLatestBuildVersionAction.get_latest_build_version  # Implementation
         raise NotImplementedError()

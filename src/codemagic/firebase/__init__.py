@@ -1,1 +1,2 @@
-from .api_client import FirebaseApiClient
+from .client import FirebaseClient
+from .errors import BaseError
