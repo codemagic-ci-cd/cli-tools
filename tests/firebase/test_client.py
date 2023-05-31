@@ -13,6 +13,7 @@ import pytest
 from codemagic.google import FirebaseClient
 from codemagic.google import GoogleBaseError
 from codemagic.google.resource_managers import ReleaseManager
+from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
 from codemagic.google.resources import ReleaseNotes
 from codemagic.google.resources.identifiers import AppIdentifier
@@ -78,7 +79,7 @@ def test_release(mock_release_response_data, mock_release):
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live Firebase access')
 def test_list_releases_live(app_identifier, credentials, client, mock_release):
-    order_by = ReleaseManager.OrderBy.create_time_asc
+    order_by = OrderBy.CREATE_TIME_ASC
     releases = client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release
@@ -146,7 +147,7 @@ def mock_releases_api_resource(mock_release_response_data):
 
 
 def test_list_releases(app_identifier, mock_client, mock_release, mock_releases_api_resource):
-    order_by = ReleaseManager.OrderBy.create_time_asc
+    order_by = OrderBy.CREATE_TIME_ASC
     releases = mock_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == mock_release

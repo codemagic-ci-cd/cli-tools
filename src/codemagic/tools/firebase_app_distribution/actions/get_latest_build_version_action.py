@@ -5,7 +5,7 @@ from codemagic.google.errors import GoogleBaseError
 from codemagic.google.resources.identifiers import AppIdentifier
 
 from ..arguments import ReleasesArgument
-from ..errors import FirebaseError
+from ..errors import FirebaseAppDistributionError
 from ..firebase_action import FirebaseAction
 
 
@@ -22,9 +22,9 @@ class GetLatestBuildVersionAction(FirebaseAction, metaclass=ABCMeta):
         try:
             releases = self.client.releases.list(app_identifier, limit=1)
         except GoogleBaseError as e:
-            raise FirebaseError(str(e))
+            raise FirebaseAppDistributionError(str(e))
         if not releases:
-            raise FirebaseError(f'No releases available for {app_identifier.app_id}')
+            raise FirebaseAppDistributionError(f'No releases available for {app_identifier.app_id}')
 
         build_version = releases[0].buildVersion
         self.echo(str(build_version)) if should_print else None

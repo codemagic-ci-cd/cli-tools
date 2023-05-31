@@ -1,1 +1,1 @@
-from .firebase import FirebaseAppDistribution
+from .firebase_app_distribution import FirebaseAppDistribution

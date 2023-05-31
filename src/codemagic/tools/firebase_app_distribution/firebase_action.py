@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import List
 
 from codemagic.google.firebase_client import FirebaseClient
-from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
 
 
@@ -36,7 +36,7 @@ class FirebaseAction(metaclass=ABCMeta):
         self,
         app_id: str,
         limit: int = 25,
-        order_by: ResourceManager.OrderBy = ResourceManager.OrderBy.create_time_desc,
+        order_by: OrderBy = OrderBy.CREATE_TIME_DESC,
         json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:

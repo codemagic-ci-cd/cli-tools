@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from typing import ClassVar
 from typing import Generic
 from typing import List
 from typing import Optional
@@ -10,23 +11,24 @@ from typing import TypeVar
 
 from googleapiclient.http import HttpRequest
 
-from ..resource_manager import ResourceManager
+from codemagic.google.resources import OrderBy
+
 from .acting_manager_mixin import ActingManagerMixin
 
 if TYPE_CHECKING:
-    from ...resources.identifiers import ResourceIdentifier
-    from ...resources.resource import Resource
+    from codemagic.google.resources.identifiers import ResourceIdentifier
+    from codemagic.google.resources.resource import Resource
 
 ResourceT = TypeVar('ResourceT', bound='Resource')
 ResourceIdentifierT = TypeVar('ResourceIdentifierT', bound='ResourceIdentifier')
 
 
 class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManagerMixin[ResourceT]):
-    manager_action = 'list'
+    manager_action: ClassVar[str] = 'list'
 
     @dataclass
     class PageRequestArguments:
-        order_by: ResourceManager.OrderBy
+        order_by: OrderBy
         page_size: int
         page_token: Optional[str]
         parent_uri: str
@@ -46,7 +48,7 @@ class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManager
     def list(
         self,
         parent_identifier: ResourceIdentifierT,
-        order_by: ResourceManager.OrderBy = ResourceManager.OrderBy.create_time_desc,
+        order_by: OrderBy = OrderBy.CREATE_TIME_DESC,
         limit: Optional[int] = None,
         page_size: int = 25,
     ) -> List[ResourceT]:

@@ -1,6 +1,6 @@
 from codemagic import cli
 from codemagic.cli.colors import Colors
-from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources import OrderBy
 
 from .argument_types import CredentialsArgument
 
@@ -39,12 +39,12 @@ class ResourcesArgument(cli.Argument):
     ORDER_BY = cli.ArgumentProperties(
         key='order_by',
         flags=('--order-by', '-o'),
-        type=ResourceManager.OrderBy,
+        type=OrderBy,
         description='Sort resources in the specified order',
         argparse_kwargs={
             'required': False,
-            'default': ResourceManager.OrderBy.create_time_desc,
-            'choices': list(ResourceManager.OrderBy),
+            'default': OrderBy.CREATE_TIME_DESC,
+            'choices': list(OrderBy),
         },
     )
 

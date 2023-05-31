@@ -13,12 +13,13 @@ from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
 from codemagic.google.resource_managers.release_manager import ReleaseManager
+from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
 from codemagic.google.resources.identifiers import AppIdentifier
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
-from codemagic.tools.firebase_app_distribution.errors import FirebaseError
+from codemagic.tools.firebase_app_distribution.errors import FirebaseAppDistributionError
 
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_id_argument = FirebaseArgument.PROJECT_ID
@@ -83,7 +84,7 @@ def test_credentials_invalid_path(namespace_kwargs):
     assert str(exception_info.value) == 'argument --credentials/-c: File "this-is-not-a-file" does not exist'
 
 
-@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase_app_distribution.FirebaseClient')
 def test_read_private_key(mock_firebase_api_client, namespace_kwargs):
     namespace_kwargs[credentials_argument.key] = CredentialsArgument('{"type":"service_account"}')
     _ = FirebaseAppDistribution.from_cli_args(argparse.Namespace(**namespace_kwargs))
@@ -100,7 +101,7 @@ def test_read_private_key(mock_firebase_api_client, namespace_kwargs):
         ),
     ],
 )
-@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase_app_distribution.FirebaseClient')
 def test_private_key_path_arg(mock_firebase_api_client, configure_variable, namespace_kwargs):
     with NamedTemporaryFile(mode='w') as tf:
         tf.write('{"type":"service_account"}')
@@ -122,7 +123,7 @@ def test_private_key_path_arg(mock_firebase_api_client, configure_variable, name
         ),
     ],
 )
-@mock.patch('codemagic.tools.firebase_app_distribution.firebase.FirebaseClient')
+@mock.patch('codemagic.tools.firebase_app_distribution.firebase_app_distribution.FirebaseClient')
 def test_private_key_env_arg(mock_firebase_api_client, configure_variable, namespace_kwargs):
     os.environ['CREDENTIALS'] = '{"type":"service_account"}'
     namespace_kwargs[credentials_argument.key] = None
@@ -162,13 +163,13 @@ def mock_api_releases_list(mock_releases, app_identifier):
 
 def test_list_releases(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
     releases = mock_firebase.list_releases(app_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(app_identifier, ReleaseManager.OrderBy.create_time_desc, 25)
+    mock_api_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 25)
     assert releases == mock_releases
 
 
 def test_list_releases_with_limit(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
     mock_firebase.list_releases(app_identifier.app_id, limit=1)
-    mock_api_releases_list.assert_called_once_with(app_identifier, ReleaseManager.OrderBy.create_time_desc, 1)
+    mock_api_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 1)
 
 
 def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_identifier):
@@ -179,6 +180,6 @@ def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_ide
 
 def test_get_latest_build_version_no_releases(mock_firebase, app_identifier):
     with mock.patch.object(ReleaseManager, 'list', return_value=[]) as mock_api_releases_list:
-        with pytest.raises(FirebaseError):
+        with pytest.raises(FirebaseAppDistributionError):
             mock_firebase.get_latest_build_version(app_identifier.app_id)
     mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)

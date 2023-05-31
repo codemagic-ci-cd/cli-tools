@@ -1,5 +1,5 @@
 from codemagic import cli
 
 
-class FirebaseError(cli.CliAppException):
+class FirebaseAppDistributionError(cli.CliAppException):
     pass

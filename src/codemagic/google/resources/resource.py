@@ -8,6 +8,13 @@ from typing import ClassVar
 from typing import Dict
 from typing import Optional
 
+from codemagic.models.enums import ResourceEnum
+
+
+class OrderBy(ResourceEnum):
+    CREATE_TIME_DESC = 'createTimeDesc'
+    CREATE_TIME_ASC = 'createTime'
+
 
 class Resource(ABC):
     __google_api_label__: ClassVar[Optional[str]] = None

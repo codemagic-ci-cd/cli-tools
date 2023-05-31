@@ -3,14 +3,14 @@ from typing import List
 
 from codemagic import cli
 from codemagic.google.errors import GoogleBaseError
-from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
 from codemagic.google.resources.identifiers import AppIdentifier
 
 from ..arguments import FirebaseArgument
 from ..arguments import ReleasesArgument
 from ..arguments import ResourcesArgument
-from ..errors import FirebaseError
+from ..errors import FirebaseAppDistributionError
 from ..firebase_action import FirebaseAction
 from ..resource_printer import ResourcePrinter
 from .firebase_action_groups import FirebaseActionGroups
@@ -29,7 +29,7 @@ class ReleasesActionGroup(FirebaseAction, metaclass=ABCMeta):
         self,
         app_id: str,
         limit: int = ResourcesArgument.LIMIT.get_default(),
-        order_by: ResourceManager.OrderBy = ResourcesArgument.ORDER_BY.get_default(),
+        order_by: OrderBy = ResourcesArgument.ORDER_BY.get_default(),
         json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:
@@ -41,7 +41,7 @@ class ReleasesActionGroup(FirebaseAction, metaclass=ABCMeta):
         try:
             releases = self.client.releases.list(app_identifier, order_by, limit)
         except GoogleBaseError as e:
-            raise FirebaseError(str(e))
+            raise FirebaseAppDistributionError(str(e))
 
         printer = ResourcePrinter(json_output, self.echo)
         printer.print_resources(releases, should_print)
