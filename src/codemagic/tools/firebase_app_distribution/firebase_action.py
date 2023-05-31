@@ -3,9 +3,9 @@ from abc import ABCMeta
 from abc import abstractmethod
 from typing import List
 
-from codemagic.firebase.client import FirebaseClient
-from codemagic.firebase.resource_managers.resource_manager import ResourceManager
-from codemagic.firebase.resources import Release
+from codemagic.google.firebase_client import FirebaseClient
+from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources import Release
 
 
 class FirebaseAction(metaclass=ABCMeta):

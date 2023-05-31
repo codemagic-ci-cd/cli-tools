@@ -6,7 +6,7 @@ import argparse
 from typing import Dict
 
 from codemagic import cli
-from codemagic.firebase.client import FirebaseClient
+from codemagic.google.firebase_client import FirebaseClient
 
 from .action_groups import ReleasesActionGroup
 from .actions import GetLatestBuildVersionAction

@@ -2,10 +2,10 @@ from abc import ABCMeta
 from typing import List
 
 from codemagic import cli
-from codemagic.firebase.errors import BaseError
-from codemagic.firebase.resource_managers.resource_manager import ResourceManager
-from codemagic.firebase.resources import Release
-from codemagic.firebase.resources.identifiers import AppIdentifier
+from codemagic.google.errors import GoogleBaseError
+from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources import Release
+from codemagic.google.resources.identifiers import AppIdentifier
 
 from ..arguments import FirebaseArgument
 from ..arguments import ReleasesArgument
@@ -40,7 +40,7 @@ class ReleasesActionGroup(FirebaseAction, metaclass=ABCMeta):
         app_identifier = AppIdentifier(self.project_id, app_id)
         try:
             releases = self.client.releases.list(app_identifier, order_by, limit)
-        except BaseError as e:
+        except GoogleBaseError as e:
             raise FirebaseError(str(e))
 
         printer = ResourcePrinter(json_output, self.echo)

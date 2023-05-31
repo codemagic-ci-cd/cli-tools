@@ -12,9 +12,9 @@ import pytest
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.firebase.resource_managers.release_manager import ReleaseManager
-from codemagic.firebase.resources import Release
-from codemagic.firebase.resources.identifiers import AppIdentifier
+from codemagic.google.resource_managers.release_manager import ReleaseManager
+from codemagic.google.resources import Release
+from codemagic.google.resources.identifiers import AppIdentifier
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument

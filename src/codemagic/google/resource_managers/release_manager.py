@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from codemagic.firebase.resources.identifiers import AppIdentifier
+from codemagic.google.resources.identifiers import AppIdentifier
 
 from ..resources import Release
 from .mixins import ListingManagerMixin

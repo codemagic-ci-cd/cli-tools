@@ -15,9 +15,9 @@ from googleapiclient import errors
 from googleapiclient.http import HttpRequest
 from oauth2client.client import Error as OAuth2ClientError
 
-from ...errors import AuthenticationError
-from ...errors import ClientError
-from ...errors import FirebaseApiHttpError
+from ...errors import GoogleApiHttpError
+from ...errors import GoogleAuthenticationError
+from ...errors import GoogleClientError
 
 if TYPE_CHECKING:
     from ...resources.resource import Resource
@@ -43,11 +43,11 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
             return request.execute()
         except OAuth2ClientError as e:
             self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
-            raise AuthenticationError(str(e)) from e
+            raise GoogleAuthenticationError(str(e)) from e
         except errors.HttpError as e:
             self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
             reason = e.reason  # type: ignore
-            raise FirebaseApiHttpError(reason) from e
+            raise GoogleApiHttpError(reason) from e
         except errors.Error as e:
             self.logger.exception(f'Failed to {self.manager_action} Firebase {self.resource_type.get_label()}')
-            raise ClientError(str(e)) from e
+            raise GoogleClientError(str(e)) from e

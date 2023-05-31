@@ -10,12 +10,12 @@ from unittest.mock import patch
 
 import pytest
 
-from codemagic.firebase import BaseError
-from codemagic.firebase import FirebaseClient
-from codemagic.firebase.resource_managers import ReleaseManager
-from codemagic.firebase.resources import Release
-from codemagic.firebase.resources import ReleaseNotes
-from codemagic.firebase.resources.identifiers import AppIdentifier
+from codemagic.google import FirebaseClient
+from codemagic.google import GoogleBaseError
+from codemagic.google.resource_managers import ReleaseManager
+from codemagic.google.resources import Release
+from codemagic.google.resources import ReleaseNotes
+from codemagic.google.resources.identifiers import AppIdentifier
 
 
 @pytest.fixture
@@ -105,7 +105,7 @@ def test_list_releases_pagination_live(app_identifier, credentials, client, mock
     ],
 )
 def test_invalid_credentials(credentials, app_identifier):
-    with pytest.raises(BaseError):
+    with pytest.raises(GoogleBaseError):
         FirebaseClient(credentials).releases.list(app_identifier)
 
 
@@ -127,7 +127,7 @@ def mock_releases_api_resource_class(releases, next_page_token):
 def mock_client():
     with patch.object(
         FirebaseClient,
-        '_firebase_app_distribution',
+        'service_resource',
         new_callable=PropertyMock,
     ) as mock_firebase_app_distribution:
         mock_firebase_app_distribution.return_value = None

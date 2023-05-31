@@ -1,6 +1,6 @@
 from codemagic import cli
 from codemagic.cli.colors import Colors
-from codemagic.firebase.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resource_managers.resource_manager import ResourceManager
 
 from .argument_types import CredentialsArgument
 

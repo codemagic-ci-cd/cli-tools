@@ -1,8 +1,8 @@
 from abc import ABCMeta
 
 from codemagic import cli
-from codemagic.firebase.errors import BaseError
-from codemagic.firebase.resources.identifiers import AppIdentifier
+from codemagic.google.errors import GoogleBaseError
+from codemagic.google.resources.identifiers import AppIdentifier
 
 from ..arguments import ReleasesArgument
 from ..errors import FirebaseError
@@ -21,7 +21,7 @@ class GetLatestBuildVersionAction(FirebaseAction, metaclass=ABCMeta):
         app_identifier = AppIdentifier(self.project_id, app_id)
         try:
             releases = self.client.releases.list(app_identifier, limit=1)
-        except BaseError as e:
+        except GoogleBaseError as e:
             raise FirebaseError(str(e))
         if not releases:
             raise FirebaseError(f'No releases available for {app_identifier.app_id}')
