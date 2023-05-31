@@ -30,5 +30,4 @@ class ResourcePrinter:
             self.print(json.dumps(resource.dict(), indent=4))
         else:
             header = f'-- {resource.__class__.__name__} --'
-            self.print(Colors.BLUE(header))
-            self.print(str(resource))
+            self.print(f'{Colors.BLUE(header)}{resource}\n')
