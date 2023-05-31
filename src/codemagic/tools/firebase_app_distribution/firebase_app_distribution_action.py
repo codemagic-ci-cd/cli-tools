@@ -1,5 +1,5 @@
 import logging
-from abc import ABCMeta
+from abc import ABC
 from abc import abstractmethod
 from typing import List
 
@@ -8,7 +8,7 @@ from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
 
 
-class FirebaseAction(metaclass=ABCMeta):
+class FirebaseAppDistributionAction(ABC):
     client: FirebaseClient
     logger: logging.Logger
 

@@ -11,7 +11,7 @@ from unittest.mock import patch
 import pytest
 
 from codemagic.google import FirebaseClient
-from codemagic.google import GoogleBaseError
+from codemagic.google import GoogleError
 from codemagic.google.resource_managers import ReleaseManager
 from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
@@ -106,7 +106,7 @@ def test_list_releases_pagination_live(app_identifier, credentials, client, mock
     ],
 )
 def test_invalid_credentials(credentials, app_identifier):
-    with pytest.raises(GoogleBaseError):
+    with pytest.raises(GoogleError):
         FirebaseClient(credentials).releases.list(app_identifier)
 
 

@@ -1,2 +1,2 @@
-from .errors import GoogleBaseError
+from .errors import GoogleError
 from .firebase_client import FirebaseClient

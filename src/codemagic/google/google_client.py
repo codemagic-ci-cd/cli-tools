@@ -12,9 +12,9 @@ from googleapiclient import discovery
 from googleapiclient import errors
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.google.errors import GoogleApiHttpError
 from codemagic.google.errors import GoogleClientError
 from codemagic.google.errors import GoogleCredentialsError
+from codemagic.google.errors import GoogleHttpError
 
 ServiceResourceT = TypeVar('ServiceResourceT', bound=discovery.Resource)
 
@@ -38,7 +38,7 @@ class GoogleClient(Generic[ServiceResourceT], ABC):
             raise GoogleCredentialsError(str(e))
         except errors.HttpError as e:
             reason = e.reason  # type: ignore
-            raise GoogleApiHttpError(reason)
+            raise GoogleHttpError(reason)
         except errors.Error as e:
             raise GoogleClientError(str(e))
         else:
