@@ -139,7 +139,7 @@ def app_identifier():
 
 
 @pytest.fixture
-def mock_firebase(app_identifier):
+def firebase_app_distribution(app_identifier):
     return FirebaseAppDistribution({'type': 'service_account'}, app_identifier.project_id)
 
 
@@ -150,36 +150,36 @@ def mock_service_account():
 
 
 @pytest.fixture(autouse=True)
-def mock_discovery_service():
+def mock_discovery_build():
     with mock.patch.object(discovery, 'build', return_value=mock.Mock):
         yield
 
 
 @pytest.fixture
-def mock_api_releases_list(mock_releases, app_identifier):
+def mock_releases_list(mock_releases, app_identifier):
     with mock.patch.object(ReleaseManager, 'list', return_value=mock_releases) as mock_releases_list:
         yield mock_releases_list
 
 
-def test_list_releases(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
-    releases = mock_firebase.list_releases(app_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 25)
+def test_list_releases(firebase_app_distribution, mock_releases_list, mock_releases, app_identifier):
+    releases = firebase_app_distribution.list_releases(app_identifier.app_id)
+    mock_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 25)
     assert releases == mock_releases
 
 
-def test_list_releases_with_limit(mock_firebase, mock_api_releases_list, mock_releases, app_identifier):
-    mock_firebase.list_releases(app_identifier.app_id, limit=1)
-    mock_api_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 1)
+def test_list_releases_with_limit(firebase_app_distribution, mock_releases_list, mock_releases, app_identifier):
+    firebase_app_distribution.list_releases(app_identifier.app_id, limit=1)
+    mock_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 1)
 
 
-def test_get_latest_build_version(mock_firebase, mock_api_releases_list, app_identifier):
-    build_number = mock_firebase.get_latest_build_version(app_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)
+def test_get_latest_build_version(firebase_app_distribution, mock_releases_list, app_identifier):
+    build_number = firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
+    mock_releases_list.assert_called_once_with(app_identifier, limit=1)
     assert build_number == 71
 
 
-def test_get_latest_build_version_no_releases(mock_firebase, app_identifier):
-    with mock.patch.object(ReleaseManager, 'list', return_value=[]) as mock_api_releases_list:
+def test_get_latest_build_version_no_releases(firebase_app_distribution, app_identifier):
+    with mock.patch.object(ReleaseManager, 'list', return_value=[]) as mock_releases_list:
         with pytest.raises(FirebaseAppDistributionError):
-            mock_firebase.get_latest_build_version(app_identifier.app_id)
-    mock_api_releases_list.assert_called_once_with(app_identifier, limit=1)
+            firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
+    mock_releases_list.assert_called_once_with(app_identifier, limit=1)
