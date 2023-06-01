@@ -16,24 +16,28 @@ from codemagic.google.errors import GoogleClientError
 from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.errors import GoogleHttpError
 
-ServiceResourceT = TypeVar('ServiceResourceT', bound=discovery.Resource)
+GoogleResourceT = TypeVar('GoogleResourceT', bound=discovery.Resource)
 
 
-class GoogleClient(Generic[ServiceResourceT], ABC):
-    service_version: ClassVar[str] = 'v1'
+class GoogleClient(Generic[GoogleResourceT], ABC):
+    google_service_version: ClassVar[str] = 'v1'
 
     def __init__(self, service_account_dict: Dict):
         self._service_account_dict = service_account_dict
 
     @property
     @abstractmethod
-    def service_name(self) -> str:
+    def google_service_name(self) -> str:
         ...
 
     @property
-    def service_resource(self) -> ServiceResourceT:
+    def google_resource(self) -> GoogleResourceT:
         try:
-            recourse = discovery.build(self.service_name, self.service_version, credentials=self._credentials)
+            recourse = discovery.build(
+                self.google_service_name,
+                self.google_service_version,
+                credentials=self._credentials,
+            )
         except ValueError as e:
             raise GoogleCredentialsError(str(e))
         except errors.HttpError as e:
@@ -42,7 +46,7 @@ class GoogleClient(Generic[ServiceResourceT], ABC):
         except errors.Error as e:
             raise GoogleClientError(str(e))
         else:
-            return cast(ServiceResourceT, recourse)
+            return cast(GoogleResourceT, recourse)
 
     @property
     def _credentials(self) -> ServiceAccountCredentials:

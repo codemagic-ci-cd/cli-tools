@@ -11,8 +11,8 @@ if TYPE_CHECKING:
 
 
 class FirebaseClient(GoogleClient['FirebaseAppDistributionResource']):
-    service_name: ClassVar[str] = 'firebaseappdistribution'
+    google_service_name: ClassVar[str] = 'firebaseappdistribution'
 
     @property
     def releases(self) -> ReleaseManager:
-        return ReleaseManager(self.service_resource)
+        return ReleaseManager(self.google_resource)

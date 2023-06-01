@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import ClassVar
+from typing import Type
 
 from codemagic.google.resources.identifiers import AppIdentifier
 
@@ -14,18 +16,19 @@ if TYPE_CHECKING:
         GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest
 
 
-class ReleaseManager(ResourceManager[Release], ListingManagerMixin[Release, AppIdentifier]):
+class ReleaseManager(
+    ResourceManager[Release, 'FirebaseAppDistributionResource'],
+    ListingManagerMixin[Release, AppIdentifier],
+):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list
     """
 
-    resource_type = Release
+    resource_type: ClassVar[Type[Release]] = Release
 
     @property
-    def _releases(
-        self,
-    ) -> FirebaseAppDistributionResource.ProjectsResource.AppsResource.ReleasesResource:
-        return self._firebase_app_distribution.projects().apps().releases()
+    def _releases(self) -> FirebaseAppDistributionResource.ProjectsResource.AppsResource.ReleasesResource:
+        return self._google_resource.projects().apps().releases()
 
     def _get_resources_page_request(
         self,

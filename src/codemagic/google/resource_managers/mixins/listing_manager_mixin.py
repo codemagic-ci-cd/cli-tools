@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -23,7 +24,7 @@ ResourceT = TypeVar('ResourceT', bound='Resource')
 ResourceIdentifierT = TypeVar('ResourceIdentifierT', bound='ResourceIdentifier')
 
 
-class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManagerMixin[ResourceT]):
+class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManagerMixin[ResourceT], ABC):
     manager_action: ClassVar[str] = 'list'
 
     @dataclass
