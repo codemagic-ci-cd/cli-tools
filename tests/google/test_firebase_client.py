@@ -5,13 +5,14 @@ from datetime import timezone
 from functools import lru_cache
 from pathlib import Path
 from unittest import mock
+from unittest.mock import Mock
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import pytest
 
 from codemagic.google import FirebaseClient
-from codemagic.google import GoogleError
+from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.resource_managers import ReleaseManager
 from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
@@ -106,22 +107,8 @@ def test_list_releases_pagination_live(app_identifier, credentials, client, mock
     ],
 )
 def test_invalid_credentials(credentials, app_identifier):
-    with pytest.raises(GoogleError):
+    with pytest.raises(GoogleCredentialsError):
         FirebaseClient(credentials).releases.list(app_identifier)
-
-
-def mock_releases_api_resource_class(releases, next_page_token):
-    class MockList:
-        @staticmethod
-        def execute():
-            return {'releases': releases, 'nextPageToken': next_page_token}
-
-    class MockFirebaseReleaseResource:
-        @staticmethod
-        def list(**_kw):
-            return MockList()
-
-    return MockFirebaseReleaseResource
 
 
 @pytest.fixture
@@ -135,18 +122,37 @@ def mock_client():
         yield FirebaseClient({})
 
 
+def google_request_stub(resources, resource_type_label):
+    mock_execute = Mock()
+    mock_execute.return_value = {resource_type_label: resources}
+
+    class GoogleRequest:
+        execute = mock_execute
+
+    return GoogleRequest
+
+
+def google_resource_stub(request_stub):
+    class GoogleResource:
+        @staticmethod
+        def list(**_kw):
+            return request_stub()
+
+    return GoogleResource
+
+
 @pytest.fixture
-def mock_releases_api_resource(mock_release_response_data):
+def mock_releases(mock_release_response_data):
     release_0 = mock_release_response_data.copy()
     release_1 = mock_release_response_data.copy()
     release_1['buildVersion'] = '71'
-    api_resource_class_stub = mock_releases_api_resource_class([release_0, release_1], None)
     with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
-        mock_resource.return_value = api_resource_class_stub()
+        request_stub = google_request_stub([release_0, release_1], 'releases')
+        mock_resource.return_value = google_resource_stub(request_stub)
         yield mock_resource
 
 
-def test_list_releases(app_identifier, mock_client, mock_release, mock_releases_api_resource):
+def test_list_releases(app_identifier, mock_client, mock_release, mock_releases):
     order_by = OrderBy.CREATE_TIME_ASC
     releases = mock_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
@@ -154,7 +160,39 @@ def test_list_releases(app_identifier, mock_client, mock_release, mock_releases_
     assert releases[1].buildVersion == 71
 
 
-def test_list_releases_limit(app_identifier, mock_client, mock_release, mock_releases_api_resource):
+def test_list_releases_limit(app_identifier, mock_client, mock_releases):
     releases = mock_client.releases.list(app_identifier, limit=1)
 
     assert len(releases) == 1
+
+
+def google_request_stub_pagination(resources, resource_type_label):
+    mock_execute = Mock()
+    mock_execute.side_effect = [
+        {resource_type_label: [resources[0]], 'nextPageToken': 'next-page-token'},
+        {resource_type_label: [resources[1]]},
+    ]
+
+    class GoogleRequest:
+        execute = mock_execute
+
+    return GoogleRequest
+
+
+@pytest.fixture
+def mock_releases_pagination(mock_release_response_data):
+    release_0 = mock_release_response_data.copy()
+    release_1 = mock_release_response_data.copy()
+    release_1['buildVersion'] = '71'
+    with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
+        request_stub = google_request_stub_pagination([release_0, release_1], 'releases')
+        mock_resource.return_value = google_resource_stub(request_stub)
+        yield mock_resource
+
+
+def test_list_releases_pagination(app_identifier, mock_release, mock_client, mock_releases_pagination):
+    releases = mock_client.releases.list(app_identifier, page_size=1)
+
+    assert len(releases) == 2
+    assert releases[0] == mock_release
+    assert releases[1].buildVersion == 71
