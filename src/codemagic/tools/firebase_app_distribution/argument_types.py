@@ -14,8 +14,8 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[dict]):
         try:
             value = json.loads(non_typed_value)
         except json.decoder.JSONDecodeError as e:
-            raise argparse.ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON') from e
+            raise argparse.ArgumentTypeError('Provided value is not a valid JSON') from e
 
         if isinstance(value, dict) and value.get('type') == 'service_account':
             return value
-        raise argparse.ArgumentTypeError(f'Provided value {non_typed_value!r} is not a service account object')
+        raise argparse.ArgumentTypeError('Provided value is not a service account object')

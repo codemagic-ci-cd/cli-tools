@@ -71,8 +71,7 @@ def test_invalid_credentials_from_env(namespace_kwargs):
     cli_args = argparse.Namespace(**dict(namespace_kwargs.items()))
     with pytest.raises(argparse.ArgumentError) as exception_info:
         FirebaseAppDistribution.from_cli_args(cli_args)
-    assert str(exception_info.value) == \
-           "argument --credentials/-c: Provided value 'invalid credentials' is not a valid JSON"
+    assert str(exception_info.value) == 'argument --credentials/-c: Provided value is not a valid JSON'
 
 
 def test_credentials_invalid_path(namespace_kwargs):
