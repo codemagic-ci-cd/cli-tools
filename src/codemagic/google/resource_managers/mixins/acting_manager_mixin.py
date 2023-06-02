@@ -29,7 +29,7 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
 
     @property
     @abstractmethod
-    def manager_action(self):
+    def manager_action(self) -> str:
         ...
 
     @property
