@@ -184,6 +184,13 @@ Note that for the tests to run successfully, you'd have to define the following 
     export TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT=... # Content of gcloud service account creedentials with `JSON` key type
     ```
 
+- For Firebase:
+    Either of the two:
+    ```shell
+    export TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH=... # Path to gcloud service account creedentials with `JSON` key type
+    export TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT=... # Content of gcloud service account creedentials with `JSON` key type
+    ```
+
 ### Pre-commit hooks
 
 Optionally, the [pre-commit](https://pre-commit.com/) framework can be used to ensure that
