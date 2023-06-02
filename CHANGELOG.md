@@ -1,3 +1,26 @@
+Version 0.40.0
+-------------
+
+**Features**
+- Introduce `firebase-app-distribution` tool with the actions:
+  - `firebase-app-distribution releases list` action to list releases
+  - `firebase-app-distribution get-latest-build-version` to get a version number for the latest release build
+
+**Development**
+- Introduce action methods:
+  - `FirebaseAppDistribution.list_releases`
+  - `FirebaseAppDistribution.get_latest_build_version`
+
+**Tests**
+- Coverage for Firebase client `FirebaseClient`
+- Coverage for action methods: `FirebaseAppDistribution.list_releases` and `FirebaseAppDistribution.get_latest_build_version`
+
+**Documentation**
+- Document `firebase-app-distribution` tool
+- Document actions:
+  - `firebase-app-distribution releases list`
+  - `firebase-app-distribution get-latest-build-version`
+
 Version 0.39.2
 -------------
 

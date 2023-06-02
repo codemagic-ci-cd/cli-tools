@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import enum
 import re
+from abc import ABC
 from abc import ABCMeta
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -59,7 +60,8 @@ class DictSerializable:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
-class GracefulDataclassMixin:
+@dataclass
+class GracefulDataclassMixin(ABC):
     @classmethod
     def get_fields(cls) -> Set[str]:
         return {f.name for f in dataclasses.fields(cls)}

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.39.2"
+version = "0.40.0"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
@@ -27,6 +27,7 @@ android-app-bundle = "codemagic.tools:AndroidAppBundle.invoke_cli"
 android-keystore = "codemagic.tools:AndroidKeystore.invoke_cli"
 app-store-connect = "codemagic.tools:AppStoreConnect.invoke_cli"
 codemagic-cli-tools = "codemagic.tools:CodemagicCliTools.invoke_cli"
+firebase-app-distribution = "codemagic.tools:FirebaseAppDistribution.invoke_cli"
 git-changelog = "codemagic.tools:GitChangelog.invoke_cli"
 google-play = "codemagic.tools:GooglePlay.invoke_cli"
 keychain = "codemagic.tools:Keychain.invoke_cli"
@@ -58,6 +59,7 @@ pylint = "*"
 pytest = "*"
 pytest-cov = "*"
 types-requests = "*"
+google-api-python-client-stubs = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
