@@ -24,7 +24,7 @@ class ResourcePrinter:
                 self.print_resource(resource, True)
 
     def print_resource(self, resource: Resource, should_print: bool):
-        if should_print is not True:
+        if not should_print:
             return
         if self.print_json:
             self.print(json.dumps(resource.dict(), indent=4))

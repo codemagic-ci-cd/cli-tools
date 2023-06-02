@@ -1,7 +1,4 @@
-import json
-import os
-from functools import lru_cache
-from pathlib import Path
+from unittest.mock import MagicMock
 from unittest.mock import PropertyMock
 from unittest.mock import patch
 
@@ -12,29 +9,10 @@ from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.resource_managers import ReleaseManager
 from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
-from tests.google.stubs import google_request_pagination_stub
-from tests.google.stubs import google_request_stub
-from tests.google.stubs import google_resource_stub
 
 
 def test_release(release_response, release):
     assert Release(**release_response) == release
-
-
-@pytest.fixture
-@lru_cache(1)
-def credentials() -> dict:
-    if 'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
-        credentials_path = Path(os.environ['TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
-        credentials = credentials_path.expanduser().read_text()
-    elif 'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT' in os.environ:
-        credentials = os.environ['TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT']
-    else:
-        raise KeyError(
-            'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH',
-            'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_CONTENT',
-        )
-    return json.loads(credentials)
 
 
 @pytest.mark.parametrize(
@@ -66,8 +44,11 @@ def mock_releases(release_response):
     release_1 = release_response.copy()
     release_1['buildVersion'] = '71'
     with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
-        request_stub = google_request_stub([release_0, release_1], 'releases')
-        mock_resource.return_value = google_resource_stub(request_stub)
+        google_request_mock_class = MagicMock()
+        google_request_mock_class.execute.return_value = {'releases': [release_0, release_1]}
+        google_resource_mock_class = MagicMock()
+        google_resource_mock_class.list.return_value = google_request_mock_class
+        mock_resource.return_value = google_resource_mock_class
         yield mock_resource
 
 
@@ -91,8 +72,14 @@ def mock_releases_pagination(release_response):
     release_1 = release_response.copy()
     release_1['buildVersion'] = '71'
     with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
-        request_stub = google_request_pagination_stub([release_0, release_1], 'releases')
-        mock_resource.return_value = google_resource_stub(request_stub)
+        google_request_mock_class = MagicMock()
+        google_request_mock_class.execute.side_effect = [
+            {'releases': [release_0], 'nextPageToken': 'next-page-token'},
+            {'releases': [release_1]},
+        ]
+        google_resource_mock_class = MagicMock()
+        google_resource_mock_class.list.return_value = google_request_mock_class
+        mock_resource.return_value = google_resource_mock_class
         yield mock_resource
 
 

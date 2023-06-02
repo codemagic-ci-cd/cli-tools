@@ -16,13 +16,13 @@ firebase-app-distribution releases [-h] [--log-stream STREAM] [--no-color] [--ve
 ##### `--project-id, -p=PROJECT_ID`
 
 
-Project ID in Firebase. For example 228333310124
+Project ID in Firebase. For example `228333310124`
 ### Optional arguments for command `firebase-app-distribution`
 
 ##### `--credentials, -c=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`
 
 
-Firebase service account credentials with `JSON` key type to access Firebase. If not given, the value will be checked from the environment variable `FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+Firebase service account credentials with JSON key type to access Firebase. If not given, the value will be checked from the environment variable `FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Common options
 
 ##### `-h, --help`

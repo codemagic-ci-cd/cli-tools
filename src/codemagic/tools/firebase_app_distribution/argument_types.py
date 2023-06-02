@@ -10,14 +10,12 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[dict]):
     environment_variable_key = 'FIREBASE_SERVICE_ACCOUNT_CREDENTIALS'
 
     @classmethod
-    def _apply_type(cls, non_typed_value: str) -> Dict:
+    def _apply_type(cls, non_typed_value: str) -> Dict[str, str]:
         try:
-            return json.loads(non_typed_value)
+            value = json.loads(non_typed_value)
         except json.decoder.JSONDecodeError as e:
-            raise argparse.ArgumentTypeError(
-                f'Provided value {non_typed_value!r} is not a valid JSON encoded object',
-            ) from e
+            raise argparse.ArgumentTypeError(f'Provided value {non_typed_value!r} is not a valid JSON') from e
 
-    @classmethod
-    def _is_valid(cls, value) -> bool:
-        return isinstance(value, dict) and value.get('type') == 'service_account'
+        if isinstance(value, dict) and value.get('type') == 'service_account':
+            return value
+        raise argparse.ArgumentTypeError(f'Provided value {non_typed_value!r} is not a service account object')

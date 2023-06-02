@@ -9,14 +9,14 @@ class FirebaseArgument(cli.Argument):
     PROJECT_ID = cli.ArgumentProperties(
         key='project_id',
         flags=('--project-id', '-p'),
-        description=f'Project ID in Firebase. For example {Colors.WHITE("228333310124")}',
+        description=f'Project ID in Firebase. For example `{Colors.WHITE("228333310124")}`',
         argparse_kwargs={'required': True},
     )
     FIREBASE_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key='credentials',
         flags=('--credentials', '-c'),
         type=CredentialsArgument,
-        description='Firebase service account credentials with `JSON` key type to access Firebase',
+        description='Firebase service account credentials with JSON key type to access Firebase',
         argparse_kwargs={'required': False},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
@@ -53,7 +53,9 @@ class ReleasesArgument(cli.Argument):
     APP_ID = cli.ArgumentProperties(
         key='app_id',
         flags=('--app-id', '-a'),
-        description='Application ID in Firebase. '
-                    f'For example {Colors.WHITE("1:228333310124:ios:5e439e0d0231a788ac8f09")}',
+        description=(
+            'Application ID in Firebase. '
+            f'For example `{Colors.WHITE("1:228333310124:ios:5e439e0d0231a788ac8f09")}`'
+        ),
         argparse_kwargs={'required': True},
     )
