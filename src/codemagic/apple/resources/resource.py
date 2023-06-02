@@ -3,6 +3,9 @@ from __future__ import annotations
 import dataclasses
 import enum
 import re
+from abc import ABC
+from abc import ABCMeta
+from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timezone
@@ -57,7 +60,8 @@ class DictSerializable:
         return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
 
 
-class GracefulDataclassMixin:
+@dataclass
+class GracefulDataclassMixin(ABC):
     @classmethod
     def get_fields(cls) -> Set[str]:
         return {f.name for f in dataclasses.fields(cls)}
@@ -175,7 +179,25 @@ class PrettyNameMeta(JsonSerializableMeta):
         return f'{singular}s'
 
 
-class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
+# workaround for Inconsistent metaclass structure for "Resource" error
+class PrettyNameAbcMeta(PrettyNameMeta, ABCMeta):
+    pass
+
+
+class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
+    _OMIT_IF_NONE_KEYS = ('relationships',)
+
+    def __init_subclass__(cls) -> None:
+        """
+        hack to work around the fact that we are overriding the `attributes` and ``relationships`` properties with
+        variables instead of properties
+
+        they are always given values in ``__init__``, but that runs after the check in ``ABCMeta``
+        """
+        cls.attributes = None  # type:ignore[assignment]
+        cls.relationships = None  # type:ignore[assignment]
+        super().__init_subclass__()
+
     @dataclass
     class Attributes(DictSerializable, GracefulDataclassMixin):
         pass
@@ -189,7 +211,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
                     setattr(self, field, Relationship(**value))
 
     @classmethod
-    def _create_attributes(cls, api_response):
+    def _create_attributes(cls, api_response) -> Attributes:
         if cls.Attributes is Resource.Attributes:
             # In case the resource does not have attributes
             defined_fields = {}
@@ -198,7 +220,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         return cls.Attributes(**defined_fields)
 
     @classmethod
-    def _create_relationships(cls, api_response):
+    def _create_relationships(cls, api_response) -> Relationships:
         if cls.Relationships is Resource.Relationships:
             # In case the resource does not have relationships
             defined_fields = {}
@@ -213,6 +235,26 @@ class Resource(LinkedResourceData, metaclass=PrettyNameMeta):
         self.attributes = self._create_attributes(api_response)
         if 'relationships' in api_response:
             self.relationships = self._create_relationships(api_response)
+        else:
+            self.relationships = None
+
+    @property
+    @abstractmethod
+    def attributes(self) -> Attributes:
+        ...
+
+    @attributes.setter
+    def attributes(self, value: Attributes) -> None:
+        ...
+
+    @property
+    @abstractmethod
+    def relationships(self) -> Optional[Relationships]:
+        ...
+
+    @relationships.setter
+    def relationships(self, value: Optional[Relationships]) -> None:
+        ...
 
     @property
     def created(self) -> bool:

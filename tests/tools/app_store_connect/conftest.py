@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 
 import pytest
 
@@ -15,8 +16,13 @@ def register_args(cli_argument_group):
         arg.register(cli_argument_group)
 
 
+@pytest.fixture
+def mock_auth_key() -> pathlib.Path:
+    return pathlib.Path(__file__).parent / 'mocks' / 'AuthKeyMock.p8'
+
+
 @pytest.fixture()
-def namespace_kwargs():
+def namespace_kwargs(mock_auth_key):
     ns_kwargs = {
         'action': 'list-devices',
         AppStoreConnectArgument.CERTIFICATES_DIRECTORY.key:
@@ -26,8 +32,9 @@ def namespace_kwargs():
         AppStoreConnectArgument.JSON_OUTPUT.key: False,
         AppStoreConnectArgument.ISSUER_ID.key: Types.IssuerIdArgument('issuer-id'),
         AppStoreConnectArgument.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument('key-identifier'),
-        AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument('-----BEGIN PRIVATE KEY-----'),
+        AppStoreConnectArgument.PRIVATE_KEY.key: Types.PrivateKeyArgument(mock_auth_key.read_text()),
         AppStoreConnectArgument.UNAUTHORIZED_REQUEST_RETRIES.key: 1,
+        AppStoreConnectArgument.SERVER_ERROR_RETRIES.key: 1,
         AppStoreConnectArgument.DISABLE_JWT_CACHE.key: True,
     }
     for arg in AppStoreConnect.CLASS_ARGUMENTS:

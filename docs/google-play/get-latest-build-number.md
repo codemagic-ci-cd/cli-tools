@@ -7,38 +7,28 @@ get-latest-build-number
 ### Usage
 ```bash
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --package-name PACKAGE_NAME
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
-    [--log-api-calls]
-    [--json]
     [--tracks TRACKS]
+    --package-name PACKAGE_NAME
 ```
+### Required arguments for action `get-latest-build-number`
+
+##### `--package-name, -p=PACKAGE_NAME`
+
+
+Package name of the app in Google Play Console. For example `com.example.app`
 ### Optional arguments for action `get-latest-build-number`
 
-##### `--tracks=internal | alpha | beta | production`
+##### `--tracks, -t=TRACKS`
 
 
-Get the build number from the specified track(s). If not specified, the highest build number across all tracks (internal, alpha, beta, production) is returned. Multiple arguments
-### Required arguments for command `google-play`
-
-##### `--package-name=PACKAGE_NAME`
-
-
-Package name of the app in Google Play Console (Ex: com.google.example)
+Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments
 ### Optional arguments for command `google-play`
 
 ##### `--credentials=GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`
 
 
 Gcloud service account credentials with `JSON` key type to access Google Play Developer API. If not given, the value will be checked from the environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--log-api-calls`
-
-
-Turn on logging for Google Play Developer API requests
-##### `--json`
-
-
-Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`

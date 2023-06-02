@@ -1,14 +1,16 @@
 name: Checks
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
-  test:
-
+  test-py-3-7:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
+
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
@@ -17,37 +19,60 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip pipenv 'setuptools<60'
-        pipenv install --dev
-
-    - name: Pipenv checks
-      run: |
-        pipenv check
+        curl -sSL https://install.python-poetry.org | python
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
 
     - name: Check code formatting
-      run: |
-        pipenv run flake8 src/codemagic tests
+      run: poetry run flake8 .
 
     - name: Check imports sort order
-      run: |
-        pipenv run isort src/codemagic tests --check-only
+      run: poetry run isort --check-only .
 
     - name: Static type checks with mypy
-      env:
-        MYPYPATH: stubs
-      run: |
-        pipenv run mypy src/codemagic
+      run: poetry run mypy src
 
     - name: Test with pytest
-      env:
-        TEST_APPLE_ISSUER_ID: ${{ secrets.TEST_APPLE_ISSUER_ID }}
-        TEST_APPLE_KEY_IDENTIFIER: ${{ secrets.TEST_APPLE_KEY_IDENTIFIER }}
-        TEST_APPLE_PRIVATE_KEY_CONTENT: ${{ secrets.TEST_APPLE_PRIVATE_KEY_CONTENT }}
+      run: poetry run pytest
+
+  test-py-3-11:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.11
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
       run: |
-        pipenv run pytest
+        curl -sSL https://install.python-poetry.org | python
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+
+    - name: Check code formatting
+      run: poetry run flake8 .
+
+    - name: Check imports sort order
+      run: poetry run isort --check-only .
+
+    - name: Static type checks with mypy
+      run: poetry run mypy src
+
+    - name: Test with pytest
+      run: poetry run pytest

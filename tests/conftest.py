@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import pathlib
@@ -12,14 +13,11 @@ from typing import Optional
 
 import pytest
 
-sys.path.append('src')
-
-from codemagic.apple.app_store_connect import AppStoreConnectApiClient  # noqa: E402
-from codemagic.apple.app_store_connect import IssuerId  # noqa: E402
-from codemagic.apple.app_store_connect import KeyIdentifier  # noqa: E402
-from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient  # noqa: E402
-from codemagic.google_play.api_client import ResourcePrinter  # noqa: E402
-from codemagic.utilities import log  # noqa: E402
+from codemagic.apple.app_store_connect import AppStoreConnectApiClient
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
+from codemagic.utilities import log
 
 log.initialize_logging(
     stream=open(os.devnull, 'w'),
@@ -36,7 +34,7 @@ class PEM(NamedTuple):
 
 
 @lru_cache()
-def _get_pem(filename: str, password: str = '', key_size: int = 2048) -> PEM:
+def _get_pem(filename: str, password: Optional[str] = None, key_size: int = 2048) -> PEM:
     mocks_dir = pathlib.Path(__file__).parent / 'mocks'
     pem_path = mocks_dir / filename
     pub_key_path = mocks_dir / f'{filename}.pub'
@@ -44,7 +42,8 @@ def _get_pem(filename: str, password: str = '', key_size: int = 2048) -> PEM:
         pem_path.read_bytes().rstrip(b'\n'),
         pub_key_path.read_bytes().rstrip(b'\n'),
         key_size,
-        password.encode())
+        password.encode() if password is not None else None,
+    )
 
 
 def _encrypted_pem() -> PEM:
@@ -60,19 +59,34 @@ def _appstore_api_client() -> AppStoreConnectApiClient:
     if 'TEST_APPLE_PRIVATE_KEY_PATH' in os.environ:
         key_path = pathlib.Path(os.environ['TEST_APPLE_PRIVATE_KEY_PATH'])
         private_key = key_path.expanduser().read_text()
+        key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
+        issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
     elif 'TEST_APPLE_PRIVATE_KEY_CONTENT' in os.environ:
         private_key = os.environ['TEST_APPLE_PRIVATE_KEY_CONTENT']
+        key_identifier = os.environ['TEST_APPLE_KEY_IDENTIFIER']
+        issuer_id = os.environ['TEST_APPLE_ISSUER_ID']
     else:
-        raise KeyError('TEST_APPLE_PRIVATE_KEY_PATH', 'TEST_APPLE_PRIVATE_KEY_CONTENT')
+        _logger().warning('Using mock App Store Connect private key')
+        private_key = (
+            '-----BEGIN PRIVATE KEY-----\n'
+            'MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgg57UZZvJPP2RSVnb\n'
+            'z09v3WoH9SPgoZW9Aa9zLVAIVQGgCgYIKoZIzj0DAQehRANCAAQOmjqG2uAvOmx3\n'
+            '8cXoNHDaAD9aDiNDqG2LcsOloIKgBRTLwcQPkTd/emZZndx0a0gDtviu2UDQ4l2/\n'
+            'ngq1dJ3d\n'
+            '-----END PRIVATE KEY-----\n'
+        )
+        key_identifier = '6NMHPUB3G8'
+        issuer_id = 'def71228-a8db-74ca-792d-763bded762de'  # Random non functional issuer
+
     return AppStoreConnectApiClient(
-        KeyIdentifier(os.environ['TEST_APPLE_KEY_IDENTIFIER']),
-        IssuerId(os.environ['TEST_APPLE_ISSUER_ID']),
+        KeyIdentifier(key_identifier),
+        IssuerId(issuer_id),
         private_key,
     )
 
 
-@lru_cache()
-def _google_play_api_client() -> GooglePlayDeveloperAPIClient:
+@lru_cache(1)
+def _google_play_api_credentials() -> dict:
     if 'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
         credentials_path = pathlib.Path(os.environ['TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
         credentials = credentials_path.expanduser().read_text()
@@ -83,11 +97,7 @@ def _google_play_api_client() -> GooglePlayDeveloperAPIClient:
             'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH',
             'TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT',
         )
-    return GooglePlayDeveloperAPIClient(
-        credentials,
-        os.environ['TEST_GCLOUD_PACKAGE_NAME'],
-        ResourcePrinter(False, False),
-    )
+    return json.loads(credentials)
 
 
 def _logger():
@@ -113,22 +123,13 @@ def app_store_api_client() -> AppStoreConnectApiClient:
 
 @pytest.fixture
 def google_play_api_client() -> GooglePlayDeveloperAPIClient:
-    return _google_play_api_client()
-
-
-@pytest.fixture()
-def app_store_connect_api_client() -> AppStoreConnectApiClient:
-    return _appstore_api_client()
+    credentials = _google_play_api_credentials()
+    return GooglePlayDeveloperAPIClient(credentials)
 
 
 @pytest.fixture(scope='class')
 def class_appstore_api_client(request):
     request.cls.api_client = _appstore_api_client()
-
-
-@pytest.fixture(scope='class')
-def class_google_play_api_client(request):
-    request.cls.api_client = _google_play_api_client()
 
 
 @pytest.fixture

@@ -38,7 +38,7 @@ class Error(DictSerializable):
     code: str
     status: str
     title: str
-    detail: str
+    detail: Optional[str] = None
     id: Optional[str] = None
     source: Optional[Dict[str, str]] = None
     meta: Optional[ErrorMeta] = None
@@ -49,7 +49,11 @@ class Error(DictSerializable):
             self.meta = ErrorMeta(**self.meta)
 
     def __str__(self):
-        s = f'{self.title} - {self.detail}'
+        if self.detail is None:
+            s = self.title
+        else:
+            s = f'{self.title} - {self.detail}'
+
         if self.meta:
             meta = textwrap.indent(str(self.meta), '\t')
             if meta:
@@ -66,11 +70,14 @@ class ErrorResponse(DictSerializable):
     @classmethod
     def from_raw_response(cls, response: Response) -> ErrorResponse:
         error_response = ErrorResponse({'errors': []})
-        error_response.errors.append(Error(
-            code='NA',
-            status=str(response.status_code),
-            title='Request failed',
-            detail=f'Request failed with status code {response.status_code}'))
+        error_response.errors.append(
+            Error(
+                code='NA',
+                status=str(response.status_code),
+                title='Request failed',
+                detail=f'Request failed with status code {response.status_code}',
+            ),
+        )
         return error_response
 
     def __str__(self):

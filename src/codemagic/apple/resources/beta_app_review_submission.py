@@ -14,6 +14,9 @@ class BetaAppReviewSubmission(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/betaappreviewsubmission
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         betaReviewState: BetaReviewState

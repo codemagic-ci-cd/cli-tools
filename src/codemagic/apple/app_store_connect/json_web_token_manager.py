@@ -65,6 +65,7 @@ class JsonWebTokenManager(StringConverterMixin):
         self._revoke_disk_cache()
 
     def _revoke_disk_cache(self):
+        self._logger.debug('Revoke JWT disk cache for App Store Connect key %r', self._key.identifier)
         if not self._enable_cache:
             return
 
@@ -78,7 +79,7 @@ class JsonWebTokenManager(StringConverterMixin):
             return
         self.cache_path.parent.mkdir(exist_ok=True, parents=True)
         self.cache_path.write_text(token)
-        self._logger.debug('Cached App Store Connect JWT')
+        self._logger.debug('Cached App Store Connect JWT for key %s', self._key.identifier)
 
     def _encode_token(self, jwt_payload: JwtPayload):
         return jwt.encode(
@@ -99,7 +100,7 @@ class JsonWebTokenManager(StringConverterMixin):
     def _load_jwt_from_disk(self) -> JWT:
         if not self._enable_cache:
             raise JwtCacheError('Disk cache is disabled')
-        self._logger.debug('Load JWT for App Store Connect from disk cache')
+        self._logger.debug('Load JWT for App Store Connect key %r from disk cache', self._key.identifier)
         try:
             token = self.cache_path.read_text().strip()
         except FileNotFoundError:
@@ -125,7 +126,7 @@ class JsonWebTokenManager(StringConverterMixin):
         return JWT(self._key.identifier, token, payload, expires_at)
 
     def _generate_jwt(self) -> JWT:
-        self._logger.debug('Generate new App Store Connect JWT')
+        self._logger.debug('Generate new App Store Connect JWT for key %r', self._key.identifier)
         expires_at = datetime.now() + timedelta(seconds=self._token_duration)
         payload = {
             'iss': self._key.issuer_id,

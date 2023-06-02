@@ -1,69 +1,134 @@
+definitions:
+  cache: &cache
+    cache_paths:
+      - $CM_BUILD_DIR/.venv
+  artifacts: &artifacts
+    - dist/codemagic*.whl
+    - dist/codemagic*.tar.gz
+  scripts:
+    - &install_dependencies
+      name: Install dependencies
+      script: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
+    - &check_code_formatting
+      name: Check code formatting
+      script: poetry run flake8 .
+    - &check_imports_ordering
+      name: Check imports ordering
+      script: poetry run isort --check-only .
+    - &static_type_checks
+      name: Static type checks with mypy
+      script: poetry run mypy src
+    - &run_tests
+      name: Run tests
+      script: poetry run pytest --junitxml="test-report.xml"
+      test_report: test-report.xml
+    - &update_version_in_source
+      name: Update version number in source code
+      script: |
+        set -e
+        VERSION=$(poetry version --short)
+        echo "Using version $VERSION"
+        sed -i -e \
+          "s/__version__ = .*/__version__ = '${VERSION}'/g" \
+          src/codemagic/__version__.py
+    - &build_wheels
+      name: Build wheels
+      script: poetry build
+
 workflows:
   tests:
-    environment:
-      vars:
-        HOMEBREW_NO_AUTO_UPDATE: 1
-        MYPYPATH: stubs
-        TEST_APPLE_ISSUER_ID: Encrypted(Z0FBQUFBQmdmWF9lRkdUSjh0TkYxdkJsWExzZGdVbkpkWGY3eHBsU2Z3bGZ6aVpRVElFdklCYnFPWHc4RzI4bC13cUhaRF9GYnlUMDRVc2dGV3ZDNkFjR2ZHLVpUa2o5N3Y2TkhSRWhXY3I2S1l5dUdxRjRQaEQ3a0RXNWpHVHJxOGZyRlcwLXphN3Q=)
-        TEST_APPLE_KEY_IDENTIFIER: Encrypted(Z0FBQUFBQmdmWF9GaElkcWFRMTIzMUJfLU5WeDBZWVBCWWsydlhTS19lZ1Nkb1BZaTZiZG10V1IzWXVWaGxfWVhoWmNYMF9CdGtIdl9uaW9HUlZjY3FDYVYzV3VnUHVfc1E9PQ==)
-        TEST_APPLE_PRIVATE_KEY_CONTENT: Encrypted(Z0FBQUFBQmdmWUFBcExqYWdiN3RwMGZHZlFNLWNaRmg5SHdyNEdwVlR1Q3IxWkRlajllcEwxemRfcnpyUzBQTlRzN2EyX09vRGJWQzE1YTZKVmpOeC1FS1I1a0swRFZ1VUdGQ0RmRXVoVDltcUJ1ZEV1ZTZvMEFzY0pqcHQ5VDVUdEhaTWstUWRDWTQzRE53YWswci1UNVpOTWJTejZqT1VVWFBUdVVXTFBlR1RFd3dVZjVSR2lTODdpSzRKRm80eGpyWHhoSm5aVERLMTQ5TEhVQ2JiaDc5eXVZNTZ3R2JBY2FibDVLYUhib2ZLVklNcnFWRDNiUTEyRGxsNTFLUjdSV19LVU5USUZKRGV6TlZlOTF4NkZYVUE2Q0otXzdpMUtHY3ZTMzRkdF9MbTkwQ2tUTGN3TVdnUjNoNTQxOVFFb2xUZzlJQTJ0eXpaNGFUeGFqSW1EaF9EQ2RjeW9HVFNCNHc0dzB0bUF4YVBBM2dqb2o4S2wwYmdXbFdwUmtkYTdzeVVpYzJlUTNQV0lGUTVjMU9nZ2JvSEJoRy1iOEpMcWwwYjhRR2RBeXctNHg4Ump5RlNtRT0=)
+    instance_type: mac_mini_m1
+    triggering:
+      events:
+        - push
+      cancel_previous_builds: true
+    cache: *cache
     scripts:
-      - name: Install pyenv
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
+
+  release-test:
+    name: Release [Test]
+    instance_type: mac_mini_m1
+    cache: *cache
+    environment:
+      groups:
+        - github
+        - pypi-test
+    scripts:
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
+      - name: Bump version number for development build
+        script: poetry version "$(poetry version --short).${BUILD_NUMBER:?}"
+      - *update_version_in_source
+      - *build_wheels
+      - name: Make GitHub prerelease
         script: |
-          export RUBY_CONFIGURE_OPTS="--with-openssl-dir=$(brew --prefix openssl@1.1)"
-          brew install pyenv
-      - name: Install dependencies
+          set -e
+          TAG_NAME=v$(poetry version --short)
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
+          gh release create "${TAG_NAME}" \
+              --title "${TAG_NAME}" \
+              --notes "Test release of ${TAG_NAME}" \
+              --prerelease \
+              --draft \
+              dist/codemagic*.whl \
+              dist/codemagic*.tar.gz
+          rm dist/codemagic_cli_tools-latest-py3-none-any.whl
+      - name: Publish release to PyPI Test environment
         script: |
-          python3 -m pip install --upgrade pip pipenv
-          pipenv install --dev
-      - name: Pipenv checks
-        script: pipenv check
-      - name: Check code formatting
-        script: pipenv run flake8 src/codemagic tests
-      - name: Check imports sort order
-        script: pipenv run isort src/codemagic tests --check-only
-      - name: Static type checks with mypy
-        script: pipenv run mypy src/codemagic
-      - name: Test with pytest
-        script: pipenv run pytest
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry publish \
+            --repository test-pypi \
+            --username "__token__" \
+            --password "${PYPI_TOKEN:?}"
+    artifacts: *artifacts
+
   release:
+    name: Release
+    instance_type: mac_mini_m1
+    cache: *cache
     environment:
-      vars:
-        GITHUB_TOKEN: Encrypted(Z0FBQUFBQmdkQXVZLUN0STF4WlBpMEFmc2V5Z2FmMi00bWtUeUFMREJxejNpaW85c3FwcWZsaU51a3BYWlcyc3FPbTlLM2dZeXgzdHY1VnRlX0RVZERmQlhiSlhzQ055YVgwV1R3MXV5N1dobHY5UnhkeHhadWw4cjFsUkNXTUxuTHlxWkduU3JEOHE=)
-        GOOGLE_CLIENT_SECRET: Encrypted(Z0FBQUFBQmQzbWh3dHNnNU5PV3g4SXpLaXhMbENiVkZKSXk1YVl4YmRPLTZoU29DMmU2NGJNNHpjQWthSTFjTWR4a091Q2FWQlpfMGw5emcxZkM3eUtQSW9QckpwWjl1cWItanJub2FFVWU5VXdTeS12VjNzLTZzamk3cE5PbWhma1J0d2dHaGduQ0JKeHVyVXN0TkkyNlVFOGFVQ3dBakRKMkN2T2Rva3BFUHM1cER5UTFGUzJtNGVRS3d0VFAyMkRyUjRLUkpRbXA4Y2VGdE82aWk4VlR0aXVicDQyU0ZrbmdKRzNkNWd1UGgwQ0lBbUt1Q19PRXZyZzF6Q3hQb2Vyd045aTM0R1BacTFDVmFkODRiSU5wbDNrVHZDaDNWYS1EOTF3QW5XNHdENjh2anNrWXdvbU1ZdFdmeFhWQlJWMVBXdzRVd0hsLVRKc0xIYmhLMEVjQlVZSV9kQTVmelI0SzRJbGZYMnk0R19UcmRPX0M5ZHJvcXd0X3UzNzJxTkhuUGFFTzNXNmhVUVluR3JzZ29PbzZvUzBzQ1ZJc3Z4STVDSnA4SkI4RHJXa2o3VEM2TUdvWFB6Y2VLUGM3SENDaVFvNFM0ZkpLTU1Nb0Z3NEJvWmpaNTRoeWQ2LUN4d2NnaENYaWNLaHZYTlBubEdPN1F6VzQ1WXQ2RXd0QXlZVE4wdVpXdkowWWExQm5rR2pCZ2tlQlVUSmQzdTg1WndzMmxpdnN1MkhNbFN2ZGhmeUNFUlJLZmNMRmhzYXFQTFJPTTVtTURxaDF1Qjh1SHVuajA5SnZTYVJGS2VFTFdKLU1HQ0hPMFU0TTJTWHhRRmJqemlOc0pyS0Zad1VnM2lvV1UtQVFBLWFpVWpkbm1RRm5jSGpqM3lhcUxNejZlUGRpc0lCVUk0eWc3RzFWZG1JMXJ6R0R6aTNnSnYtT0daNUl3QjNKVzhiRXJsVXdOMmY0NVM1N0U0YjAxeEJwa09xdnlwaWpPYmdreVBCX05lRVF4T0dkUktSWXU5TmFsdVF6RTlyZ2FkQWZrUDN0aHNUeTA5R0VRd1RqejBLdVNucXFkdTY2d2dpRWJUeW1FcDBnbFdXalMyeVY4RktubWZwRHF5YlU2SUVwampNRUNXYWwxcGwySDBXeDhkZzJQTWxMNzR5eHZBcm1vNndDZTQxMmpZUER6Qk5jWWtGTW5aNUVyZFdQS1V2MG5CQmVUMmJDc0NsSmNKOWotSUM5M3psSFlmNjJLeTFnNHIxRDNUR0JldjJHbmVLZjVpSWNfYkJxUFB1czlmcnNqMG1EVG5wMXRVaTdyc1RVdjV4U0NvUWJCZnlZQ1A4R2JaYllmVWZNUXE5YnM2NElvSjk2TlZ1bnBWTWE1VmdKT1NLa0FSLVRfNzQ0ZVJqcm9NamhRU0lhanpPUEMzaVdheVZfZWtvREdDM3pnRlBvOVMwLXBodG9GeVJYVkVRYl9ULVJ1N1dqRnBMUldCcTFfWE81OTZtVFg4R09QY2VWTEM3SS16Z2lhMHZ6ZG1NMkpta0h5ODZjYXI2ejJoT1RlV2g1V2NaZVJjMGZaei0xVHNqMm8tYUMwYmltNHdsSndia3dlOU9TYXd0LXBDd29XcE5KNERudHJWbE1fbHlqbVc2LXB3N25HaUNBQU1QdjduTGRQTU10ZS1BZkRnMENodk9GMkFuZWw5dGQzRmVFOWx0UzNZTmRLbjRLdEFFNlE4dGExcEIxMmRVZ1RsVHJIQ0lZbFFzWWhHVy1PSG91UklVa3JBeFpDSDJwZHUtWk5BQnY5TDNMTDBSNm9lejRrRFZxY29ueUhEQUJNVmF6Zll1bWVzVmlRNnFwZ21aa2tXMTNfWE1uQkZYU3FycE9Fa0Z4OV9tSXVZbWFIY3VyUjBFWGdRMFB0UG90WHlIWHZILW5kcF9rVDVQNDZScWEwbkZPYVVNbWhCWG93VjVNX0tTcGVkU0hlSE9mMFlMNm95YTVoQkFsdTBSSWEzTHZRbnJfNVR6YmJXRXdGSnEtMlAwc1ZsTnJ4QlFpZ3hsOWFqaG9KSngzX240eVI5aWxSYlFMSmM5X0JCN2xqTk9sNV9jMGN3RU1GRVFINU9VenVyWXB3TzZCb1ZDdkZhemFXWldmN1BobGpsaU1kcjNQQTVMdk4yOGZXSkRmdHdQOU9NaGlQdnB6UlYxeW9hekFkLTE5dnNUd1Q2S09Eb0JSQlV2c2oxemNTMHNiQ1V2NG14aWh4LWZxa2FVTGw3WFY2dl8yWTc4Q0dhUUFTQ2NXRDkzR3BfUy1OTE1XcTVYRzRTRk00T1pzcDliVmFBQ0dHb3YwQ19CdUtzYnd6ZTUxV3FKaHc0am9yZTFFOWNVdEVvbkJzSDhkYWxLTzMzdzNmNFo5dzdxRmJUc3pRdWtSWk8zTklYazYwZVdVU05YOFZUYl9MMTRFT3g5S0QtalZiYUdLeWh4ODBCa0xHcmVjc3ZxYngwRmxwNlE5WmdpRHM2ZjQ2RVhlYkp6VUluYnBrSEp0NW5RUTZMbDlic2NQN05CSDVlaEw0SzdiR1JnQVhHbkhzT0d3LU9sbV95ZEdIbklWT3hUOUlnWGkzdUhOTnI4aWVJT2twYWZvbXVqZTEwZlFkV2VIdlp3VEZObDUtcS03emd3OG5wM2RLbllYVXd5Rk5yRExzdHZtNGxFd0hGYXhRMVN3Yk4ycEVsc3VNUG52aGN6d1l0ekc4YXBSUGJOT0hnN2dzeUlxaHFyazhHMVIyQWpWdG9DN3ZSTWg0dDdjNG1qUERfUk9tTHpHdWlsaTZraDhxQVJhb051a1ROSjYyWTRSRkVGMktGRDFacVNfSDljYXVnZ3ZsSzVRb1RESk50QnRJWEVvQjF3TC1naWdILVdORmpnVlJSaTRIOFRacGtzeXJEbGVwcnJGODNJLXlvV3l3ZnlNYmdsNDFONlpvcFNUVjdpRmdyYnVhRkVKWTZVQUxob1ZDYk1WdzZ3aVdTMUZCaTZTSURtLTJLYWhnbVozUnk0WXdqTlRqWnp0bjFpMFE5UGQ3V0d3TDkzOGJYaGlScC1vaExVVkloRTdKM3lCdU9NS09tRVBxVUN3ei04MmNsRTlpUDMzdURwMVdfUE1Fdmo1Q1dCTGp4dkNnOVJYVEY4MVBZbHdHVWxUQTZPaTBKYlA4cTlOc2EyV0pJcmZQX0hiblZfSkdRT1NFSzRNN3VWeHFEWmZqTjlLd0pCdTY3SHR6LU94Tml5V2RnekFUbmQtUFotcXFwc1RuMGFaQ0liQl9aWnd2QXJ4YVhLSHExdmVhenNOTVNqMDFYalo2cmJLOVBQYWNFcG5MbGNpTzk1LWtSSWNxYTlwQzJFdktuRDNjekxRaTV6SFdRSDhBU3NlV1cxc3VmeVFVNkU5azJwSU5uSTdXR0Z1MkM5eFg4R2ZrRGJmN2dXcEJUeXhCYkJIM2hCcTRzaUhsTlVwR2Q0bFN2Ml9QRlNmanRVa08wTjN3WUFtc29BWlpvRldjM3JrNHdlV3JrR1RwU3JQZWtHWjR6aTZENldQLTBSQVVVSjBteVJzMmxpUS1NOF92ZVFBeFNoZ2t4aDJONHJ2QkFGek11LUdxYUt3aHg0VHkyTE9MX3dTNTZvSWVmeTA5MDVFcUltb0VWeUtuUTZiV3ZtdG5xOFNHcjlPenR1MGFDWHBiOGlha2JQeTFDQzRWQ2tCVnFwYzNuY0pUbGNRbGtKdFo1Tjl1ZHRvR2RJOHFCU1Z1UUhWbmRLWFlEVHNibzc1S0FxLWpKS2FZaVllVkVLOGJwNnNWbGs5d2ZvbWl0aFdxSjE2VlBxNFJLc24xejR3WHFNUVB1TTM1SjRRUVU2YmlHT1RuWHJpZGd4YV9xNFBKM1hTdGM3WFRKWFcwNVBrSFk3cHc5d1NHbzlYeFo0WDMza244N1psWm9mbEpROC1zbW50MllxLVN5R1BIemh2dGh0NUpSRmp0bHRvdnlRcWdKWWlOWjBmdnE1NlJpUmM4am91bHFTNmdwNEkzOXhEMUtSWk9ILVNOLWJxWDF0XzdNY0JWUzdwZF9kc0tMMHN1ZE0zck5FbnA1dGV4dVA0RnBLYWY4UFdtQndndkh1V3NTMVMxU1pRNW15VWNCZFJXYkdBQk96czVpMDM0WjUwVVczTzBhaXNSUUJvTEhvMTFaUndlTmJjZ05waWxtUzJzZ1hnQ1BMR1NKLWxBcmgwei1OcHpzOERodks2WDdaYWVOc1ZGLUIteWJfRFFDZUtRMWx3d2xRTF9RTlNmOUxIZVk4ZWlaRmdhT0JhYmIyWndxVVl2VmUyTXJjbXJYWTN4TUNOVWRhbzIxc3pDeUF4T1dKLU9UUjl3V1praG5lNkhYZGctZnB4MTNOa1FTUXBWLTRSWTRueFNlN3d0RG4zc3lOUTdJOEo3eGotdDBOdlhDdEN1MGpmTnU4azVibE5EcUxOMExUQkQzMExfdk1mMVpoU1FfSm1zXzRsd0QtdEpWazFEV0xMN3dzMHpMYjRWc0xpNlpsYTV3Si1CdWJNWng1NkVUbEZPeENLZE5wM29XR0k4clVtN0VNLW9OTW9ZMlQxbGxuOW5HNUxzdHU3WkZkRDRXMTAxaGFsNHY5WjhMd3pkU2ttUjZrRGZWa1VWNEpudGI3YWhXcWxpSnYyZG1PRjJzR2FhNWNJSE1NT0lyWWlqRFcwbUE1aDJGbkhKakRyY3JHbzBuY1NOQ1FWVGZaS0ZEemFrUzFpb2toM1ZrVm50Ul9PUkgxMEhmSEttSDdSQ0xKV2NNbVN1cnp1X0lfNGFvZkViUGF6MjQzU1VaTGZ3TTZ3M0RNZThZMjRabXduN1JrUVZmeGMxYkswM1NmWXZHcjNKUkxHWTE4V0s2ekNxM1J2dTctajdWVmJMV1J6M0dqLWlnT25pc1RCaktnX1ZBaF9aTnhMTG5aOERiNnUyWXBkZXlleGN6VTI3NHhCOFpqUk9ValFSQ0N0d1l3LWpJVGtfLUpieUJJUTJ0QVpyQkduZWNzSl8wZ0xyRGRpWEFjOURaVmswd040SnFRYkZaSzQ2am9IVC1rQmh5ZXFBbTVYVmtfQS1aU1h2Mm51VjJJNFVkODRmd09XMzBnVGJqamluN3V4X1BfUFU4dlZ0SDV4QTRPSTVsdkJDb2VDRGpmdUMtWFVsQXFadnlZc204T2gtNFFVMVI3aW16MzhuVjJuVTR1ekVYN3pOaDNkVUJYLWMwelNlbnBhdzlaRGZiS3BuSTVlVEFJUXVlRUlFNGNwaFpwMFVjUzJwSnE0ZmFpckVDTkllb01fQWMyQVpoZXVueDRHMkhJbUhqNWMtY2dpU0xWSkhJUm14UGVuRDRsdnN4SWdldV9hRzhlQ0tCam1SUGN4a1Z4U0JLYkJjamoxVER3QXlFZmZac3V2SDUyanUxdFB3dWQyREtUOWNITnRLbUVUVHQ1UmVCWDY5TXl6WFRrNy1KX2xNOUFSVEpNRUIxVk54MW5xQ1hCSVFCS3NDVnlTVFZUQjlKekxRaFRZbnpNRWJHSjZEVXE1WTFyZXZwM0NRQW9lM1lpU0VXelNnX0N5U2p2QnhnUFBuWGVCZjBmTkxTalB5cldOQWNBZ0dTcGRveGpHQ1g0a3c4VGoxX3l3UDBzVjNBcjRkRHFjcTZPelRsN21kNUlSMk02b2NvUT09)
-        PYPI_USER: __token__
-        PYPI_TOKEN: Encrypted(Z0FBQUFBQmU2TTJqVVYxSy04cm1qOGJzUWhtekNRQ3lGNjdYUTFiUGwybHc2RENLVFo0SDVTVUhyR1JrMkMxckV3QnpFWWxWa0pZVXFsM29aM2djRThUYUlWMlNBMjdWaHQzSm16UjlTSVRocXpWenBhZ20tTjhPU1dZWFNwOHFEWUR3X2pBdC10eGV5cXNvSkpRV2djQncyMWgwdEZzMlhQRC1kcEw5VThTSTcxWUhKQnFrMU5Fc3gtQ29WSDhORHpyMmI1ODh0cFhwMXBhcGRpWDR2b0Q3ZFhBdVFQWlBKSjFxekloUERBV2g2S2piejhubWN5Y3VsOUdhai1xZXlvcWxsbHVSU1dOQ2hmak9jc0pGOXpBN1FYZ01HUzl6U3RTd2dwU1h4NXJBQzY1MmszeXlZS1NoNDhZNEdkMVZlTkZqQVVzRWVoSGRsLXhoRXZYMXd5V1B1U1h1UUdPNzRKcnh6REVxWVBtOVkwbXdJS3QxU1E4PQ==)
-    name: Generate binary distribution wheel
+      groups:
+        - github
+        - pypi
     scripts:
-      - name: Build wheel
+      - name: Verify branch
         script: |
-          python3 -m pip install wheel
-          python3 setup.py sdist bdist_wheel
-      - name: Draft GitHub release
+          if [ "${CM_BRANCH:?}" != "master" ];
+          then
+            echo "Not on master branch, cannot release from branch $CM_BRANCH"
+            exit 1
+          fi
+      - *install_dependencies
+      - *check_code_formatting
+      - *check_imports_ordering
+      - *static_type_checks
+      - *run_tests
+      - *update_version_in_source
+      - *build_wheels
+      - name: Make GitHub release
         script: |
-          TAG_NAME=v$(python3 setup.py --version)
+          set -e
+          TAG_NAME=v$(poetry version --short)
           previous_version_line=$(grep -n "^Version " CHANGELOG.md | head -2 | tail -1 | cut -f1 -d:)
           head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.md
+          cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
               --notes-file release_notes.md \
-              --draft \
-              dist/codemagic*.whl
-      - name: Upload wheel
-        script: |
-          set -e
-
-          echo $GOOGLE_CLIENT_SECRET | base64 --decode --output $HOME/client-secret.json
-          gcloud auth activate-service-account --key-file $HOME/client-secret.json
-          SRC_PATH=$(find dist -name "*.whl" | tail -n1)
-          DST_URL="gs://static.codemagic.io/builder/codemagic_cli_tools-latest-py3-none-any.whl"
-          gsutil -h "Content-Type:application/x-wheel+zip" \
-                 -h "Cache-Control:no-cache,max-age=0" \
-                 cp -a public-read "$SRC_PATH" "$DST_URL"
-      - name: Publish release to PyPI codemagic-cli-tools
-        script: |
-          python3 -m pip install --user --upgrade twine
-          python3 -m twine upload dist/* --username $PYPI_USER --password $PYPI_TOKEN
-    artifacts:
-      - dist/codemagic*.whl
-      - dist/codemagic*.tar.gz
+              dist/codemagic*.whl \
+              dist/codemagic*.tar.gz
+          rm dist/codemagic_cli_tools-latest-py3-none-any.whl
+      - name: Publish release to PyPI
+        script: poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
+    artifacts: *artifacts

@@ -1,3 +1,4 @@
+import argparse
 import json
 import pathlib
 import re
@@ -9,12 +10,16 @@ from datetime import datetime
 from datetime import timezone
 from typing import List
 from typing import Optional
+from typing import Type
+
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -25,6 +30,7 @@ from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
@@ -75,11 +81,20 @@ class Types:
         environment_variable_key = 'APP_STORE_CONNECT_PRIVATE_KEY'
 
         @classmethod
+        def _apply_type(cls, non_typed_value: str) -> str:
+            pem_private_key = cls.argument_type(non_typed_value)
+            try:
+                _ = load_pem_private_key(pem_private_key.encode(), None)
+            except ValueError as ve:
+                raise argparse.ArgumentTypeError('Provided value is not a valid PEM encoded private key') from ve
+            return pem_private_key
+
+    class CertificateKeyArgument(cli.EnvironmentArgumentValue[str]):
+        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
+
+        @classmethod
         def _is_valid(cls, value: str) -> bool:
             return value.startswith('-----BEGIN ')
-
-    class CertificateKeyArgument(PrivateKeyArgument):
-        environment_variable_key = 'CERTIFICATE_PRIVATE_KEY'
 
     class CertificateKeyPasswordArgument(cli.EnvironmentArgumentValue):
         environment_variable_key = 'CERTIFICATE_PRIVATE_KEY_PASSWORD'
@@ -150,12 +165,21 @@ class Types:
         def _is_valid(cls, value: int) -> bool:
             return value > 0
 
+    class ApiServerErrorRetries(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = 'APP_STORE_CONNECT_API_SERVER_ERROR_RETRIES'
+        default_value = 3
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
+
     class EarliestReleaseDate(cli.TypedCliArgument[datetime]):
-        argument_type = datetime
+        argument_type = Type[datetime]
 
         @classmethod
         def validate(cls, value: datetime):
-            if value <= datetime.utcnow().replace(tzinfo=timezone.utc):
+            if value <= datetime.now(timezone.utc):
                 raise ArgumentTypeError(f'Provided value "{value}" is not valid, date cannot be in the past')
             elif (value.minute, value.second, value.microsecond) != (0, 0, 0):
                 raise ArgumentTypeError((
@@ -381,6 +405,21 @@ class AppStoreConnectArgument(cli.Argument):
             'required': False,
         },
     )
+    SERVER_ERROR_RETRIES = cli.ArgumentProperties(
+        key='server_error_retries',
+        flags=('--api-server-error-retries',),
+        type=Types.ApiServerErrorRetries,
+        description=(
+            'Specify how many times the App Store Connect API request '
+            'should be retried in case the called request fails due to a '
+            'server error (response with status code 5xx). '
+            'In case of server error, the request is retried until '
+            'the number of retries is exhausted.'
+        ),
+        argparse_kwargs={
+            'required': False,
+        },
+    )
     DISABLE_JWT_CACHE = cli.ArgumentProperties(
         key='disable_jwt_cache',
         flags=('--disable-jwt-cache',),
@@ -525,10 +564,13 @@ class AppStoreVersionArgument(cli.Argument):
             'default': Platform.IOS,
         },
     )
-    PLATFORM_OPTIONAL = PLATFORM.duplicate(argparse_kwargs={
-        'required': False,
-        'choices': list(Platform),
-    })
+    PLATFORM_OPTIONAL = cli.ArgumentProperties.duplicate(
+        PLATFORM,
+        argparse_kwargs={
+            'required': False,
+            'choices': list(Platform),
+        },
+    )
     RELEASE_TYPE = cli.ArgumentProperties(
         key='release_type',
         flags=('--release-type',),
@@ -557,6 +599,49 @@ class AppStoreVersionArgument(cli.Argument):
     )
 
 
+class ReviewSubmissionArgument(cli.Argument):
+    APP_CUSTOM_PRODUCT_PAGE_VERSION_ID = cli.ArgumentProperties(
+        key='app_custom_product_page_version_id',
+        flags=('--app-custom-product-page-version-id',),
+        description='UUID value of custom product page',
+        type=ResourceId,
+    )
+    APP_EVENT_ID = cli.ArgumentProperties(
+        key='app_event_id',
+        flags=('--app-event-id',),
+        description='UUID value of app event',
+        type=ResourceId,
+    )
+    APP_STORE_VERSION_ID = cli.ArgumentProperties(
+        key='app_store_version_id',
+        flags=('--version-id', '--app-store-version-id'),
+        type=ResourceId,
+        description='UUID value of the App Store Version',
+    )
+    APP_STORE_VERSION_EXPERIMENT_ID = cli.ArgumentProperties(
+        key='app_store_version_experiment_id',
+        flags=('--app-store-version-experiment-id',),
+        type=ResourceId,
+        description='UUID value of the App Store Version experiment',
+    )
+    REVIEW_SUBMISSION_ID = cli.ArgumentProperties(
+        key='review_submission_id',
+        type=ResourceId,
+        description='UUID value of the review submission',
+    )
+    REVIEW_SUBMISSION_STATE = cli.ArgumentProperties(
+        key='review_submission_state',
+        flags=('--review-submission-state',),
+        type=ReviewSubmissionState,
+        description='String value of the review submission state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(ReviewSubmissionState),
+            'nargs': '+',
+        },
+    )
+
+
 class AppStoreVersionLocalizationArgument(cli.Argument):
     APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
         key='app_store_version_localization_id',
@@ -574,7 +659,8 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
-    LOCALE_DEFAULT = LOCALE.duplicate(
+    LOCALE_DEFAULT = cli.ArgumentProperties.duplicate(
+        LOCALE,
         flags=('--locale', '-l'),
         description=(
             'The locale code name for App Store metadata in different languages. '
@@ -816,6 +902,32 @@ class PublishArgument(cli.Argument):
             'required': False,
         },
     )
+    EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(
+        key='expire_build_submitted_for_review',
+        flags=('--expire-build-submitted-for-review',),
+        type=bool,
+        description=(
+            'Expires any previous build waiting for, or in, review '
+            'before submitting the build to TestFlight.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
+    CANCEL_PREVIOUS_SUBMISSIONS = cli.ArgumentProperties(
+        key='cancel_previous_submissions',
+        flags=('--cancel-previous-submissions',),
+        type=bool,
+        description=(
+            'Cancels previous submissions for the application in App Store Connect '
+            'before creating a new submission if the submissions are in a state where it is possible.'
+        ),
+        argparse_kwargs={
+            'required': False,
+            'action': 'store_true',
+        },
+    )
     ALTOOL_VERBOSE_LOGGING = cli.ArgumentProperties(
         key='altool_verbose_logging',
         flags=('--altool-verbose-logging',),
@@ -850,7 +962,7 @@ class PublishArgument(cli.Argument):
             'For how long (in seconds) should the tool wait between the retries of package validation or '
             'upload action retries in case they failed due to a known `altool` issues '
             '(authentication failure or request timeout). '
-            f'See also {ALTOOL_RETRIES_COUNT.flags[0]} for more configuration options.'
+            f'See also {cli.ArgumentProperties.get_flag(ALTOOL_RETRIES_COUNT)} for more configuration options.'
         ),
         argparse_kwargs={
             'required': False,
@@ -894,6 +1006,16 @@ class BuildArgument(cli.Argument):
         type=ResourceId,
         description='Alphanumeric ID value of the Build',
         argparse_kwargs={'required': False},
+    )
+    BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL = cli.ArgumentProperties(
+        key='excluded_build_id',
+        flags=('--exclude-build-id',),
+        type=ResourceId,
+        description='Alphanumeric ID value of the Build(s)',
+        argparse_kwargs={
+            'required': False,
+            'nargs': '+',
+        },
     )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key='pre_release_version',
@@ -944,7 +1066,8 @@ class BuildArgument(cli.Argument):
             'choices': list(Locale),
         },
     )
-    LOCALE_DEFAULT = LOCALE_OPTIONAL.duplicate(
+    LOCALE_DEFAULT = cli.ArgumentProperties.duplicate(
+        LOCALE_OPTIONAL,
         description=(
             'The locale code name for displaying localized "What\'s new" content in TestFlight. '
             "In case not provided, application's primary locale from test information is used instead. "
@@ -963,6 +1086,17 @@ class BuildArgument(cli.Argument):
             'required': False,
         },
     )
+    BETA_REVIEW_STATE = cli.ArgumentProperties(
+        key='beta_review_state',
+        flags=('--beta-review-state',),
+        type=BetaReviewState,
+        description='Build beta review state',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(BetaReviewState),
+            'nargs': '+',
+        },
+    )
     BETA_BUILD_LOCALIZATIONS = cli.ArgumentProperties(
         key='beta_build_localizations',
         flags=('--beta-build-localizations',),
@@ -970,7 +1104,7 @@ class BuildArgument(cli.Argument):
         description=(
             "Localized beta test info for what's new in the uploaded build as a JSON encoded list. "
             f'For example, "{Colors.WHITE(Types.BetaBuildLocalizations.example_value)}". '
-            f'See "{Colors.WHITE(LOCALE_OPTIONAL.flags[0])}" for possible locale options.'
+            f'See "{Colors.WHITE(cli.ArgumentProperties.get_flag(LOCALE_OPTIONAL))}" for possible locale options.'
         ),
         argparse_kwargs={
             'required': False,
@@ -987,7 +1121,8 @@ class BuildArgument(cli.Argument):
             'required': True,
         },
     )
-    BETA_GROUP_NAMES_OPTIONAL = BETA_GROUP_NAMES_REQUIRED.duplicate(
+    BETA_GROUP_NAMES_OPTIONAL = cli.ArgumentProperties.duplicate(
+        BETA_GROUP_NAMES_REQUIRED,
         argparse_kwargs={
             'nargs': '+',
             'metavar': 'beta-group',
@@ -1084,7 +1219,8 @@ class DeviceArgument(cli.Argument):
         description='Name of the Device',
         argparse_kwargs={'required': True},
     )
-    DEVICE_NAME_OPTIONAL = DEVICE_NAME.duplicate(
+    DEVICE_NAME_OPTIONAL = cli.ArgumentProperties.duplicate(
+        DEVICE_NAME,
         argparse_kwargs={'required': False},
     )
     DEVICE_UDID = cli.ArgumentProperties(
@@ -1143,6 +1279,17 @@ class CertificateArgument(cli.Argument):
             'choices': list(CertificateType),
         },
     )
+    CERTIFICATE_TYPES_OPTIONAL = cli.ArgumentProperties(
+        key='certificate_types',
+        flags=('--type',),
+        type=CertificateType,
+        description='Type of the certificate',
+        argparse_kwargs={
+            'required': False,
+            'choices': list(CertificateType),
+            'nargs': '+',
+        },
+    )
     PROFILE_TYPE_OPTIONAL = cli.ArgumentProperties(
         key='profile_type',
         flags=('--profile-type',),
@@ -1190,6 +1337,18 @@ class CertificateArgument(cli.Argument):
             f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
         ),
         argparse_kwargs={'required': False, 'default': ''},
+    )
+    P12_CONTAINER_SAVE_PATH = cli.ArgumentProperties(
+        key='p12_container_save_path',
+        flags=('--p12-path',),
+        type=cli.CommonArgumentTypes.non_existing_path,
+        description=(
+            'If provided, the exported p12 container will saved at this path. '
+            'Otherwise it will be saved with a random name in the directory specified '
+            f'by {Colors.BRIGHT_BLUE("--certificates-dir")}. '
+            f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
+        ),
+        argparse_kwargs={'required': False},
     )
 
 
@@ -1292,6 +1451,7 @@ class ArgumentGroups:
         PublishArgument.ALTOOL_VERBOSE_LOGGING,
     )
     LIST_BUILDS_FILTERING_ARGUMENTS = (
+        BuildArgument.BETA_REVIEW_STATE,
         BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
         BuildArgument.BUILD_VERSION_NUMBER,
         BuildArgument.EXPIRED,
@@ -1306,6 +1466,7 @@ class ArgumentGroups:
     )
     SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.CANCEL_PREVIOUS_SUBMISSIONS,
         # Generic App Store Version information arguments
         AppStoreVersionArgument.APP_STORE_VERSION_INFO,
         AppStoreVersionArgument.COPYRIGHT,
@@ -1325,4 +1486,5 @@ class ArgumentGroups:
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,
+        PublishArgument.EXPIRE_BUILD_SUBMITTED_FOR_REVIEW,
     )

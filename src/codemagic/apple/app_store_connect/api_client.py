@@ -27,6 +27,8 @@ from .versioning import AppStoreVersionSubmissions
 from .versioning import BetaAppReviewSubmissions
 from .versioning import BetaBuildLocalizations
 from .versioning import PreReleaseVersions
+from .versioning import ReviewSubmissionItems
+from .versioning import ReviewSubmissions
 
 
 class AppStoreConnectApiClient:
@@ -41,6 +43,7 @@ class AppStoreConnectApiClient:
             private_key: str,
             log_requests: bool = False,
             unauthorized_request_retries: int = 1,
+            server_error_retries: int = 1,
             enable_jwt_cache: bool = False,
     ):
         """
@@ -52,23 +55,23 @@ class AppStoreConnectApiClient:
         :param enable_jwt_cache: Whether or not to allow loading and writing generated App Store Connect
                                  JSON Web Token from or to a file cache.
         """
+        self._logger = log.get_logger(self.__class__)
+        self._api_key = ApiKey(key_identifier, issuer_id, private_key)
+        self._jwt_manager = JsonWebTokenManager(self._api_key, enable_cache=enable_jwt_cache)
         self.session = AppStoreConnectApiSession(
             self.generate_auth_headers,
             log_requests=log_requests,
             unauthorized_request_retries=unauthorized_request_retries,
+            server_error_retries=server_error_retries,
+            revoke_auth_info=self._jwt_manager.revoke,
         )
-        self._logger = log.get_logger(self.__class__)
-        self._api_key = ApiKey(key_identifier, issuer_id, private_key)
-        self._jwt_manager = JsonWebTokenManager(self._api_key, enable_cache=enable_jwt_cache)
 
     @property
     def jwt(self) -> str:
         jwt = self._jwt_manager.get_jwt()
         return jwt.token
 
-    def generate_auth_headers(self, reset_token: bool = False) -> Dict[str, str]:
-        if reset_token:
-            self._jwt_manager.revoke()
+    def generate_auth_headers(self) -> Dict[str, str]:
         return {'Authorization': f'Bearer {self.jwt}'}
 
     @classmethod
@@ -159,6 +162,14 @@ class AppStoreConnectApiClient:
     @property
     def profiles(self) -> Profiles:
         return Profiles(self)
+
+    @property
+    def review_submissions(self) -> ReviewSubmissions:
+        return ReviewSubmissions(self)
+
+    @property
+    def review_submissions_items(self) -> ReviewSubmissionItems:
+        return ReviewSubmissionItems(self)
 
     @property
     def signing_certificates(self) -> SigningCertificates:

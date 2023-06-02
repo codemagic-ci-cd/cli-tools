@@ -62,7 +62,10 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
-    KEYSTORE_PATH_REQUIRED = KEYSTORE_PATH.duplicate(argparse_kwargs={'required': True})
+    KEYSTORE_PATH_REQUIRED = cli.ArgumentProperties.duplicate(
+        KEYSTORE_PATH,
+        argparse_kwargs={'required': True},
+    )
     KEYSTORE_PASSWORD = cli.ArgumentProperties(
         flags=('--ks-pass',),
         key='keystore_password',
@@ -73,7 +76,10 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
-    KEYSTORE_PASSWORD_REQUIRED = KEYSTORE_PASSWORD.duplicate(argparse_kwargs={'required': True})
+    KEYSTORE_PASSWORD_REQUIRED = cli.ArgumentProperties.duplicate(
+        KEYSTORE_PASSWORD,
+        argparse_kwargs={'required': True},
+    )
     KEY_ALIAS = cli.ArgumentProperties(
         flags=('--ks-key-alias',),
         key='key_alias',
@@ -84,7 +90,10 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
-    KEY_ALIAS_REQUIRED = KEY_ALIAS.duplicate(argparse_kwargs={'required': True})
+    KEY_ALIAS_REQUIRED = cli.ArgumentProperties.duplicate(
+        KEY_ALIAS,
+        argparse_kwargs={'required': True},
+    )
     KEY_PASSWORD = cli.ArgumentProperties(
         flags=('--key-pass',),
         key='key_password',
@@ -95,7 +104,10 @@ class AndroidAppBundleArgument(cli.Argument):
             'required': False,
         },
     )
-    KEY_PASSWORD_REQUIRED = KEY_PASSWORD.duplicate(argparse_kwargs={'required': True})
+    KEY_PASSWORD_REQUIRED = cli.ArgumentProperties.duplicate(
+        KEY_PASSWORD,
+        argparse_kwargs={'required': True},
+    )
     BUILD_APKS_MODE = cli.ArgumentProperties(
         flags=('--mode',),
         key='mode',
@@ -143,7 +155,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     [Bundletool](https://developer.android.com/studio/command-line/bundletool)
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(AndroidAppBundle, self).__init__(*args, **kwargs)
         self.__bundletool_jar: Optional[pathlib.Path] = None
 
@@ -189,7 +201,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             keystore_path: pathlib.Path,
             keystore_password: KeystorePassword,
             key_alias: KeyAlias,
-            key_password: KeyPassword) -> AndroidSigningInfo:
+            key_password: KeyPassword,
+    ) -> AndroidSigningInfo:
         ...
 
     @classmethod
@@ -199,7 +212,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             keystore_path: Optional[pathlib.Path],
             keystore_password: Optional[KeystorePassword],
             key_alias: Optional[KeyAlias],
-            key_password: Optional[KeyPassword]) -> Optional[AndroidSigningInfo]:
+            key_password: Optional[KeyPassword],
+    ) -> Optional[AndroidSigningInfo]:
         ...
 
     @classmethod
@@ -208,7 +222,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             keystore_path: Optional[pathlib.Path],
             keystore_password: Optional[KeystorePassword],
             key_alias: Optional[KeyAlias],
-            key_password: Optional[KeyPassword]) -> Optional[AndroidSigningInfo]:
+            key_password: Optional[KeyPassword],
+    ) -> Optional[AndroidSigningInfo]:
         keystore_password_value = cls._get_password_value(keystore_password)
         key_password_value = cls._get_password_value(key_password)
         if keystore_path and keystore_password_value and key_alias and key_password_value:
@@ -216,7 +231,8 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
                 store_path=keystore_path,
                 store_pass=keystore_password_value,
                 key_alias=str(key_alias),
-                key_pass=key_password_value)
+                key_pass=key_password_value,
+            )
         elif keystore_path or keystore_password_value or key_alias or key_password_value:
             error_msg = 'Either all signing info arguments should be specified, or none of them should'
             raise AndroidAppBundleArgument.KEYSTORE_PATH.raise_argument_error(error_msg)
@@ -238,13 +254,15 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
         return aab_paths
 
-    @cli.action('build-apks',
-                AndroidAppBundleArgument.BUNDLE_PATTERN,
-                AndroidAppBundleArgument.KEYSTORE_PATH,
-                AndroidAppBundleArgument.KEYSTORE_PASSWORD,
-                AndroidAppBundleArgument.KEY_ALIAS,
-                AndroidAppBundleArgument.KEY_PASSWORD,
-                AndroidAppBundleArgument.BUILD_APKS_MODE)
+    @cli.action(
+        'build-apks',
+        AndroidAppBundleArgument.BUNDLE_PATTERN,
+        AndroidAppBundleArgument.KEYSTORE_PATH,
+        AndroidAppBundleArgument.KEYSTORE_PASSWORD,
+        AndroidAppBundleArgument.KEY_ALIAS,
+        AndroidAppBundleArgument.KEY_PASSWORD,
+        AndroidAppBundleArgument.BUILD_APKS_MODE,
+    )
     def build_apks(
             self,
             aab_pattern: pathlib.Path,
@@ -253,14 +271,16 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             key_alias: Optional[KeyAlias] = None,
             key_password: Optional[KeyPassword] = None,
             mode: Optional[str] = None,
-            should_print: bool = True) -> List[pathlib.Path]:
+            should_print: bool = True,
+    ) -> List[pathlib.Path]:
         """
         Generates an APK Set archive containing either all possible split APKs and
         standalone APKs or APKs optimized for the connected device (see connected-
         device flag). Returns list of generated APK set archives
         """
         signing_info = self._convert_cli_args_to_signing_info(
-            keystore_path, keystore_password, key_alias, key_password)
+            keystore_path, keystore_password, key_alias, key_password,
+        )
 
         apks_paths = []
         for aab_path in self._get_aab_paths_from_pattern(aab_pattern):
@@ -270,19 +290,22 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
                 self.echo(str(apks_path))
         return apks_paths
 
-    @cli.action('build-universal-apk',
-                AndroidAppBundleArgument.BUNDLE_PATTERN,
-                AndroidAppBundleArgument.KEYSTORE_PATH,
-                AndroidAppBundleArgument.KEYSTORE_PASSWORD,
-                AndroidAppBundleArgument.KEY_ALIAS,
-                AndroidAppBundleArgument.KEY_PASSWORD)
+    @cli.action(
+        'build-universal-apk',
+        AndroidAppBundleArgument.BUNDLE_PATTERN,
+        AndroidAppBundleArgument.KEYSTORE_PATH,
+        AndroidAppBundleArgument.KEYSTORE_PASSWORD,
+        AndroidAppBundleArgument.KEY_ALIAS,
+        AndroidAppBundleArgument.KEY_PASSWORD,
+    )
     def build_universal_apks(
             self,
             aab_pattern: pathlib.Path,
             keystore_path: Optional[pathlib.Path] = None,
             keystore_password: Optional[KeystorePassword] = None,
             key_alias: Optional[KeyAlias] = None,
-            key_password: Optional[KeyPassword] = None) -> List[pathlib.Path]:
+            key_password: Optional[KeyPassword] = None,
+    ) -> List[pathlib.Path]:
         """
         Shortcut for `build-apks` to build universal APKs from bundles
         """
@@ -306,10 +329,12 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
         return apk_paths
 
-    @cli.action('dump',
-                AndroidAppBundleArgument.DUMP_TARGET,
-                AndroidAppBundleArgument.BUNDLE_PATH,
-                AndroidAppBundleArgument.DUMP_XPATH)
+    @cli.action(
+        'dump',
+        AndroidAppBundleArgument.DUMP_TARGET,
+        AndroidAppBundleArgument.BUNDLE_PATH,
+        AndroidAppBundleArgument.DUMP_XPATH,
+    )
     def dump(self, target: str, aab_path: pathlib.Path, xpath: Optional[str] = None) -> str:
         """
         Get files list or extract values from the bundle in a human-readable form
@@ -331,24 +356,29 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             raise AndroidAppBundleError(f'Unable to dump {target} for bundle {aab_path}', process)
         return process.stdout
 
-    @cli.action('sign',
-                AndroidAppBundleArgument.BUNDLE_PATH,
-                AndroidAppBundleArgument.KEYSTORE_PATH_REQUIRED,
-                AndroidAppBundleArgument.KEYSTORE_PASSWORD_REQUIRED,
-                AndroidAppBundleArgument.KEY_ALIAS_REQUIRED,
-                AndroidAppBundleArgument.KEY_PASSWORD_REQUIRED)
-    def sign(self,
-             aab_path: pathlib.Path,
-             keystore_path: pathlib.Path,
-             keystore_password: KeystorePassword,
-             key_alias: KeyAlias,
-             key_password: KeyPassword):
+    @cli.action(
+        'sign',
+        AndroidAppBundleArgument.BUNDLE_PATH,
+        AndroidAppBundleArgument.KEYSTORE_PATH_REQUIRED,
+        AndroidAppBundleArgument.KEYSTORE_PASSWORD_REQUIRED,
+        AndroidAppBundleArgument.KEY_ALIAS_REQUIRED,
+        AndroidAppBundleArgument.KEY_PASSWORD_REQUIRED,
+    )
+    def sign(
+        self,
+        aab_path: pathlib.Path,
+        keystore_path: pathlib.Path,
+        keystore_password: KeystorePassword,
+        key_alias: KeyAlias,
+        key_password: KeyPassword,
+    ):
         """
         Sign Android app bundle with specified key and keystore
         """
         self._ensure_jarsigner()
         signing_info = self._convert_cli_args_to_signing_info(
-            keystore_path, keystore_password, key_alias, key_password)
+            keystore_path, keystore_password, key_alias, key_password,
+        )
 
         self.logger.info(f'Sign {aab_path}')
         command = [
@@ -402,11 +432,13 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         self.echo(version)
         return version
 
-    def _build_apk_set_archive(self,
-                               aab_path: pathlib.Path,
-                               *,
-                               signing_info: Optional[AndroidSigningInfo] = None,
-                               mode: Optional[str] = None) -> pathlib.Path:
+    def _build_apk_set_archive(
+        self,
+        aab_path: pathlib.Path,
+        *,
+        signing_info: Optional[AndroidSigningInfo] = None,
+        mode: Optional[str] = None,
+    ) -> pathlib.Path:
         self.logger.info(f'Generating APKs from bundle {aab_path}')
         apks_path = aab_path.parent / f'{aab_path.stem}.apks'
         command = [

@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Generic
@@ -41,12 +42,13 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
             raise
 
     def _get_type_name(cls) -> Optional[str]:
-        known_types: Dict[Union[Type, Callable[[str], T]], str] = {
+        known_types: Dict[Any, str] = {
             int: 'integer',
             float: 'number',
             bool: 'boolean',
             str: 'string',
             datetime: 'datetime',
+            Type[datetime]: 'datetime',
         }
         return known_types.get(cls.argument_type)
 
@@ -121,7 +123,7 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     def _apply_type(cls, non_typed_value: str) -> T:
         value = cls.argument_type(non_typed_value)
         if not cls._is_valid(value):
-            raise argparse.ArgumentTypeError(f'Provided value "{value}" is not valid')
+            raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
         return value
 
     def _parse_value(self) -> T:

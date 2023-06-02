@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -10,6 +12,9 @@ class BetaGroup(Resource):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/betagroup
     """
+
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
 
     @dataclass
     class Attributes(Resource.Attributes):

@@ -5,8 +5,6 @@ from itertools import chain
 from typing import List
 from typing import Optional
 
-from codemagic.google_play import VersionCodeFromTrackError
-
 from .enums import ReleaseStatus
 from .resource import Resource
 
@@ -28,11 +26,15 @@ class CountryTargeting(Resource):
     """
 
     countries: List[str]
-    includeRestOfWorld: bool
+    includeRestOfWorld: Optional[bool] = None
 
 
 @dataclass
 class Release(Resource):
+    """
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#release
+    """
+
     _OMIT_IF_NONE_KEYS = (
         'name',
         'userFraction',
@@ -62,7 +64,7 @@ class Release(Resource):
 @dataclass
 class Track(Resource):
     """
-    https://developers.google.com/android-publisher/api-ref/rest/v3/edits
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#Track
     """
     _OMIT_IF_NONE_KEYS = ('releases',)
 
@@ -73,11 +75,11 @@ class Track(Resource):
         if isinstance(self.releases, list):
             self.releases = [Release(**release) for release in self.releases]
 
-    @property
-    def max_version_code(self) -> int:
+    def get_max_version_code(self) -> int:
+        error_prefix = f'Failed to get version code from "{self.track}" track'
         if not self.releases:
-            raise VersionCodeFromTrackError(self.track, 'No release information')
+            raise ValueError(f'{error_prefix}: track has no releases')
         version_codes = [release.versionCodes for release in self.releases if release.versionCodes]
         if not version_codes:
-            raise VersionCodeFromTrackError(self.track, 'No releases with uploaded App bundles or APKs')
+            raise ValueError(f'{error_prefix}: releases with version code do not exist')
         return max(map(int, chain(*version_codes)))

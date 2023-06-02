@@ -9,6 +9,7 @@ from typing import AnyStr
 from typing import Counter
 from typing import Dict
 from typing import List
+from typing import NamedTuple
 from typing import NoReturn
 from typing import Optional
 from typing import Sequence
@@ -20,7 +21,8 @@ from codemagic.cli import Colors
 from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
-from .matched_profile import MatchedProfile
+from .enums import ResourceEnum
+from .enums import ResourceEnumMeta
 from .provisioning_profile import ProvisioningProfile
 
 
@@ -29,11 +31,15 @@ class Destination(enum.Enum):
     UPLOAD = 'upload'
 
 
-class ArchiveMethod(enum.Enum):
+class ArchiveMethod(ResourceEnum):
     AD_HOC = 'ad-hoc'
-    DEVELOPMENT = 'development'
     APP_STORE = 'app-store'
+    DEVELOPMENT = 'development'
     ENTERPRISE = 'enterprise'
+
+    @classmethod
+    def from_profile(cls, profile: ProvisioningProfile) -> ArchiveMethod:
+        return cls.from_profiles([profile])
 
     @classmethod
     def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> ArchiveMethod:
@@ -67,6 +73,11 @@ class SigningStyle(enum.Enum):
             return SigningStyle.MANUAL
 
 
+class ProvisioningProfileAssignment(NamedTuple):
+    target_bundle_id: str
+    provisioning_profile: ProvisioningProfile
+
+
 @dataclass
 class ProvisioningProfileInfo:
     identifier: str
@@ -84,15 +95,27 @@ class Manifest:
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
+ExportOptionValue = Union[
+    Dict[str, str],
+    List[ProvisioningProfileInfo],
+    Manifest,
+    bool,
+    enum.Enum,
+    str,
+]
+
+
 @dataclass
 class ExportOptions(StringConverterMixin):
     compileBitcode: Optional[bool] = None
     destination: Optional[Destination] = None
+    distributionBundleIdentifier: Optional[str] = None
     embedOnDemandResourcesAssetPacksInBundle: Optional[bool] = None
     generateAppStoreInformation: Optional[bool] = None
     iCloudContainerEnvironment: Optional[str] = None
     installerSigningCertificate: Optional[str] = None
     manifest: Optional[Manifest] = None
+    manageAppVersionAndBuildNumber: Optional[bool] = None
     method: Optional[ArchiveMethod] = None
     onDemandResourcesAssetPacksBaseURL: Optional[str] = None
     provisioningProfiles: Optional[List[ProvisioningProfileInfo]] = None
@@ -158,10 +181,7 @@ class ExportOptions(StringConverterMixin):
         else:
             raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
 
-    def set_value(self,
-                  field_name: str,
-                  value: Union[enum.Enum, bool, str, Dict[str, str], List[ProvisioningProfileInfo], Manifest]):
-
+    def set_value(self, field_name: str, value: ExportOptionValue):
         if field_name not in self.__dict__:
             raise ValueError(f'Invalid filed {field_name}')
 
@@ -173,7 +193,8 @@ class ExportOptions(StringConverterMixin):
         elif field_name == 'provisioningProfiles':
             self._set_provisioning_profiles(value)
         elif not isinstance(value, field_type):
-            setattr(self, field_name, field_type(value))
+            with ResourceEnumMeta.without_graceful_fallback():
+                setattr(self, field_name, field_type(value))
         else:
             setattr(self, field_name, value)
 
@@ -195,17 +216,20 @@ class ExportOptions(StringConverterMixin):
         return ExportOptions(**data)
 
     @classmethod
-    def from_matched_profiles(cls, matched_profiles: Sequence[MatchedProfile]) -> ExportOptions:
-        used_profiles = [entry.profile for entry in matched_profiles]
-        certificates = (c for mp in matched_profiles for c in mp.profile.certificates)
-        team_ids = Counter[str](mp.profile.team_identifier for mp in matched_profiles)
+    def from_profile_assignments(cls, profile_assignments: Sequence[ProvisioningProfileAssignment]) -> ExportOptions:
+        used_profiles = tuple(assignment.provisioning_profile for assignment in profile_assignments)
+        certificates = (certificate for profile in used_profiles for certificate in profile.certificates)
+        team_ids = Counter[str](profile.team_identifier for profile in used_profiles)
         common_names = Counter[str](c.common_name.split(':')[0] for c in certificates)
 
         return ExportOptions(
             method=ArchiveMethod.from_profiles(used_profiles),
             signingStyle=SigningStyle.from_profiles(used_profiles),
             teamID=team_ids.most_common(1)[0][0] if team_ids else '',
-            provisioningProfiles=[ProvisioningProfileInfo(mp.bundle_id, mp.profile.name) for mp in matched_profiles],
+            provisioningProfiles=[
+                ProvisioningProfileInfo(a.target_bundle_id, a.provisioning_profile.name)
+                for a in profile_assignments
+            ],
             signingCertificate=common_names.most_common(1)[0][0] if common_names else '',
         )
 

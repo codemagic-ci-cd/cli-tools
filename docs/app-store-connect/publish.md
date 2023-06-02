@@ -9,6 +9,7 @@ publish
 app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
+    [--api-server-error-retries SERVER_ERROR_RETRIES]
     [--disable-jwt-cache]
     [--json]
     [--issuer-id ISSUER_ID]
@@ -25,9 +26,11 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
+    [--expire-build-submitted-for-review]
     [--beta-group BETA_GROUP_NAMES_OPTIONAL]
     [--app-store]
     [--platform PLATFORM_OPTIONAL]
+    [--cancel-previous-submissions]
     [--app-store-version-info APP_STORE_VERSION_INFO]
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
@@ -58,7 +61,7 @@ App Store Connect username used for application package validation and upload if
 ##### `--password, -p=APP_SPECIFIC_PASSWORD`
 
 
-App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with --apple-id and should match pattern `abcd-abcd-abcd-abcd`. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from the environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering `APP_SPECIFIC_PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+App-specific password used for application package validation and upload if App Store Connect API Key is not specified. Used together with `--apple-id` and should match pattern `abcd-abcd-abcd-abcd`. Create an app-specific password in the Security section of your Apple ID account. Learn more from https://support.apple.com/en-us/HT204397. If not given, the value will be checked from the environment variable `APP_SPECIFIC_PASSWORD`. Alternatively to entering `APP_SPECIFIC_PASSWORD` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--enable-package-validation, -ev`
 
 
@@ -66,7 +69,7 @@ Validate package before uploading it to App Store Connect. Use this switch to en
 ##### `--skip-package-validation, -sv`
 
 
-Deprecated. Starting from version `0.14.0` package validation before uploading it to App Store Connect is disabled by default. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
+**Deprecated**. Starting from version `0.14.0` package validation before uploading it to App Store Connect is disabled by default. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_VALIDATION`.
 ##### `--skip-package-upload, -su`
 
 
@@ -87,6 +90,10 @@ Localized beta test info for what's new in the uploaded build as a JSON encoded 
 
 
 Enable submission of an app for Testflight beta app review to allow external testing.
+##### `--expire-build-submitted-for-review`
+
+
+Expires any previous build waiting for, or in, review before submitting the build to TestFlight.
 ### Optional arguments to add build to Beta groups
 
 ##### `--beta-group=BETA_GROUP_NAMES_OPTIONAL`
@@ -103,6 +110,10 @@ Enable submission of an app to App Store app review procedure.
 
 
 App Store Version platform
+##### `--cancel-previous-submissions`
+
+
+Cancels previous submissions for the application in App Store Connect before creating a new submission if the submissions are in a state where it is possible.
 ##### `--app-store-version-info, -vi=APP_STORE_VERSION_INFO`
 
 
@@ -181,6 +192,10 @@ Turn on logging for App Store Connect API HTTP requests
 
 
 Specify how many times the App Store Connect API request should be retried in case the called request fails due to an authentication error (401 Unauthorized response from the server). In case of the above authentication error, the request is retried usinga new JSON Web Token as many times until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_UNAUTHORIZED_RETRIES`. [Default: 3]
+##### `--api-server-error-retries=SERVER_ERROR_RETRIES`
+
+
+Specify how many times the App Store Connect API request should be retried in case the called request fails due to a server error (response with status code 5xx). In case of server error, the request is retried until the number of retries is exhausted. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_API_SERVER_ERROR_RETRIES`. [Default: 3]
 ##### `--disable-jwt-cache`
 
 
@@ -200,7 +215,7 @@ App Store Connect API Key ID. Learn more at https://developer.apple.com/document
 ##### `--private-key=PRIVATE_KEY`
 
 
-App Store Connect API private key used for JWT authentication to communicate with Apple services. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api. If not provided, the key will be searched from the following directories in sequence for a private key file with the name `AuthKey_<key_identifier>.p8`: private_keys, ~/private_keys, ~/.private_keys, ~/.appstoreconnect/private_keys, where <key_identifier> is the value of --key-id. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_PRIVATE_KEY`. Alternatively to entering `PRIVATE_KEY` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+App Store Connect API private key used for JWT authentication to communicate with Apple services. Learn more at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api. If not provided, the key will be searched from the following directories in sequence for a private key file with the name `AuthKey_<key_identifier>.p8`: private_keys, ~/private_keys, ~/.private_keys, ~/.appstoreconnect/private_keys, where <key_identifier> is the value of `--key-id`. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_PRIVATE_KEY`. Alternatively to entering `PRIVATE_KEY` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ##### `--certificates-dir=CERTIFICATES_DIRECTORY`
 
 

@@ -7,32 +7,15 @@ google-play
 ### Usage
 ```bash
 google-play [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --package-name PACKAGE_NAME
     [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
-    [--log-api-calls]
-    [--json]
     ACTION
 ```
-### Required arguments for command `google-play`
-
-##### `--package-name=PACKAGE_NAME`
-
-
-Package name of the app in Google Play Console (Ex: com.google.example)
 ### Optional arguments for command `google-play`
 
 ##### `--credentials=GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`
 
 
 Gcloud service account credentials with `JSON` key type to access Google Play Developer API. If not given, the value will be checked from the environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--log-api-calls`
-
-
-Turn on logging for Google Play Developer API requests
-##### `--json`
-
-
-Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`
@@ -64,3 +47,9 @@ Enable verbose logging for commands
 |Action|Description|
 | :--- | :--- |
 |[`get-latest-build-number`](get-latest-build-number.md)|Get latest build number from Google Play Developer API matching given constraints|
+
+### Action groups
+
+|Action group|Description|
+| :--- | :--- |
+|[`tracks`](tracks.md)|Manage your Google Play release tracks|

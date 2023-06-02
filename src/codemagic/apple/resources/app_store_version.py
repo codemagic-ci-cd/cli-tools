@@ -16,6 +16,9 @@ class AppStoreVersion(Resource):
     https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion
     """
 
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
+
     @dataclass
     class Attributes(Resource.Attributes):
         platform: Platform
@@ -54,4 +57,6 @@ class AppStoreVersion(Resource):
         routingAppCoverage: Relationship
 
         app: Optional[Relationship] = None
+        appClipDefaultExperience: Optional[Relationship] = None
+        appStoreVersionExperiments: Optional[Relationship] = None
         appVersionExperiments: Optional[Relationship] = None

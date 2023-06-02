@@ -5,7 +5,6 @@ from typing import List
 from typing import Optional
 
 from codemagic import cli
-from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import ResourceId
@@ -21,7 +20,7 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
                 BuildArgument.BUILD_ID_RESOURCE_ID,
                 action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
     def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> AppStoreVersionSubmission:
+            self, build_id: ResourceId, should_print: bool = True) -> BetaAppReviewSubmission:
         """
         Submit an app for beta app review to allow external testing
         """

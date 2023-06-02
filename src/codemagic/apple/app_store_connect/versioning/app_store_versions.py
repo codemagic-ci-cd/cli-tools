@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -92,17 +91,18 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_information
         """
-        app_id = self._get_resource_id(app_store_version)
-        response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_id}').json()
+        app_store_version_id = self._get_resource_id(app_store_version)
+        response = self.client.session.get(f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}').json()
         return AppStoreVersion(response['data'])
 
     def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Optional[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.build.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/build'
         response = self.client.session.get(url).json()
 
@@ -117,9 +117,10 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_submission_information_of_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.appStoreVersionSubmission.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionSubmission'
         response = self.client.session.get(url).json()
         return AppStoreVersionSubmission(response['data'])
@@ -131,36 +132,15 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
         """
-        if isinstance(app_store_version, AppStoreVersion):
+        url = None
+        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
             url = app_store_version.relationships.appStoreVersionLocalizations.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/appStoreVersions/{app_store_version}/appStoreVersionLocalizations'
         return [
             AppStoreVersionLocalization(app_store_version_localization)
             for app_store_version_localization in self.client.paginate(url, page_size=None)
         ]
-
-    def list_with_include(
-            self,
-            application_id: ResourceId,
-            include_type: Type[IncludedResource],
-            resource_filter: Filter = Filter()) -> Tuple[List[AppStoreVersion], List[IncludedResource]]:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
-        """
-
-        # TODO: Move this method under `Apps.list_app_store_versions`
-
-        params = {
-            'include': self._get_include_field_name(include_type),
-            **resource_filter.as_query_params(),
-        }
-        results = self.client.paginate_with_included(
-            f'{self.client.API_URL}/apps/{application_id}/appStoreVersions', params=params)
-        return (
-            [AppStoreVersion(app_store_version) for app_store_version in results.data],
-            [include_type(included) for included in results.included],
-        )
 
     def modify(
             self,
@@ -197,7 +177,8 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
             relationships=relationships,
         )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}', json=payload).json()
+            f'{self.client.API_URL}/appStoreVersions/{app_store_version_id}', json=payload,
+        ).json()
         return AppStoreVersion(response['data'])
 
     def delete(self, app_store_version: Union[LinkedResourceData, ResourceId]) -> None:

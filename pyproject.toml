@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "codemagic-cli-tools"
+version = "0.39.2"
+description = "CLI tools used in Codemagic builds"
+readme = "README.md"
+authors = [
+    "Priit Lätt <priit@nevercode.io>"
+]
+license = "GPL-3.0-or-later"
+packages = [
+    { include = "codemagic", from = "src" },
+]
+include = [
+    { path = "tests", format = "sdist" },
+]
+
+homepage = "https://github.com/codemagic-ci-cd/cli-tools"
+repository = "https://github.com/codemagic-ci-cd/cli-tools"
+documentation = "https://github.com/codemagic-ci-cd/cli-tools/tree/master/docs#cli-tools"
+
+[tool.poetry.urls]
+"Issue Tracker" = "https://github.com/codemagic-ci-cd/cli-tools/issues"
+"Changelog" = "https://github.com/codemagic-ci-cd/cli-tools/blob/master/CHANGELOG.md"
+
+[tool.poetry.scripts]
+android-app-bundle = "codemagic.tools:AndroidAppBundle.invoke_cli"
+android-keystore = "codemagic.tools:AndroidKeystore.invoke_cli"
+app-store-connect = "codemagic.tools:AppStoreConnect.invoke_cli"
+codemagic-cli-tools = "codemagic.tools:CodemagicCliTools.invoke_cli"
+git-changelog = "codemagic.tools:GitChangelog.invoke_cli"
+google-play = "codemagic.tools:GooglePlay.invoke_cli"
+keychain = "codemagic.tools:Keychain.invoke_cli"
+universal-apk = "codemagic.tools:UniversalApkGenerator.invoke_cli"
+xcode-project = "codemagic.tools:XcodeProject.invoke_cli"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+cryptography = ">= 3.3, != 37.0.0"
+google-api-python-client = ">= 1.7.12"
+httplib2 = ">= 0.19.0"
+oauth2client = ">= 4.1.3"
+packaging = ">=22.0"
+psutil = ">= 5.8.0"
+pyjwt = "^2.4.0"
+requests = ">= 2.25"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "*"
+flake8 = "*"
+flake8-commas = "*"
+flake8-quotes = "*"
+ipdb = "*"
+isort = "*"
+mdutils = "*"
+mypy = "*"
+pep8-naming = "*"
+pylint = "*"
+pytest = "*"
+pytest-cov = "*"
+types-requests = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+line_length = 120
+force_single_line = true
+skip = [".venv", "stubs"]
+
+[tool.mypy]
+mypy_path = "stubs"
+pretty = true
+error_summary = true
+show_error_context = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

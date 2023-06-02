@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 from .enums import Platform
 from .resource import Relationship
@@ -11,6 +12,9 @@ class PreReleaseVersion(Resource):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/prereleaseversion
     """
+
+    attributes: Attributes
+    relationships: Optional[Relationships] = None
 
     @dataclass
     class Attributes(Resource.Attributes):

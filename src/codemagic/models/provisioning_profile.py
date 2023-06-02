@@ -5,6 +5,8 @@ import plistlib
 import re
 import shutil
 import subprocess
+from datetime import datetime
+from datetime import timezone
 from tempfile import NamedTemporaryFile
 from typing import Any
 from typing import AnyStr
@@ -111,7 +113,11 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
     def application_identifier(self) -> str:
         entitlements = self._plist.get('Entitlements', dict())
         for key, value in entitlements.items():
-            if 'application-identifier' in key:
+            if 'application-identifier' not in key:
+                continue
+            elif 'associated-application-identifier' in key:
+                continue
+            elif isinstance(value, str):
                 return value
         return ''
 
@@ -132,6 +138,20 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
     def certificates(self) -> List[Certificate]:
         asn1_certificates = self._plist['DeveloperCertificates']
         return [Certificate.from_ans1(certificate) for certificate in asn1_certificates]
+
+    @property
+    def creation_date(self) -> datetime:
+        # Timezone information is lost when plist is parsed with plistlib.
+        # Originally dates are in UTC in profile files.
+        dt = self._plist['CreationDate']
+        return dt.replace(tzinfo=timezone.utc)
+
+    @property
+    def expiration_date(self) -> datetime:
+        # Timezone information is lost when plist is parsed with plistlib.
+        # Originally dates are in UTC in profile files.
+        dt = self._plist['ExpirationDate']
+        return dt.replace(tzinfo=timezone.utc)
 
     def dict(self) -> Dict:
         return {

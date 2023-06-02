@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 from typing import Union
 
 from codemagic.apple import AppStoreConnectApiClient
@@ -20,12 +21,16 @@ from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources import ReviewSubmissionState
 from codemagic.mixins import PathFinderMixin
 
 from .arguments import AppStoreVersionInfo
@@ -53,6 +58,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     # Define signatures for self-reference to other action groups
 
     @property
+    @abstractmethod
     def api_client(self) -> AppStoreConnectApiClient:
         ...
 
@@ -85,6 +91,26 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     ):
         from .action_groups import BetaGroupsActionGroup
         _ = BetaGroupsActionGroup.add_build_to_beta_groups  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_review_submission(
+        self,
+        review_submission_id: ResourceId,
+        should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.cancel_review_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def confirm_review_submission(
+        self,
+        review_submission_id: ResourceId,
+        should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.confirm_review_submission  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -152,6 +178,74 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
+    def create_review_submission(
+            self,
+            application_id: ResourceId,
+            platform: Platform,
+            should_print: bool = True,
+    ) -> ReviewSubmission:
+        from .action_groups import ReviewSubmissionsActionGroup
+        _ = ReviewSubmissionsActionGroup.create_review_submission  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def create_review_submission_item(
+        self,
+        review_submission_id: ResourceId,
+        app_custom_product_page_version_id: Optional[ResourceId] = None,
+        app_event_id: Optional[ResourceId] = None,
+        app_store_version_id: Optional[ResourceId] = None,
+        app_store_version_experiment_id: Optional[ResourceId] = None,
+        should_print: bool = True,
+    ) -> ReviewSubmissionItem:
+        from .action_groups import ReviewSubmissionItemsActionGroup
+        _ = ReviewSubmissionItemsActionGroup.create_review_submission_item  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_app_builds(
+        self,
+        application_id: ResourceId,
+        excluded_build_id: Optional[Union[ResourceId, Sequence[ResourceId]]] = None,
+        should_print: bool = False,
+    ) -> List[Build]:
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.expire_app_builds  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_build_submitted_for_review(
+        self,
+        application_id: ResourceId,
+        should_print: bool = False,
+    ) -> Optional[Build]:
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.expire_build_submitted_for_review  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def expire_build(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> Build:
+        from .action_groups import BuildsActionGroup
+        _ = BuildsActionGroup.expire_build  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_review_submissions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = False,
+    ) -> List[ReviewSubmission]:
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.cancel_review_submissions  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def list_app_store_version_localizations(
         self,
         app_store_version_id: ResourceId,
@@ -187,6 +281,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         build_id: Optional[ResourceId] = None,
         pre_release_version: Optional[str] = None,
         processing_state: Optional[BuildProcessingState] = None,
+        beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
         should_print: bool = True,
     ) -> List[Build]:
@@ -195,10 +290,23 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         raise NotImplementedError()
 
     @abstractmethod
+    def list_review_submissions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform] = None,
+        review_submission_state: Optional[Union[ReviewSubmissionState, Sequence[ReviewSubmissionState]]] = None,
+        should_print: bool = True,
+    ) -> List[ReviewSubmission]:
+        from .action_groups import AppsActionGroup
+        _ = AppsActionGroup.list_review_submissions  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def submit_to_app_store(
         self,
         build_id: ResourceId,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        cancel_previous_submissions: bool = False,
         # App Store Version information arguments
         copyright: Optional[str] = None,
         earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
@@ -215,7 +323,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         support_url: Optional[str] = None,
         whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
-    ) -> AppStoreVersionSubmission:
+    ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_app_store  # Implementation
         raise NotImplementedError()
@@ -225,6 +333,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
         self,
         build_id: ResourceId,
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
         from .action_groups import BuildsActionGroup
         _ = BuildsActionGroup.submit_to_testflight  # Implementation

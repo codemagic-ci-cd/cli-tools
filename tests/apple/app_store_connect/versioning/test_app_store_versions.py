@@ -8,28 +8,11 @@ from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
-from codemagic.apple.resources import ResourceType
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 
 @pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
 class AppStoreVersionsTest(ResourceManagerTestsBase):
-    def test_list_with_include(self):
-        application_id = ResourceId('1481211155')  # Banaan
-        # application_id = ResourceId('1453997552')  # Testmagic
-        app_store_versions, builds = self.api_client.app_store_versions.list_with_include(
-            application_id,
-            Build,
-        )
-        assert len(builds) > 0
-        for build in builds:
-            assert isinstance(build, Build)
-            assert build.type is ResourceType.BUILDS
-        assert len(app_store_versions) > 0
-        for app_store_version in app_store_versions:
-            assert isinstance(app_store_version, AppStoreVersion)
-            assert app_store_version.type is ResourceType.APP_STORE_VERSIONS
-
     def test_read(self):
         app_store_version_id = ResourceId('409ebefb-ebd1-4f1a-903d-6ba16e013ebf')
         app_store_version = self.api_client.app_store_versions.read(app_store_version_id)

@@ -1,3 +1,3 @@
 from .edit import Edit
-from .enums import TrackName
+from .resource import Resource
 from .track import Track

@@ -115,9 +115,10 @@ class BundleIds(ResourceManager[BundleId]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_profile_ids_for_a_bundle_id
         """
-        if isinstance(bundle_id, BundleId):
+        url = None
+        if isinstance(bundle_id, BundleId) and bundle_id.relationships is not None:
             url = bundle_id.relationships.profiles.links.self
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/relationships/profiles'
         return [LinkedResourceData(bundle_id_profile) for bundle_id_profile in self.client.paginate(url)]
 
@@ -127,9 +128,10 @@ class BundleIds(ResourceManager[BundleId]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_profiles_for_a_bundle_id
         """
-        if isinstance(bundle_id, BundleId):
+        url = None
+        if isinstance(bundle_id, BundleId) and bundle_id.relationships is not None:
             url = bundle_id.relationships.profiles.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/profiles'
         profiles = [Profile(profile) for profile in self.client.paginate(url)]
         if resource_filter:
@@ -140,9 +142,10 @@ class BundleIds(ResourceManager[BundleId]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_capabilility_ids_for_a_bundle_id
         """
-        if isinstance(bundle_id, BundleId):
+        url = None
+        if isinstance(bundle_id, BundleId) and bundle_id.relationships is not None:
             url = bundle_id.relationships.bundleIdCapabilities.links.self
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/relationships/bundleIdCapabilities'
         return [LinkedResourceData(capabilility) for capabilility in self.client.paginate(url, page_size=None)]
 
@@ -150,8 +153,9 @@ class BundleIds(ResourceManager[BundleId]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_capabilities_for_a_bundle_id
         """
-        if isinstance(bundle_id, BundleId):
+        url = None
+        if isinstance(bundle_id, BundleId) and bundle_id.relationships is not None:
             url = bundle_id.relationships.bundleIdCapabilities.links.related
-        else:
+        if url is None:
             url = f'{self.client.API_URL}/bundleIds/{bundle_id}/bundleIdCapabilities'
         return [BundleIdCapability(capabilility) for capabilility in self.client.paginate(url, page_size=None)]
