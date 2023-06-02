@@ -31,7 +31,7 @@ def test_invalid_credentials(credentials, app_identifier):
         FirebaseClient(credentials).releases.list(app_identifier)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def firebase_client():
     with patch.object(FirebaseClient, 'google_resource', new_callable=PropertyMock) as mock_firebase_app_distribution:
         mock_firebase_app_distribution.return_value = None

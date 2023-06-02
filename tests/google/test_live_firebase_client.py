@@ -8,7 +8,7 @@ from codemagic.google import FirebaseClient
 from codemagic.google.resources import OrderBy
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='module')
 def firebase_client():
     if 'TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH' in os.environ:
         credentials_path = Path(os.environ['TEST_FIREBASE_SERVICE_ACCOUNT_CREDENTIALS_PATH'])
