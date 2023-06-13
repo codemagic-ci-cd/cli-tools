@@ -19,6 +19,6 @@ class ActionCallable:
     arguments: Sequence[Argument]
     is_cli_action: bool
     action_options: Dict[str, Any]
-    legacy_alias: Optional[str]
+    deprecated_alias: Optional[str]
     __name__: str
     __call__: Callable

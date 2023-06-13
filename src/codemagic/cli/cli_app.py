@@ -152,7 +152,7 @@ class CliApp(metaclass=abc.ABCMeta):
         try:
             return cli_actions[action_key]
         except KeyError:
-            aliased_cli_actions = {ac.legacy_alias: ac for ac in self.iter_cli_actions_with_aliases()}
+            aliased_cli_actions = {ac.deprecated_alias: ac for ac in self.iter_cli_actions_with_aliases()}
             return aliased_cli_actions[action_key]
 
     def _invoke_action(self, args: argparse.Namespace):
@@ -286,7 +286,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     def iter_cli_actions_with_aliases(self):
         for class_action in self.iter_class_cli_actions(include_all=True):
-            if class_action.legacy_alias:
+            if class_action.deprecated_alias:
                 yield getattr(self, class_action.__name__)
 
     @classmethod
@@ -336,9 +336,9 @@ class CliApp(metaclass=abc.ABCMeta):
                 for group_action in cls.iter_class_cli_actions(action_group):
                     ArgumentParserBuilder(cls, group_action, group_parsers).build()
 
-                    if group_action.legacy_alias:
-                        ArgumentParserBuilder(cls, group_action, action_parsers, for_legacy_alias=True).build()
-                        CliHelpFormatter.suppress_action(group_action.legacy_alias)
+                    if group_action.deprecated_alias:
+                        ArgumentParserBuilder(cls, group_action, action_parsers, for_deprecated_alias=True).build()
+                        CliHelpFormatter.suppress_action(group_action.deprecated_alias)
 
             else:
                 main_action: ActionCallable = action_or_group
@@ -410,7 +410,7 @@ def action(
     *arguments: Argument,
     action_group: Optional[ActionGroup] = None,
     action_options: Optional[Dict[str, Any]] = None,
-    legacy_alias: Optional[str] = None,
+    deprecated_alias: Optional[str] = None,
 ) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
@@ -418,9 +418,9 @@ def action(
     :param arguments: CLI arguments that are required for this method to work
     :param action_group: CLI argument group under which this action belongs
     :param action_options: Meta information about the action to check whether some conditions are met
-    :param legacy_alias: Deprecated name of the action for backwards compatibility.
-                         The action is registered on the root arguments parser with this name
-                         without explicit documentation.
+    :param deprecated_alias: Deprecated name of the action for backwards compatibility.
+                             The action is registered on the root arguments parser with this name
+                             without explicit documentation.
     """
 
     # Ensure that each argument is used exactly once
@@ -439,13 +439,13 @@ def action(
         func.action_name = action_name
         func.arguments = function_cli_arguments
         func.is_cli_action = True
-        func.legacy_alias = legacy_alias
+        func.deprecated_alias = deprecated_alias
         func.action_options = action_options or {}
 
         @wraps(func)
         def wrapper(self: CliApp, *args, **kwargs):
-            if legacy_alias and legacy_alias in sys.argv:
-                _notify_deprecated_action_usage(self, action_name, action_group, legacy_alias)
+            if deprecated_alias and deprecated_alias in sys.argv:
+                _notify_deprecated_action_usage(self, action_name, action_group, deprecated_alias)
             return func(self, *args, **kwargs)
 
         return wrapper
@@ -457,15 +457,15 @@ def _notify_deprecated_action_usage(
     cli_app: CliApp,
     action_name: str,
     action_group: Optional[ActionGroup],
-    legacy_alias: str,
+    deprecated_alias: str,
 ):
     executable = cli_app.get_executable_name()
     name_parts = (executable, action_group.name if action_group else None, action_name)
     full_action_name = ' '.join(p for p in name_parts if p)
-    legacy_action_name = f'{executable} {legacy_alias}'
+    deprecated_action_name = f'{executable} {deprecated_alias}'
     deprecation_message = (
-        f'Using `{legacy_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n'
-        f'Use `{full_action_name}` instead as `{legacy_action_name}` is subject for removal in future releases.\n'
+        f'Using `{deprecated_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n'
+        f'Use `{full_action_name}` instead as `{deprecated_action_name}` is subject for removal in future releases.\n'
     )
     cli_app.echo(Colors.apply(deprecation_message, Colors.YELLOW, Colors.BOLD))
 
