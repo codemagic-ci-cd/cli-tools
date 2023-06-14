@@ -152,8 +152,8 @@ class CliApp(metaclass=abc.ABCMeta):
         try:
             return cli_actions[action_key]
         except KeyError:
-            aliased_cli_actions = {ac.deprecated_alias: ac for ac in self.iter_cli_actions_with_aliases()}
-            return aliased_cli_actions[action_key]
+            deprecated_cli_actions = {ac.deprecated_alias: ac for ac in self.iter_deprecated_cli_actions()}
+            return deprecated_cli_actions[action_key]
 
     def _invoke_action(self, args: argparse.Namespace):
         cli_action = self._get_invoked_cli_action(args)
@@ -284,7 +284,7 @@ class CliApp(metaclass=abc.ABCMeta):
         for class_action in self.iter_class_cli_actions(action_group=action_group):
             yield getattr(self, class_action.__name__)
 
-    def iter_cli_actions_with_aliases(self):
+    def iter_deprecated_cli_actions(self) -> Iterable[ActionCallable]:
         for class_action in self.iter_class_cli_actions(include_all=True):
             if class_action.deprecated_alias:
                 yield getattr(self, class_action.__name__)
