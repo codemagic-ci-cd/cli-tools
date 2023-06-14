@@ -338,7 +338,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
                     if group_action.deprecated_alias:
                         ArgumentParserBuilder(cls, group_action, action_parsers, for_deprecated_alias=True).build()
-                        CliHelpFormatter.suppress_action(group_action.deprecated_alias)
+                        CliHelpFormatter.suppress_deprecated_action(group_action.deprecated_alias)
 
             else:
                 main_action: ActionCallable = action_or_group

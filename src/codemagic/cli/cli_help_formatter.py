@@ -8,7 +8,7 @@ from .colors import Colors
 
 
 class CliHelpFormatter(argparse.HelpFormatter):
-    _suppressed_actions: Set[str] = set()
+    _deprecated_actions: Set[str] = set()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,12 +19,12 @@ class CliHelpFormatter(argparse.HelpFormatter):
             self._width = sys.maxsize
 
     @classmethod
-    def suppress_action(cls, action_name: str):
-        cls._suppressed_actions.add(action_name)
+    def suppress_deprecated_action(cls, action_name: str):
+        cls._deprecated_actions.add(action_name)
 
-    def _exclude_suppressed_actions(self, message: str) -> str:
-        for suppressed_action in self._suppressed_actions:
-            message = re.sub(f'[^ ]{suppressed_action},?', '', message)
+    def _exclude_deprecated_actions(self, message: str) -> str:
+        for deprecated_action in self._deprecated_actions:
+            message = re.sub(f'[^ ]{deprecated_action},?', '', message)
         return message
 
     def _format_args(self, *args, **kwargs):
@@ -38,7 +38,7 @@ class CliHelpFormatter(argparse.HelpFormatter):
         fmt = super()._format_action_invocation(action)
 
         if action.dest == 'action':
-            fmt = self._exclude_suppressed_actions(fmt)
+            fmt = self._exclude_deprecated_actions(fmt)
 
         parts = fmt.split(', ')
         color = Colors.BRIGHT_BLUE if action.option_strings else Colors.GREEN
@@ -50,8 +50,10 @@ class CliHelpFormatter(argparse.HelpFormatter):
         # To cope with colored starts, the width of the actions is custom-calculated.
 
         # determine the required width and the entry label
-        help_position = min(self._action_max_length + 2,
-                            self._max_help_position)
+        help_position = min(
+            self._action_max_length + 2,
+            self._max_help_position,
+        )
         help_width = max(self._width - help_position, 11)
         action_width = help_position - self._current_indent - 2
         action_header = self._format_action_invocation(action)
@@ -97,4 +99,4 @@ class CliHelpFormatter(argparse.HelpFormatter):
 
     def _format_usage(self, *args, **kwargs) -> str:
         usage = super()._format_usage(*args, **kwargs)
-        return self._exclude_suppressed_actions(usage)
+        return self._exclude_deprecated_actions(usage)
