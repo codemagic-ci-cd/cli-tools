@@ -14,6 +14,7 @@ import sys
 import time
 from functools import wraps
 from itertools import chain
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -41,6 +42,9 @@ from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 from .cli_types import ObfuscationPattern
 from .colors import Colors
+
+if TYPE_CHECKING:
+    from argparse import _SubParsersAction as SubParsersAction
 
 
 class CliAppException(Exception):
@@ -334,17 +338,27 @@ class CliApp(metaclass=abc.ABCMeta):
                 action_group: ActionGroup = action_or_group
                 group_parsers = cls._add_action_group(action_group, action_parsers)
                 for group_action in cls.iter_class_cli_actions(action_group):
-                    ArgumentParserBuilder(cls, group_action, group_parsers).build()
-
-                    if group_action.deprecated_alias:
-                        ArgumentParserBuilder(cls, group_action, action_parsers, for_deprecated_alias=True).build()
-                        CliHelpFormatter.suppress_deprecated_action(group_action.deprecated_alias)
-
+                    cls._register_cli_action(group_action, group_parsers, action_parsers)
             else:
                 main_action: ActionCallable = action_or_group
-                ArgumentParserBuilder(cls, main_action, action_parsers).build()
+                cls._register_cli_action(main_action, action_parsers, action_parsers)
 
         return main_parser
+
+    @classmethod
+    def _register_cli_action(
+        cls,
+        main_or_group_action: ActionCallable,
+        current_action_parsers: SubParsersAction,
+        deprecated_action_parsers: SubParsersAction,
+    ):
+        ArgumentParserBuilder(cls, main_or_group_action, current_action_parsers).build()
+        if not main_or_group_action.deprecated_alias:
+            return
+
+        # Also register the deprecated alias
+        ArgumentParserBuilder(cls, main_or_group_action, deprecated_action_parsers, for_deprecated_alias=True).build()
+        CliHelpFormatter.suppress_deprecated_action(main_or_group_action.deprecated_alias)
 
     def _obfuscate_command(
         self, command_args: Sequence[CommandArg],
