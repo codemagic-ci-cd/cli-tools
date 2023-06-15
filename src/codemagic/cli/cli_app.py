@@ -14,6 +14,7 @@ import sys
 import time
 from functools import wraps
 from itertools import chain
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -41,6 +42,9 @@ from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 from .cli_types import ObfuscationPattern
 from .colors import Colors
+
+if TYPE_CHECKING:
+    from argparse import _SubParsersAction as SubParsersAction
 
 
 class CliAppException(Exception):
@@ -149,7 +153,11 @@ class CliApp(metaclass=abc.ABCMeta):
             action_key = subcommand
 
         cli_actions = {ac.action_name: ac for ac in self.iter_cli_actions(action_group)}
-        return cli_actions[action_key]
+        try:
+            return cli_actions[action_key]
+        except KeyError:
+            deprecated_cli_actions = {ac.deprecated_alias: ac for ac in self.iter_deprecated_cli_actions()}
+            return deprecated_cli_actions[action_key]
 
     def _invoke_action(self, args: argparse.Namespace):
         cli_action = self._get_invoked_cli_action(args)
@@ -280,6 +288,11 @@ class CliApp(metaclass=abc.ABCMeta):
         for class_action in self.iter_class_cli_actions(action_group=action_group):
             yield getattr(self, class_action.__name__)
 
+    def iter_deprecated_cli_actions(self) -> Iterable[ActionCallable]:
+        for class_action in self.iter_class_cli_actions(include_all=True):
+            if class_action.deprecated_alias:
+                yield getattr(self, class_action.__name__)
+
     @classmethod
     def _setup_logging(cls, cli_args: argparse.Namespace):
         log.initialize_logging(
@@ -325,12 +338,27 @@ class CliApp(metaclass=abc.ABCMeta):
                 action_group: ActionGroup = action_or_group
                 group_parsers = cls._add_action_group(action_group, action_parsers)
                 for group_action in cls.iter_class_cli_actions(action_group):
-                    ArgumentParserBuilder(cls, group_action, group_parsers).build()
+                    cls._register_cli_action(group_action, group_parsers, action_parsers)
             else:
                 main_action: ActionCallable = action_or_group
-                ArgumentParserBuilder(cls, main_action, action_parsers).build()
+                cls._register_cli_action(main_action, action_parsers, action_parsers)
 
         return main_parser
+
+    @classmethod
+    def _register_cli_action(
+        cls,
+        main_or_group_action: ActionCallable,
+        current_action_parsers: SubParsersAction,
+        deprecated_action_parsers: SubParsersAction,
+    ):
+        ArgumentParserBuilder(cls, main_or_group_action, current_action_parsers).build()
+        if not main_or_group_action.deprecated_alias:
+            return
+
+        # Also register the deprecated alias
+        ArgumentParserBuilder(cls, main_or_group_action, deprecated_action_parsers, for_deprecated_alias=True).build()
+        CliHelpFormatter.suppress_deprecated_action(main_or_group_action.deprecated_alias)
 
     def _obfuscate_command(
         self, command_args: Sequence[CommandArg],
@@ -396,6 +424,7 @@ def action(
     *arguments: Argument,
     action_group: Optional[ActionGroup] = None,
     action_options: Optional[Dict[str, Any]] = None,
+    deprecated_alias: Optional[str] = None,
 ) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
@@ -403,6 +432,9 @@ def action(
     :param arguments: CLI arguments that are required for this method to work
     :param action_group: CLI argument group under which this action belongs
     :param action_options: Meta information about the action to check whether some conditions are met
+    :param deprecated_alias: Deprecated name of the action for backwards compatibility.
+                             The action is registered on the root arguments parser with this name
+                             without explicit documentation.
     """
 
     # Ensure that each argument is used exactly once
@@ -421,15 +453,35 @@ def action(
         func.action_name = action_name
         func.arguments = function_cli_arguments
         func.is_cli_action = True
+        func.deprecated_alias = deprecated_alias
         func.action_options = action_options or {}
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+        def wrapper(self: CliApp, *args, **kwargs):
+            if deprecated_alias and deprecated_alias in sys.argv:
+                _notify_deprecated_action_usage(self, action_name, action_group, deprecated_alias)
+            return func(self, *args, **kwargs)
 
         return wrapper
 
     return decorator
+
+
+def _notify_deprecated_action_usage(
+    cli_app: CliApp,
+    action_name: str,
+    action_group: Optional[ActionGroup],
+    deprecated_alias: str,
+):
+    executable = cli_app.get_executable_name()
+    name_parts = (executable, action_group.name if action_group else None, action_name)
+    full_action_name = ' '.join(p for p in name_parts if p)
+    deprecated_action_name = f'{executable} {deprecated_alias}'
+    deprecation_message = (
+        f'Using `{deprecated_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n'
+        f'Use `{full_action_name}` instead as `{deprecated_action_name}` is subject for removal in future releases.\n'
+    )
+    cli_app.echo(Colors.apply(deprecation_message, Colors.YELLOW, Colors.BOLD))
 
 
 _CliApp = TypeVar('_CliApp', bound=Type[CliApp])

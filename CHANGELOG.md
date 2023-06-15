@@ -1,3 +1,10 @@
+Version 0.40.1
+-------------
+
+**Development**
+- Add interface to declare aliases for deprecated actions. [PR #187](https://github.com/codemagic-ci-cd/cli-tools/pull/187)
+
+
 Version 0.40.0
 -------------
 
