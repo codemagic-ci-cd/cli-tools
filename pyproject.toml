@@ -45,7 +45,7 @@ psutil = ">= 5.8.0"
 pyjwt = "^2.4.0"
 requests = ">= 2.25"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 autopep8 = "*"
 flake8 = "*"
 flake8-commas = "*"
