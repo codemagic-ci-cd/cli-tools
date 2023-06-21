@@ -6,7 +6,6 @@ from typing import ClassVar
 from typing import Dict
 from typing import Generic
 from typing import TypeVar
-from typing import cast
 
 from googleapiclient import discovery
 from googleapiclient import errors
@@ -15,6 +14,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from codemagic.google.errors import GoogleClientError
 from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.errors import GoogleHttpError
+from codemagic.utilities import log
 
 GoogleResourceT = TypeVar('GoogleResourceT', bound=discovery.Resource)
 
@@ -30,14 +30,23 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
     def google_service_name(self) -> str:
         ...
 
-    @property
-    def google_resource(self) -> GoogleResourceT:
+    def _build_google_resource(self) -> GoogleResourceT:
         try:
-            recourse = discovery.build(
+            return discovery.build(
                 self.google_service_name,
                 self.google_service_version,
                 credentials=self._credentials,
             )
+        except Exception:
+            log.get_file_logger(self.__class__).exception(
+                f'Failed to construct {self.google_service_version} {self.google_service_name} service resource',
+            )
+            raise
+
+    @property
+    def google_resource(self) -> GoogleResourceT:
+        try:
+            return self._build_google_resource()
         except ValueError as e:
             raise GoogleCredentialsError(str(e))
         except errors.HttpError as e:
@@ -45,8 +54,6 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
             raise GoogleHttpError(reason)
         except errors.Error as e:
             raise GoogleClientError(str(e))
-        else:
-            return cast(GoogleResourceT, recourse)
 
     @property
     def _credentials(self) -> ServiceAccountCredentials:

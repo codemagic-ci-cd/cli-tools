@@ -1,3 +1,9 @@
+Version 0.40.2
+-------------
+
+**Dependencies**
+- Set lower bound version limit `>= 2.84.0` to [`google-api-python-client`](https://github.com/googleapis/google-api-python-client) Python dependency in order to comply with Firebase App Distribution APIs. [PR #xyz](https://github.com/codemagic-ci-cd/cli-tools/pull/xyz)
+
 Version 0.40.1
 -------------
 
