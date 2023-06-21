@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from datetime import timezone
+from typing import Optional
 
 from .release_notes import ReleaseNotes
 from .resource import Resource
@@ -12,13 +13,13 @@ class Release(Resource):
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases
     """
     name: str
-    releaseNotes: ReleaseNotes
     displayVersion: str
     buildVersion: int
     createTime: datetime
     firebaseConsoleUri: str
     testingUri: str
     binaryDownloadUri: str
+    releaseNotes: Optional[ReleaseNotes] = None
 
     def __post_init__(self):
         if isinstance(self.createTime, str):
