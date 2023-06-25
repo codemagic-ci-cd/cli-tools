@@ -1,3 +1,8 @@
+Version 0.40.3
+-------------
+**Features**
+- Add support for visionOS runtime. [PR #325](https://github.com/codemagic-ci-cd/cli-tools/pull/325)
+
 Version 0.40.2
 -------------
 
