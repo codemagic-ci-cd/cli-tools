@@ -98,6 +98,10 @@ mypy_path = "stubs"
 pretty = true
 error_summary = true
 show_error_context = true
+exclude = [
+    "tests/",
+    "doc.py",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
