@@ -28,6 +28,7 @@ class FirebaseAppDistributionAction(ABC):
     @abstractmethod
     def get_latest_build_version(self, app_id: str, should_print: bool = True) -> int:
         from .actions import GetLatestBuildVersionAction
+
         _ = GetLatestBuildVersionAction.get_latest_build_version  # Implementation
         raise NotImplementedError()
 
@@ -41,5 +42,6 @@ class FirebaseAppDistributionAction(ABC):
         should_print: bool = True,
     ) -> List[Release]:
         from .action_groups.releases_action_group import ReleasesActionGroup
+
         _ = ReleasesActionGroup.list_releases  # Implementation
         raise NotImplementedError()

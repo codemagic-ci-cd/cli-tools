@@ -20,12 +20,12 @@ if TYPE_CHECKING:
     from codemagic.google.resources.identifiers import ResourceIdentifier
     from codemagic.google.resources.resource import Resource
 
-ResourceT = TypeVar('ResourceT', bound='Resource')
-ResourceIdentifierT = TypeVar('ResourceIdentifierT', bound='ResourceIdentifier')
+ResourceT = TypeVar("ResourceT", bound="Resource")
+ResourceIdentifierT = TypeVar("ResourceIdentifierT", bound="ResourceIdentifier")
 
 
 class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManagerMixin[ResourceT], ABC):
-    manager_action: ClassVar[str] = 'list'
+    manager_action: ClassVar[str] = "list"
 
     @dataclass
     class PageRequestArguments:
@@ -36,10 +36,10 @@ class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManager
 
         def as_request_kwargs(self):
             return {
-                'orderBy': self.order_by.value,
-                'pageSize': self.page_size,
-                'pageToken': self.page_token,
-                'parent': self.parent_uri,
+                "orderBy": self.order_by.value,
+                "pageSize": self.page_size,
+                "pageToken": self.page_token,
+                "parent": self.parent_uri,
             }
 
     @abstractmethod
@@ -66,7 +66,7 @@ class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManager
             response = self._execute_request(request)
 
             resources.extend(self.resource_type(**item) for item in response[self.resource_type.get_label()])
-            page_request_args.page_token = response.get('nextPageToken')
+            page_request_args.page_token = response.get("nextPageToken")
 
             if limit and len(resources) > limit:
                 break

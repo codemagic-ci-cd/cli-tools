@@ -24,7 +24,7 @@ class CliHelpFormatter(argparse.HelpFormatter):
 
     def _exclude_deprecated_actions(self, message: str) -> str:
         for deprecated_action in self._deprecated_actions:
-            message = re.sub(f'[^ ]{deprecated_action},?', '', message)
+            message = re.sub(f"[^ ]{deprecated_action},?", "", message)
         return message
 
     def _format_args(self, *args, **kwargs):
@@ -37,12 +37,12 @@ class CliHelpFormatter(argparse.HelpFormatter):
         # optional arguments as blue and mandatory as green
         fmt = super()._format_action_invocation(action)
 
-        if action.dest == 'action':
+        if action.dest == "action":
             fmt = self._exclude_deprecated_actions(fmt)
 
-        parts = fmt.split(', ')
+        parts = fmt.split(", ")
         color = Colors.BRIGHT_BLUE if action.option_strings else Colors.GREEN
-        return ', '.join(map(color, parts))
+        return ", ".join(map(color, parts))
 
     def _format_action(self, action):
         # Identical to superclass definition with exception in one if -branch:
@@ -60,8 +60,8 @@ class CliHelpFormatter(argparse.HelpFormatter):
 
         # no help; start on same line and add a final newline
         if not action.help:
-            tup = self._current_indent, '', action_header
-            action_header = '%*s%s\n' % tup
+            tup = self._current_indent, "", action_header
+            action_header = "%*s%s\n" % tup
 
         # short action name; start on the same line and pad two spaces
         elif len(Colors.remove(action_header)) <= action_width:
@@ -71,8 +71,8 @@ class CliHelpFormatter(argparse.HelpFormatter):
 
         # long action name; start on the next line
         else:
-            tup = self._current_indent, '', action_header
-            action_header = '%*s%s\n' % tup
+            tup = self._current_indent, "", action_header
+            action_header = "%*s%s\n" % tup
             indent_first = help_position
 
         # collect the pieces of the action help
@@ -82,13 +82,13 @@ class CliHelpFormatter(argparse.HelpFormatter):
         if action.help:
             help_text = self._expand_help(action)
             help_lines = self._split_lines(help_text, help_width)
-            parts.append('%*s%s\n' % (indent_first, '', help_lines[0]))
+            parts.append("%*s%s\n" % (indent_first, "", help_lines[0]))
             for line in help_lines[1:]:
-                parts.append('%*s%s\n' % (help_position, '', line))
+                parts.append("%*s%s\n" % (help_position, "", line))
 
         # or add a newline if the description doesn't end with one
-        elif not action_header.endswith('\n'):
-            parts.append('\n')
+        elif not action_header.endswith("\n"):
+            parts.append("\n")
 
         # if there are any sub-actions, add their help as well
         for subaction in self._iter_indented_subactions(action):

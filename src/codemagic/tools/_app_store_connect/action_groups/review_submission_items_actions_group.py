@@ -15,7 +15,7 @@ from ..arguments import ReviewSubmissionArgument
 
 class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
-        'create',
+        "create",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
         ReviewSubmissionArgument.APP_CUSTOM_PRODUCT_PAGE_VERSION_ID,
         ReviewSubmissionArgument.APP_EVENT_ID,
@@ -36,10 +36,10 @@ class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Add contents to review submission for App Store review request
         """
         optional_kwargs = {
-            'app_custom_product_page_version': app_custom_product_page_version_id,
-            'app_event': app_event_id,
-            'app_store_version': app_store_version_id,
-            'app_store_version_experiment': app_store_version_experiment_id,
+            "app_custom_product_page_version": app_custom_product_page_version_id,
+            "app_event": app_event_id,
+            "app_store_version": app_store_version_id,
+            "app_store_version_experiment": app_store_version_experiment_id,
         }
         return self._create_resource(
             self.api_client.review_submissions_items,

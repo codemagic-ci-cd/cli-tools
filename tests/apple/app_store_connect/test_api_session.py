@@ -1,11 +1,10 @@
 from unittest import mock
 
 import pytest
-from requests import Response
-from requests import Session
-
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiSession
+from requests import Response
+from requests import Session
 
 
 def _get_failed_response_mock(payload: dict, status_code: int):
@@ -21,16 +20,16 @@ def _get_failed_response_mock(payload: dict, status_code: int):
 @pytest.fixture
 def mock_unauthorized_response():
     unauthorized_payload = {
-        'errors': [
+        "errors": [
             {
-                'status': '401',
-                'code': 'NOT_AUTHORIZED',
-                'title': 'Authentication credentials are missing or invalid.',
-                'detail': (
-                    'Provide a properly configured and signed bearer token, '
-                    'and make sure that it has not expired. Learn more about '
-                    'Generating Tokens for API Requests '
-                    'https://developer.apple.com/go/?id=api-generating-tokens'
+                "status": "401",
+                "code": "NOT_AUTHORIZED",
+                "title": "Authentication credentials are missing or invalid.",
+                "detail": (
+                    "Provide a properly configured and signed bearer token, "
+                    "and make sure that it has not expired. Learn more about "
+                    "Generating Tokens for API Requests "
+                    "https://developer.apple.com/go/?id=api-generating-tokens"
                 ),
             },
         ],
@@ -41,15 +40,15 @@ def mock_unauthorized_response():
 @pytest.fixture
 def mock_server_error_response():
     server_error_payload = {
-        'errors': [
+        "errors": [
             {
-                'status': '500',
-                'code': 'UNEXPECTED_ERROR',
-                'title': 'An unexpected error occurred.',
-                'detail': (
-                    'An unexpected error occurred on the server side. '
-                    'If this issue continues, contact us at '
-                    'https://developer.apple.com/contact/.'
+                "status": "500",
+                "code": "UNEXPECTED_ERROR",
+                "title": "An unexpected error occurred.",
+                "detail": (
+                    "An unexpected error occurred on the server side. "
+                    "If this issue continues, contact us at "
+                    "https://developer.apple.com/contact/."
                 ),
             },
         ],
@@ -60,13 +59,13 @@ def mock_server_error_response():
 @pytest.fixture
 def mock_not_found_response():
     not_found_payload = {
-        'errors': [
+        "errors": [
             {
-                'id': '143c2772-4b6c-4af5-8c21-45e4a993ffc8',
-                'status': '404',
-                'code': 'NOT_FOUND',
-                'title': 'The specified resource does not exist',
-                'detail': "There is no resource of type 'AppsV1' with id 'kana'",
+                "id": "143c2772-4b6c-4af5-8c21-45e4a993ffc8",
+                "status": "404",
+                "code": "NOT_FOUND",
+                "title": "The specified resource does not exist",
+                "detail": "There is no resource of type 'AppsV1' with id 'kana'",
             },
         ],
     }
@@ -78,7 +77,7 @@ def mock_successful_response():
     return mock.create_autospec(Response, instance=True, ok=True, status_code=200)
 
 
-@mock.patch.object(Session, 'request')
+@mock.patch.object(Session, "request")
 def test_unauthorized_retrying_success(mock_session, mock_successful_response, mock_unauthorized_response):
     mock_session.side_effect = (mock_unauthorized_response, mock_unauthorized_response, mock_successful_response)
 
@@ -89,19 +88,19 @@ def test_unauthorized_retrying_success(mock_session, mock_successful_response, m
         unauthorized_request_retries=3,
         revoke_auth_info=mock_revoke_auth_info,
     )
-    final_response = session.get('https://example.com')
+    final_response = session.get("https://example.com")
 
     # Check that only first call does not require JWT refresh
     assert mock_auth_headers_factory.mock_calls == [(), (), ()]
     assert mock_revoke_auth_info.mock_calls == [(), ()]
     mock_unauthorized_response.assert_not_called()
-    mock_successful_response.assert_has_calls([('json', (), {})])
+    mock_successful_response.assert_has_calls([("json", (), {})])
 
     # After unauthorized requests finally authentication passes and successful response is returned
     assert final_response is mock_successful_response
 
 
-@mock.patch.object(Session, 'request')
+@mock.patch.object(Session, "request")
 def test_server_error_retrying_success(mock_session, mock_successful_response, mock_server_error_response):
     mock_session.side_effect = (mock_server_error_response, mock_server_error_response, mock_successful_response)
 
@@ -112,19 +111,19 @@ def test_server_error_retrying_success(mock_session, mock_successful_response, m
         server_error_retries=3,
         revoke_auth_info=mock_revoke_auth_info,
     )
-    final_response = session.get('https://example.com')
+    final_response = session.get("https://example.com")
 
     # Check that JWT refresh is not performed
     assert mock_auth_headers_factory.mock_calls == [(), (), ()]
     assert mock_revoke_auth_info.mock_calls == []
     mock_server_error_response.assert_not_called()
-    mock_successful_response.assert_has_calls([('json', (), {})])
+    mock_successful_response.assert_has_calls([("json", (), {})])
 
     # After unauthorized requests finally authentication passes and successful response is returned
     assert final_response is mock_successful_response
 
 
-@mock.patch.object(Session, 'request')
+@mock.patch.object(Session, "request")
 def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response):
     retries_count = 3
 
@@ -137,7 +136,7 @@ def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response)
         revoke_auth_info=mock_revoke_auth_info,
     )
     with pytest.raises(AppStoreConnectApiError) as error_info:
-        session.get('https://example.com')
+        session.get("https://example.com")
 
     assert session._unauthorized_retries == retries_count
     assert mock_session.call_count == retries_count
@@ -150,7 +149,7 @@ def test_unauthorized_retrying_failure(mock_session, mock_unauthorized_response)
     assert error_info.value.response is mock_unauthorized_response
 
 
-@mock.patch.object(Session, 'request')
+@mock.patch.object(Session, "request")
 def test_server_error_retrying_failure(mock_session, mock_server_error_response):
     retries_count = 3
 
@@ -163,7 +162,7 @@ def test_server_error_retrying_failure(mock_session, mock_server_error_response)
         revoke_auth_info=mock_revoke_auth_info,
     )
     with pytest.raises(AppStoreConnectApiError) as error_info:
-        session.get('https://example.com')
+        session.get("https://example.com")
 
     assert session._server_error_retries == retries_count
     assert mock_session.call_count == retries_count
@@ -176,7 +175,7 @@ def test_server_error_retrying_failure(mock_session, mock_server_error_response)
     assert error_info.value.response is mock_server_error_response
 
 
-@mock.patch.object(Session, 'request')
+@mock.patch.object(Session, "request")
 def test_http_error_not_found(mock_session, mock_successful_response, mock_not_found_response):
     mock_session.side_effect = (mock_not_found_response, mock_successful_response)
 
@@ -189,7 +188,7 @@ def test_http_error_not_found(mock_session, mock_successful_response, mock_not_f
         revoke_auth_info=mock_revoke_auth_info,
     )
     with pytest.raises(AppStoreConnectApiError) as error_info:
-        session.get('https://example.com')
+        session.get("https://example.com")
 
     # Fail hard on first attempt on non-authorization error
     assert mock_session.call_count == 1
@@ -202,7 +201,7 @@ def test_http_error_not_found(mock_session, mock_successful_response, mock_not_f
     assert mock_successful_response.method_calls == []
 
     mock_not_found_response.assert_not_called()
-    assert mock_not_found_response.method_calls == [('json', (), {}), ('json', (), {})]
+    assert mock_not_found_response.method_calls == [("json", (), {}), ("json", (), {})]
 
     # Original error is raised
     assert error_info.value.response is mock_not_found_response

@@ -30,9 +30,9 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
         """
         app_store_version_localization_id = self._get_resource_id(app_store_version_localization)
         response = self.client.session.get(
-            f'{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}',
+            f"{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}",
         ).json()
-        return AppStoreVersionLocalization(response['data'])
+        return AppStoreVersionLocalization(response["data"])
 
     def create(
         self,
@@ -49,7 +49,7 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
         https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_localization
         """
         attributes = {
-            'locale': locale.value,
+            "locale": locale.value,
             **self._construct_payload_attributes(
                 description=description,
                 keywords=keywords,
@@ -61,8 +61,8 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
         }
 
         relationships = {
-            'appStoreVersion': {
-                'data': self._get_attribute_data(app_store_version, ResourceType.APP_STORE_VERSIONS),
+            "appStoreVersion": {
+                "data": self._get_attribute_data(app_store_version, ResourceType.APP_STORE_VERSIONS),
             },
         }
 
@@ -71,8 +71,8 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
             attributes=attributes,
             relationships=relationships,
         )
-        response = self.client.session.post(f'{self.client.API_URL}/appStoreVersionLocalizations', json=payload).json()
-        return AppStoreVersionLocalization(response['data'], created=True)
+        response = self.client.session.post(f"{self.client.API_URL}/appStoreVersionLocalizations", json=payload).json()
+        return AppStoreVersionLocalization(response["data"], created=True)
 
     def modify(
         self,
@@ -102,10 +102,10 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
             attributes=attributes,
         )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}',
+            f"{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}",
             json=payload,
         ).json()
-        return AppStoreVersionLocalization(response['data'])
+        return AppStoreVersionLocalization(response["data"])
 
     def delete(
         self,
@@ -116,7 +116,7 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
         """
         app_store_version_localization_id = self._get_resource_id(app_store_version_localization)
         self.client.session.delete(
-            f'{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}',
+            f"{self.client.API_URL}/appStoreVersionLocalizations/{app_store_version_localization_id}",
         )
 
     @classmethod
@@ -131,15 +131,15 @@ class AppStoreVersionLocalizations(ResourceManager[AppStoreVersionLocalization])
     ):
         attributes = {}
         if description is not None:
-            attributes['description'] = description
+            attributes["description"] = description
         if keywords is not None:
-            attributes['keywords'] = keywords
+            attributes["keywords"] = keywords
         if marketing_url is not None:
-            attributes['marketingUrl'] = marketing_url
+            attributes["marketingUrl"] = marketing_url
         if promotional_text is not None:
-            attributes['promotionalText'] = promotional_text
+            attributes["promotionalText"] = promotional_text
         if support_url is not None:
-            attributes['supportUrl'] = support_url
+            attributes["supportUrl"] = support_url
         if whats_new is not None:
-            attributes['whatsNew'] = whats_new
+            attributes["whatsNew"] = whats_new
         return attributes

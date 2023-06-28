@@ -15,12 +15,16 @@ from ..arguments import BuildArgument
 
 
 class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
-    @cli.action('create',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
+    @cli.action(
+        "create",
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS,
+    )
     def create_beta_app_review_submission(
-            self, build_id: ResourceId, should_print: bool = True) -> BetaAppReviewSubmission:
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> BetaAppReviewSubmission:
         """
         Submit an app for beta app review to allow external testing
         """
@@ -31,21 +35,25 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
             build=build_id,
         )
 
-    @cli.action('list',
-                BuildArgument.BUILD_ID_RESOURCE_ID,
-                action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS)
+    @cli.action(
+        "list",
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BETA_APP_REVIEW_SUBMISSIONS,
+    )
     def list_beta_app_review_submissions(
-            self,
-            build_id: Optional[ResourceId],
-            beta_review_state: Optional[BetaReviewState] = None,
-            should_print: bool = True) -> List[BetaAppReviewSubmission]:
+        self,
+        build_id: Optional[ResourceId],
+        beta_review_state: Optional[BetaReviewState] = None,
+        should_print: bool = True,
+    ) -> List[BetaAppReviewSubmission]:
         """
         Find and list beta app review submissions of a build
         """
 
         beta_app_review_submissions_filter = self.api_client.beta_app_review_submissions.Filter(
             build=build_id,
-            beta_review_state=beta_review_state)
+            beta_review_state=beta_review_state,
+        )
         return self._list_resources(
             beta_app_review_submissions_filter,
             self.api_client.beta_app_review_submissions,

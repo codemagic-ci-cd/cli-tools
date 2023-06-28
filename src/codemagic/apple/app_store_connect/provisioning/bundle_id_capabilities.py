@@ -24,44 +24,56 @@ class BundleIdCapabilities(ResourceManager[BundleIdCapability]):
     def resource_type(self) -> Type[BundleIdCapability]:
         return BundleIdCapability
 
-    def enable(self,
-               capability_type: CapabilityType,
-               bundle_id: Union[ResourceId, BundleId],
-               capability_settings: Optional[CapabilitySetting] = None) -> BundleIdCapability:
+    def enable(
+        self,
+        capability_type: CapabilityType,
+        bundle_id: Union[ResourceId, BundleId],
+        capability_settings: Optional[CapabilitySetting] = None,
+    ) -> BundleIdCapability:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/enable_a_capability
         """
-        attributes: Dict[str, Any] = {'capabilityType': capability_type.value}
+        attributes: Dict[str, Any] = {"capabilityType": capability_type.value}
         if capability_settings is not None:
-            attributes['settings'] = capability_settings.dict()
+            attributes["settings"] = capability_settings.dict()
         relationships = {
-            'bundleId': {'data': self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID)},
+            "bundleId": {"data": self._get_attribute_data(bundle_id, ResourceType.BUNDLE_ID)},
         }
         payload = self._get_create_payload(
-            ResourceType.BUNDLE_ID_CAPABILITIES, attributes=attributes, relationships=relationships)
-        response = self.client.session.post(f'{self.client.API_URL}/bundleIdCapabilities', json=payload).json()
-        return BundleIdCapability(response['data'], created=True)
+            ResourceType.BUNDLE_ID_CAPABILITIES,
+            attributes=attributes,
+            relationships=relationships,
+        )
+        response = self.client.session.post(f"{self.client.API_URL}/bundleIdCapabilities", json=payload).json()
+        return BundleIdCapability(response["data"], created=True)
 
     def disable(self, bundle_id_capability: Union[LinkedResourceData, ResourceId]) -> None:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/disable_a_capability
         """
         bundle_id_capability_id = self._get_resource_id(bundle_id_capability)
-        self.client.session.delete(f'{self.client.API_URL}/bundleIdCapabilities/{bundle_id_capability_id}')
+        self.client.session.delete(f"{self.client.API_URL}/bundleIdCapabilities/{bundle_id_capability_id}")
 
-    def modify_configuration(self,
-                             bundle_id_capability: Union[LinkedResourceData, ResourceId],
-                             capability_type: CapabilityType,
-                             settings: Optional[CapabilitySetting]) -> BundleIdCapability:
+    def modify_configuration(
+        self,
+        bundle_id_capability: Union[LinkedResourceData, ResourceId],
+        capability_type: CapabilityType,
+        settings: Optional[CapabilitySetting],
+    ) -> BundleIdCapability:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/modify_a_capability_configuration
         """
         bundle_id_capability_id = self._get_resource_id(bundle_id_capability)
-        attributes: Dict[str, Any] = {'capabilityType': capability_type.value}
+        attributes: Dict[str, Any] = {"capabilityType": capability_type.value}
         if settings:
-            attributes['settings'] = settings.dict()
+            attributes["settings"] = settings.dict()
         payload = self._get_update_payload(
-            bundle_id_capability_id, ResourceType.BUNDLE_ID_CAPABILITIES, attributes=attributes)
+            bundle_id_capability_id,
+            ResourceType.BUNDLE_ID_CAPABILITIES,
+            attributes=attributes,
+        )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/bundleIdCapabilities/{bundle_id_capability_id}', json=payload).json()
-        return BundleIdCapability(response['data'])
+            f"{self.client.API_URL}/bundleIdCapabilities/{bundle_id_capability_id}",
+            json=payload,
+        ).json()
+        return BundleIdCapability(response["data"])

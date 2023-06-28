@@ -8,7 +8,7 @@ class PackageName(str):
 
 
 class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
-    environment_variable_key = 'GCLOUD_SERVICE_ACCOUNT_CREDENTIALS'
+    environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
 
     @classmethod
     def _is_valid(cls, value: str) -> bool:
@@ -17,4 +17,4 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
         except json.decoder.JSONDecodeError:
             return False
         else:
-            return json_content.get('type') == 'service_account'
+            return json_content.get("type") == "service_account"

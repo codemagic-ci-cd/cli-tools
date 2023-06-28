@@ -1,5 +1,6 @@
 from email.generator import Generator as BytesGenerator
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
 DISCOVERY_URI: str
 V1_DISCOVERY_URI = str
@@ -9,8 +10,28 @@ class _BytesGenerator(BytesGenerator):
 
 def fix_method_name(name: Any): ...
 def key2param(key: Any): ...
-def build(serviceName: Any, version: Any, http: Optional[Any] = ..., discoveryServiceUrl: Any = ..., developerKey: Optional[Any] = ..., model: Optional[Any] = ..., requestBuilder: Any = ..., credentials: Optional[Any] = ..., cache_discovery: bool = ..., cache: Optional[Any] = ...): ...
-def build_from_document(service: Any, base: Optional[Any] = ..., future: Optional[Any] = ..., http: Optional[Any] = ..., developerKey: Optional[Any] = ..., model: Optional[Any] = ..., requestBuilder: Any = ..., credentials: Optional[Any] = ...): ...
+def build(
+    serviceName: Any,
+    version: Any,
+    http: Optional[Any] = ...,
+    discoveryServiceUrl: Any = ...,
+    developerKey: Optional[Any] = ...,
+    model: Optional[Any] = ...,
+    requestBuilder: Any = ...,
+    credentials: Optional[Any] = ...,
+    cache_discovery: bool = ...,
+    cache: Optional[Any] = ...,
+): ...
+def build_from_document(
+    service: Any,
+    base: Optional[Any] = ...,
+    future: Optional[Any] = ...,
+    http: Optional[Any] = ...,
+    developerKey: Optional[Any] = ...,
+    model: Optional[Any] = ...,
+    requestBuilder: Any = ...,
+    credentials: Optional[Any] = ...,
+): ...
 
 class ResourceMethodParameters:
     argmap: Any = ...
@@ -34,7 +55,17 @@ class Resource:
     _resourceDesc: Any = ...
     _rootDesc: Any = ...
     _schema: Any = ...
-    def __init__(self, http: Any, baseUrl: Any, model: Any, requestBuilder: Any, developerKey: Any, resourceDesc: Any, rootDesc: Any, schema: Any) -> None: ...
+    def __init__(
+        self,
+        http: Any,
+        baseUrl: Any,
+        model: Any,
+        requestBuilder: Any,
+        developerKey: Any,
+        resourceDesc: Any,
+        rootDesc: Any,
+        schema: Any,
+    ) -> None: ...
     def _set_dynamic_attr(self, attr_name: Any, value: Any) -> None: ...
     def __getstate__(self): ...
     def __setstate__(self, state: Any) -> None: ...

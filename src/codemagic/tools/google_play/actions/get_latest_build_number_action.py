@@ -15,7 +15,7 @@ from ..google_play_base_action import GooglePlayBaseAction
 
 class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
-        'get-latest-build-number',
+        "get-latest-build-number",
         TracksArgument.PACKAGE_NAME,
         LatestBuildNumberArgument.TRACKS,
     )
@@ -44,7 +44,7 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
         elif len(requested_tracks) == 1:
             message = f'Get package "{package_name}" latest build number from track "{requested_tracks[0]}"'
         else:
-            formatted_specified_tracks = ', '.join(f'"{track}"' for track in requested_tracks)
+            formatted_specified_tracks = ", ".join(f'"{track}"' for track in requested_tracks)
             message = f'Get package "{package_name}" latest build number from tracks {formatted_specified_tracks}'
         self.logger.info(Colors.BLUE(message))
 
@@ -97,5 +97,5 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
             _track = requested_tracks[0]
             return f'Version code info is missing from track "{_track}" for package "{package_name}'
         else:
-            _tracks = ', '.join(f'"{track}"' for track in requested_tracks)
+            _tracks = ", ".join(f'"{track}"' for track in requested_tracks)
             return f'Version code info is missing from tracks {_tracks} for package "{package_name}'

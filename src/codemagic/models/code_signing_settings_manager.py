@@ -52,7 +52,6 @@ class TargetInfo:
 
 
 class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
-
     def __init__(self, profiles: List[ProvisioningProfile], keychain_certificates: List[Certificate]):
         self.profiles: Dict[str, ProvisioningProfile] = {profile.uuid: profile for profile in profiles}
         self._certificates = keychain_certificates
@@ -65,7 +64,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         # with the same profiles will always yield the same changeset to Xcode project settings.
 
         now = datetime.now(timezone.utc)
-        max_separators = max((p.bundle_id.count('.') for p in self.profiles.values()), default=0)
+        max_separators = max((p.bundle_id.count(".") for p in self.profiles.values()), default=0)
 
         def sort_key(profile: ProvisioningProfile) -> Tuple[int, str, timedelta]:
             """
@@ -78,7 +77,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             - Finally in case of bundle identifier collision raise priority for more recent profile.
             """
             return (
-                max_separators - profile.bundle_id.count('.'),
+                max_separators - profile.bundle_id.count("."),
                 profile.bundle_id,
                 now - profile.creation_date,
             )
@@ -95,30 +94,30 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
         usable_certificates = profile.get_usable_certificates(self._certificates)
         common_names = Counter[str](certificate.common_name for certificate in usable_certificates)
         most_popular_common = common_names.most_common(1)
-        common_name = most_popular_common[0][0] if most_popular_common else ''
+        common_name = most_popular_common[0][0] if most_popular_common else ""
         return {
-            'certificate_common_name': common_name,
-            'name': profile.name,
-            'team_id': profile.team_identifier,
-            'team_name': profile.team_name,
-            'bundle_id': profile.bundle_id,
-            'specifier': profile.uuid,
-            'xcode_managed': profile.xcode_managed,
-            'certificates': [c.serial for c in profile.certificates],
+            "certificate_common_name": common_name,
+            "name": profile.name,
+            "team_id": profile.team_identifier,
+            "team_name": profile.team_name,
+            "bundle_id": profile.bundle_id,
+            "specifier": profile.uuid,
+            "xcode_managed": profile.xcode_managed,
+            "certificates": [c.serial for c in profile.certificates],
         }
 
     @property
     def _code_signing_manager(self) -> str:
-        executable = pathlib.Path(__file__) / '..' / '..' / 'scripts' / 'code_signing_manager.rb'
+        executable = pathlib.Path(__file__) / ".." / ".." / "scripts" / "code_signing_manager.rb"
         return str(executable.resolve())
 
     @classmethod
     def _is_xcodeproj_gem_installed(cls, cli_app: Optional[CliApp]) -> bool:
-        ruby = shutil.which('ruby')
+        ruby = shutil.which("ruby")
         if ruby is None:
             return False
 
-        cmd = (ruby, '-e', 'require "xcodeproj"')
+        cmd = (ruby, "-e", 'require "xcodeproj"')
         try:
             if cli_app:
                 process = cli_app.execute(cmd, show_output=False)
@@ -131,10 +130,10 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
 
     @classmethod
     def _format_build_config_meta(cls, build_config_info):
-        profile = build_config_info['profile']
-        project = build_config_info['project_name']
-        target = build_config_info['target_name']
-        config = build_config_info['build_configuration']
+        profile = build_config_info["profile"]
+        project = build_config_info["project_name"]
+        target = build_config_info["target_name"]
+        config = build_config_info["build_configuration"]
         return Colors.BLUE(
             f' - Using profile "{profile.name}" [{profile.uuid}] '
             f'for target "{target}" [{config}] from project "{project}"',
@@ -153,9 +152,9 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             self.logger.info(Colors.BLUE(message))
 
     def _notify_target_missing_profiles(
-            self,
-            targets_with_profile: Sequence[TargetInfo],
-            targets_without_profile: Sequence[TargetInfo],
+        self,
+        targets_with_profile: Sequence[TargetInfo],
+        targets_without_profile: Sequence[TargetInfo],
     ):
         """
         Show warning only for targets that have the same bundle id prefix, configuration and project
@@ -175,9 +174,10 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             for matched_target_info in targets_with_profile:
                 project_name_match = target_info.project_name == matched_target_info.project_name
                 configuration_match = target_info.build_configuration == matched_target_info.build_configuration
-                bundle_id_prefix_match = \
-                    target_info.bundle_id == matched_target_info.bundle_id or \
-                    target_info.bundle_id.startswith(f'{matched_target_info.bundle_id}.')
+                bundle_id_prefix_match = (
+                    target_info.bundle_id == matched_target_info.bundle_id
+                    or target_info.bundle_id.startswith(f"{matched_target_info.bundle_id}.")
+                )
 
                 if project_name_match and configuration_match and bundle_id_prefix_match:
                     message = (
@@ -189,7 +189,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
                     break
 
     def notify_profile_usage(self):
-        self.logger.info(Colors.GREEN('Completed configuring code signing settings'))
+        self.logger.info(Colors.GREEN("Completed configuring code signing settings"))
 
         targets_with_profile = [ti for ti in self._target_infos if ti.provisioning_profile_uuid is not None]
         targets_without_profile = [ti for ti in self._target_infos if ti.provisioning_profile_uuid is None]
@@ -198,16 +198,19 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
             self._notify_target_profile_usage(targets_with_profile)
             self._notify_target_missing_profiles(targets_with_profile, targets_without_profile)
         else:
-            message = 'Did not find matching provisioning profiles for code signing!'
+            message = "Did not find matching provisioning profiles for code signing!"
             self.logger.warning(Colors.YELLOW(message))
 
     def _apply(self, xcode_project, result_file_name, verbose_logging: bool):
         cmd = [
             self._code_signing_manager,
-            '--xcode-project', xcode_project,
-            '--result-path', result_file_name,
-            '--profiles', self._get_json_serialized_profiles(),
-            '--verbose',
+            "--xcode-project",
+            xcode_project,
+            "--result-path",
+            result_file_name,
+            "--profiles",
+            self._get_json_serialized_profiles(),
+            "--verbose",
         ]
 
         process = None
@@ -220,17 +223,19 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
                 subprocess.check_output(cmd, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError:
             xcode_project = shlex.quote(str(xcode_project))
-            error_message = f'Failed to set code signing settings for {xcode_project}'
+            error_message = f"Failed to set code signing settings for {xcode_project}"
             if not self._is_xcodeproj_gem_installed(cli_app):
-                error_message = '\n'.join([
-                    error_message,
-                    'Ruby gem "xcodeproj" is required to configure code signing settings',
-                    f'Install it with {Colors.BOLD("[sudo] gem install xcodeproj")}',
-                ])
+                error_message = "\n".join(
+                    [
+                        error_message,
+                        'Ruby gem "xcodeproj" is required to configure code signing settings',
+                        f'Install it with {Colors.BOLD("[sudo] gem install xcodeproj")}',
+                    ],
+                )
             raise IOError(error_message, process)
 
     def use_profiles(self, xcode_project: pathlib.Path, verbose_logging: bool = False):
-        with NamedTemporaryFile(mode='r', prefix='use_profiles_result_', suffix='.json') as results_file:
+        with NamedTemporaryFile(mode="r", prefix="use_profiles_result_", suffix=".json") as results_file:
             self._apply(xcode_project, results_file.name, verbose_logging=verbose_logging)
             try:
                 target_infos = json.load(results_file)

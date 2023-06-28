@@ -16,7 +16,7 @@ from ..arguments import ReviewSubmissionArgument
 
 class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
-        'create',
+        "create",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.PLATFORM,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
@@ -38,7 +38,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'get',
+        "get",
         ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
     )
@@ -57,7 +57,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'cancel',
+        "cancel",
         ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
     )
@@ -77,7 +77,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'confirm',
+        "confirm",
         ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
     )

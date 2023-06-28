@@ -6,7 +6,6 @@ from typing import Dict
 
 
 class CommonArgumentTypes:
-
     @staticmethod
     def maybe_dir(path_str: str) -> pathlib.Path:
         path = pathlib.Path(path_str).expanduser().absolute().resolve()
@@ -18,10 +17,9 @@ class CommonArgumentTypes:
             raise argparse.ArgumentTypeError(f'Path "{path}" exists but is not a directory')
         elif any(parent.exists() and not parent.is_dir() for parent in path.parents):
             # Some of the parents is a file, directory cannot be created to this path
-            raise argparse.ArgumentTypeError((
-                f'Path "{path}" cannot be used as a directory as '
-                'it contains a path to an existing file'
-            ))
+            raise argparse.ArgumentTypeError(
+                f'Path "{path}" cannot be used as a directory as it contains a path to an existing file',
+            )
         else:
             # Either none of the parents exist, or some of them are directories
             return path
@@ -66,9 +64,9 @@ class CommonArgumentTypes:
         '2020-08-04T11:44:12.000+0000' and '2021-01-28T06:01:32-08:00'.
         """
         datetime_formats = (
-            '%Y-%m-%dT%H:%M:%S.%f%z',
-            '%Y-%m-%dT%H:%M:%S%z',
-            '%Y%m%dT%H%M%S%z',
+            "%Y-%m-%dT%H:%M:%S.%f%z",
+            "%Y-%m-%dT%H:%M:%S%z",
+            "%Y%m%dT%H%M%S%z",
         )
         for datetime_format in datetime_formats:
             try:

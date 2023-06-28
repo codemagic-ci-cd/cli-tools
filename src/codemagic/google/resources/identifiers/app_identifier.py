@@ -10,4 +10,4 @@ class AppIdentifier(ResourceIdentifier):
 
     @property
     def uri(self) -> str:
-        return f'projects/{self.project_id}/apps/{self.app_id}'
+        return f"projects/{self.project_id}/apps/{self.app_id}"

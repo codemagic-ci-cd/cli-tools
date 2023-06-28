@@ -20,10 +20,10 @@ def _iter_backwards(file_descriptor: TextIO, buffer_size: int, file_size: Option
         unprocessed_size -= buffer_size
         lines = buffer.splitlines()
 
-        if buffer.endswith('\n'):  # Previous segment was not a half line.
-            yield current_segment or ''
+        if buffer.endswith("\n"):  # Previous segment was not a half line.
+            yield current_segment or ""
         else:  # Previous segment did not end at a line break.
-            lines[-1] += current_segment or ''
+            lines[-1] += current_segment or ""
 
         # Retain the first line for next iteration as it might have some
         # portion not captured by current buffer.

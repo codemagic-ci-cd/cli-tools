@@ -32,19 +32,20 @@ from .versioning import ReviewSubmissions
 
 
 class AppStoreConnectApiClient:
-    API_URL = 'https://api.appstoreconnect.apple.com/v1'
-    API_KEYS_DOCS_URL = \
-        'https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api'
+    API_URL = "https://api.appstoreconnect.apple.com/v1"
+    API_KEYS_DOCS_URL = (
+        "https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api"
+    )
 
     def __init__(
-            self,
-            key_identifier: KeyIdentifier,
-            issuer_id: IssuerId,
-            private_key: str,
-            log_requests: bool = False,
-            unauthorized_request_retries: int = 1,
-            server_error_retries: int = 1,
-            enable_jwt_cache: bool = False,
+        self,
+        key_identifier: KeyIdentifier,
+        issuer_id: IssuerId,
+        private_key: str,
+        log_requests: bool = False,
+        unauthorized_request_retries: int = 1,
+        server_error_retries: int = 1,
+        enable_jwt_cache: bool = False,
     ):
         """
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
@@ -72,7 +73,7 @@ class AppStoreConnectApiClient:
         return jwt.token
 
     def generate_auth_headers(self) -> Dict[str, str]:
-        return {'Authorization': f'Bearer {self.jwt}'}
+        return {"Authorization": f"Bearer {self.jwt}"}
 
     @classmethod
     def _get_pagination_page_size(cls, page_size: Optional[int], limit: Optional[int]) -> Optional[int]:
@@ -81,28 +82,28 @@ class AppStoreConnectApiClient:
         return page_size or limit
 
     def _paginate(
-            self,
-            url: str,
-            params: Dict,
-            page_size: Optional[int],
-            limit: Optional[int],
+        self,
+        url: str,
+        params: Dict,
+        page_size: Optional[int],
+        limit: Optional[int],
     ) -> PaginateResult:
         params = {k: v for k, v in (params or {}).items() if v is not None}
         page_size = self._get_pagination_page_size(page_size, limit)
         if page_size is None:
             response = self.session.get(url, params=params).json()
         else:
-            response = self.session.get(url, params={'limit': page_size, **params}).json()
-        result = PaginateResult(response.get('data', []), response.get('included', []))
-        while 'next' in response['links'] and (limit is None or len(result.data) < limit):
+            response = self.session.get(url, params={"limit": page_size, **params}).json()
+        result = PaginateResult(response.get("data", []), response.get("included", []))
+        while "next" in response["links"] and (limit is None or len(result.data) < limit):
             # Query params from previous pagination call can be included in the next URL
             # and duplicate parameters are not allowed, so we need to filter those out.
-            parsed_url = parse.urlparse(response['links']['next'])
+            parsed_url = parse.urlparse(response["links"]["next"])
             included_params = parse.parse_qs(parsed_url.query)
             step_params = {k: v for k, v in params.items() if k not in included_params}
-            response = self.session.get(response['links']['next'], params=step_params).json()
-            result.data.extend(response['data'])
-            result.included.extend(response.get('included', []))
+            response = self.session.get(response["links"]["next"], params=step_params).json()
+            result.data.extend(response["data"])
+            result.included.extend(response.get("included", []))
         return result
 
     def paginate(self, url, params=None, page_size: Optional[int] = 100, limit=None) -> List[Dict]:

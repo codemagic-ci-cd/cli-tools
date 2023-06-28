@@ -40,26 +40,23 @@ class Apps(ResourceManager[App]):
 
         @classmethod
         def _get_field_name(cls, field_name) -> str:
-            if field_name == 'app_store_versions_platform':
-                field_name = 'app_store_versions.platform'
-            elif field_name == 'app_store_versions_app_store_state':
-                field_name = 'app_store_versions.app_store_state'
+            if field_name == "app_store_versions_platform":
+                field_name = "app_store_versions.platform"
+            elif field_name == "app_store_versions_app_store_state":
+                field_name = "app_store_versions.app_store_state"
             return super()._get_field_name(field_name)
 
     class Ordering(ResourceManager.Ordering):
-        BUNDLE_ID = 'bundleId'
-        NAME = 'name'
-        SKU = 'sku'
+        BUNDLE_ID = "bundleId"
+        NAME = "name"
+        SKU = "sku"
 
-    def list(self,
-             resource_filter: Filter = Filter(),
-             ordering=Ordering.NAME,
-             reverse=False) -> List[App]:
+    def list(self, resource_filter: Filter = Filter(), ordering=Ordering.NAME, reverse=False) -> List[App]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_apps
         """
-        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
-        apps = self.client.paginate(f'{self.client.API_URL}/apps', params=params)
+        params = {"sort": ordering.as_param(reverse), **resource_filter.as_query_params()}
+        apps = self.client.paginate(f"{self.client.API_URL}/apps", params=params)
         return [App(app) for app in apps]
 
     def read(self, app: Union[LinkedResourceData, ResourceId]) -> App:
@@ -67,8 +64,8 @@ class Apps(ResourceManager[App]):
         https://developer.apple.com/documentation/appstoreconnectapi/read_app_information
         """
         app_id = self._get_resource_id(app)
-        response = self.client.session.get(f'{self.client.API_URL}/apps/{app_id}').json()
-        return App(response['data'])
+        response = self.client.session.get(f"{self.client.API_URL}/apps/{app_id}").json()
+        return App(response["data"])
 
     def list_builds(self, app: Union[LinkedResourceData, ResourceId]) -> List[Build]:
         """
@@ -81,7 +78,7 @@ class Apps(ResourceManager[App]):
         if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.builds.links.related
         if url is None:
-            url = f'{self.client.API_URL}/apps/{app}/builds'
+            url = f"{self.client.API_URL}/apps/{app}/builds"
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
 
     def list_pre_release_versions(self, app: Union[LinkedResourceData, ResourceId]) -> List[PreReleaseVersion]:
@@ -92,14 +89,14 @@ class Apps(ResourceManager[App]):
         if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.preReleaseVersions.links.related
         if url is None:
-            url = f'{self.client.API_URL}/apps/{app}/preReleaseVersions'
+            url = f"{self.client.API_URL}/apps/{app}/preReleaseVersions"
         return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
 
     def list_app_store_versions(
-            self,
-            app: Union[LinkedResourceData, ResourceId],
-            resource_filter: Optional[AppStoreVersions.Filter] = None,
-            limit: Optional[int] = None,
+        self,
+        app: Union[LinkedResourceData, ResourceId],
+        resource_filter: Optional[AppStoreVersions.Filter] = None,
+        limit: Optional[int] = None,
     ) -> List[AppStoreVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
@@ -108,7 +105,7 @@ class Apps(ResourceManager[App]):
         if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.appStoreVersions.links.related
         if url is None:
-            url = f'{self.client.API_URL}/apps/{app}/appStoreVersions'
+            url = f"{self.client.API_URL}/apps/{app}/appStoreVersions"
         params = resource_filter.as_query_params() if resource_filter else None
         app_store_versions = self.client.paginate(url, params=params, limit=limit)
         return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
@@ -121,9 +118,9 @@ class Apps(ResourceManager[App]):
         if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.betaAppLocalizations.links.related
         if url is None:
-            url = f'{self.client.API_URL}/apps/{app}/betaAppLocalizations'
+            url = f"{self.client.API_URL}/apps/{app}/betaAppLocalizations"
         response = self.client.session.get(url).json()
-        return [BetaAppLocalization(bal) for bal in response['data']]
+        return [BetaAppLocalization(bal) for bal in response["data"]]
 
     def read_beta_app_review_detail(self, app: Union[App, ResourceId]) -> BetaAppReviewDetail:
         """
@@ -133,6 +130,6 @@ class Apps(ResourceManager[App]):
         if isinstance(app, App) and app.relationships is not None:
             url = app.relationships.betaAppReviewDetail.links.related
         if url is None:
-            url = f'{self.client.API_URL}/apps/{app}/betaAppReviewDetail'
+            url = f"{self.client.API_URL}/apps/{app}/betaAppReviewDetail"
         response = self.client.session.get(url).json()
-        return BetaAppReviewDetail(response['data'])
+        return BetaAppReviewDetail(response["data"])

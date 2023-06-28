@@ -30,7 +30,7 @@ class Profile(Resource):
         profileState: ProfileState
         profileType: ProfileType
         expirationDate: datetime
-        profileContent: str = field(metadata={'hide': True})
+        profileContent: str = field(metadata={"hide": True})
 
         def __post_init__(self):
             if isinstance(self.platform, str):
@@ -51,13 +51,13 @@ class Profile(Resource):
         bundleId: Relationship
 
     def get_display_info(self) -> str:
-        return f'{self.attributes.profileType} {self.attributes.name} ({self.id})'
+        return f"{self.attributes.profileType} {self.attributes.name} ({self.id})"
 
     @property
     def profile_extension(self) -> str:
         if self.attributes.profileType.is_macos_profile:
-            return '.provisionprofile'
-        return '.mobileprovision'
+            return ".provisionprofile"
+        return ".mobileprovision"
 
     @property
     def profile_content(self) -> bytes:

@@ -28,6 +28,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         tracks: Optional[Sequence[str]] = None,
     ) -> Optional[int]:
         from .actions import GetLatestBuildNumberAction
+
         _ = GetLatestBuildNumberAction.get_latest_build_number  # Implementation
         raise NotImplementedError()
 
@@ -40,6 +41,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         should_print: bool = True,
     ) -> Track:
         from .action_groups import TracksActionGroup
+
         _ = TracksActionGroup.get_track  # Implementation
         raise NotImplementedError
 
@@ -51,5 +53,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         should_print: bool = True,
     ) -> List[Track]:
         from .action_groups import TracksActionGroup
+
         _ = TracksActionGroup.list_tracks  # Implementation
         raise NotImplementedError()
