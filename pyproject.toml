@@ -103,5 +103,12 @@ exclude = [
     "doc.py",
 ]
 
+[[tool.mypy.overrides]]
+module = [
+    "mdutils.mdutils",
+    "mdutils.tools.Table",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
