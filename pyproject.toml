@@ -86,6 +86,7 @@ exclude = [".venv", "stubs"]
 "__init__.py" = ["F401"]
 "doc.py" = ["E402"]
 "src/codemagic/apple/resources/*.py" = ["N815"]
+"src/codemagic/google/resources/*.py" = ["N815"]
 "src/codemagic/google_play/resources/*.py" = ["N815"]
 "src/codemagic/models/export_options.py" = ["N815"]
 
@@ -97,6 +98,17 @@ mypy_path = "stubs"
 pretty = true
 error_summary = true
 show_error_context = true
+exclude = [
+    "tests/",
+    "doc.py",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "mdutils.mdutils",
+    "mdutils.tools.Table",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
