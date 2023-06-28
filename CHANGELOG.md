@@ -1,3 +1,12 @@
+Version 0.40.4
+-------------
+
+**Deprecations**
+- Method `list_capabilility_ids` of `codemagic.apple.app_store_connect.provisioning.BundleIds` is deprecated and shows a deprecation warning on calls. Use `list_capability_ids` of the same class instead. [PR #326](https://github.com/codemagic-ci-cd/cli-tools/pull/326)
+
+**Development**
+- Define `deprecated` decorator in `codemagic.utilities.decorators` to mark functions and methods as obsolete. [PR #326](https://github.com/codemagic-ci-cd/cli-tools/pull/326)
+
 Version 0.40.3
 -------------
 **Features**
