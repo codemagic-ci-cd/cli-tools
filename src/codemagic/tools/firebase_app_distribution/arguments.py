@@ -54,10 +54,7 @@ class ReleasesArgument(cli.Argument):
         key="app_id",
         flags=("--app-id", "-a"),
         description=(
-            "Application ID in Firebase. "
-            f'For example `{Colors.WHITE("1:228333310124:ios:5e439e0d0231a788ac8f09")}`'
-            "Application ID in Firebase. "
-            f'For example `{Colors.WHITE("1:228333310124:ios:5e439e0d0231a788ac8f09")}`'
+            f"Application ID in Firebase. For example `{Colors.WHITE('1:228333310124:ios:5e439e0d0231a788ac8f09')}`"
         ),
         argparse_kwargs={"required": True},
     )
