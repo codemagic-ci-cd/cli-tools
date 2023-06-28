@@ -16,7 +16,7 @@ definitions:
       name: Check code formatting
       script: |
         set -e
-        poetry run black .
+        poetry run black --check .
         poetry run ruff check .
     - &static_type_checks
       name: Static type checks with mypy

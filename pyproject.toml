@@ -68,7 +68,16 @@ build-backend = "poetry.core.masonry.api"
 line-length = 120
 
 [tool.ruff]
-select = ["E", "F", "I"]
+select = [
+    "F",  # https://beta.ruff.rs/docs/rules/#pyflakes-f
+    "E",  # https://beta.ruff.rs/docs/rules/#error-e
+    "W",  # https://beta.ruff.rs/docs/rules/#warning-w
+    "I",  # https://beta.ruff.rs/docs/rules/#isort-i
+    "N",  # https://beta.ruff.rs/docs/rules/#pep8-naming-n
+    "COM",  # https://beta.ruff.rs/docs/rules/#flake8-commas-com
+    "ISC",  # https://beta.ruff.rs/docs/rules/#flake8-implicit-str-concat-isc
+    "ASYNC",  # https://beta.ruff.rs/docs/rules/#flake8-async-async
+]
 line-length = 120
 target-version = "py37"
 exclude = [".venv"]
