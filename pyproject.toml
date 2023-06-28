@@ -80,7 +80,7 @@ select = [
 ]
 line-length = 120
 target-version = "py37"
-exclude = [".venv"]
+exclude = [".venv", "stubs"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
