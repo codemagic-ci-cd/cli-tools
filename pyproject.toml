@@ -86,6 +86,7 @@ exclude = [".venv", "stubs"]
 "__init__.py" = ["F401"]
 "doc.py" = ["E402"]
 "src/codemagic/apple/resources/*.py" = ["N815"]
+"src/codemagic/google/resources/*.py" = ["N815"]
 "src/codemagic/google_play/resources/*.py" = ["N815"]
 "src/codemagic/models/export_options.py" = ["N815"]
 
