@@ -20,7 +20,7 @@ definitions:
         poetry run ruff check .
     - &static_type_checks
       name: Static type checks with mypy
-      script: poetry run mypy src
+      script: poetry run mypy .
     - &run_tests
       name: Run tests
       script: poetry run pytest --junitxml="test-report.xml"
