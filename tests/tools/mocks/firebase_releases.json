@@ -1,0 +1,22 @@
+[
+    {
+        "name": "projects/228333310124/apps/1:228333310124:ios:5e439e0d0231a788ac8f09/releases/1111111111111",
+        "releaseNotes": {"text": "Something new :) :)"},
+        "displayVersion": "0.0.42",
+        "buildVersion": "71",
+        "createTime": "2023-05-18T12:00:00.000000Z",
+        "firebaseConsoleUri": "",
+        "testingUri": "",
+        "binaryDownloadUri": ""
+    },
+    {
+        "name": "projects/228333310124/apps/1:228333310124:ios:5e439e0d0231a788ac8f09/releases/0000000000000",
+        "releaseNotes": {"text": "Something new :) :)"},
+        "displayVersion": "0.0.42",
+        "buildVersion": "70",
+        "createTime": "2023-05-18T10:00:00.000000Z",
+        "firebaseConsoleUri": "",
+        "testingUri": "",
+        "binaryDownloadUri": ""
+    }
+]

@@ -13,15 +13,17 @@ class Runtime:
         I_OS = 'iOS'
         TV_OS = 'tvOS'
         WATCH_OS = 'watchOS'
+        VISION_OS = 'visionOS'
 
         def __str__(self):
             return str(self.value)
 
+    # visionOS is identified as xrOS in json output, so we need to search for it and adjust the name later
     _PATTERN = re.compile(
-        r'((?P<name>iOS|tvOS|watchOS)[. -]?)(?P<version>(\d+[.-]?)+)')
+        r'((?P<name>iOS|tvOS|watchOS|visionOS|xrOS)[. -]?)(?P<version>(\d+[.-]?)+)')
 
     _VALIDATION_PATTERN = re.compile(
-        r'((?P<name>iOS|tvOS|watchOS)[. -]?)?(?P<version>(\d+[.-]?)+)?')
+        r'((?P<name>iOS|tvOS|watchOS|visionOS|xrOS)[. -]?)?(?P<version>(\d+[.-]?)+)?')
 
     def __init__(self, raw_runtime_name: str):
         self.raw_name = raw_runtime_name
@@ -63,7 +65,7 @@ class Runtime:
         match = self._PATTERN.search(self.raw_name)
         if not match:
             raise ValueError(f'Invalid runtime {self.raw_name!r}')
-        return Runtime.Name(match.groupdict()['name'])
+        return Runtime.Name(match.groupdict()['name'].replace('xrOS', 'visionOS'))
 
     def __eq__(self, other):
         if isinstance(other, str):

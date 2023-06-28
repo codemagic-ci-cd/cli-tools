@@ -1,3 +1,47 @@
+Version 0.40.3
+-------------
+**Features**
+- Add support for visionOS runtime. [PR #325](https://github.com/codemagic-ci-cd/cli-tools/pull/325)
+
+Version 0.40.2
+-------------
+
+**Bugfixes**
+- Do not require `releaseNotes` from Firebase App Distribution release responses. [PR #323](https://github.com/codemagic-ci-cd/cli-tools/pull/323)
+
+**Dependencies**
+- Set lower bound version limit `>= 2.84.0` to [`google-api-python-client`](https://github.com/googleapis/google-api-python-client) Python dependency in order to comply with Firebase App Distribution APIs. [PR #322](https://github.com/codemagic-ci-cd/cli-tools/pull/322)
+
+Version 0.40.1
+-------------
+
+**Development**
+- Add interface to declare aliases for deprecated actions. [PR #187](https://github.com/codemagic-ci-cd/cli-tools/pull/187)
+
+
+Version 0.40.0
+-------------
+
+**Features**
+- Introduce `firebase-app-distribution` tool with the actions:
+  - `firebase-app-distribution releases list` action to list releases
+  - `firebase-app-distribution get-latest-build-version` to get a version number for the latest release build
+
+**Development**
+- Introduce action methods:
+  - `FirebaseAppDistribution.list_releases`
+  - `FirebaseAppDistribution.get_latest_build_version`
+
+**Tests**
+- Coverage for Firebase client `FirebaseClient`
+- Coverage for action methods: `FirebaseAppDistribution.list_releases` and `FirebaseAppDistribution.get_latest_build_version`
+
+**Documentation**
+- Document `firebase-app-distribution` tool
+- Document actions:
+  - `firebase-app-distribution releases list`
+  - `firebase-app-distribution get-latest-build-version`
+
 Version 0.39.2
 -------------
 
