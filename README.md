@@ -140,7 +140,7 @@ are expected to have type hints. Static type checks of the source code are perfo
 [Mypy](http://mypy-lang.org/) from the repository root by running
 
 ```shell
-poetry run mypy src
+poetry run mypy .
 ```
 
 ### Running tests
