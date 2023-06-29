@@ -15,6 +15,7 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
+from codemagic.utilities.decorators import deprecated
 
 if TYPE_CHECKING:
     from .profiles import Profiles
@@ -53,7 +54,13 @@ class BundleIds(ResourceManager[BundleId]):
         PLATFORM = "platform"
         SEED_ID = "seedId"
 
-    def create(self, identifier: str, name: str, platform: BundleIdPlatform, seed_id: Optional[str] = None) -> BundleId:
+    def create(
+        self,
+        identifier: str,
+        name: str,
+        platform: BundleIdPlatform,
+        seed_id: Optional[str] = None,
+    ) -> BundleId:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/register_a_new_bundle_id
         """
@@ -89,7 +96,12 @@ class BundleIds(ResourceManager[BundleId]):
         bundle_id_resource_id = self._get_resource_id(bundle_id)
         self.client.session.delete(f"{self.client.API_URL}/bundleIds/{bundle_id_resource_id}")
 
-    def list(self, resource_filter: Filter = Filter(), ordering=Ordering.NAME, reverse=False) -> List[BundleId]:
+    def list(
+        self,
+        resource_filter: Filter = Filter(),
+        ordering=Ordering.NAME,
+        reverse=False,
+    ) -> List[BundleId]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_bundle_ids
         """
@@ -135,7 +147,11 @@ class BundleIds(ResourceManager[BundleId]):
             return [profile for profile in profiles if resource_filter.matches(profile)]
         return profiles
 
-    def list_capabilility_ids(self, bundle_id: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
+    @deprecated("0.40.4", 'Use "BundleIds.list_capability_ids" instead.')
+    def list_capabilility_ids(self, *args, **kwargs):
+        return self.list_capability_ids(*args, **kwargs)
+
+    def list_capability_ids(self, bundle_id: Union[BundleId, ResourceId]) -> List[LinkedResourceData]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_all_capabilility_ids_for_a_bundle_id
         """
@@ -144,7 +160,7 @@ class BundleIds(ResourceManager[BundleId]):
             url = bundle_id.relationships.bundleIdCapabilities.links.self
         if url is None:
             url = f"{self.client.API_URL}/bundleIds/{bundle_id}/relationships/bundleIdCapabilities"
-        return [LinkedResourceData(capabilility) for capabilility in self.client.paginate(url, page_size=None)]
+        return [LinkedResourceData(capability) for capability in self.client.paginate(url, page_size=None)]
 
     def list_capabilities(self, bundle_id: Union[BundleId, ResourceId]) -> List[BundleIdCapability]:
         """

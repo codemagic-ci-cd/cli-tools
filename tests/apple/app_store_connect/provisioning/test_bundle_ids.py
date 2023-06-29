@@ -75,8 +75,8 @@ class BundleIdsTest(ResourceManagerTestsBase):
             assert isinstance(profile, Profile)
             assert profile.type is ResourceType.PROFILES
 
-    def test_list_capabilility_ids(self):
-        linked_capabilities = self.api_client.bundle_ids.list_capabilility_ids(CAPYBARA_ID)
+    def test_list_capability_ids(self):
+        linked_capabilities = self.api_client.bundle_ids.list_capability_ids(CAPYBARA_ID)
         assert len(linked_capabilities) > 0
         for capability in linked_capabilities:
             assert isinstance(capability, LinkedResourceData)
