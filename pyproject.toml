@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.40.4"
+version = "0.40.5"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
@@ -46,11 +46,7 @@ pyjwt = "^2.4.0"
 requests = ">= 2.25"
 
 [tool.poetry.group.dev.dependencies]
-autopep8 = "*"
 black = "*"
-flake8 = "*"
-flake8-commas = "*"
-flake8-quotes = "*"
 google-api-python-client-stubs = "*"
 ipdb = "*"
 mdutils = "*"
