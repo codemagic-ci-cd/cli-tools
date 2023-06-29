@@ -1,3 +1,10 @@
+Version 0.40.5
+-------------
+
+**Development**
+- Format Python source code with [Black](https://github.com/psf/black). [PR #322](https://github.com/codemagic-ci-cd/cli-tools/pull/322)
+- Check Python linting rules with [Ruff](https://beta.ruff.rs). This replaces Flake8 and isort checks. [PR #322](https://github.com/codemagic-ci-cd/cli-tools/pull/322)
+
 Version 0.40.4
 -------------
 
