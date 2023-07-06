@@ -1239,6 +1239,12 @@ class DeviceArgument(cli.Argument):
             'choices': list(DeviceStatus),
         },
     )
+    DEVICES_UDIDS_FILE = cli.ArgumentProperties(
+        key='file_path',
+        flags=('--file-path',),
+        description='Path to the devices UDIDs file separated by lines',
+        argparse_kwargs={'required': True},
+    )
 
 
 class CertificateArgument(cli.Argument):

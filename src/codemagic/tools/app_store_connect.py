@@ -509,6 +509,38 @@ class AppStoreConnect(
             name=device_name,
             platform=platform,
         )
+    
+    @cli.action(
+        'register-multiple-devices',
+        BundleIdArgument.PLATFORM,
+        DeviceArgument.DEVICES_UDIDS_FILE,
+        DeviceArgument.DEVICE_NAME_OPTIONAL
+    )
+    def register_multiple_devices(
+        self,
+        platform: BundleIdPlatform,
+        file_path: str,
+        device_name: str = "Device from CLI",
+        should_print: bool = True,
+    ) -> List[Device]:
+        """
+        Register multiple device for app development
+        """
+        devices = []
+        with open(file_path, "r") as txtfile:
+            for line in txtfile:
+                device_udid = line.strip()
+                if device_udid == "":
+                    continue
+                device = self._create_resource(
+                    self.api_client.devices,
+                    should_print,
+                    udid=device_udid,
+                    name=device_name,
+                    platform=platform,
+                )       
+                devices.append(device)
+        return devices
 
     @cli.action(
         'create-bundle-id',
