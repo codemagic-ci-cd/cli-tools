@@ -509,38 +509,49 @@ class AppStoreConnect(
             name=device_name,
             platform=platform,
         )
-    
+
     @cli.action(
-        'register-multiple-devices',
+        'register-devices-from-file',
         BundleIdArgument.PLATFORM,
-        DeviceArgument.DEVICES_UDIDS_FILE,
-        DeviceArgument.DEVICE_NAME_OPTIONAL
+        DeviceArgument.COMMON_DEVICE_NAME,
+        DeviceArgument.DEVICE_UDIDS_PATH,
     )
-    def register_multiple_devices(
+    def register_devices_from_file(
         self,
         platform: BundleIdPlatform,
-        file_path: str,
-        device_name: str = "Device from CLI",
+        device_name: str,
+        device_udids_path: pathlib.Path,
         should_print: bool = True,
     ) -> List[Device]:
         """
-        Register multiple device for app development
+        Register devices with a common name for app development
         """
-        devices = []
-        with open(file_path, "r") as txtfile:
-            for line in txtfile:
-                device_udid = line.strip()
-                if device_udid == "":
-                    continue
+        registered_devices = []
+        device_udid_lines = [udid.strip() for udid in device_udids_path.read_text().split('\n')]
+        udid_pattern = re.compile(r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{16}$')
+
+        for line, device_udid in enumerate(device_udid_lines):
+            if not device_udid:
+                continue
+
+            if udid_pattern.match(device_udid) is None:
+                self.logger.warning(Colors.YELLOW(f'Invalid device UDID on line {line}: {device_udid!r}'))
+                continue
+
+            try:
                 device = self._create_resource(
                     self.api_client.devices,
                     should_print,
                     udid=device_udid,
                     name=device_name,
                     platform=platform,
-                )       
-                devices.append(device)
-        return devices
+                )
+            except AppStoreConnectError as error:
+                self.logger.error(Colors.YELLOW(f'Failed to register a device: {error.args[0]}'))
+            else:
+                registered_devices.append(device)
+
+        return registered_devices
 
     @cli.action(
         'create-bundle-id',

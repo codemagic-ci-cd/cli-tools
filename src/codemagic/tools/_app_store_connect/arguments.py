@@ -1215,7 +1215,7 @@ class DeviceArgument(cli.Argument):
     )
     DEVICE_NAME = cli.ArgumentProperties(
         key='device_name',
-        flags=('--name',),
+        flags=('-n', '--name'),
         description='Name of the Device',
         argparse_kwargs={'required': True},
     )
@@ -1223,9 +1223,13 @@ class DeviceArgument(cli.Argument):
         DEVICE_NAME,
         argparse_kwargs={'required': False},
     )
+    COMMON_DEVICE_NAME = cli.ArgumentProperties.duplicate(
+        DEVICE_NAME,
+        description='Common name of the Devices',
+    )
     DEVICE_UDID = cli.ArgumentProperties(
         key='device_udid',
-        flags=('--udid',),
+        flags=('-u', '--udid'),
         description='Device ID (UDID)',
         argparse_kwargs={'required': True},
     )
@@ -1239,11 +1243,10 @@ class DeviceArgument(cli.Argument):
             'choices': list(DeviceStatus),
         },
     )
-    DEVICES_UDIDS_FILE = cli.ArgumentProperties(
-        key='file_path',
-        flags=('--file-path',),
-        description='Path to the devices UDIDs file separated by lines',
-        argparse_kwargs={'required': True},
+    DEVICE_UDIDS_PATH = cli.ArgumentProperties(
+        key='device_udids_path',
+        type=cli.CommonArgumentTypes.existing_path,
+        description='Path to the file containing Device UDIDs separated by newlines',
     )
 
 

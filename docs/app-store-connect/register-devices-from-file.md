@@ -1,12 +1,12 @@
 
-register-device
-===============
+register-devices-from-file
+==========================
 
 
-**Register a new device for app development**
+**Register devices with a common name for app development**
 ### Usage
 ```bash
-app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect register-devices-from-file [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -18,20 +18,20 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM]
-    -n DEVICE_NAME
-    -u DEVICE_UDID
+    -n COMMON_DEVICE_NAME
+    DEVICE_UDIDS_PATH
 ```
-### Required arguments for action `register-device`
+### Required arguments for action `register-devices-from-file`
 
-##### `-n, --name=DEVICE_NAME`
-
-
-Name of the Device
-##### `-u, --udid=DEVICE_UDID`
+##### `-n, --name=COMMON_DEVICE_NAME`
 
 
-Device ID (UDID)
-### Optional arguments for action `register-device`
+Common name of the Devices
+##### `DEVICE_UDIDS_PATH`
+
+
+Path to the file containing Device UDIDs separated by newlines
+### Optional arguments for action `register-devices-from-file`
 
 ##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 

@@ -18,7 +18,7 @@ app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--versio
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM_OPTIONAL]
-    [--name DEVICE_NAME_OPTIONAL]
+    [-n DEVICE_NAME_OPTIONAL]
     [--status DEVICE_STATUS]
 ```
 ### Optional arguments for action `list-devices`
@@ -27,7 +27,7 @@ app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--versio
 
 
 Bundle ID platform
-##### `--name=DEVICE_NAME_OPTIONAL`
+##### `-n, --name=DEVICE_NAME_OPTIONAL`
 
 
 Name of the Device

@@ -112,7 +112,7 @@ Enable verbose logging for commands
 |[`list-profiles`](list-profiles.md)|List Profiles from Apple Developer portal matching given constraints|
 |[`publish`](publish.md)|Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers|
 |[`register-device`](register-device.md)|Register a new device for app development|
-|[`register-multiple-devices`](register-multiple-devices.md)|Register multiple devices for app development|
+|[`register-devices-from-file`](register-devices-from-file.md)|Register devices with a common name for app development|
 
 ### Action groups
 
