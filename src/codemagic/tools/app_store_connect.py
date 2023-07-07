@@ -535,7 +535,7 @@ class AppStoreConnect(
                 continue
 
             if udid_pattern.match(device_udid) is None:
-                self.logger.warning(Colors.YELLOW(f'Invalid device UDID on line {line}: {device_udid!r}'))
+                self.logger.warning(Colors.YELLOW(f'Invalid device UDID on line {line + 1}: {device_udid!r}'))
                 continue
 
             try:
@@ -550,6 +550,8 @@ class AppStoreConnect(
                 self.logger.error(Colors.YELLOW(f'Failed to register a device: {error.args[0]}'))
             else:
                 registered_devices.append(device)
+
+            self.echo('') if should_print else None
 
         return registered_devices
 
