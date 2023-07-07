@@ -1,3 +1,17 @@
+Version 0.40.5
+-------------
+
+**Features**
+- Introduce `app-store-connect register-devices-from-file` action to bulk-register devices from a file with UDIDs
+- Add short flags for `app-store-connect register-device` action
+
+**Development**
+- Introduce a new action method `AppStoreConnect.register_devices_from_file`
+
+**Documentation**
+- Document `app-store-connect register-devices-from-file` action
+- Document short flags for `app-store-connect register-device`
+
 Version 0.40.4
 -------------
 
