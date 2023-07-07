@@ -502,6 +502,9 @@ class AppStoreConnect(
         """
         Register a new device for app development
         """
+        if not self._is_device_udid_valid(device_udid):
+            raise AppStoreConnectError(f'Invalid device UDID: {device_udid}')
+
         return self._create_resource(
             self.api_client.devices,
             should_print,
@@ -528,13 +531,12 @@ class AppStoreConnect(
         """
         registered_devices = []
         device_udid_lines = [udid.strip() for udid in device_udids_path.read_text().split('\n')]
-        udid_pattern = re.compile(r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{16}$')
 
         for line, device_udid in enumerate(device_udid_lines):
             if not device_udid:
                 continue
 
-            if udid_pattern.match(device_udid) is None:
+            if not self._is_device_udid_valid(device_udid):
                 self.logger.warning(Colors.YELLOW(f'Invalid device UDID on line {line + 1}: {device_udid!r}'))
                 continue
 
@@ -1239,6 +1241,10 @@ class AppStoreConnect(
         p12_container_password: str,
     ) -> List[pathlib.Path]:
         return [self._save_certificate(c, private_key, p12_container_password) for c in certificates]
+
+    @staticmethod
+    def _is_device_udid_valid(device_udid: str) -> bool:
+        return re.match(r'^[a-fA-F0-9]{8}-[a-fA-F0-9]{16}$', device_udid) is not None
 
 
 if __name__ == '__main__':
