@@ -14,13 +14,13 @@ definitions:
         poetry install --no-interaction
     - &check_code_formatting
       name: Check code formatting
-      script: poetry run flake8 .
-    - &check_imports_ordering
-      name: Check imports ordering
-      script: poetry run isort --check-only .
+      script: |
+        set -e
+        poetry run black --check .
+        poetry run ruff check .
     - &static_type_checks
       name: Static type checks with mypy
-      script: poetry run mypy src
+      script: poetry run mypy .
     - &run_tests
       name: Run tests
       script: poetry run pytest --junitxml="test-report.xml"
@@ -49,7 +49,6 @@ workflows:
     scripts:
       - *install_dependencies
       - *check_code_formatting
-      - *check_imports_ordering
       - *static_type_checks
       - *run_tests
 
@@ -64,7 +63,6 @@ workflows:
     scripts:
       - *install_dependencies
       - *check_code_formatting
-      - *check_imports_ordering
       - *static_type_checks
       - *run_tests
       - name: Bump version number for development build
@@ -111,7 +109,6 @@ workflows:
           fi
       - *install_dependencies
       - *check_code_formatting
-      - *check_imports_ordering
       - *static_type_checks
       - *run_tests
       - *update_version_in_source
