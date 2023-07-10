@@ -1,7 +1,49 @@
 import os
-from ._common import AccessDenied as AccessDenied, BSD as BSD, CONN_CLOSE as CONN_CLOSE, CONN_CLOSE_WAIT as CONN_CLOSE_WAIT, CONN_CLOSING as CONN_CLOSING, CONN_ESTABLISHED as CONN_ESTABLISHED, CONN_FIN_WAIT1 as CONN_FIN_WAIT1, CONN_FIN_WAIT2 as CONN_FIN_WAIT2, CONN_LAST_ACK as CONN_LAST_ACK, CONN_LISTEN as CONN_LISTEN, CONN_NONE as CONN_NONE, CONN_SYN_RECV as CONN_SYN_RECV, CONN_SYN_SENT as CONN_SYN_SENT, CONN_TIME_WAIT as CONN_TIME_WAIT, Error as Error, FREEBSD as FREEBSD, LINUX as LINUX, MACOS as MACOS, NETBSD as NETBSD, NIC_DUPLEX_FULL as NIC_DUPLEX_FULL, NIC_DUPLEX_HALF as NIC_DUPLEX_HALF, NIC_DUPLEX_UNKNOWN as NIC_DUPLEX_UNKNOWN, NoSuchProcess as NoSuchProcess, OPENBSD as OPENBSD, OSX as OSX, POSIX as POSIX, STATUS_DEAD as STATUS_DEAD, STATUS_DISK_SLEEP as STATUS_DISK_SLEEP, STATUS_IDLE as STATUS_IDLE, STATUS_LOCKED as STATUS_LOCKED, STATUS_PARKED as STATUS_PARKED, STATUS_RUNNING as STATUS_RUNNING, STATUS_SLEEPING as STATUS_SLEEPING, STATUS_STOPPED as STATUS_STOPPED, STATUS_TRACING_STOP as STATUS_TRACING_STOP, STATUS_WAITING as STATUS_WAITING, STATUS_WAKING as STATUS_WAKING, STATUS_ZOMBIE as STATUS_ZOMBIE, SUNOS as SUNOS, TimeoutExpired as TimeoutExpired, WINDOWS as WINDOWS, ZombieProcess as ZombieProcess
 from collections.abc import Generator
 from typing import Any
+
+from ._common import BSD as BSD
+from ._common import CONN_CLOSE as CONN_CLOSE
+from ._common import CONN_CLOSE_WAIT as CONN_CLOSE_WAIT
+from ._common import CONN_CLOSING as CONN_CLOSING
+from ._common import CONN_ESTABLISHED as CONN_ESTABLISHED
+from ._common import CONN_FIN_WAIT1 as CONN_FIN_WAIT1
+from ._common import CONN_FIN_WAIT2 as CONN_FIN_WAIT2
+from ._common import CONN_LAST_ACK as CONN_LAST_ACK
+from ._common import CONN_LISTEN as CONN_LISTEN
+from ._common import CONN_NONE as CONN_NONE
+from ._common import CONN_SYN_RECV as CONN_SYN_RECV
+from ._common import CONN_SYN_SENT as CONN_SYN_SENT
+from ._common import CONN_TIME_WAIT as CONN_TIME_WAIT
+from ._common import FREEBSD as FREEBSD
+from ._common import LINUX as LINUX
+from ._common import MACOS as MACOS
+from ._common import NETBSD as NETBSD
+from ._common import NIC_DUPLEX_FULL as NIC_DUPLEX_FULL
+from ._common import NIC_DUPLEX_HALF as NIC_DUPLEX_HALF
+from ._common import NIC_DUPLEX_UNKNOWN as NIC_DUPLEX_UNKNOWN
+from ._common import OPENBSD as OPENBSD
+from ._common import OSX as OSX
+from ._common import POSIX as POSIX
+from ._common import STATUS_DEAD as STATUS_DEAD
+from ._common import STATUS_DISK_SLEEP as STATUS_DISK_SLEEP
+from ._common import STATUS_IDLE as STATUS_IDLE
+from ._common import STATUS_LOCKED as STATUS_LOCKED
+from ._common import STATUS_PARKED as STATUS_PARKED
+from ._common import STATUS_RUNNING as STATUS_RUNNING
+from ._common import STATUS_SLEEPING as STATUS_SLEEPING
+from ._common import STATUS_STOPPED as STATUS_STOPPED
+from ._common import STATUS_TRACING_STOP as STATUS_TRACING_STOP
+from ._common import STATUS_WAITING as STATUS_WAITING
+from ._common import STATUS_WAKING as STATUS_WAKING
+from ._common import STATUS_ZOMBIE as STATUS_ZOMBIE
+from ._common import SUNOS as SUNOS
+from ._common import WINDOWS as WINDOWS
+from ._common import AccessDenied as AccessDenied
+from ._common import Error as Error
+from ._common import NoSuchProcess as NoSuchProcess
+from ._common import TimeoutExpired as TimeoutExpired
+from ._common import ZombieProcess as ZombieProcess
 
 AF_LINK: Any
 version_info: Any
@@ -76,6 +118,7 @@ def cpu_percent(interval: Any | None = ..., percpu: bool = ...): ...
 def cpu_times_percent(interval: Any | None = ..., percpu: bool = ...): ...
 def cpu_stats(): ...
 def cpu_freq(percpu: bool = ...): ...
+
 getloadavg = os.getloadavg
 
 def virtual_memory(): ...

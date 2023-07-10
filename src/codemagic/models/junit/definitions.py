@@ -26,32 +26,32 @@ class TestSuites:
 
     @property
     def disabled(self) -> int:
-        """ Total number of disabled tests from all testsuites. """
+        """Total number of disabled tests from all testsuites."""
         return sum(suite.disabled for suite in self.test_suites if suite.disabled)
 
     @property
     def errors(self) -> int:
-        """ Total number of tests with error result from all testsuites. """
+        """Total number of tests with error result from all testsuites."""
         return sum(suite.errors for suite in self.test_suites if suite.errors)
 
     @property
     def failures(self) -> int:
-        """ Total number of failed tests from all testsuites. """
+        """Total number of failed tests from all testsuites."""
         return sum(suite.failures for suite in self.test_suites if suite.failures)
 
     @property
     def tests(self) -> int:
-        """ Total number of tests from all testsuites. """
+        """Total number of tests from all testsuites."""
         return sum(suite.tests for suite in self.test_suites)
 
     @property
     def skipped(self) -> int:
-        """ Total number of tests from all testsuites. """
+        """Total number of tests from all testsuites."""
         return sum((suite.skipped or 0) for suite in self.test_suites)
 
     @property
     def time(self) -> float:
-        """ Time in seconds to execute all test suites. """
+        """Time in seconds to execute all test suites."""
         return sum(suite.time for suite in self.test_suites if suite.time)
 
     def has_failed_tests(self) -> bool:
@@ -62,14 +62,14 @@ class TestSuites:
 
     def as_xml(self) -> Element:
         extras = {
-            'disabled': self.disabled,
-            'errors': self.errors,
-            'failures': self.failures,
-            'time': self.time,
+            "disabled": self.disabled,
+            "errors": self.errors,
+            "failures": self.failures,
+            "time": self.time,
         }
         root = Element(
-            'testsuites',
-            attrib={'name': self.name, 'tests': str(self.tests)},
+            "testsuites",
+            attrib={"name": self.name, "tests": str(self.tests)},
             **{k: str(v) for k, v in extras.items() if v},
         )
         root.extend([test_suite.as_xml() for test_suite in self.test_suites])
@@ -116,21 +116,21 @@ class TestSuite:
 
     def as_xml(self) -> Element:
         extras = {
-            'disabled': self.disabled,
-            'errors': self.errors,
-            'failures': self.failures,
-            'package': self.package,
-            'skipped': self.skipped,
-            'time': self.time,
-            'timestamp': self.timestamp,
+            "disabled": self.disabled,
+            "errors": self.errors,
+            "failures": self.failures,
+            "package": self.package,
+            "skipped": self.skipped,
+            "time": self.time,
+            "timestamp": self.timestamp,
         }
         element = Element(
-            'testsuite',
-            attrib={'name': self.name, 'tests': str(self.tests)},
+            "testsuite",
+            attrib={"name": self.name, "tests": str(self.tests)},
             **{k: str(v) for k, v in extras.items() if v},
         )
         if self.properties:
-            properties = SubElement(element, 'properties')
+            properties = SubElement(element, "properties")
             properties.extend([p.as_xml() for p in self.properties])
         element.extend([tc.as_xml() for tc in self.testcases])
         return element
@@ -142,7 +142,7 @@ class Property:
     value: str
 
     def as_xml(self) -> Element:
-        return Element('property', attrib={'name': self.name, 'value': str(self.value)})
+        return Element("property", attrib={"name": self.name, "value": str(self.value)})
 
 
 @dataclass
@@ -171,13 +171,13 @@ class TestCase:
 
     def as_xml(self) -> Element:
         extras = {
-            'time': self.time,
-            'status': self.status,
-            'assertions': self.assertions,
+            "time": self.time,
+            "status": self.status,
+            "assertions": self.assertions,
         }
         element = Element(
-            'testcase',
-            attrib={'name': self.name, 'classname': self.classname},
+            "testcase",
+            attrib={"name": self.name, "classname": self.classname},
             **{k: str(v) for k, v in extras.items() if v},
         )
         if self.error:
@@ -191,10 +191,10 @@ class TestCase:
 
 @dataclass
 class Skipped:
-    message: str = ''  # Message / description why the test case was skipped.
+    message: str = ""  # Message / description why the test case was skipped.
 
     def as_xml(self):
-        return Element('skipped', attrib={'message': self.message})
+        return Element("skipped", attrib={"message": self.message})
 
 
 @dataclass
@@ -205,12 +205,13 @@ class Error:
     For example an unchecked throwable (exception), crash or a problem with the implementation of the test.
     Contains as a text node relevant data for the error, for example a stack trace.
     """
+
     message: str  # The error message. e.g., if a java exception is thrown, the return value of getMessage()
     type: str  # The type of error that occurred (if a java exception is thrown the full class name of the exception).
     error_description: Optional[str] = None
 
     def as_xml(self):
-        element = Element('error', attrib={'message': self.message, 'type': self.type})
+        element = Element("error", attrib={"message": self.message, "type": self.type})
         if self.error_description:
             element.text = self.error_description
         return element
@@ -224,12 +225,13 @@ class Failure:
     For example via an assertEquals.
     Contains as a text node relevant data for the failure, e.g., a stack trace.
     """
+
     message: str  # The message specified in the assert.
     type: str  # The type of the assert.
     failure_description: Optional[str] = None
 
     def as_xml(self):
-        element = Element('failure', attrib={'message': self.message, 'type': self.type})
+        element = Element("failure", attrib={"message": self.message, "type": self.type})
         if self.failure_description:
             element.text = self.failure_description
         return element

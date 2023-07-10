@@ -81,8 +81,8 @@ from ._app_store_connect.resource_printer import ResourcePrinter
 
 
 def _get_certificate_key(
-        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
-        certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+    certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
+    certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
 ) -> Optional[PrivateKey]:
     if isinstance(certificate_key, PrivateKey):
         return certificate_key
@@ -91,7 +91,7 @@ def _get_certificate_key(
         try:
             return PrivateKey.from_buffer(certificate_key.value, password)
         except ValueError:
-            CertificateArgument.PRIVATE_KEY.raise_argument_error('Not a valid certificate private key')
+            CertificateArgument.PRIVATE_KEY.raise_argument_error("Not a valid certificate private key")
     return None
 
 
@@ -176,7 +176,7 @@ class AppStoreConnect(
         )
 
         cli_action = app_store_connect._get_invoked_cli_action(cli_args)
-        if cli_action.action_options.get('requires_api_client', True):
+        if cli_action.action_options.get("requires_api_client", True):
             app_store_connect._assert_api_client_credentials()
 
         return app_store_connect
@@ -185,14 +185,14 @@ class AppStoreConnect(
         if self._issuer_id is None:
             if custom_error:
                 default_message = AppStoreConnectArgument.ISSUER_ID.get_missing_value_error_message()
-                raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error(f'{default_message}. {custom_error}')
+                raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error(f"{default_message}. {custom_error}")
             else:
                 raise AppStoreConnectArgument.ISSUER_ID.raise_argument_error()
 
         if self._key_identifier is None:
             if custom_error:
                 default_message = AppStoreConnectArgument.KEY_IDENTIFIER.get_missing_value_error_message()
-                raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error(f'{default_message}. {custom_error}')
+                raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error(f"{default_message}. {custom_error}")
             else:
                 raise AppStoreConnectArgument.KEY_IDENTIFIER.raise_argument_error()
 
@@ -202,7 +202,7 @@ class AppStoreConnect(
             custom_error = ve.args[0] if ve.args else custom_error
             if custom_error:
                 default_message = AppStoreConnectArgument.PRIVATE_KEY.get_missing_value_error_message()
-                AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(f'{default_message}. {custom_error}')
+                AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(f"{default_message}. {custom_error}")
             else:
                 AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error()
 
@@ -212,14 +212,14 @@ class AppStoreConnect(
 
         for keys_path in Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS:
             try:
-                api_key = next(keys_path.expanduser().glob(f'AuthKey_{self._key_identifier}.p8'))
+                api_key = next(keys_path.expanduser().glob(f"AuthKey_{self._key_identifier}.p8"))
             except StopIteration:
                 continue
 
             try:
                 private_key_argument = Types.PrivateKeyArgument(api_key.read_text())
             except ValueError:
-                raise ValueError(f'Provided value in {api_key} is not valid')
+                raise ValueError(f"Provided value in {api_key} is not valid")
             self._private_key = private_key_argument.value
             break
         else:
@@ -245,7 +245,7 @@ class AppStoreConnect(
         return self._get_api_client()
 
     @cli.action(
-        'list-builds',
+        "list-builds",
         AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
         *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS,
     )
@@ -267,8 +267,8 @@ class AppStoreConnect(
         try:
             expired_value = Argument.resolve_optional_two_way_switch(expired, not_expired)
         except ValueError:
-            flags = f'{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}'
-            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
+            flags = f"{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}"
+            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f"Using mutually exclusive switches {flags}.")
 
         builds_filter = self.api_client.builds.Filter(
             app=application_id,
@@ -282,7 +282,7 @@ class AppStoreConnect(
         return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @cli.action(
-        'get-latest-build-number',
+        "get-latest-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         CommonArgument.PLATFORM,
     )
@@ -307,7 +307,7 @@ class AppStoreConnect(
         elif testflight_build_info is not None:
             latest_build_info = testflight_build_info
         else:
-            self.logger.info(Colors.YELLOW(f'Did not find any builds for app {application_id}'))
+            self.logger.info(Colors.YELLOW(f"Did not find any builds for app {application_id}"))
             return None
 
         self._log_latest_build_info(latest_build_info)
@@ -315,7 +315,7 @@ class AppStoreConnect(
         return latest_build_info.build.attributes.version
 
     @cli.action(
-        'get-latest-app-store-build-number',
+        "get-latest-app-store-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.VERSION_STRING,
         CommonArgument.PLATFORM,
@@ -335,7 +335,7 @@ class AppStoreConnect(
             platform=platform,
         )
         if latest_build_info is None:
-            self.logger.info(Colors.YELLOW(f'Did not find latest build for app {application_id}'))
+            self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))
             return None
 
         self._log_latest_build_info(latest_build_info)
@@ -343,7 +343,7 @@ class AppStoreConnect(
         return latest_build_info.build.attributes.version
 
     @cli.action(
-        'get-latest-testflight-build-number',
+        "get-latest-testflight-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         BuildArgument.PRE_RELEASE_VERSION,
         CommonArgument.PLATFORM,
@@ -364,8 +364,8 @@ class AppStoreConnect(
         try:
             expired_value: Optional[bool] = Argument.resolve_optional_two_way_switch(expired, not_expired)
         except ValueError:
-            flags = f'{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}'
-            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f'Using mutually exclusive switches {flags}.')
+            flags = f"{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}"
+            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f"Using mutually exclusive switches {flags}.")
 
         def builds_filter_predicate(build: Build) -> bool:
             if expired_value is None:
@@ -379,7 +379,7 @@ class AppStoreConnect(
             builds_filter_predicate=builds_filter_predicate,
         )
         if latest_build_info is None:
-            self.logger.info(Colors.YELLOW(f'Did not find latest build for app {application_id}'))
+            self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))
             return None
 
         self._log_latest_build_info(latest_build_info)
@@ -389,10 +389,10 @@ class AppStoreConnect(
     def _log_latest_build_info(self, latest_build_info: _LatestBuildInfo):
         build_number = latest_build_info.build.attributes.version
         if isinstance(latest_build_info.version, AppStoreVersion):
-            version_info = f'App Store version {latest_build_info.version.attributes.versionString}'
+            version_info = f"App Store version {latest_build_info.version.attributes.versionString}"
         else:
-            version_info = f'TestFlight version {latest_build_info.version.attributes.version}'
-        self.logger.info(f'Found build number {build_number} from {version_info}')
+            version_info = f"TestFlight version {latest_build_info.version.attributes.version}"
+        self.logger.info(f"Found build number {build_number} from {version_info}")
 
     def _get_max_testflight_version_and_build(
         self,
@@ -465,7 +465,7 @@ class AppStoreConnect(
         return None
 
     @cli.action(
-        'list-devices',
+        "list-devices",
         BundleIdArgument.PLATFORM_OPTIONAL,
         DeviceArgument.DEVICE_NAME_OPTIONAL,
         DeviceArgument.DEVICE_STATUS,
@@ -482,12 +482,14 @@ class AppStoreConnect(
         """
 
         device_filter = self.api_client.devices.Filter(
-            name=device_name, platform=platform, status=device_status,
+            name=device_name,
+            platform=platform,
+            status=device_status,
         )
         return self._list_resources(device_filter, self.api_client.devices, should_print)
 
     @cli.action(
-        'register-device',
+        "register-device",
         BundleIdArgument.PLATFORM,
         DeviceArgument.DEVICE_NAME,
         DeviceArgument.DEVICE_UDID,
@@ -511,7 +513,7 @@ class AppStoreConnect(
         )
 
     @cli.action(
-        'create-bundle-id',
+        "create-bundle-id",
         BundleIdArgument.BUNDLE_ID_IDENTIFIER,
         BundleIdArgument.BUNDLE_ID_NAME,
         BundleIdArgument.PLATFORM,
@@ -528,13 +530,13 @@ class AppStoreConnect(
         """
 
         if bundle_id_name is None:
-            bundle_id_name = bundle_id_identifier.replace('.', ' ')
+            bundle_id_name = bundle_id_identifier.replace(".", " ")
 
         create_params = dict(identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
         return self._create_resource(self.api_client.bundle_ids, should_print, **create_params)
 
     @cli.action(
-        'list-bundle-ids',
+        "list-bundle-ids",
         BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
         BundleIdArgument.BUNDLE_ID_NAME,
         BundleIdArgument.PLATFORM_OPTIONAL,
@@ -569,7 +571,7 @@ class AppStoreConnect(
 
         return bundle_ids
 
-    @cli.action('get-bundle-id', BundleIdArgument.BUNDLE_ID_RESOURCE_ID)
+    @cli.action("get-bundle-id", BundleIdArgument.BUNDLE_ID_RESOURCE_ID)
     def get_bundle_id(
         self,
         bundle_id_resource_id: ResourceId,
@@ -582,7 +584,7 @@ class AppStoreConnect(
         return self._get_resource(bundle_id_resource_id, self.api_client.bundle_ids, should_print)
 
     @cli.action(
-        'delete-bundle-id',
+        "delete-bundle-id",
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
     )
@@ -598,7 +600,7 @@ class AppStoreConnect(
         self._delete_resource(self.api_client.bundle_ids, bundle_id_resource_id, ignore_not_found)
 
     @cli.action(
-        'create-certificate',
+        "create-certificate",
         CertificateArgument.CERTIFICATE_TYPE,
         CertificateArgument.PRIVATE_KEY,
         CertificateArgument.PRIVATE_KEY_PASSWORD,
@@ -611,7 +613,7 @@ class AppStoreConnect(
         certificate_type: CertificateType = CertificateType.IOS_DEVELOPMENT,
         certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-        p12_container_password: str = '',
+        p12_container_password: str = "",
         p12_container_save_path: Optional[pathlib.Path] = None,
         save: bool = False,
         should_print: bool = True,
@@ -622,12 +624,12 @@ class AppStoreConnect(
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AppStoreConnectError('Cannot create resource without certificate private key')
+            raise AppStoreConnectError("Cannot create resource without certificate private key")
 
         csr = Certificate.create_certificate_signing_request(private_key)
         csr_content = Certificate.get_certificate_signing_request_content(csr)
 
-        create_params = dict(csr_content=csr_content, certificate_type=certificate_type, omit_keys=['csr_content'])
+        create_params = dict(csr_content=csr_content, certificate_type=certificate_type, omit_keys=["csr_content"])
         certificate = self._create_resource(self.api_client.signing_certificates, should_print, **create_params)
 
         if save:
@@ -635,7 +637,7 @@ class AppStoreConnect(
         return certificate
 
     @cli.action(
-        'get-certificate',
+        "get-certificate",
         CertificateArgument.CERTIFICATE_RESOURCE_ID,
         CertificateArgument.PRIVATE_KEY,
         CertificateArgument.PRIVATE_KEY_PASSWORD,
@@ -648,7 +650,7 @@ class AppStoreConnect(
         certificate_resource_id: ResourceId,
         certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-        p12_container_password: str = '',
+        p12_container_password: str = "",
         p12_container_save_path: Optional[pathlib.Path] = None,
         save: bool = False,
         should_print: bool = True,
@@ -659,7 +661,7 @@ class AppStoreConnect(
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AppStoreConnectError('Cannot save resource without certificate private key')
+            raise AppStoreConnectError("Cannot save resource without certificate private key")
         else:
             assert private_key is not None
 
@@ -670,7 +672,7 @@ class AppStoreConnect(
         return certificate
 
     @cli.action(
-        'delete-certificate',
+        "delete-certificate",
         CertificateArgument.CERTIFICATE_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
     )
@@ -686,7 +688,7 @@ class AppStoreConnect(
         self._delete_resource(self.api_client.signing_certificates, certificate_resource_id, ignore_not_found)
 
     @cli.action(
-        'list-certificates',
+        "list-certificates",
         CertificateArgument.CERTIFICATE_TYPES_OPTIONAL,
         CertificateArgument.PROFILE_TYPE_OPTIONAL,
         CertificateArgument.DISPLAY_NAME,
@@ -696,16 +698,16 @@ class AppStoreConnect(
         CommonArgument.SAVE,
     )
     def list_certificates(
-            self,
-            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
-            profile_type: Optional[ProfileType] = None,
-            display_name: Optional[str] = None,
-            certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
-            certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-            p12_container_password: str = '',
-            save: bool = False,
-            should_print: bool = True,
-            **_deprecated_kwargs,
+        self,
+        certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
+        profile_type: Optional[ProfileType] = None,
+        display_name: Optional[str] = None,
+        certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
+        certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
+        p12_container_password: str = "",
+        save: bool = False,
+        should_print: bool = True,
+        **_deprecated_kwargs,
     ) -> List[SigningCertificate]:
         """
         List Signing Certificates from Apple Developer Portal matching given constraints
@@ -713,9 +715,9 @@ class AppStoreConnect(
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if save and private_key is None:
-            raise AppStoreConnectError('Cannot create or save resource without certificate private key')
+            raise AppStoreConnectError("Cannot create or save resource without certificate private key")
 
-        _certificate_type: Optional[CertificateType] = _deprecated_kwargs.get('certificate_type')
+        _certificate_type: Optional[CertificateType] = _deprecated_kwargs.get("certificate_type")
         certificate_types_filter = self._resolve_certificate_types(_certificate_type, certificate_types, profile_type)
 
         certificate_filter = self.api_client.signing_certificates.Filter(
@@ -730,12 +732,13 @@ class AppStoreConnect(
 
         if private_key:
             certificates = [
-                certificate for certificate in certificates
+                certificate
+                for certificate in certificates
                 if Certificate.from_ans1(certificate.asn1_content).is_signed_with(private_key)
             ]
-            self.printer.log_filtered(SigningCertificate, certificates, 'for given private key')
+            self.printer.log_filtered(SigningCertificate, certificates, "for given private key")
             for certificate in certificates:
-                self.logger.info(f'- {certificate.get_display_info()}')
+                self.logger.info(f"- {certificate.get_display_info()}")
 
         if save:
             assert private_key is not None  # Make mypy happy
@@ -744,10 +747,10 @@ class AppStoreConnect(
         return certificates
 
     def _resolve_certificate_types(
-            self,
-            certificate_type: Optional[CertificateType],
-            certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]],
-            profile_type: Optional[ProfileType],
+        self,
+        certificate_type: Optional[CertificateType],
+        certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]],
+        profile_type: Optional[ProfileType],
     ) -> Optional[List[CertificateType]]:
         types: Set[CertificateType] = set()
 
@@ -758,10 +761,10 @@ class AppStoreConnect(
 
         if isinstance(certificate_type, CertificateType):
             warning = (
-                'Deprecation warning! Keyword argument '
+                "Deprecation warning! Keyword argument "
                 '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
                 '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None", '
-                'and is subject for removal.'
+                "and is subject for removal."
             )
             self.logger.warning(Colors.RED(warning))
             types.add(certificate_type)
@@ -783,7 +786,7 @@ class AppStoreConnect(
         return list(types) if types else None
 
     @cli.action(
-        'create-profile',
+        "create-profile",
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
         CertificateArgument.CERTIFICATE_RESOURCE_IDS,
         DeviceArgument.DEVICE_RESOURCE_IDS,
@@ -809,7 +812,7 @@ class AppStoreConnect(
         if profile_name:
             name = profile_name
         elif profile_name is None:
-            name = f'{bundle_id.attributes.name} {profile_type.value.lower()} {int(time.time())}'
+            name = f"{bundle_id.attributes.name} {profile_type.value.lower()} {int(time.time())}"
         else:
             raise AppStoreConnectError(f'"{profile_name}" is not a valid {Profile} name')
 
@@ -819,10 +822,10 @@ class AppStoreConnect(
             bundle_id=bundle_id_resource_id,
             certificates=certificate_resource_ids,
             devices=[],
-            omit_keys=['devices'],
+            omit_keys=["devices"],
         )
         if profile_type.devices_required():
-            create_params['devices'] = device_resource_ids
+            create_params["devices"] = device_resource_ids
         profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
 
         if save:
@@ -830,7 +833,7 @@ class AppStoreConnect(
         return profile
 
     @cli.action(
-        'get-profile',
+        "get-profile",
         ProfileArgument.PROFILE_RESOURCE_ID,
         CommonArgument.SAVE,
     )
@@ -850,7 +853,7 @@ class AppStoreConnect(
         return profile
 
     @cli.action(
-        'delete-profile',
+        "delete-profile",
         ProfileArgument.PROFILE_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
     )
@@ -866,7 +869,7 @@ class AppStoreConnect(
         self._delete_resource(self.api_client.profiles, profile_resource_id, ignore_not_found)
 
     @cli.action(
-        'list-profiles',
+        "list-profiles",
         ProfileArgument.PROFILE_TYPE_OPTIONAL,
         ProfileArgument.PROFILE_STATE_OPTIONAL,
         ProfileArgument.PROFILE_NAME,
@@ -895,7 +898,7 @@ class AppStoreConnect(
         return profiles
 
     @cli.action(
-        'list-bundle-id-profiles',
+        "list-bundle-id-profiles",
         BundleIdArgument.BUNDLE_ID_RESOURCE_IDS,
         ProfileArgument.PROFILE_TYPE_OPTIONAL,
         ProfileArgument.PROFILE_STATE_OPTIONAL,
@@ -938,7 +941,7 @@ class AppStoreConnect(
         return profiles
 
     @cli.action(
-        'fetch-signing-files',
+        "fetch-signing-files",
         BundleIdArgument.BUNDLE_ID_IDENTIFIER,
         BundleIdArgument.PLATFORM,
         CertificateArgument.PRIVATE_KEY,
@@ -953,7 +956,7 @@ class AppStoreConnect(
         bundle_id_identifier: str,
         certificate_key: Optional[Union[PrivateKey, Types.CertificateKeyArgument]] = None,
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument] = None,
-        p12_container_password: str = '',
+        p12_container_password: str = "",
         platform: BundleIdPlatform = BundleIdPlatform.IOS,
         profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
         bundle_id_identifier_strict_match: bool = False,
@@ -966,7 +969,7 @@ class AppStoreConnect(
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
-            raise AppStoreConnectError(f'Cannot save {SigningCertificate.s} without certificate private key')
+            raise AppStoreConnectError(f"Cannot save {SigningCertificate.s} without certificate private key")
 
         bundle_ids = self._get_or_create_bundle_ids(
             bundle_id_identifier,
@@ -974,7 +977,7 @@ class AppStoreConnect(
             create_resource,
             bundle_id_identifier_strict_match,
         )
-        self.echo('')
+        self.echo("")
 
         certificates = self._get_or_create_certificates(
             profile_type,
@@ -982,7 +985,7 @@ class AppStoreConnect(
             certificate_key_password,
             create_resource,
         )
-        self.echo('')
+        self.echo("")
 
         profiles = self._get_or_create_profiles(
             bundle_ids,
@@ -991,7 +994,7 @@ class AppStoreConnect(
             create_resource,
             platform,
         )
-        self.echo('')
+        self.echo("")
 
         self._save_certificates(certificates, private_key, p12_container_password)
         self._save_profiles(profiles)
@@ -1012,11 +1015,11 @@ class AppStoreConnect(
         )
         if not bundle_ids:
             if not create_resource:
-                raise AppStoreConnectError(f'Did not find {BundleId.s} with identifier {bundle_id_identifier}')
+                raise AppStoreConnectError(f"Did not find {BundleId.s} with identifier {bundle_id_identifier}")
             bundle_ids.append(self.create_bundle_id(bundle_id_identifier, platform=platform, should_print=False))
         else:
             for bundle_id in bundle_ids:
-                self.logger.info(f'- {bundle_id.attributes.name} {bundle_id.attributes.identifier} ({bundle_id.id})')
+                self.logger.info(f"- {bundle_id.attributes.name} {bundle_id.attributes.identifier} ({bundle_id.id})")
         return bundle_ids
 
     def _get_or_create_certificates(
@@ -1048,8 +1051,8 @@ class AppStoreConnect(
 
         if not certificates:
             if not create_resource:
-                _certificate_types = ', '.join(map(str, certificate_types))
-                raise AppStoreConnectError(f'Did not find {SigningCertificate.s} with type {_certificate_types}')
+                _certificate_types = ", ".join(map(str, certificate_types))
+                raise AppStoreConnectError(f"Did not find {SigningCertificate.s} with type {_certificate_types}")
             certificate = self.create_certificate(
                 certificate_types[0],
                 certificate_key=certificate_key,
@@ -1098,8 +1101,8 @@ class AppStoreConnect(
                 profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
                 return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
             except AppStoreConnectApiError as err:
-                error = f'Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly'
-                self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
+                error = f"Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly"
+                self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
                 return False
 
         def missing_profile(bundle_id) -> bool:
@@ -1107,8 +1110,8 @@ class AppStoreConnect(
                 bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
                 return not (profile_ids & {p.id for p in bundle_ids_profiles})
             except AppStoreConnectApiError as err:
-                error = f'Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly'
-                self.logger.warning(Colors.YELLOW(f'{error}: {err.error_response}'))
+                error = f"Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly"
+                self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
                 return True
 
         certificate_ids = {c.id for c in certificates}
@@ -1120,20 +1123,23 @@ class AppStoreConnect(
         )
         profiles = list(filter(has_certificate, profiles))
 
-        certificate_names = ', '.join(c.get_display_info() for c in certificates)
-        message = f'that contain {SigningCertificate.plural(len(certificates))} {certificate_names}'
+        certificate_names = ", ".join(c.get_display_info() for c in certificates)
+        message = f"that contain {SigningCertificate.plural(len(certificates))} {certificate_names}"
         self.printer.log_filtered(Profile, profiles, message)
         for profile in profiles:
-            self.logger.info(f'- {profile.get_display_info()}')
+            self.logger.info(f"- {profile.get_display_info()}")
 
         profile_ids = {p.id for p in profiles}
         bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
         if bundle_ids_without_profiles and not create_resource:
-            missing = ', '.join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
-            raise AppStoreConnectError(f'Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}')
+            missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
+            raise AppStoreConnectError(f"Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}")
 
         created_profiles = self._create_missing_profiles(
-            bundle_ids_without_profiles, certificates, profile_type, platform,
+            bundle_ids_without_profiles,
+            certificates,
+            profile_type,
+            platform,
         )
         profiles.extend(created_profiles)
         return profiles
@@ -1141,18 +1147,21 @@ class AppStoreConnect(
     @classmethod
     def _get_unique_path(cls, file_name: str, destination: pathlib.Path) -> pathlib.Path:
         if destination.exists() and not destination.is_dir():
-            raise ValueError(f'Destination {destination} is not a directory')
+            raise ValueError(f"Destination {destination} is not a directory")
         destination.mkdir(parents=True, exist_ok=True)
-        name = pathlib.Path(re.sub(r'[^\w.]', '_', file_name))
+        name = pathlib.Path(re.sub(r"[^\w.]", "_", file_name))
         tf = tempfile.NamedTemporaryFile(
-            prefix=f'{name.stem}_', suffix=name.suffix, dir=destination, delete=False,
+            prefix=f"{name.stem}_",
+            suffix=name.suffix,
+            dir=destination,
+            delete=False,
         )
         tf.close()
         return pathlib.Path(tf.name)
 
     def _save_profile(self, profile: Profile) -> pathlib.Path:
         profile_path = self._get_unique_path(
-            f'{profile.attributes.profileType}_{profile.id}{profile.profile_extension}',
+            f"{profile.attributes.profileType}_{profile.id}{profile.profile_extension}",
             self.profiles_directory,
         )
         profile_path.write_bytes(profile.profile_content)
@@ -1160,15 +1169,15 @@ class AppStoreConnect(
         return profile_path
 
     def _save_certificate(
-            self,
-            certificate: SigningCertificate,
-            private_key: PrivateKey,
-            p12_container_password: str,
-            certificate_save_path: Optional[pathlib.Path] = None,
+        self,
+        certificate: SigningCertificate,
+        private_key: PrivateKey,
+        p12_container_password: str,
+        certificate_save_path: Optional[pathlib.Path] = None,
     ) -> pathlib.Path:
         if certificate_save_path is None:
             certificate_path = self._get_unique_path(
-                f'{certificate.attributes.certificateType}_{certificate.id}.p12',
+                f"{certificate.attributes.certificateType}_{certificate.id}.p12",
                 self.certificates_directory,
             )
         else:
@@ -1196,5 +1205,5 @@ class AppStoreConnect(
         return [self._save_certificate(c, private_key, p12_container_password) for c in certificates]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     AppStoreConnect.invoke_cli()

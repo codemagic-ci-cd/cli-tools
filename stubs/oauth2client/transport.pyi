@@ -1,5 +1,7 @@
+from typing import Any
+from typing import Optional
+
 from oauth2client import _helpers as _helpers
-from typing import Any, Optional
 
 _LOGGER: Any
 _STREAM_PROPERTIES: Any
@@ -19,6 +21,14 @@ def _apply_user_agent(headers: Any, user_agent: Any): ...
 def clean_headers(headers: Any): ...
 def wrap_http_for_auth(credentials: Any, http: Any): ...
 def wrap_http_for_jwt_access(credentials: Any, http: Any): ...
-def request(http: Any, uri: Any, method: str = ..., body: Optional[Any] = ..., headers: Optional[Any] = ..., redirections: Any = ..., connection_type: Optional[Any] = ...): ...
+def request(
+    http: Any,
+    uri: Any,
+    method: str = ...,
+    body: Optional[Any] = ...,
+    headers: Optional[Any] = ...,
+    redirections: Any = ...,
+    connection_type: Optional[Any] = ...,
+): ...
 
 _CACHED_HTTP: Any

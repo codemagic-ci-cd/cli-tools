@@ -34,30 +34,33 @@ class Simulator(RunningCliAppMixin):
             self.log_path = pathlib.Path(self.log_path)
 
     def __repr__(self):
-        return f'<Simulator: {self.name!r}>'
+        return f"<Simulator: {self.name!r}>"
 
     def dict(self) -> Dict[str, Union[str, bool]]:
         return {
             **self.__dict__,
-            'data_path': str(self.data_path),
-            'log_path': str(self.log_path),
-            'runtime': str(self.runtime),
+            "data_path": str(self.data_path),
+            "log_path": str(self.log_path),
+            "runtime": str(self.runtime),
         }
 
     @classmethod
     def create(cls, **kwargs) -> Simulator:
         @lru_cache()
         def camel_to_snake(s: str) -> str:
-            return re.sub(r'([A-Z])', lambda m: f'_{m.group(1).lower()}', s)
+            return re.sub(r"([A-Z])", lambda m: f"_{m.group(1).lower()}", s)
 
-        return Simulator(**{
-            camel_to_snake(name): value for name, value in kwargs.items()
-            if camel_to_snake(name) in cls.__dataclass_fields__  # type: ignore
-        })
+        return Simulator(
+            **{
+                camel_to_snake(name): value
+                for name, value in kwargs.items()
+                if camel_to_snake(name) in cls.__dataclass_fields__  # type: ignore
+            },
+        )
 
     @classmethod
     def _list_devices(cls) -> Dict[str, List[Dict]]:
-        cmd_args = ('xcrun', 'simctl', 'list', 'devices', '--json')
+        cmd_args = ("xcrun", "simctl", "list", "devices", "--json")
         stdout: Union[bytes, str]
         cli_app = cls.get_current_cli_app()
         try:
@@ -68,14 +71,16 @@ class Simulator(RunningCliAppMixin):
             else:
                 stdout = subprocess.check_output(cmd_args)
         except subprocess.CalledProcessError:
-            raise IOError('Failed to list available test devices')
-        return json.loads(stdout).get('devices', {})
+            raise IOError("Failed to list available test devices")
+        return json.loads(stdout).get("devices", {})
 
     @classmethod
-    def list(cls,
-             runtimes: Optional[Sequence[Runtime]] = None,
-             simulator_name: Optional[re.Pattern] = None,
-             include_unavailable: bool = False) -> List[Simulator]:
+    def list(
+        cls,
+        runtimes: Optional[Sequence[Runtime]] = None,
+        simulator_name: Optional[re.Pattern] = None,
+        include_unavailable: bool = False,
+    ) -> List[Simulator]:
         simulators: List[Simulator] = []
         for runtime_name, devices in cls._list_devices().items():
             runtime = Runtime(runtime_name)
@@ -98,18 +103,18 @@ class Simulator(RunningCliAppMixin):
         Get default iOS simulator for currently selected Xcode version.
         If available, chooses iPhone SE (2nd generation), otherwise an iPhone or iPad device.
         """
-        simulators = Simulator.list(simulator_name=re.compile(r'iPad|iPhone'))
+        simulators = Simulator.list(simulator_name=re.compile(r"iPad|iPhone"))
 
         ios_simulators = [s for s in simulators if s.runtime.runtime_name is Runtime.Name.I_OS]
         if not ios_simulators:
-            raise ValueError('No iOS simulators available')
+            raise ValueError("No iOS simulators available")
         runtime = sorted({s.runtime for s in ios_simulators}, reverse=True)[0]
 
-        ipads = [s for s in ios_simulators if 'iPad' in s.name and s.runtime == runtime]
-        iphones = [s for s in ios_simulators if 'iPhone' in s.name and s.runtime == runtime]
+        ipads = [s for s in ios_simulators if "iPad" in s.name and s.runtime == runtime]
+        iphones = [s for s in ios_simulators if "iPhone" in s.name and s.runtime == runtime]
         if iphones:
             # Choose 2nd gen SE if available
-            iphone_se = next((s for s in iphones if s.name == 'iPhone SE (2nd generation)'), None)
+            iphone_se = next((s for s in iphones if s.name == "iPhone SE (2nd generation)"), None)
             simulator = iphone_se or sorted(iphones, key=lambda s: s.name)[-1]
         else:
             simulator = sorted(ipads, key=lambda s: s.name)[-1]
@@ -120,12 +125,12 @@ class Simulator(RunningCliAppMixin):
         description = simulator_description.strip()
         requested_runtime = Runtime.parse(description)
 
-        if re.match(r'[A-Z0-9-]{36}', description):
+        if re.match(r"[A-Z0-9-]{36}", description):
             # UDID was given, find matching simulator
             simulator = next((s for s in simulators if s.udid == description), None)
         elif requested_runtime:
             # Runtime constraint was provided, narrow down search domain
-            device_name = description.replace(requested_runtime.raw_name, '').strip()
+            device_name = description.replace(requested_runtime.raw_name, "").strip()
             runtime_choices = (s for s in simulators if s.runtime == requested_runtime and s.name == device_name)
             simulator = next(runtime_choices, None)
         else:
@@ -136,7 +141,7 @@ class Simulator(RunningCliAppMixin):
                 simulator = max(choices, key=lambda s: s.runtime)
 
         if simulator is None:
-            raise ValueError(f'Simulator for destination {description!r} is not available')
+            raise ValueError(f"Simulator for destination {description!r} is not available")
         return simulator
 
     @classmethod
@@ -145,4 +150,4 @@ class Simulator(RunningCliAppMixin):
         return [cls.choose_simulator(desc, simulators) for desc in simulator_descriptions]
 
     def get_logs_path(self) -> pathlib.Path:
-        return pathlib.Path(f'~/Library/Logs/CoreSimulator/{self.udid}/system.log').expanduser()
+        return pathlib.Path(f"~/Library/Logs/CoreSimulator/{self.udid}/system.log").expanduser()

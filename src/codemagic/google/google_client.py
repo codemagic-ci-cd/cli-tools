@@ -16,11 +16,11 @@ from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.errors import GoogleHttpError
 from codemagic.utilities import log
 
-GoogleResourceT = TypeVar('GoogleResourceT', bound=discovery.Resource)
+GoogleResourceT = TypeVar("GoogleResourceT", bound=discovery.Resource)
 
 
 class GoogleClient(Generic[GoogleResourceT], ABC):
-    google_service_version: ClassVar[str] = 'v1'
+    google_service_version: ClassVar[str] = "v1"
 
     def __init__(self, service_account_dict: Dict):
         self._service_account_dict = service_account_dict
@@ -39,7 +39,7 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
             )
         except Exception:
             log.get_file_logger(self.__class__).exception(
-                f'Failed to construct {self.google_service_version} {self.google_service_name} service resource',
+                f"Failed to construct {self.google_service_version} {self.google_service_name} service resource",
             )
             raise
 

@@ -45,7 +45,7 @@ from ._xcode_project.arguments import XcodeArgument
 from ._xcode_project.arguments import XcodeProjectArgument
 from ._xcode_project.arguments import XcprettyArgument
 
-P = TypeVar('P', Ipa, MacOsPackage)
+P = TypeVar("P", Ipa, MacOsPackage)
 
 
 class XcodeProjectException(cli.CliAppException):
@@ -59,7 +59,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     """
 
     @cli.action(
-        'detect-bundle-id',
+        "detect-bundle-id",
         XcodeProjectArgument.XCODE_PROJECT_PATTERN,
         XcodeProjectArgument.TARGET_NAME,
         XcodeProjectArgument.CONFIGURATION_NAME,
@@ -72,28 +72,31 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         include_pods: bool = False,
         should_print: bool = True,
     ) -> str:
-        """ Try to deduce the Bundle ID from specified Xcode project """
+        """Try to deduce the Bundle ID from specified Xcode project"""
 
         xcode_projects = self.find_paths(*xcode_project_patterns)
         bundle_ids = Counter[str](
             bundle_id
             for xcode_project in xcode_projects
             for bundle_id in self._detect_project_bundle_ids(
-                xcode_project, target_name, configuration_name, include_pods,
+                xcode_project,
+                target_name,
+                configuration_name,
+                include_pods,
             )
         )
 
         if not bundle_ids:
-            raise XcodeProjectException('Unable to detect Bundle ID')
+            raise XcodeProjectException("Unable to detect Bundle ID")
         bundle_id = bundle_ids.most_common(1)[0][0]
 
-        self.logger.info(Colors.GREEN(f'Chose Bundle ID {bundle_id}'))
+        self.logger.info(Colors.GREEN(f"Chose Bundle ID {bundle_id}"))
         if should_print:
             self.echo(bundle_id)
         return bundle_id
 
     @cli.action(
-        'use-profiles',
+        "use-profiles",
         XcodeProjectArgument.XCODE_PROJECT_PATTERN,
         XcodeProjectArgument.PROFILE_PATHS,
         ExportIpaArgument.EXPORT_OPTIONS_PATH,
@@ -103,14 +106,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         XcodeProjectArgument.USE_PROFILE_ARCHIVE_METHOD,
     )
     def use_profiles(
-            self,
-            xcode_project_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.XCODE_PROJECT_PATTERN.get_default(),
-            profile_path_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.PROFILE_PATHS.get_default(),
-            export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
-            custom_export_options: Optional[Union[Dict, CustomExportOptions]] = None,
-            warn_only: bool = False,
-            code_signing_setup_verbose_logging: bool = False,
-            archive_method: Optional[ArchiveMethod] = None,
+        self,
+        xcode_project_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.XCODE_PROJECT_PATTERN.get_default(),
+        profile_path_patterns: Sequence[pathlib.Path] = XcodeProjectArgument.PROFILE_PATHS.get_default(),
+        export_options_plist: pathlib.Path = ExportIpaArgument.EXPORT_OPTIONS_PATH.get_default(),
+        custom_export_options: Optional[Union[Dict, CustomExportOptions]] = None,
+        warn_only: bool = False,
+        code_signing_setup_verbose_logging: bool = False,
+        archive_method: Optional[ArchiveMethod] = None,
     ):
         """
         Set up code signing settings on specified Xcode projects
@@ -121,7 +124,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if isinstance(custom_export_options, CustomExportOptions):
             custom_export_options = custom_export_options.value
 
-        self.logger.info(Colors.BLUE('Configure code signing settings'))
+        self.logger.info(Colors.BLUE("Configure code signing settings"))
 
         profile_paths = self.find_paths(*profile_path_patterns)
         xcode_projects = self.find_paths(*xcode_project_patterns)
@@ -145,20 +148,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 )
             except (ValueError, IOError) as error:
                 if warn_only:
-                    self.logger.warning(Colors.YELLOW(f'Using profiles on {xcode_project} failed'))
+                    self.logger.warning(Colors.YELLOW(f"Using profiles on {xcode_project} failed"))
                 else:
                     raise XcodeProjectException(*error.args)
 
         code_signing_settings_manager.notify_profile_usage()
         export_options = code_signing_settings_manager.generate_export_options(custom_export_options)
-        export_options.notify(Colors.GREEN('Generated options for exporting the project'))
+        export_options.notify(Colors.GREEN("Generated options for exporting the project"))
         export_options.save(export_options_plist)
 
-        self.logger.info(Colors.GREEN(f'Saved export options to {export_options_plist}'))
+        self.logger.info(Colors.GREEN(f"Saved export options to {export_options_plist}"))
         return export_options
 
     @cli.action(
-        'clean',
+        "clean",
         XcodeProjectArgument.XCODE_PROJECT_PATH,
         XcodeProjectArgument.XCODE_WORKSPACE_PATH,
         XcodeProjectArgument.TARGET_NAME,
@@ -186,7 +189,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self._clean(xcodebuild)
 
     @cli.action(
-        'show-build-settings',
+        "show-build-settings",
         XcodeProjectArgument.XCODE_PROJECT_PATH,
         XcodeProjectArgument.XCODE_WORKSPACE_PATH,
         XcodeProjectArgument.TARGET_NAME,
@@ -208,7 +211,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self._show_build_settings(xcodebuild, show_output=True)
 
     @cli.action(
-        'build-ipa',
+        "build-ipa",
         XcodeProjectArgument.XCODE_PROJECT_PATH,
         XcodeProjectArgument.XCODE_WORKSPACE_PATH,
         XcodeProjectArgument.TARGET_NAME,
@@ -257,12 +260,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
 
         xcode = Xcode.get_selected()
-        self.logger.info(Colors.BLUE(f'Using Xcode {xcode.version} ({xcode.build_version})\n'))
+        self.logger.info(Colors.BLUE(f"Using Xcode {xcode.version} ({xcode.build_version})\n"))
 
         clean and self._clean(xcodebuild)
         show_build_settings and self._show_build_settings(xcodebuild, show_output=self.verbose)
 
-        self.logger.info(Colors.BLUE(f'Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.BLUE(f"Archive {(xcodebuild.workspace or xcodebuild.xcode_project).name}"))
         try:
             xcarchive = xcodebuild.archive(
                 export_options,
@@ -273,11 +276,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
         except IOError as error:
             raise XcodeProjectException(*error.args)
-        self.logger.info(Colors.GREEN(f'Successfully created archive at {xcarchive}\n'))
+        self.logger.info(Colors.GREEN(f"Successfully created archive at {xcarchive}\n"))
 
         self._update_export_options(xcarchive, export_options_plist, export_options)
 
-        self.logger.info(Colors.BLUE(f'Export {xcarchive} to {ipa_directory}'))
+        self.logger.info(Colors.BLUE(f"Export {xcarchive} to {ipa_directory}"))
         try:
             ipa = xcodebuild.export_archive(
                 xcarchive,
@@ -289,17 +292,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except IOError as error:
             raise XcodeProjectException(*error.args)
         else:
-            self.logger.info(Colors.GREEN(f'Successfully exported ipa to {ipa}\n'))
+            self.logger.info(Colors.GREEN(f"Successfully exported ipa to {ipa}\n"))
         finally:
             if not disable_xcpretty:
-                self.logger.info(f'Raw xcodebuild logs stored in {xcodebuild.logs_path}')
+                self.logger.info(f"Raw xcodebuild logs stored in {xcodebuild.logs_path}")
             if xcarchive is not None and remove_xcarchive:
-                self.logger.info(f'Removing generated xcarchive {xcarchive.resolve()}')
+                self.logger.info(f"Removing generated xcarchive {xcarchive.resolve()}")
                 shutil.rmtree(xcarchive, ignore_errors=True)
         return ipa
 
     @cli.action(
-        'pkg-info',
+        "pkg-info",
         XcodeProjectArgument.PKG_PATH,
         XcodeProjectArgument.JSON_OUTPUT,
     )
@@ -321,7 +324,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         )
 
     @cli.action(
-        'ipa-info',
+        "ipa-info",
         XcodeProjectArgument.IPA_PATH,
         XcodeProjectArgument.JSON_OUTPUT,
     )
@@ -343,7 +346,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         )
 
     @cli.action(
-        'test-destinations',
+        "test-destinations",
         TestArgument.RUNTIMES,
         TestArgument.SIMULATOR_NAME,
         TestArgument.INCLUDE_UNAVAILABLE,
@@ -366,13 +369,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         except ValueError as ve:
             TestArgument.RUNTIMES.raise_argument_error(str(ve))
 
-        self.logger.info(Colors.BLUE('List available test devices'))
+        self.logger.info(Colors.BLUE("List available test devices"))
         try:
             simulators = Simulator.list(runtimes, simulator_name, include_unavailable)
         except IOError as e:
             raise XcodeProjectException(str(e)) from e
         if not simulators:
-            raise XcodeProjectException('No simulator runtimes are available')
+            raise XcodeProjectException("No simulator runtimes are available")
 
         if should_print:
             if json_output:
@@ -382,12 +385,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 for s in simulators:
                     runtime_simulators[s.runtime].append(s)
                 for runtime in sorted(runtime_simulators.keys()):
-                    self.echo(Colors.GREEN('Runtime: %s'), runtime)
+                    self.echo(Colors.GREEN("Runtime: %s"), runtime)
                     for simulator in runtime_simulators[runtime]:
-                        self.echo(f'- {simulator.name}')
+                        self.echo(f"- {simulator.name}")
         return simulators
 
-    @cli.action('default-test-destination', XcodeProjectArgument.JSON_OUTPUT)
+    @cli.action("default-test-destination", XcodeProjectArgument.JSON_OUTPUT)
     def get_default_test_destination(
         self,
         json_output: bool = False,
@@ -398,7 +401,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         xcode = Xcode.get_selected()
         if should_print:
-            msg_template = 'Show default test destination for Xcode %s (%s)'
+            msg_template = "Show default test destination for Xcode %s (%s)"
             self.logger.info(Colors.BLUE(msg_template), xcode.version, xcode.build_version)
 
         try:
@@ -410,11 +413,11 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             if json_output:
                 self.echo(json.dumps(simulator.dict(), indent=4))
             else:
-                self.echo(Colors.GREEN(f'{simulator.runtime} {simulator.name}'))
+                self.echo(Colors.GREEN(f"{simulator.runtime} {simulator.name}"))
         return simulator
 
     @cli.action(
-        'run-tests',
+        "run-tests",
         XcodeProjectArgument.XCODE_PROJECT_PATH,
         XcodeProjectArgument.XCODE_WORKSPACE_PATH,
         XcodeProjectArgument.TARGET_NAME,
@@ -465,7 +468,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
-        self.echo(Colors.BLUE(f'Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+        self.echo(Colors.BLUE(f"Run tests for {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n"))
         xcresult_collector = XcResultCollector()
         xcresult_collector.ignore_results(Xcode.DERIVED_DATA_PATH)
         try:
@@ -481,17 +484,17 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             )
         except IOError:
             testing_failed = True
-            self.echo(Colors.RED('\nTest run failed\n'))
+            self.echo(Colors.RED("\nTest run failed\n"))
         else:
             testing_failed = False
-            self.echo(Colors.GREEN('\nTest run completed successfully\n'))
+            self.echo(Colors.GREEN("\nTest run completed successfully\n"))
         xcresult_collector.gather_results(Xcode.DERIVED_DATA_PATH)
 
         output_dir.mkdir(parents=True, exist_ok=True)
         self._copy_simulator_logs(simulators, output_dir)
 
         if not xcresult_collector.get_collected_results():
-            raise XcodeProjectException('Did not find any test results')
+            raise XcodeProjectException("Did not find any test results")
 
         test_suites, xcresult = self._get_test_suites(
             xcresult_collector,
@@ -500,10 +503,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         )
 
         message = (
-            f'Executed {test_suites.tests} tests with '
-            f'{test_suites.failures} failures and '
-            f'{test_suites.errors} errors in '
-            f'{test_suites.time:.2f} seconds.\n'
+            f"Executed {test_suites.tests} tests with "
+            f"{test_suites.failures} failures and "
+            f"{test_suites.errors} errors in "
+            f"{test_suites.time:.2f} seconds.\n"
         )
         self.echo(Colors.BLUE(message))
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
@@ -511,10 +514,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         if not graceful_exit:
             if testing_failed or (test_suites and test_suites.has_failed_tests()):
-                raise XcodeProjectException('Tests failed')
+                raise XcodeProjectException("Tests failed")
 
     @cli.action(
-        'test-summary',
+        "test-summary",
         TestResultArgument.XCRESULT_PATTERNS,
         TestResultArgument.XCRESULT_DIRS,
     )
@@ -529,13 +532,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcresult_collector = self._collect_xcresults(xcresult_patterns, xcresult_dirs)
         xcresults = xcresult_collector.get_collected_results()
         if not xcresults:
-            raise XcodeProjectException('Did not find any Xcode test results for given patterns')
+            raise XcodeProjectException("Did not find any Xcode test results for given patterns")
 
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
 
     @cli.action(
-        'junit-test-results',
+        "junit-test-results",
         TestResultArgument.XCRESULT_PATTERNS,
         TestResultArgument.XCRESULT_DIRS,
         TestResultArgument.OUTPUT_DIRECTORY,
@@ -554,23 +557,23 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcresult_collector = self._collect_xcresults(xcresult_patterns, xcresult_dirs)
         xcresults = xcresult_collector.get_collected_results()
         if not xcresults:
-            raise XcodeProjectException('Did not find any Xcode test results for given patterns')
+            raise XcodeProjectException("Did not find any Xcode test results for given patterns")
 
         test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
         output_dir.mkdir(parents=True, exist_ok=True)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
     def _clean(self, xcodebuild: Xcodebuild):
-        self.logger.info(Colors.BLUE(f'Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}'))
+        self.logger.info(Colors.BLUE(f"Clean {(xcodebuild.workspace or xcodebuild.xcode_project).name}"))
         try:
             xcodebuild.clean()
         except IOError as error:
             raise XcodeProjectException(*error.args)
-        self.logger.info(Colors.GREEN(f'Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n'))
+        self.logger.info(Colors.GREEN(f"Cleaned {(xcodebuild.workspace or xcodebuild.xcode_project).name}\n"))
 
     def _show_build_settings(self, xcodebuild: Xcodebuild, *, show_output: bool = True):
         project_name = (xcodebuild.workspace or xcodebuild.xcode_project).name
-        self.logger.info(Colors.BLUE(f'Check {project_name} build settings'))
+        self.logger.info(Colors.BLUE(f"Check {project_name} build settings"))
         try:
             xcodebuild.show_build_settings(show_output)
         except IOError as error:
@@ -583,13 +586,13 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     ) -> XcResultCollector:
         glob_patterns: List[pathlib.Path] = []
 
-        for xcresult_pattern in (xcresult_patterns or []):
-            if xcresult_pattern.suffix != '.xcresult':
-                raise TestResultArgument.XCRESULT_PATTERNS.raise_argument_error('Not a Xcode Test Result pattern')
+        for xcresult_pattern in xcresult_patterns or []:
+            if xcresult_pattern.suffix != ".xcresult":
+                raise TestResultArgument.XCRESULT_PATTERNS.raise_argument_error("Not a Xcode Test Result pattern")
             glob_patterns.append(xcresult_pattern)
 
         for xcresult_dir in xcresult_dirs:
-            glob_patterns.append(xcresult_dir / '**/*.xcresult')
+            glob_patterns.append(xcresult_dir / "**/*.xcresult")
 
         xcresult_collector = XcResultCollector()
         for xcresult in self.find_paths(*glob_patterns):
@@ -599,21 +602,21 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
     def _copy_simulator_logs(self, simulators: List[Simulator], target_directory: pathlib.Path):
         for simulator in simulators:
-            simulator_description = f'{simulator.runtime}_{simulator.name}'
+            simulator_description = f"{simulator.runtime}_{simulator.name}"
             log_path = simulator.get_logs_path()
             if not log_path.exists():
-                self.logger.debug('No logs found for simulator %s', simulator)
+                self.logger.debug("No logs found for simulator %s", simulator)
                 continue
 
-            unsafe_destination_name = f'{simulator_description}{log_path.suffix}'
-            destination_path = target_directory / re.sub(r'[^\w.]', '_', unsafe_destination_name)
+            unsafe_destination_name = f"{simulator_description}{log_path.suffix}"
+            destination_path = target_directory / re.sub(r"[^\w.]", "_", unsafe_destination_name)
 
             try:
                 shutil.copy(log_path, destination_path)
             except OSError:
-                self.logger.exception('Saving simulator %s logs to %s failed', simulator_description, destination_path)
+                self.logger.exception("Saving simulator %s logs to %s failed", simulator_description, destination_path)
             else:
-                self.logger.debug('Saved simulator %s logs to %s', simulator_description, destination_path)
+                self.logger.debug("Saved simulator %s logs to %s", simulator_description, destination_path)
 
     def _detect_project_bundle_ids(
         self,
@@ -622,15 +625,14 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         config_name: Optional[str],
         include_pods: bool,
     ) -> List[str]:
-
         def group(bundle_ids):
             groups = defaultdict(list)
             for bundle_id in bundle_ids:
-                groups['$' in bundle_id].append(bundle_id)
+                groups["$" in bundle_id].append(bundle_id)
             return groups[True], groups[False]
 
-        if not include_pods and xcode_project.stem == 'Pods':
-            self.logger.info(f'Skip Bundle ID detection from Pod project {xcode_project}')
+        if not include_pods and xcode_project.stem == "Pods":
+            self.logger.info(f"Skip Bundle ID detection from Pod project {xcode_project}")
             return []
 
         detector = BundleIdDetector(xcode_project, target_name, config_name)
@@ -651,7 +653,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     def _ensure_project_or_workspace(cls, xcode_project, xcode_workspace):
         if xcode_project is None and xcode_workspace is None:
             XcodeProjectArgument.XCODE_WORKSPACE_PATH.raise_argument_error(
-                'Workspace or project argument needs to be specified',
+                "Workspace or project argument needs to be specified",
             )
 
     @classmethod
@@ -673,7 +675,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 simulators = Simulator.find_simulators(requested_devices)
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
-        elif 'macos' in test_sdk.lower():
+        elif "macos" in test_sdk.lower():
             # macOS tests are run on the host machine and no test destinations are required
             simulators = []
         else:
@@ -681,8 +683,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         self.echo(Colors.BLUE(f'Running tests on {"simulators:" if simulators else "macOS"}'))
         for s in simulators:
-            self.echo('- %s %s (%s)', s.runtime, s.name, s.udid)
-        self.echo('')
+            self.echo("- %s %s (%s)", s.runtime, s.name, s.udid)
+        self.echo("")
         return simulators
 
     @classmethod
@@ -694,7 +696,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         configuration_name: Optional[str] = None,
         scheme_name: Optional[str] = None,
         disable_xcpretty: bool = False,
-        xcpretty_options: str = '',
+        xcpretty_options: str = "",
         **_,
     ) -> Xcodebuild:
         try:
@@ -716,10 +718,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         save_xcresult_dir: Optional[pathlib.Path] = None,
     ):
         if show_found_result:
-            self.logger.info(Colors.GREEN('Found test results at'))
+            self.logger.info(Colors.GREEN("Found test results at"))
             for xcresult in xcresult_collector.get_collected_results():
-                self.logger.info('- %s', xcresult)
-            self.logger.info('')
+                self.logger.info("- %s", xcresult)
+            self.logger.info("")
 
         xcresult = xcresult_collector.get_merged_xcresult()
         try:
@@ -737,9 +739,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         output_dir: pathlib.Path,
         output_extension: str,
     ):
-        result_path = output_dir / f'{xcresult.stem}.{output_extension}'
+        result_path = output_dir / f"{xcresult.stem}.{output_extension}"
         test_suites.save_xml(result_path)
-        self.echo(Colors.GREEN('Saved JUnit XML report to %s'), result_path)
+        self.echo(Colors.GREEN("Saved JUnit XML report to %s"), result_path)
 
     def _update_export_options(
         self,
@@ -758,18 +760,18 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         archive_entitlements = CodeSignEntitlements.from_xcarchive(xcarchive)
         icloud_services = archive_entitlements.get_icloud_services()
-        if not {'CloudKit', 'CloudDocuments'}.intersection(icloud_services):
+        if not {"CloudKit", "CloudDocuments"}.intersection(icloud_services):
             return
 
-        if 'Production' in archive_entitlements.get_icloud_container_environments():
-            icloud_container_environment = 'Production'
+        if "Production" in archive_entitlements.get_icloud_container_environments():
+            icloud_container_environment = "Production"
         else:
-            icloud_container_environment = 'Development'
+            icloud_container_environment = "Development"
 
-        self.echo('App is using iCloud services that require iCloudContainerEnvironment export option')
-        self.echo('Set iCloudContainerEnvironment export option to %s', icloud_container_environment)
-        export_options.set_value('iCloudContainerEnvironment', icloud_container_environment)
-        export_options.notify(Colors.GREEN('\nUsing options for exporting IPA'))
+        self.echo("App is using iCloud services that require iCloudContainerEnvironment export option")
+        self.echo("Set iCloudContainerEnvironment export option to %s", icloud_container_environment)
+        export_options.set_value("iCloudContainerEnvironment", icloud_container_environment)
+        export_options.notify(Colors.GREEN("\nUsing options for exporting IPA"))
         export_options.save(export_options_path)
 
     def _show_application_package_info(
@@ -794,5 +796,5 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         return application_package
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     XcodeProject.invoke_cli()

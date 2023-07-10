@@ -24,7 +24,7 @@ class AbstractShellTool(
     def executable(self) -> str:
         executable = shutil.which(self._executable_name)
         if executable is None:
-            raise ValueError(f'{self._executable_name!r} executable is not present on the system')
+            raise ValueError(f"{self._executable_name!r} executable is not present on the system")
         return pathlib.Path(executable).name
 
     def _ensure_executable(self):

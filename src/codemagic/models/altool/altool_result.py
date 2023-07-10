@@ -10,17 +10,14 @@ from typing import Optional
 class ResultBase:
     @classmethod
     def _convert_field_name(cls, name: str) -> str:
-        name = name.replace('-', '_')
-        name = re.sub(r'^NSLocalized', '', name)
-        name = f'{name[0].lower()}{name[1:]}'
-        return re.sub(r'([A-Z])', lambda m: f'_{m.group(1).lower()}', name)
+        name = name.replace("-", "_")
+        name = re.sub(r"^NSLocalized", "", name)
+        name = f"{name[0].lower()}{name[1:]}"
+        return re.sub(r"([A-Z])", lambda m: f"_{m.group(1).lower()}", name)
 
     @classmethod
     def create(cls, **kwargs):
-        return cls(**{
-            cls._convert_field_name(name): value
-            for name, value in kwargs.items()
-        })
+        return cls(**{cls._convert_field_name(name): value for name, value in kwargs.items()})
 
 
 @dataclass

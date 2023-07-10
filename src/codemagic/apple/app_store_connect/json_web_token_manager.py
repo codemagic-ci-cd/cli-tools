@@ -39,9 +39,9 @@ class JsonWebTokenManager(StringConverterMixin):
     def __init__(
         self,
         api_key: ApiKey,
-        token_duration: Seconds = 19*60,
-        audience='appstoreconnect-v1',
-        algorithm='ES256',
+        token_duration: Seconds = 19 * 60,
+        audience="appstoreconnect-v1",
+        algorithm="ES256",
         enable_cache: bool = False,
     ):
         self._logger = log.get_logger(self.__class__)
@@ -58,14 +58,14 @@ class JsonWebTokenManager(StringConverterMixin):
     @property
     def cache_path(self):
         temp_dir = pathlib.Path(tempfile.gettempdir())
-        return temp_dir / '.codemagic-cli-tools' / 'cache' / 'app_store_connect_jwt' / self._key.identifier
+        return temp_dir / ".codemagic-cli-tools" / "cache" / "app_store_connect_jwt" / self._key.identifier
 
     def revoke(self):
         self._jwt = None
         self._revoke_disk_cache()
 
     def _revoke_disk_cache(self):
-        self._logger.debug('Revoke JWT disk cache for App Store Connect key %r', self._key.identifier)
+        self._logger.debug("Revoke JWT disk cache for App Store Connect key %r", self._key.identifier)
         if not self._enable_cache:
             return
 
@@ -79,14 +79,14 @@ class JsonWebTokenManager(StringConverterMixin):
             return
         self.cache_path.parent.mkdir(exist_ok=True, parents=True)
         self.cache_path.write_text(token)
-        self._logger.debug('Cached App Store Connect JWT for key %s', self._key.identifier)
+        self._logger.debug("Cached App Store Connect JWT for key %s", self._key.identifier)
 
     def _encode_token(self, jwt_payload: JwtPayload):
         return jwt.encode(
             jwt_payload,
             self._key.private_key,
             algorithm=self._algorithm,
-            headers={'kid': self._key.identifier},
+            headers={"kid": self._key.identifier},
         )
 
     def _decode_payload(self, token: str) -> JwtPayload:
@@ -99,39 +99,39 @@ class JsonWebTokenManager(StringConverterMixin):
 
     def _load_jwt_from_disk(self) -> JWT:
         if not self._enable_cache:
-            raise JwtCacheError('Disk cache is disabled')
-        self._logger.debug('Load JWT for App Store Connect key %r from disk cache', self._key.identifier)
+            raise JwtCacheError("Disk cache is disabled")
+        self._logger.debug("Load JWT for App Store Connect key %r from disk cache", self._key.identifier)
         try:
             token = self.cache_path.read_text().strip()
         except FileNotFoundError:
-            raise JwtCacheError('Token is not cached', self._key.identifier)
+            raise JwtCacheError("Token is not cached", self._key.identifier)
 
         try:
             payload = self._decode_payload(token)
-            expiration_timestamp = int(payload['exp'])
+            expiration_timestamp = int(payload["exp"])
             expires_at = datetime.fromtimestamp(expiration_timestamp)
-            issuer_id = payload['iss']
+            issuer_id = payload["iss"]
         except (ValueError, TypeError, KeyError, jwt.InvalidTokenError):
             self._revoke_disk_cache()
-            raise JwtCacheError('Cached token is invalid', self._key.identifier)
+            raise JwtCacheError("Cached token is invalid", self._key.identifier)
 
         if issuer_id != self._key.issuer_id:
             self._revoke_disk_cache()
-            raise JwtCacheError('Cached token is invalid', self._key.identifier)
+            raise JwtCacheError("Cached token is invalid", self._key.identifier)
         elif self._is_expired(expires_at):
             self._revoke_disk_cache()
-            raise JwtCacheError('Cached token is expired', expires_at)
+            raise JwtCacheError("Cached token is expired", expires_at)
 
-        self._logger.debug('Loaded JWT for App Store Connect from disk cache')
+        self._logger.debug("Loaded JWT for App Store Connect from disk cache")
         return JWT(self._key.identifier, token, payload, expires_at)
 
     def _generate_jwt(self) -> JWT:
-        self._logger.debug('Generate new App Store Connect JWT for key %r', self._key.identifier)
+        self._logger.debug("Generate new App Store Connect JWT for key %r", self._key.identifier)
         expires_at = datetime.now() + timedelta(seconds=self._token_duration)
         payload = {
-            'iss': self._key.issuer_id,
-            'exp': int(expires_at.timestamp()),
-            'aud': self._audience,
+            "iss": self._key.issuer_id,
+            "exp": int(expires_at.timestamp()),
+            "aud": self._audience,
         }
         token = self._encode_token(payload)
         return JWT(self._key.identifier, self._str(token), payload, expires_at)
@@ -147,7 +147,7 @@ class JsonWebTokenManager(StringConverterMixin):
         try:
             self._jwt = self._load_jwt_from_disk()
         except JwtCacheError as e:
-            self._logger.debug('Failed to load App Store Connect JWT from disk cache: %s', e.args[0])
+            self._logger.debug("Failed to load App Store Connect JWT from disk cache: %s", e.args[0])
             self._jwt = self._generate_jwt()
             self._write_disk_cache(self._jwt.token)
         return self._jwt

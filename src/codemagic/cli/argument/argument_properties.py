@@ -45,7 +45,7 @@ class ArgumentProperties(NamedTuple):
         return flags[flag_index]
 
     def _get_parser_argument(self):
-        return getattr(self, '__parser_argument')
+        return getattr(self, "__parser_argument")
 
     def _set_parser_argument(self, parser_argument):
-        setattr(self, '__parser_argument', parser_argument)
+        setattr(self, "__parser_argument", parser_argument)

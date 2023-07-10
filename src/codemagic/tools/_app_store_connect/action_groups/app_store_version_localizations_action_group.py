@@ -18,9 +18,8 @@ from ..arguments import Types
 
 
 class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
     @cli.action(
-        'get',
+        "get",
         AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_ID,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_LOCALIZATIONS,
     )
@@ -40,7 +39,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         )
 
     @cli.action(
-        'create',
+        "create",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
         AppStoreVersionLocalizationArgument.LOCALE,
         AppStoreVersionLocalizationArgument.DESCRIPTION,
@@ -84,7 +83,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         )
 
     @cli.action(
-        'modify',
+        "modify",
         AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_ID,
         AppStoreVersionLocalizationArgument.DESCRIPTION,
         AppStoreVersionLocalizationArgument.KEYWORDS,
@@ -122,7 +121,7 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         )
 
     @cli.action(
-        'delete',
+        "delete",
         AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_ID,
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_LOCALIZATIONS,

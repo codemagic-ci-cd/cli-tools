@@ -20,14 +20,13 @@ from .application_package import Ipa
 
 
 class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
-
     def __init__(self, entitlement_data: Dict[str, Any]):
         self.plist: Dict[str, Any] = entitlement_data
         self.logger = log.get_logger(self.__class__)
 
     @classmethod
     def _ensure_codesign(cls):
-        if shutil.which('codesign') is None:
+        if shutil.which("codesign") is None:
             raise IOError('Missing executable "codesign"')
 
     @classmethod
@@ -38,7 +37,8 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     def _get_codesign_command(cls, app_path: pathlib.Path) -> Tuple[str, ...]:
         from codemagic.models import Xcode
-        if Xcode.get_selected().version < LooseVersion('13.3'):
+
+        if Xcode.get_selected().version < LooseVersion("13.3"):
             # The "--entitlements" option of codesign takes "path" parameter to specify where the
             # entitlements should be displayed. In order to send the output to stdout instead
             # of file, "-" needs to be specified. Until Xcode 13.2 it had the following
@@ -46,7 +46,7 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
             # > By default, the binary "blob" header is returned intact;
             # > prefix the path with a colon ":" to automatically strip it off.
             # Hence entitlements path needs to be given as ":-".
-            command: Tuple[str, ...] = ('codesign', '--display', '--entitlements', ':-', str(app_path))
+            command: Tuple[str, ...] = ("codesign", "--display", "--entitlements", ":-", str(app_path))
         else:
             # Starting from Xcode 13.3 codesign command line API changed a little.
             # By default the displayed information is not in plist/xml format any more:
@@ -55,7 +55,7 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
             # Hence the need for additional "--xml" option. Additionally
             # specifying ':' in the path was deprecated and when xml formatting is requested,
             # then binary blob header is automatically removed.
-            command = ('codesign', '--display', '--entitlements', '-', '--xml', str(app_path))
+            command = ("codesign", "--display", "--entitlements", "-", "--xml", str(app_path))
         return command
 
     @classmethod
@@ -71,10 +71,10 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
             else:
                 output = subprocess.check_output(cmd, stderr=subprocess.PIPE)
         except subprocess.CalledProcessError as cpe:
-            raise IOError(f'Failed to obtain entitlements from {app_path}, {cls._str(cpe.stderr)}')
+            raise IOError(f"Failed to obtain entitlements from {app_path}, {cls._str(cpe.stderr)}")
 
         # With Xcode 13.3+ codesign adds a 0 byte to the end of the XML formatted plist
-        plist = cls._bytes(output).rstrip(b'\x00')
+        plist = cls._bytes(output).rstrip(b"\x00")
 
         return cls.from_plist(plist)
 
@@ -84,25 +84,25 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
             try:
                 app_path = Ipa(ipa_path).extract_app(pathlib.Path(td))
             except IOError:
-                raise IOError(f'Failed to obtain entitlements from {ipa_path}, .app not found')
+                raise IOError(f"Failed to obtain entitlements from {ipa_path}, .app not found")
             return cls.from_app(app_path)
 
     @classmethod
     def from_xcarchive(cls, xcarchive_path: pathlib.Path) -> CodeSignEntitlements:
-        app_path = next((xcarchive_path.glob('Products/Applications/*.app')), None)
+        app_path = next((xcarchive_path.glob("Products/Applications/*.app")), None)
         if not app_path:
-            raise IOError(f'Failed to obtain entitlements from {xcarchive_path}, .app not found')
+            raise IOError(f"Failed to obtain entitlements from {xcarchive_path}, .app not found")
         return cls.from_app(app_path)
 
     def get_icloud_container_environments(self) -> List[str]:
-        environment = self.plist.get('com.apple.developer.icloud-container-environment')
+        environment = self.plist.get("com.apple.developer.icloud-container-environment")
         if environment is None:
             return []
         elif isinstance(environment, str):
             return [environment]
         elif isinstance(environment, list):
             return environment
-        raise ValueError(f'Unknown type for environment: {type(environment)}')
+        raise ValueError(f"Unknown type for environment: {type(environment)}")
 
     def get_icloud_services(self) -> List[str]:
-        return self.plist.get('com.apple.developer.icloud-services', [])
+        return self.plist.get("com.apple.developer.icloud-services", [])

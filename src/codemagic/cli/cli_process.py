@@ -20,11 +20,13 @@ from .cli_types import ObfuscatedCommand
 
 
 class CliProcess:
-
-    def __init__(self, command_args: Sequence[CommandArg],
-                 safe_form: Optional[ObfuscatedCommand] = None,
-                 print_streams: bool = True,
-                 dry: bool = False):
+    def __init__(
+        self,
+        command_args: Sequence[CommandArg],
+        safe_form: Optional[ObfuscatedCommand] = None,
+        print_streams: bool = True,
+        dry: bool = False,
+    ):
         self.logger = log.get_logger(self.__class__)
         self.duration: float = 0
         self._process: Optional[subprocess.Popen] = None
@@ -34,10 +36,10 @@ class CliProcess:
         self._buffer_size = 8192
         self.safe_form = safe_form
         if safe_form is None:
-            full_command = ' '.join(shlex.quote(str(arg)) for arg in command_args)
+            full_command = " ".join(shlex.quote(str(arg)) for arg in command_args)
             self.safe_form = ObfuscatedCommand(full_command)
-        self._stdout = ''
-        self._stderr = ''
+        self._stdout = ""
+        self._stderr = ""
         self._stdout_stream: Optional[CliProcessStream] = None
         self._stderr_stream: Optional[CliProcessStream] = None
 
@@ -60,10 +62,10 @@ class CliProcess:
             self.logger.debug(f'Execute "{self.safe_form}"')
 
     def _log_exec_completed(self):
-        duration = time.strftime('%M:%S', time.gmtime(self.duration))
+        duration = time.strftime("%M:%S", time.gmtime(self.duration))
         file_logger = log.get_file_logger(self.__class__)
-        file_logger.debug('STDOUT: %s', self.stdout)
-        file_logger.debug('STDERR: %s', self.stderr)
+        file_logger.debug("STDOUT: %s", self.stdout)
+        file_logger.debug("STDERR: %s", self.stderr)
         self.logger.debug(f'Completed "{self.safe_form}" with returncode {self.returncode} in {duration}')
 
     def _handle_streams(self, buffer_size: Optional[int] = None):
@@ -81,11 +83,11 @@ class CliProcess:
             self._stderr_stream = CliProcessStream.create(self._process.stderr, sys.stderr, blocking=False)
 
     def execute(
-            self,
-            stdout: Union[int, IO] = subprocess.PIPE,
-            stderr: Union[int, IO] = subprocess.PIPE,
-            env: Optional[Dict[str, str]] = None,
-            poll_interval: float = 0.01,
+        self,
+        stdout: Union[int, IO] = subprocess.PIPE,
+        stderr: Union[int, IO] = subprocess.PIPE,
+        env: Optional[Dict[str, str]] = None,
+        poll_interval: float = 0.01,
     ) -> CliProcess:
         self._log_exec_started()
         start = time.time()
@@ -114,6 +116,6 @@ class CliProcess:
             stdout = self.stdout
             stderr = self.stderr
         else:
-            stdout = ''
-            stderr = ''
+            stdout = ""
+            stderr = ""
         raise subprocess.CalledProcessError(self.returncode, self._command_args, stdout, stderr)

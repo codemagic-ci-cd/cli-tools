@@ -13,7 +13,7 @@ from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 
-IncludedResource = TypeVar('IncludedResource', bound=Resource)
+IncludedResource = TypeVar("IncludedResource", bound=Resource)
 
 
 class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
@@ -35,15 +35,15 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
     @classmethod
     def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
         if include_type is Build:
-            return 'builds'
-        raise ValueError(f'Unknown include type {include_type}')
+            return "builds"
+        raise ValueError(f"Unknown include type {include_type}")
 
     def list(self, resource_filter: Filter = Filter()) -> List[PreReleaseVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """
         results = self.client.paginate_with_included(
-            f'{self.client.API_URL}/preReleaseVersions',
+            f"{self.client.API_URL}/preReleaseVersions",
             params=resource_filter.as_query_params(),
         )
         return [PreReleaseVersion(prerelease_version) for prerelease_version in results.data]
@@ -57,6 +57,6 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         if isinstance(pre_release_version, PreReleaseVersion) and pre_release_version.relationships is not None:
             url = pre_release_version.relationships.builds.links.related
         if url is None:
-            url = f'{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds'
+            url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds"
 
         return [Build(build) for build in self.client.paginate(url, page_size=None)]

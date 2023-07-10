@@ -5,7 +5,6 @@ import itertools
 from pathlib import Path
 
 import pytest
-
 from codemagic.tools.universal_apk_generator import UniversalApkGenerator
 from codemagic.tools.universal_apk_generator import UniversalApkGeneratorArgument
 
@@ -20,15 +19,18 @@ SIGNING_INFO_ARGS = (
 @pytest.fixture
 def namespace_kwargs():
     return {
-        UniversalApkGeneratorArgument.PATTERN.key: Path('**/*.aab'),
+        UniversalApkGeneratorArgument.PATTERN.key: Path("**/*.aab"),
     }
 
 
-@pytest.mark.parametrize('cli_args', itertools.chain(
-    itertools.combinations(SIGNING_INFO_ARGS, 1),
-    itertools.combinations(SIGNING_INFO_ARGS, 2),
-    itertools.combinations(SIGNING_INFO_ARGS, 3),
-))
+@pytest.mark.parametrize(
+    "cli_args",
+    itertools.chain(
+        itertools.combinations(SIGNING_INFO_ARGS, 1),
+        itertools.combinations(SIGNING_INFO_ARGS, 2),
+        itertools.combinations(SIGNING_INFO_ARGS, 3),
+    ),
+)
 def test_incomplete_signing_info_args(cli_args, cli_argument_group, namespace_kwargs):
     for arg in SIGNING_INFO_ARGS:
         namespace_kwargs[arg.key] = arg.key if arg in cli_args else None
@@ -38,7 +40,7 @@ def test_incomplete_signing_info_args(cli_args, cli_argument_group, namespace_kw
     with pytest.raises(argparse.ArgumentError) as exception_info:
         UniversalApkGenerator.from_cli_args(cli_namespace)
     assert exception_info.value.argument_name in UniversalApkGeneratorArgument.KEYSTORE_PATH.flags
-    assert 'all signing info arguments should be specified' in exception_info.value.message
+    assert "all signing info arguments should be specified" in exception_info.value.message
 
 
 def test_no_signing_info_args(cli_argument_group, namespace_kwargs):

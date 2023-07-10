@@ -1,6 +1,7 @@
 import enum
 from socket import AF_INET6 as AF_INET6
-from typing import Any, NamedTuple
+from typing import Any
+from typing import NamedTuple
 
 POSIX: Any
 WINDOWS: Any
@@ -199,6 +200,7 @@ class pconn(NamedTuple):
 class addr(NamedTuple):
     ip: Any
     port: Any
+
 conn_tmap: Any
 
 class Error(Exception):

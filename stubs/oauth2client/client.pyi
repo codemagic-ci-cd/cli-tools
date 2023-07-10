@@ -1,6 +1,12 @@
 from collections import namedtuple
-from oauth2client import _helpers as _helpers, _pkce as _pkce, clientsecrets as clientsecrets, crypt as crypt, transport as transport
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
+
+from oauth2client import _helpers as _helpers
+from oauth2client import _pkce as _pkce
+from oauth2client import clientsecrets as clientsecrets
+from oauth2client import crypt as crypt
+from oauth2client import transport as transport
 
 HAS_OPENSSL: bool
 HAS_CRYPTO: bool
@@ -17,7 +23,7 @@ _CLOUDSDK_CONFIG_ENV_VAR: str
 ADC_HELP_MSG: Any
 _WELL_KNOWN_CREDENTIALS_FILE: str
 
-AccessTokenInfo = namedtuple('AccessTokenInfo', ['access_token', 'expires_in'])
+AccessTokenInfo = namedtuple("AccessTokenInfo", ["access_token", "expires_in"])
 DEFAULT_ENV_NAME: str
 NO_GCE_CHECK: Any
 GCE_METADATA_TIMEOUT: Any
@@ -96,7 +102,22 @@ class OAuth2Credentials(Credentials):
     scopes: Any = ...
     token_info_uri: Any = ...
     invalid: bool = ...
-    def __init__(self, access_token: Any, client_id: Any, client_secret: Any, refresh_token: Any, token_expiry: Any, token_uri: Any, user_agent: Any, revoke_uri: Optional[Any] = ..., id_token: Optional[Any] = ..., token_response: Optional[Any] = ..., scopes: Optional[Any] = ..., token_info_uri: Optional[Any] = ..., id_token_jwt: Optional[Any] = ...) -> None: ...
+    def __init__(
+        self,
+        access_token: Any,
+        client_id: Any,
+        client_secret: Any,
+        refresh_token: Any,
+        token_expiry: Any,
+        token_uri: Any,
+        user_agent: Any,
+        revoke_uri: Optional[Any] = ...,
+        id_token: Optional[Any] = ...,
+        token_response: Optional[Any] = ...,
+        scopes: Optional[Any] = ...,
+        token_info_uri: Optional[Any] = ...,
+        id_token_jwt: Optional[Any] = ...,
+    ) -> None: ...
     def authorize(self, http: Any): ...
     def refresh(self, http: Any) -> None: ...
     def revoke(self, http: Any) -> None: ...
@@ -135,7 +156,17 @@ def _in_gce_environment(): ...
 
 class GoogleCredentials(OAuth2Credentials):
     NON_SERIALIZED_MEMBERS: Any = ...
-    def __init__(self, access_token: Any, client_id: Any, client_secret: Any, refresh_token: Any, token_expiry: Any, token_uri: Any, user_agent: Any, revoke_uri: Any = ...) -> None: ...
+    def __init__(
+        self,
+        access_token: Any,
+        client_id: Any,
+        client_secret: Any,
+        refresh_token: Any,
+        token_expiry: Any,
+        token_uri: Any,
+        user_agent: Any,
+        revoke_uri: Any = ...,
+    ) -> None: ...
     def create_scoped_required(self): ...
     def create_scoped(self, scopes: Any): ...
     @classmethod
@@ -167,7 +198,14 @@ def _get_application_default_credential_GCE(): ...
 
 class AssertionCredentials(GoogleCredentials):
     assertion_type: Any = ...
-    def __init__(self, assertion_type: Any, user_agent: Optional[Any] = ..., token_uri: Any = ..., revoke_uri: Any = ..., **unused_kwargs: Any) -> None: ...
+    def __init__(
+        self,
+        assertion_type: Any,
+        user_agent: Optional[Any] = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+        **unused_kwargs: Any,
+    ) -> None: ...
     def _generate_refresh_request_body(self): ...
     def _generate_assertion(self) -> None: ...
     def _revoke(self, http: Any) -> None: ...
@@ -177,8 +215,32 @@ def _require_crypto_or_die() -> None: ...
 def verify_id_token(id_token: Any, audience: Any, http: Optional[Any] = ..., cert_uri: Any = ...): ...
 def _extract_id_token(id_token: Any): ...
 def _parse_exchange_token_response(content: Any): ...
-def credentials_from_code(client_id: Any, client_secret: Any, scope: Any, code: Any, redirect_uri: str = ..., http: Optional[Any] = ..., user_agent: Optional[Any] = ..., token_uri: Any = ..., auth_uri: Any = ..., revoke_uri: Any = ..., device_uri: Any = ..., token_info_uri: Any = ..., pkce: bool = ..., code_verifier: Optional[Any] = ...): ...
-def credentials_from_clientsecrets_and_code(filename: Any, scope: Any, code: Any, message: Optional[Any] = ..., redirect_uri: str = ..., http: Optional[Any] = ..., cache: Optional[Any] = ..., device_uri: Optional[Any] = ...): ...
+def credentials_from_code(
+    client_id: Any,
+    client_secret: Any,
+    scope: Any,
+    code: Any,
+    redirect_uri: str = ...,
+    http: Optional[Any] = ...,
+    user_agent: Optional[Any] = ...,
+    token_uri: Any = ...,
+    auth_uri: Any = ...,
+    revoke_uri: Any = ...,
+    device_uri: Any = ...,
+    token_info_uri: Any = ...,
+    pkce: bool = ...,
+    code_verifier: Optional[Any] = ...,
+): ...
+def credentials_from_clientsecrets_and_code(
+    filename: Any,
+    scope: Any,
+    code: Any,
+    message: Optional[Any] = ...,
+    redirect_uri: str = ...,
+    http: Optional[Any] = ...,
+    cache: Optional[Any] = ...,
+    device_uri: Optional[Any] = ...,
+): ...
 
 class DeviceFlowInfo:
     @classmethod
@@ -202,9 +264,42 @@ class OAuth2WebServerFlow(Flow):
     _pkce: Any = ...
     code_verifier: Any = ...
     params: Any = ...
-    def __init__(self, client_id: Any, client_secret: Optional[Any] = ..., scope: Optional[Any] = ..., redirect_uri: Optional[Any] = ..., user_agent: Optional[Any] = ..., auth_uri: Any = ..., token_uri: Any = ..., revoke_uri: Any = ..., login_hint: Optional[Any] = ..., device_uri: Any = ..., token_info_uri: Any = ..., authorization_header: Optional[Any] = ..., pkce: bool = ..., code_verifier: Optional[Any] = ..., **kwargs: Any) -> None: ...
+    def __init__(
+        self,
+        client_id: Any,
+        client_secret: Optional[Any] = ...,
+        scope: Optional[Any] = ...,
+        redirect_uri: Optional[Any] = ...,
+        user_agent: Optional[Any] = ...,
+        auth_uri: Any = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+        login_hint: Optional[Any] = ...,
+        device_uri: Any = ...,
+        token_info_uri: Any = ...,
+        authorization_header: Optional[Any] = ...,
+        pkce: bool = ...,
+        code_verifier: Optional[Any] = ...,
+        **kwargs: Any,
+    ) -> None: ...
     def step1_get_authorize_url(self, redirect_uri: Optional[Any] = ..., state: Optional[Any] = ...): ...
     def step1_get_device_and_user_codes(self, http: Optional[Any] = ...): ...
-    def step2_exchange(self, code: Optional[Any] = ..., http: Optional[Any] = ..., device_flow_info: Optional[Any] = ...): ...
+    def step2_exchange(
+        self,
+        code: Optional[Any] = ...,
+        http: Optional[Any] = ...,
+        device_flow_info: Optional[Any] = ...,
+    ): ...
 
-def flow_from_clientsecrets(filename: Any, scope: Any, redirect_uri: Optional[Any] = ..., message: Optional[Any] = ..., cache: Optional[Any] = ..., login_hint: Optional[Any] = ..., device_uri: Optional[Any] = ..., pkce: Optional[Any] = ..., code_verifier: Optional[Any] = ..., prompt: Optional[Any] = ...): ...
+def flow_from_clientsecrets(
+    filename: Any,
+    scope: Any,
+    redirect_uri: Optional[Any] = ...,
+    message: Optional[Any] = ...,
+    cache: Optional[Any] = ...,
+    login_hint: Optional[Any] = ...,
+    device_uri: Optional[Any] = ...,
+    pkce: Optional[Any] = ...,
+    code_verifier: Optional[Any] = ...,
+    prompt: Optional[Any] = ...,
+): ...

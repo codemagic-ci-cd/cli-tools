@@ -30,22 +30,22 @@ class ArgumentParserBuilder:
         self._cli_action = cli_action
         self._action_parser = self._create_action_parser(parent_parser, for_deprecated_alias)
         self._required_arguments = self._action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Required arguments for command {Colors.BOLD(cli_action.action_name)}'),
+            Colors.UNDERLINE(f"Required arguments for command {Colors.BOLD(cli_action.action_name)}"),
         )
         self._optional_arguments = self._action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Optional arguments for command {Colors.BOLD(cli_action.action_name)}'),
+            Colors.UNDERLINE(f"Optional arguments for command {Colors.BOLD(cli_action.action_name)}"),
         )
         self._custom_arguments_groups: Dict[str, ArgumentGroup] = {}
 
     def _create_action_parser(self, parent_parser: SubParsersAction, for_deprecated_alias: bool):
         if for_deprecated_alias:
             if self._cli_action.deprecated_alias is None:
-                raise RuntimeError(f'Deprecated alias requested for {self._cli_action.action_name} without alias')
-            deprecation_message = Colors.YELLOW(Colors.BOLD(f'Deprecated alias for `{self._full_action_name}`.'))
+                raise RuntimeError(f"Deprecated alias requested for {self._cli_action.action_name} without alias")
+            deprecation_message = Colors.YELLOW(Colors.BOLD(f"Deprecated alias for `{self._full_action_name}`."))
             return parent_parser.add_parser(
                 self._cli_action.deprecated_alias,
                 formatter_class=CliHelpFormatter,
-                description=f'{deprecation_message} {Colors.BOLD(self._cli_action.__doc__)}',
+                description=f"{deprecation_message} {Colors.BOLD(self._cli_action.__doc__)}",
             )
         else:
             return parent_parser.add_parser(
@@ -59,32 +59,45 @@ class ArgumentParserBuilder:
     def _full_action_name(self) -> str:
         executable = self._cli_app.get_executable_name()
         if self._cli_action.action_group:
-            return f'{executable} {self._cli_action.action_group.name} {self._cli_action.action_name}'
+            return f"{executable} {self._cli_action.action_group.name} {self._cli_action.action_name}"
         else:
-            return f'{executable} {self._cli_action.action_name}'
+            return f"{executable} {self._cli_action.action_name}"
 
     @classmethod
     def set_default_cli_options(cls, cli_options_parser):
-        options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE('Options'))
+        options_group = cli_options_parser.add_argument_group(Colors.UNDERLINE("Options"))
         options_group.add_argument(
-            '--log-stream', type=str, default='stderr', choices=['stderr', 'stdout'],
+            "--log-stream",
+            type=str,
+            default="stderr",
+            choices=["stderr", "stdout"],
             help=f'Log output stream. {ArgumentFormatter.format_default_value("stderr")}',
         )
         options_group.add_argument(
-            '--no-color', dest='no_color', action='store_true',
-            help='Do not use ANSI colors to format terminal output',
+            "--no-color",
+            dest="no_color",
+            action="store_true",
+            help="Do not use ANSI colors to format terminal output",
         )
         options_group.add_argument(
-            '--version', dest='show_version', action='store_true',
-            help='Show tool version and exit',
+            "--version",
+            dest="show_version",
+            action="store_true",
+            help="Show tool version and exit",
         )
         options_group.add_argument(
-            '-s', '--silent', dest='enable_logging', action='store_false',
-            help='Disable log output for commands',
+            "-s",
+            "--silent",
+            dest="enable_logging",
+            action="store_false",
+            help="Disable log output for commands",
         )
         options_group.add_argument(
-            '-v', '--verbose', dest='verbose', action='store_true',
-            help='Enable verbose logging for commands',
+            "-v",
+            "--verbose",
+            dest="verbose",
+            action="store_true",
+            help="Enable verbose logging for commands",
         )
 
         options_group.set_defaults(
@@ -99,7 +112,7 @@ class ArgumentParserBuilder:
             argument_group = self._custom_arguments_groups[group_name]
         except KeyError:
             group_description = Colors.UNDERLINE(
-                f'Optional arguments for command {self._cli_action.action_name} to {Colors.BOLD(group_name)}',
+                f"Optional arguments for command {self._cli_action.action_name} to {Colors.BOLD(group_name)}",
             )
             argument_group = self._action_parser.add_argument_group(group_description)
             self._custom_arguments_groups[group_name] = argument_group
@@ -118,10 +131,10 @@ class ArgumentParserBuilder:
     def _setup_cli_app_options(self):
         executable = self._action_parser.prog.split()[0]
         tool_required_arguments = self._action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Required arguments for {Colors.BOLD(executable)}'),
+            Colors.UNDERLINE(f"Required arguments for {Colors.BOLD(executable)}"),
         )
         tool_optional_arguments = self._action_parser.add_argument_group(
-            Colors.UNDERLINE(f'Optional arguments for {Colors.BOLD(executable)}'),
+            Colors.UNDERLINE(f"Optional arguments for {Colors.BOLD(executable)}"),
         )
         for argument in self._cli_app.CLASS_ARGUMENTS:
             argument_group = tool_required_arguments if argument.is_required() else tool_optional_arguments

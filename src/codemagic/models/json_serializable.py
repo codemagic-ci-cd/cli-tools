@@ -6,7 +6,6 @@ _json_encoder_default = json.JSONEncoder.default
 
 
 class JsonSerializableMeta(type):
-
     @staticmethod
     def default(json_encoder, obj) -> Dict:
         if isinstance(obj, JsonSerializable):
@@ -20,12 +19,11 @@ class JsonSerializableMeta(type):
 
 
 class JsonSerializable(metaclass=JsonSerializableMeta):
-
     @abstractmethod
     def dict(self) -> Dict:
-        raise NotImplementedError(f'Method {self.__class__.__name__}.{self.dict.__name__} is not implemented')
+        raise NotImplementedError(f"Method {self.__class__.__name__}.{self.dict.__name__} is not implemented")
 
     def json(self, *args, indent=4, **kwargs) -> str:
-        if 'indent' not in kwargs:
-            kwargs['indent'] = indent
+        if "indent" not in kwargs:
+            kwargs["indent"] = indent
         return json.dumps(self, *args, **kwargs)

@@ -13,13 +13,16 @@ from ..arguments import CommonArgument
 
 
 class AppStoreVersionSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
-    @cli.action('create',
-                AppStoreVersionArgument.APP_STORE_VERSION_ID,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def create_app_store_version_submission(self,
-                                            app_store_version_id: ResourceId,
-                                            should_print: bool = True) -> AppStoreVersionSubmission:
+    @cli.action(
+        "create",
+        AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS,
+    )
+    def create_app_store_version_submission(
+        self,
+        app_store_version_id: ResourceId,
+        should_print: bool = True,
+    ) -> AppStoreVersionSubmission:
         """
         Submit an App Store Version to App Review
         """
@@ -29,13 +32,17 @@ class AppStoreVersionSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMet
             app_store_version=app_store_version_id,
         )
 
-    @cli.action('delete',
-                AppStoreVersionArgument.APP_STORE_VERSION_SUBMISSION_ID,
-                CommonArgument.IGNORE_NOT_FOUND,
-                action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS)
-    def delete_app_store_version_submission(self,
-                                            app_store_version_submission_id: ResourceId,
-                                            ignore_not_found: bool = False) -> None:
+    @cli.action(
+        "delete",
+        AppStoreVersionArgument.APP_STORE_VERSION_SUBMISSION_ID,
+        CommonArgument.IGNORE_NOT_FOUND,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSION_SUBMISSIONS,
+    )
+    def delete_app_store_version_submission(
+        self,
+        app_store_version_submission_id: ResourceId,
+        ignore_not_found: bool = False,
+    ) -> None:
         """
         Remove a version submission from App Store review
         """

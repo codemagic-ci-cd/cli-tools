@@ -12,7 +12,6 @@ from .api_error import AppStoreConnectApiError
 
 
 class AppStoreConnectApiSession(requests.Session):
-
     def __init__(
         self,
         auth_headers_factory: Callable[[], Dict[str, str]],
@@ -30,32 +29,32 @@ class AppStoreConnectApiSession(requests.Session):
 
     def _log_response(self, response):
         try:
-            self._logger.info(f'<<< {response.status_code} {response.json()}')
+            self._logger.info(f"<<< {response.status_code} {response.json()}")
         except ValueError:
-            self._logger.info(f'<<< {response.status_code} {response.content}')
+            self._logger.info(f"<<< {response.status_code} {response.content}")
 
     def _log_request(self, *args, **kwargs):
         method = args[0].upper()
         url = args[1]
-        body = kwargs.get('params') or kwargs.get('data') or kwargs.get('json')
+        body = kwargs.get("params") or kwargs.get("data") or kwargs.get("json")
         if isinstance(body, dict):
-            body = {k: (v if 'password' not in k.lower() else '*******') for k, v in body.items()}
-        self._logger.info(f'>>> {method} {url} {body}')
+            body = {k: (v if "password" not in k.lower() else "*******") for k, v in body.items()}
+        self._logger.info(f">>> {method} {url} {body}")
 
     def _handle_unauthorized_request_response(self, attempt: int, response: requests.Response):
         self._revoke_auth_info()
         if attempt >= self._unauthorized_retries:
-            self._logger.info(f'Unauthorized request retries are exhausted with {attempt} attempts, stop trying')
+            self._logger.info(f"Unauthorized request retries are exhausted with {attempt} attempts, stop trying")
             raise AppStoreConnectApiError(response)
 
-        self._logger.info(f'Request failed due to authentication failure on attempt #{attempt}, try again')
+        self._logger.info(f"Request failed due to authentication failure on attempt #{attempt}, try again")
 
     def _handle_server_error_response(self, attempt: int, response: requests.Response):
         if attempt >= self._server_error_retries:
-            self._logger.info(f'Server error retries are exhausted with {attempt} attempts, stop trying')
+            self._logger.info(f"Server error retries are exhausted with {attempt} attempts, stop trying")
             raise AppStoreConnectApiError(response)
 
-        self._logger.info(f'Request failed due to server error {response.status_code} on attempt #{attempt}, try again')
+        self._logger.info(f"Request failed due to server error {response.status_code} on attempt #{attempt}, try again")
 
     def _do_request(
         self,
@@ -65,9 +64,9 @@ class AppStoreConnectApiSession(requests.Session):
         **request_kwargs,
     ) -> requests.Response:
         self._log_request(*request_args, **request_kwargs)
-        headers = request_kwargs.pop('headers', {})
+        headers = request_kwargs.pop("headers", {})
         headers.update(self._auth_headers_factory())
-        request_kwargs['headers'] = headers
+        request_kwargs["headers"] = headers
         response = super().request(*request_args, **request_kwargs)
         self._log_response(response)
 
@@ -75,7 +74,7 @@ class AppStoreConnectApiSession(requests.Session):
             return response
 
         # Request failed, save request info and see if we can retry it
-        auditing.save_http_request_audit(response, audit_directory_name='failed-http-requests')
+        auditing.save_http_request_audit(response, audit_directory_name="failed-http-requests")
 
         if response.status_code == 401:
             self._handle_unauthorized_request_response(unauthorized_attempt, response)

@@ -32,7 +32,6 @@ from .xcpretty import Xcpretty
 
 
 class Xcodebuild(RunningCliAppMixin):
-
     def __init__(
         self,
         xcode_workspace: Optional[pathlib.Path] = None,
@@ -53,23 +52,23 @@ class Xcodebuild(RunningCliAppMixin):
         self.logs_path = self._get_logs_path()
 
     def _get_logs_path(self) -> pathlib.Path:
-        tmp_dir = pathlib.Path('/tmp')
+        tmp_dir = pathlib.Path("/tmp")
         if not tmp_dir.is_dir():
             tmp_dir = pathlib.Path(tempfile.gettempdir())
-        logs_dir = tmp_dir / 'xcodebuild_logs'
+        logs_dir = tmp_dir / "xcodebuild_logs"
         logs_dir.mkdir(exist_ok=True)
         path_candidates = itertools.chain(
-            (logs_dir / f'{self.xcode_project.stem}.log',),
-            (logs_dir / f'{self.xcode_project.stem}_{i}.log' for i in itertools.count(1)),
+            (logs_dir / f"{self.xcode_project.stem}.log",),
+            (logs_dir / f"{self.xcode_project.stem}_{i}.log" for i in itertools.count(1)),
         )
         return next(log_path for log_path in path_candidates if not log_path.exists())
 
     def _log_process(self, xcodebuild_cli_process: Optional[XcodebuildCliProcess]):
         if not xcodebuild_cli_process:
             return
-        with self.logs_path.open('a') as fd, xcodebuild_cli_process.log_path.open('r') as process_logs:
-            fd.write(f'>>> {xcodebuild_cli_process.safe_form}')
-            fd.write('\n\n')
+        with self.logs_path.open("a") as fd, xcodebuild_cli_process.log_path.open("r") as process_logs:
+            fd.write(f">>> {xcodebuild_cli_process.safe_form}")
+            fd.write("\n\n")
 
             chunk = process_logs.read(8192)
             while chunk:
@@ -78,19 +77,19 @@ class Xcodebuild(RunningCliAppMixin):
             # do an extra read in case xcodebuild exited unexpectedly and did not flush last buffer
             fd.write(process_logs.read())
 
-            fd.write('\n\n')
-            duration = time.strftime('%M:%S', time.gmtime(xcodebuild_cli_process.duration))
-            fd.write(f'<<< Process completed with status code {xcodebuild_cli_process.returncode} in {duration}')
-            fd.write('\n\n')
+            fd.write("\n\n")
+            duration = time.strftime("%M:%S", time.gmtime(xcodebuild_cli_process.duration))
+            fd.write(f"<<< Process completed with status code {xcodebuild_cli_process.returncode} in {duration}")
+            fd.write("\n\n")
 
     @property
     def xcode_project(self):
         if self.workspace and not self.project:
-            return self.workspace.parent / f'{self.workspace.stem}.xcodeproj'
+            return self.workspace.parent / f"{self.workspace.stem}.xcodeproj"
         elif self.project:
             return self.project
         else:
-            raise ValueError('Missing project and workspace')
+            raise ValueError("Missing project and workspace")
 
     def _ensure_scheme_or_target(self):
         project = self.xcode_project
@@ -99,10 +98,10 @@ class Xcodebuild(RunningCliAppMixin):
 
         schemes = self._detect_schemes(project)
         if not schemes:
-            raise ValueError(f'Did not find any schemes for {project}. Please specify scheme or target manually')
+            raise ValueError(f"Did not find any schemes for {project}. Please specify scheme or target manually")
         self.logger.debug(f'Found schemes {", ".join(map(repr, schemes))}')
         self.scheme = self._find_matching_scheme(schemes, project.stem)
-        self.logger.debug(f'Using scheme {self.scheme!r}')
+        self.logger.debug(f"Using scheme {self.scheme!r}")
 
     @classmethod
     def _find_matching_scheme(cls, schemes: List[str], reference_name: str) -> str:
@@ -110,20 +109,20 @@ class Xcodebuild(RunningCliAppMixin):
 
     @classmethod
     def _detect_schemes(cls, project: pathlib.Path) -> List[str]:
-        return [scheme.stem for scheme in project.glob('**/*.xcscheme')]
+        return [scheme.stem for scheme in project.glob("**/*.xcscheme")]
 
     def _construct_base_command(self, custom_flags: Optional[str]) -> List[str]:
-        command = ['xcodebuild']
+        command = ["xcodebuild"]
         if self.workspace:
-            command.extend(['-workspace', str(self.workspace)])
+            command.extend(["-workspace", str(self.workspace)])
         if self.project:
-            command.extend(['-project', str(self.project)])
+            command.extend(["-project", str(self.project)])
         if self.scheme:
-            command.extend(['-scheme', self.scheme])
+            command.extend(["-scheme", self.scheme])
         if self.target:
-            command.extend(['-target', self.target])
+            command.extend(["-target", self.target])
         if self.configuration:
-            command.extend(['-config', self.configuration])
+            command.extend(["-config", self.configuration])
         if custom_flags:
             command.extend([os.path.expandvars(part) for part in shlex.split(custom_flags)])
         return command
@@ -139,17 +138,18 @@ class Xcodebuild(RunningCliAppMixin):
         code_signing_options = []
         if not export_options.has_xcode_managed_profiles():
             if export_options.teamID:
-                code_signing_options.append(f'DEVELOPMENT_TEAM={export_options.teamID}')
+                code_signing_options.append(f"DEVELOPMENT_TEAM={export_options.teamID}")
             if export_options.signingCertificate:
-                code_signing_options.append(f'CODE_SIGN_IDENTITY={export_options.signingCertificate}')
-            if LooseVersion('14') <= xcode.version:
-                code_signing_options.append('CODE_SIGN_STYLE=Manual')
+                code_signing_options.append(f"CODE_SIGN_IDENTITY={export_options.signingCertificate}")
+            if LooseVersion("14") <= xcode.version:
+                code_signing_options.append("CODE_SIGN_STYLE=Manual")
 
         return [
             *self._construct_base_command(custom_flags),
-            '-archivePath', str(archive_path),
-            'archive',
-            *shlex.split(xcargs or ''),
+            "-archivePath",
+            str(archive_path),
+            "archive",
+            *shlex.split(xcargs or ""),
             *code_signing_options,
         ]
 
@@ -162,12 +162,16 @@ class Xcodebuild(RunningCliAppMixin):
         custom_flags: Optional[str],
     ) -> List[str]:
         return [
-            'xcodebuild', '-exportArchive',
-            '-archivePath', str(archive_path),
-            '-exportPath', str(ipa_directory),
-            '-exportOptionsPlist', str(export_options_plist),
-            *[os.path.expandvars(part) for part in shlex.split(custom_flags or '')],
-            *shlex.split(xcargs or ''),
+            "xcodebuild",
+            "-exportArchive",
+            "-archivePath",
+            str(archive_path),
+            "-exportPath",
+            str(ipa_directory),
+            "-exportOptionsPlist",
+            str(export_options_plist),
+            *[os.path.expandvars(part) for part in shlex.split(custom_flags or "")],
+            *shlex.split(xcargs or ""),
         ]
 
     def _construct_test_command(
@@ -181,30 +185,31 @@ class Xcodebuild(RunningCliAppMixin):
         xcargs: Optional[str],
         custom_flags: Optional[str],
     ) -> List[str]:
-        max_devices_flag = '-maximum-concurrent-test-device-destinations'
-        max_sims_flag = '-maximum-concurrent-test-simulator-destinations'
+        max_devices_flag = "-maximum-concurrent-test-device-destinations"
+        max_sims_flag = "-maximum-concurrent-test-simulator-destinations"
 
-        destinations_args = [['-destination', f'id={s.udid}'] for s in simulators]
-        only_testing_args = ['-only-testing', only_testing] if only_testing else []
+        destinations_args = [["-destination", f"id={s.udid}"] for s in simulators]
+        only_testing_args = ["-only-testing", only_testing] if only_testing else []
         max_devices_args = [max_devices_flag, str(max_devices)] if max_devices else []
         max_simulators_args = [max_sims_flag, str(max_simulators)] if max_simulators else []
-        coverage_args = ['-enableCodeCoverage', 'YES' if enable_code_coverage else 'NO']
+        coverage_args = ["-enableCodeCoverage", "YES" if enable_code_coverage else "NO"]
 
         return [
             *self._construct_base_command(custom_flags),
             *only_testing_args,
-            '-sdk', sdk,
+            "-sdk",
+            sdk,
             *coverage_args,
             *reduce(add, destinations_args, []),
             *max_devices_args,
             *max_simulators_args,
-            'test',
-            *shlex.split(xcargs or ''),
+            "test",
+            *shlex.split(xcargs or ""),
         ]
 
     def clean(self):
-        cmd = [*self._construct_base_command(None), 'clean']
-        self._run_command(cmd, f'Failed to clean {self.workspace or self.project}')
+        cmd = [*self._construct_base_command(None), "clean"]
+        self._run_command(cmd, f"Failed to clean {self.workspace or self.project}")
 
     def archive(
         self,
@@ -222,8 +227,8 @@ class Xcodebuild(RunningCliAppMixin):
 
         archive_directory.mkdir(parents=True, exist_ok=True)
         temp_dir = tempfile.mkdtemp(
-            prefix=f'{self.xcode_project.stem}_',
-            suffix='.xcarchive',
+            prefix=f"{self.xcode_project.stem}_",
+            suffix=".xcarchive",
             dir=archive_directory,
         )
         xcarchive = pathlib.Path(temp_dir)
@@ -236,7 +241,7 @@ class Xcodebuild(RunningCliAppMixin):
             xcode,
         )
         try:
-            self._run_command(cmd, f'Failed to archive {self.workspace or self.project}')
+            self._run_command(cmd, f"Failed to archive {self.workspace or self.project}")
         except IOError as error:
             if not self.xcpretty:
                 raise
@@ -244,7 +249,7 @@ class Xcodebuild(RunningCliAppMixin):
             errors = _XcodebuildLogErrorFinder(self.logs_path).find_failure_logs()
             if not errors:
                 raise
-            raise IOError('\n'.join([f'{message}. The following build commands failed:', '', errors]), process)
+            raise IOError("\n".join([f"{message}. The following build commands failed:", "", errors]), process)
 
         return xcarchive
 
@@ -260,14 +265,18 @@ class Xcodebuild(RunningCliAppMixin):
         ipa_directory.mkdir(parents=True, exist_ok=True)
 
         cmd = self._construct_export_archive_command(
-            archive_path, ipa_directory, export_options_plist, xcargs, custom_flags,
+            archive_path,
+            ipa_directory,
+            export_options_plist,
+            xcargs,
+            custom_flags,
         )
-        self._run_command(cmd, f'Failed to export archive {archive_path}')
+        self._run_command(cmd, f"Failed to export archive {archive_path}")
 
         try:
-            return next(ipa_directory.glob('*.ipa'))
+            return next(ipa_directory.glob("*.ipa"))
         except StopIteration:
-            raise IOError(f'Ipa not found from {ipa_directory}')
+            raise IOError(f"Ipa not found from {ipa_directory}")
 
     def test(
         self,
@@ -283,16 +292,21 @@ class Xcodebuild(RunningCliAppMixin):
     ):
         CoreSimulatorService().ensure_clean_state()
         cmd = self._construct_test_command(
-            sdk, simulators, only_testing, enable_code_coverage,
-            max_concurrent_devices, max_concurrent_simulators,
-            xcargs, custom_flags,
+            sdk,
+            simulators,
+            only_testing,
+            enable_code_coverage,
+            max_concurrent_devices,
+            max_concurrent_simulators,
+            xcargs,
+            custom_flags,
         )
-        error_message = f'Failed to test {self.workspace or self.project}'
+        error_message = f"Failed to test {self.workspace or self.project}"
         self._run_command(cmd, error_message)
 
     def show_build_settings(self, print_streams: bool = True):
-        cmd = [*self._construct_base_command(None), '-showBuildSettings']
-        error_message = f'Failed to show build settings {self.workspace or self.project}'
+        cmd = [*self._construct_base_command(None), "-showBuildSettings"]
+        error_message = f"Failed to show build settings {self.workspace or self.project}"
 
         # avoid formatting build settings output
         self._run_command(cmd, error_message, print_streams=print_streams, allow_xcpretty_formatting=False)
@@ -321,10 +335,9 @@ class Xcodebuild(RunningCliAppMixin):
 
 
 class XcodebuildCliProcess(CliProcess):
-
     def __init__(self, *args, xcpretty: Optional[Xcpretty] = None, **kwargs):
         super().__init__(*args, **kwargs)
-        with tempfile.NamedTemporaryFile(prefix='xcodebuild_', suffix='.log', delete=False) as tf:
+        with tempfile.NamedTemporaryFile(prefix="xcodebuild_", suffix=".log", delete=False) as tf:
             self.log_path = pathlib.Path(tf.name)
         self._buffer: Optional[IO] = None
         self.xcpretty = xcpretty
@@ -335,7 +348,7 @@ class XcodebuildCliProcess(CliProcess):
 
     @property
     def stderr(self) -> str:
-        return ''
+        return ""
 
     def _print_stream(self, chunk: str):
         if not self._print_streams:
@@ -347,15 +360,15 @@ class XcodebuildCliProcess(CliProcess):
 
     def _handle_streams(self, buffer_size: Optional[int] = None):
         if not self._buffer:
-            self._buffer = self.log_path.open('r')
+            self._buffer = self.log_path.open("r")
         lines = self._buffer.readlines(buffer_size or -1)
-        chunk = ''.join(lines)
+        chunk = "".join(lines)
         self._print_stream(chunk)
 
     def execute(self, *args, **kwargs) -> XcodebuildCliProcess:
         try:
-            with self.log_path.open('wb') as log_fd:
-                kwargs.update({'stdout': log_fd, 'stderr': log_fd})
+            with self.log_path.open("wb") as log_fd:
+                kwargs.update({"stdout": log_fd, "stderr": log_fd})
                 super(XcodebuildCliProcess, self).execute(*args, **kwargs)
                 return self
         finally:
@@ -367,7 +380,6 @@ class XcodebuildCliProcess(CliProcess):
 
 
 class _XcodebuildLogErrorFinder:
-
     def __init__(self, log_path: Union[pathlib.Path, str]):
         self._log_path = pathlib.Path(log_path)
         self._backwards_log_iterator = iter_backwards(log_path)
@@ -377,10 +389,10 @@ class _XcodebuildLogErrorFinder:
         error_lines = []
         for line in self._backwards_log_iterator:
             line = line.strip()
-            if re.match(r'^\(\d+ failures?\)$', line):
+            if re.match(r"^\(\d+ failures?\)$", line):
                 capture_lines = True
                 continue
-            elif line == 'The following build commands failed:':
+            elif line == "The following build commands failed:":
                 break
             elif capture_lines and line:
                 error_lines.append(line)
@@ -395,7 +407,7 @@ class _XcodebuildLogErrorFinder:
             line = line.strip()
             if not line:
                 continue
-            elif re.match(r'^\*\* [^ ]+ FAILED \*\*', line):  # Match lines like '** ARCHIVE FAILED **'
+            elif re.match(r"^\*\* [^ ]+ FAILED \*\*", line):  # Match lines like '** ARCHIVE FAILED **'
                 # From here on upwards we can start looking for error logs
                 capture_lines = True
                 continue
@@ -404,7 +416,7 @@ class _XcodebuildLogErrorFinder:
                 if line not in logs:
                     # Capture up to 10 last lines of the logs
                     log_lines = reversed(lines_cache[:max_lines])
-                    logs[line] = ['...', *log_lines] if len(lines_cache) > max_lines else list(log_lines)
+                    logs[line] = ["...", *log_lines] if len(lines_cache) > max_lines else list(log_lines)
                 if set(logs.keys()) == set(failed_commands):
                     # All errors are processed, stop
                     break
@@ -420,9 +432,9 @@ class _XcodebuildLogErrorFinder:
         for error in sorted(failed_command_logs.keys()):
             lines.append(error)
             for log_line in failed_command_logs[error]:
-                lines.append(f'\t{log_line}')
-            lines.append('')
-        return '\n'.join(lines[:-1])
+                lines.append(f"\t{log_line}")
+            lines.append("")
+        return "\n".join(lines[:-1])
 
     def find_failure_logs(self, max_lines_per_error=6) -> Optional[str]:
         failed_commands = self._get_failed_commands()

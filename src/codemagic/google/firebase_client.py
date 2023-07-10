@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource  # noqa: F401
 
 
-class FirebaseClient(GoogleClient['FirebaseAppDistributionResource']):
-    google_service_name: ClassVar[str] = 'firebaseappdistribution'
+class FirebaseClient(GoogleClient["FirebaseAppDistributionResource"]):
+    google_service_name: ClassVar[str] = "firebaseappdistribution"
 
     @property
     def releases(self) -> ReleaseManager:

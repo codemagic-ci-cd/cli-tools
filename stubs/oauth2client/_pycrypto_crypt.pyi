@@ -1,5 +1,6 @@
-from oauth2client import _helpers as _helpers
 from typing import Any
+
+from oauth2client import _helpers as _helpers
 
 class PyCryptoVerifier:
     _pubkey: Any = ...

@@ -1,15 +1,14 @@
 import argparse
 
 import pytest
-
 from codemagic import cli
 
 
 class _TestArgument(cli.Argument):
-    ARG1 = cli.ArgumentProperties(key='arg1', description='')
-    ARG2 = cli.ArgumentProperties(key='arg2', description='')
-    ARG3 = cli.ArgumentProperties(key='arg3', description='')
-    ARG4 = cli.ArgumentProperties(key='arg4', description='')
+    ARG1 = cli.ArgumentProperties(key="arg1", description="")
+    ARG2 = cli.ArgumentProperties(key="arg2", description="")
+    ARG3 = cli.ArgumentProperties(key="arg3", description="")
+    ARG4 = cli.ArgumentProperties(key="arg4", description="")
 
 
 def test_class_arguments_inclusion():
@@ -27,12 +26,12 @@ def test_class_arguments_inclusion():
             self.arg3 = arg3
             self.arg4 = arg4
 
-    cli_args = argparse.Namespace(**{arg.key: f'{arg.key}-value' for arg in _TestArgument})
+    cli_args = argparse.Namespace(**{arg.key: f"{arg.key}-value" for arg in _TestArgument})
     cli_app = MyApp.from_cli_args(cli_args)
-    assert cli_app.arg1 == 'arg1-value'
-    assert cli_app.arg2 == 'arg2-value'
-    assert cli_app.arg3 == 'arg3-value'
-    assert cli_app.arg4 == 'arg4-value'
+    assert cli_app.arg1 == "arg1-value"
+    assert cli_app.arg2 == "arg2-value"
+    assert cli_app.arg3 == "arg3-value"
+    assert cli_app.arg4 == "arg4-value"
 
 
 def test_class_arguments_inheritance():
@@ -50,6 +49,7 @@ def test_class_arguments_inheritance():
 
 def test_class_arguments_duplicates():
     with pytest.raises(ValueError):
+
         @cli.common_arguments(_TestArgument.ARG1, _TestArgument.ARG1)
         class CliApp(cli.CliApp):
             ...
@@ -61,6 +61,7 @@ def test_class_arguments_duplicates_on_inheritance():
         ...
 
     with pytest.raises(ValueError):
+
         @cli.common_arguments(_TestArgument.ARG1)
         class CliApp(BaseCliApp):
             ...
@@ -68,6 +69,7 @@ def test_class_arguments_duplicates_on_inheritance():
 
 def test_invalid_class_argument():
     with pytest.raises(TypeError):
-        @cli.common_arguments('ARGUMENT')
+
+        @cli.common_arguments("ARGUMENT")
         class CliApp(cli.CliApp):
             ...

@@ -31,7 +31,7 @@ class ResourceId(str):
 
 
 class DictSerializable:
-    _OMIT_KEYS: Tuple[str, ...] = ('_raw',)
+    _OMIT_KEYS: Tuple[str, ...] = ("_raw",)
     _OMIT_IF_NONE_KEYS: Tuple[str, ...] = tuple()
 
     @classmethod
@@ -48,7 +48,7 @@ class DictSerializable:
 
     @classmethod
     def _should_omit(cls, key, value) -> bool:
-        if key.startswith('_'):
+        if key.startswith("_"):
             return True
         if key in cls._OMIT_KEYS:
             return True
@@ -75,7 +75,7 @@ class GracefulDataclassMixin(ABC):
             if field_name in defined_fields:
                 fields[field_name] = field_value
             else:
-                logger.warning('Unknown field %r for resource %s.%s', field_name, parent_class.__name__, cls.__name__)
+                logger.warning("Unknown field %r for resource %s.%s", field_name, parent_class.__name__, cls.__name__)
         return fields
 
 
@@ -98,7 +98,7 @@ class PagingInformation(DictSerializable):
 
 
 class Links(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('self', 'related')
+    _OMIT_IF_NONE_KEYS = ("self", "related")
 
     def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):  # noqa: N805
         _self.self = self
@@ -126,7 +126,7 @@ class Data(DictSerializable):
 
 @dataclass
 class Relationship(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('data', 'meta')
+    _OMIT_IF_NONE_KEYS = ("data", "meta")
 
     links: Links
     data: Optional[Union[Data, List[Data]]] = None
@@ -145,38 +145,39 @@ class Relationship(DictSerializable):
 
 
 class LinkedResourceData(DictSerializable, JsonSerializable):
-
     def __init__(self, api_response: Dict):
         self._raw = api_response
-        self.type = ResourceType(api_response['type'])
-        self.id: ResourceId = ResourceId(api_response['id'])
+        self.type = ResourceType(api_response["type"])
+        self.id: ResourceId = ResourceId(api_response["id"])
 
     def __str__(self):
-        return '\n'.join([
-            f'Id: {self.id}',
-            f'Type: {self.type.value}',
-        ])
+        return "\n".join(
+            [
+                f"Id: {self.id}",
+                f"Type: {self.type.value}",
+            ],
+        )
 
 
 class PrettyNameMeta(JsonSerializableMeta):
     def __str__(cls):  # noqa: N805
         class_name = cls.__name__
-        name = re.sub(r'([A-Z])', r' \1', class_name).lstrip(' ')
-        return re.sub('Id', 'ID', name)
+        name = re.sub(r"([A-Z])", r" \1", class_name).lstrip(" ")
+        return re.sub("Id", "ID", name)
 
     @property
     def s(cls) -> str:  # noqa: N805
-        """ Plural name of the object """
+        """Plural name of the object"""
         return cls.plural()
 
     def plural(cls, count: Optional[int] = None) -> str:  # noqa: N805
-        """ Optional plural name of the object depending on the count """
+        """Optional plural name of the object depending on the count"""
         singular = str(cls)
         if count == 1:
             return singular
-        if singular.endswith('y'):
-            return f'{singular[:-1]}ies'
-        return f'{singular}s'
+        if singular.endswith("y"):
+            return f"{singular[:-1]}ies"
+        return f"{singular}s"
 
 
 # workaround for Inconsistent metaclass structure for "Resource" error
@@ -185,7 +186,7 @@ class PrettyNameAbcMeta(PrettyNameMeta, ABCMeta):
 
 
 class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
-    _OMIT_IF_NONE_KEYS = ('relationships',)
+    _OMIT_IF_NONE_KEYS = ("relationships",)
 
     def __init_subclass__(cls) -> None:
         """
@@ -216,7 +217,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             # In case the resource does not have attributes
             defined_fields = {}
         else:
-            defined_fields = cls.Attributes.get_defined_fields(cls, api_response['attributes'])
+            defined_fields = cls.Attributes.get_defined_fields(cls, api_response["attributes"])
         return cls.Attributes(**defined_fields)
 
     @classmethod
@@ -225,15 +226,15 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             # In case the resource does not have relationships
             defined_fields = {}
         else:
-            defined_fields = cls.Relationships.get_defined_fields(cls, api_response['relationships'])
+            defined_fields = cls.Relationships.get_defined_fields(cls, api_response["relationships"])
         return cls.Relationships(**defined_fields)
 
     def __init__(self, api_response: Dict, created: bool = False):
         super().__init__(api_response)
         self._created = created
-        self.links: ResourceLinks = ResourceLinks(**api_response['links'])
+        self.links: ResourceLinks = ResourceLinks(**api_response["links"])
         self.attributes = self._create_attributes(api_response)
-        if 'relationships' in api_response:
+        if "relationships" in api_response:
             self.relationships = self._create_relationships(api_response)
         else:
             self.relationships = None
@@ -275,12 +276,12 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         if iso_8601_timestamp is None:
             return None
         try:
-            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S.%f%z')
+            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
         except ValueError:
             # while most of API responses contain timestamp as '2020-08-04T11:44:12.000+0000'
             # /builds endpoint returns timestamps with timedelta and without milliseconds
             # as '2021-01-28T06:01:32-08:00'
-            return datetime.strptime(iso_8601_timestamp, '%Y-%m-%dT%H:%M:%S%z')
+            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S%z")
 
     @classmethod
     @overload
@@ -304,20 +305,20 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             #   2021, 1, 28, 6, 1, 32, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=57600))
             # ).
             # So need to convert it to the initial form based on the presence of the explicit utc timezone
-            return dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+            return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+0000"
         return dt.isoformat()
 
     def _format_attribute_name(self, name: str) -> str:
-        type_prefix = self.type.value.rstrip('s')
-        name = re.sub(f'{type_prefix}s?', '', name)
-        name = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
+        type_prefix = self.type.value.rstrip("s")
+        name = re.sub(f"{type_prefix}s?", "", name)
+        name = re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
         return name.lower().capitalize()
 
     def _hide_attribute_value(self, attribute_name: str) -> bool:
-        if not hasattr(self.attributes, '__dataclass_fields__'):
+        if not hasattr(self.attributes, "__dataclass_fields__"):
             return False
         field = self.attributes.__dataclass_fields__[attribute_name]
-        return field.metadata.get('hide') is True
+        return field.metadata.get("hide") is True
 
     def _format_attribute_value(self, attribute_name: str, value: Any) -> Any:
         if self._hide_attribute_value(attribute_name):
@@ -325,8 +326,8 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         if isinstance(value, enum.Enum):
             return value.value
         if isinstance(value, DictSerializable):
-            lines = '\n'.join(f'\t{self._format_attribute_name(k)}: {v}' for k, v in value.dict().items())
-            return f'\n{lines}'
+            lines = "\n".join(f"\t{self._format_attribute_name(k)}: {v}" for k, v in value.dict().items())
+            return f"\n{lines}"
         return value
 
     def __str__(self) -> str:
@@ -336,5 +337,5 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
                 continue
             name = self._format_attribute_name(attribute_name)
             value = self._format_attribute_value(attribute_name, value)
-            s += f'\n{name}: {value}'
+            s += f"\n{name}: {value}"
         return s

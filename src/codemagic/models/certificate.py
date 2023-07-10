@@ -28,10 +28,10 @@ from .private_key import PrivateKey
 
 
 class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
-    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), 'Library', 'MobileDevice', 'Certificates')
+    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), "Library", "MobileDevice", "Certificates")
 
     def __init__(self, certificate: x509.Certificate):
-        if hasattr(certificate, 'to_cryptography'):
+        if hasattr(certificate, "to_cryptography"):
             # Legacy OpenSSL.crypto.X509 instance
             self._deprecation_warning()
             self.certificate = certificate.to_cryptography()  # type: ignore
@@ -46,10 +46,10 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         else:
             logger = cli_app.logger
         warning = (
-            'WARNING! Creating `codemagic.models.Certificate` instances from '
-            '`OpenSSL.crypto.X509` objects is deprecated and support for '
-            'it will be removed in future versions. Use '
-            '`cryptography.x509.Certificate` instances instead, or use factory methods.'
+            "WARNING! Creating `codemagic.models.Certificate` instances from "
+            "`OpenSSL.crypto.X509` objects is deprecated and support for "
+            "it will be removed in future versions. Use "
+            "`cryptography.x509.Certificate` instances instead, or use factory methods."
         )
         logger.warning(Colors.YELLOW(warning))
 
@@ -60,8 +60,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         try:
             x509_certificate = x509.load_pem_x509_certificate(cls._bytes(pem))
         except ValueError as ve:
-            log.get_file_logger(cls).exception('Failed to initialize certificate: Invalid PEM contents')
-            raise ValueError('Not a valid PEM certificate content') from ve
+            log.get_file_logger(cls).exception("Failed to initialize certificate: Invalid PEM contents")
+            raise ValueError("Not a valid PEM certificate content") from ve
         return Certificate(x509_certificate)
 
     @classmethod
@@ -69,8 +69,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         try:
             x509_certificate = x509.load_der_x509_certificate(cls._bytes(asn1))
         except ValueError as ve:
-            log.get_file_logger(cls).exception('Failed to initialize certificate: Invalid ASN1 contents')
-            raise ValueError('Not a valid ASN1 certificate content') from ve
+            log.get_file_logger(cls).exception("Failed to initialize certificate: Invalid ASN1 contents")
+            raise ValueError("Not a valid ASN1 certificate content") from ve
         return Certificate(x509_certificate)
 
     @classmethod
@@ -78,7 +78,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         password_encoded = None if password is None else cls._bytes(password)
         _, x509_certificate, _ = pkcs12.load_key_and_certificates(p12, password_encoded)
         if x509_certificate is None:
-            raise ValueError('Certificate was not found from PKCS#12 container')
+            raise ValueError("Certificate was not found from PKCS#12 container")
         return Certificate(x509_certificate)
 
     @property
@@ -97,7 +97,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def common_name(self) -> str:
-        return self.subject.get('CN', '')
+        return self.subject.get("CN", "")
 
     @property
     def not_after(self) -> str:
@@ -106,12 +106,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         as an ASN.1 TIME YYYYMMDDhhmmssZ
         """
         not_after = self.certificate.not_valid_after
-        return not_after.strftime('%Y%m%d%H%M%SZ')
+        return not_after.strftime("%Y%m%d%H%M%SZ")
 
     @property
     def not_before(self) -> str:
         not_before = self.certificate.not_valid_before
-        return not_before.strftime('%Y%m%d%H%M%SZ')
+        return not_before.strftime("%Y%m%d%H%M%SZ")
 
     @property
     def has_expired(self) -> bool:
@@ -133,31 +133,31 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     @property
     def is_development_certificate(self) -> bool:
         development_certificate_pattern = re.compile(
-            r'^((Apple Development)|(iPhone Developer)|(Mac Developer)):.*$',
+            r"^((Apple Development)|(iPhone Developer)|(Mac Developer)):.*$",
         )
         return development_certificate_pattern.match(self.common_name) is not None
 
     def is_code_signing_certificate(self) -> bool:
         code_signing_certificate_patterns = (
-            re.compile(r'^Apple (Development|Distribution):.*$'),
-            re.compile(r'^iPhone (Developer|Distribution):.*$'),
-            re.compile(r'^Developer ID Application:.*$'),
-            re.compile(r'^Mac Developer:.*$'),
-            re.compile(r'^3rd Party Mac Developer (Application|Installer):.*$'),
+            re.compile(r"^Apple (Development|Distribution):.*$"),
+            re.compile(r"^iPhone (Developer|Distribution):.*$"),
+            re.compile(r"^Developer ID Application:.*$"),
+            re.compile(r"^Mac Developer:.*$"),
+            re.compile(r"^3rd Party Mac Developer (Application|Installer):.*$"),
         )
         return any(p.match(self.common_name) is not None for p in code_signing_certificate_patterns)
 
     def dict(self) -> Dict[str, Union[str, int, Dict[str, str], List[str]]]:
         return {
-            'common_name': self.common_name,
-            'extensions': self.extensions,
-            'has_expired': self.has_expired,
-            'issuer': self.issuer,
-            'is_development_certificate': self.is_development_certificate,
-            'not_after': self.not_after,
-            'not_before': self.not_before,
-            'serial': self.serial,
-            'subject': self.subject,
+            "common_name": self.common_name,
+            "extensions": self.extensions,
+            "has_expired": self.has_expired,
+            "issuer": self.issuer,
+            "is_development_certificate": self.is_development_certificate,
+            "not_after": self.not_after,
+            "not_before": self.not_before,
+            "serial": self.serial,
+            "subject": self.subject,
         }
 
     def as_pem(self) -> str:
@@ -166,9 +166,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @classmethod
     def create_certificate_signing_request(cls, private_key: PrivateKey) -> x509.CertificateSigningRequest:
-        subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, 'PEM')])
-        csr_builder = x509.CertificateSigningRequestBuilder() \
-            .subject_name(subject_name)
+        subject_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "PEM")])
+        csr_builder = x509.CertificateSigningRequestBuilder().subject_name(subject_name)
         csr = csr_builder.sign(private_key.cryptography_private_key, hashes.SHA256(), default_backend())
         return csr
 
@@ -201,43 +200,45 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
     def is_signed_with(self, private_key: PrivateKey) -> bool:
         certificate_public_key = self.certificate.public_key()
         if not isinstance(certificate_public_key, SUPPORTED_PUBLIC_KEY_TYPES):
-            raise TypeError('Public key type is not supported', type(certificate_public_key))
+            raise TypeError("Public key type is not supported", type(certificate_public_key))
         certificate_public_numbers = certificate_public_key.public_numbers()
         private_key_public_numbers = private_key.public_key.public_numbers()
         return certificate_public_numbers == private_key_public_numbers
 
     def get_summary(self) -> Dict[str, Union[str, int, Dict[str, str]]]:
         return {
-            'common_name': self.common_name,
-            'serial_number': self.serial,
-            'issuer': self.issuer,
-            'expires_at': self.expires_at.isoformat(),
-            'has_expired': self.has_expired,
-            'sha1': self.get_fingerprint(hashes.SHA1()),
-            'sha256': self.get_fingerprint(hashes.SHA256()),
+            "common_name": self.common_name,
+            "serial_number": self.serial,
+            "issuer": self.issuer,
+            "expires_at": self.expires_at.isoformat(),
+            "has_expired": self.has_expired,
+            "sha1": self.get_fingerprint(hashes.SHA1()),
+            "sha256": self.get_fingerprint(hashes.SHA256()),
         }
 
     def get_text_summary(self) -> str:
         issuer_name_transformation = {
-            'CN': 'Common name',
-            'OU': 'Organizational unit',
-            'O': 'Organization',
-            'L': 'Locality',
-            'S': 'State or province',
-            'ST': 'State',
-            'C': 'Country',
+            "CN": "Common name",
+            "OU": "Organizational unit",
+            "O": "Organization",
+            "L": "Locality",
+            "S": "State or province",
+            "ST": "State",
+            "C": "Country",
         }
-        return '\n'.join([
-            '-- Certificate --',
-            f'Common name: {self.common_name}',
-            'Issuer:',
-            *(f'    {issuer_name_transformation[k]}: {v}' for k, v in self.issuer.items()),
-            f'Expires at: {self.expires_at}',
-            f'Has expired: {self.has_expired}',
-            f'Serial number: {self.serial}',
-            f'SHA1: {self.get_fingerprint(hashes.SHA1())}',
-            f'SHA256: {self.get_fingerprint(hashes.SHA256())}',
-        ])
+        return "\n".join(
+            [
+                "-- Certificate --",
+                f"Common name: {self.common_name}",
+                "Issuer:",
+                *(f"    {issuer_name_transformation[k]}: {v}" for k, v in self.issuer.items()),
+                f"Expires at: {self.expires_at}",
+                f"Has expired: {self.has_expired}",
+                f"Serial number: {self.serial}",
+                f"SHA1: {self.get_fingerprint(hashes.SHA1())}",
+                f"SHA256: {self.get_fingerprint(hashes.SHA256())}",
+            ],
+        )
 
     @staticmethod
     def _get_rfc_4514_attribute_name(name_attribute: x509.NameAttribute) -> str:
@@ -245,8 +246,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         # Use this if possible, otherwise resolve it from full RFC 4514 string which
         # also contains value.
         # https://cryptography.io/en/latest/x509/reference/#cryptography.509.NameAttribute.rfc4514_attribute_name
-        if hasattr(name_attribute, 'rfc4514_attribute_name'):
+        if hasattr(name_attribute, "rfc4514_attribute_name"):
             return name_attribute.rfc4514_attribute_name
         else:
             rfc4514_string = name_attribute.rfc4514_string()
-            return rfc4514_string.split('=', maxsplit=1)[0]
+            return rfc4514_string.split("=", maxsplit=1)[0]

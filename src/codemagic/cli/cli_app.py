@@ -47,8 +47,7 @@ if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
 
 
-class CliAppException(Exception):
-
+class CliAppException(Exception):  # noqa: N818
     def __init__(self, message: str, cli_process: Optional[CliProcess] = None):
         self.cli_process = cli_process
         self.message = message
@@ -57,8 +56,8 @@ class CliAppException(Exception):
         if not self.cli_process:
             return self.message
         return (
-            f'Running {self.cli_process.safe_form} failed with '
-            f'exit code {self.cli_process.returncode}: {self.message}'
+            f"Running {self.cli_process.safe_form} failed with "
+            f"exit code {self.cli_process.returncode}: {self.message}"
         )
 
 
@@ -72,7 +71,7 @@ class CliApp(metaclass=abc.ABCMeta):
     def __init__(self, dry=False, verbose=False, **cli_options):
         self.dry_run = dry
         self.default_obfuscation = []
-        self.obfuscation = 8 * '*'
+        self.obfuscation = 8 * "*"
         self.verbose = verbose
         self.logger = log.get_logger(self.__class__)
 
@@ -82,7 +81,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def get_executable_name(cls) -> str:
-        return re.sub(r'(.)([A-Z])', r'\1-\2', cls.__name__).lower()
+        return re.sub(r"(.)([A-Z])", r"\1-\2", cls.__name__).lower()
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):
@@ -102,22 +101,19 @@ class CliApp(metaclass=abc.ABCMeta):
     def _parent_class_kwargs(cls, cli_args: argparse.Namespace) -> Dict[str, Any]:
         class_args = cls.REGISTERED_CLASS_ARGUMENTS[cls]
         class_arg_keys = {arg.key for arg in class_args}
-        return {
-            key: value for key, value in cli_args.__dict__.items()
-            if key not in class_arg_keys
-        }
+        return {key: value for key, value in cli_args.__dict__.items() if key not in class_arg_keys}
 
     @classmethod
     def _handle_generic_exception(cls, action_name: str) -> int:
         logger = log.get_logger(cls)
         message = (
-            f'Executing {cls.__name__} action {action_name} failed unexpectedly. '
+            f"Executing {cls.__name__} action {action_name} failed unexpectedly. "
             f'Detailed logs are available at "{log.get_log_path()}". '
-            f'To see more details about the error, add `--verbose` command line option.'
+            f"To see more details about the error, add `--verbose` command line option."
         )
         logger.warning(Colors.RED(message))
         file_logger = log.get_file_logger(cls)
-        file_logger.exception('Exception traceback:')
+        file_logger.exception("Exception traceback:")
         auditing.save_exception_audit()
         return 9
 
@@ -125,7 +121,7 @@ class CliApp(metaclass=abc.ABCMeta):
     def _handle_cli_exception(cls, cli_exception: CliAppException) -> int:
         if cli_exception.message:
             logger = log.get_logger(cls)
-            logger.error(f'{Colors.RED(cli_exception.message)}')
+            logger.error(f"{Colors.RED(cli_exception.message)}")
 
         if cli_exception.cli_process:
             return cli_exception.cli_process.returncode
@@ -144,7 +140,7 @@ class CliApp(metaclass=abc.ABCMeta):
         return instance
 
     def _get_invoked_cli_action(self, args: argparse.Namespace) -> ActionCallable:
-        subcommand = getattr(args, 'action_subcommand', None)
+        subcommand = getattr(args, "action_subcommand", None)
         if subcommand is None:
             action_group = None
             action_key = args.action
@@ -162,21 +158,20 @@ class CliApp(metaclass=abc.ABCMeta):
     def _invoke_action(self, args: argparse.Namespace):
         cli_action = self._get_invoked_cli_action(args)
         action_args = {
-            arg_type.value.key: arg_type.from_args(args, arg_type.get_default())
-            for arg_type in cli_action.arguments
+            arg_type.value.key: arg_type.from_args(args, arg_type.get_default()) for arg_type in cli_action.arguments
         }
         return cli_action(**action_args)
 
     @classmethod
     def show_version(cls):
         executable = cls.get_executable_name()
-        cls.echo(f'{cls.__name__} installed at {shutil.which(executable) or executable}')
-        cls.echo(f'{executable} {__version__}')
+        cls.echo(f"{cls.__name__} installed at {shutil.which(executable) or executable}")
+        cls.echo(f"{executable} {__version__}")
         return __version__
 
     @classmethod
     def is_cli_invocation(cls) -> bool:
-        return os.environ.get('_CLI_INVOCATION') == 'true'
+        return os.environ.get("_CLI_INVOCATION") == "true"
 
     @classmethod
     def _resolve_cli_invocation_arg(cls):
@@ -184,15 +179,14 @@ class CliApp(metaclass=abc.ABCMeta):
         from codemagic.models.enums import ResourceEnumMeta
 
         parser = cls._setup_cli_options()
-        with ResourceEnumMeta.cli_arguments_parsing_mode(), \
-                TypedCliArgumentMeta.cli_arguments_parsing_mode():
+        with ResourceEnumMeta.cli_arguments_parsing_mode(), TypedCliArgumentMeta.cli_arguments_parsing_mode():
             args = parser.parse_args()
 
         return parser, args
 
     @classmethod
     def invoke_cli(cls) -> NoReturn:
-        os.environ['_CLI_INVOCATION'] = 'true'
+        os.environ["_CLI_INVOCATION"] = "true"
 
         parser, args = cls._resolve_cli_invocation_arg()
         cls._setup_logging(args)
@@ -204,9 +198,9 @@ class CliApp(metaclass=abc.ABCMeta):
             if args.show_version:
                 cls.show_version()
             elif not args.action:
-                raise argparse.ArgumentError(args.action, 'the following argument is required: action')
+                raise argparse.ArgumentError(args.action, "the following argument is required: action")
             elif cls._action_requires_subcommand(args.action) and not args.action_subcommand:
-                raise argparse.ArgumentError(args.action_subcommand, 'the following argument is required: subcommand')
+                raise argparse.ArgumentError(args.action_subcommand, "the following argument is required: subcommand")
             else:
                 CliApp._running_app = cls._create_instance(parser, args)
                 CliApp._running_app._invoke_action(args)
@@ -217,7 +211,7 @@ class CliApp(metaclass=abc.ABCMeta):
             status = cls._handle_cli_exception(cli_exception)
         except KeyboardInterrupt:
             logger = log.get_logger(cls)
-            logger.warning(Colors.YELLOW('Terminated'))
+            logger.warning(Colors.YELLOW("Terminated"))
             status = 130
         except Exception:
             status = cls._handle_generic_exception(args.action)
@@ -235,9 +229,9 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _log_cli_invoke_started(cls):
         exec_line = f'Execute {" ".join(map(shlex.quote, sys.argv))}'
-        install_line = f'From {pathlib.Path(__file__).parent.parent.resolve()}'
-        version_line = f'Using Python {platform.python_version()} on {platform.system()} {platform.release()}'
-        separator = '-' * max(len(exec_line), len(version_line), len(install_line))
+        install_line = f"From {pathlib.Path(__file__).parent.parent.resolve()}"
+        version_line = f"Using Python {platform.python_version()} on {platform.system()} {platform.release()}"
+        separator = "-" * max(len(exec_line), len(version_line), len(install_line))
         file_logger = log.get_file_logger(cls)
         file_logger.debug(Colors.MAGENTA(separator))
         file_logger.debug(Colors.MAGENTA(exec_line))
@@ -248,12 +242,12 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _log_cli_invoke_completed(cls, action_name: str, started_at: float, exit_status: int):
         seconds = int(time.time() - started_at)
-        duration = time.strftime('%M:%S', time.gmtime(seconds))
-        msg = f'Completed {cls.__name__} {action_name} in {duration} with status code {exit_status}'
+        duration = time.strftime("%M:%S", time.gmtime(seconds))
+        msg = f"Completed {cls.__name__} {action_name} in {duration} with status code {exit_status}"
         file_logger = log.get_file_logger(cls)
-        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+        file_logger.debug(Colors.MAGENTA("-" * len(msg)))
         file_logger.debug(Colors.MAGENTA(msg))
-        file_logger.debug(Colors.MAGENTA('-' * len(msg)))
+        file_logger.debug(Colors.MAGENTA("-" * len(msg)))
 
     @classmethod
     def iter_class_action_groups(cls) -> Iterable[ActionGroup]:
@@ -279,9 +273,9 @@ class CliApp(metaclass=abc.ABCMeta):
     ) -> Iterable[ActionCallable]:
         for attr_name in dir(cls):
             attr = getattr(cls, attr_name)
-            if not callable(attr) or not getattr(attr, 'is_cli_action', False):
+            if not callable(attr) or not getattr(attr, "is_cli_action", False):
                 continue
-            if include_all or getattr(attr, 'action_group') is action_group:
+            if include_all or getattr(attr, "action_group") is action_group:
                 yield attr
 
     def iter_cli_actions(self, action_group: Optional[ActionGroup] = None) -> Iterable[ActionCallable]:
@@ -296,7 +290,7 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _setup_logging(cls, cli_args: argparse.Namespace):
         log.initialize_logging(
-            stream={'stderr': sys.stderr, 'stdout': sys.stdout}[cli_args.log_stream],
+            stream={"stderr": sys.stderr, "stdout": sys.stdout}[cli_args.log_stream],
             verbose=cli_args.verbose,
             enable_logging=cli_args.enable_logging,
         )
@@ -311,8 +305,8 @@ class CliApp(metaclass=abc.ABCMeta):
         )
         ArgumentParserBuilder.set_default_cli_options(group_parser)
 
-        group_title = Colors.BOLD(Colors.UNDERLINE(f'Available subcommands for {action_group.name}'))
-        return group_parser.add_subparsers(title=group_title, dest='action_subcommand')
+        group_title = Colors.BOLD(Colors.UNDERLINE(f"Available subcommands for {action_group.name}"))
+        return group_parser.add_subparsers(title=group_title, dest="action_subcommand")
 
     @classmethod
     def _setup_cli_options(cls) -> argparse.ArgumentParser:
@@ -325,8 +319,8 @@ class CliApp(metaclass=abc.ABCMeta):
         )
         ArgumentParserBuilder.set_default_cli_options(main_parser)
 
-        formatted_title = Colors.BOLD(Colors.UNDERLINE('Available commands'))
-        action_parsers = main_parser.add_subparsers(dest='action', title=formatted_title)
+        formatted_title = Colors.BOLD(Colors.UNDERLINE("Available commands"))
+        action_parsers = main_parser.add_subparsers(dest="action", title=formatted_title)
 
         actions_and_groups: List[Union[ActionGroup, ActionCallable]] = sorted(
             chain(cls.iter_class_cli_actions(), cls.list_class_action_groups()),
@@ -361,10 +355,10 @@ class CliApp(metaclass=abc.ABCMeta):
         CliHelpFormatter.suppress_deprecated_action(main_or_group_action.deprecated_alias)
 
     def _obfuscate_command(
-        self, command_args: Sequence[CommandArg],
+        self,
+        command_args: Sequence[CommandArg],
         obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None,
     ) -> ObfuscatedCommand:
-
         all_obfuscate_patterns = set(chain((obfuscate_patterns or []), self.default_obfuscation))
 
         def should_obfuscate(arg: CommandArg):
@@ -376,7 +370,7 @@ class CliApp(metaclass=abc.ABCMeta):
                 elif isinstance(pattern, (str, bytes, pathlib.Path)):
                     match = pattern == arg
                 else:
-                    raise ValueError(f'Invalid obfuscation pattern {pattern}')
+                    raise ValueError(f"Invalid obfuscation pattern {pattern}")
                 if match:
                     return True
             return False
@@ -384,7 +378,7 @@ class CliApp(metaclass=abc.ABCMeta):
         def obfuscate_arg(arg: CommandArg):
             return self.obfuscation if should_obfuscate(arg) else shlex.quote(str(arg))
 
-        return ObfuscatedCommand(' '.join(map(obfuscate_arg, command_args)))
+        return ObfuscatedCommand(" ".join(map(obfuscate_arg, command_args)))
 
     @classmethod
     def _expand_variables(cls, command_args: Sequence[CommandArg]) -> List[str]:
@@ -397,7 +391,8 @@ class CliApp(metaclass=abc.ABCMeta):
         return [expand(command_arg) for command_arg in command_args]
 
     def execute(
-        self, command_args: Sequence[CommandArg],
+        self,
+        command_args: Sequence[CommandArg],
         obfuscate_patterns: Optional[Sequence[ObfuscationPattern]] = None,
         show_output: bool = True,
         suppress_output: bool = False,
@@ -416,7 +411,7 @@ class CliApp(metaclass=abc.ABCMeta):
         ).execute(**execute_kwargs)
 
 
-_Fn = TypeVar('_Fn', bound=Callable[..., object])
+_Fn = TypeVar("_Fn", bound=Callable[..., object])
 
 
 def action(
@@ -441,7 +436,7 @@ def action(
     unique_arguments = set()
     function_cli_arguments = []
     for argument in arguments:
-        argument_name = f'{argument.__class__.__name__}.{argument.name}'
+        argument_name = f"{argument.__class__.__name__}.{argument.name}"
         if argument_name not in unique_arguments:
             function_cli_arguments.append(argument)
             unique_arguments.add(argument_name)
@@ -475,16 +470,16 @@ def _notify_deprecated_action_usage(
 ):
     executable = cli_app.get_executable_name()
     name_parts = (executable, action_group.name if action_group else None, action_name)
-    full_action_name = ' '.join(p for p in name_parts if p)
-    deprecated_action_name = f'{executable} {deprecated_alias}'
+    full_action_name = " ".join(p for p in name_parts if p)
+    deprecated_action_name = f"{executable} {deprecated_alias}"
     deprecation_message = (
-        f'Using `{deprecated_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n'
-        f'Use `{full_action_name}` instead as `{deprecated_action_name}` is subject for removal in future releases.\n'
+        f"Using `{deprecated_action_name}` is deprecated and replaced by equivalent action `{full_action_name}`.\n"
+        f"Use `{full_action_name}` instead as `{deprecated_action_name}` is subject for removal in future releases.\n"
     )
     cli_app.echo(Colors.apply(deprecation_message, Colors.YELLOW, Colors.BOLD))
 
 
-_CliApp = TypeVar('_CliApp', bound=Type[CliApp])
+_CliApp = TypeVar("_CliApp", bound=Type[CliApp])
 
 
 def common_arguments(*class_arguments: Argument) -> Callable[[_CliApp], _CliApp]:
@@ -495,12 +490,12 @@ def common_arguments(*class_arguments: Argument) -> Callable[[_CliApp], _CliApp]
 
     def decorator(cli_app_type: _CliApp) -> _CliApp:
         if not issubclass(cli_app_type, CliApp):
-            raise RuntimeError(f'Cannot decorate {cli_app_type} with {common_arguments}')
+            raise RuntimeError(f"Cannot decorate {cli_app_type} with {common_arguments}")
         for class_argument in class_arguments:
             if not isinstance(class_argument, Argument):
-                raise TypeError(f'Invalid argument to common_arguments: {class_argument}')
+                raise TypeError(f"Invalid argument to common_arguments: {class_argument}")
             elif class_argument in cli_app_type.CLASS_ARGUMENTS:
-                raise ValueError(f'{class_argument} is already registered on class {cli_app_type.__name__}')
+                raise ValueError(f"{class_argument} is already registered on class {cli_app_type.__name__}")
             else:
                 cli_app_type.CLASS_ARGUMENTS += (class_argument,)
 

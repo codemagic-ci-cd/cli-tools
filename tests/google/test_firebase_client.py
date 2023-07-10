@@ -3,7 +3,6 @@ from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import pytest
-
 from codemagic.google import FirebaseClient
 from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.resource_managers import ReleaseManager
@@ -16,13 +15,17 @@ def test_release(release_response, release):
 
 
 @pytest.mark.parametrize(
-    'credentials', [
+    "credentials",
+    [
         {},
-        {'type': 'service_account'},
-        {'type': 'service_account', 'client_email': 'user@example.com'},
+        {"type": "service_account"},
+        {"type": "service_account", "client_email": "user@example.com"},
         {
-            'type': 'service_account', 'client_email': 'user@example.com', 'client_id': 'client-id',
-            'private_key': 'invalid-private-key', 'private_key_id': 'private-key-id',
+            "type": "service_account",
+            "client_email": "user@example.com",
+            "client_id": "client-id",
+            "private_key": "invalid-private-key",
+            "private_key_id": "private-key-id",
         },
     ],
 )
@@ -31,9 +34,9 @@ def test_invalid_credentials(credentials, app_identifier):
         FirebaseClient(credentials).releases.list(app_identifier)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def firebase_client():
-    with patch.object(FirebaseClient, 'google_resource', new_callable=PropertyMock) as mock_firebase_app_distribution:
+    with patch.object(FirebaseClient, "google_resource", new_callable=PropertyMock) as mock_firebase_app_distribution:
         mock_firebase_app_distribution.return_value = None
         yield FirebaseClient({})
 
@@ -42,10 +45,10 @@ def firebase_client():
 def mock_releases(release_response):
     release_0 = release_response.copy()
     release_1 = release_response.copy()
-    release_1['buildVersion'] = '71'
-    with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
+    release_1["buildVersion"] = "71"
+    with patch.object(ReleaseManager, "_releases", new_callable=PropertyMock) as mock_resource:
         google_request_mock_class = MagicMock()
-        google_request_mock_class.execute.return_value = {'releases': [release_0, release_1]}
+        google_request_mock_class.execute.return_value = {"releases": [release_0, release_1]}
         google_resource_mock_class = MagicMock()
         google_resource_mock_class.list.return_value = google_request_mock_class
         mock_resource.return_value = google_resource_mock_class
@@ -70,12 +73,12 @@ def test_list_releases_limit(app_identifier, firebase_client, mock_releases):
 def mock_releases_pagination(release_response):
     release_0 = release_response.copy()
     release_1 = release_response.copy()
-    release_1['buildVersion'] = '71'
-    with patch.object(ReleaseManager, '_releases', new_callable=PropertyMock) as mock_resource:
+    release_1["buildVersion"] = "71"
+    with patch.object(ReleaseManager, "_releases", new_callable=PropertyMock) as mock_resource:
         google_request_mock_class = MagicMock()
         google_request_mock_class.execute.side_effect = [
-            {'releases': [release_0], 'nextPageToken': 'next-page-token'},
-            {'releases': [release_1]},
+            {"releases": [release_0], "nextPageToken": "next-page-token"},
+            {"releases": [release_1]},
         ]
         google_resource_mock_class = MagicMock()
         google_resource_mock_class.list.return_value = google_request_mock_class

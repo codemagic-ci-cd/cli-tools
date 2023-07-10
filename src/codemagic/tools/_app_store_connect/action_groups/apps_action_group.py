@@ -30,8 +30,7 @@ from ..arguments import ReviewSubmissionArgument
 
 
 class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
-    @cli.action('get', AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
+    @cli.action("get", AppArgument.APPLICATION_ID_RESOURCE_ID, action_group=AppStoreConnectActionGroup.APPS)
     def get_app(self, application_id: ResourceId, should_print: bool = True) -> App:
         """
         Get information about a specific app
@@ -40,7 +39,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self._get_resource(application_id, self.api_client.apps, should_print)
 
     @cli.action(
-        'list',
+        "list",
         BundleIdArgument.BUNDLE_ID_IDENTIFIER_OPTIONAL,
         BundleIdArgument.IDENTIFIER_STRICT_MATCH,
         AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
@@ -88,7 +87,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'builds',
+        "builds",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.APPS,
@@ -100,12 +99,14 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self.list_builds(application_id=application_id, **builds_filters, should_print=should_print)
 
     @cli.action(
-        'pre-release-versions',
+        "pre-release-versions",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.APPS,
     )
     def list_app_pre_release_versions(
-            self, application_id: ResourceId, should_print: bool = True,
+        self,
+        application_id: ResourceId,
+        should_print: bool = True,
     ) -> List[PreReleaseVersion]:
         """
         Get a list of prerelease versions associated with a specific app
@@ -121,7 +122,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'app-store-versions',
+        "app-store-versions",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.APP_STORE_VERSION_ID_OPTIONAL,
         AppStoreVersionArgument.VERSION_STRING,
@@ -130,13 +131,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         action_group=AppStoreConnectActionGroup.APPS,
     )
     def list_app_store_versions_for_app(
-            self,
-            application_id: ResourceId,
-            app_store_version_id: Optional[ResourceId] = None,
-            version_string: Optional[str] = None,
-            platform: Optional[Platform] = None,
-            app_store_state: Optional[AppStoreState] = None,
-            should_print: bool = True,
+        self,
+        application_id: ResourceId,
+        app_store_version_id: Optional[ResourceId] = None,
+        version_string: Optional[str] = None,
+        platform: Optional[Platform] = None,
+        app_store_state: Optional[AppStoreState] = None,
+        should_print: bool = True,
     ) -> List[AppStoreVersion]:
         """
         Get a list of App Store versions associated with a specific app
@@ -158,7 +159,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'expire-builds',
+        "expire-builds",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         BuildArgument.BUILD_ID_RESOURCE_ID_EXCLUDE_OPTIONAL,
         action_group=AppStoreConnectActionGroup.APPS,
@@ -189,7 +190,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ]
 
     @cli.action(
-        'expire-build-submitted-for-review',
+        "expire-build-submitted-for-review",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.APPS,
     )
@@ -219,7 +220,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             return None
 
     @cli.action(
-        'cancel-review-submissions',
+        "cancel-review-submissions",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.PLATFORM_OPTIONAL,
         ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,
@@ -246,7 +247,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return [self.cancel_review_submission(submission.id) for submission in review_submissions]
 
     @cli.action(
-        'list-review-submissions',
+        "list-review-submissions",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.PLATFORM_OPTIONAL,
         ReviewSubmissionArgument.REVIEW_SUBMISSION_STATE,

@@ -56,9 +56,8 @@ BetaBuildLocalizationsInfo = Union[
 
 
 class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
     @cli.action(
-        'get',
+        "get",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
@@ -70,7 +69,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         return self._get_resource(build_id, self.api_client.builds, should_print)
 
     @cli.action(
-        'expire',
+        "expire",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
@@ -91,14 +90,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'pre-release-version',
+        "pre-release-version",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def get_build_pre_release_version(
-            self,
-            build_id: ResourceId,
-            should_print: bool = True,
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
     ) -> PreReleaseVersion:
         """
         Get the prerelease version for a specific build
@@ -113,14 +112,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'app-store-version',
+        "app-store-version",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def get_build_app_store_version(
-            self,
-            build_id: ResourceId,
-            should_print: bool = True,
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
     ) -> AppStoreVersion:
         """
         Get the App Store version of a specific build.
@@ -135,14 +134,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'app',
+        "app",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def get_build_app(
-            self,
-            build_id: ResourceId,
-            should_print: bool = True,
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
     ) -> App:
         """
         Get the App details for a specific build.
@@ -157,17 +156,17 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'add-beta-test-info',
+        "add-beta-test-info",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.ADD_BETA_TEST_INFO_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def add_beta_test_info(
-            self,
-            build_id: ResourceId,
-            beta_build_localizations: Optional[BetaBuildLocalizationsInfo] = None,
-            locale: Optional[Locale] = None,
-            whats_new: Optional[Types.WhatsNewArgument] = None,
+        self,
+        build_id: ResourceId,
+        beta_build_localizations: Optional[BetaBuildLocalizationsInfo] = None,
+        locale: Optional[Locale] = None,
+        whats_new: Optional[Types.WhatsNewArgument] = None,
     ):
         """
         Add localized What's new (what to test) information
@@ -181,21 +180,21 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if whats_new:
             beta_test_info_items.append(BetaBuildInfo(whats_new=whats_new.value, locale=locale))
 
-        self.logger.info(Colors.BLUE('\nUpdate beta build localization info in TestFlight for uploaded build'))
+        self.logger.info(Colors.BLUE("\nUpdate beta build localization info in TestFlight for uploaded build"))
         for item in beta_test_info_items:
             self.create_beta_build_localization(build_id=build_id, locale=item.locale, whats_new=item.whats_new)
 
     @cli.action(
-        'submit-to-testflight',
+        "submit-to-testflight",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def submit_to_testflight(
-            self,
-            build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-            expire_build_submitted_for_review: bool = False,
+        self,
+        build_id: ResourceId,
+        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
         """
         Submit build to TestFlight
@@ -203,7 +202,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         max_processing_minutes = Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait)
 
-        self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to TestFlight beta review'))
+        self.logger.info(Colors.BLUE(f"\nSubmit build {build_id!r} to TestFlight beta review"))
 
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
@@ -219,38 +218,38 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
         if expire_build_submitted_for_review:
-            self.logger.info(Colors.BLUE('\nExpire previous build before creating submission'))
+            self.logger.info(Colors.BLUE("\nExpire previous build before creating submission"))
             self.expire_build_submitted_for_review(application_id=app.id, should_print=False)
 
         return self.create_beta_app_review_submission(build.id)
 
     @cli.action(
-        'submit-to-app-store',
+        "submit-to-app-store",
         BuildArgument.BUILD_ID_RESOURCE_ID,
         *ArgumentGroups.SUBMIT_TO_APP_STORE_OPTIONAL_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS,
     )
     def submit_to_app_store(
-            self,
-            build_id: ResourceId,
-            max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
-            cancel_previous_submissions: bool = False,
-            # App Store Version information arguments
-            copyright: Optional[str] = None,
-            earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
-            platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
-            release_type: Optional[ReleaseType] = None,
-            version_string: Optional[str] = None,
-            app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
-            # App Store Version Localization arguments
-            description: Optional[str] = None,
-            keywords: Optional[str] = None,
-            locale: Optional[Locale] = None,
-            marketing_url: Optional[str] = None,
-            promotional_text: Optional[str] = None,
-            support_url: Optional[str] = None,
-            whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
-            app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
+        self,
+        build_id: ResourceId,
+        max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
+        cancel_previous_submissions: bool = False,
+        # App Store Version information arguments
+        copyright: Optional[str] = None,
+        earliest_release_date: Optional[Union[datetime, Types.EarliestReleaseDate]] = None,
+        platform: Platform = AppStoreVersionArgument.PLATFORM.get_default(),
+        release_type: Optional[ReleaseType] = None,
+        version_string: Optional[str] = None,
+        app_store_version_info: Optional[Union[AppStoreVersionInfo, Types.AppStoreVersionInfoArgument]] = None,
+        # App Store Version Localization arguments
+        description: Optional[str] = None,
+        keywords: Optional[str] = None,
+        locale: Optional[Locale] = None,
+        marketing_url: Optional[str] = None,
+        promotional_text: Optional[str] = None,
+        support_url: Optional[str] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
+        app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
         """
         Submit build to App Store review
@@ -288,7 +287,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         application_id: ResourceId,
         platform: Platform,
     ):
-        self.logger.info(Colors.BLUE('\nCancel previous submissions before creating new submission'))
+        self.logger.info(Colors.BLUE("\nCancel previous submissions before creating new submission"))
         states_to_cancel = (
             ReviewSubmissionState.WAITING_FOR_REVIEW,
             ReviewSubmissionState.IN_REVIEW,
@@ -311,7 +310,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         platform: Platform,
         timeout=120,
     ):
-        self.logger.info(Colors.BLUE('Wait until cancelled submissions are completed'))
+        self.logger.info(Colors.BLUE("Wait until cancelled submissions are completed"))
 
         review_submissions_filter = self.api_client.review_submissions.Filter(
             app=application_id,
@@ -323,12 +322,12 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         while timeout > waited_duration:
             cancelling_submissions = self.api_client.review_submissions.list(review_submissions_filter)
             if not cancelling_submissions:
-                self.logger.info(Colors.GREEN('Previous submissions are successfully cancelled'))
+                self.logger.info(Colors.GREEN("Previous submissions are successfully cancelled"))
                 return
             time.sleep(1)
             waited_duration += 1
 
-        warning_message = f'Cancelling submissions was not completed in {timeout} seconds. Try to continue...'
+        warning_message = f"Cancelling submissions was not completed in {timeout} seconds. Try to continue..."
         self.logger.warning(Colors.YELLOW(warning_message))
 
     def _submit_to_app_store(
@@ -340,7 +339,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
         cancel_previous_submissions: bool,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
-        self.logger.info(Colors.BLUE(f'\nSubmit build {build_id!r} to App Store review'))
+        self.logger.info(Colors.BLUE(f"\nSubmit build {build_id!r} to App Store review"))
 
         try:
             build, app = self.api_client.builds.read_with_include(build_id, App)
@@ -359,11 +358,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_version_info.version_string = pre_release_version.attributes.version
 
         self.logger.info(
-            Colors.BLUE(f'\nUsing version {app_store_version_info.version_string} for App Store submission'),
+            Colors.BLUE(f"\nUsing version {app_store_version_info.version_string} for App Store submission"),
         )
 
         app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
-        self.echo('')
+        self.echo("")
 
         self._create_or_update_app_store_version_localizations(
             app,
@@ -377,12 +376,13 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             app_store_version_id=app_store_version.id,
         )
 
-        self.echo(Colors.BLUE('\nSubmit to App Review\n'))
+        self.echo(Colors.BLUE("\nSubmit to App Review\n"))
         self.confirm_review_submission(review_submission.id)
 
-        submission_url = \
-            f'https://appstoreconnect.apple.com/apps/{app.id}/appstore/reviewsubmissions/details/{review_submission.id}'
-        self.logger.info(f'\nCheck App Store review submission details from\n{submission_url}\n')
+        submission_url = (
+            f"https://appstoreconnect.apple.com/apps/{app.id}/appstore/reviewsubmissions/details/{review_submission.id}"
+        )
+        self.logger.info(f"\nCheck App Store review submission details from\n{submission_url}\n")
 
         return review_submission, review_submission_item
 
@@ -392,7 +392,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             review_submission = self.api_client.review_submissions.create(platform, app)
         except AppStoreConnectApiError as api_error:
             existing_submission_error_patt = re.compile(
-                r'There is another reviewSubmissions with id ([\w-]+) still in progress',
+                r"There is another reviewSubmissions with id ([\w-]+) still in progress",
             )
 
             existing_submission_matches: Iterator[Optional[re.Match]] = (
@@ -406,14 +406,14 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             except StopIteration:
                 raise AppStoreConnectError(str(api_error)) from api_error
 
-            self.logger.warning('Review submission already exists, reuse it')
+            self.logger.warning("Review submission already exists, reuse it")
             existing_review_submission_id = ResourceId(existing_submission_match.group(1))
             review_submission = self.api_client.review_submissions.read(existing_review_submission_id)
 
         self.printer.print_resource(review_submission, True)
         if review_submission.created:
             self.printer.log_created(review_submission)
-        self.echo('')
+        self.echo("")
 
         return review_submission
 
@@ -430,8 +430,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 if is_first_attempt:
                     self._log_build_processing_message(build.id, max_processing_minutes)
 
-                msg_template = 'Build %s is still being processed on App Store Connect side, waiting %d seconds ' \
-                               'and checking again'
+                msg_template = (
+                    "Build %s is still being processed on App Store Connect side, waiting %d seconds "
+                    "and checking again"
+                )
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
                 time.sleep(retry_wait_seconds)
                 try:
@@ -439,25 +441,27 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 except AppStoreConnectApiError as api_error:
                     raise AppStoreConnectError(str(api_error))
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
-                raise IOError(f'Uploaded build {build.id} is {build.attributes.processingState.value.lower()}')
+                raise IOError(f"Uploaded build {build.id} is {build.attributes.processingState.value.lower()}")
             else:
                 if not is_first_attempt:
-                    self.logger.info(Colors.BLUE('Processing build %s is completed\n'), build.id)
+                    self.logger.info(Colors.BLUE("Processing build %s is completed\n"), build.id)
                 return build
             is_first_attempt = False
 
-        raise IOError((
-            f'Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. '
-            f'You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} '
-            f'command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable.'
-        ))
+        raise IOError(
+            (
+                f"Waiting for build {build.id} processing timed out in {max_processing_minutes} minutes. "
+                f"You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} "
+                f"command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable."
+            ),
+        )
 
     def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int):
         processing_message_template = (
-            '\n'
-            'Processing of builds by Apple can take a while, '
-            'the timeout for waiting the processing '
-            'to finish for build %s is set to %d minutes.'
+            "\n"
+            "Processing of builds by Apple can take a while, "
+            "the timeout for waiting the processing "
+            "to finish for build %s is set to %d minutes."
         )
         self.logger.info(Colors.BLUE(processing_message_template), build_id, max_processing_minutes)
 
@@ -470,19 +474,21 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         error_lines = []
         if missing_beta_app_information:
-            missing_values = ', '.join(missing_beta_app_information)
-            error_lines.append(f'App is missing required Beta App Information: {missing_values}.')
+            missing_values = ", ".join(missing_beta_app_information)
+            error_lines.append(f"App is missing required Beta App Information: {missing_values}.")
         if missing_beta_app_review_information:
-            missing_values = ', '.join(missing_beta_app_review_information)
-            error_lines.append(f'App is missing required Beta App Review Information: {missing_values}.')
+            missing_values = ", ".join(missing_beta_app_review_information)
+            error_lines.append(f"App is missing required Beta App Review Information: {missing_values}.")
 
         name = app.attributes.name
         raise ValueError(
-            '\n'.join([
-                f'Complete test information is required to submit application {name} build for external testing.',
-                *error_lines,
-                f'Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.',
-            ]),
+            "\n".join(
+                [
+                    f"Complete test information is required to submit application {name} build for external testing.",
+                    *error_lines,
+                    f"Fill in test information at https://appstoreconnect.apple.com/apps/{app.id}/testflight/test-info.",
+                ],
+            ),
         )
 
     def _get_missing_beta_app_information(self, app: App) -> List[str]:
@@ -490,17 +496,17 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         feedback_email = app_beta_localization.attributes.feedbackEmail if app_beta_localization else None
         required_test_information = {
-            'Feedback Email': feedback_email,
+            "Feedback Email": feedback_email,
         }
         return [field_name for field_name, value in required_test_information.items() if not value]
 
     def _get_missing_beta_app_review_information(self, app: App) -> List[str]:
         beta_app_review_detail = self.api_client.apps.read_beta_app_review_detail(app)
         required_test_information = {
-            'First Name': beta_app_review_detail.attributes.contactFirstName,
-            'Last Name': beta_app_review_detail.attributes.contactLastName,
-            'Phone Number': beta_app_review_detail.attributes.contactPhone,
-            'Email': beta_app_review_detail.attributes.contactEmail,
+            "First Name": beta_app_review_detail.attributes.contactFirstName,
+            "Last Name": beta_app_review_detail.attributes.contactLastName,
+            "Phone Number": beta_app_review_detail.attributes.contactPhone,
+            "Email": beta_app_review_detail.attributes.contactEmail,
         }
         return [field_name for field_name, value in required_test_information.items() if not value]
 
@@ -521,7 +527,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version = self._get_editable_app_store_version(app, app_store_version_info.platform)
         if app_store_version is None:
             # Version does not exist, create a new version for App Store review submission
-            self.logger.info(f'\n{AppStoreVersion} does not exist for build {build.id}')
+            self.logger.info(f"\n{AppStoreVersion} does not exist for build {build.id}")
             app_store_version = self.create_app_store_version(
                 build.id,
                 platform=app_store_version_info.platform,
@@ -555,19 +561,19 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                     localization,
                 )
             except AppStoreConnectApiError as error:
-                verb = 'update' if localization_id else 'create new'
-                message = f'Failed to {verb} {AppStoreVersionLocalization} for locale {localization.locale}:'
-                self.echo(f'{Colors.YELLOW(message)}\n{error}\n')
+                verb = "update" if localization_id else "create new"
+                message = f"Failed to {verb} {AppStoreVersionLocalization} for locale {localization.locale}:"
+                self.echo(f"{Colors.YELLOW(message)}\n{error}\n")
 
     def _create_or_update_app_store_version_localization(
-            self,
-            existing_localization_id: Optional[ResourceId],
-            app: App,
-            app_store_version: AppStoreVersion,
-            localization: AppStoreVersionLocalizationInfo,
+        self,
+        existing_localization_id: Optional[ResourceId],
+        app: App,
+        app_store_version: AppStoreVersion,
+        localization: AppStoreVersionLocalizationInfo,
     ):
         if existing_localization_id is None:
-            self.echo(Colors.GREEN(f'Create new {AppStoreVersionLocalization} for locale {localization.locale}'))
+            self.echo(Colors.GREEN(f"Create new {AppStoreVersionLocalization} for locale {localization.locale}"))
             app_store_version_localization = self.api_client.app_store_version_localizations.create(
                 app_store_version,
                 localization.locale or app.attributes.primaryLocale,  # Use app's primary locale if not defined
@@ -579,7 +585,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 whats_new=localization.whats_new,
             )
         else:
-            self.echo(Colors.GREEN(f'Update {AppStoreVersionLocalization} for locale {localization.locale}'))
+            self.echo(Colors.GREEN(f"Update {AppStoreVersionLocalization} for locale {localization.locale}"))
             app_store_version_localization = self.api_client.app_store_version_localizations.modify(
                 existing_localization_id,
                 description=localization.description,
@@ -590,7 +596,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 whats_new=localization.whats_new,
             )
         self.printer.print_resource(app_store_version_localization, True)
-        self.echo('')
+        self.echo("")
 
     def _update_existing_app_store_version(
         self,
@@ -598,26 +604,25 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         build: Build,
         app_store_version_info: AppStoreVersionInfo,
     ):
-        self.logger.info((
-            f'\nFound existing {AppStoreVersion} {app_store_version.id} '
-            f'in state "{app_store_version.attributes.appStoreState}". '
-        ))
-
-        updates: Dict[str, str] = {'build': build.id}
-        if app_store_version_info.copyright:
-            updates['copyright'] = app_store_version_info.copyright
-        if app_store_version_info.earliest_release_date:
-            updates['earliest release date'] = AppStoreVersion.to_iso_8601(app_store_version_info.earliest_release_date)
-        if app_store_version_info.release_type:
-            updates['release type'] = app_store_version_info.release_type.value.lower()
-        if app_store_version_info.version_string:
-            updates['version string'] = app_store_version_info.version_string
-
-        update_message = ', '.join(
-            f'{param}: {shlex.quote(value)}'
-            for param, value in updates.items()
+        self.logger.info(
+            (
+                f"\nFound existing {AppStoreVersion} {app_store_version.id} "
+                f'in state "{app_store_version.attributes.appStoreState}". '
+            ),
         )
-        self.logger.info(f'Use it for current submission by updating it with {update_message}.')
+
+        updates: Dict[str, str] = {"build": build.id}
+        if app_store_version_info.copyright:
+            updates["copyright"] = app_store_version_info.copyright
+        if app_store_version_info.earliest_release_date:
+            updates["earliest release date"] = AppStoreVersion.to_iso_8601(app_store_version_info.earliest_release_date)
+        if app_store_version_info.release_type:
+            updates["release type"] = app_store_version_info.release_type.value.lower()
+        if app_store_version_info.version_string:
+            updates["version string"] = app_store_version_info.version_string
+
+        update_message = ", ".join(f"{param}: {shlex.quote(value)}" for param, value in updates.items())
+        self.logger.info(f"Use it for current submission by updating it with {update_message}.")
 
         return self.update_app_store_version(
             app_store_version.id,
@@ -642,10 +647,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version: AppStoreVersion,
     ) -> Dict[Locale, ResourceId]:
         localizations = self.api_client.app_store_versions.list_app_store_version_localizations(app_store_version)
-        return {
-            localization.attributes.locale: localization.id
-            for localization in localizations
-        }
+        return {localization.attributes.locale: localization.id for localization in localizations}
 
     def _get_editable_app_store_version(self, app: App, platform: Platform) -> Optional[AppStoreVersion]:
         def sorting_key(app_store_version: Optional[AppStoreVersion]) -> versions.Version:

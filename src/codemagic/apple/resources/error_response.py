@@ -20,20 +20,19 @@ class ErrorMeta(DictSerializable):
             return
         for scope in self.associatedErrors.keys():
             self.associatedErrors[scope] = [
-                Error(**error) if isinstance(error, dict) else error
-                for error in self.associatedErrors[scope]
+                Error(**error) if isinstance(error, dict) else error for error in self.associatedErrors[scope]
             ]
 
     def __str__(self):
         lines = []
         for scope, errors in (self.associatedErrors or {}).items():
-            lines.extend(f'Associated error: {e}' for e in errors)
-        return '\n'.join(lines)
+            lines.extend(f"Associated error: {e}" for e in errors)
+        return "\n".join(lines)
 
 
 @dataclass
 class Error(DictSerializable):
-    _OMIT_IF_NONE_KEYS = ('meta', 'source', 'links')
+    _OMIT_IF_NONE_KEYS = ("meta", "source", "links")
 
     code: str
     status: str
@@ -52,33 +51,32 @@ class Error(DictSerializable):
         if self.detail is None:
             s = self.title
         else:
-            s = f'{self.title} - {self.detail}'
+            s = f"{self.title} - {self.detail}"
 
         if self.meta:
-            meta = textwrap.indent(str(self.meta), '\t')
+            meta = textwrap.indent(str(self.meta), "\t")
             if meta:
-                s += f'\n{meta}'
+                s += f"\n{meta}"
         return s
 
 
 class ErrorResponse(DictSerializable):
-
     def __init__(self, api_response: Dict):
         self._raw = api_response
-        self.errors = [Error(**error) for error in api_response['errors']]
+        self.errors = [Error(**error) for error in api_response["errors"]]
 
     @classmethod
     def from_raw_response(cls, response: Response) -> ErrorResponse:
-        error_response = ErrorResponse({'errors': []})
+        error_response = ErrorResponse({"errors": []})
         error_response.errors.append(
             Error(
-                code='NA',
+                code="NA",
                 status=str(response.status_code),
-                title='Request failed',
-                detail=f'Request failed with status code {response.status_code}',
+                title="Request failed",
+                detail=f"Request failed with status code {response.status_code}",
             ),
         )
         return error_response
 
     def __str__(self):
-        return '\n'.join(map(str, self.errors))
+        return "\n".join(map(str, self.errors))

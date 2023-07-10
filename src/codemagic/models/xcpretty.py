@@ -13,18 +13,17 @@ _IO = Union[int, IO]
 
 
 class Xcpretty(StringConverterMixin):
-
-    def __init__(self, custom_options: str = '', stdout: _IO = sys.stdout, stderr: _IO = sys.stderr):
+    def __init__(self, custom_options: str = "", stdout: _IO = sys.stdout, stderr: _IO = sys.stderr):
         self._ensure_xcpretty()
-        self._command = ['xcpretty'] + shlex.split(custom_options)
+        self._command = ["xcpretty"] + shlex.split(custom_options)
         self._process: Optional[subprocess.Popen] = None
         self._stdout: _IO = stdout
         self._stderr: _IO = stderr
 
     @classmethod
     def _ensure_xcpretty(cls):
-        if shutil.which('xcpretty') is None:
-            raise IOError('xcpretty executable not present on the system')
+        if shutil.which("xcpretty") is None:
+            raise IOError("xcpretty executable not present on the system")
 
     def format(self, chunk: AnyStr):
         if not chunk:
@@ -46,7 +45,7 @@ class Xcpretty(StringConverterMixin):
             return
 
         try:
-            self._process.communicate(b'', timeout=5)
+            self._process.communicate(b"", timeout=5)
         except subprocess.TimeoutExpired:
             pass
         finally:

@@ -29,11 +29,11 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def get_text_summary(self) -> str:
         summary: List[str] = []
         for property_name, property_value in self.get_summary().items():
-            name = property_name.replace('_', ' ').capitalize()
+            name = property_name.replace("_", " ").capitalize()
             value: Optional[str] = None
 
             if isinstance(property_value, bool):
-                value = 'Yes' if property_value else 'No'
+                value = "Yes" if property_value else "No"
             elif isinstance(property_value, list):
                 if not property_value:
                     pass
@@ -42,10 +42,10 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
                     value = property_value[0]
                 else:
                     # Multiple values are spanned over indented lines
-                    lines = '\n'.join(f'\t{v}' for v in property_value)
-                    value = f'\n{lines}'
+                    lines = "\n".join(f"\t{v}" for v in property_value)
+                    value = f"\n{lines}"
             else:
                 value = str(property_value)
             summary.append(f'{name}: {"N/A" if value is None else value}')
 
-        return '\n'.join(sorted(summary))
+        return "\n".join(sorted(summary))
