@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
 
 TYPE_WEB: str
 TYPE_INSTALLED: str

@@ -11,7 +11,7 @@ from ..firebase_app_distribution_action import FirebaseAppDistributionAction
 
 class GetLatestBuildVersionAction(FirebaseAppDistributionAction, ABC):
     @cli.action(
-        'get-latest-build-version',
+        "get-latest-build-version",
         ReleasesArgument.APP_ID,
     )
     def get_latest_build_version(self, app_id: str, should_print: bool = True) -> int:
@@ -24,7 +24,7 @@ class GetLatestBuildVersionAction(FirebaseAppDistributionAction, ABC):
         except GoogleError as e:
             raise FirebaseAppDistributionError(str(e))
         if not releases:
-            raise FirebaseAppDistributionError(f'No releases available for {app_identifier.app_id}')
+            raise FirebaseAppDistributionError(f"No releases available for {app_identifier.app_id}")
 
         build_version = releases[0].buildVersion
         self.echo(str(build_version)) if should_print else None

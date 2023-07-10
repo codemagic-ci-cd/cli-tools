@@ -27,9 +27,9 @@ class ResourceEnumMeta(enum.EnumMeta):
                 cls._transform_class_name()
                 raise
             logger = log.get_logger(cls, log_to_stream=False)
-            logger.warning('Undefined Resource enumeration: %s', ve)
+            logger.warning("Undefined Resource enumeration: %s", ve)
             try:
-                enum_class = ResourceEnum(f'Graceful{cls.__name__}', {value: value})
+                enum_class = ResourceEnum(f"Graceful{cls.__name__}", {value: value})
                 return enum_class(value)
             except TypeError:
                 raise ve
@@ -41,7 +41,7 @@ class ResourceEnumMeta(enum.EnumMeta):
         """
         if not cls.enable_name_transformation:
             return
-        formatted_name = re.sub(r'([A-Z])', lambda m: f' {m.group(1).lower()}', cls.__name__)
+        formatted_name = re.sub(r"([A-Z])", lambda m: f" {m.group(1).lower()}", cls.__name__)
         cls.__name__ = formatted_name.strip()
 
     @staticmethod
@@ -72,6 +72,5 @@ class ResourceEnumMeta(enum.EnumMeta):
 
 
 class ResourceEnum(enum.Enum, metaclass=ResourceEnumMeta):
-
     def __str__(self):
         return str(self.value)

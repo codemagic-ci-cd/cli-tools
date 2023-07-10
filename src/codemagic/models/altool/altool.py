@@ -44,7 +44,6 @@ class AltoolCommandError(Exception):
 
 
 class Altool(RunningCliAppMixin, StringConverterMixin):
-
     def __init__(
         self,
         key_identifier: Optional[KeyIdentifier] = None,
@@ -69,23 +68,23 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
     @lru_cache(1)
     def _ensure_altool(cls) -> None:
         try:
-            subprocess.check_output(['xcrun', 'altool', '--version'])
+            subprocess.check_output(["xcrun", "altool", "--version"])
         except subprocess.CalledProcessError:
-            raise IOError('altool executable is not present on system')
+            raise IOError("altool executable is not present on system")
 
     def _validate_authentication_info(self):
         if self._authentication_method is AuthenticationMethod.NONE:
             raise ValueError(
-                'Missing authentication credentials. Either API key and issuer ID '
-                'or username and password are required.',
+                "Missing authentication credentials. Either API key and issuer ID "
+                "or username and password are required.",
             )
         elif self._authentication_method is AuthenticationMethod.USERNAME_AND_EMAIL:
-            is_valid_app_specific_password = bool(re.match(r'^([a-z]{4}-){3}[a-z]{4}$', self._password))
+            is_valid_app_specific_password = bool(re.match(r"^([a-z]{4}-){3}[a-z]{4}$", self._password))
             if not is_valid_app_specific_password:
                 raise ValueError(
                     'Invalid App Store Connect password. Expected pattern "abcd-abcd-abcd-abcd". '
-                    'Please use app-specific password generated at Apple ID account page. '
-                    'See https://support.apple.com/en-us/HT204397 for more information.',
+                    "Please use app-specific password generated at Apple ID account page. "
+                    "See https://support.apple.com/en-us/HT204397 for more information.",
                 )
 
     @property
@@ -98,9 +97,9 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             return AuthenticationMethod.NONE
 
     def _save_api_key_to_disk(self):
-        keys_dir = pathlib.Path('~/.private_keys').expanduser()
+        keys_dir = pathlib.Path("~/.private_keys").expanduser()
         keys_dir.mkdir(exist_ok=True)
-        key_path = keys_dir / f'AuthKey_{self._key_identifier}.p8'
+        key_path = keys_dir / f"AuthKey_{self._key_identifier}.p8"
         key_path.write_text(self._private_key)
         return key_path
 
@@ -112,12 +111,12 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 assert self._key_identifier is not None  # Make mypy happy
                 assert self._issuer_id is not None  # Make mypy happy
                 private_key_path = self._save_api_key_to_disk()
-                flags: StrTuple = ('--apiKey', str(self._key_identifier), '--apiIssuer', str(self._issuer_id))
+                flags: StrTuple = ("--apiKey", str(self._key_identifier), "--apiIssuer", str(self._issuer_id))
             elif self._authentication_method is AuthenticationMethod.USERNAME_AND_EMAIL:
                 assert isinstance(self._username, str)  # Make mypy happy
                 assert isinstance(self._password, str)  # Make mypy happy
-                flags = ('--username', self._username, '--password', '@env:APP_STORE_CONNECT_PASSWORD')
-                os.environ['APP_STORE_CONNECT_PASSWORD'] = self._password
+                flags = ("--username", self._username, "--password", "@env:APP_STORE_CONNECT_PASSWORD")
+                os.environ["APP_STORE_CONNECT_PASSWORD"] = self._password
             else:
                 flags = tuple()
             yield flags
@@ -125,7 +124,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             if private_key_path:
                 private_key_path.unlink()
             try:
-                os.environ.pop('APP_STORE_CONNECT_PASSWORD')
+                os.environ.pop("APP_STORE_CONNECT_PASSWORD")
             except KeyError:
                 pass
 
@@ -135,45 +134,50 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         artifact_path: pathlib.Path,
         auth_flags: Sequence[str],
     ) -> Tuple[str, ...]:
-        verbose_flags = ['--verbose'] if self.verbose else []
+        verbose_flags = ["--verbose"] if self.verbose else []
         return (
-            'xcrun', 'altool', action_name,
-            '--file', str(artifact_path),
-            '--type', PlatformType.from_path(artifact_path).value,
+            "xcrun",
+            "altool",
+            action_name,
+            "--file",
+            str(artifact_path),
+            "--type",
+            PlatformType.from_path(artifact_path).value,
             *auth_flags,
-            '--output-format', 'json',
+            "--output-format",
+            "json",
             *verbose_flags,
         )
 
     def validate_app(
-            self,
-            artifact_path: pathlib.Path,
-            retries: int = 1,
-            retry_wait_seconds: Union[int, float] = 0.5,
+        self,
+        artifact_path: pathlib.Path,
+        retries: int = 1,
+        retry_wait_seconds: Union[int, float] = 0.5,
     ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
-            cmd = self._construct_action_command('--validate-app', artifact_path, auth_flags)
-            return self._run_retrying_command(cmd, artifact_path, 'validate', retries, retry_wait_seconds)
+            cmd = self._construct_action_command("--validate-app", artifact_path, auth_flags)
+            return self._run_retrying_command(cmd, artifact_path, "validate", retries, retry_wait_seconds)
 
     def upload_app(
-            self,
-            artifact_path: pathlib.Path,
-            retries: int = 1,
-            retry_wait_seconds: Union[int, float] = 0.5,
+        self,
+        artifact_path: pathlib.Path,
+        retries: int = 1,
+        retry_wait_seconds: Union[int, float] = 0.5,
     ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
-            cmd = self._construct_action_command('--upload-app', artifact_path, auth_flags)
-            return self._run_retrying_command(cmd, artifact_path, 'upload', retries, retry_wait_seconds)
+            cmd = self._construct_action_command("--upload-app", artifact_path, auth_flags)
+            return self._run_retrying_command(cmd, artifact_path, "upload", retries, retry_wait_seconds)
 
     def _run_retrying_command(
-            self,
-            command: Sequence[str],
-            artifact_path: pathlib.Path,
-            action_name: str,
-            retries: int,
-            retry_delay: Union[int, float],
+        self,
+        command: Sequence[str],
+        artifact_path: pathlib.Path,
+        action_name: str,
+        retries: int,
+        retry_delay: Union[int, float],
     ) -> Optional[AltoolResult]:
         cli_app = self.get_current_cli_app()
         initial_retry_count = retries
@@ -194,19 +198,19 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 should_retry = self._should_retry_command(error.process_output)
                 if has_retries and should_retry:
                     if attempt == 1:
-                        print_fn(f'Failed to {action_name} archive, but this might be a temporary issue, retrying...')
+                        print_fn(f"Failed to {action_name} archive, but this might be a temporary issue, retrying...")
                     else:
-                        print_fn(f'Attempt #{attempt} to {action_name} failed, retrying...')
+                        print_fn(f"Attempt #{attempt} to {action_name} failed, retrying...")
                     self._kill_xcode_processes_for_retrying()
                 else:
                     if initial_retry_count > retries + 1:  # Only print this in case retrying was used
-                        print_fn(f'Attempt #{attempt} to {action_name} failed.')
+                        print_fn(f"Attempt #{attempt} to {action_name} failed.")
                     self._log_process_output(error.process_output, cli_app)
                     raise IOError(str(error)) from error
 
-            self.logger.debug(f'Wait {retry_delay:.1f}s after failed attempt #{attempt}, {retries} tries remaining')
+            self.logger.debug(f"Wait {retry_delay:.1f}s after failed attempt #{attempt}, {retries} tries remaining")
             time.sleep(retry_delay)
-        raise RuntimeError('Did not return')
+        raise RuntimeError("Did not return")
 
     def _kill_xcode_processes_for_retrying(self):
         if not environment.is_ci_environment():
@@ -215,13 +219,13 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         for process in psutil.process_iter():
             try:
                 process_name = process.name()
-                if 'xcode' not in process_name.lower():
+                if "xcode" not in process_name.lower():
                     continue
                 process.kill()
             except psutil.Error as error:
-                self.logger.debug('Failed to kill Xcode process: %s', error)
+                self.logger.debug("Failed to kill Xcode process: %s", error)
             else:
-                self.logger.debug('Killed Xcode process (pid=%d, name=%s)', process.pid, process_name)
+                self.logger.debug("Killed Xcode process (pid=%d, name=%s)", process.pid, process_name)
 
     def _run_command(
         self,
@@ -248,8 +252,8 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         except subprocess.CalledProcessError as cpe:
             result = self._get_action_result(cpe.stdout)
             if result and result.product_errors:
-                product_errors = '\n'.join(pe.message for pe in result.product_errors)
-                error_message = f'{error_message}:\n{product_errors}'
+                product_errors = "\n".join(pe.message for pe in result.product_errors)
+                error_message = f"{error_message}:\n{product_errors}"
             raise AltoolCommandError(
                 error_message,
                 self._hide_environment_variable_values(cpe.stdout),
@@ -267,30 +271,26 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         it is not desirable to have them in the publishing output.
         """
         if altool_output is None:
-            return ''
+            return ""
 
         output = cls._str(altool_output)
-        env_match = re.search(r'ENV: \{(.*)\}', output)
+        env_match = re.search(r"ENV: \{(.*)\}", output)
 
         if env_match is not None:
             # Ruby hashes are represented as `{ "name" => "value", "key" => "other value", ... }
             # This pattern captures the variable name before `=>`.
             environment_variable_names = re.findall(r',?"([^"]+)"\s?=>', env_match.group(1))
-            sanitized_environment = ', '.join(f'"{name}"=>"..."' for name in environment_variable_names)
-            output = (
-                f'{output[:env_match.span()[0]]}'
-                f'ENV: {{{sanitized_environment}}}'
-                f'{output[env_match.span()[1]:]}'
-            )
+            sanitized_environment = ", ".join(f'"{name}"=>"..."' for name in environment_variable_names)
+            output = f"{output[:env_match.span()[0]]}ENV: {{{sanitized_environment}}}{output[env_match.span()[1]:]}"
 
         return output
 
     @classmethod
     def _should_retry_command(cls, process_output: str):
         patterns = (
-            re.compile('Unable to authenticate.*-19209'),
-            re.compile('server returned an invalid response.*try your request again'),
-            re.compile('The request timed out.'),
+            re.compile("Unable to authenticate.*-19209"),
+            re.compile("server returned an invalid response.*try your request again"),
+            re.compile("The request timed out."),
         )
         return any(pattern.search(process_output) for pattern in patterns)
 

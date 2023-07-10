@@ -22,8 +22,8 @@ from codemagic.apple.resources import ResourceType
 if TYPE_CHECKING:
     from codemagic.apple import AppStoreConnectApiClient
 
-R = TypeVar('R', bound=Resource)
-R2 = TypeVar('R2', bound=Resource)
+R = TypeVar("R", bound=Resource)
+R2 = TypeVar("R2", bound=Resource)
 
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
@@ -34,7 +34,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
         @classmethod
         def _snake_to_camel(cls, field_name: str) -> str:
-            patt = re.compile(r'_(\w)')
+            patt = re.compile(r"_(\w)")
             return patt.sub(lambda m: m.group(1).upper(), field_name)
 
         @classmethod
@@ -44,7 +44,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             elif isinstance(field_value, str):
                 return field_value
             elif isinstance(field_value, Sequence):
-                return ','.join(cls._get_param_value(element) for element in field_value)
+                return ",".join(cls._get_param_value(element) for element in field_value)
             return str(field_value)
 
         def _get_restrictions(self) -> Dict[str, str]:
@@ -55,7 +55,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             }
 
         def as_query_params(self) -> Dict[str, str]:
-            return {f'filter[{field}]': p for field, p in self._get_restrictions().items()}
+            return {f"filter[{field}]": p for field, p in self._get_restrictions().items()}
 
         @classmethod
         def _field_matches(cls, field_value, resource_value):
@@ -69,8 +69,8 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
         def __str__(self):
             restrictions = self._get_restrictions()
             if not restrictions:
-                return '*'
-            return ', '.join(f'{param}={shlex.quote(value)}' for param, value in restrictions.items())
+                return "*"
+            return ", ".join(f"{param}={shlex.quote(value)}" for param, value in restrictions.items())
 
     class Ordering(enum.Enum):
         def as_param(self, reverse=False) -> str:
@@ -90,34 +90,37 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
     @classmethod
     def _get_update_payload(
-            cls,
-            resource_id: ResourceId,
-            resource_type: ResourceType,
-            *,
-            attributes: Optional[Dict] = None,
-            relationships: Optional[Dict] = None,
+        cls,
+        resource_id: ResourceId,
+        resource_type: ResourceType,
+        *,
+        attributes: Optional[Dict] = None,
+        relationships: Optional[Dict] = None,
     ) -> Dict:
         data: Dict[str, Any] = {
-            'id': resource_id,
-            'type': resource_type.value,
+            "id": resource_id,
+            "type": resource_type.value,
         }
         if attributes:
-            data['attributes'] = attributes
+            data["attributes"] = attributes
         if relationships:
-            data['relationships'] = relationships
-        return {'data': data}
+            data["relationships"] = relationships
+        return {"data": data}
 
     @classmethod
-    def _get_create_payload(cls,
-                            resource_type: ResourceType, *,
-                            attributes: Optional[Dict] = None,
-                            relationships: Optional[Dict] = None) -> Dict[str, Dict[str, Any]]:
-        data: Dict[str, Any] = {'type': resource_type.value}
+    def _get_create_payload(
+        cls,
+        resource_type: ResourceType,
+        *,
+        attributes: Optional[Dict] = None,
+        relationships: Optional[Dict] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        data: Dict[str, Any] = {"type": resource_type.value}
         if attributes is not None:
-            data['attributes'] = attributes
+            data["attributes"] = attributes
         if relationships is not None:
-            data['relationships'] = relationships
-        return {'data': data}
+            data["relationships"] = relationships
+        return {"data": data}
 
     @classmethod
     def _get_resource_id(cls, resource: Union[ResourceId, LinkedResourceData]) -> ResourceId:
@@ -127,10 +130,12 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
             return resource
 
     @classmethod
-    def _get_attribute_data(cls,
-                            resource: Union[ResourceId, LinkedResourceData],
-                            resource_type: ResourceType) -> Dict[str, str]:
+    def _get_attribute_data(
+        cls,
+        resource: Union[ResourceId, LinkedResourceData],
+        resource_type: ResourceType,
+    ) -> Dict[str, str]:
         return {
-            'id': cls._get_resource_id(resource),
-            'type': resource_type.value,
+            "id": cls._get_resource_id(resource),
+            "type": resource_type.value,
         }

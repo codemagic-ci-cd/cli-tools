@@ -116,21 +116,20 @@ This will install all required dependencies specified in the `poetry.lock` file.
 The source code of the project lives inside the `src` directory and tests are
 implemented in the `tests` directory.
 
-### Code style and formatting
+### Code formatting and linting rules
 
-Automatic formatting checks are enforced using [Flake8](https://flake8.pycqa.org/en/latest/)
-and [isort](https://pycqa.github.io/isort/).
-
-Invoke Flake8 checks from repository root directory with
+Automatic code formatting is done with [Black](https://github.com/psf/black).
+Invoke Black checks from repository root directory with
 
 ```shell
-poetry run flake8 .
+poetry run black --check .
 ```
 
-Ensure that all imports are ordered as expected using isort from the repository root with
+Linting rules are enforced using [Ruff](https://beta.ruff.rs).
+Checks can be started from repository root with
 
 ```shell
-poetry run isort --check-only .
+poetry run ruff check .
 ```
 
 ### Static type checks
@@ -140,7 +139,7 @@ are expected to have type hints. Static type checks of the source code are perfo
 [Mypy](http://mypy-lang.org/) from the repository root by running
 
 ```shell
-poetry run mypy src
+poetry run mypy .
 ```
 
 ### Running tests

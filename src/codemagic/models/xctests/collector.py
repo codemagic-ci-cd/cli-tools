@@ -13,7 +13,6 @@ from .xcresulttool import XcResultTool
 
 
 class XcResultCollector:
-
     def __init__(self) -> None:
         self.logger = log.get_logger(self.__class__)
         self._ignore_xcresults: Set[pathlib.Path] = set()
@@ -23,7 +22,7 @@ class XcResultCollector:
 
     def forget_merged_result(self):
         if self._xcresult and self._xcresult_is_merged:
-            self.logger.debug('Remove merged xcresult at %s', self._xcresult)
+            self.logger.debug("Remove merged xcresult at %s", self._xcresult)
             shutil.rmtree(self._xcresult)
             self._xcresult = None
             self._xcresult_is_merged = False
@@ -36,10 +35,10 @@ class XcResultCollector:
         tests_directory = tests_directory.expanduser()
         if not tests_directory.is_dir():
             return set()  # Not a directory, cannot gather results
-        elif tests_directory.suffix == '.xcresult':
+        elif tests_directory.suffix == ".xcresult":
             return {tests_directory}
         else:
-            return set(tests_directory.rglob('*.xcresult'))
+            return set(tests_directory.rglob("*.xcresult"))
 
     def ignore_results(self, tests_directory: pathlib.Path) -> XcResultCollector:
         xcresults = self._find_results(tests_directory)
@@ -58,7 +57,7 @@ class XcResultCollector:
 
         xcresults = self.get_collected_results()
         if not xcresults:
-            raise ValueError('No test results were found')
+            raise ValueError("No test results were found")
         elif len(xcresults) == 1:
             self._xcresult = xcresults[0]
             self._xcresult_is_merged = False
@@ -76,4 +75,4 @@ class XcResultCollector:
     def _get_merged_result_prefix(self) -> str:
         assert len(self._gathered_xcresults) > 1
         matching_chars = takewhile(lambda cs: len(set(cs)) == 1, zip(*(p.stem for p in self._gathered_xcresults)))
-        return ''.join(chars[0] for chars in matching_chars)
+        return "".join(chars[0] for chars in matching_chars)

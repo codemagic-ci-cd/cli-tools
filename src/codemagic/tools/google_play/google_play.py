@@ -39,5 +39,5 @@ class GooglePlay(
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     GooglePlay.invoke_cli()

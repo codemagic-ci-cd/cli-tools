@@ -12,8 +12,8 @@ from codemagic.utilities import log
 
 from ..resources import Resource
 
-ResourceT = TypeVar('ResourceT', bound=Resource)
-GoogleResourceT = TypeVar('GoogleResourceT', bound=discovery.Resource)
+ResourceT = TypeVar("ResourceT", bound=Resource)
+GoogleResourceT = TypeVar("GoogleResourceT", bound=discovery.Resource)
 
 
 class ResourceManager(Generic[ResourceT, GoogleResourceT], ABC):

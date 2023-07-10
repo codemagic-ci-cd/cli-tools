@@ -25,9 +25,9 @@ CredentialsJson = Union[AnyStr, dict]
 
 
 class GooglePlayDeveloperAPIClient:
-    SCOPE = 'androidpublisher'
-    SCOPE_URI = f'https://www.googleapis.com/auth/{SCOPE}'
-    API_VERSION = 'v3'
+    SCOPE = "androidpublisher"
+    SCOPE_URI = f"https://www.googleapis.com/auth/{SCOPE}"
+    API_VERSION = "v3"
 
     def __init__(self, service_account_json_keyfile: CredentialsJson):
         """
@@ -48,7 +48,7 @@ class GooglePlayDeveloperAPIClient:
         try:
             return json.loads(self._service_account_json_keyfile)
         except ValueError as ve:
-            message = 'Unable to parse service account credentials, must be a valid json'
+            message = "Unable to parse service account credentials, must be a valid json"
             raise GooglePlayDeveloperAPIClientError(message) from ve
 
     @lru_cache(1)
@@ -79,28 +79,28 @@ class GooglePlayDeveloperAPIClient:
         return self.android_publishing_service.edits()
 
     def create_edit(self, package_name: str) -> Edit:
-        self._logger.debug(f'Create an edit for the package {package_name!r}')
+        self._logger.debug(f"Create an edit for the package {package_name!r}")
         try:
             edit_request = self.edits_service.insert(body={}, packageName=package_name)
             edit_response = edit_request.execute()
-            self._logger.debug(f'Created edit {edit_response} for package {package_name!r}')
+            self._logger.debug(f"Created edit {edit_response} for package {package_name!r}")
         except (errors.Error, errors.HttpError) as e:
-            raise EditError('create', package_name, e) from e
+            raise EditError("create", package_name, e) from e
         else:
             return Edit(**edit_response)
 
     def delete_edit(self, edit: Union[str, Edit], package_name: str) -> None:
         edit_id = self._get_edit_id(edit)
-        self._logger.debug(f'Delete the edit {edit_id!r} for the package {package_name!r}')
+        self._logger.debug(f"Delete the edit {edit_id!r} for the package {package_name!r}")
         try:
             delete_request = self.edits_service.delete(
                 packageName=package_name,
                 editId=edit_id,
             )
             delete_request.execute()
-            self._logger.debug(f'Deleted edit {edit_id} for package {package_name!r}')
+            self._logger.debug(f"Deleted edit {edit_id} for package {package_name!r}")
         except (errors.Error, errors.HttpError) as e:
-            raise EditError('delete', package_name, e) from e
+            raise EditError("delete", package_name, e) from e
 
     @contextlib.contextmanager
     def use_app_edit(self, package_name: str):
@@ -123,7 +123,7 @@ class GooglePlayDeveloperAPIClient:
             return self._get_track(package_name, track_name, _edit.id)
 
     def _get_track(self, package_name: str, track_name: str, edit_id: str) -> Track:
-        self._logger.debug(f'Get track {track_name!r} for package {package_name!r} using edit {edit_id}')
+        self._logger.debug(f"Get track {track_name!r} for package {package_name!r} using edit {edit_id}")
         try:
             track_request = self.edits_service.tracks().get(
                 packageName=package_name,
@@ -131,9 +131,9 @@ class GooglePlayDeveloperAPIClient:
                 track=track_name,
             )
             track_response = track_request.execute()
-            self._logger.debug(f'Got track {track_name!r} for package {package_name!r}: {track_response}')
+            self._logger.debug(f"Got track {track_name!r} for package {package_name!r}: {track_response}")
         except (errors.Error, errors.HttpError) as e:
-            raise GetResourceError('track', package_name, e) from e
+            raise GetResourceError("track", package_name, e) from e
         else:
             return Track(**track_response)
 
@@ -149,15 +149,15 @@ class GooglePlayDeveloperAPIClient:
             return self._list_tracks(package_name, _edit.id)
 
     def _list_tracks(self, package_name: str, edit_id: str) -> List[Track]:
-        self._logger.debug(f'List tracks for package {package_name!r} using edit {edit_id}')
+        self._logger.debug(f"List tracks for package {package_name!r} using edit {edit_id}")
         try:
             tracks_request = self.edits_service.tracks().list(
                 packageName=package_name,
                 editId=edit_id,
             )
             tracks_response = tracks_request.execute()
-            self._logger.debug(f'Got tracks for package {package_name!r}: {tracks_response}')
+            self._logger.debug(f"Got tracks for package {package_name!r}: {tracks_response}")
         except (errors.Error, errors.HttpError) as e:
-            raise ListResourcesError('tracks', package_name, e) from e
+            raise ListResourcesError("tracks", package_name, e) from e
         else:
-            return [Track(**track) for track in tracks_response['tracks']]
+            return [Track(**track) for track in tracks_response["tracks"]]

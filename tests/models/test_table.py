@@ -56,45 +56,51 @@ ooooooooooooooooooooooooo
 
 
 def test_default_table():
-    table = Table([
-        Header('Header'),
-        Line('row_1', 'key_1'),
-        Spacer(),
-        Line('row_2', 'key_2'),
-        Line('row_3', 'key_3'),
-        Header('Subheader'),
-        Line('row_4', 'key_4'),
-    ], header_color=None)
+    table = Table(
+        [
+            Header("Header"),
+            Line("row_1", "key_1"),
+            Spacer(),
+            Line("row_2", "key_2"),
+            Line("row_3", "key_3"),
+            Header("Subheader"),
+            Line("row_4", "key_4"),
+        ],
+        header_color=None,
+    )
     assert table.construct() == _EXPECTED_DEFAULT_RENDER
 
 
 def test_headerless_table():
-    table = Table([
-        Line('row_1', 'key_1'),
-        Line('row_2', 'key_2'),
-    ], header_color=None)
+    table = Table(
+        [
+            Line("row_1", "key_1"),
+            Line("row_2", "key_2"),
+        ],
+        header_color=None,
+    )
     assert table.construct() == _EXPECTED_HEADERLESS_TABLE
 
 
 def test_custom_table_1():
     table = Table(
         [
-            Header('Header'),
-            Line('row_1', 'key_1'),
+            Header("Header"),
+            Line("row_1", "key_1"),
             Spacer(),
-            Line('row_2', 'key_2'),
-            Line('row_3', 'key_3'),
-            Header('Subheader'),
-            Line('row_4', 'key_4'),
+            Line("row_2", "key_2"),
+            Line("row_3", "key_3"),
+            Header("Subheader"),
+            Line("row_4", "key_4"),
         ],
         header_color=None,
-        vertical_separator='|',
-        horizontal_separator='-',
-        horizontal_hinges=('+', '+', '+'),
-        vertical_hinges=('+', '+'),
-        corners=('+', '+', '+', '+'),
-        left_padding=' < ',
-        right_padding=' > ',
+        vertical_separator="|",
+        horizontal_separator="-",
+        horizontal_hinges=("+", "+", "+"),
+        vertical_hinges=("+", "+"),
+        corners=("+", "+", "+", "+"),
+        left_padding=" < ",
+        right_padding=" > ",
     )
     rendered = table.construct()
     assert rendered == _EXPECTED_CUSTOM_TABLE_1
@@ -103,18 +109,18 @@ def test_custom_table_1():
 def test_custom_table_2():
     table = Table(
         [
-            Header('Header'),
-            Line('row_1', 'key_1'),
+            Header("Header"),
+            Line("row_1", "key_1"),
             Spacer(),
-            Line('row_2', 'key_2'),
-            Line('row_3', 'key_3'),
-            Header('Subheader'),
+            Line("row_2", "key_2"),
+            Line("row_3", "key_3"),
+            Header("Subheader"),
         ],
         header_color=None,
-        vertical_separator='o',
-        horizontal_separator='o',
-        horizontal_hinges=('o', 'o', 'o'),
-        vertical_hinges=('o', 'o'),
-        corners=('o', 'o', 'o', 'o'),
+        vertical_separator="o",
+        horizontal_separator="o",
+        horizontal_hinges=("o", "o", "o"),
+        vertical_hinges=("o", "o"),
+        corners=("o", "o", "o", "o"),
     )
     assert table.construct() == _EXPECTED_CUSTOM_TABLE_2

@@ -26,9 +26,8 @@ from ..errors import AppStoreConnectError
 
 
 class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
-
     @cli.action(
-        'create',
+        "create",
         AppStoreVersionArgument.COPYRIGHT,
         AppStoreVersionArgument.VERSION_STRING,
         BuildArgument.BUILD_ID_RESOURCE_ID,
@@ -74,7 +73,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'modify',
+        "modify",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
         BuildArgument.BUILD_ID_RESOURCE_ID_OPTIONAL,
         AppStoreVersionArgument.COPYRIGHT,
@@ -110,7 +109,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        'delete',
+        "delete",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
@@ -136,16 +135,18 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             pre_release_version = self.api_client.builds.read_pre_release_version(build)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(
-                f'Build version is not specified and checking it from prerelease version failed: {api_error}')
+                f"Build version is not specified and checking it from prerelease version failed: {api_error}",
+            )
 
         if not pre_release_version:
             raise AppStoreConnectError(
-                'Build version is not specified and build does not have prerelease version to check the version from')
+                "Build version is not specified and build does not have prerelease version to check the version from",
+            )
 
         return pre_release_version.attributes.version
 
     @cli.action(
-        'localizations',
+        "localizations",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )

@@ -31,7 +31,7 @@ class BetaGroups(ResourceManager[BetaGroup]):
         https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
         """
         response = self.client.paginate(
-            f'{self.client.API_URL}/betaGroups',
+            f"{self.client.API_URL}/betaGroups",
             params=resource_filter.as_query_params(),
         )
 
@@ -45,13 +45,15 @@ class BetaGroups(ResourceManager[BetaGroup]):
         build_resource_id = self._get_resource_id(build)
 
         payload = {
-            'data': [
+            "data": [
                 self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
             ],
         }
 
         self.client.session.post(
-            f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
+            f"{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds",
+            json=payload,
+        )
 
     def remove_build(self, beta_group: Union[ResourceId, BetaGroup], build: Union[ResourceId, Build]):
         """
@@ -61,10 +63,12 @@ class BetaGroups(ResourceManager[BetaGroup]):
         build_resource_id = self._get_resource_id(build)
 
         payload = {
-            'data': [
+            "data": [
                 self._get_attribute_data(build_resource_id, resource_type=ResourceType.BUILDS),
             ],
         }
 
         self.client.session.delete(
-            f'{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds', json=payload)
+            f"{self.client.API_URL}/betaGroups/{beta_group_resource_id}/relationships/builds",
+            json=payload,
+        )

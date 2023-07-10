@@ -27,15 +27,15 @@ from .provisioning_profile import ProvisioningProfile
 
 
 class Destination(enum.Enum):
-    EXPORT = 'export'
-    UPLOAD = 'upload'
+    EXPORT = "export"
+    UPLOAD = "upload"
 
 
 class ArchiveMethod(ResourceEnum):
-    AD_HOC = 'ad-hoc'
-    APP_STORE = 'app-store'
-    DEVELOPMENT = 'development'
-    ENTERPRISE = 'enterprise'
+    AD_HOC = "ad-hoc"
+    APP_STORE = "app-store"
+    DEVELOPMENT = "development"
+    ENTERPRISE = "enterprise"
 
     @classmethod
     def from_profile(cls, profile: ProvisioningProfile) -> ArchiveMethod:
@@ -61,8 +61,8 @@ class ArchiveMethod(ResourceEnum):
 
 
 class SigningStyle(enum.Enum):
-    AUTOMATIC = 'automatic'
-    MANUAL = 'manual'
+    AUTOMATIC = "automatic"
+    MANUAL = "manual"
 
     @classmethod
     def from_profiles(cls, profiles: Sequence[ProvisioningProfile]) -> SigningStyle:
@@ -134,7 +134,7 @@ class ExportOptions(StringConverterMixin):
     @classmethod
     def _get_field_type(cls, field_name: str) -> type:
         type_hint = get_type_hints(cls)[field_name]
-        if hasattr(type_hint, '__origin__') and type_hint.__origin__ is Union:
+        if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Union:
             # Optionals are unions of actual type and NoneType
             actual_type = type_hint.__args__[0]
         else:
@@ -157,9 +157,9 @@ class ExportOptions(StringConverterMixin):
             try:
                 self.manifest = Manifest(**new_manifest)
             except TypeError:
-                raise ValueError(f'Invalid value for manifest: {new_manifest!r}')
+                raise ValueError(f"Invalid value for manifest: {new_manifest!r}")
         else:
-            raise ValueError(f'Invalid value for manifest: {new_manifest!r}')
+            raise ValueError(f"Invalid value for manifest: {new_manifest!r}")
 
     @overload
     def _set_provisioning_profiles(self, new_profiles: Union[enum.Enum, bool, str, Manifest]) -> NoReturn:
@@ -172,25 +172,25 @@ class ExportOptions(StringConverterMixin):
     def _set_provisioning_profiles(self, new_profiles):
         if isinstance(new_profiles, list):
             if not all(isinstance(profile_info, ProvisioningProfileInfo) for profile_info in new_profiles):
-                raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
+                raise ValueError(f"Invalid value for provisioningProfiles: {new_profiles!r}")
             self.provisioningProfiles = new_profiles
         elif isinstance(new_profiles, dict):
             self.provisioningProfiles = [
                 ProvisioningProfileInfo(identifier, name) for identifier, name in new_profiles.items()
             ]
         else:
-            raise ValueError(f'Invalid value for provisioningProfiles: {new_profiles!r}')
+            raise ValueError(f"Invalid value for provisioningProfiles: {new_profiles!r}")
 
     def set_value(self, field_name: str, value: ExportOptionValue):
         if field_name not in self.__dict__:
-            raise ValueError(f'Invalid filed {field_name}')
+            raise ValueError(f"Invalid filed {field_name}")
 
         field_type = self._get_field_type(field_name)
         if value is None:
             setattr(self, field_name, None)
-        elif field_name == 'manifest':
+        elif field_name == "manifest":
             self._set_manifest(value)
-        elif field_name == 'provisioningProfiles':
+        elif field_name == "provisioningProfiles":
             self._set_provisioning_profiles(value)
         elif not isinstance(value, field_type):
             with ResourceEnumMeta.without_graceful_fallback():
@@ -208,11 +208,11 @@ class ExportOptions(StringConverterMixin):
             plist_path = pathlib.Path(cls._str(plist_path))
         if not plist_path.is_file():
             raise FileNotFoundError(plist_path)
-        with plist_path.open('rb') as fd:
+        with plist_path.open("rb") as fd:
             try:
                 data = plistlib.load(fd)  # type: ignore
             except plistlib.InvalidFileException:
-                raise ValueError('Invalid plist')
+                raise ValueError("Invalid plist")
         return ExportOptions(**data)
 
     @classmethod
@@ -220,17 +220,16 @@ class ExportOptions(StringConverterMixin):
         used_profiles = tuple(assignment.provisioning_profile for assignment in profile_assignments)
         certificates = (certificate for profile in used_profiles for certificate in profile.certificates)
         team_ids = Counter[str](profile.team_identifier for profile in used_profiles)
-        common_names = Counter[str](c.common_name.split(':')[0] for c in certificates)
+        common_names = Counter[str](c.common_name.split(":")[0] for c in certificates)
 
         return ExportOptions(
             method=ArchiveMethod.from_profiles(used_profiles),
             signingStyle=SigningStyle.from_profiles(used_profiles),
-            teamID=team_ids.most_common(1)[0][0] if team_ids else '',
+            teamID=team_ids.most_common(1)[0][0] if team_ids else "",
             provisioningProfiles=[
-                ProvisioningProfileInfo(a.target_bundle_id, a.provisioning_profile.name)
-                for a in profile_assignments
+                ProvisioningProfileInfo(a.target_bundle_id, a.provisioning_profile.name) for a in profile_assignments
             ],
-            signingCertificate=common_names.most_common(1)[0][0] if common_names else '',
+            signingCertificate=common_names.most_common(1)[0][0] if common_names else "",
         )
 
     def has_xcode_managed_profiles(self) -> bool:
@@ -245,13 +244,13 @@ class ExportOptions(StringConverterMixin):
             if value is not None
         }
         if self.provisioningProfiles:
-            d['provisioningProfiles'] = {p.identifier: p.name for p in self.provisioningProfiles}
+            d["provisioningProfiles"] = {p.identifier: p.name for p in self.provisioningProfiles}
         if self.manifest:
-            d['manifest'] = self.manifest.dict()
+            d["manifest"] = self.manifest.dict()
         return d
 
     def save(self, path: pathlib.Path):
-        with path.open('wb') as fd:
+        with path.open("wb") as fd:
             plistlib.dump(self.dict(), fd)
 
     def notify(self, title: str):
@@ -261,13 +260,13 @@ class ExportOptions(StringConverterMixin):
 
         for key in sorted(options.keys()):
             value = options[key]
-            option = re.sub(r'([A-Z])', r' \1', key.replace('ID', 'Id')).lstrip(' ').title()
+            option = re.sub(r"([A-Z])", r" \1", key.replace("ID", "Id")).lstrip(" ").title()
             if isinstance(value, dict):
-                logger.info(Colors.BLUE(f' - {option}:'))
+                logger.info(Colors.BLUE(f" - {option}:"))
                 for k, v in value.items():
-                    logger.info(Colors.BLUE(f'     - {k}: {v}'))
+                    logger.info(Colors.BLUE(f"     - {k}: {v}"))
             else:
-                logger.info(Colors.BLUE(f' - {option}: {value}'))
+                logger.info(Colors.BLUE(f" - {option}: {value}"))
 
     def is_app_store_export(self):
         return self.method is ArchiveMethod.APP_STORE

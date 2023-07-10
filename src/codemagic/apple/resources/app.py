@@ -35,7 +35,7 @@ class App(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
-        _OMIT_IF_NONE_KEYS = ('betaTesters', 'ciProduct', 'perfPowerMetrics')
+        _OMIT_IF_NONE_KEYS = ("betaTesters", "ciProduct", "perfPowerMetrics")
 
         appInfos: Relationship
         appStoreVersions: Relationship

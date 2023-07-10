@@ -20,7 +20,7 @@ class ExceptionAuditor(BaseAuditor):
         exception_type: Type[BaseException],
         exception: BaseException,
         exception_traceback: TracebackType,
-        audit_directory_name: str = 'exceptions',
+        audit_directory_name: str = "exceptions",
     ):
         super().__init__(audit_directory_name=audit_directory_name)
         self._exception_type = exception_type
@@ -31,7 +31,7 @@ class ExceptionAuditor(BaseAuditor):
         if self._exception_type:
             exception_name = self._exception_type.__name__
         else:
-            exception_name = 'UnknownException'
+            exception_name = "UnknownException"
         return f'error-{exception_name}-{datetime.now().strftime("%H-%M-%S")}.json'
 
     def _serialize_exception_arguments(self):
@@ -47,16 +47,16 @@ class ExceptionAuditor(BaseAuditor):
 
     def _serialize_audit_info(self):
         return {
-            'command': shlex.join(sys.argv),
-            'exception_arguments': self._serialize_exception_arguments(),
-            'exception_type': self._exception_type.__name__,
-            'stacktrace': ''.join(traceback.format_tb(self._traceback)),
-            'timestamp': datetime.now(timezone.utc).isoformat(),
-            'version': __version__,
+            "command": shlex.join(sys.argv),
+            "exception_arguments": self._serialize_exception_arguments(),
+            "exception_type": self._exception_type.__name__,
+            "stacktrace": "".join(traceback.format_tb(self._traceback)),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "version": __version__,
         }
 
 
-def save_exception_audit(audit_directory_name: str = 'exceptions'):
+def save_exception_audit(audit_directory_name: str = "exceptions"):
     exception_type, exception, exception_traceback = sys.exc_info()
     if exception_type is None or exception is None or exception_traceback is None:
         return

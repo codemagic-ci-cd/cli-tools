@@ -1,5 +1,10 @@
-from oauth2client import _helpers as _helpers, client as client, crypt as crypt, transport as transport
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
+
+from oauth2client import _helpers as _helpers
+from oauth2client import client as client
+from oauth2client import crypt as crypt
+from oauth2client import transport as transport
 
 _PASSWORD_DEFAULT: str
 _PKCS12_KEY: str
@@ -18,20 +23,73 @@ class ServiceAccountCredentials(client.AssertionCredentials):
     client_id: Any = ...
     _user_agent: Any = ...
     _kwargs: Any = ...
-    def __init__(self, service_account_email: Any, signer: Any, scopes: str = ..., private_key_id: Optional[Any] = ..., client_id: Optional[Any] = ..., user_agent: Optional[Any] = ..., token_uri: Any = ..., revoke_uri: Any = ..., **kwargs: Any) -> None: ...
+    def __init__(
+        self,
+        service_account_email: Any,
+        signer: Any,
+        scopes: str = ...,
+        private_key_id: Optional[Any] = ...,
+        client_id: Optional[Any] = ...,
+        user_agent: Optional[Any] = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+        **kwargs: Any,
+    ) -> None: ...
     def _to_json(self, strip: Any, to_serialize: Optional[Any] = ...): ...
     @classmethod
-    def _from_parsed_json_keyfile(cls, keyfile_dict: Any, scopes: Any, token_uri: Optional[Any] = ..., revoke_uri: Optional[Any] = ...): ...
+    def _from_parsed_json_keyfile(
+        cls,
+        keyfile_dict: Any,
+        scopes: Any,
+        token_uri: Optional[Any] = ...,
+        revoke_uri: Optional[Any] = ...,
+    ): ...
     @classmethod
-    def from_json_keyfile_name(cls, filename: Any, scopes: str = ..., token_uri: Optional[Any] = ..., revoke_uri: Optional[Any] = ...): ...
+    def from_json_keyfile_name(
+        cls,
+        filename: Any,
+        scopes: str = ...,
+        token_uri: Optional[Any] = ...,
+        revoke_uri: Optional[Any] = ...,
+    ): ...
     @classmethod
-    def from_json_keyfile_dict(cls, keyfile_dict: Any, scopes: str = ..., token_uri: Optional[Any] = ..., revoke_uri: Optional[Any] = ...): ...
+    def from_json_keyfile_dict(
+        cls,
+        keyfile_dict: Any,
+        scopes: str = ...,
+        token_uri: Optional[Any] = ...,
+        revoke_uri: Optional[Any] = ...,
+    ): ...
     @classmethod
-    def _from_p12_keyfile_contents(cls, service_account_email: Any, private_key_pkcs12: Any, private_key_password: Optional[Any] = ..., scopes: str = ..., token_uri: Any = ..., revoke_uri: Any = ...): ...
+    def _from_p12_keyfile_contents(
+        cls,
+        service_account_email: Any,
+        private_key_pkcs12: Any,
+        private_key_password: Optional[Any] = ...,
+        scopes: str = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+    ): ...
     @classmethod
-    def from_p12_keyfile(cls, service_account_email: Any, filename: Any, private_key_password: Optional[Any] = ..., scopes: str = ..., token_uri: Any = ..., revoke_uri: Any = ...): ...
+    def from_p12_keyfile(
+        cls,
+        service_account_email: Any,
+        filename: Any,
+        private_key_password: Optional[Any] = ...,
+        scopes: str = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+    ): ...
     @classmethod
-    def from_p12_keyfile_buffer(cls, service_account_email: Any, file_buffer: Any, private_key_password: Optional[Any] = ..., scopes: str = ..., token_uri: Any = ..., revoke_uri: Any = ...): ...
+    def from_p12_keyfile_buffer(
+        cls,
+        service_account_email: Any,
+        file_buffer: Any,
+        private_key_password: Optional[Any] = ...,
+        scopes: str = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+    ): ...
     def _generate_assertion(self): ...
     def sign_blob(self, blob: Any): ...
     @property
@@ -49,7 +107,18 @@ def _datetime_to_secs(utc_time: Any): ...
 
 class _JWTAccessCredentials(ServiceAccountCredentials):
     _MAX_TOKEN_LIFETIME_SECS: int = ...
-    def __init__(self, service_account_email: Any, signer: Any, scopes: Optional[Any] = ..., private_key_id: Optional[Any] = ..., client_id: Optional[Any] = ..., user_agent: Optional[Any] = ..., token_uri: Any = ..., revoke_uri: Any = ..., additional_claims: Optional[Any] = ...) -> None: ...
+    def __init__(
+        self,
+        service_account_email: Any,
+        signer: Any,
+        scopes: Optional[Any] = ...,
+        private_key_id: Optional[Any] = ...,
+        client_id: Optional[Any] = ...,
+        user_agent: Optional[Any] = ...,
+        token_uri: Any = ...,
+        revoke_uri: Any = ...,
+        additional_claims: Optional[Any] = ...,
+    ) -> None: ...
     def authorize(self, http: Any): ...
     def get_access_token(self, http: Optional[Any] = ..., additional_claims: Optional[Any] = ...): ...
     def revoke(self, http: Any) -> None: ...

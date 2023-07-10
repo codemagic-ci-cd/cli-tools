@@ -36,12 +36,12 @@ class Release(Resource):
     """
 
     _OMIT_IF_NONE_KEYS = (
-        'name',
-        'userFraction',
-        'countryTargeting',
-        'inAppUpdatePriority',
-        'versionCodes',
-        'releaseNotes',
+        "name",
+        "userFraction",
+        "countryTargeting",
+        "inAppUpdatePriority",
+        "versionCodes",
+        "releaseNotes",
     )
 
     status: ReleaseStatus
@@ -66,7 +66,8 @@ class Track(Resource):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks#Track
     """
-    _OMIT_IF_NONE_KEYS = ('releases',)
+
+    _OMIT_IF_NONE_KEYS = ("releases",)
 
     track: str
     releases: Optional[List[Release]] = None
@@ -78,8 +79,8 @@ class Track(Resource):
     def get_max_version_code(self) -> int:
         error_prefix = f'Failed to get version code from "{self.track}" track'
         if not self.releases:
-            raise ValueError(f'{error_prefix}: track has no releases')
+            raise ValueError(f"{error_prefix}: track has no releases")
         version_codes = [release.versionCodes for release in self.releases if release.versionCodes]
         if not version_codes:
-            raise ValueError(f'{error_prefix}: releases with version code do not exist')
+            raise ValueError(f"{error_prefix}: releases with version code do not exist")
         return max(map(int, chain(*version_codes)))

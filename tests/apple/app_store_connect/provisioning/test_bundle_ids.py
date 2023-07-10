@@ -2,7 +2,6 @@ import os
 import uuid
 
 import pytest
-
 from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import BundleIdCapability
 from codemagic.apple.resources import BundleIdPlatform
@@ -10,33 +9,33 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
+
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
-CAPYBARA_ID = ResourceId('F88J43FA9J')
+CAPYBARA_ID = ResourceId("F88J43FA9J")
 
 
-@pytest.mark.skipif(not os.environ.get('RUN_LIVE_API_TESTS'), reason='Live App Store Connect API access')
+@pytest.mark.skipif(not os.environ.get("RUN_LIVE_API_TESTS"), reason="Live App Store Connect API access")
 class BundleIdsTest(ResourceManagerTestsBase):
-
     def test_create(self):
         bundle_id = self.api_client.bundle_ids.create(
-            'com.example.test-app',
-            'com example test app',
+            "com.example.test-app",
+            "com example test app",
             BundleIdPlatform.IOS,
         )
         assert isinstance(bundle_id, BundleId)
 
     def test_modify(self):
-        new_name = f'io codemagic capybara {uuid.uuid4()}'
+        new_name = f"io codemagic capybara {uuid.uuid4()}"
         modified_bundle_id = self.api_client.bundle_ids.modify(CAPYBARA_ID, name=new_name)
         assert isinstance(modified_bundle_id, BundleId)
         assert modified_bundle_id.attributes.name == new_name
 
     def test_delete(self):
-        self.api_client.bundle_ids.delete(ResourceId('US2AH335HU'))
+        self.api_client.bundle_ids.delete(ResourceId("US2AH335HU"))
 
     def test_list_identifier_and_platform_constraint(self):
-        expected_identifier = 'io.codemagic.banaan'
+        expected_identifier = "io.codemagic.banaan"
         expected_platform = BundleIdPlatform.IOS
         bundle_id_filter = self.api_client.bundle_ids.Filter(
             identifier=expected_identifier,
@@ -60,7 +59,7 @@ class BundleIdsTest(ResourceManagerTestsBase):
     def test_read(self):
         bundle_id = self.api_client.bundle_ids.read(CAPYBARA_ID)
         assert isinstance(bundle_id, BundleId)
-        assert bundle_id.attributes.name.startswith('io codemagic capybara')
+        assert bundle_id.attributes.name.startswith("io codemagic capybara")
 
     def test_list_profile_ids(self):
         linked_profiles = self.api_client.bundle_ids.list_profile_ids(CAPYBARA_ID)

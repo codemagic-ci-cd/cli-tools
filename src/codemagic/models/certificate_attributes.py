@@ -10,12 +10,12 @@ from typing import Tuple
 
 @dataclass
 class CertificateAttributes:
-    common_name: Optional[str] = field(default=None, metadata={'abbr': 'CN'})
-    organizational_unit: Optional[str] = field(default=None, metadata={'abbr': 'OU'})
-    organization: Optional[str] = field(default=None, metadata={'abbr': 'O'})
-    locality: Optional[str] = field(default=None, metadata={'abbr': 'L'})
-    state_or_province: Optional[str] = field(default=None, metadata={'abbr': 'S'})
-    country: Optional[str] = field(default=None, metadata={'abbr': 'C'})
+    common_name: Optional[str] = field(default=None, metadata={"abbr": "CN"})
+    organizational_unit: Optional[str] = field(default=None, metadata={"abbr": "OU"})
+    organization: Optional[str] = field(default=None, metadata={"abbr": "O"})
+    locality: Optional[str] = field(default=None, metadata={"abbr": "L"})
+    state_or_province: Optional[str] = field(default=None, metadata={"abbr": "S"})
+    country: Optional[str] = field(default=None, metadata={"abbr": "C"})
 
     @classmethod
     def from_distinguished_name(cls, distinguished_name: str) -> CertificateAttributes:
@@ -25,16 +25,16 @@ class CertificateAttributes:
         name to CertificateAttributes
         """
         certificate_attributes = cls()
-        for part in distinguished_name.split(','):
+        for part in distinguished_name.split(","):
             if not part.strip():
                 continue
-            short_name, value = part.strip().split('=')
+            short_name, value = part.strip().split("=")
             for class_field in fields(cls):
-                if class_field.metadata['abbr'] == short_name:
+                if class_field.metadata["abbr"] == short_name:
                     setattr(certificate_attributes, class_field.name, value)
                     break
             else:
-                raise ValueError(f'Unknown attribute name {short_name!r} in certificate distinguished name')
+                raise ValueError(f"Unknown attribute name {short_name!r} in certificate distinguished name")
         return certificate_attributes
 
     def is_valid(self) -> bool:
@@ -48,13 +48,12 @@ class CertificateAttributes:
         Returns the components of this name, as a sequence of 2-tuples.
         """
         components_table = tuple(
-            (instance_field.metadata['abbr'], getattr(self, instance_field.name))
-            for instance_field in fields(self)
+            (instance_field.metadata["abbr"], getattr(self, instance_field.name)) for instance_field in fields(self)
         )
         return [(name, value) for name, value in components_table if value is not None]
 
     def get_distinguished_name(self) -> str:
         components = self.get_components()
         if not components:
-            raise ValueError('At least one certificate attribute is required to be non-empty')
-        return ','.join(f'{name}={value}' for name, value in components)
+            raise ValueError("At least one certificate attribute is required to be non-empty")
+        return ",".join(f"{name}={value}" for name, value in components)

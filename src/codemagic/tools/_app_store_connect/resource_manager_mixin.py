@@ -25,11 +25,11 @@ class ResourceManagerMixin:
         **create_params,
     ) -> R:
         try:
-            create_resource: Callable[..., R] = getattr(resource_manager, 'create')
+            create_resource: Callable[..., R] = getattr(resource_manager, "create")
         except AttributeError:
-            raise RuntimeError('Resource manager cannot create resources', resource_manager)
+            raise RuntimeError("Resource manager cannot create resources", resource_manager)
 
-        omit_keys = create_params.pop('omit_keys', tuple())
+        omit_keys = create_params.pop("omit_keys", tuple())
         self.printer.log_creating(
             resource_manager.resource_type,
             **{k: v for k, v in create_params.items() if k not in omit_keys},
@@ -50,9 +50,9 @@ class ResourceManagerMixin:
         should_print: bool,
     ) -> R:
         try:
-            read_resource: Callable[[ResourceId], R] = getattr(resource_manager, 'read')
+            read_resource: Callable[[ResourceId], R] = getattr(resource_manager, "read")
         except AttributeError:
-            raise RuntimeError('Resource manager cannot read resources', resource_manager)
+            raise RuntimeError("Resource manager cannot read resources", resource_manager)
 
         self.printer.log_get(resource_manager.resource_type, resource_id)
         try:
@@ -70,9 +70,9 @@ class ResourceManagerMixin:
         filter_predicate: Optional[Callable[[R], bool]] = None,
     ) -> List[R]:
         try:
-            list_resources: Callable[..., List[R]] = getattr(resource_manager, 'list')
+            list_resources: Callable[..., List[R]] = getattr(resource_manager, "list")
         except AttributeError:
-            raise RuntimeError('Resource manager cannot list resources', resource_manager)
+            raise RuntimeError("Resource manager cannot list resources", resource_manager)
 
         try:
             resources = list_resources(resource_filter=resource_filter)
@@ -102,7 +102,7 @@ class ResourceManagerMixin:
             raise AppStoreConnectError(str(api_error))
 
         if resource is None:
-            raise AppStoreConnectError(f'{related_resource_type} was not found for {resource_type} {resource_id}')
+            raise AppStoreConnectError(f"{related_resource_type} was not found for {resource_type} {resource_id}")
 
         self.printer.print_resource(resource, should_print)
         return resource
@@ -117,7 +117,7 @@ class ResourceManagerMixin:
         should_print: bool,
     ) -> List[R2]:
         self.printer.log_get_related(related_resource_type, resource_type, resource_id)
-        kwargs = {'resource_filter': resource_filter} if resource_filter else {}
+        kwargs = {"resource_filter": resource_filter} if resource_filter else {}
 
         try:
             resources = list_related_resources_method(resource_id, **kwargs)
@@ -135,9 +135,9 @@ class ResourceManagerMixin:
         ignore_not_found: bool,
     ):
         try:
-            delete_resource: Callable[[ResourceId], None] = getattr(resource_manager, 'delete')
+            delete_resource: Callable[[ResourceId], None] = getattr(resource_manager, "delete")
         except AttributeError:
-            raise RuntimeError('Resource manager cannot delete resources', resource_manager)
+            raise RuntimeError("Resource manager cannot delete resources", resource_manager)
 
         self.printer.log_delete(resource_manager.resource_type, resource_id)
         try:
@@ -158,9 +158,9 @@ class ResourceManagerMixin:
         **update_params,
     ) -> R:
         try:
-            modify_resource: Callable[..., R] = getattr(resource_manager, 'modify')
+            modify_resource: Callable[..., R] = getattr(resource_manager, "modify")
         except AttributeError:
-            raise RuntimeError('Resource manager cannot modify resources', resource_manager)
+            raise RuntimeError("Resource manager cannot modify resources", resource_manager)
 
         self.printer.log_modify(resource_manager.resource_type, resource_id)
         try:

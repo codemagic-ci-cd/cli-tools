@@ -28,20 +28,20 @@ def test_mock_resource(api_mock_resource):
 
 def test_undefined_attribute(api_mock_resource):
     api_mock_resource_with_excess_attribute = copy.deepcopy(api_mock_resource)
-    api_mock_resource_with_excess_attribute['attributes']['age'] = 27
+    api_mock_resource_with_excess_attribute["attributes"]["age"] = 27
     resource = MockResource(api_mock_resource_with_excess_attribute)
     assert resource.dict() == api_mock_resource
 
 
 def test_undefined_relationship(api_mock_resource):
     api_mock_resource_with_excess_relationship = copy.deepcopy(api_mock_resource)
-    api_mock_resource_with_excess_relationship['relationships']['job'] = {
-        'data': {
-            'type': 'mockResource',
-            'id': 'F88J43FA9J',
+    api_mock_resource_with_excess_relationship["relationships"]["job"] = {
+        "data": {
+            "type": "mockResource",
+            "id": "F88J43FA9J",
         },
-        'links': {
-            'self': 'https://example.com/mock_resource/F88J43FA9J',
+        "links": {
+            "self": "https://example.com/mock_resource/F88J43FA9J",
         },
     }
     resource = MockResource(api_mock_resource_with_excess_relationship)
