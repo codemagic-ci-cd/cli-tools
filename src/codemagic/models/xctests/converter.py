@@ -23,10 +23,9 @@ from .xcresult import ActionTestMetadata
 
 
 class XcResultConverter:
-
     @classmethod
     def _timestamp(cls, date: datetime) -> str:
-        return date.strftime('%Y-%m-%dT%H:%M:%S')
+        return date.strftime("%Y-%m-%dT%H:%M:%S")
 
     @classmethod
     def _get_test_case_error(cls, test: ActionTestMetadata) -> Optional[Error]:
@@ -75,36 +74,38 @@ class XcResultConverter:
     @classmethod
     def _get_test_suite_properties(cls, action: ActionRecord) -> List[Property]:
         properties: List[Property] = [
-            Property(name='started_time', value=cls._timestamp(action.started_time)),
-            Property(name='ended_time', value=cls._timestamp(action.ended_time)),
+            Property(name="started_time", value=cls._timestamp(action.started_time)),
+            Property(name="ended_time", value=cls._timestamp(action.ended_time)),
         ]
         if action.title:
-            properties.append(Property(name='title', value=action.title))
+            properties.append(Property(name="title", value=action.title))
 
         device = cls._get_test_suite_run_destination(action)
         if device:
-            properties.extend([
-                Property(name='device_name', value=device.model_name),
-                Property(name='device_architecture', value=device.native_architecture),
-                Property(name='device_identifier', value=device.identifier),
-                Property(name='device_operating_system', value=device.operating_system_version_with_build_number),
-                Property(name='device_platform', value=device.platform_record.user_description),
-            ])
+            properties.extend(
+                [
+                    Property(name="device_name", value=device.model_name),
+                    Property(name="device_architecture", value=device.native_architecture),
+                    Property(name="device_identifier", value=device.identifier),
+                    Property(name="device_operating_system", value=device.operating_system_version_with_build_number),
+                    Property(name="device_platform", value=device.platform_record.user_description),
+                ],
+            )
         return sorted(properties, key=lambda p: p.name)
 
     @classmethod
     def _get_test_suite_name(cls, action: ActionRecord, testable_summary: ActionTestableSummary):
-        name = testable_summary.name or ''
-        device_info = ''
+        name = testable_summary.name or ""
+        device_info = ""
 
         device = cls._get_test_suite_run_destination(action)
         if device:
             platform_name = device.platform_record.user_description
-            platform = re.sub('simulator', '', platform_name, flags=re.IGNORECASE).strip()
-            device_info = f'{platform} {device.operating_system_version} {device.model_name}'
+            platform = re.sub("simulator", "", platform_name, flags=re.IGNORECASE).strip()
+            device_info = f"{platform} {device.operating_system_version} {device.model_name}"
 
         if name and device_info:
-            return f'{name} [{device_info}]'
+            return f"{name} [{device_info}]"
         return name or device_info
 
     @classmethod
@@ -137,7 +138,7 @@ class XcResultConverter:
         test_suites: List[TestSuite] = []
         for action in actions_invocation_record.actions:
             test_suites.extend(cls._get_action_test_suites(action))
-        return TestSuites(name='', test_suites=test_suites)
+        return TestSuites(name="", test_suites=test_suites)
 
     @classmethod
     def xcresult_to_junit(cls, xcresult: pathlib.Path) -> TestSuites:

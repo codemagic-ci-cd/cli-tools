@@ -18,7 +18,7 @@ from .firebase_action_groups import FirebaseActionGroups
 
 class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
     @cli.action(
-        'list',
+        "list",
         ReleasesArgument.APP_ID,
         ResourcesArgument.LIMIT,
         ResourcesArgument.ORDER_BY,

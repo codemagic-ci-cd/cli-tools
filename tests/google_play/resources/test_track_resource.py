@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from codemagic.google_play.resources import Track
 
 
@@ -16,7 +15,7 @@ def test_max_version_code(api_track):
 
 
 def test_max_version_code_error_no_releases(api_track):
-    api_track.pop('releases')
+    api_track.pop("releases")
     track = Track(**api_track)
     with pytest.raises(ValueError) as e:
         track.get_max_version_code()
@@ -24,8 +23,8 @@ def test_max_version_code_error_no_releases(api_track):
 
 
 def test_max_version_code_error_no_version_codes(api_track):
-    for release in api_track['releases']:
-        release.pop('versionCodes')
+    for release in api_track["releases"]:
+        release.pop("versionCodes")
     track = Track(**api_track)
     with pytest.raises(ValueError) as e:
         track.get_max_version_code()

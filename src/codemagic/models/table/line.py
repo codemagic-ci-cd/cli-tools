@@ -5,11 +5,7 @@ from codemagic.cli import Colors
 
 
 class Line:
-    def __init__(self,
-                 key: str,
-                 value: Any,
-                 key_color: Optional[Colors] = None,
-                 value_color: Optional[Colors] = None):
+    def __init__(self, key: str, value: Any, key_color: Optional[Colors] = None, value_color: Optional[Colors] = None):
         self._key = key
         self._value = value
         self._key_color = key_color
@@ -43,12 +39,12 @@ class Line:
 
 class Spacer(Line):
     def __init__(self):
-        super().__init__('', '')
+        super().__init__("", "")
 
 
 class Header(Line):
     def __init__(self, header: str):
-        super().__init__(header, '')
+        super().__init__(header, "")
 
     def get_header(self) -> str:
         return str(self._key)

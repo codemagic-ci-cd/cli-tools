@@ -12,12 +12,13 @@ from .resource_manager import ResourceManager
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
-    from googleapiclient._apis.firebaseappdistribution.v1.resources import \
-        GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest
+    from googleapiclient._apis.firebaseappdistribution.v1.resources import (
+        GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest,
+    )
 
 
 class ReleaseManager(
-    ResourceManager[Release, 'FirebaseAppDistributionResource'],
+    ResourceManager[Release, "FirebaseAppDistributionResource"],
     ListingManagerMixin[Release, AppIdentifier],
 ):
     """

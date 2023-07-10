@@ -51,7 +51,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
                 country=issuer_country,
             )
             if not certificate_attributes.is_valid():
-                raise AndroidKeystoreIssuerArgument.COMMON_NAME.raise_argument_error('Missing issuer information')
+                raise AndroidKeystoreIssuerArgument.COMMON_NAME.raise_argument_error("Missing issuer information")
         else:
             try:
                 certificate_attributes = CertificateAttributes.from_distinguished_name(issuer_distinguished_name)
@@ -59,13 +59,13 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
                 error = f'Invalid distinguished name "{issuer_distinguished_name}"'
                 raise AndroidKeystoreIssuerArgument.DISTINGUISHED_NAME.raise_argument_error(error)
             if not certificate_attributes.is_valid():
-                error = 'Missing issuer information'
+                error = "Missing issuer information"
                 raise AndroidKeystoreIssuerArgument.DISTINGUISHED_NAME.raise_argument_error(error)
 
         return certificate_attributes
 
     @cli.action(
-        'create',
+        "create",
         AndroidKeystoreArgument.KEYSTORE_PATH,
         AndroidKeystoreArgument.KEYSTORE_PASSWORD,
         AndroidKeystoreArgument.KEY_ALIAS,
@@ -73,7 +73,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         CreateAndroidKeystoreArgument.OVERWRITE_EXISTING,
         CreateAndroidKeystoreArgument.VALIDITY_DAYS,
         *AndroidKeystoreIssuerArgument.with_custom_argument_group(
-            'set keystore issuer information. At least one is required',
+            "set keystore issuer information. At least one is required",
             *AndroidKeystoreIssuerArgument,
         ),
     )
@@ -120,24 +120,24 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             store_password=store_password,
             validity=validity_days,
         )
-        self.logger.info(Colors.GREEN(f'Create Android keystore at {keystore.store_path}'))
+        self.logger.info(Colors.GREEN(f"Create Android keystore at {keystore.store_path}"))
         if keystore.store_path.exists():
             if overwrite_existing:
-                self.logger.info(f'Remove existing keystore from {keystore.store_path}')
+                self.logger.info(f"Remove existing keystore from {keystore.store_path}")
                 keystore.store_path.unlink()
             else:
-                error = f'Keystore already exists at {keystore.store_path}'
+                error = f"Keystore already exists at {keystore.store_path}"
                 raise AndroidKeystoreArgument.KEYSTORE_PATH.raise_argument_error(error)
 
         keystore.store_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             Keytool().generate_keystore(keystore)
         except IOError:
-            raise AndroidKeystoreError('Creating keystore failed')
+            raise AndroidKeystoreError("Creating keystore failed")
         return keystore
 
     @cli.action(
-        'create-debug-keystore',
+        "create-debug-keystore",
         CreateAndroidKeystoreArgument.OVERWRITE_EXISTING,
         CreateAndroidKeystoreArgument.VALIDITY_DAYS,
     )
@@ -150,18 +150,18 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         Create Android debug keystore at ~/.android/debug.keystore
         """
         return self.create(
-            keystore_path=pathlib.Path('~/.android/debug.keystore').expanduser(),
-            key_alias='androiddebugkey',
-            keystore_password='android',
-            issuer_common_name='Android Debug',
-            issuer_organization='Android',
-            issuer_country='US',
+            keystore_path=pathlib.Path("~/.android/debug.keystore").expanduser(),
+            key_alias="androiddebugkey",
+            keystore_password="android",
+            issuer_common_name="Android Debug",
+            issuer_organization="Android",
+            issuer_country="US",
             overwrite_existing=overwrite_existing,
             validity_days=validity_days,
         )
 
     @cli.action(
-        'verify',
+        "verify",
         AndroidKeystoreArgument.KEYSTORE_PATH,
         AndroidKeystoreArgument.KEYSTORE_PASSWORD,
         AndroidKeystoreArgument.KEY_ALIAS,
@@ -189,13 +189,10 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             )
         except ValueError as ve:
             raise AndroidKeystoreError(str(ve)) from ve
-        self.logger.info((
-            f'Keystore "{keystore_path}" has alias "{key_alias}" '
-            f'and can be unlocked with given password'
-        ))
+        self.logger.info(f'Keystore "{keystore_path}" has alias "{key_alias}" and can be unlocked with given password')
 
     @cli.action(
-        'certificate',
+        "certificate",
         AndroidKeystoreArgument.KEYSTORE_PATH,
         AndroidKeystoreArgument.KEYSTORE_PASSWORD,
         AndroidKeystoreArgument.KEY_ALIAS,
@@ -236,7 +233,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
         return certificate
 
     @cli.action(
-        'certificates',
+        "certificates",
         AndroidKeystoreArgument.KEYSTORE_PATH,
         AndroidKeystoreArgument.KEYSTORE_PASSWORD,
         AndroidKeystoreArgument.KEY_ALIAS_OPTIONAL,
@@ -275,7 +272,7 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
             if json_output:
                 summary = json.dumps([c.get_summary() for c in certificates], indent=4)
             else:
-                summary = '\n'.join([c.get_text_summary() for c in certificates])
+                summary = "\n".join([c.get_text_summary() for c in certificates])
             self.echo(summary)
 
         return certificates
@@ -283,9 +280,9 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     @classmethod
     def _assert_keystore_exists(cls, keystore_path: pathlib.Path):
         if not keystore_path.is_file():
-            error = f'Keystore does not exists at {keystore_path}'
+            error = f"Keystore does not exists at {keystore_path}"
             raise AndroidKeystoreArgument.KEYSTORE_PATH.raise_argument_error(error)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     AndroidKeystore.invoke_cli()

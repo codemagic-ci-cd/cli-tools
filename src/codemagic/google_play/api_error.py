@@ -12,13 +12,13 @@ class GooglePlayDeveloperAPIClientError(Exception):
             return str(error)
         else:
             reason = error._get_reason()
-            return reason or 'Http Error'
+            return reason or "Http Error"
 
 
 class AuthorizationError(GooglePlayDeveloperAPIClientError):
     def __init__(self, error: Union[errors.Error, errors.HttpError]):
         reason = self._get_error_reason(error)
-        super().__init__(f'Unable to authorize with provided credentials. {reason}')
+        super().__init__(f"Unable to authorize with provided credentials. {reason}")
 
 
 class EditError(GooglePlayDeveloperAPIClientError):
@@ -29,10 +29,10 @@ class EditError(GooglePlayDeveloperAPIClientError):
 
 class _RequestError(GooglePlayDeveloperAPIClientError, ABC):
     def __init__(
-            self,
-            resource_description: str,
-            package_name: str,
-            request_error: Union[errors.Error, errors.HttpError],
+        self,
+        resource_description: str,
+        package_name: str,
+        request_error: Union[errors.Error, errors.HttpError],
     ):
         self.package_name = package_name
         self.request_error = request_error
@@ -50,7 +50,7 @@ class GetResourceError(_RequestError):
     def _get_message(self, resource_description: str) -> str:
         return (
             f'Failed to get {resource_description} from Google Play for package "{self.package_name}". '
-            f'{self._get_reason()}'
+            f"{self._get_reason()}"
         )
 
 
@@ -58,5 +58,5 @@ class ListResourcesError(_RequestError):
     def _get_message(self, resource_description: str) -> str:
         return (
             f'Failed to list {resource_description} from Google Play for package "{self.package_name}". '
-            f'{self._get_reason()}'
+            f"{self._get_reason()}"
         )

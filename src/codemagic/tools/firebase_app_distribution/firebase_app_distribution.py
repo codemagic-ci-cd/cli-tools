@@ -49,5 +49,5 @@ class FirebaseAppDistribution(
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     FirebaseAppDistribution.invoke_cli()

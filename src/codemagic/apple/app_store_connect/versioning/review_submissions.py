@@ -40,12 +40,12 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
         https://developer.apple.com/documentation/appstoreconnectapi/post_v1_reviewsubmissions
         """
         attributes = {
-            'platform': platform.value,
+            "platform": platform.value,
         }
 
         relationships = {
-            'app': {
-                'data': self._get_attribute_data(app, ResourceType.APPS),
+            "app": {
+                "data": self._get_attribute_data(app, ResourceType.APPS),
             },
         }
 
@@ -54,23 +54,23 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
             attributes=attributes,
             relationships=relationships,
         )
-        response = self.client.session.post(f'{self.client.API_URL}/reviewSubmissions', json=payload).json()
-        return ReviewSubmission(response['data'], created=True)
+        response = self.client.session.post(f"{self.client.API_URL}/reviewSubmissions", json=payload).json()
+        return ReviewSubmission(response["data"], created=True)
 
     def read(self, review_submission: Union[LinkedResourceData, ResourceId]) -> ReviewSubmission:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_v1_reviewsubmissions_id
         """
         review_submission_id = self._get_resource_id(review_submission)
-        response = self.client.session.get(f'{self.client.API_URL}/reviewSubmissions/{review_submission_id}').json()
-        return ReviewSubmission(response['data'])
+        response = self.client.session.get(f"{self.client.API_URL}/reviewSubmissions/{review_submission_id}").json()
+        return ReviewSubmission(response["data"])
 
     def list(self, resource_filter: Filter = Filter()) -> List[ReviewSubmission]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/get_v1_reviewsubmissions
         """
         review_submissions = self.client.paginate(
-            f'{self.client.API_URL}/reviewSubmissions',
+            f"{self.client.API_URL}/reviewSubmissions",
             params=resource_filter.as_query_params(),
         )
         return [ReviewSubmission(submission_info) for submission_info in review_submissions]
@@ -85,9 +85,9 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
 
         attributes = {}
         if canceled is not None:
-            attributes['canceled'] = canceled
+            attributes["canceled"] = canceled
         if submitted is not None:
-            attributes['submitted'] = submitted
+            attributes["submitted"] = submitted
 
         payload = self._get_update_payload(
             review_submission_id,
@@ -95,7 +95,7 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
             attributes=attributes,
         )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/reviewSubmissions/{review_submission_id}',
+            f"{self.client.API_URL}/reviewSubmissions/{review_submission_id}",
             json=payload,
         ).json()
-        return ReviewSubmission(response['data'])
+        return ReviewSubmission(response["data"])

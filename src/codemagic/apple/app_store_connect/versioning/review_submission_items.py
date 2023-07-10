@@ -35,19 +35,19 @@ class ReviewSubmissionItems(ResourceManager[ReviewSubmissionItem]):
         https://developer.apple.com/documentation/appstoreconnectapi/post_v1_reviewsubmissionitems
         """
         relationships = {
-            'reviewSubmission': {
-                'data': self._get_attribute_data(review_submission, ResourceType.REVIEW_SUBMISSIONS),
+            "reviewSubmission": {
+                "data": self._get_attribute_data(review_submission, ResourceType.REVIEW_SUBMISSIONS),
             },
         }
 
         optional_relationships: Dict[str, Tuple[Optional[Union[ResourceId, LinkedResourceData]], ResourceType]] = {
-            'appCustomProductPageVersion': (
+            "appCustomProductPageVersion": (
                 app_custom_product_page_version,
                 ResourceType.APP_CUSTOM_PRODUCT_PAGE_VERSIONS,
             ),
-            'appEvent': (app_event, ResourceType.APP_EVENTS),
-            'appStoreVersion': (app_store_version, ResourceType.APP_STORE_VERSIONS),
-            'appStoreVersionExperiment': (
+            "appEvent": (app_event, ResourceType.APP_EVENTS),
+            "appStoreVersion": (app_store_version, ResourceType.APP_STORE_VERSIONS),
+            "appStoreVersionExperiment": (
                 app_store_version_experiment,
                 ResourceType.APP_STORE_VERSION_EXPERIMENTS,
             ),
@@ -55,18 +55,18 @@ class ReviewSubmissionItems(ResourceManager[ReviewSubmissionItem]):
 
         for relationship_name, (resource, resource_type) in optional_relationships.items():
             if resource is not None:
-                relationships[relationship_name] = {'data': self._get_attribute_data(resource, resource_type)}
+                relationships[relationship_name] = {"data": self._get_attribute_data(resource, resource_type)}
 
         payload = self._get_create_payload(
             ResourceType.REVIEW_SUBMISSION_ITEMS,
             relationships=relationships,
         )
-        response = self.client.session.post(f'{self.client.API_URL}/reviewSubmissionItems', json=payload).json()
-        return ReviewSubmissionItem(response['data'], created=True)
+        response = self.client.session.post(f"{self.client.API_URL}/reviewSubmissionItems", json=payload).json()
+        return ReviewSubmissionItem(response["data"], created=True)
 
     def delete(self, review_submission_item: Union[LinkedResourceData, ResourceId]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/delete_v1_reviewsubmissionitems_id
         """
         review_submission_item_id = self._get_resource_id(review_submission_item)
-        self.client.session.delete(f'{self.client.API_URL}/reviewSubmissionItems/{review_submission_item_id}')
+        self.client.session.delete(f"{self.client.API_URL}/reviewSubmissionItems/{review_submission_item_id}")

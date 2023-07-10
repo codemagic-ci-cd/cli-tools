@@ -15,7 +15,7 @@ from .google_play_action_groups import GooglePlayActionGroups
 
 class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
-        'get',
+        "get",
         TracksArgument.PACKAGE_NAME,
         TracksArgument.TRACK_NAME,
         GooglePlayArgument.JSON_OUTPUT,
@@ -43,7 +43,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         return track
 
     @cli.action(
-        'list',
+        "list",
         TracksArgument.PACKAGE_NAME,
         GooglePlayArgument.JSON_OUTPUT,
         action_group=GooglePlayActionGroups.TRACKS,

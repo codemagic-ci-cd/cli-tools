@@ -7,12 +7,11 @@ from codemagic.utilities import log
 
 
 class CoreSimulatorService(RunningCliAppMixin):
-
     def __init__(self):
         self.logger = log.get_logger(self.__class__)
 
     def _kill_service(self):
-        cmd = ('killall', '-9', 'com.apple.CoreSimulator.CoreSimulatorService')
+        cmd = ("killall", "-9", "com.apple.CoreSimulator.CoreSimulatorService")
         cli_app = self.get_current_cli_app()
         try:
             if cli_app:
@@ -21,7 +20,7 @@ class CoreSimulatorService(RunningCliAppMixin):
             else:
                 subprocess.check_output(cmd, stderr=subprocess.PIPE).decode()
         except subprocess.CalledProcessError as cpe:
-            self.logger.debug('Failed to kill com.apple.CoreSimulator.CoreSimulatorService: %s', cpe)
+            self.logger.debug("Failed to kill com.apple.CoreSimulator.CoreSimulatorService: %s", cpe)
 
     def ensure_clean_state(self):
         """
@@ -31,10 +30,10 @@ class CoreSimulatorService(RunningCliAppMixin):
         proposed in this SO thread https://stackoverflow.com/a/63530321 by killing the CoreSimulatorService.
         """
 
-        cmd = ('xcrun', 'simctl', 'list', 'devices')
-        invalid_simulator_state = 'unavailable, failed to open liblaunch_sim.dylib'
+        cmd = ("xcrun", "simctl", "list", "devices")
+        invalid_simulator_state = "unavailable, failed to open liblaunch_sim.dylib"
 
-        self.logger.debug('Check for CoreSimulatorService health')
+        self.logger.debug("Check for CoreSimulatorService health")
         cli_app = self.get_current_cli_app()
         try:
             if cli_app:
@@ -44,11 +43,11 @@ class CoreSimulatorService(RunningCliAppMixin):
             else:
                 devices_output = subprocess.check_output(cmd, stderr=subprocess.PIPE).decode()
         except subprocess.CalledProcessError as cpe:
-            self.logger.debug('Failed to obtain simulators listing: %s', cpe)
+            self.logger.debug("Failed to obtain simulators listing: %s", cpe)
             self._kill_service()
         else:
             if invalid_simulator_state in devices_output:
-                self.logger.debug('CoreSimulatorService is potentially poisoned, kill it')
+                self.logger.debug("CoreSimulatorService is potentially poisoned, kill it")
                 self._kill_service()
             else:
-                self.logger.debug('CoreSimulatorService seems to be alright')
+                self.logger.debug("CoreSimulatorService seems to be alright")

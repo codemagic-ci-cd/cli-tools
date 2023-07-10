@@ -11,4 +11,4 @@ from typing import Union
 
 CommandArg = Union[AnyStr, pathlib.Path]
 ObfuscationPattern = Union[Pattern, Callable[[CommandArg], bool], CommandArg]
-ObfuscatedCommand = NewType('ObfuscatedCommand', str)
+ObfuscatedCommand = NewType("ObfuscatedCommand", str)

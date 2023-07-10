@@ -45,7 +45,7 @@ class AppStoreVersion(Resource):
 
     @dataclass
     class Relationships(Resource.Relationships):
-        _OMIT_IF_NONE_KEYS = ('app', 'appVersionExperiments')
+        _OMIT_IF_NONE_KEYS = ("app", "appVersionExperiments")
 
         ageRatingDeclaration: Relationship
         appStoreReviewDetail: Relationship

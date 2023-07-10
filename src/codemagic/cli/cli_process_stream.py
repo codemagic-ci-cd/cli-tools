@@ -8,14 +8,13 @@ from typing import Optional
 
 from codemagic.mixins import StringConverterMixin
 
-if os.name == 'nt':
+if os.name == "nt":
     import msvcrt
 
     import _winapi as winapi
 
 
 class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
-
     def __init__(self, input_stream_descriptor: IO, output_stream: IO):
         self._descriptor = input_stream_descriptor
         self._fileno = input_stream_descriptor.fileno()
@@ -23,7 +22,7 @@ class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
 
     @classmethod
     def create(cls, stream_descriptor: IO, output_stream: IO, blocking: bool = False) -> CliProcessStream:
-        if os.name == 'nt':  # Running on Windows
+        if os.name == "nt":  # Running on Windows
             stream: CliProcessStream = _WindowsCliProcessStream(stream_descriptor, output_stream)
         else:
             stream = _PosixCliProcessStream(stream_descriptor, output_stream)
@@ -55,7 +54,7 @@ class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
         else:
             bytes_chunk = self.read_all()
 
-        chunk = bytes_chunk.decode(encoding='utf-8', errors='ignore')
+        chunk = bytes_chunk.decode(encoding="utf-8", errors="ignore")
         if multiplex_output:
             self._output_stream.write(chunk)
         return chunk
@@ -70,8 +69,8 @@ class _PosixCliProcessStream(CliProcessStream):
             chunk = self._descriptor.read(buffer_size)
         except IOError:
             # In case we get "Resource temporarily unavailable" from the OS
-            chunk = b''
-        return self._bytes(chunk or b'')
+            chunk = b""
+        return self._bytes(chunk or b"")
 
     def read_all(self) -> bytes:
         return self.read(-1)
@@ -93,8 +92,8 @@ class _WindowsCliProcessStream(CliProcessStream):
         try:
             chunk, _result = winapi.ReadFile(self._pipe_handle, buffer_size, 0)  # type: ignore
         except BrokenPipeError:
-            chunk = b''
-        return self._bytes(chunk or b'')
+            chunk = b""
+        return self._bytes(chunk or b"")
 
     def read_all(self) -> bytes:
         # https://docs.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-peeknamedpipe
@@ -103,5 +102,5 @@ class _WindowsCliProcessStream(CliProcessStream):
             _data, buffer_size, *_rest = winapi.PeekNamedPipe(self._pipe_handle, 1)  # type: ignore
         except BrokenPipeError:
             # The pipe has already been ended
-            return b''
+            return b""
         return self.read(buffer_size)

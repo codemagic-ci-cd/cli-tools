@@ -21,7 +21,7 @@ from codemagic.google.errors import GoogleHttpError
 if TYPE_CHECKING:
     from ...resources.resource import Resource
 
-ResourceT = TypeVar('ResourceT', bound='Resource')
+ResourceT = TypeVar("ResourceT", bound="Resource")
 
 
 class ActingManagerMixin(Generic[ResourceT], ABC):
@@ -41,12 +41,12 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
         try:
             return request.execute()
         except OAuth2ClientError as e:
-            self._logger.exception(f'Failed to {self.manager_action} {self.resource_type.get_label()}')
+            self._logger.exception(f"Failed to {self.manager_action} {self.resource_type.get_label()}")
             raise GoogleAuthenticationError(str(e)) from e
         except errors.HttpError as e:
-            self._logger.exception(f'Failed to {self.manager_action} {self.resource_type.get_label()}')
+            self._logger.exception(f"Failed to {self.manager_action} {self.resource_type.get_label()}")
             reason = e.reason  # type: ignore
             raise GoogleHttpError(reason) from e
         except errors.Error as e:
-            self._logger.exception(f'Failed to {self.manager_action} {self.resource_type.get_label()}')
+            self._logger.exception(f"Failed to {self.manager_action} {self.resource_type.get_label()}")
             raise GoogleClientError(str(e)) from e

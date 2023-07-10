@@ -19,7 +19,7 @@ from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 
-IncludedResource = TypeVar('IncludedResource', bound=Resource)
+IncludedResource = TypeVar("IncludedResource", bound=Resource)
 
 
 class Builds(ResourceManager[Build]):
@@ -44,25 +44,25 @@ class Builds(ResourceManager[Build]):
 
         @classmethod
         def _get_field_name(cls, field_name) -> str:
-            if field_name == 'pre_release_version_version':
-                field_name = 'pre_release_version.version'
-            elif field_name == 'beta_app_review_submission_beta_review_state':
-                field_name = 'beta_app_review_submission.beta_review_state'
+            if field_name == "pre_release_version_version":
+                field_name = "pre_release_version.version"
+            elif field_name == "beta_app_review_submission_beta_review_state":
+                field_name = "beta_app_review_submission.beta_review_state"
             return super()._get_field_name(field_name)
 
     class Ordering(ResourceManager.Ordering):
-        PRE_RELEASE_VERSION = 'preReleaseVersion'
-        UPLOADED_DATE = 'uploadedDate'
-        VERSION = 'version'
-        BETA_REVIEW_STATE = 'betaReviewState'
+        PRE_RELEASE_VERSION = "preReleaseVersion"
+        UPLOADED_DATE = "uploadedDate"
+        VERSION = "version"
+        BETA_REVIEW_STATE = "betaReviewState"
 
     def read(self, build: Union[LinkedResourceData, ResourceId]) -> Build:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
         """
         build_id = self._get_resource_id(build)
-        response = self.client.session.get(f'{self.client.API_URL}/builds/{build_id}').json()
-        return Build(response['data'])
+        response = self.client.session.get(f"{self.client.API_URL}/builds/{build_id}").json()
+        return Build(response["data"])
 
     def list(
         self,
@@ -74,8 +74,8 @@ class Builds(ResourceManager[Build]):
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
 
-        params = {'sort': ordering.as_param(reverse), **resource_filter.as_query_params()}
-        builds = self.client.paginate(f'{self.client.API_URL}/builds', params=params)
+        params = {"sort": ordering.as_param(reverse), **resource_filter.as_query_params()}
+        builds = self.client.paginate(f"{self.client.API_URL}/builds", params=params)
         return [Build(build) for build in builds]
 
     def read_app(self, build: Union[Build, ResourceId]) -> App:
@@ -86,9 +86,9 @@ class Builds(ResourceManager[Build]):
         if isinstance(build, Build) and build.relationships is not None:
             url = build.relationships.app.links.related
         if url is None:
-            url = f'{self.client.API_URL}/builds/{build}/app'
+            url = f"{self.client.API_URL}/builds/{build}/app"
         response = self.client.session.get(url).json()
-        return App(response['data'])
+        return App(response["data"])
 
     def read_app_store_version(self, build: Union[Build, ResourceId]) -> Optional[AppStoreVersion]:
         """
@@ -98,11 +98,11 @@ class Builds(ResourceManager[Build]):
         if isinstance(build, Build) and build.relationships is not None:
             url = build.relationships.appStoreVersion.links.related
         if url is None:
-            url = f'{self.client.API_URL}/builds/{build}/appStoreVersion'
+            url = f"{self.client.API_URL}/builds/{build}/appStoreVersion"
         response = self.client.session.get(url).json()
-        if response['data'] is None:
+        if response["data"] is None:
             return None
-        return AppStoreVersion(response['data'])
+        return AppStoreVersion(response["data"])
 
     def read_pre_release_version(self, build: Union[Build, ResourceId]) -> Optional[PreReleaseVersion]:
         """
@@ -112,16 +112,16 @@ class Builds(ResourceManager[Build]):
         if isinstance(build, Build) and build.relationships is not None:
             url = build.relationships.preReleaseVersion.links.related
         if url is None:
-            url = f'{self.client.API_URL}/builds/{build}/preReleaseVersion'
+            url = f"{self.client.API_URL}/builds/{build}/preReleaseVersion"
         response = self.client.session.get(url).json()
-        if response['data'] is None:
+        if response["data"] is None:
             return None
-        return PreReleaseVersion(response['data'])
+        return PreReleaseVersion(response["data"])
 
     def read_with_include(
-            self,
-            build: Union[LinkedResourceData, ResourceId],
-            include_type: Type[IncludedResource],
+        self,
+        build: Union[LinkedResourceData, ResourceId],
+        include_type: Type[IncludedResource],
     ) -> Tuple[Build, IncludedResource]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
@@ -130,11 +130,11 @@ class Builds(ResourceManager[Build]):
 
         build_id = self._get_resource_id(build)
         response = self.client.session.get(
-            f'{self.client.API_URL}/builds/{build_id}',
-            params={'include': included_field},
+            f"{self.client.API_URL}/builds/{build_id}",
+            params={"include": included_field},
         ).json()
 
-        return Build(response['data']), include_type(response['included'][0])
+        return Build(response["data"]), include_type(response["included"][0])
 
     def modify(
         self,
@@ -148,7 +148,7 @@ class Builds(ResourceManager[Build]):
 
         attributes = {}
         if expired is not None:
-            attributes['expired'] = expired
+            attributes["expired"] = expired
 
         payload = self._get_update_payload(
             build_id,
@@ -156,13 +156,13 @@ class Builds(ResourceManager[Build]):
             attributes=attributes,
         )
         response = self.client.session.patch(
-            f'{self.client.API_URL}/builds/{build_id}',
+            f"{self.client.API_URL}/builds/{build_id}",
             json=payload,
         ).json()
-        return Build(response['data'])
+        return Build(response["data"])
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[IncludedResource]) -> str:
         if include_type is App:
-            return 'app'
-        raise ValueError(f'Unknown include type {include_type}')
+            return "app"
+        raise ValueError(f"Unknown include type {include_type}")

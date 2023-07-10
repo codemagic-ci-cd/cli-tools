@@ -25,7 +25,7 @@ from .argument_formatter import ArgumentFormatter
 if TYPE_CHECKING:
     from .argument_properties import ArgumentProperties
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
@@ -43,12 +43,12 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
 
     def _get_type_name(cls) -> Optional[str]:
         known_types: Dict[Any, str] = {
-            int: 'integer',
-            float: 'number',
-            bool: 'boolean',
-            str: 'string',
-            datetime: 'datetime',
-            Type[datetime]: 'datetime',
+            int: "integer",
+            float: "number",
+            bool: "boolean",
+            str: "string",
+            datetime: "datetime",
+            Type[datetime]: "datetime",
         }
         return known_types.get(cls.argument_type)
 
@@ -61,7 +61,7 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
         if type_name is not None:
             cls.__name__ = type_name
         else:
-            formatted_name = re.sub(r'([A-Z])', lambda m: f' {m.group(1).lower()}', cls.__name__)
+            formatted_name = re.sub(r"([A-Z])", lambda m: f" {m.group(1).lower()}", cls.__name__)
             cls.__name__ = formatted_name.strip()
 
     @staticmethod
@@ -105,7 +105,7 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
         return cls.default_value
 
     @classmethod
-    def from_environment_variable_default(cls) -> Optional['TypedCliArgument[T]']:
+    def from_environment_variable_default(cls) -> Optional["TypedCliArgument[T]"]:
         if cls.environment_variable_key is None:
             return None
         elif cls.environment_variable_key not in os.environ:
@@ -131,39 +131,41 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
         return self._apply_type(value)
 
     @classmethod
-    def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
+    def get_description(cls, properties: "ArgumentProperties", include_default=True) -> str:
         description = f'{properties.description.rstrip(".")}.'
         if cls.environment_variable_key is not None:
-            description += '\nIf not given, the value will be checked from the ' \
-                           f'environment variable {Colors.CYAN(cls.environment_variable_key)}.'
+            description += (
+                "\nIf not given, the value will be checked from the "
+                f"environment variable {Colors.CYAN(cls.environment_variable_key)}."
+            )
         if include_default:
             try:
                 if cls.default_value:
                     default_value = cls.default_value
                 else:
-                    default_value = (properties.argparse_kwargs or {})['default']
+                    default_value = (properties.argparse_kwargs or {})["default"]
             except KeyError:
                 pass
             else:
                 default = ArgumentFormatter.format_default_value(default_value)
-                return '\n'.join([description, default])
+                return "\n".join([description, default])
         return description
 
     @classmethod
-    def get_missing_value_error_message(cls, properties: 'ArgumentProperties') -> str:
+    def get_missing_value_error_message(cls, properties: "ArgumentProperties") -> str:
         name = Colors.CYAN(properties.key.upper())
-        message = f'Missing value {name}. Provide it'
+        message = f"Missing value {name}. Provide it"
         if properties.flags:
-            flags = Colors.BRIGHT_BLUE(','.join(properties.flags))
-            message = f'{message} with argument {flags}'
+            flags = Colors.BRIGHT_BLUE(",".join(properties.flags))
+            message = f"{message} with argument {flags}"
         if cls.environment_variable_key:
             key = Colors.CYAN(cls.environment_variable_key)
-            message = f'{message}, or set environment variable {key}'
+            message = f"{message}, or set environment variable {key}"
         return message
 
     def __str__(self):
         if self._from_environment:
-            return f'@env:{self.environment_variable_key}'
+            return f"@env:{self.environment_variable_key}"
         return self._raw_value
 
     def __repr__(self):
@@ -171,12 +173,11 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
 
 
 class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=TypedCliArgumentMeta):
-
     def _is_from_environment(self) -> bool:
-        return self._raw_value.startswith('@env:')
+        return self._raw_value.startswith("@env:")
 
     def _is_from_file(self) -> bool:
-        return self._raw_value.startswith('@file:')
+        return self._raw_value.startswith("@file:")
 
     def _get_from_environment(self) -> T:
         key = self._raw_value[5:]
@@ -210,25 +211,29 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=TypedCliArgumentMe
             return super()._parse_value()
 
     @classmethod
-    def get_description(cls, properties: 'ArgumentProperties', include_default=True) -> str:
+    def get_description(cls, properties: "ArgumentProperties", include_default=True) -> str:
         description = super().get_description(properties, include_default=False)
-        usage = f'Alternatively to entering {Colors.CYAN(properties.key.upper())} in plaintext, ' \
-                f'it may also be specified using the "{Colors.WHITE("@env:")}" prefix followed ' \
-                f'by an environment variable name, or the "{Colors.WHITE("@file:")}" prefix followed ' \
-                f'by a path to the file containing the value.'
-        example = f'Example: "{Colors.WHITE("@env:<variable>")}" uses the value in the environment variable ' \
-                  f'named "{Colors.WHITE("<variable>")}", and "{Colors.WHITE("@file:<file_path>")}" ' \
-                  f'uses the value from the file at "{Colors.WHITE("<file_path>")}".'
+        usage = (
+            f"Alternatively to entering {Colors.CYAN(properties.key.upper())} in plaintext, "
+            f'it may also be specified using the "{Colors.WHITE("@env:")}" prefix followed '
+            f'by an environment variable name, or the "{Colors.WHITE("@file:")}" prefix followed '
+            f"by a path to the file containing the value."
+        )
+        example = (
+            f'Example: "{Colors.WHITE("@env:<variable>")}" uses the value in the environment variable '
+            f'named "{Colors.WHITE("<variable>")}", and "{Colors.WHITE("@file:<file_path>")}" '
+            f'uses the value from the file at "{Colors.WHITE("<file_path>")}".'
+        )
 
         if include_default:
             try:
-                default_value = (properties.argparse_kwargs or {})['default']
+                default_value = (properties.argparse_kwargs or {})["default"]
             except KeyError:
                 pass
             else:
                 default = ArgumentFormatter.format_default_value(default_value)
-                return '\n'.join([description, usage, example, default])
-        return '\n'.join([description, usage, example])
+                return "\n".join([description, usage, example, default])
+        return "\n".join([description, usage, example])
 
     def __str__(self):
         return self._raw_value

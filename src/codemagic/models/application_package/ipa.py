@@ -22,7 +22,7 @@ class Ipa(AbstractPackage):
         try:
             return bool(self.info_plist)
         except zipfile.BadZipFile as bad_zip_file:
-            raise IOError(f'Not a valid iOS application package at {self.path}') from bad_zip_file
+            raise IOError(f"Not a valid iOS application package at {self.path}") from bad_zip_file
 
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
         with zipfile.ZipFile(self.path) as zf:
@@ -32,17 +32,17 @@ class Ipa(AbstractPackage):
                 raise FileNotFoundError(filename_filter.__name__, self.path)
 
             try:
-                with zf.open(found_file_name, 'r') as fd:
+                with zf.open(found_file_name, "r") as fd:
                     return fd.read()
             except zipfile.BadZipFile as e:
-                if str(e) == 'Bad magic number for file header':
+                if str(e) == "Bad magic number for file header":
                     # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
                     # Unfortunately Python's built-in zip library is not capable to handle those
                     pass
                 else:
                     raise
 
-            completed_process = subprocess.run(['unzip', '-p', self.path, found_file_name], capture_output=True)
+            completed_process = subprocess.run(["unzip", "-p", self.path, found_file_name], capture_output=True)
             return completed_process.stdout
 
     def _get_app_file_contents(self, filename: str) -> bytes:
@@ -51,9 +51,9 @@ class Ipa(AbstractPackage):
         """
 
         def filename_filter(path_name):
-            return pathlib.Path(path_name).match(f'Payload/*.app/{filename}')
+            return pathlib.Path(path_name).match(f"Payload/*.app/{filename}")
 
-        filename_filter.__name__ = f'Payload/*.app/{filename}'
+        filename_filter.__name__ = f"Payload/*.app/{filename}"
         return self._extract_file(filename_filter)
 
     def extract_app(self, target_directory: pathlib.Path) -> pathlib.Path:
@@ -64,17 +64,17 @@ class Ipa(AbstractPackage):
                     p1, p2, *_rest = path.parts
                 except ValueError:
                     continue
-                if p1 == 'Payload' and p2.endswith('.app'):
+                if p1 == "Payload" and p2.endswith(".app"):
                     zf.extract(zi, path=target_directory)
 
             try:
-                return next(pathlib.Path(target_directory).glob('Payload/*.app'))
+                return next(pathlib.Path(target_directory).glob("Payload/*.app"))
             except StopIteration:
-                raise IOError(f'Failed to extract Payload/*.app from {self.path}')
+                raise IOError(f"Failed to extract Payload/*.app from {self.path}")
 
     @lru_cache(1)
     def _get_info_plist(self) -> Dict[str, Any]:
-        info_plist_contents = self._get_app_file_contents('Info.plist')
+        info_plist_contents = self._get_app_file_contents("Info.plist")
         return plistlib.loads(info_plist_contents)
 
     @property
@@ -85,7 +85,7 @@ class Ipa(AbstractPackage):
     @lru_cache(1)
     def _get_embedded_provisioning_profile(self) -> Optional[ProvisioningProfile]:
         try:
-            embedded_mobileprovision_contents = self._get_app_file_contents('embedded.mobileprovision')
+            embedded_mobileprovision_contents = self._get_app_file_contents("embedded.mobileprovision")
         except FileNotFoundError:
             return None
         return ProvisioningProfile.from_content(embedded_mobileprovision_contents)
@@ -111,46 +111,39 @@ class Ipa(AbstractPackage):
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleidentifier
         """
-        return self.info_plist['CFBundleIdentifier']
+        return self.info_plist["CFBundleIdentifier"]
 
     @property
     def app_name(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundledisplayname
         """
-        return (
-            self.info_plist.get('CFBundleDisplayName')
-            or self.info_plist.get('CFBundleName')
-            or ''
-        )
+        return self.info_plist.get("CFBundleDisplayName") or self.info_plist.get("CFBundleName") or ""
 
     @property
     def version(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleshortversionstring
         """
-        return (
-            self.info_plist.get('CFBundleShortVersionString')
-            or self.version_code
-        )
+        return self.info_plist.get("CFBundleShortVersionString") or self.version_code
 
     @property
     def version_code(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/cfbundleversion
         """
-        return self.info_plist.get('CFBundleVersion', '')
+        return self.info_plist.get("CFBundleVersion", "")
 
     @property
     def minimum_os_version(self) -> str:
         """
         https://developer.apple.com/documentation/bundleresources/information_property_list/minimumosversion
         """
-        return self.info_plist.get('MinimumOSVersion', '')
+        return self.info_plist.get("MinimumOSVersion", "")
 
     @property
     def supported_platforms(self) -> List[str]:
-        return self.info_plist.get('CFBundleSupportedPlatforms', [])
+        return self.info_plist.get("CFBundleSupportedPlatforms", [])
 
     @property
     def archive_method(self) -> ArchiveMethod:
@@ -170,19 +163,19 @@ class Ipa(AbstractPackage):
     def get_summary(self) -> Dict[str, Union[bool, Optional[str], List[str]]]:
         certificate_expires = None
         if self.certificate:
-            certificate_expires = self.certificate.expires_at.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + '+0000'
+            certificate_expires = self.certificate.expires_at.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "+0000"
         return {
-            'app_name': self.app_name,
-            'bundle_identifier': self.bundle_identifier,
-            'certificate_expires': certificate_expires,
-            'distribution_type': self.archive_method.value.replace('-', ' ').title(),
-            'min_os_version': self.minimum_os_version,
-            'provisioned_devices': self.provisioned_devices,
-            'provisions_all_devices': self.provisions_all_devices,
-            'supported_platforms': self.supported_platforms,
-            'version': self.version,
-            'version_code': self.version_code,
+            "app_name": self.app_name,
+            "bundle_identifier": self.bundle_identifier,
+            "certificate_expires": certificate_expires,
+            "distribution_type": self.archive_method.value.replace("-", " ").title(),
+            "min_os_version": self.minimum_os_version,
+            "provisioned_devices": self.provisioned_devices,
+            "provisions_all_devices": self.provisions_all_devices,
+            "supported_platforms": self.supported_platforms,
+            "version": self.version,
+            "version_code": self.version_code,
         }
 
     def is_for_tvos(self) -> bool:
-        return any('tv' in platform_name.lower() for platform_name in self.supported_platforms)
+        return any("tv" in platform_name.lower() for platform_name in self.supported_platforms)

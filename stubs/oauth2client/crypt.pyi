@@ -1,5 +1,10 @@
-from oauth2client import _helpers as _helpers, _openssl_crypt as _openssl_crypt, _pure_python_crypt as _pure_python_crypt, _pycrypto_crypt as _pycrypto_crypt
-from typing import Any, Optional
+from typing import Any
+from typing import Optional
+
+from oauth2client import _helpers as _helpers
+from oauth2client import _openssl_crypt as _openssl_crypt
+from oauth2client import _pure_python_crypt as _pure_python_crypt
+from oauth2client import _pycrypto_crypt as _pycrypto_crypt
 
 RsaSigner: Any
 RsaVerifier: Any
@@ -11,6 +16,7 @@ logger: Any
 class AppIdentityError(Exception): ...
 
 def _bad_pkcs12_key_as_pem(*args: Any, **kwargs: Any) -> None: ...
+
 OpenSSLSigner = _openssl_crypt.OpenSSLSigner
 OpenSSLVerifier = _openssl_crypt.OpenSSLVerifier
 pkcs12_key_as_pem = _openssl_crypt.pkcs12_key_as_pem
