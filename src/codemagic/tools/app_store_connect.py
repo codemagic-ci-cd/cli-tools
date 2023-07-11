@@ -499,21 +499,27 @@ class AppStoreConnect(
         self,
         platform: BundleIdPlatform,
         device_name: str,
-        device_udids: Union[Types.DeviceUdidsArgument, Sequence[Types.DeviceUdidsArgument]],
+        device_udids_argument: Union[str, Types.DeviceUdidsArgument, Sequence[Union[str, Types.DeviceUdidsArgument]]],
         ignore_registration_errors: bool = False,
         should_print: bool = True,
     ) -> List[Device]:
         """
         Register new Devices for app development
         """
-        if isinstance(device_udids, Types.DeviceUdidsArgument):
-            device_udids = [device_udids]
-        device_udid_values = [udid for arg in device_udids for udid in arg.value]
-        if not device_udid_values:
+        if isinstance(device_udids_argument, str) or isinstance(device_udids_argument, Types.DeviceUdidsArgument):
+            device_udids_argument = [device_udids_argument]
+
+        device_udids = []
+        for device_udids_argument in device_udids_argument:
+            if isinstance(device_udids_argument, Types.DeviceUdidsArgument):
+                device_udids.extend(device_udids_argument.value)
+            else:
+                device_udids.append(device_udids_argument)
+        if not device_udids:
             DeviceArgument.DEVICE_UDIDS.raise_argument_error("At least one device UDID is required")
 
         registered_devices = []
-        for i, device_udid in enumerate(device_udid_values):
+        for i, device_udids_argument in enumerate(device_udids):
             if should_print:
                 self.echo("") if i != 0 else None
 
@@ -521,13 +527,13 @@ class AppStoreConnect(
                 device = self._create_resource(
                     self.api_client.devices,
                     should_print,
-                    udid=device_udid,
+                    udid=device_udids_argument,
                     name=device_name,
                     platform=platform,
                 )
             except AppStoreConnectError as error:
                 if not ignore_registration_errors:
-                    raise error from error
+                    raise error
                 self.logger.error(Colors.YELLOW(f"Failed to register a device: {error.args[0]}"))
             else:
                 registered_devices.append(device)

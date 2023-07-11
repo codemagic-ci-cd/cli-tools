@@ -355,18 +355,13 @@ class Types:
 
     class DeviceUdidsArgument(cli.EnvironmentArgumentValue[List[str]]):
         argument_type = List[str]
-        environment_variable_key = "DEVICE_UDIDS"
+        environment_variable_key = "APP_STORE_CONNECT_DEVICE_UDIDS"
         example_value = "00000000-000000000000001E"
 
         def _apply_type(self, non_typed_value: str) -> List[str]:
-            if self._is_from_environment() or self._is_from_file():
-                udids = [udid.strip() for udid in shlex.split(non_typed_value)]
-            else:
-                udids = [non_typed_value.strip()]
-
+            udids = [udid.strip() for udid in shlex.split(non_typed_value) if udid.strip()]
             if not udids or not all(udids):
                 raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
-
             return udids
 
 
@@ -1233,7 +1228,7 @@ class DeviceArgument(cli.Argument):
         argparse_kwargs={"required": False},
     )
     DEVICE_UDIDS = cli.ArgumentProperties(
-        key="device_udids",
+        key="device_udids_argument",
         flags=("--udid", "-u"),
         type=Types.DeviceUdidsArgument,
         description=f"Device ID (UDID), for example: {Types.DeviceUdidsArgument.example_value}",
