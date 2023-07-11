@@ -357,6 +357,17 @@ class Types:
 
             return beta_build_infos
 
+    class DeviceUdidsArgument(cli.EnvironmentArgumentValue[List[str]]):
+        environment_variable_key = "DEVICE_UDIDS"
+        example_value = "00000000-000000000000001E"
+
+        @classmethod
+        def _apply_type(cls, non_typed_value: str) -> List[str]:
+            udids = non_typed_value.split()
+            if not udids:
+                argparse.ArgumentTypeError(f"Provided value contains no UDID: {non_typed_value}")
+            return udids
+
 
 _API_DOCS_REFERENCE = f"Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}."
 _LOCALE_CODES_URL = (
@@ -1212,7 +1223,7 @@ class DeviceArgument(cli.Argument):
     )
     DEVICE_NAME = cli.ArgumentProperties(
         key="device_name",
-        flags=("--name",),
+        flags=("--name", "-n"),
         description="Name of the Device",
         argparse_kwargs={"required": True},
     )
@@ -1220,10 +1231,11 @@ class DeviceArgument(cli.Argument):
         DEVICE_NAME,
         argparse_kwargs={"required": False},
     )
-    DEVICE_UDID = cli.ArgumentProperties(
-        key="device_udid",
-        flags=("--udid",),
-        description="Device ID (UDID)",
+    DEVICE_UDIDS = cli.ArgumentProperties(
+        key="device_udids",
+        flags=("--udid", "-u"),
+        type=Types.DeviceUdidsArgument,
+        description=f"Device ID (UDID), for example: {Types.DeviceUdidsArgument.example_value}",
         argparse_kwargs={"required": True},
     )
     DEVICE_STATUS = cli.ArgumentProperties(
@@ -1235,6 +1247,16 @@ class DeviceArgument(cli.Argument):
             "required": False,
             "choices": list(DeviceStatus),
         },
+    )
+    IGNORE_REGISTRATION_ERRORS = cli.ArgumentProperties(
+        key="ignore_registration_errors",
+        flags=("--ignore-registration-errors",),
+        type=bool,
+        description=(
+            "Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. "
+            "Proceed registering remaining UDIDs when the flag is set."
+        ),
+        argparse_kwargs={"required": False, "action": "store_true"},
     )
 
 

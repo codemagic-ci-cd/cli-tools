@@ -27,7 +27,7 @@ app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--versio
 
 
 Bundle ID platform
-##### `--name=DEVICE_NAME_OPTIONAL`
+##### `--name, -n=DEVICE_NAME_OPTIONAL`
 
 
 Name of the Device

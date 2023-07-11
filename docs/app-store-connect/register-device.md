@@ -3,7 +3,7 @@ register-device
 ===============
 
 
-**Register a new device for app development**
+**Register new Devices for app development**
 ### Usage
 ```bash
 app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -18,25 +18,30 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM]
+    [--ignore-registration-errors]
     --name DEVICE_NAME
-    --udid DEVICE_UDID
+    --udid DEVICE_UDIDS
 ```
 ### Required arguments for action `register-device`
 
-##### `--name=DEVICE_NAME`
+##### `--name, -n=DEVICE_NAME`
 
 
 Name of the Device
-##### `--udid=DEVICE_UDID`
+##### `--udid, -u=DEVICE_UDIDS`
 
 
-Device ID (UDID)
+Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Optional arguments for action `register-device`
 
 ##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
 Bundle ID platform. Default:&nbsp;`IOS`
+##### `--ignore-registration-errors`
+
+
+Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. Proceed registering remaining UDIDs when the flag is set.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

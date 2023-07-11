@@ -1,3 +1,31 @@
+Version 0.41.0
+-------------
+
+Changes in this release improve `app-store-connect register-device` action by allowing to pass multiple UDIDs from different sources.
+
+**None of the breaking changes have an effect on command line usage**, only the Python API of is affected.
+
+**Features**
+- Update `app-store-connect register-device` action:
+  - The `--udid` argument now accepts multiple UDIDs.
+  - The `--udid` argument now accepts a file or an environment variable as a source for UDIDs.
+  - Introduce `--ignore-registration-errors` flag to continue registering devices despite errors
+  - Introduce short flags:
+    - `-n` flag for the device name,
+    - `-u` flag for the UDIDs.
+
+**Development**
+- **Breaking**: `AppStoreConnect.register_device` action method update:
+  - It now accepts a list of UDIDs for registration at the positional argument `device_udids`.
+  - It returns a list of registered devices.
+- Add `ignore_registration_errors` keyword argument to continue registering devices despite errors.
+
+**Documentation**
+- Update documentation for `app-store-connect register-device` action:
+  - Add new short flags: `-n` and `-u`.
+  - Add the description for the new `--ignore-registration-errors` option.
+  - Update the action description.
+
 Version 0.40.5
 -------------
 
