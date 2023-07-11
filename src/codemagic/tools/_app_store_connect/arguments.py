@@ -2,6 +2,7 @@ import argparse
 import json
 import pathlib
 import re
+import shlex
 from argparse import ArgumentTypeError
 from collections import Counter
 from dataclasses import dataclass
@@ -80,9 +81,8 @@ class Types:
         )
         environment_variable_key = "APP_STORE_CONNECT_PRIVATE_KEY"
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> str:
-            pem_private_key = cls.argument_type(non_typed_value)
+        def _apply_type(self, non_typed_value: str) -> str:
+            pem_private_key = self.argument_type(non_typed_value)
             try:
                 _ = load_pem_private_key(pem_private_key.encode(), None)
             except ValueError as ve:
@@ -190,10 +190,9 @@ class Types:
                     ),
                 )
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> datetime:
+        def _apply_type(self, non_typed_value: str) -> datetime:
             value = cli.CommonArgumentTypes.iso_8601_datetime(non_typed_value)
-            cls.validate(value)
+            self.validate(value)
             return value
 
     class AppStoreVersionInfoArgument(cli.EnvironmentArgumentValue[AppStoreVersionInfo]):
@@ -209,8 +208,7 @@ class Types:
             },
         )
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> AppStoreVersionInfo:
+        def _apply_type(self, non_typed_value: str) -> AppStoreVersionInfo:
             try:
                 given_app_store_version_info = json.loads(non_typed_value)
                 assert isinstance(given_app_store_version_info, dict)
@@ -272,8 +270,7 @@ class Types:
             ],
         )
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> List[AppStoreVersionLocalizationInfo]:
+        def _apply_type(self, non_typed_value: str) -> List[AppStoreVersionLocalizationInfo]:
             try:
                 given_localization_infos = json.loads(non_typed_value)
                 assert isinstance(given_localization_infos, list)
@@ -323,8 +320,7 @@ class Types:
         environment_variable_key = "APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS"
         example_value = json.dumps([{"locale": "en-US", "whats_new": "What's new in English"}])
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> List[BetaBuildInfo]:
+        def _apply_type(self, non_typed_value: str) -> List[BetaBuildInfo]:
             try:
                 given_beta_build_localizations = json.loads(non_typed_value)
                 assert isinstance(given_beta_build_localizations, list)
@@ -358,14 +354,19 @@ class Types:
             return beta_build_infos
 
     class DeviceUdidsArgument(cli.EnvironmentArgumentValue[List[str]]):
+        argument_type = List[str]
         environment_variable_key = "DEVICE_UDIDS"
         example_value = "00000000-000000000000001E"
 
-        @classmethod
-        def _apply_type(cls, non_typed_value: str) -> List[str]:
-            udids = non_typed_value.split()
-            if not udids:
-                argparse.ArgumentTypeError(f"Provided value contains no UDID: {non_typed_value}")
+        def _apply_type(self, non_typed_value: str) -> List[str]:
+            if self._is_from_environment() or self._is_from_file():
+                udids = [udid.strip() for udid in shlex.split(non_typed_value)]
+            else:
+                udids = [non_typed_value.strip()]
+
+            if not udids or not all(udids):
+                raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
+
             return udids
 
 
@@ -1236,7 +1237,11 @@ class DeviceArgument(cli.Argument):
         flags=("--udid", "-u"),
         type=Types.DeviceUdidsArgument,
         description=f"Device ID (UDID), for example: {Types.DeviceUdidsArgument.example_value}",
-        argparse_kwargs={"required": True},
+        argparse_kwargs={
+            "required": False,
+            "nargs": "+",
+            "metavar": "UDID",
+        },
     )
     DEVICE_STATUS = cli.ArgumentProperties(
         key="device_status",
