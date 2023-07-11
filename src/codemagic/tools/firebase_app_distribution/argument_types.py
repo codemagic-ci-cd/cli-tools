@@ -9,8 +9,7 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[dict]):
     argument_type = dict
     environment_variable_key = "FIREBASE_SERVICE_ACCOUNT_CREDENTIALS"
 
-    @classmethod
-    def _apply_type(cls, non_typed_value: str) -> Dict[str, str]:
+    def _apply_type(self, non_typed_value: str) -> Dict[str, str]:
         try:
             value = json.loads(non_typed_value)
         except json.decoder.JSONDecodeError as e:

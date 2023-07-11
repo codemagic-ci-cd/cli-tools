@@ -499,15 +499,21 @@ class AppStoreConnect(
         self,
         platform: BundleIdPlatform,
         device_name: str,
-        device_udids: Types.DeviceUdidsArgument,
+        device_udids: Union[Types.DeviceUdidsArgument, Sequence[Types.DeviceUdidsArgument]],
         ignore_registration_errors: bool = False,
         should_print: bool = True,
     ) -> List[Device]:
         """
         Register new Devices for app development
         """
+        if isinstance(device_udids, Types.DeviceUdidsArgument):
+            device_udids = [device_udids]
+        device_udid_values = [udid for arg in device_udids for udid in arg.value]
+        if not device_udid_values:
+            DeviceArgument.DEVICE_UDIDS.raise_argument_error("At least one device UDID is required")
+
         registered_devices = []
-        for i, device_udid in enumerate(Types.DeviceUdidsArgument.resolve_value(device_udids)):
+        for i, device_udid in enumerate(device_udid_values):
             if should_print:
                 self.echo("") if i != 0 else None
 
