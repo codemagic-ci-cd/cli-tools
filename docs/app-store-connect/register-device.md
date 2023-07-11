@@ -18,9 +18,9 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM]
+    [--udid DEVICE_UDIDS]
     [--ignore-registration-errors]
     --name DEVICE_NAME
-    --udid DEVICE_UDIDS
 ```
 ### Required arguments for action `register-device`
 
@@ -28,16 +28,16 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
 
 
 Name of the Device
-##### `--udid, -u=DEVICE_UDIDS`
-
-
-Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Optional arguments for action `register-device`
 
 ##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
 Bundle ID platform. Default:&nbsp;`IOS`
+##### `--udid, -u=DEVICE_UDIDS`
+
+
+Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS`_ARGUMENT in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`. Multiple arguments
 ##### `--ignore-registration-errors`
 
 
