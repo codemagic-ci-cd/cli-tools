@@ -359,7 +359,11 @@ class Types:
         example_value = "00000000-000000000000001E"
 
         def _apply_type(self, non_typed_value: str) -> List[str]:
-            udids = [udid.strip() for udid in shlex.split(non_typed_value) if udid.strip()]
+            is_from_cli = not (self._is_from_environment() or self._is_from_file() or self._from_environment)
+            if is_from_cli:
+                udids = [non_typed_value]
+            else:
+                udids = [udid.strip() for udid in shlex.split(non_typed_value) if udid.strip()]
             if not udids or not all(udids):
                 raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
             return udids
@@ -1228,7 +1232,7 @@ class DeviceArgument(cli.Argument):
         argparse_kwargs={"required": False},
     )
     DEVICE_UDIDS = cli.ArgumentProperties(
-        key="device_udids_argument",
+        key="device_udids",
         flags=("--udid", "-u"),
         type=Types.DeviceUdidsArgument,
         description=f"Device ID (UDID), for example: {Types.DeviceUdidsArgument.example_value}",

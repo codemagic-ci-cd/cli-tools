@@ -85,8 +85,8 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
-        self.value: T = self._parse_value()
         self._from_environment = from_environment
+        self.value: T = self._parse_value()
 
     @classmethod
     def resolve_value(cls, argument_instance: Optional[Union[T, TypedCliArgument]]) -> T:

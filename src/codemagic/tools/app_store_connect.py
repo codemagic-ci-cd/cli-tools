@@ -499,35 +499,45 @@ class AppStoreConnect(
         self,
         platform: BundleIdPlatform,
         device_name: str,
-        device_udids_argument: Union[str, Types.DeviceUdidsArgument, Sequence[Union[str, Types.DeviceUdidsArgument]]],
+        device_udids: Optional[
+            Union[
+                str,
+                Types.DeviceUdidsArgument,
+                Sequence[Union[str, Types.DeviceUdidsArgument]],
+            ]
+        ],
+        device_udid: Optional[str] = None,
         ignore_registration_errors: bool = False,
         should_print: bool = True,
     ) -> List[Device]:
         """
         Register new Devices for app development
         """
-        if isinstance(device_udids_argument, str) or isinstance(device_udids_argument, Types.DeviceUdidsArgument):
-            device_udids_argument = [device_udids_argument]
-
-        device_udids = []
-        for device_udids_argument in device_udids_argument:
-            if isinstance(device_udids_argument, Types.DeviceUdidsArgument):
-                device_udids.extend(device_udids_argument.value)
-            else:
-                device_udids.append(device_udids_argument)
-        if not device_udids:
+        if not device_udids and not device_udid:
             DeviceArgument.DEVICE_UDIDS.raise_argument_error("At least one device UDID is required")
 
-        registered_devices = []
-        for i, device_udids_argument in enumerate(device_udids):
-            if should_print:
-                self.echo("") if i != 0 else None
+        if device_udids is None:
+            device_udids = []
+        if isinstance(device_udids, str) or isinstance(device_udids, Types.DeviceUdidsArgument):
+            device_udids = [device_udids]
 
+        if device_udid:
+            device_udids = [device_udid, *device_udids]
+
+        device_udids_values: List[str] = []
+        for device_udids in device_udids:
+            if isinstance(device_udids, Types.DeviceUdidsArgument):
+                device_udids_values.extend(device_udids.value)
+            else:
+                device_udids_values.append(device_udids)
+
+        registered_devices = []
+        for device_udid in device_udids_values:
             try:
                 device = self._create_resource(
                     self.api_client.devices,
                     should_print,
-                    udid=device_udids_argument,
+                    udid=device_udid,
                     name=device_name,
                     platform=platform,
                 )
@@ -537,6 +547,8 @@ class AppStoreConnect(
                 self.logger.error(Colors.YELLOW(f"Failed to register a device: {error.args[0]}"))
             else:
                 registered_devices.append(device)
+
+            self.echo("") if should_print else None
 
         return registered_devices
 
