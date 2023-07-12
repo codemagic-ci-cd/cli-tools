@@ -499,7 +499,7 @@ class AppStoreConnect(
         self,
         platform: BundleIdPlatform,
         device_name: str,
-        device_udid: Optional[str] = None,
+        device_udid: Optional[str] = None,  # Deprecated in https://github.com/codemagic-ci-cd/cli-tools/pull/331
         device_udids: Optional[
             Union[
                 str,
