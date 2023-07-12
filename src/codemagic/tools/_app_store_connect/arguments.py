@@ -364,9 +364,9 @@ class Types:
                 udids = [non_typed_value.strip()]
             else:
                 udids = [udid.strip() for udid in shlex.split(non_typed_value) if udid.strip()]
-            if not udids or not all(udids):
-                raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
-            return udids
+            if udids and all(udids):
+                return udids
+            raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
 
 
 _API_DOCS_REFERENCE = f"Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_URL}."
