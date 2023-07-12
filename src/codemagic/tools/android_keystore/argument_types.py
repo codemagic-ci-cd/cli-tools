@@ -4,8 +4,7 @@ from codemagic import cli
 
 
 class Password(cli.EnvironmentArgumentValue[str]):
-    @classmethod
-    def _apply_type(cls, non_typed_value: str) -> str:
+    def _apply_type(self, non_typed_value: str) -> str:
         value = super()._apply_type(non_typed_value)
         if len(value) < 6:
             raise argparse.ArgumentTypeError("Minimum required password length is 6 characters")

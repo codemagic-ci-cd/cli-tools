@@ -33,8 +33,7 @@ class CustomExportOptions(cli.EnvironmentArgumentValue[dict]):
         },
     )
 
-    @classmethod
-    def _apply_type(cls, non_typed_value: str) -> Dict:
+    def _apply_type(self, non_typed_value: str) -> Dict:
         try:
             given_custom_export_options = json.loads(non_typed_value)
             if not isinstance(given_custom_export_options, dict):

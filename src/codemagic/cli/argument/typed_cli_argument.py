@@ -85,8 +85,8 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
 
     def __init__(self, raw_value: str, from_environment=False):
         self._raw_value = raw_value
-        self.value: T = self._parse_value()
         self._from_environment = from_environment
+        self.value: T = self._parse_value()
 
     @classmethod
     def resolve_value(cls, argument_instance: Optional[Union[T, TypedCliArgument]]) -> T:
@@ -119,10 +119,9 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     def _is_valid(cls, value: T) -> bool:
         return bool(value)
 
-    @classmethod
-    def _apply_type(cls, non_typed_value: str) -> T:
-        value = cls.argument_type(non_typed_value)
-        if not cls._is_valid(value):
+    def _apply_type(self, non_typed_value: str) -> T:
+        value = self.argument_type(non_typed_value)  # type: ignore
+        if not self._is_valid(value):
             raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
         return value
 
@@ -239,4 +238,4 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=TypedCliArgumentMe
         return self._raw_value
 
     def __repr__(self):
-        return self._raw_value
+        return f"{self.__class__.__name__}({self._raw_value!r})"

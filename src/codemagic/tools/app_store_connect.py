@@ -492,25 +492,65 @@ class AppStoreConnect(
         "register-device",
         BundleIdArgument.PLATFORM,
         DeviceArgument.DEVICE_NAME,
-        DeviceArgument.DEVICE_UDID,
+        DeviceArgument.DEVICE_UDIDS,
+        DeviceArgument.IGNORE_REGISTRATION_ERRORS,
     )
     def register_device(
         self,
         platform: BundleIdPlatform,
         device_name: str,
-        device_udid: str,
+        device_udid: Optional[str] = None,  # Deprecated in https://github.com/codemagic-ci-cd/cli-tools/pull/331
+        device_udids: Optional[
+            Union[
+                str,
+                Types.DeviceUdidsArgument,
+                Sequence[Union[str, Types.DeviceUdidsArgument]],
+            ]
+        ] = None,
+        ignore_registration_errors: bool = DeviceArgument.IGNORE_REGISTRATION_ERRORS.get_default(),
         should_print: bool = True,
-    ) -> Device:
+    ) -> List[Device]:
         """
-        Register a new device for app development
+        Register new Devices for app development
         """
-        return self._create_resource(
-            self.api_client.devices,
-            should_print,
-            udid=device_udid,
-            name=device_name,
-            platform=platform,
-        )
+        if not device_udids and not device_udid:
+            DeviceArgument.DEVICE_UDIDS.raise_argument_error("At least one device UDID is required")
+
+        if device_udids is None:
+            device_udids = []
+        if isinstance(device_udids, str) or isinstance(device_udids, Types.DeviceUdidsArgument):
+            device_udids = [device_udids]
+
+        if device_udid:
+            device_udids = [device_udid, *device_udids]
+
+        device_udids_values: List[str] = []
+        for device_udids in device_udids:
+            if isinstance(device_udids, Types.DeviceUdidsArgument):
+                device_udids_values.extend(device_udids.value)
+            else:
+                device_udids_values.append(device_udids)
+
+        registered_devices = []
+        for device_udid in device_udids_values:
+            try:
+                device = self._create_resource(
+                    self.api_client.devices,
+                    should_print,
+                    udid=device_udid,
+                    name=device_name,
+                    platform=platform,
+                )
+            except AppStoreConnectError as error:
+                if not ignore_registration_errors:
+                    raise error
+                self.logger.error(Colors.YELLOW(f"Failed to register a device: {error.args[0]}"))
+            else:
+                registered_devices.append(device)
+
+            self.echo("") if should_print else None
+
+        return registered_devices
 
     @cli.action(
         "create-bundle-id",
