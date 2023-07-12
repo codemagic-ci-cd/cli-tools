@@ -30,7 +30,7 @@ Bundle ID platform
 ##### `--name, -n=DEVICE_NAME_OPTIONAL`
 
 
-Name of the Device
+Common name of Devices
 ##### `--status=DISABLED | ENABLED`
 
 

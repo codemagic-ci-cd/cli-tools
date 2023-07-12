@@ -27,7 +27,7 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
 ##### `--name, -n=DEVICE_NAME`
 
 
-Name of the Device
+Common name of Devices
 ### Optional arguments for action `register-device`
 
 ##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`

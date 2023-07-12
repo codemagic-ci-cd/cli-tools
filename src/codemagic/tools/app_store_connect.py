@@ -499,15 +499,15 @@ class AppStoreConnect(
         self,
         platform: BundleIdPlatform,
         device_name: str,
+        device_udid: Optional[str] = None,
         device_udids: Optional[
             Union[
                 str,
                 Types.DeviceUdidsArgument,
                 Sequence[Union[str, Types.DeviceUdidsArgument]],
             ]
-        ],
-        device_udid: Optional[str] = None,
-        ignore_registration_errors: bool = False,
+        ] = None,
+        ignore_registration_errors: bool = DeviceArgument.IGNORE_REGISTRATION_ERRORS.get_default(),
         should_print: bool = True,
     ) -> List[Device]:
         """

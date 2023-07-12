@@ -361,7 +361,7 @@ class Types:
         def _apply_type(self, non_typed_value: str) -> List[str]:
             is_from_cli = not (self._is_from_environment() or self._is_from_file() or self._from_environment)
             if is_from_cli:
-                udids = [non_typed_value]
+                udids = [non_typed_value.strip()]
             else:
                 udids = [udid.strip() for udid in shlex.split(non_typed_value) if udid.strip()]
             if not udids or not all(udids):
@@ -1224,7 +1224,7 @@ class DeviceArgument(cli.Argument):
     DEVICE_NAME = cli.ArgumentProperties(
         key="device_name",
         flags=("--name", "-n"),
-        description="Name of the Device",
+        description="Common name of Devices",
         argparse_kwargs={"required": True},
     )
     DEVICE_NAME_OPTIONAL = cli.ArgumentProperties.duplicate(
@@ -1260,7 +1260,11 @@ class DeviceArgument(cli.Argument):
             "Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. "
             "Proceed registering remaining UDIDs when the flag is set."
         ),
-        argparse_kwargs={"required": False, "action": "store_true"},
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+            "default": False,
+        },
     )
 
 

@@ -16,7 +16,7 @@ Changes in this release improve `app-store-connect register-device` action by al
 
 **Development**
 - `AppStoreConnect.register_device` action method update:
-  - It now accepts a list of UDIDs for registration at the positional argument `device_udids`.
+  - It now accepts a list of UDIDs for registration at the keyword argument `device_udids`.
   - **Breaking**: `AppStoreConnect.register_device` now returns a list of registered devices.
 - Add `ignore_registration_errors` keyword argument to continue registering devices despite errors.
 
