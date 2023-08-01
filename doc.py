@@ -191,6 +191,7 @@ class ToolDocumentationGenerator:
         self._write_tool_command_arguments_and_options(writer)
         writer.write_actions_table(self.tool_serialized_actions)
         writer.write_action_groups_table(self.tool_serialized_action_groups)
+        writer.ensure_empty_line_at_end()
         md.create_md_file()
 
     def _write_action_group_page(self, action_group: ActionGroup):
@@ -201,6 +202,7 @@ class ToolDocumentationGenerator:
         writer.write_command_usage(self, action_group=action_group)
         self._write_tool_command_arguments_and_options(writer)
         writer.write_actions_table(action_group.actions, action_group=action_group)
+        writer.ensure_empty_line_at_end()
         md.create_md_file()
         os.makedirs(group_path, exist_ok=True)
         for action in action_group.actions:
@@ -219,6 +221,7 @@ class ToolDocumentationGenerator:
             action.custom_args,
         )
         self._write_tool_command_arguments_and_options(writer)
+        writer.ensure_empty_line_at_end()
         md.create_md_file()
 
     @classmethod
@@ -326,6 +329,11 @@ class CommandUsageGenerator:
 class Writer:
     def __init__(self, file: MdUtils):
         self.file = file
+
+    def ensure_empty_line_at_end(self):
+        if self.file.file_data_text.endswith("\n"):
+            return
+        self.file.write("\n")
 
     def write_description(self, content: str):
         content = str_plain(content)
