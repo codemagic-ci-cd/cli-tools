@@ -431,6 +431,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         TestArgument.TEST_DEVICES,
         TestArgument.TEST_ONLY,
         TestArgument.TEST_SDK,
+        TestArgument.OMIT_TEST_SDK,
         TestResultArgument.OUTPUT_DIRECTORY,
         TestResultArgument.OUTPUT_EXTENSION,
         XcodeArgument.TEST_FLAGS,
@@ -459,6 +460,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         output_dir: pathlib.Path = TestResultArgument.OUTPUT_DIRECTORY.get_default(),
         output_extension: str = TestResultArgument.OUTPUT_EXTENSION.get_default(),
         graceful_exit: bool = False,
+        omit_test_sdk: bool = False,
     ):
         """
         Run unit or UI tests for given Xcode project or workspace
@@ -473,7 +475,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         xcresult_collector.ignore_results(Xcode.DERIVED_DATA_PATH)
         try:
             xcodebuild.test(
-                test_sdk,
+                None if omit_test_sdk else test_sdk,
                 simulators,
                 enable_code_coverage=not disable_code_coverage,
                 only_testing=test_only,
@@ -669,14 +671,18 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 f'File "{export_options_plist}" is not a valid property list',
             )
 
-    def _get_test_destinations(self, test_sdk: str, requested_devices: Optional[List[str]]) -> List[Simulator]:
+    def _get_test_destinations(
+        self,
+        test_sdk: str | None,
+        requested_devices: Optional[List[str]],
+    ) -> List[Simulator]:
         if requested_devices:
             try:
                 simulators = Simulator.find_simulators(requested_devices)
             except ValueError as ve:
                 raise TestArgument.TEST_DEVICES.raise_argument_error(str(ve)) from ve
-        elif "macos" in test_sdk.lower():
-            # macOS tests are run on the host machine and no test destinations are required
+        elif test_sdk and "macos" in test_sdk.lower():
+            # macOS tests run on the host machine and no test destinations are required
             simulators = []
         else:
             simulators = [self.get_default_test_destination(should_print=False)]
