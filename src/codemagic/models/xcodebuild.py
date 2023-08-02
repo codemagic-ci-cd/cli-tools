@@ -176,7 +176,7 @@ class Xcodebuild(RunningCliAppMixin):
 
     def _construct_test_command(
         self,
-        sdk: str,
+        sdk: Optional[str],
         simulators: List[Simulator],
         only_testing: Optional[str],
         enable_code_coverage: bool,
@@ -188,6 +188,7 @@ class Xcodebuild(RunningCliAppMixin):
         max_devices_flag = "-maximum-concurrent-test-device-destinations"
         max_sims_flag = "-maximum-concurrent-test-simulator-destinations"
 
+        sdk_args = ["-sdk", sdk] if sdk else []
         destinations_args = [["-destination", f"id={s.udid}"] for s in simulators]
         only_testing_args = ["-only-testing", only_testing] if only_testing else []
         max_devices_args = [max_devices_flag, str(max_devices)] if max_devices else []
@@ -197,8 +198,7 @@ class Xcodebuild(RunningCliAppMixin):
         return [
             *self._construct_base_command(custom_flags),
             *only_testing_args,
-            "-sdk",
-            sdk,
+            *sdk_args,
             *coverage_args,
             *reduce(add, destinations_args, []),
             *max_devices_args,
@@ -280,7 +280,7 @@ class Xcodebuild(RunningCliAppMixin):
 
     def test(
         self,
-        sdk: str,
+        sdk: Optional[str],
         simulators: List[Simulator],
         *,
         enable_code_coverage: bool = False,

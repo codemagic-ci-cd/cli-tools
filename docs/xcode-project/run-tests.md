@@ -20,6 +20,7 @@ xcode-project run-tests [-h] [--log-stream STREAM] [--no-color] [--version] [-s]
     [-d TEST_DEVICES]
     [--test-only TEST_ONLY]
     [--sdk TEST_SDK]
+    [--omit-sdk]
     [-o OUTPUT_DIRECTORY]
     [-e OUTPUT_EXTENSION]
     [--test-flags TEST_FLAGS]
@@ -81,6 +82,10 @@ Limit test run to execute only specified tests, and exclude all other tests
 
 
 Name of the SDK that should be used for building the application for testing. Default:&nbsp;`iphonesimulator`
+##### `--omit-sdk`
+
+
+Do not pass -sdk argument to `xcodebuild test` command
 ##### `-o, --output-dir=OUTPUT_DIRECTORY`
 
 

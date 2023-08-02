@@ -319,6 +319,13 @@ class TestArgument(cli.Argument):
         description="Name of the SDK that should be used for building the application for testing.",
         argparse_kwargs={"required": False, "default": "iphonesimulator"},
     )
+    OMIT_TEST_SDK = cli.ArgumentProperties(
+        key="omit_test_sdk",
+        flags=("--omit-sdk",),
+        type=bool,
+        description="Do not pass -sdk argument to `xcodebuild test` command",
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
 
 
 class TestResultArgument(cli.Argument):

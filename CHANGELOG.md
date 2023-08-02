@@ -1,3 +1,9 @@
+Version 0.42.0
+-------------
+
+**Features**
+- Add `--omit-sdk` option to action `xcode-project run-tests` to exclude `-sdk` flag from being passed to underlying `xcodebuild test` command. [PR #335](https://github.com/codemagic-ci-cd/cli-tools/pull/335)
+
 Version 0.41.0
 -------------
 
