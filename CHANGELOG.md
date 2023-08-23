@@ -1,3 +1,9 @@
+Version 0.42.1
+-------------
+
+**Bugfixes**
+- Do not require certificate private key to show certificate information using `app-store-connect get-certificate` if certificate is not saved to disk. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+
 Version 0.42.0
 -------------
 

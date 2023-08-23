@@ -19,6 +19,7 @@ from typing import Sequence
 from typing import Set
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -700,15 +701,18 @@ class AppStoreConnect(
         """
 
         private_key = _get_certificate_key(certificate_key, certificate_key_password)
-        if save and private_key is None:
+        if save and not private_key:
             raise AppStoreConnectError("Cannot save resource without certificate private key")
-        else:
-            assert private_key is not None
 
         certificate = self._get_resource(certificate_resource_id, self.api_client.signing_certificates, should_print)
 
         if save:
-            self._save_certificate(certificate, private_key, p12_container_password, p12_container_save_path)
+            self._save_certificate(
+                certificate,
+                cast(PrivateKey, private_key),
+                p12_container_password,
+                p12_container_save_path,
+            )
         return certificate
 
     @cli.action(
@@ -781,8 +785,11 @@ class AppStoreConnect(
                 self.logger.info(f"- {certificate.get_display_info()}")
 
         if save:
-            assert private_key is not None  # Make mypy happy
-            self._save_certificates(certificates, private_key, p12_container_password)
+            self._save_certificates(
+                certificates,
+                cast(PrivateKey, private_key),
+                p12_container_password,
+            )
 
         return certificates
 
