@@ -785,8 +785,11 @@ class AppStoreConnect(
                 self.logger.info(f"- {certificate.get_display_info()}")
 
         if save:
-            assert private_key is not None  # Make mypy happy
-            self._save_certificates(certificates, private_key, p12_container_password)
+            self._save_certificates(
+                certificates,
+                cast(PrivateKey, private_key),
+                p12_container_password,
+            )
 
         return certificates
 
