@@ -37,7 +37,7 @@ class Ipa(AbstractPackage):
                 with zf.open(found_file_name, "r") as fd:
                     return fd.read()
             except zipfile.BadZipFile as e:
-                extract_command: Tuple[Union[str | pathlib.Path], ...]
+                extract_command: Tuple[Union[str, pathlib.Path], ...]
 
                 if str(e) == "Bad magic number for file header":
                     # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
