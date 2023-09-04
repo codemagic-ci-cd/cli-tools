@@ -172,7 +172,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_app_store_connect_submit_options(
         cls,
-        ipa: Ipa,
+        application_package: Union[Ipa, MacOsPackage],
         submit_to_testflight: Optional[bool],
         submit_to_app_store: Optional[bool],
         # Submit to TestFlight arguments
@@ -206,10 +206,13 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         add_beta_test_info_options = None
 
         if not platform:
-            if ipa.is_for_tvos():
-                platform = Platform.TV_OS
+            if isinstance(application_package, MacOsPackage):
+                platform = Platform.MAC_OS
             else:
-                platform = Platform.IOS
+                if application_package.is_for_tvos():
+                    platform = Platform.TV_OS
+                else:
+                    platform = Platform.IOS
 
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
