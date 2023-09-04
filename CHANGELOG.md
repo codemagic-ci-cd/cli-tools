@@ -1,8 +1,14 @@
+Version 0.42.2
+-------------
+
+**Bugfixes**
+- Fix iOS application package abstraction layer in `codemagic.models.application_package.Ipa` to support large archives (exceeding 4GB in size). [PR #342](https://github.com/codemagic-ci-cd/cli-tools/pull/342)
+
 Version 0.42.1
 -------------
 
 **Bugfixes**
-- Do not require certificate private key to show certificate information using `app-store-connect get-certificate` if certificate is not saved to disk. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Do not require certificate private key to show certificate information using `app-store-connect get-certificate` if certificate is not saved to disk. [PR #337](https://github.com/codemagic-ci-cd/cli-tools/pull/337)
 
 Version 0.42.0
 -------------
