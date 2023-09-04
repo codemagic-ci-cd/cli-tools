@@ -9,6 +9,7 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from codemagic.models.certificate import Certificate
@@ -36,7 +37,7 @@ class Ipa(AbstractPackage):
                 with zf.open(found_file_name, "r") as fd:
                     return fd.read()
             except zipfile.BadZipFile as e:
-                extract_command: tuple[Union[str | pathlib.Path], ...]
+                extract_command: Tuple[Union[str | pathlib.Path], ...]
 
                 if str(e) == "Bad magic number for file header":
                     # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
