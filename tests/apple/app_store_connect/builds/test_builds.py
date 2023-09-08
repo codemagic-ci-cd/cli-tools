@@ -4,6 +4,9 @@ import pytest
 from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildBetaDetail
+from codemagic.apple.resources import ExternalBetaState
+from codemagic.apple.resources import InternalBetaState
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 
@@ -35,6 +38,15 @@ class BuildsTest(ResourceManagerTestsBase):
         build_id = ResourceId("3bf3e846-3d31-4e1e-ab0f-0834fb9f9a26")
         app_store_version = self.api_client.builds.read_app_store_version(build_id)
         assert app_store_version is None
+
+    def test_read_beta_detail(self):
+        build_id = ResourceId("3bf3e846-3d31-4e1e-ab0f-0834fb9f9a26")
+        build_beta_detail = self.api_client.builds.read_beta_detail(build_id)
+        assert isinstance(build_beta_detail, BuildBetaDetail)
+        assert build_beta_detail.attributes.internalBuildState == InternalBetaState.EXPIRED
+        assert build_beta_detail.attributes.externalBuildState == ExternalBetaState.EXPIRED
+        assert build_beta_detail.attributes.autoNotifyEnabled is True
+        assert build_id in build_beta_detail.relationships.build.links.related
 
 
 @pytest.mark.parametrize(
