@@ -1,3 +1,25 @@
+Version 0.43.0
+-------------
+
+Additions and changes from [pull request #340](https://github.com/codemagic-ci-cd/cli-tools/pull/340). Resolves [issue #339](https://github.com/codemagic-ci-cd/cli-tools/issues/339).
+
+**Features**
+- Support submitting macOS packages to TestFlight using `app-store-connect publish --testflight`.
+- Add new action `app-store-connect builds betat-details` to show beta detail information for specific build.
+- Waiting for App Store Connect build processing also waits for beta builds details to be processed before returning.
+
+**Development**
+- Add new client method `read_beta_detail` to builds resource manager in `src/codemagic/apple/app_store_connect/builds/builds.py`.
+- Add new definitions for App Store Connect models:
+  - `BuildBetaDetail` for https://developer.apple.com/documentation/appstoreconnectapi/buildbetadetail,
+  - `ExternalBetaState` enumeration for https://developer.apple.com/documentation/appstoreconnectapi/externalbetastate,
+  - `InternalBetaState` for https://developer.apple.com/documentation/appstoreconnectapi/internalbetastate.
+
+**Documentation**
+- Add documentation for action `app-store-connect builds betat-details`.
+
+Special thanks for contribution to [@nilsreichardt](https://github.com/nilsreichardt).
+
 Version 0.42.2
 -------------
 
