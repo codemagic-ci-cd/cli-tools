@@ -206,13 +206,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         add_beta_test_info_options = None
 
         if not platform:
-            if isinstance(application_package, MacOsPackage):
-                platform = Platform.MAC_OS
-            else:
-                if application_package.is_for_tvos():
-                    platform = Platform.TV_OS
-                else:
-                    platform = Platform.IOS
+            platform = cls._get_application_package_platform(application_package)
 
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
@@ -264,6 +258,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             add_beta_test_info_options,
             add_build_to_beta_group_options,
         )
+    
+    @staticmethod
+    def _get_application_package_platform(application_package: Union[Ipa, MacOsPackage]) -> Platform:
+        if isinstance(application_package, MacOsPackage):
+            return Platform.MAC_OS
+        if application_package.is_for_tvos():
+            return Platform.TV_OS
+        return Platform.IOS
 
     @cli.action(
         "publish",
