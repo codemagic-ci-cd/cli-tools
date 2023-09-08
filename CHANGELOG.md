@@ -5,7 +5,7 @@ Additions and changes from [pull request #340](https://github.com/codemagic-ci-c
 
 **Features**
 - Support submitting macOS packages to TestFlight using `app-store-connect publish --testflight`.
-- Add new action `app-store-connect builds betat-details` to show beta detail information for specific build.
+- Add new action `app-store-connect builds beta-details` to show beta detail information for specific build.
 - Waiting for App Store Connect build processing also waits for beta builds details to be processed before returning.
 
 **Development**
