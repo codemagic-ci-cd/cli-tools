@@ -1,5 +1,6 @@
 import pathlib
 import plistlib
+import shutil
 import subprocess
 import zipfile
 from functools import lru_cache
@@ -8,6 +9,7 @@ from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from codemagic.models.certificate import Certificate
@@ -21,8 +23,8 @@ class Ipa(AbstractPackage):
     def _validate_package(self):
         try:
             return bool(self.info_plist)
-        except zipfile.BadZipFile as bad_zip_file:
-            raise IOError(f"Not a valid iOS application package at {self.path}") from bad_zip_file
+        except (subprocess.CalledProcessError, zipfile.BadZipFile) as error:
+            raise IOError(f"Not a valid iOS application package at {self.path}") from error
 
     def _extract_file(self, filename_filter: Callable[[str], bool]) -> bytes:
         with zipfile.ZipFile(self.path) as zf:
@@ -35,14 +37,26 @@ class Ipa(AbstractPackage):
                 with zf.open(found_file_name, "r") as fd:
                     return fd.read()
             except zipfile.BadZipFile as e:
+                extract_command: Tuple[Union[str, pathlib.Path], ...]
+
                 if str(e) == "Bad magic number for file header":
                     # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
                     # Unfortunately Python's built-in zip library is not capable to handle those
-                    pass
+                    extract_command = ("unzip", "-p", self.path, found_file_name)
+                elif str(e) == "Truncated file header":
+                    # If the archive size exceeds 4GB then macOS created "corrupt" zip files as it doesn't
+                    # use zip64 specification. 7-Zip is capable of extracting such archives. Let's try that.
+                    if not shutil.which("7z"):
+                        error_message = (
+                            f"Failed to inspect iOS application package at {self.path}. "
+                            f"Please ensure 7-Zip is installed and 7z executable in available in $PATH."
+                        )
+                        raise IOError(error_message) from e
+                    extract_command = ("7z", "x", "-so", self.path, found_file_name)
                 else:
                     raise
 
-            completed_process = subprocess.run(["unzip", "-p", self.path, found_file_name], capture_output=True)
+            completed_process = subprocess.run(extract_command, capture_output=True, check=True)
             return completed_process.stdout
 
     def _get_app_file_contents(self, filename: str) -> bytes:
