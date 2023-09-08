@@ -258,7 +258,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             add_beta_test_info_options,
             add_build_to_beta_group_options,
         )
-    
+
     @staticmethod
     def _get_application_package_platform(application_package: Union[Ipa, MacOsPackage]) -> Platform:
         if isinstance(application_package, MacOsPackage):
