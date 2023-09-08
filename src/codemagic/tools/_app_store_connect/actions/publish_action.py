@@ -172,7 +172,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_app_store_connect_submit_options(
         cls,
-        ipa: Ipa,
+        application_package: Union[Ipa, MacOsPackage],
         submit_to_testflight: Optional[bool],
         submit_to_app_store: Optional[bool],
         # Submit to TestFlight arguments
@@ -206,10 +206,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         add_beta_test_info_options = None
 
         if not platform:
-            if ipa.is_for_tvos():
-                platform = Platform.TV_OS
-            else:
-                platform = Platform.IOS
+            platform = cls._get_application_package_platform(application_package)
 
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
@@ -262,6 +259,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             add_build_to_beta_group_options,
         )
 
+    @staticmethod
+    def _get_application_package_platform(application_package: Union[Ipa, MacOsPackage]) -> Platform:
+        if isinstance(application_package, MacOsPackage):
+            return Platform.MAC_OS
+        if application_package.is_for_tvos():
+            return Platform.TV_OS
+        return Platform.IOS
+
     @cli.action(
         "publish",
         *ACTION_ARGUMENTS,
@@ -311,18 +316,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     Types.AltoolRetriesCount.resolve_value(altool_retries_count),
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
                 )
-                if isinstance(application_package, Ipa):
-                    self._process_ipa_after_upload(
+                self._process_application_after_upload(
+                    application_package,
+                    *self._get_app_store_connect_submit_options(
                         application_package,
-                        *self._get_app_store_connect_submit_options(
-                            application_package,
-                            submit_to_testflight,
-                            submit_to_app_store,
-                            **app_store_connect_submit_options,
-                        ),
-                    )
-                else:
-                    continue  # Cannot submit macOS packages to TestFlight, skip
+                        submit_to_testflight,
+                        submit_to_app_store,
+                        **app_store_connect_submit_options,
+                    ),
+                )
             except (AppStoreConnectError, IOError, ValueError) as error:
                 failed_packages.append(str(application_package.path))
                 self.logger.error(Colors.RED(error.args[0]))
@@ -364,19 +366,19 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         else:
             self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
 
-    def _process_ipa_after_upload(
+    def _process_application_after_upload(
         self,
-        ipa: Ipa,
+        application_package: Union[Ipa, MacOsPackage],
         testflight_options: Optional[SubmitToTestFlightOptions],
         app_store_options: Optional[SubmitToAppStoreOptions],
         beta_test_info_options: Optional[AddBetaTestInfoOptions],
         beta_group_options: Optional[AddBuildToBetaGroupOptions],
     ) -> None:
         if not any([testflight_options, app_store_options, beta_test_info_options, beta_group_options]):
-            return  # Nothing to do with the ipa...
+            return  # Nothing to do with the application...
 
-        app = self._get_uploaded_build_application(ipa)
-        build = self._get_uploaded_build(app, ipa)
+        app = self._get_uploaded_build_application(application_package)
+        build = self._get_uploaded_build(app, application_package)
 
         if beta_test_info_options:
             self.add_beta_test_info(build.id, **beta_test_info_options.__dict__)
@@ -398,7 +400,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             app_store_submission_kwargs = {
                 **app_store_options.__dict__,
                 "max_build_processing_wait": 0,  # Overwrite waiting since we already waited above.
-                "version_string": app_store_options.version_string or ipa.version,
+                "version_string": app_store_options.version_string or application_package.version,
             }
             self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
 

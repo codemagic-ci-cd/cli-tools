@@ -8,6 +8,7 @@ from .beta_app_review_submission import BetaAppReviewSubmission
 from .beta_build_localization import BetaBuildLocalization
 from .beta_group import BetaGroup
 from .build import Build
+from .build_beta_detail import BuildBetaDetail
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
@@ -24,6 +25,8 @@ from .enums import CertificateType
 from .enums import ContentRightsDeclaration
 from .enums import DeviceClass
 from .enums import DeviceStatus
+from .enums import ExternalBetaState
+from .enums import InternalBetaState
 from .enums import Locale
 from .enums import Platform
 from .enums import ProfileState

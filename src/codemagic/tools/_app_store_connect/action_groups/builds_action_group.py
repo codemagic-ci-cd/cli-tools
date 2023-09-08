@@ -21,7 +21,10 @@ from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import BetaAppLocalization
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildBetaDetail
 from codemagic.apple.resources import BuildProcessingState
+from codemagic.apple.resources import ExternalBetaState
+from codemagic.apple.resources import InternalBetaState
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
@@ -152,6 +155,23 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             Build,
             App,
             self.api_client.builds.read_app,
+            should_print,
+        )
+
+    @cli.action(
+        "beta-details",
+        BuildArgument.BUILD_ID_RESOURCE_ID,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+    )
+    def get_build_beta_detail(self, build_id: ResourceId, should_print: bool = True) -> BuildBetaDetail:
+        """
+        Get Build Beta Details Information of a specific build.
+        """
+        return self._get_related_resource(
+            build_id,
+            Build,
+            BuildBetaDetail,
+            self.api_client.builds.read_beta_detail,
             should_print,
         )
 
@@ -417,15 +437,15 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         return review_submission
 
-    def wait_until_build_is_processed(
+    def _wait_until_build_is_processed(
         self,
         build: Build,
+        processing_started_at: float,
         max_processing_minutes: int,
-        retry_wait_seconds: int = 30,
+        retry_wait_seconds: int,
     ) -> Build:
         is_first_attempt = True
-        start_waiting = time.time()
-        while time.time() - start_waiting < max_processing_minutes * 60:
+        while time.time() - processing_started_at < max_processing_minutes * 60:
             if build.attributes.processingState is BuildProcessingState.PROCESSING:
                 if is_first_attempt:
                     self._log_build_processing_message(build.id, max_processing_minutes)
@@ -456,6 +476,84 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             ),
         )
 
+    def _wait_until_build_beta_detail_is_processed(
+        self,
+        build: Build,
+        processing_started_at: float,
+        max_processing_minutes: int,
+        retry_wait_seconds: int,
+    ) -> BuildBetaDetail:
+        is_first_attempt = True
+        build_beta_detail = None
+        while time.time() - processing_started_at < max_processing_minutes * 60:
+            try:
+                build_beta_detail = self.api_client.builds.read_beta_detail(build)
+            except AppStoreConnectApiError as api_error:
+                raise AppStoreConnectError(str(api_error))
+
+            if (
+                build_beta_detail.attributes.externalBuildState is not ExternalBetaState.PROCESSING
+                or build_beta_detail.attributes.internalBuildState is not InternalBetaState.PROCESSING
+            ):
+                if not is_first_attempt:
+                    self.logger.info(
+                        Colors.BLUE("Processing build %s beta detail %s is completed\n"),
+                        build.id,
+                        build_beta_detail.id,
+                    )
+                return build_beta_detail
+
+            if is_first_attempt:
+                self._log_build_beta_detail_processing_message(build.id, max_processing_minutes)
+
+            msg_template = (
+                "Build %s beta details %s are still being processed on App Store Connect side, "
+                "waiting %d seconds and checking again"
+            )
+            self.logger.info(msg_template, build.id, build_beta_detail.id, retry_wait_seconds)
+            time.sleep(retry_wait_seconds)
+            is_first_attempt = False
+
+        build_beta_detail_id = build_beta_detail.id if build_beta_detail else "N/A"
+        raise IOError(
+            (
+                f"Waiting for build {build.id} beta detail {build_beta_detail_id} processing "
+                f"timed out in {max_processing_minutes} minutes. "
+                f"You can configure maximum timeout using {PublishArgument.MAX_BUILD_PROCESSING_WAIT.flag} "
+                f"command line option, or {Types.MaxBuildProcessingWait.environment_variable_key} environment variable."
+            ),
+        )
+
+    def wait_until_build_is_processed(
+        self,
+        build: Build,
+        max_processing_minutes: int,
+        retry_wait_seconds: int = 30,
+    ) -> Build:
+        """
+        Wait until
+        1. build's processing state becomes 'processed', and
+        2. beta details of the build report that both external and internal build
+           state are not processing anymore.
+        Returns updated build instance that is already processed.
+        """
+        processing_started_at = time.time()
+
+        build = self._wait_until_build_is_processed(
+            build,
+            processing_started_at,
+            max_processing_minutes,
+            retry_wait_seconds,
+        )
+        self._wait_until_build_beta_detail_is_processed(
+            build,
+            processing_started_at,
+            max_processing_minutes,
+            retry_wait_seconds,
+        )
+
+        return build
+
     def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int):
         processing_message_template = (
             "\n"
@@ -464,6 +562,15 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             "to finish for build %s is set to %d minutes."
         )
         self.logger.info(Colors.BLUE(processing_message_template), build_id, max_processing_minutes)
+
+    def _log_build_beta_detail_processing_message(self, build_beta_detail_id: ResourceId, max_processing_minutes: int):
+        processing_message_template = (
+            "\n"
+            "Processing build beta detail information by Apple can take some time after "
+            "the build is already processed. Timeout for waiting the processing "
+            "to finish for build beta detail %s is set to %d minutes."
+        )
+        self.logger.info(Colors.BLUE(processing_message_template), build_beta_detail_id, max_processing_minutes)
 
     def _assert_app_has_testflight_information(self, app: App):
         missing_beta_app_information = self._get_missing_beta_app_information(app)
