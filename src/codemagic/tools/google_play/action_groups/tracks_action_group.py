@@ -1,9 +1,12 @@
+import dataclasses
 import json
 from abc import ABCMeta
 from typing import List
 
 from codemagic import cli
+from codemagic.cli import Colors
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
+from codemagic.google_play.resources import ReleaseStatus
 from codemagic.google_play.resources import Track
 
 from ..arguments import GooglePlayArgument
@@ -68,6 +71,60 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
                 self.echo(json.dumps([t.dict() for t in tracks], indent=4))
             else:
                 for track in tracks:
-                    self.echo(str(track))
+                    self.echo(f"{track}\n")
 
         return tracks
+
+    @cli.action(
+        "promote",
+        TracksArgument.PACKAGE_NAME,
+        TracksArgument.SOURCE_TRACK_NAME,
+        TracksArgument.TARGET_TRACK_NAME,
+        TracksArgument.TRACK_PROMOTED_RELEASE_STATUS,
+        GooglePlayArgument.JSON_OUTPUT,
+        action_group=GooglePlayActionGroups.TRACKS,
+    )
+    def promote_track(
+        self,
+        package_name: str,
+        source_track_name: str,
+        target_track_name: str,
+        promoted_release_status: ReleaseStatus = TracksArgument.TRACK_PROMOTED_RELEASE_STATUS.get_default(),
+        json_output: bool = False,
+        should_print: bool = True,
+    ) -> Track:
+        """
+        Promote releases from source track to target track
+        """
+
+        source_track = self.get_track(package_name, source_track_name, should_print=False)
+        target_track = self.get_track(package_name, target_track_name, should_print=False)
+
+        if not source_track.releases:
+            raise GooglePlayError("Source track does not have any releases")
+
+        release_to_promote = dataclasses.replace(
+            source_track.releases[0],
+            status=promoted_release_status,
+        )
+
+        promoted_version_codes = ", ".join(release_to_promote.versionCodes or ["version code N/A"])
+        self.logger.info(
+            f"Promote release {release_to_promote.name} ({promoted_version_codes}) "
+            f'from track "{source_track.track}" to track "{target_track.track}"',
+        )
+
+        try:
+            updated_track = self.api_client.update_track(
+                package_name,
+                dataclasses.replace(target_track, releases=[release_to_promote]),
+            )
+        except GooglePlayDeveloperAPIClientError as api_error:
+            raise GooglePlayError(str(api_error))
+
+        self.logger.info(Colors.GREEN(f"Successfully Completed release promotion to track {target_track.track}"))
+
+        if should_print:
+            self.echo(updated_track.json() if json_output else str(updated_track))
+
+        return updated_track

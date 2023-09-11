@@ -74,7 +74,9 @@ class Track(Resource):
 
     def __post_init__(self):
         if isinstance(self.releases, list):
-            self.releases = [Release(**release) for release in self.releases]
+            self.releases = [
+                release if isinstance(release, Release) else Release(**release) for release in self.releases
+            ]
 
     def get_max_version_code(self) -> int:
         error_prefix = f'Failed to get version code from "{self.track}" track'

@@ -1,4 +1,5 @@
 from codemagic import cli
+from codemagic.google_play.resources import ReleaseStatus
 
 from .argument_types import CredentialsArgument
 from .argument_types import PackageName
@@ -34,6 +35,30 @@ class TracksArgument(cli.Argument):
         flags=("--track", "-t"),
         description="Release track name. For example `alpha` or `production`",
         argparse_kwargs={"required": True},
+    )
+
+    SOURCE_TRACK_NAME = cli.ArgumentProperties(
+        key="source_track_name",
+        flags=("--source-track",),
+        description="Name of the track from where releases are promoted from. For example `internal`",
+        argparse_kwargs={"required": True},
+    )
+    TARGET_TRACK_NAME = cli.ArgumentProperties(
+        key="target_track_name",
+        flags=("--target-track",),
+        description="Name of the track to where releases are promoted to. For example `alpha`",
+        argparse_kwargs={"required": True},
+    )
+    TRACK_PROMOTED_RELEASE_STATUS = cli.ArgumentProperties(
+        key="promoted_release_status",
+        flags=("--promoted-release-status",),
+        type=ReleaseStatus,
+        description="Release status in a promoted track",
+        argparse_kwargs={
+            "required": False,
+            "default": ReleaseStatus.COMPLETED,
+            "choices": list(ReleaseStatus),
+        },
     )
 
 
