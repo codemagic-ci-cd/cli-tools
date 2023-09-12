@@ -6,10 +6,12 @@ import pathlib
 import shlex
 from typing import Any
 from typing import Callable
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
+from typing import TypeAlias
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import R2
@@ -22,12 +24,24 @@ from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Colors
 from codemagic.utilities import log
 
+JsonSerializable: TypeAlias = (
+    Mapping[str, "JsonSerializable"] | Sequence["JsonSerializable"] | str | int | float | bool | None
+)
+
 
 class ResourcePrinter:
     def __init__(self, print_json: bool, print_function: Callable[[str], None]):
         self.print_json = print_json
         self.logger = log.get_logger(self.__class__)
         self.print = print_function
+
+    def print_value(self, value: JsonSerializable, should_print: bool):
+        if not should_print:
+            return
+        if self.print_json:
+            self.print(json.dumps(value, indent=4))
+        else:
+            self.print(str(value))
 
     def print_resources(self, resources: Sequence[R], should_print: bool):
         if should_print is not True:
