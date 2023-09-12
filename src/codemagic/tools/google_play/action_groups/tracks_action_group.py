@@ -2,14 +2,17 @@ import dataclasses
 import json
 from abc import ABCMeta
 from typing import List
+from typing import Optional
 
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google_play import GooglePlayDeveloperAPIClientError
+from codemagic.google_play.resources import Release
 from codemagic.google_play.resources import ReleaseStatus
 from codemagic.google_play.resources import Track
 
 from ..arguments import GooglePlayArgument
+from ..arguments import PromoteArgument
 from ..arguments import TracksArgument
 from ..errors import GooglePlayError
 from ..google_play_base_action import GooglePlayBaseAction
@@ -76,37 +79,54 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         return tracks
 
     @cli.action(
-        "promote",
+        "promote-release",
         TracksArgument.PACKAGE_NAME,
-        TracksArgument.SOURCE_TRACK_NAME,
-        TracksArgument.TARGET_TRACK_NAME,
-        TracksArgument.TRACK_PROMOTED_RELEASE_STATUS,
+        PromoteArgument.SOURCE_TRACK_NAME,
+        PromoteArgument.TARGET_TRACK_NAME,
+        PromoteArgument.PROMOTED_STATUS,
+        PromoteArgument.PROMOTED_USER_FRACTION,
+        PromoteArgument.PROMOTE_VERSION_CODE,
+        PromoteArgument.PROMOTE_STATUS,
         GooglePlayArgument.JSON_OUTPUT,
         action_group=GooglePlayActionGroups.TRACKS,
     )
-    def promote_track(
+    def promote_release(
         self,
         package_name: str,
         source_track_name: str,
         target_track_name: str,
-        promoted_release_status: ReleaseStatus = TracksArgument.TRACK_PROMOTED_RELEASE_STATUS.get_default(),
+        promoted_status: ReleaseStatus = PromoteArgument.PROMOTED_STATUS.get_default(),
+        promoted_user_fraction: Optional[float] = None,
+        promote_version_code: Optional[str] = None,
+        promote_status: Optional[ReleaseStatus] = None,
         json_output: bool = False,
         should_print: bool = True,
     ) -> Track:
         """
-        Promote releases from source track to target track
+        Promote releases from source track to target track. If filters for source
+        track release are not specified, then the latest release will be promoted
         """
-
         source_track = self.get_track(package_name, source_track_name, should_print=False)
         target_track = self.get_track(package_name, target_track_name, should_print=False)
 
-        if not source_track.releases:
-            raise GooglePlayError("Source track does not have any releases")
+        source_releases: List[Release] = source_track.releases or []
+        if promote_version_code:
+            source_releases = [r for r in source_releases if r.versionCodes and promote_version_code in r.versionCodes]
+        if promote_status:
+            source_releases = [r for r in source_releases if r.status is promote_status]
+
+        if not source_releases:
+            error = f'Source track "{source_track_name}" does not have any releases'
+            if promote_version_code or promote_status:
+                error = f"{error} matching specified filters"
+            raise GooglePlayError(error)
 
         release_to_promote = dataclasses.replace(
-            source_track.releases[0],
-            status=promoted_release_status,
+            source_releases[0],
+            status=promoted_status,
         )
+        if promoted_user_fraction:
+            release_to_promote.userFraction = promoted_user_fraction
 
         promoted_version_codes = ", ".join(release_to_promote.versionCodes or ["version code N/A"])
         self.logger.info(
@@ -122,7 +142,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         except GooglePlayDeveloperAPIClientError as api_error:
             raise GooglePlayError(str(api_error))
 
-        self.logger.info(Colors.GREEN(f"Successfully Completed release promotion to track {target_track.track}"))
+        self.logger.info(Colors.GREEN(f"Successfully completed release promotion to track {target_track.track}"))
 
         if should_print:
             self.echo(updated_track.json() if json_output else str(updated_track))
