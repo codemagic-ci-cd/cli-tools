@@ -36,11 +36,11 @@ Name of the track to which releases are promoted to. For example `alpha`
 ##### `--release-status=statusUnspecified | draft | inProgress | halted | completed`
 
 
-Release status in a promoted track. Default:&nbsp;`completed`
+Promoted release status in the target track. Default:&nbsp;`completed`
 ##### `--user-fraction=PROMOTED_USER_FRACTION`
 
 
-Fraction of users who are eligible for a staged release in promoted track. Number from interval `0 < fraction < 1`. Can only be set when status is `inProgress` or `halted`
+Fraction of users who are eligible for a staged promoted release in the target track. Number from interval `0 < fraction < 1`. Can only be set when status is `inProgress` or `halted`
 ##### `--version-code-filter=PROMOTE_VERSION_CODE`
 
 

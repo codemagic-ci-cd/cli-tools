@@ -60,7 +60,7 @@ class PromoteArgument(cli.Argument):
         key="promoted_status",
         flags=("--release-status",),
         type=ReleaseStatus,
-        description="Release status in a promoted track",
+        description="Promoted release status in the target track",
         argparse_kwargs={
             "required": False,
             "default": ReleaseStatus.COMPLETED,
@@ -72,7 +72,7 @@ class PromoteArgument(cli.Argument):
         flags=("--user-fraction",),
         type=cli.CommonArgumentTypes.bounded_number(float, 0, 1, inclusive=False),
         description=(
-            "Fraction of users who are eligible for a staged release in promoted track. "
+            "Fraction of users who are eligible for a staged promoted release in the target track. "
             f"Number from interval `{Colors.WHITE('0 < fraction < 1')}`. Can only be set when status is "
             f"`{Colors.WHITE(str(ReleaseStatus.IN_PROGRESS))}` or `{Colors.WHITE(str(ReleaseStatus.HALTED))}`"
         ),
