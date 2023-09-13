@@ -7,6 +7,7 @@ import operator
 import os
 import re
 import sys
+import textwrap
 from collections import defaultdict
 from functools import reduce
 from pathlib import Path
@@ -212,6 +213,9 @@ class ToolDocumentationGenerator:
         group_str = f"{action_group.name}/" if action_group else ""
         md = MdUtils(file_name=f"{self.tool_prefix}/{group_str}{action.action_name}", title=action.action_name)
         writer = Writer(md)
+        print(action.action_name)
+        if action.action_name == "promote-release":
+            pass
         writer.write_description(action.description)
         writer.write_command_usage(self, action_group=action_group, action=action)
         writer.write_arguments(
@@ -442,6 +446,7 @@ class Writer:
 
 
 def str_plain(string: str) -> str:
+    string = textwrap.dedent(string)
     bold = re.escape(cli.Colors.BOLD.value)
     blue = re.escape(cli.Colors.BRIGHT_BLUE.value)
     reset = re.escape(cli.Colors.RESET.value)
