@@ -171,34 +171,26 @@ class GooglePlayDeveloperAPIClient:
         package_name: str,
         track: Track,
     ) -> Track:
-        with self.use_app_edit(package_name) as _edit:
-            return self._update_track(package_name, track, _edit.id)
-
-    def _update_track(
-        self,
-        package_name: str,
-        track: Track,
-        edit_id: str,
-    ) -> Track:
-        track_update = track.dict()
-        self._logger.debug(
-            f"Update track {track.track!r} for package {package_name} using edit {edit_id} with {track_update!r}",
-        )
-        track_request = self.edits_service.tracks().update(
-            packageName=package_name,
-            editId=edit_id,
-            track=track.track,
-            body=track_update,
-        )
-        commit_request = self.edits_service.commit(
-            packageName=package_name,
-            editId=edit_id,
-        )
-        try:
-            track_response = track_request.execute()
-            commit_response = commit_request.execute()
-        except (errors.Error, errors.HttpError) as e:
-            raise UpdateResourceError("track", package_name, e) from e
+        with self.use_app_edit(package_name) as edit:
+            track_update = track.dict()
+            self._logger.debug(
+                f"Update track {track.track!r} for package {package_name} using edit {edit.id} with {track_update!r}",
+            )
+            track_request = self.edits_service.tracks().update(
+                packageName=package_name,
+                editId=edit.id,
+                track=track.track,
+                body=track_update,
+            )
+            commit_request = self.edits_service.commit(
+                packageName=package_name,
+                editId=edit.id,
+            )
+            try:
+                track_response = track_request.execute()
+                commit_response = commit_request.execute()
+            except (errors.Error, errors.HttpError) as e:
+                raise UpdateResourceError("track", package_name, e) from e
 
         self._logger.debug(f"Track {track.track!r} update response for package {package_name!r}: {track_response}")
         self._logger.debug(f"Track {track.track!r} commit response for package {package_name!r}: {commit_response}")
