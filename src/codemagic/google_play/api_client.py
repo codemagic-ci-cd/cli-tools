@@ -102,6 +102,7 @@ class GooglePlayDeveloperAPIClient:
             self._logger.debug(f"Deleted edit {edit_id} for package {package_name!r}")
         except (errors.Error, errors.HttpError) as e:
             if isinstance(e, errors.HttpError) and "edit has already been successfully committed" in e.error_details:
+                # This can be ignored as the commit has already been exhausted
                 return
             raise EditError("delete", package_name, e) from e
 
