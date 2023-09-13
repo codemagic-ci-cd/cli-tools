@@ -30,13 +30,13 @@ Name of the track from where releases are promoted from. For example `internal`
 ##### `--target-track=TARGET_TRACK_NAME`
 
 
-Name of the track to which releases are promoted to. For example `alpha`
+Name of the track to which releases are promoted. For example `alpha`
 ### Optional arguments for action `promote-release`
 
 ##### `--release-status=statusUnspecified | draft | inProgress | halted | completed`
 
 
-Promoted release status in the target track. Default:&nbsp;`completed`
+Status of the promoted release in the target track. Default:&nbsp;`completed`
 ##### `--user-fraction=PROMOTED_USER_FRACTION`
 
 
@@ -44,11 +44,11 @@ Fraction of users who are eligible for a staged promoted release in the target t
 ##### `--version-code-filter=PROMOTE_VERSION_CODE`
 
 
-Promote only release from source track that contains specified version code
+Promote only a source track release that contains the specified version code
 ##### `--release-status-filter=statusUnspecified | draft | inProgress | halted | completed`
 
 
-Promote only release from source track with specified status
+Promote only a source track release with the specified status
 ##### `--json, -j`
 
 
@@ -58,7 +58,7 @@ Whether to show the request response in JSON format
 ##### `--credentials=GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`
 
 
-Gcloud service account credentials with `JSON` key type to access Google Play Developer API. If not given, the value will be checked from the environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+Gcloud service account credentials with the `JSON` key type to access Google Play Developer API. If not given, the value will be checked from the environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Common options
 
 ##### `-h, --help`

@@ -11,7 +11,7 @@ class GooglePlayArgument(cli.Argument):
         key="credentials",
         flags=("--credentials",),
         type=CredentialsArgument,
-        description="Gcloud service account credentials with `JSON` key type to access Google Play Developer API",
+        description="Gcloud service account credentials with the `JSON` key type to access Google Play Developer API",
         argparse_kwargs={"required": False},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
@@ -53,14 +53,14 @@ class PromoteArgument(cli.Argument):
     TARGET_TRACK_NAME = cli.ArgumentProperties(
         key="target_track_name",
         flags=("--target-track",),
-        description=f"Name of the track to which releases are promoted to. For example `{Colors.WHITE('alpha')}`",
+        description=f"Name of the track to which releases are promoted. For example `{Colors.WHITE('alpha')}`",
         argparse_kwargs={"required": True},
     )
     PROMOTED_STATUS = cli.ArgumentProperties(
         key="promoted_status",
         flags=("--release-status",),
         type=ReleaseStatus,
-        description="Promoted release status in the target track",
+        description="Status of the promoted release in the target track",
         argparse_kwargs={
             "required": False,
             "default": ReleaseStatus.COMPLETED,
@@ -81,14 +81,14 @@ class PromoteArgument(cli.Argument):
     PROMOTE_VERSION_CODE = cli.ArgumentProperties(
         key="promote_version_code",
         flags=("--version-code-filter",),
-        description="Promote only release from source track that contains specified version code",
+        description="Promote only a source track release that contains the specified version code",
         argparse_kwargs={"required": False},
     )
     PROMOTE_STATUS = cli.ArgumentProperties(
         key="promote_status",
         flags=("--release-status-filter",),
         type=ReleaseStatus,
-        description="Promote only release from source track with specified status",
+        description="Promote only a source track release with the specified status",
         argparse_kwargs={
             "required": False,
             "choices": list(ReleaseStatus),
