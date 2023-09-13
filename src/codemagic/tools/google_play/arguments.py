@@ -70,7 +70,7 @@ class PromoteArgument(cli.Argument):
     PROMOTED_USER_FRACTION = cli.ArgumentProperties(
         key="promoted_user_fraction",
         flags=("--user-fraction",),
-        type=cli.CommonArgumentTypes.bounded_float(0, 1, inclusive=False),
+        type=cli.CommonArgumentTypes.bounded_number(float, 0, 1, inclusive=False),
         description=(
             "Fraction of users who are eligible for a staged release in promoted track. "
             f"Number from interval `{Colors.WHITE('0 < fraction < 1')}`. Can only be set when status is "

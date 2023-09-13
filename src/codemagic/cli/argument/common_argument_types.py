@@ -4,6 +4,10 @@ import pathlib
 from datetime import datetime
 from typing import Callable
 from typing import Dict
+from typing import Type
+from typing import TypeVar
+
+N = TypeVar("N", int, float)
 
 
 class CommonArgumentTypes:
@@ -77,20 +81,26 @@ class CommonArgumentTypes:
         raise argparse.ArgumentTypeError(f'"{iso_8601_timestamp}" is not a valid ISO 8601 timestamp')
 
     @staticmethod
-    def bounded_float(lower_limit: float, upper_limit: float, inclusive: bool) -> Callable[[str], float]:
-        def _bounded_float(number: str):
+    def bounded_number(
+        number_type: Type[N],
+        lower_limit: N,
+        upper_limit: N,
+        inclusive: bool,
+    ) -> Callable[[str], N]:
+        def _resolve_number(number_as_string: str):
             try:
-                f = float(number)
+                n = number_type(number_as_string)
             except ValueError:
-                raise argparse.ArgumentTypeError(f"Value {number} is not a valid floating point number")
+                type_description = "floating point number" if number_type is float else "integer"
+                raise argparse.ArgumentTypeError(f"Value {number_as_string} is not a valid {type_description}")
 
-            if inclusive and lower_limit > f or f > upper_limit:
-                error = f"Value {f} is out of allowed bounds, {lower_limit} <= value <= {upper_limit}"
+            if inclusive and (lower_limit > n or n > upper_limit):
+                error = f"Value {n} is out of allowed bounds, {lower_limit} <= value <= {upper_limit}"
                 raise argparse.ArgumentTypeError(error)
-            if not inclusive and lower_limit >= f or f >= upper_limit:
-                error = f"Value {f} is out of allowed bounds, {lower_limit} < value < {upper_limit}"
+            if not inclusive and (lower_limit >= n or n >= upper_limit):
+                error = f"Value {n} is out of allowed bounds, {lower_limit} < value < {upper_limit}"
                 raise argparse.ArgumentTypeError(error)
 
-            return f
+            return n
 
-        return _bounded_float
+        return _resolve_number
