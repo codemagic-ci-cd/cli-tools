@@ -45,9 +45,7 @@ class PromoteArgument(cli.Argument):
     SOURCE_TRACK_NAME = cli.ArgumentProperties(
         key="source_track_name",
         flags=("--source-track",),
-        description=(
-            f"Name of the track from where releases are promoted from. For example `{Colors.WHITE('internal')}`"
-        ),
+        description=(f"Name of the track from where releases are promoted. For example `{Colors.WHITE('internal')}`"),
         argparse_kwargs={"required": True},
     )
     TARGET_TRACK_NAME = cli.ArgumentProperties(

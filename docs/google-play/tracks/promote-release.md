@@ -26,7 +26,7 @@ Package name of the app in Google Play Console. For example `com.example.app`
 ##### `--source-track=SOURCE_TRACK_NAME`
 
 
-Name of the track from where releases are promoted from. For example `internal`
+Name of the track from where releases are promoted. For example `internal`
 ##### `--target-track=TARGET_TRACK_NAME`
 
 
