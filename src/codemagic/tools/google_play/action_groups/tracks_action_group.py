@@ -124,9 +124,8 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         release_to_promote = dataclasses.replace(
             source_releases[0],
             status=promoted_status,
+            userFraction=promoted_user_fraction,
         )
-        if promoted_user_fraction:
-            release_to_promote.userFraction = promoted_user_fraction
 
         promoted_version_codes = ", ".join(release_to_promote.versionCodes or ["version code N/A"])
         self.logger.info(
