@@ -52,27 +52,21 @@ def test_within_bounds(number_as_string, inclusive_comparison, expected_number):
     assert resolved_value == expected_number
 
 
-@pytest.mark.parametrize(
-    ("out_of_bounds_number_string", "inclusive_comparison"),
-    (
-        ("-1", True),
-        ("0", True),
-        ("11", True),
-        ("20", True),
-        ("-1", False),
-        ("1", False),
-        ("10", False),
-        ("11", False),
-        ("20", False),
-    ),
-)
-def test_out_of_bounds(out_of_bounds_number_string, inclusive_comparison):
-    constructor = CommonArgumentTypes.bounded_number(int, 1, 10, inclusive=inclusive_comparison)
+@pytest.mark.parametrize("out_of_bounds_number_string", ("-1", "0", "11", "20"))
+def test_out_of_bounds_inclusive(out_of_bounds_number_string):
+    constructor = CommonArgumentTypes.bounded_number(int, 1, 10, inclusive=True)
     with pytest.raises(ArgumentTypeError) as error_info:
         constructor(out_of_bounds_number_string)
 
-    comparison_op = "<=" if inclusive_comparison else "<"
-    expected_error_message = (
-        f"Value {out_of_bounds_number_string} is out of allowed bounds, 1 {comparison_op} value {comparison_op} 10"
-    )
+    expected_error_message = f"Value {out_of_bounds_number_string} is out of allowed bounds, 1 <= value <= 10"
+    assert str(error_info.value) == expected_error_message
+
+
+@pytest.mark.parametrize("out_of_bounds_number_string", ("-1", "1", "10", "11", "20"))
+def test_out_of_bounds_exclusive(out_of_bounds_number_string):
+    constructor = CommonArgumentTypes.bounded_number(int, 1, 10, inclusive=False)
+    with pytest.raises(ArgumentTypeError) as error_info:
+        constructor(out_of_bounds_number_string)
+
+    expected_error_message = f"Value {out_of_bounds_number_string} is out of allowed bounds, 1 < value < 10"
     assert str(error_info.value) == expected_error_message
