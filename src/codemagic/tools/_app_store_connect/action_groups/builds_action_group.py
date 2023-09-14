@@ -463,8 +463,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
                 raise IOError(f"Uploaded build {build.id} is {build.attributes.processingState.value.lower()}")
             else:
-                if not is_first_attempt:
-                    self.logger.info(Colors.BLUE("Processing build %s is completed\n"), build.id)
+                self.logger.info(Colors.GREEN("Processing build %s is completed"), build.id)
                 return build
             is_first_attempt = False
 
@@ -495,12 +494,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 build_beta_detail.attributes.externalBuildState is not ExternalBetaState.PROCESSING
                 or build_beta_detail.attributes.internalBuildState is not InternalBetaState.PROCESSING
             ):
-                if not is_first_attempt:
-                    self.logger.info(
-                        Colors.BLUE("Processing build %s beta detail %s is completed\n"),
-                        build.id,
-                        build_beta_detail.id,
-                    )
+                self.logger.info(
+                    Colors.GREEN("Processing build %s beta detail %s is completed"),
+                    build.id,
+                    build_beta_detail.id,
+                )
                 return build_beta_detail
 
             if is_first_attempt:
@@ -537,6 +535,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
            state are not processing anymore.
         Returns updated build instance that is already processed.
         """
+        self.logger.info(Colors.BLUE(f"\nWait until build {build.id} and its beta details are processed"))
+
         processing_started_at = time.time()
 
         build = self._wait_until_build_is_processed(
@@ -545,18 +545,21 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             max_processing_minutes,
             retry_wait_seconds,
         )
-        self._wait_until_build_beta_detail_is_processed(
+        build_beta_detail = self._wait_until_build_beta_detail_is_processed(
             build,
             processing_started_at,
             max_processing_minutes,
             retry_wait_seconds,
         )
 
+        self.logger.info(Colors.GREEN("\nProcessed build and beta details are"))
+        self.printer.print_resource(build, True)
+        self.printer.print_resource(build_beta_detail, True)
+
         return build
 
     def _log_build_processing_message(self, build_id: ResourceId, max_processing_minutes: int):
         processing_message_template = (
-            "\n"
             "Processing of builds by Apple can take a while, "
             "the timeout for waiting the processing "
             "to finish for build %s is set to %d minutes."
@@ -565,7 +568,6 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
     def _log_build_beta_detail_processing_message(self, build_beta_detail_id: ResourceId, max_processing_minutes: int):
         processing_message_template = (
-            "\n"
             "Processing build beta detail information by Apple can take some time after "
             "the build is already processed. Timeout for waiting the processing "
             "to finish for build beta detail %s is set to %d minutes."
