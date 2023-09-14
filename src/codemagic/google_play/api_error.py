@@ -60,3 +60,11 @@ class ListResourcesError(_RequestError):
             f'Failed to list {resource_description} from Google Play for package "{self.package_name}". '
             f"{self._get_reason()}"
         )
+
+
+class UpdateResourceError(_RequestError):
+    def _get_message(self, resource_description: str) -> str:
+        return (
+            f'Failed to update {resource_description} in Google Play for package "{self.package_name}". '
+            f"{self._get_reason()}"
+        )

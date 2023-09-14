@@ -6,7 +6,6 @@ from codemagic.google_play.resources import Track
 def test_track_string(api_track):
     track = Track(**api_track)
     expected_output = (
-        "\n"
         "Track: internal\n"
         "Releases: [\n"
         "    Status: draft\n"
