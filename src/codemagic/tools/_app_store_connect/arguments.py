@@ -1139,6 +1139,16 @@ class BuildArgument(cli.Argument):
     )
 
 
+class BuildNumberArgument(cli.Argument):
+    INCLUDE_VERSION = cli.ArgumentProperties(
+        key="include_version",
+        flags=("--include-version",),
+        type=bool,
+        description="Explicitly show version string in command output in addition to build number",
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
+
+
 class BundleIdArgument(cli.Argument):
     BUNDLE_ID_IDENTIFIER = cli.ArgumentProperties(
         key="bundle_id_identifier",

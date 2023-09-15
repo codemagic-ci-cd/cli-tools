@@ -30,6 +30,7 @@ from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildProcessingState
+from codemagic.apple.resources import BuildVersionInfo
 from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
@@ -69,6 +70,7 @@ from ._app_store_connect.arguments import AppStoreVersionLocalizationInfo  # noq
 from ._app_store_connect.arguments import ArgumentGroups
 from ._app_store_connect.arguments import BetaBuildInfo  # noqa: F401
 from ._app_store_connect.arguments import BuildArgument
+from ._app_store_connect.arguments import BuildNumberArgument
 from ._app_store_connect.arguments import BundleIdArgument
 from ._app_store_connect.arguments import CertificateArgument
 from ._app_store_connect.arguments import CommonArgument
@@ -286,11 +288,13 @@ class AppStoreConnect(
         "get-latest-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         CommonArgument.PLATFORM,
+        BuildNumberArgument.INCLUDE_VERSION,
     )
     def get_latest_build_number(
         self,
         application_id: ResourceId,
         platform: Optional[Platform] = None,
+        include_version: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the highest build number of the highest version used for the given app.
@@ -311,8 +315,8 @@ class AppStoreConnect(
             self.logger.info(Colors.YELLOW(f"Did not find any builds for app {application_id}"))
             return None
 
-        self._log_latest_build_info(latest_build_info)
-        self.echo(latest_build_info.build.attributes.version)
+        self._log_latest_build_info(latest_build_info, include_version)
+
         return latest_build_info.build.attributes.version
 
     @cli.action(
@@ -320,12 +324,14 @@ class AppStoreConnect(
         AppArgument.APPLICATION_ID_RESOURCE_ID,
         AppStoreVersionArgument.VERSION_STRING,
         CommonArgument.PLATFORM,
+        BuildNumberArgument.INCLUDE_VERSION,
     )
     def get_latest_app_store_build_number(
         self,
         application_id: ResourceId,
         version_string: Optional[str] = None,
         platform: Optional[Platform] = None,
+        include_version: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the latest App Store build number of the highest version for the given application
@@ -339,8 +345,8 @@ class AppStoreConnect(
             self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))
             return None
 
-        self._log_latest_build_info(latest_build_info)
-        self.echo(latest_build_info.build.attributes.version)
+        self._log_latest_build_info(latest_build_info, include_version)
+
         return latest_build_info.build.attributes.version
 
     @cli.action(
@@ -350,6 +356,7 @@ class AppStoreConnect(
         CommonArgument.PLATFORM,
         BuildArgument.EXPIRED,
         BuildArgument.NOT_EXPIRED,
+        BuildNumberArgument.INCLUDE_VERSION,
     )
     def get_latest_testflight_build_number(
         self,
@@ -358,6 +365,7 @@ class AppStoreConnect(
         platform: Optional[Platform] = None,
         expired: Optional[bool] = None,
         not_expired: Optional[bool] = None,
+        include_version: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the latest Testflight build number of the highest version for the given application
@@ -383,17 +391,30 @@ class AppStoreConnect(
             self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))
             return None
 
-        self._log_latest_build_info(latest_build_info)
-        self.echo(latest_build_info.build.attributes.version)
+        self._log_latest_build_info(latest_build_info, include_version)
+
         return latest_build_info.build.attributes.version
 
-    def _log_latest_build_info(self, latest_build_info: _LatestBuildInfo):
+    def _log_latest_build_info(self, latest_build_info: _LatestBuildInfo, include_version: Optional[bool] = False):
         build_number = latest_build_info.build.attributes.version
         if isinstance(latest_build_info.version, AppStoreVersion):
             version_info = f"App Store version {latest_build_info.version.attributes.versionString}"
+            version_number = latest_build_info.version.attributes.versionString
         else:
             version_info = f"TestFlight version {latest_build_info.version.attributes.version}"
-        self.logger.info(f"Found build number {build_number} from {version_info}")
+            version_number = latest_build_info.version.attributes.version
+
+        self.logger.info(Colors.GREEN(f"Found build number {build_number} from {version_info}"))
+        if include_version:
+            build_version_info = BuildVersionInfo(
+                buildId=latest_build_info.build.id,
+                version=version_number,
+                build_number=build_number,
+            )
+            self.logger.info(Colors.BLUE("-- Build Version Info --"))
+            self.printer.print_value(build_version_info, True)
+        else:
+            self.printer.print_value(latest_build_info.build.attributes.version, True)
 
     def _get_max_testflight_version_and_build(
         self,
