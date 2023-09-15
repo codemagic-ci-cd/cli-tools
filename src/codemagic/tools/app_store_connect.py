@@ -384,7 +384,7 @@ class AppStoreConnect(
             return None
 
         self._log_latest_build_info(latest_build_info)
-        self.printer.print_value(latest_build_info.build.attributes.version, True)
+        self.echo(latest_build_info.build.attributes.version)
         return latest_build_info.build.attributes.version
 
     def _log_latest_build_info(self, latest_build_info: _LatestBuildInfo):
