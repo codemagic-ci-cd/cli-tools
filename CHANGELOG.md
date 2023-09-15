@@ -1,3 +1,9 @@
+Version 0.44.1
+-------------
+
+**Features**
+- Log out processed build and its beta detail information before submitting it to App Store or TestFlight. [PR #347](https://github.com/codemagic-ci-cd/cli-tools/pull/347)
+
 Version 0.44.0
 -------------
 
