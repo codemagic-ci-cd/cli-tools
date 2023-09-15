@@ -1,3 +1,17 @@
+Version 0.43.0
+-------------
+
+Additions and changes from [pull request #349](https://github.com/codemagic-ci-cd/cli-tools/pull/349). Resolves [issue #344](https://github.com/codemagic-ci-cd/cli-tools/issues/344).
+
+**Features**
+- TBD ...
+
+**Bugfixes**
+- ...
+
+**Docs**
+- ...
+
 Version 0.44.1
 -------------
 
