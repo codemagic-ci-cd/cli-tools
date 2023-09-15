@@ -97,7 +97,7 @@ Enable verbose logging for commands
 |[`delete-bundle-id`](delete-bundle-id.md)|Delete specified Bundle ID from Apple Developer portal|
 |[`delete-certificate`](delete-certificate.md)|Delete specified Signing Certificate from Apple Developer portal|
 |[`delete-profile`](delete-profile.md)|Delete specified Profile from Apple Developer portal|
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
+|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates for Bundle ID with given identifier|
 |[`get-bundle-id`](get-bundle-id.md)|Get specified Bundle ID from Apple Developer portal|
 |[`get-certificate`](get-certificate.md)|Get specified Signing Certificate from Apple Developer portal|
 |[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get the latest App Store build number of the highest version for the given application|

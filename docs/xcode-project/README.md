@@ -3,7 +3,7 @@ xcode-project
 =============
 
 
-**Utility to work with Xcode projects. Use it to manage iOS application     code signing properties for builds, create IPAs and run tests**
+**Utility to work with Xcode projects. Use it to manage iOS application code signing properties for builds, create IPAs and run tests**
 ### Usage
 ```bash
 xcode-project [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -50,4 +50,4 @@ Enable verbose logging for commands
 |[`run-tests`](run-tests.md)|Run unit or UI tests for given Xcode project or workspace|
 |[`show-build-settings`](show-build-settings.md)|Show build settings for Xcode project|
 |[`test-summary`](test-summary.md)|Show summary of Xcode Test Result|
-|[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|
+|[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects to use given provisioning profiles|
