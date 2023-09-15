@@ -213,9 +213,6 @@ class ToolDocumentationGenerator:
         group_str = f"{action_group.name}/" if action_group else ""
         md = MdUtils(file_name=f"{self.tool_prefix}/{group_str}{action.action_name}", title=action.action_name)
         writer = Writer(md)
-        print(action.action_name)
-        if action.action_name == "promote-release":
-            pass
         writer.write_description(action.description)
         writer.write_command_usage(self, action_group=action_group, action=action)
         writer.write_arguments(
