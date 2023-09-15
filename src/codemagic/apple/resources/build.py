@@ -15,13 +15,13 @@ from .resource import ResourceId
 class BuildVersionInfo(DictSerializable):
     buildId: ResourceId
     version: str
-    build_number: str
+    buildNumber: str
 
     def __str__(self) -> str:
         lines = (
             f"Build Id: {self.buildId}",
             f"Version: {self.version}",
-            f"Build number: {self.build_number}",
+            f"Build number: {self.buildNumber}",
         )
         return "\n".join(lines)
 

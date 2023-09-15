@@ -409,7 +409,7 @@ class AppStoreConnect(
             build_version_info = BuildVersionInfo(
                 buildId=latest_build_info.build.id,
                 version=version_number,
-                build_number=build_number,
+                buildNumber=build_number,
             )
             self.logger.info(Colors.BLUE("-- Build Version Info --"))
             self.printer.print_value(build_version_info, True)
