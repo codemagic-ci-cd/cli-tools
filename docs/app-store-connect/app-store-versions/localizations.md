@@ -3,7 +3,7 @@ localizations
 =============
 
 
-**List All App Store Version Localizations for an App Store Version.         Get a list of localized, version-level information about an app, for all locales.**
+**List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.**
 ### Usage
 ```bash
 app-store-connect app-store-versions localizations [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

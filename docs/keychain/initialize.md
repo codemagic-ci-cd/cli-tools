@@ -3,7 +3,7 @@ initialize
 ==========
 
 
-**Set up the keychain to be used for code signing. Create the keychain         at specified path with specified password with given timeout.         Make it default and unlock it for upcoming use**
+**Set up the keychain to be used for code signing. Create the keychain at specified path with specified password with given timeout. Make it default and unlock it for upcoming use**
 ### Usage
 ```bash
 keychain initialize [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

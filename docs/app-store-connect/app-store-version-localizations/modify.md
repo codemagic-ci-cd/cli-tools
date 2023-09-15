@@ -3,7 +3,7 @@ modify
 ======
 
 
-**Modify an App Store Version Localization.         Edit localized version-level information for a particular language.**
+**Modify an App Store Version Localization. Edit localized version-level information for a particular language.**
 ### Usage
 ```bash
 app-store-connect app-store-version-localizations modify [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
