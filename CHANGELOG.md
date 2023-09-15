@@ -1,3 +1,19 @@
+Version 0.44.0
+-------------
+
+Additions and changes from [pull request #345](https://github.com/codemagic-ci-cd/cli-tools/pull/345).
+
+**Features**
+- Add a new action `google-play tracks promote-release` to promote a release from one Google Play release track to another.
+
+**Development**
+- Define a new common argument type `bounded_number` for CLI usage that can be used to load floats and integers from CLI inputs within specified ranges.
+- Add a new client method `update_track` to update release track in Google Play API client `codemagic.google_play.api_client.GooglePlayDeveloperAPIClient`.
+-
+**Documentation**
+- Update documentation for action group `google-play tracks`.
+- Add documentation for action `google-play tracks promote-release`.
+
 Version 0.43.0
 -------------
 

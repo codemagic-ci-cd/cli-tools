@@ -2,7 +2,12 @@ import argparse
 import json
 import pathlib
 from datetime import datetime
+from typing import Callable
 from typing import Dict
+from typing import Type
+from typing import TypeVar
+
+N = TypeVar("N", int, float)
 
 
 class CommonArgumentTypes:
@@ -74,3 +79,28 @@ class CommonArgumentTypes:
             except ValueError:
                 continue
         raise argparse.ArgumentTypeError(f'"{iso_8601_timestamp}" is not a valid ISO 8601 timestamp')
+
+    @staticmethod
+    def bounded_number(
+        number_type: Type[N],
+        lower_limit: N,
+        upper_limit: N,
+        inclusive: bool,
+    ) -> Callable[[str], N]:
+        def _resolve_number(number_as_string: str):
+            try:
+                n = number_type(number_as_string)
+            except ValueError:
+                type_description = "floating point number" if number_type is float else "integer"
+                raise argparse.ArgumentTypeError(f"Value {number_as_string} is not a valid {type_description}")
+
+            if inclusive and (lower_limit > n or n > upper_limit):
+                error = f"Value {n} is out of allowed bounds, {lower_limit} <= value <= {upper_limit}"
+                raise argparse.ArgumentTypeError(error)
+            if not inclusive and (lower_limit >= n or n >= upper_limit):
+                error = f"Value {n} is out of allowed bounds, {lower_limit} < value < {upper_limit}"
+                raise argparse.ArgumentTypeError(error)
+
+            return n
+
+        return _resolve_number
