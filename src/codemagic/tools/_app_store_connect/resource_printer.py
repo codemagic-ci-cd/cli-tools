@@ -11,7 +11,6 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
-from typing import TypeAlias
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import R2
@@ -24,9 +23,15 @@ from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Colors
 from codemagic.utilities import log
 
-JsonSerializable: TypeAlias = (
-    Mapping[str, "JsonSerializable"] | Sequence["JsonSerializable"] | str | int | float | bool | None
-)
+JsonSerializable = Union[
+    Mapping[str, "JsonSerializable"],
+    Sequence["JsonSerializable"],
+    str,
+    int,
+    float,
+    bool,
+    None,
+]
 
 
 class ResourcePrinter:
