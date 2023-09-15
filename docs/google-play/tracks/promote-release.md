@@ -3,7 +3,7 @@ promote-release
 ===============
 
 
-**Promote releases from source track to target track. If filters for source         track release are not specified, then the latest release will be promoted**
+**Promote releases from source track to target track. If filters for source track release are not specified, then the latest release will be promoted**
 ### Usage
 ```bash
 google-play tracks promote-release [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

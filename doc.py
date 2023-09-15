@@ -7,6 +7,7 @@ import operator
 import os
 import re
 import sys
+import textwrap
 from collections import defaultdict
 from functools import reduce
 from pathlib import Path
@@ -442,6 +443,7 @@ class Writer:
 
 
 def str_plain(string: str) -> str:
+    string = textwrap.dedent(string)
     bold = re.escape(cli.Colors.BOLD.value)
     blue = re.escape(cli.Colors.BRIGHT_BLUE.value)
     reset = re.escape(cli.Colors.RESET.value)

@@ -3,7 +3,7 @@ create
 ======
 
 
-**Create an App Store Version Localization.         Add localized version-level information for a new locale.**
+**Create an App Store Version Localization. Add localized version-level information for a new locale.**
 ### Usage
 ```bash
 app-store-connect app-store-version-localizations create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

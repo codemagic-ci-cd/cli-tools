@@ -3,7 +3,7 @@ set-timeout
 ===========
 
 
-**Set timeout settings for the keychain.         If seconds are not provided, then no-timeout will be set**
+**Set timeout settings for the keychain. If seconds are not provided, then no-timeout will be set**
 ### Usage
 ```bash
 keychain set-timeout [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
