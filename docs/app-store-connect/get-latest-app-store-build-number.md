@@ -19,6 +19,7 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--profiles-dir PROFILES_DIRECTORY]
     [--version-string VERSION_STRING]
     [--platform PLATFORM]
+    [--include-version]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-app-store-build-number`
@@ -37,6 +38,10 @@ Version of the build published to App Store that identifies an iteration of the 
 
 
 Apple operating systems
+##### `--include-version`
+
+
+Explicitly show version string in command output in addition to build number
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

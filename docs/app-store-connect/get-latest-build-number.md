@@ -18,6 +18,7 @@ app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM]
+    [--include-version]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-build-number`
@@ -32,6 +33,10 @@ Application Apple ID. An automatically generated ID assigned to your app
 
 
 Apple operating systems
+##### `--include-version`
+
+
+Explicitly show version string in command output in addition to build number
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

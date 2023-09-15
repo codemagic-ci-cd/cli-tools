@@ -21,6 +21,7 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--platform PLATFORM]
     [--expired]
     [--not-expired]
+    [--include-version]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-testflight-build-number`
@@ -47,6 +48,10 @@ List only expired builds. Mutually exclusive with option `--not-expired`.
 
 
 List only not expired builds. Mutually exclusive with option `--expired`.
+##### `--include-version`
+
+
+Explicitly show version string in command output in addition to build number
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
