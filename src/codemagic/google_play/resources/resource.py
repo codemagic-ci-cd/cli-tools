@@ -96,9 +96,9 @@ class Resource(DictSerializable, JsonSerializable):
             return str(value)
 
     def __str__(self) -> str:
-        return "".join(
+        return "\n".join(
             [
-                f"\n{self._format_attribute_name(k)}: {self._format_attribute_value(v)}"
+                f"{self._format_attribute_name(k)}: {self._format_attribute_value(v)}"
                 for k, v in self.__dict__.items()
                 if v is not None
             ],

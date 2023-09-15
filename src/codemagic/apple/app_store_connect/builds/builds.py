@@ -12,6 +12,7 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildBetaDetail
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import PreReleaseVersion
@@ -117,6 +118,18 @@ class Builds(ResourceManager[Build]):
         if response["data"] is None:
             return None
         return PreReleaseVersion(response["data"])
+
+    def read_beta_detail(self, build: Union[Build, ResourceId]) -> BuildBetaDetail:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_beta_details_information_of_a_build
+        """
+        url = None
+        if isinstance(build, Build) and build.relationships is not None:
+            url = build.relationships.buildBetaDetail.links.related
+        if url is None:
+            url = f"{self.client.API_URL}/builds/{build}/buildBetaDetail"
+        response = self.client.session.get(url).json()
+        return BuildBetaDetail(response["data"])
 
     def read_with_include(
         self,

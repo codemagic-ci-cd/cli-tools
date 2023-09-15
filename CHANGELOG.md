@@ -1,8 +1,52 @@
+Version 0.44.0
+-------------
+
+Additions and changes from [pull request #345](https://github.com/codemagic-ci-cd/cli-tools/pull/345).
+
+**Features**
+- Add a new action `google-play tracks promote-release` to promote a release from one Google Play release track to another.
+
+**Development**
+- Define a new common argument type `bounded_number` for CLI usage that can be used to load floats and integers from CLI inputs within specified ranges.
+- Add a new client method `update_track` to update release track in Google Play API client `codemagic.google_play.api_client.GooglePlayDeveloperAPIClient`.
+-
+**Documentation**
+- Update documentation for action group `google-play tracks`.
+- Add documentation for action `google-play tracks promote-release`.
+
+Version 0.43.0
+-------------
+
+Additions and changes from [pull request #340](https://github.com/codemagic-ci-cd/cli-tools/pull/340). Resolves [issue #339](https://github.com/codemagic-ci-cd/cli-tools/issues/339).
+
+**Features**
+- Support submitting macOS packages to TestFlight using `app-store-connect publish --testflight`.
+- Add new action `app-store-connect builds beta-details` to show beta detail information for specific build.
+- Waiting for App Store Connect build processing also waits for beta builds details to be processed before returning.
+
+**Development**
+- Add new client method `read_beta_detail` to builds resource manager in `src/codemagic/apple/app_store_connect/builds/builds.py`.
+- Add new definitions for App Store Connect models:
+  - `BuildBetaDetail` for https://developer.apple.com/documentation/appstoreconnectapi/buildbetadetail,
+  - `ExternalBetaState` enumeration for https://developer.apple.com/documentation/appstoreconnectapi/externalbetastate,
+  - `InternalBetaState` for https://developer.apple.com/documentation/appstoreconnectapi/internalbetastate.
+
+**Documentation**
+- Add documentation for action `app-store-connect builds betat-details`.
+
+Special thanks for contribution to [@nilsreichardt](https://github.com/nilsreichardt).
+
+Version 0.42.2
+-------------
+
+**Bugfixes**
+- Fix iOS application package abstraction layer in `codemagic.models.application_package.Ipa` to support large archives (exceeding 4GB in size). [PR #342](https://github.com/codemagic-ci-cd/cli-tools/pull/342)
+
 Version 0.42.1
 -------------
 
 **Bugfixes**
-- Do not require certificate private key to show certificate information using `app-store-connect get-certificate` if certificate is not saved to disk. [PR #XYZ](https://github.com/codemagic-ci-cd/cli-tools/pull/XYZ)
+- Do not require certificate private key to show certificate information using `app-store-connect get-certificate` if certificate is not saved to disk. [PR #337](https://github.com/codemagic-ci-cd/cli-tools/pull/337)
 
 Version 0.42.0
 -------------
