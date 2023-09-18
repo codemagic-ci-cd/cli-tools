@@ -6,6 +6,7 @@ import pathlib
 import shlex
 from typing import Any
 from typing import Callable
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -19,8 +20,22 @@ from codemagic.apple.resources import Profile
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
+from codemagic.apple.resources.resource import DictSerializable
 from codemagic.cli import Colors
+from codemagic.models import JsonSerializable
 from codemagic.utilities import log
+
+JsonSerializableT = Union[
+    Mapping[str, "JsonSerializableT"],
+    Sequence["JsonSerializableT"],
+    JsonSerializable,
+    DictSerializable,
+    str,
+    int,
+    float,
+    bool,
+    None,
+]
 
 
 class ResourcePrinter:
@@ -28,6 +43,20 @@ class ResourcePrinter:
         self.print_json = print_json
         self.logger = log.get_logger(self.__class__)
         self.print = print_function
+
+    def print_value(self, value: JsonSerializableT, should_print: bool):
+        if not should_print:
+            return
+        if self.print_json:
+            if isinstance(value, JsonSerializable):
+                serialized = value.json(indent=4)
+            elif isinstance(value, DictSerializable):
+                serialized = json.dumps(value.dict(), indent=4)
+            else:
+                serialized = json.dumps(value, indent=4)
+            self.print(serialized)
+        else:
+            self.print(str(value))
 
     def print_resources(self, resources: Sequence[R], should_print: bool):
         if should_print is not True:
