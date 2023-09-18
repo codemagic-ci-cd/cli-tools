@@ -1,16 +1,19 @@
-Version 0.43.0
+Version 0.45.0
 -------------
 
 Additions and changes from [pull request #349](https://github.com/codemagic-ci-cd/cli-tools/pull/349). Resolves [issue #344](https://github.com/codemagic-ci-cd/cli-tools/issues/344).
 
 **Features**
-- TBD ...
+- Add new option `--include-version` to `app-store-connect` actions `get-latest-build-number`, `get-latest-app-store-build-number` and `get-latest-testflight-build-number`. If specified, the action outputs matched build's version string in addition to build number.
 
 **Bugfixes**
-- ...
+- Output valid `JSON` string with `app-store-connect` actions `get-latest-build-number`, `get-latest-app-store-build-number` and `get-latest-testflight-build-number` if `--json` option is specified.
 
 **Docs**
-- ...
+- Documentation was updated for actions:
+  - `app-store-connect get-latest-build-number`,
+  - `app-store-connect get-latest-app-store-build-number`,
+  - `app-store-connect get-latest-testflight-build-number`.
 
 Version 0.44.1
 -------------
