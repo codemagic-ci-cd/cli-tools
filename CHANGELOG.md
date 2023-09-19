@@ -1,3 +1,9 @@
+Version 0.45.1
+-------------
+
+**Bugfixes**
+- Ensure that build for correct platform is looked up from App Store Connect after initial upload completes using `app-store-connect publish`. [PR #352](https://github.com/codemagic-ci-cd/cli-tools/pull/352)
+
 Version 0.45.0
 -------------
 
