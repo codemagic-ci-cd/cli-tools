@@ -15,6 +15,7 @@ from codemagic.apple.resources import Build
 from codemagic.apple.resources import BuildBetaDetail
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import LinkedResourceData
+from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
@@ -42,11 +43,14 @@ class Builds(ResourceManager[Build]):
         beta_app_review_submission_beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None
         version: Optional[Union[str, int]] = None
         pre_release_version_version: Optional[str] = None
+        pre_release_version_platform: Optional[Platform] = None
 
         @classmethod
         def _get_field_name(cls, field_name) -> str:
             if field_name == "pre_release_version_version":
                 field_name = "pre_release_version.version"
+            elif field_name == "pre_release_version_platform":
+                field_name = "pre_release_version.platform"
             elif field_name == "beta_app_review_submission_beta_review_state":
                 field_name = "beta_app_review_submission.beta_review_state"
             return super()._get_field_name(field_name)
