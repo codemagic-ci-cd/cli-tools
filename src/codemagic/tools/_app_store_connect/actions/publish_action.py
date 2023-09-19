@@ -421,9 +421,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             app=app_id,
             version=application_package.version_code,
             pre_release_version_version=application_package.version,
+            pre_release_version_platform=self._get_application_package_platform(application_package),
         )
         try:
-            found_builds = self.api_client.builds.list(builds_filter)
+            found_builds = self.api_client.builds.list(
+                builds_filter,
+                ordering=self.api_client.builds.Ordering.UPLOADED_DATE,
+                reverse=True,
+            )
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
