@@ -917,9 +917,7 @@ class PublishArgument(cli.Argument):
             "in App Store Connect before proceeding with submission TestFlight or App Store. "
             "Works in conjunction with TestFlight beta review submission, or App Store review submission "
             "and operations that depend on either one of those. If the build does not become available "
-            "within the specified timeframe, further submission will be terminated. "
-            "Waiting will be skipped if the value is set to 0, further actions will fail "
-            "if the build is not found."
+            "within the specified timeframe, further submission will be terminated."
         ),
         argparse_kwargs={
             "required": False,
