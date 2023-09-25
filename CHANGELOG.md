@@ -1,3 +1,12 @@
+Version 0.46.0
+-------------
+
+**Features**
+- Add new option `--max-find-build-wait` to action `app-store-connect publish` to configure maximum waiting time to discover uploaded build from App Store Connect before failing publishing. Defaults to 10 minutes. [PR #355](https://github.com/codemagic-ci-cd/cli-tools/pull/355)
+
+**Docs**
+- Update documentation for `app-store-connect publish`.
+
 Version 0.45.1
 -------------
 
