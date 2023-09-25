@@ -923,7 +923,6 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={
             "required": False,
-            "default": Types.MaxFindBuildWait.default_value,
         },
     )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
@@ -941,7 +940,6 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={
             "required": False,
-            "default": Types.MaxBuildProcessingWait.default_value,
         },
     )
     EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(

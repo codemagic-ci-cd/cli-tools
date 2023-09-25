@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import itertools
 import pathlib
 import time
 from abc import ABCMeta
@@ -428,7 +429,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             pre_release_version_platform=self._get_application_package_platform(application_package),
         )
 
-        not_found_message = "Could not find the build matching the uploaded version"
+        not_found_message = "Could not find the build matching uploaded version"
         default_retry_message = f"{not_found_message}, waiting {retry_wait_seconds} seconds to try again."
         first_retry_message = (
             f"Build has finished uploading but is not available in App Store Connect yet. "
@@ -436,8 +437,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         )
 
         find_started_at = time.time()
-        first_attempt = True
-        while True:
+        for attempt in itertools.count():
             try:
                 found_builds = self.api_client.builds.list(
                     builds_filter,
@@ -449,13 +449,11 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
             if found_builds:
                 return found_builds[0]
-
-            if time.time() - find_started_at < max_find_build_minutes * 60:
-                self.logger.info(first_retry_message if first_attempt else default_retry_message)
+            elif int(time.time() - find_started_at) <= max_find_build_minutes * 60:
+                self.logger.info(first_retry_message if attempt == 0 else default_retry_message)
                 time.sleep(retry_wait_seconds)
-                first_attempt = False
             else:
-                self.logger.info(f"{not_found_message}. Timeout reached, stop trying.")
+                self.logger.info(f"{not_found_message}. Timeout reached, stop trying.\n")
                 break  # No more time left, give up.
 
         error_message = (
