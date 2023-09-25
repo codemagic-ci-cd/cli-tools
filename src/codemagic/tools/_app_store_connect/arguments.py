@@ -147,6 +147,15 @@ class Types:
         argument_type = bool
         environment_variable_key = "APP_STORE_CONNECT_ALTOOL_VERBOSE_LOGGING"
 
+    class MaxFindBuildWait(cli.TypedCliArgument[int]):
+        argument_type = int
+        environment_variable_key = "APP_STORE_CONNECT_MAX_FIND_BUILD_WAIT"
+        default_value = 10
+
+        @classmethod
+        def _is_valid(cls, value: int) -> bool:
+            return value > 0
+
     class MaxBuildProcessingWait(cli.TypedCliArgument[int]):
         argument_type = int
         environment_variable_key = "APP_STORE_CONNECT_MAX_BUILD_PROCESSING_WAIT"
@@ -899,6 +908,24 @@ class PublishArgument(cli.Argument):
             "required": False,
         },
     )
+    MAX_BUILD_FIND_WAIT = cli.ArgumentProperties(
+        key="max_find_build_wait",
+        flags=("--max-find-build-wait",),
+        type=Types.MaxFindBuildWait,
+        description=(
+            "Maximum amount of minutes to wait for the freshly uploaded build to become discoverable "
+            "in App Store Connect before proceeding with submission TestFlight or App Store. "
+            "Works in conjunction with TestFlight beta review submission, or App Store review submission "
+            "and operations that depend on either one of those. If the build does not become available "
+            "within the specified timeframe, further submission will be terminated. "
+            "Waiting will be skipped if the value is set to 0, further actions will fail "
+            "if the build is not found."
+        ),
+        argparse_kwargs={
+            "required": False,
+            "default": Types.MaxFindBuildWait.default_value,
+        },
+    )
     MAX_BUILD_PROCESSING_WAIT = cli.ArgumentProperties(
         key="max_build_processing_wait",
         flags=("--max-build-processing-wait", "-w"),
@@ -914,6 +941,7 @@ class PublishArgument(cli.Argument):
         ),
         argparse_kwargs={
             "required": False,
+            "default": Types.MaxBuildProcessingWait.default_value,
         },
     )
     EXPIRE_BUILD_SUBMITTED_FOR_REVIEW = cli.ArgumentProperties(
