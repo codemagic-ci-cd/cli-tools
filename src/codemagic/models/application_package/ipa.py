@@ -1,5 +1,6 @@
 import pathlib
 import plistlib
+import shlex
 import shutil
 import subprocess
 import zipfile
@@ -37,27 +38,48 @@ class Ipa(AbstractPackage):
                 with zf.open(found_file_name, "r") as fd:
                     return fd.read()
             except zipfile.BadZipFile as e:
-                extract_command: Tuple[Union[str, pathlib.Path], ...]
+                self._logger.error(f"Failed to extract {found_file_name!r} from {self.path!r}: {e}")
+                if str(e) in ("Truncated file header", "Bad magic number for file header"):
+                    # Those errors are known to be salvageable by either 7-zip or unzip
+                    return self._extract_file_fallback(found_file_name)
+                raise
 
-                if str(e) == "Bad magic number for file header":
-                    # Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
-                    # Unfortunately Python's built-in zip library is not capable to handle those
-                    extract_command = ("unzip", "-p", self.path, found_file_name)
-                elif str(e) == "Truncated file header":
-                    # If the archive size exceeds 4GB then macOS created "corrupt" zip files as it doesn't
-                    # use zip64 specification. 7-Zip is capable of extracting such archives. Let's try that.
-                    if not shutil.which("7z"):
-                        error_message = (
-                            f"Failed to inspect iOS application package at {self.path}. "
-                            f"Please ensure 7-Zip is installed and 7z executable in available in $PATH."
-                        )
-                        raise IOError(error_message) from e
-                    extract_command = ("7z", "x", "-so", self.path, found_file_name)
-                else:
-                    raise
+    def _extract_file_fallback(self, file_path_in_archive: Union[str, pathlib.Path]) -> bytes:
+        """
+        Attempt to extract file from ipa
+        1. If the archive size exceeds 4GB then macOS created "corrupt" zip files as it doesn't
+           use zip64 specification.
+        2. Big ipas are compressed using lzfse compression format which adds extra bytes to Info-Zip
+           Unfortunately Python's built-in zip library is not capable to handle those
 
-            completed_process = subprocess.run(extract_command, capture_output=True, check=True)
-            return completed_process.stdout
+        7-Zip is capable of overcoming both cases while extracting such archives.
+        Let's try that as a first fallback if it is present. Otherwise, give it a shot with
+        basic UNIX `unzip`
+        """
+
+        command_args: Tuple[Union[str, pathlib.Path], ...]
+        if shutil.which("7z"):
+            command_args = ("7z", "x", "-so", self.path, file_path_in_archive)
+        else:
+            command_args = ("unzip", "-p", self.path, file_path_in_archive)
+
+        command = shlex.join(map(str, command_args))
+        self._logger.debug(f"Running {command!r}")
+
+        try:
+            completed_process = subprocess.run(
+                command_args,
+                capture_output=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as cpe:
+            self._logger.error(f"Executing {command!r} failed with exit code {cpe.returncode}")
+            self._logger.error(f"STDERR: {cpe.stderr}")
+            self._logger.exception(f"Failed to extract {file_path_in_archive} from {self.path}")
+            raise IOError(f'Failed to extract "{file_path_in_archive}" from "{self.path}"')
+
+        self._logger.debug(f"Running {command!r} completed successfully with exit code {completed_process.returncode}")
+        return completed_process.stdout
 
     def _get_app_file_contents(self, filename: str) -> bytes:
         """
