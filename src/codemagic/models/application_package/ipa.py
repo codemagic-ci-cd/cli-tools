@@ -63,7 +63,7 @@ class Ipa(AbstractPackage):
         else:
             command_args = ("unzip", "-p", self.path, file_path_in_archive)
 
-        command = shlex.join(map(str, command_args))
+        command = " ".join(shlex.quote(str(arg)) for arg in command_args)
         self._logger.debug(f"Running {command!r}")
 
         try:
