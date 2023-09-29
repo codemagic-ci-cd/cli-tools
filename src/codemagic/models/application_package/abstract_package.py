@@ -8,10 +8,12 @@ from typing import Optional
 from typing import Union
 
 from codemagic.mixins import StringConverterMixin
+from codemagic.utilities import log
 
 
 class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def __init__(self, path: Union[pathlib.Path, AnyStr]):
+        self._logger = log.get_file_logger(self.__class__)
         if isinstance(path, (bytes, str)):
             self.path = pathlib.Path(self._str(path))
         else:
