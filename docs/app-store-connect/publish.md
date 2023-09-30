@@ -113,7 +113,7 @@ App Store Version platform
 ##### `--cancel-previous-submissions`
 
 
-Cancels previous App Store submissions for the application in App Store Connect before creating a new submission if the submissions are in a state where it is possible. This option is not available for TestFlight submissions.
+Cancels previous submissions for the application in App Store Connect before creating a new submission if the submissions are in a state where it is possible.
 ##### `--app-store-version-info, -vi=APP_STORE_VERSION_INFO`
 
 
