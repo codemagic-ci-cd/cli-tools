@@ -1,3 +1,10 @@
+Version UNRELEASED
+-------------
+
+**Docs**
+- Update option `--cancel-previous-submissions` documentation for actions `app-store-connect builds submit-to-app-store` and `app-store-connect publish`. [PR #353](https://github.com/codemagic-ci-cd/cli-tools/pull/353)
+
+
 Version 0.45.3
 -------------
 
