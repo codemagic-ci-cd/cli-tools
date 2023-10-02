@@ -145,6 +145,7 @@ class ContentRightsDeclaration(ResourceEnum):
 
 class DeviceClass(ResourceEnum):
     APPLE_TV = "APPLE_TV"
+    APPLE_VISION_PRO = "APPLE_VISION_PRO"
     APPLE_WATCH = "APPLE_WATCH"
     IPAD = "IPAD"
     IPHONE = "IPHONE"
@@ -158,6 +159,7 @@ class DeviceClass(ResourceEnum):
             return self is DeviceClass.MAC
         else:
             return self in (
+                DeviceClass.APPLE_VISION_PRO,
                 DeviceClass.APPLE_WATCH,
                 DeviceClass.IPAD,
                 DeviceClass.IPOD,
