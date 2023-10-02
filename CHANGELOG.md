@@ -1,3 +1,9 @@
+Version 0.45.2
+-------------
+
+**Bugfixes**
+- Fix initializing `codemagic.models.application_package.Ipa` objects for big binaries (exceeding 4GB in size). [PR #356](https://github.com/codemagic-ci-cd/cli-tools/pull/356)
+
 Version 0.45.1
 -------------
 
