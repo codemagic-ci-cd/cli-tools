@@ -1,3 +1,15 @@
+Version 0.45.3
+-------------
+
+**Bugfixes**
+- Support Apple Vision Pro devices in App Store Connect API read device information and list devices endpoints. This is done by declaring `APPLE_VISION_PRO` definition in enumeration `codemagic.apple.resources.enums.DeviceClass`. [PR #357](https://github.com/codemagic-ci-cd/cli-tools/pull/357)
+
+Version 0.45.2
+-------------
+
+**Bugfixes**
+- Fix initializing `codemagic.models.application_package.Ipa` objects for big binaries (exceeding 4GB in size). [PR #356](https://github.com/codemagic-ci-cd/cli-tools/pull/356)
+
 Version 0.45.1
 -------------
 
