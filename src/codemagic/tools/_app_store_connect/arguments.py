@@ -955,8 +955,9 @@ class PublishArgument(cli.Argument):
         flags=("--cancel-previous-submissions",),
         type=bool,
         description=(
-            "Cancels previous submissions for the application in App Store Connect "
-            "before creating a new submission if the submissions are in a state where it is possible."
+            "Cancels previous App Store submissions for the application in App Store Connect "
+            "before creating a new submission if the submissions are in a state where it is possible. "
+            "This option is not available for TestFlight submissions."
         ),
         argparse_kwargs={
             "required": False,
