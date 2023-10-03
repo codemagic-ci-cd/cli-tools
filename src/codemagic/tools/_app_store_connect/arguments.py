@@ -913,9 +913,9 @@ class PublishArgument(cli.Argument):
         flags=("--max-find-build-wait",),
         type=Types.MaxFindBuildWait,
         description=(
-            "Maximum amount of minutes to wait for the freshly uploaded build to become discoverable "
-            "in App Store Connect before proceeding with submission TestFlight or App Store. "
-            "Works in conjunction with TestFlight beta review submission, or App Store review submission "
+            "The maximum amount of minutes to wait for the freshly uploaded build to become discoverable "
+            "in App Store Connect before proceeding with submission to TestFlight or App Store. "
+            "Works in conjunction with TestFlight beta review submission or App Store review submission "
             "and operations that depend on either one of those. If the build does not become available "
             "within the specified timeframe, further submission will be terminated."
         ),

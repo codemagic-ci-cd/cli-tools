@@ -429,7 +429,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             pre_release_version_platform=self._get_application_package_platform(application_package),
         )
 
-        not_found_message = "Could not find the build matching uploaded version"
+        not_found_message = "Could not find the build matching the uploaded version"
         default_retry_message = f"{not_found_message}, waiting {retry_wait_seconds} seconds to try again."
         first_retry_message = (
             f"Build has finished uploading but is not available in App Store Connect yet. "
