@@ -78,7 +78,7 @@ Skip package upload before doing any other TestFlight or App Store related actio
 ##### `--max-find-build-wait=MAX_BUILD_FIND_WAIT`
 
 
-The maximum amount of minutes to wait for the freshly uploaded build to become discoverable in App Store Connect before proceeding with submission to TestFlight or App Store. Works in conjunction with TestFlight beta review submission or App Store review submission and operations that depend on either one of those. If the build does not become available within the specified timeframe, further submission will be terminated. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_FIND_BUILD_WAIT`. [Default: 10]
+The maximum amount of minutes to wait for the freshly uploaded build to become discoverable in App Store Connect. Works in conjunction with TestFlight beta review submission or App Store review submission and operations that depend on either one of those. If the build does not become available within the specified timeframe, further submission will be terminated. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_FIND_BUILD_WAIT`. [Default: 10]
 ##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
 
 
