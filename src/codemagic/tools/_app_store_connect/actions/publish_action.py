@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import itertools
 import pathlib
 import time
 from abc import ABCMeta
@@ -86,6 +87,7 @@ ACTION_ARGUMENTS = (
     PublishArgument.APPLE_ID,
     PublishArgument.APP_SPECIFIC_PASSWORD,
     *ArgumentGroups.PACKAGE_UPLOAD_ARGUMENTS,
+    PublishArgument.MAX_BUILD_FIND_WAIT,
     PublishArgument.MAX_BUILD_PROCESSING_WAIT,
     *PublishArgument.with_custom_argument_group(
         "add localized What's new (what to test) information to uploaded build",
@@ -286,6 +288,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
         altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
         altool_verbose_logging: Optional[bool] = None,
+        max_find_build_wait: Union[Types.MaxFindBuildWait, int] = PublishArgument.MAX_BUILD_FIND_WAIT.get_default(),
         **app_store_connect_submit_options,
     ) -> None:
         """
@@ -318,6 +321,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 )
                 self._process_application_after_upload(
                     application_package,
+                    Types.MaxFindBuildWait.resolve_value(max_find_build_wait),
                     *self._get_app_store_connect_submit_options(
                         application_package,
                         submit_to_testflight,
@@ -369,6 +373,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _process_application_after_upload(
         self,
         application_package: Union[Ipa, MacOsPackage],
+        max_find_build_wait: int,
         testflight_options: Optional[SubmitToTestFlightOptions],
         app_store_options: Optional[SubmitToAppStoreOptions],
         beta_test_info_options: Optional[AddBetaTestInfoOptions],
@@ -378,7 +383,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             return  # Nothing to do with the application...
 
         app = self._get_uploaded_build_application(application_package)
-        build = self._get_uploaded_build(app, application_package)
+        build = self._get_uploaded_build(app, application_package, max_find_build_wait)
 
         if beta_test_info_options:
             self.add_beta_test_info(build.id, **beta_test_info_options.__dict__)
@@ -408,8 +413,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         app_id: ResourceId,
         application_package: Union[Ipa, MacOsPackage],
-        retries: int = 20,
-        retry_wait_seconds: int = 30,
+        max_find_build_minutes: int,
+        retry_wait_seconds: int,
     ) -> Build:
         """
         Find corresponding build for the uploaded ipa or macOS package.
@@ -423,44 +428,43 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             pre_release_version_version=application_package.version,
             pre_release_version_platform=self._get_application_package_platform(application_package),
         )
-        try:
-            found_builds = self.api_client.builds.list(
-                builds_filter,
-                ordering=self.api_client.builds.Ordering.UPLOADED_DATE,
-                reverse=True,
-            )
-        except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
 
-        if found_builds:
-            return found_builds[0]
+        not_found_message = "Could not find the build matching the uploaded version"
+        default_retry_message = f"{not_found_message}, waiting {retry_wait_seconds} seconds to try again."
+        first_retry_message = (
+            f"Build has finished uploading but is not available in App Store Connect yet. "
+            f"{default_retry_message} Timeout in {max_find_build_minutes} minutes."
+        )
 
-        # Matching build was not found.
-        if retries > 0:
-            # There are retries left, wait a bit and try again.
-            self.logger.info(
-                (
-                    "Build has finished uploading but is processing on App Store Connect side. Could not find the "
-                    "build matching the uploaded version yet. Waiting %d seconds to try again, %d attempts remaining."
-                ),
-                retry_wait_seconds,
-                retries,
-            )
-            time.sleep(retry_wait_seconds)
-            return self._find_build(
-                app_id,
-                application_package,
-                retries=retries - 1,
-                retry_wait_seconds=retry_wait_seconds,
-            )
-        else:
-            # There are no more retries left, give up.
-            raise IOError(
-                "The build was successfully uploaded to App Store Connect but processing the corresponding artifact "
-                f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
-                "What to test information or submitting the build to beta review could not be performed at the moment "
-                "but can be completed manually in TestFlight once the build has finished processing.",
-            )
+        find_started_at = time.time()
+        for attempt in itertools.count():
+            try:
+                found_builds = self.api_client.builds.list(
+                    builds_filter,
+                    ordering=self.api_client.builds.Ordering.UPLOADED_DATE,
+                    reverse=True,
+                )
+            except AppStoreConnectApiError as api_error:
+                raise AppStoreConnectError(str(api_error))
+
+            if found_builds:
+                return found_builds[0]
+            elif int(time.time() - find_started_at) <= max_find_build_minutes * 60:
+                self.logger.info(first_retry_message if attempt == 0 else default_retry_message)
+                time.sleep(retry_wait_seconds)
+            else:
+                self.logger.info(f"{not_found_message}. Timeout reached, stop trying.\n")
+                break  # No more time left, give up.
+
+        error_message = (
+            "The build was successfully uploaded to App Store Connect but processing the corresponding artifact "
+            f'"{application_package.path}" by Apple took longer than expected. Further actions like updating the '
+            '"What to test information" or submitting the build to beta review could not be performed at the moment '
+            "but can be completed manually in TestFlight once the build has finished processing.\n"
+            f"You can configure maximum timeout using {PublishArgument.MAX_BUILD_FIND_WAIT.flag} "
+            f"command line option, or {Types.MaxFindBuildWait.environment_variable_key} environment variable."
+        )
+        raise IOError(error_message)
 
     def _get_uploaded_build_application(self, application_package: Union[Ipa, MacOsPackage]) -> App:
         bundle_id = application_package.bundle_identifier
@@ -481,9 +485,16 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         app: App,
         application_package: Union[Ipa, MacOsPackage],
+        max_find_build_minutes: int,
+        retry_wait_seconds: int = 30,
     ) -> Build:
         self.logger.info(Colors.BLUE("\nFind uploaded build"))
-        build = self._find_build(app.id, application_package)
+        build = self._find_build(
+            app.id,
+            application_package,
+            max_find_build_minutes,
+            retry_wait_seconds,
+        )
         self.logger.info(Colors.GREEN("\nUploaded build is"))
         self.printer.print_resource(build, True)
         return build

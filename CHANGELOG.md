@@ -1,9 +1,12 @@
-Version UNRELEASED
+Version 0.46.0
 -------------
 
-**Docs**
-- Update option `--cancel-previous-submissions` documentation for actions `app-store-connect builds submit-to-app-store` and `app-store-connect publish`. [PR #353](https://github.com/codemagic-ci-cd/cli-tools/pull/353)
+**Features**
+- Add new option `--max-find-build-wait` to action `app-store-connect publish` to configure maximum waiting time to discover uploaded build from App Store Connect before failing publishing. Defaults to 10 minutes. [PR #355](https://github.com/codemagic-ci-cd/cli-tools/pull/355)
 
+**Docs**
+- Add option `--max-find-build-wait` documentation for action `app-store-connect publish`. [PR #355](https://github.com/codemagic-ci-cd/cli-tools/pull/355)
+- Update option `--cancel-previous-submissions` documentation for actions `app-store-connect builds submit-to-app-store` and `app-store-connect publish`. [PR #353](https://github.com/codemagic-ci-cd/cli-tools/pull/353)
 
 Version 0.45.3
 -------------

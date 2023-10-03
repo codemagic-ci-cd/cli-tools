@@ -23,6 +23,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--enable-package-validation]
     [--skip-package-validation]
     [--skip-package-upload]
+    [--max-find-build-wait MAX_BUILD_FIND_WAIT]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
@@ -74,6 +75,10 @@ Validate package before uploading it to App Store Connect. Use this switch to en
 
 
 Skip package upload before doing any other TestFlight or App Store related actions. Using this switch will opt out from running `altool --upload-app` as part of publishing action. Use this option in case your application package is already uploaded to App Store. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_SKIP_PACKAGE_UPLOAD`.
+##### `--max-find-build-wait=MAX_BUILD_FIND_WAIT`
+
+
+The maximum amount of minutes to wait for the freshly uploaded build to become discoverable in App Store Connect. Works in conjunction with TestFlight beta review submission or App Store review submission and operations that depend on either one of those. If the build does not become available within the specified timeframe, further submission will be terminated. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_MAX_FIND_BUILD_WAIT`. [Default: 10]
 ##### `--max-build-processing-wait, -w=MAX_BUILD_PROCESSING_WAIT`
 
 
