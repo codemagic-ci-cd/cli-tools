@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
+from codemagic.google_play.resources import Release
+from codemagic.google_play.resources import ReleaseStatus
 from codemagic.google_play.resources import Track
 
 
@@ -29,3 +33,19 @@ def test_max_version_code_error_no_version_codes(api_track):
     with pytest.raises(ValueError) as e:
         track.get_max_version_code()
     assert str(e.value) == 'Failed to get version code from "internal" track: releases with version code do not exist'
+
+
+def test_release_duplication():
+    source_release = Release(
+        **{
+            "name": "1.2.3",
+            "versionCodes": ["123"],
+            "releaseNotes": [{"language": "en-US", "text": "* Release notes\n\nwith some new lines"}],
+            "status": "draft",
+        },
+    )
+    updated_release = dataclasses.replace(
+        source_release,
+        status=ReleaseStatus.COMPLETED,
+    )
+    assert updated_release.status is ReleaseStatus.COMPLETED
