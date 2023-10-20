@@ -1,3 +1,9 @@
+Version 0.46.1
+-------------
+
+**Bugfixes**
+- Fix Google Play release promotion with action `google-play tracks promote-release` for releases that have release notes. [PR #361](https://github.com/codemagic-ci-cd/cli-tools/pull/361)
+
 Version 0.46.0
 -------------
 
