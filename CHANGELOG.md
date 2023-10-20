@@ -4,6 +4,9 @@ Version 0.46.1
 **Bugfixes**
 - Fix Google Play release promotion with action `google-play tracks promote-release` for releases that have release notes. [PR #361](https://github.com/codemagic-ci-cd/cli-tools/pull/361)
 
+**Development**
+- Add GitHub Actions job to run tests with Python 3.12. [PR #362](https://github.com/codemagic-ci-cd/cli-tools/pull/362)
+
 Version 0.46.0
 -------------
 
@@ -66,7 +69,7 @@ Additions and changes from [pull request #345](https://github.com/codemagic-ci-c
 **Development**
 - Define a new common argument type `bounded_number` for CLI usage that can be used to load floats and integers from CLI inputs within specified ranges.
 - Add a new client method `update_track` to update release track in Google Play API client `codemagic.google_play.api_client.GooglePlayDeveloperAPIClient`.
--
+
 **Documentation**
 - Update documentation for action group `google-play tracks`.
 - Add documentation for action `google-play tracks promote-release`.
