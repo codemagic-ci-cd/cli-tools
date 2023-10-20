@@ -54,7 +54,9 @@ class Release(Resource):
 
     def __post_init__(self):
         if isinstance(self.releaseNotes, list):
-            self.releaseNotes = [LocalizedText(**note) for note in self.releaseNotes]
+            self.releaseNotes = [
+                note if isinstance(note, LocalizedText) else LocalizedText(**note) for note in self.releaseNotes
+            ]
         if isinstance(self.status, str):
             self.status = ReleaseStatus(self.status)
         if isinstance(self.countryTargeting, dict):
