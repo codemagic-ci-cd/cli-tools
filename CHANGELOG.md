@@ -1,7 +1,8 @@
 Version 0.46.2
 -------------
 
-# TODO
+**Bugfixes**
+- Fix handing of required arguments to `google-play` if they are defined as empty strings (`--track`, `-tracks`, `--package-name`, `--source-track` and `--target-track`). [PR #363](https://github.com/codemagic-ci-cd/cli-tools/pull/363)
 
 Version 0.46.1
 -------------
