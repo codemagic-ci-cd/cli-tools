@@ -107,9 +107,9 @@ class CliApp(metaclass=abc.ABCMeta):
     def _handle_generic_exception(cls, args: argparse.Namespace) -> int:
         subaction_name = getattr(args, "action_subcommand", None)
         if subaction_name:
-            executed_command = shlex.join([cls.get_executable_name(), args.action, subaction_name])
+            executed_command = f"{cls.get_executable_name()} {args.action} {subaction_name}"
         else:
-            executed_command = shlex.join([cls.get_executable_name(), args.action])
+            executed_command = f"{cls.get_executable_name()} {args.action}"
 
         use_verbose_message = 'To see more details about the error, add "--verbose" command line option.'
         message = (
