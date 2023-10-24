@@ -3,10 +3,6 @@ import json
 from codemagic import cli
 
 
-class PackageName(str):
-    pass
-
-
 class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
     environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
 
