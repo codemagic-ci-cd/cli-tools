@@ -115,7 +115,7 @@ class CliApp(metaclass=abc.ABCMeta):
         message = (
             f'Executing "{executed_command}" failed unexpectedly. '
             f'Detailed logs are available at "{log.get_log_path()}". '
-            f'{use_verbose_message if args.verbose else ""}'
+            f'{"" if args.verbose else use_verbose_message}'
         )
 
         log.get_logger(cls).warning(Colors.RED(message))
