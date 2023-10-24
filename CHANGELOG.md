@@ -1,7 +1,9 @@
 Version 0.46.2
 -------------
 
-# TBD
+**Features**
+- Show full executed command in error output if action execution fails unexpectedly. [PR #364](https://github.com/codemagic-ci-cd/cli-tools/pull/364)
+- Show full exception tracktrace in STDOUT logs if `--verbose` option is set. [PR #364](https://github.com/codemagic-ci-cd/cli-tools/pull/364)
 
 Version 0.46.1
 -------------
