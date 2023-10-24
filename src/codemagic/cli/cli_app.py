@@ -104,23 +104,16 @@ class CliApp(metaclass=abc.ABCMeta):
         return {key: value for key, value in cli_args.__dict__.items() if key not in class_arg_keys}
 
     @classmethod
-    def _handle_generic_exception(cls, args: argparse.Namespace) -> int:
-        subaction_name = getattr(args, "action_subcommand", None)
-        if subaction_name:
-            executed_command = f"{cls.get_executable_name()} {args.action} {subaction_name}"
-        else:
-            executed_command = f"{cls.get_executable_name()} {args.action}"
-
-        use_verbose_message = 'To see more details about the error, add "--verbose" command line option.'
+    def _handle_generic_exception(cls, action_name: str) -> int:
+        logger = log.get_logger(cls)
         message = (
-            f'Executing "{executed_command}" failed unexpectedly. '
+            f"Executing {cls.__name__} action {action_name} failed unexpectedly. "
             f'Detailed logs are available at "{log.get_log_path()}". '
-            f'{use_verbose_message if args.verbose else ""}'
+            f"To see more details about the error, add `--verbose` command line option."
         )
-
-        log.get_logger(cls).warning(Colors.RED(message))
-        logger = log.get_logger(cls, log_to_file=True, log_to_stream=args.verbose)
-        logger.exception("Exception traceback:")
+        logger.warning(Colors.RED(message))
+        file_logger = log.get_file_logger(cls)
+        file_logger.exception("Exception traceback:")
         auditing.save_exception_audit()
         return 9
 
@@ -221,7 +214,7 @@ class CliApp(metaclass=abc.ABCMeta):
             logger.warning(Colors.YELLOW("Terminated"))
             status = 130
         except Exception:
-            status = cls._handle_generic_exception(args)
+            status = cls._handle_generic_exception(args.action)
         finally:
             cls._log_cli_invoke_completed(args.action, started_at, status)
         sys.exit(status)
