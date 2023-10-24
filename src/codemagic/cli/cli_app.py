@@ -111,11 +111,11 @@ class CliApp(metaclass=abc.ABCMeta):
         else:
             executed_command = f"{cls.get_executable_name()} {args.action}"
 
-        use_verbose_message = 'To see more details about the error, add "--verbose" command line option.'
+        verbose_log_suggestion = 'To see more details about the error, add "--verbose" command line option.'
         message = (
             f'Executing "{executed_command}" failed unexpectedly. '
             f'Detailed logs are available at "{log.get_log_path()}". '
-            f'{"" if args.verbose else use_verbose_message}'
+            f'{"" if args.verbose else verbose_log_suggestion}'
         )
 
         log.get_logger(cls).warning(Colors.RED(message))
