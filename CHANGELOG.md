@@ -5,6 +5,9 @@ Version 0.46.2
 - Show full executed command in error output if action execution fails unexpectedly. [PR #364](https://github.com/codemagic-ci-cd/cli-tools/pull/364)
 - Show full exception tracktrace in STDOUT logs if `--verbose` option is set. [PR #364](https://github.com/codemagic-ci-cd/cli-tools/pull/364)
 
+**Bugfixes**
+- Fix handing of required arguments to `google-play` if they are defined as empty strings (`--track`, `-tracks`, `--package-name`, `--source-track` and `--target-track`). [PR #363](https://github.com/codemagic-ci-cd/cli-tools/pull/363)
+
 Version 0.46.1
 -------------
 
