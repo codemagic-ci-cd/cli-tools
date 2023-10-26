@@ -3,7 +3,6 @@ from codemagic.cli import Colors
 from codemagic.google_play.resources import ReleaseStatus
 
 from .argument_types import CredentialsArgument
-from .argument_types import PackageName
 
 
 class GooglePlayArgument(cli.Argument):
@@ -27,7 +26,7 @@ class TracksArgument(cli.Argument):
     PACKAGE_NAME = cli.ArgumentProperties(
         key="package_name",
         flags=("--package-name", "-p"),
-        type=PackageName,
+        type=cli.CommonArgumentTypes.non_empty_string,
         description=(
             f"Package name of the app in Google Play Console. For example `{Colors.WHITE('com.example.app')}`"
         ),
@@ -36,6 +35,7 @@ class TracksArgument(cli.Argument):
     TRACK_NAME = cli.ArgumentProperties(
         key="track_name",
         flags=("--track", "-t"),
+        type=cli.CommonArgumentTypes.non_empty_string,
         description=f"Release track name. For example `{Colors.WHITE('alpha')}` or `{Colors.WHITE('production')}`",
         argparse_kwargs={"required": True},
     )
@@ -45,12 +45,14 @@ class PromoteArgument(cli.Argument):
     SOURCE_TRACK_NAME = cli.ArgumentProperties(
         key="source_track_name",
         flags=("--source-track",),
-        description=(f"Name of the track from where releases are promoted. For example `{Colors.WHITE('internal')}`"),
+        type=cli.CommonArgumentTypes.non_empty_string,
+        description=f"Name of the track from where releases are promoted. For example `{Colors.WHITE('internal')}`",
         argparse_kwargs={"required": True},
     )
     TARGET_TRACK_NAME = cli.ArgumentProperties(
         key="target_track_name",
         flags=("--target-track",),
+        type=cli.CommonArgumentTypes.non_empty_string,
         description=f"Name of the track to which releases are promoted. For example `{Colors.WHITE('alpha')}`",
         argparse_kwargs={"required": True},
     )
@@ -98,6 +100,7 @@ class LatestBuildNumberArgument(cli.Argument):
     TRACKS = cli.ArgumentProperties(
         key="tracks",
         flags=("--tracks", "-t"),
+        type=cli.CommonArgumentTypes.non_empty_string,
         description=(
             "Get the build number from the specified track(s). "
             "If not specified, the highest build number across all tracks is returned"

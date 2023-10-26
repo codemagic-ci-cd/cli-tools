@@ -4,6 +4,7 @@ import pathlib
 from datetime import datetime
 from typing import Callable
 from typing import Dict
+from typing import Optional
 from typing import Type
 from typing import TypeVar
 
@@ -104,3 +105,9 @@ class CommonArgumentTypes:
             return n
 
         return _resolve_number
+
+    @staticmethod
+    def non_empty_string(string: Optional[str]) -> str:
+        if not string:
+            raise argparse.ArgumentTypeError("Empty value is not allowed")
+        return string
