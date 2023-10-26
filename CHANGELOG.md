@@ -7,6 +7,10 @@ Version 0.46.2
 
 **Bugfixes**
 - Fix handing of required arguments to `google-play` if they are defined as empty strings (`--track`, `-tracks`, `--package-name`, `--source-track` and `--target-track`). [PR #363](https://github.com/codemagic-ci-cd/cli-tools/pull/363)
+- Fix looking for errors from Xcode build logs as part of `xcode-project build-ipa` if the logs contain byte sequences that cannot be decoded. [PR #365](https://github.com/codemagic-ci-cd/cli-tools/pull/365)
+
+**Development**
+- Support iterating over binary file descriptors with `codemagic.utilities.backwards_file_reader.iter_backwards`. [PR #365](https://github.com/codemagic-ci-cd/cli-tools/pull/365)
 
 Version 0.46.1
 -------------
