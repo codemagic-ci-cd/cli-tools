@@ -38,6 +38,9 @@ class CodemagicCliTools(cli.CliApp):
         Enable tab autocompletion for Codemagic CLI tools in your shell
         """
 
+        # TODO: Add required shell argument
+        # TODO: Add optional argument for completion script location
+
         executables = [tool_class.get_executable_name() for tool_class in cli.CliApp.__subclasses__()]
 
         completion_scripts_dir = pathlib.Path("~/.codemagic-cli-tools/completions").expanduser()
