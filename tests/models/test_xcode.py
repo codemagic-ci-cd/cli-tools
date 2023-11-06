@@ -1,9 +1,9 @@
 import pathlib
-from distutils.version import LooseVersion
 from unittest import mock
 
 import pytest
 from codemagic.models import Xcode
+from packaging.version import Version
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_get_selected(mock_developer_dir):
 
 def test_version(mock_developer_dir):
     xcode = Xcode(mock_developer_dir)
-    assert xcode.version == LooseVersion("12.0.1")
+    assert xcode.version == Version("12.0.1")
 
 
 def test_build_version(mock_developer_dir):

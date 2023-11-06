@@ -4,9 +4,10 @@ import pathlib
 import plistlib
 import shutil
 import subprocess
-from distutils.version import LooseVersion
 from functools import lru_cache
 from typing import Dict
+
+from packaging.version import Version
 
 from codemagic.mixins import RunningCliAppMixin
 
@@ -27,9 +28,9 @@ class Xcode(RunningCliAppMixin):
             return plistlib.load(fd)
 
     @property
-    def version(self) -> LooseVersion:
+    def version(self) -> Version:
         version_info = self._get_version_info()
-        return LooseVersion(version_info["CFBundleShortVersionString"])
+        return Version(version_info["CFBundleShortVersionString"])
 
     @property
     def build_version(self) -> str:

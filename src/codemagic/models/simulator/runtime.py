@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import enum
 import re
-from distutils.version import LooseVersion
 from functools import total_ordering
 from typing import Optional
+
+from packaging.version import Version
 
 
 @total_ordering
@@ -52,11 +53,11 @@ class Runtime:
         return None
 
     @property
-    def runtime_version(self) -> LooseVersion:
+    def runtime_version(self) -> Version:
         match = self._PATTERN.search(self.raw_name)
         if not match:
             raise ValueError(f"Invalid runtime {self.raw_name!r}")
-        return LooseVersion(match.groupdict()["version"].replace("-", "."))
+        return Version(match.groupdict()["version"].replace("-", "."))
 
     @property
     def runtime_name(self) -> Name:
