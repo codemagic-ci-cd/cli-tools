@@ -1,3 +1,16 @@
+Version 0.47.0
+-------------
+
+Changes in this release are from [PR #370](https://github.com/codemagic-ci-cd/cli-tools/pull/370) and add Python 3.12 compatibility.
+
+[PEP-632](https://peps.python.org/pep-0632/) deprecated `distutils` module, and it was removed entirely in Python 3.12. This release ensures that `distutils` module is not used any more.
+
+**None of the breaking changes have an effect on command line usage**, only the Python API is affected.
+
+**Development**
+- **Breaking**: Type of `codemagic.models.Xcode.version` property was changed. Instead of `distutils.version.LooseVersion` it is now `packaging.version.Version`.
+- **Breaking**: Type of `codemagic.models.simulator.Runtime.runtime_version` property was changed. Instead of `distutils.version.LooseVersion` it is now `packaging.version.Version`.
+
 Version 0.46.2
 -------------
 
