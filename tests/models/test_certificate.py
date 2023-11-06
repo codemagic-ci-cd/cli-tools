@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from datetime import timezone
-from distutils.version import LooseVersion
 from unittest import mock
 from unittest.mock import PropertyMock
 
@@ -12,6 +11,7 @@ from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
+from packaging.version import Version
 
 
 @pytest.fixture
@@ -98,7 +98,7 @@ def certificate(certificate_asn1) -> Certificate:
 
 
 @pytest.mark.skipif(
-    LooseVersion(cryptography.__version__) < LooseVersion("36.0.0"),
+    Version(cryptography.__version__) < Version("36.0.0"),
     reason=(
         f"Cryptography {cryptography.__version__} < 36.0.0 generates "
         f"slightly different CSR public bytes for certificate request "

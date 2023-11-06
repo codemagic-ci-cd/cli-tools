@@ -9,7 +9,6 @@ import subprocess
 import sys
 import tempfile
 import time
-from distutils.version import LooseVersion
 from functools import reduce
 from operator import add
 from typing import IO
@@ -17,6 +16,8 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
+
+from packaging.version import Version
 
 from codemagic.cli import CliProcess
 from codemagic.mixins import RunningCliAppMixin
@@ -141,7 +142,7 @@ class Xcodebuild(RunningCliAppMixin):
                 code_signing_options.append(f"DEVELOPMENT_TEAM={export_options.teamID}")
             if export_options.signingCertificate:
                 code_signing_options.append(f"CODE_SIGN_IDENTITY={export_options.signingCertificate}")
-            if LooseVersion("14") <= xcode.version:
+            if Version("14") <= xcode.version:
                 code_signing_options.append("CODE_SIGN_STYLE=Manual")
 
         return [

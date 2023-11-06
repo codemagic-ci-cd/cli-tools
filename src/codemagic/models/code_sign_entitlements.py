@@ -5,12 +5,13 @@ import plistlib
 import shutil
 import subprocess
 import tempfile
-from distutils.version import LooseVersion
 from typing import Any
 from typing import AnyStr
 from typing import Dict
 from typing import List
 from typing import Tuple
+
+from packaging.version import Version
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -38,7 +39,7 @@ class CodeSignEntitlements(RunningCliAppMixin, StringConverterMixin):
     def _get_codesign_command(cls, app_path: pathlib.Path) -> Tuple[str, ...]:
         from codemagic.models import Xcode
 
-        if Xcode.get_selected().version < LooseVersion("13.3"):
+        if Xcode.get_selected().version < Version("13.3"):
             # The "--entitlements" option of codesign takes "path" parameter to specify where the
             # entitlements should be displayed. In order to send the output to stdout instead
             # of file, "-" needs to be specified. Until Xcode 13.2 it had the following

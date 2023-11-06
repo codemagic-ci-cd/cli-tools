@@ -1,7 +1,6 @@
-from distutils.version import LooseVersion
-
 import pytest
 from codemagic.models.simulator import Runtime
+from packaging.version import Version
 
 
 @pytest.mark.parametrize(
@@ -21,7 +20,7 @@ from codemagic.models.simulator import Runtime
 )
 def test_get_runtime_version(raw_runtime_name, expected_runtime_version):
     runtime_version = Runtime(raw_runtime_name).runtime_version
-    assert runtime_version == LooseVersion(expected_runtime_version)
+    assert runtime_version == Version(expected_runtime_version)
 
 
 @pytest.mark.parametrize(
