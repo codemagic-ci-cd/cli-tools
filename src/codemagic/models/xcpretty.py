@@ -21,8 +21,12 @@ class Xcpretty(StringConverterMixin):
         self._stderr: _IO = stderr
 
     @classmethod
+    def is_available(cls) -> bool:
+        return shutil.which("xcpretty") is not None
+
+    @classmethod
     def _ensure_xcpretty(cls):
-        if shutil.which("xcpretty") is None:
+        if not cls.is_available():
             raise IOError("xcpretty executable not present on the system")
 
     def format(self, chunk: AnyStr):
