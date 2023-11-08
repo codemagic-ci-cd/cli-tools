@@ -1,3 +1,9 @@
+Version 0.47.1
+-------------
+
+**Bugfixes**
+- Update action `xcode-project use-profiles`. Fix assigning provisioning profiles to Xcode targets that have SDK specific provisioning profile specifiers. [PR #371](https://github.com/codemagic-ci-cd/cli-tools/pull/371)
+
 Version 0.47.0
 -------------
 
