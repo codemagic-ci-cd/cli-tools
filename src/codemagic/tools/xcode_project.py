@@ -704,8 +704,8 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             return Xcpretty(xcpretty_options)
 
         message = (
-            "Cannot use XCPretty formatter to process Xcode log output. Showing verbatim Xcode logs.\n"
-            f'To see formatted logs install XCPretty with {Colors.BOLD("[sudo] gem install xcpretty")}\n'
+            "Cannot use xcpretty formatter to process Xcode log output. Showing verbatim Xcode logs.\n"
+            f'To see formatted logs install xcpretty with {Colors.BOLD("[sudo] gem install xcpretty")}\n'
         )
         self.logger.info(Colors.YELLOW(message))
         return None
