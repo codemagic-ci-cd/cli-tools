@@ -185,6 +185,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
 
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
+        xcpretty = self._get_xcpretty(disable_xcpretty, xcpretty_options)
         xcodebuild = self._get_xcodebuild(**locals())
         self._clean(xcodebuild)
 
@@ -257,6 +258,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         show_build_settings = not disable_show_build_settings
         export_options = self._get_export_options_from_path(export_options_plist)
+        xcpretty = self._get_xcpretty(disable_xcpretty, xcpretty_options)
         xcodebuild = self._get_xcodebuild(**locals())
 
         xcode = Xcode.get_selected()
@@ -467,6 +469,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         """
         self._ensure_project_or_workspace(xcode_project_path, xcode_workspace_path)
         simulators = self._get_test_destinations(test_sdk, devices)
+        xcpretty = self._get_xcpretty(disable_xcpretty, xcpretty_options)
         xcodebuild = self._get_xcodebuild(**locals())
         clean and self._clean(xcodebuild)
 
@@ -693,6 +696,20 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         self.echo("")
         return simulators
 
+    def _get_xcpretty(self, disable_xcpretty: bool = False, xcpretty_options: str = "") -> Optional[Xcpretty]:
+        if disable_xcpretty:
+            return None
+
+        if Xcpretty.is_available():
+            return Xcpretty(xcpretty_options)
+
+        message = (
+            "Cannot use XCPretty formatter to process Xcode log output. Showing verbatim Xcode logs.\n"
+            f'To see formatted logs install XCPretty with {Colors.BOLD("[sudo] gem install xcpretty")}\n'
+        )
+        self.logger.info(Colors.YELLOW(message))
+        return None
+
     @classmethod
     def _get_xcodebuild(
         cls,
@@ -701,8 +718,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         target_name: Optional[str] = None,
         configuration_name: Optional[str] = None,
         scheme_name: Optional[str] = None,
-        disable_xcpretty: bool = False,
-        xcpretty_options: str = "",
+        xcpretty: Optional[Xcpretty] = None,
         **_,
     ) -> Xcodebuild:
         try:
@@ -712,7 +728,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
                 scheme_name=scheme_name,
                 target_name=target_name,
                 configuration_name=configuration_name,
-                xcpretty=Xcpretty(xcpretty_options) if not disable_xcpretty else None,
+                xcpretty=xcpretty,
             )
         except ValueError as error:
             raise XcodeProjectException(*error.args) from error
