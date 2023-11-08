@@ -2,7 +2,7 @@ Version 0.47.1
 -------------
 
 **Bugfixes**
-- TODO
+- Do not crash `xcode-project` actions `clean`, `build-ipa` and `run-tests` if [`xcpretty`](https://github.com/xcpretty/xcpretty) is not installed. [PR #372](https://github.com/codemagic-ci-cd/cli-tools/pull/372)
 
 Version 0.47.0
 -------------
