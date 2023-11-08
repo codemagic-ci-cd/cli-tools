@@ -2,6 +2,7 @@ Version 0.47.1
 -------------
 
 **Bugfixes**
+- Update action `xcode-project use-profiles`. Fix assigning provisioning profiles to Xcode targets that have SDK specific provisioning profile specifiers. [PR #371](https://github.com/codemagic-ci-cd/cli-tools/pull/371)
 - Do not crash `xcode-project` actions `clean`, `build-ipa` and `run-tests` if [`xcpretty`](https://github.com/xcpretty/xcpretty) is not installed. [PR #372](https://github.com/codemagic-ci-cd/cli-tools/pull/372)
 
 Version 0.47.0

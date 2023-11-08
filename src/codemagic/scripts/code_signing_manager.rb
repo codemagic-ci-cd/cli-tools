@@ -235,7 +235,7 @@ class CodeSigningManager
     build_configuration.build_settings["DEVELOPMENT_TEAM"] = profile["team_id"]
 
     build_configuration.build_settings.each do |build_setting, _value|
-      if build_setting.start_with? "CODE_SIGN_IDENTITY[sdk="
+      if build_setting.start_with?("CODE_SIGN_IDENTITY[sdk=", "PROVISIONING_PROFILE_SPECIFIER[sdk=")
         build_configuration.build_settings.delete build_setting
       end
     end
@@ -255,6 +255,11 @@ class CodeSigningManager
     unless target.product_type == UNIT_TESTING_PRODUCT_TYPE
       target_attributes[target.uuid]["ProvisioningStyle"] = "Manual"
       build_configuration.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = profile['name']
+      build_configuration.build_settings.each do |build_setting, _value|
+        if build_setting.start_with? "PROVISIONING_PROFILE_SPECIFIER[sdk="
+          build_configuration.build_settings[build_setting] = profile["name"]
+        end
+      end
     end
 
     build_configuration.build_settings["CODE_SIGN_IDENTITY"] = profile["certificate_common_name"]
