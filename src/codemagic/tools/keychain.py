@@ -339,7 +339,7 @@ class Keychain(cli.CliApp, PathFinderMixin):
             add_for_apps = list(self._get_certificate_allowed_applications(allowed_applications))
 
         self.logger.info("Add certificates to keychain %s", self.path)
-        certificate_paths = list(self.find_paths(*certificate_path_patterns))
+        certificate_paths = list(self.find_paths(*(p.resolve() for p in certificate_path_patterns)))
         if not certificate_paths:
             raise KeychainError("Did not find any certificates from specified locations")
 

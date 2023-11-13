@@ -1,9 +1,14 @@
+Version 0.47.3
+-------------
+
+**Bugfixes**
+- Fix handling of relative certificate path patterns for action `keychain add-certificates`. [PR #374](https://github.com/codemagic-ci-cd/cli-tools/pull/374)
+
 Version 0.47.2
 -------------
 
 **Bugfixes**
 - Fix actions `firebase-app-distribution get-latest-build-version` and `firebase-app-distribution releases list` for cases when specified application does not have any releases available. [PR #373](https://github.com/codemagic-ci-cd/cli-tools/pull/373)
-
 
 Version 0.47.1
 -------------
