@@ -2,6 +2,7 @@ from abc import ABC
 from typing import List
 
 from codemagic import cli
+from codemagic.cli import Colors
 from codemagic.google.errors import GoogleError
 from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
@@ -43,6 +44,10 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         except GoogleError as e:
             raise FirebaseAppDistributionError(str(e))
 
-        printer = ResourcePrinter(json_output, self.echo)
-        printer.print_resources(releases, should_print)
+        if not releases:
+            self.logger.info(Colors.YELLOW(f"No releases available for {app_identifier.app_id}"))
+        else:
+            printer = ResourcePrinter(json_output, self.echo)
+            printer.print_resources(releases, should_print)
+
         return releases

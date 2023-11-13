@@ -38,8 +38,9 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
         ...
 
     def _execute_request(self, request: HttpRequest) -> Dict[str, Any]:
+        self._logger.info(f">>> {request.method} {request.uri} {request.body}")
         try:
-            return request.execute()
+            response = request.execute()
         except OAuth2ClientError as e:
             self._logger.exception(f"Failed to {self.manager_action} {self.resource_type.get_label()}")
             raise GoogleAuthenticationError(str(e)) from e
@@ -50,3 +51,5 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
         except errors.Error as e:
             self._logger.exception(f"Failed to {self.manager_action} {self.resource_type.get_label()}")
             raise GoogleClientError(str(e)) from e
+        self._logger.info(f"<<< {response}")
+        return response
