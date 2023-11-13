@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import textwrap
 from typing import TYPE_CHECKING
 from typing import Dict
 from typing import Type
+from typing import cast
 
 from codemagic.cli.cli_help_formatter import CliHelpFormatter
 from codemagic.cli.colors import Colors
@@ -52,7 +54,7 @@ class ArgumentParserBuilder:
                 self._cli_action.action_name,
                 formatter_class=CliHelpFormatter,
                 description=Colors.BOLD(self._cli_action.__doc__),
-                help=self._cli_action.__doc__,
+                help=textwrap.dedent(cast(str, self._cli_action.__doc__)).strip().replace("\n", " "),
             )
 
     @property

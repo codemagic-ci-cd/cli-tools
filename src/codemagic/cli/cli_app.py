@@ -11,6 +11,7 @@ import re
 import shlex
 import shutil
 import sys
+import textwrap
 import time
 from functools import wraps
 from itertools import chain
@@ -27,6 +28,8 @@ from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
+
+import argcomplete
 
 from codemagic import __version__
 from codemagic.utilities import auditing
@@ -307,7 +310,7 @@ class CliApp(metaclass=abc.ABCMeta):
         group_parser = parent_parser.add_parser(
             action_group.name,
             formatter_class=CliHelpFormatter,
-            help=action_group.description,
+            help=textwrap.dedent(action_group.description).strip().replace("\n", " "),
             description=action_group.description,
         )
         ArgumentParserBuilder.set_default_cli_options(group_parser)
@@ -343,6 +346,8 @@ class CliApp(metaclass=abc.ABCMeta):
             else:
                 main_action: ActionCallable = action_or_group
                 cls._register_cli_action(main_action, action_parsers, action_parsers)
+
+        argcomplete.autocomplete(main_parser)
 
         return main_parser
 
