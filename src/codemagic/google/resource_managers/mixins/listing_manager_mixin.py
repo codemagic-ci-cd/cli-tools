@@ -65,6 +65,7 @@ class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManager
             request = self._get_resources_page_request(page_request_args)
             response = self._execute_request(request)
 
+            # In case no matches are found, then the relevant key is missing from response
             response_items = response.get(self.resource_type.get_label(), [])
             resources.extend(self.resource_type(**item) for item in response_items)
             page_request_args.page_token = response.get("nextPageToken")
