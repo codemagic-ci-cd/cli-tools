@@ -47,7 +47,7 @@ try:
     from typing import assert_never
 except ImportError:
 
-    def assert_never(arg: NoReturn, /) -> NoReturn:
+    def assert_never(arg) -> NoReturn:  # type: ignore
         raise AssertionError(f"Expected code to be unreachable, but got: {arg!r}")
 
 
