@@ -140,6 +140,10 @@ class CertificateType(ResourceEnum):
             return CertificateType.DISTRIBUTION
         elif profile_type is profile_type.MAC_CATALYST_APP_DIRECT:
             return CertificateType.DEVELOPER_ID_APPLICATION
+        elif profile_type is profile_type.IOS_APP_INHOUSE:
+            return CertificateType.DISTRIBUTION
+        elif profile_type is profile_type.TVOS_APP_INHOUSE:
+            return CertificateType.DISTRIBUTION
         else:
             raise ValueError(f"Certificate type for profile type {profile_type} is unknown")
 
