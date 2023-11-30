@@ -1,3 +1,9 @@
+Version 0.47.4
+-------------
+
+**Bugfixes**
+- Fail gracefully with informative error message if CLI args are passed with invalid encoding. [PR #376](https://github.com/codemagic-ci-cd/cli-tools/pull/376)
+
 Version 0.47.3
 -------------
 
