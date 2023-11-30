@@ -202,9 +202,10 @@ class CliApp(metaclass=abc.ABCMeta):
                 continue
 
             try:
-                argument_value.encode("utf-8")
+                argument_value.encode()
             except UnicodeEncodeError:
-                raise ArgumentValueEncodingError(f"Invalid value for argument {destination_name}: {argument_value}")
+                error = f"Unknown encoding for argument {destination_name} value: {argument_value}"
+                raise ArgumentValueEncodingError(error)
 
         return True
 
