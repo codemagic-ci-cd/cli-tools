@@ -1246,17 +1246,6 @@ class BundleIdArgument(cli.Argument):
 
 
 class DeviceArgument(cli.Argument):
-    DEVICE_RESOURCE_IDS = cli.ArgumentProperties(
-        key="device_resource_ids",
-        flags=("--device-ids",),
-        type=ResourceId,
-        description="Alphanumeric ID value of the Device",
-        argparse_kwargs={
-            "required": True,
-            "nargs": "+",
-            "metavar": "device-id",
-        },
-    )
     DEVICE_NAME = cli.ArgumentProperties(
         key="device_name",
         flags=("--name", "-n"),
@@ -1457,6 +1446,17 @@ class ProfileArgument(cli.Argument):
         flags=("--name",),
         description="Name of the provisioning profile",
         argparse_kwargs={"required": False},
+    )
+    DEVICE_RESOURCE_IDS = cli.ArgumentProperties(
+        key="device_resource_ids",
+        flags=("--device-ids",),
+        type=ResourceId,
+        description="Alphanumeric ID value of the Device. Required for development profile types.",
+        argparse_kwargs={
+            "required": False,
+            "nargs": "+",
+            "metavar": "device-id",
+        },
     )
 
 
