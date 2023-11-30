@@ -1,3 +1,9 @@
+Version 0.47.4
+-------------
+
+**Bugfixes**
+- Fix resolving certificate type for Mac Catalyst and In-House provisioning profiles. [PR #378](https://github.com/codemagic-ci-cd/cli-tools/pull/378)
+
 Version 0.47.3
 -------------
 
