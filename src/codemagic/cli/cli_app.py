@@ -197,15 +197,14 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _validate_args(cls, cli_args: argparse.Namespace):
-        for value in sys.argv:
+        for destination_name, argument_value in vars(cli_args).items():
+            if not isinstance(argument_value, str):
+                continue
+
             try:
-                value.encode("utf-8")
+                argument_value.encode("utf-8")
             except UnicodeEncodeError:
-                # try to infer more information about the argument
-                argument_dest = next((dest for dest, v in vars(cli_args).items() if str(v) == value), None)
-                if argument_dest:
-                    raise ArgumentValueEncodingError(f"Invalid value for argument {argument_dest}: {value}")
-                raise ArgumentValueEncodingError(f"Invalid argument value: {value}")
+                raise ArgumentValueEncodingError(f"Invalid value for argument {destination_name}: {argument_value}")
 
         return True
 
