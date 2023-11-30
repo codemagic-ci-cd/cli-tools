@@ -44,7 +44,7 @@ from .cli_types import ObfuscationPattern
 from .colors import Colors
 
 try:
-    from typing import assert_never
+    from typing import assert_never  # type: ignore
 except ImportError:
 
     def assert_never(arg) -> NoReturn:  # type: ignore
