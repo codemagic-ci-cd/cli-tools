@@ -20,7 +20,6 @@ from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Literal
 from typing import NoReturn
 from typing import Optional
 from typing import Sequence
@@ -48,12 +47,14 @@ try:
     from typing import assert_never
 except ImportError:
 
-    def assert_never(arg):  # type: ignore
+    def assert_never(arg: NoReturn, /) -> NoReturn:
         raise AssertionError(f"Expected code to be unreachable, but got: {arg!r}")
 
 
 if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
+
+    from typing_extensions import Literal
 
 
 class ArgumentValueEncodingError(Exception):
