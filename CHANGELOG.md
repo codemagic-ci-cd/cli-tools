@@ -1,3 +1,9 @@
+Version 0.47.4
+-------------
+
+**Bugfixes**
+- Improve error handling for `google-play` actions. Capture `oauth2client.client` errors in Google Play API client so that the action fails gracefully with appropriate error message. [PR #379](https://github.com/codemagic-ci-cd/cli-tools/pull/379)
+
 Version 0.47.3
 -------------
 
