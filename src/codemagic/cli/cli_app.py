@@ -20,6 +20,7 @@ from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import Literal
 from typing import NoReturn
 from typing import Optional
 from typing import Sequence
@@ -42,6 +43,14 @@ from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 from .cli_types import ObfuscationPattern
 from .colors import Colors
+
+try:
+    from typing import assert_never
+except ImportError:
+
+    def assert_never(arg):  # type: ignore
+        raise AssertionError(f"Expected code to be unreachable, but got: {arg!r}")
+
 
 if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
@@ -196,7 +205,7 @@ class CliApp(metaclass=abc.ABCMeta):
         return parser, args
 
     @classmethod
-    def _validate_args(cls, cli_args: argparse.Namespace):
+    def _validate_args(cls, cli_args: argparse.Namespace) -> Literal[True]:
         for destination_name, argument_value in vars(cli_args).items():
             if not isinstance(argument_value, str):
                 continue
@@ -227,7 +236,7 @@ class CliApp(metaclass=abc.ABCMeta):
             elif cls._action_requires_subcommand(args.action) and not args.action_subcommand:
                 raise argparse.ArgumentError(args.action_subcommand, "the following argument is required: subcommand")
             elif not cls._validate_args(args):
-                pass  # In case of invalid args validation will raise
+                assert_never("Invalid args")  # In case of invalid args validation will raise
             else:
                 CliApp._running_app = cls._create_instance(parser, args)
                 CliApp._running_app._invoke_action(args)
