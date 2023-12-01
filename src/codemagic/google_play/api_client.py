@@ -9,6 +9,7 @@ from typing import Union
 import httplib2
 from googleapiclient import discovery
 from googleapiclient import errors
+from oauth2client import client
 from oauth2client.service_account import ServiceAccountCredentials
 
 from codemagic.utilities import log
@@ -68,7 +69,7 @@ class GooglePlayDeveloperAPIClient:
                 http=http,
                 cache_discovery=False,
             )
-        except (errors.Error, errors.HttpError) as e:
+        except (errors.Error, client.Error) as e:
             raise AuthorizationError(e) from e
 
     @property
@@ -85,7 +86,7 @@ class GooglePlayDeveloperAPIClient:
             edit_request = self.edits_service.insert(body={}, packageName=package_name)
             edit_response = edit_request.execute()
             self._logger.debug(f"Created edit {edit_response} for package {package_name!r}")
-        except (errors.Error, errors.HttpError) as e:
+        except (errors.Error, client.Error) as e:
             raise EditError("create", package_name, e) from e
         else:
             return Edit(**edit_response)
@@ -100,7 +101,7 @@ class GooglePlayDeveloperAPIClient:
             )
             delete_request.execute()
             self._logger.debug(f"Deleted edit {edit_id} for package {package_name!r}")
-        except (errors.Error, errors.HttpError) as e:
+        except (errors.Error, client.Error) as e:
             if isinstance(e, errors.HttpError) and "edit has already been successfully committed" in e.error_details:
                 # This can be ignored as the commit has already been exhausted
                 return
@@ -136,7 +137,7 @@ class GooglePlayDeveloperAPIClient:
             )
             track_response = track_request.execute()
             self._logger.debug(f"Got track {track_name!r} for package {package_name!r}: {track_response}")
-        except (errors.Error, errors.HttpError) as e:
+        except (errors.Error, client.Error) as e:
             raise GetResourceError("track", package_name, e) from e
         else:
             return Track(**track_response)
@@ -161,7 +162,7 @@ class GooglePlayDeveloperAPIClient:
             )
             tracks_response = tracks_request.execute()
             self._logger.debug(f"Got tracks for package {package_name!r}: {tracks_response}")
-        except (errors.Error, errors.HttpError) as e:
+        except (errors.Error, client.Error) as e:
             raise ListResourcesError("tracks", package_name, e) from e
         else:
             return [Track(**track) for track in tracks_response["tracks"]]
@@ -189,7 +190,7 @@ class GooglePlayDeveloperAPIClient:
             try:
                 track_response = track_request.execute()
                 commit_response = commit_request.execute()
-            except (errors.Error, errors.HttpError) as e:
+            except (errors.Error, client.Error) as e:
                 raise UpdateResourceError("track", package_name, e) from e
 
         self._logger.debug(f"Track {track.track!r} update response for package {package_name!r}: {track_response}")
