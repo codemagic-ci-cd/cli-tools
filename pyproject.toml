@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.47.3"
+version = "0.47.4"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
@@ -55,6 +55,7 @@ pytest = "*"
 pytest-cov = "*"
 ruff = "*"
 types-requests = "*"
+typing-extensions = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

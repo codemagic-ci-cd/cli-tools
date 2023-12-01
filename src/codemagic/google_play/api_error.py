@@ -3,26 +3,30 @@ from abc import abstractmethod
 from typing import Union
 
 from googleapiclient import errors
+from oauth2client import client
 
 
 class GooglePlayDeveloperAPIClientError(Exception):
     @classmethod
-    def _get_error_reason(cls, error: Union[errors.Error, errors.HttpError]) -> str:
-        if isinstance(error, errors.Error):
-            return str(error)
-        else:
-            reason = error._get_reason()
-            return reason or "Http Error"
+    def _get_error_reason(cls, error: Union[errors.Error, client.Error]) -> str:
+        if isinstance(error, errors.HttpError):
+            return error._get_reason() or "Http Error"
+        return str(error)
 
 
 class AuthorizationError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, error: Union[errors.Error, errors.HttpError]):
+    def __init__(self, error: Union[errors.Error, client.Error]):
         reason = self._get_error_reason(error)
         super().__init__(f"Unable to authorize with provided credentials. {reason}")
 
 
 class EditError(GooglePlayDeveloperAPIClientError):
-    def __init__(self, action: str, package_name: str, error: Union[errors.Error, errors.HttpError]):
+    def __init__(
+        self,
+        action: str,
+        package_name: str,
+        error: Union[errors.Error, client.Error],
+    ):
         reason = self._get_error_reason(error)
         super().__init__(f'Unable to {action} an edit for package "{package_name}". {reason}')
 
@@ -32,7 +36,7 @@ class _RequestError(GooglePlayDeveloperAPIClientError, ABC):
         self,
         resource_description: str,
         package_name: str,
-        request_error: Union[errors.Error, errors.HttpError],
+        request_error: Union[errors.Error, client.Error],
     ):
         self.package_name = package_name
         self.request_error = request_error
