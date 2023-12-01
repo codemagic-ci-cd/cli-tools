@@ -5,6 +5,7 @@ Version 0.47.4
 - Fail gracefully with informative error message if CLI args are passed with invalid encoding. [PR #376](https://github.com/codemagic-ci-cd/cli-tools/pull/376)
 - Do not require `--device-ids` for action `app-store-connect create-profile` when not creating development or ad-hoc provisioning profiles. [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
 - Fix error handling if device IDs are missing and development or ad-hoc provisioning profiles are being created (applies to actions `app-store-connect create-profile` and `app-store-connect fetch-signing-files`). [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
+- Fix resolving certificate type for Mac Catalyst and In-House provisioning profiles. [PR #378](https://github.com/codemagic-ci-cd/cli-tools/pull/378)
 
 **Docs**
 - Update option `--device-ids` documentation for action `app-store-connect create-profile`. [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
