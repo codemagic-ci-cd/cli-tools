@@ -1,12 +1,12 @@
 
-localizations
-=============
+items
+=====
 
 
-**List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.**
+**List review submission items from Apple Developer Portal for specified review submission**
 ### Usage
 ```bash
-app-store-connect app-store-versions localizations [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect review-submissions items [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,21 +17,14 @@ app-store-connect app-store-versions localizations [-h] [--log-stream STREAM] [-
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--locale LOCALES]
-    APP_STORE_VERSION_ID
+    REVIEW_SUBMISSION_ID
 ```
-### Required arguments for action `localizations`
+### Required arguments for action `items`
 
-##### `APP_STORE_VERSION_ID`
-
-
-UUID value of the App Store Version
-### Optional arguments for action `localizations`
-
-##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `REVIEW_SUBMISSION_ID`
 
 
-The locale code name for App Store metadata in different languages. See available locale code names from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes. Multiple arguments
+UUID value of the review submission
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
