@@ -702,6 +702,16 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             "choices": list(Locale),
         },
     )
+    LOCALES = cli.ArgumentProperties.duplicate(
+        LOCALE,
+        key="locales",
+        flags=("--locale", "-l"),
+        argparse_kwargs={
+            "nargs": "+",
+            "required": False,
+            "choices": list(Locale),
+        },
+    )
     DESCRIPTION = cli.ArgumentProperties(
         key="description",
         flags=("--description", "-d"),

@@ -115,6 +115,7 @@ class ResourceManagerMixin:
         list_related_resources_method: Callable[..., List[R2]],
         resource_filter: Optional[ResourceManager.Filter],
         should_print: bool,
+        filter_predicate: Optional[Callable[[R2], bool]] = None,
     ) -> List[R2]:
         self.printer.log_get_related(related_resource_type, resource_type, resource_id)
         kwargs = {"resource_filter": resource_filter} if resource_filter else {}
@@ -123,6 +124,9 @@ class ResourceManagerMixin:
             resources = list_related_resources_method(resource_id, **kwargs)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
+
+        if filter_predicate is not None:
+            resources = list(filter(filter_predicate, resources))
 
         self.printer.log_found(related_resource_type, resources, resource_filter, resource_type, resource_id)
         self.printer.print_resources(resources, should_print)
