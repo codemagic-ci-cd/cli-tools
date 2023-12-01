@@ -43,8 +43,22 @@ from .cli_types import ObfuscatedCommand
 from .cli_types import ObfuscationPattern
 from .colors import Colors
 
+try:
+    from typing import assert_never  # type: ignore
+except ImportError:
+
+    def assert_never(arg) -> NoReturn:  # type: ignore
+        raise AssertionError(f"Expected code to be unreachable, but got: {arg!r}")
+
+
 if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
+
+    from typing_extensions import Literal
+
+
+class ArgumentValueEncodingError(Exception):
+    pass
 
 
 class CliAppException(Exception):  # noqa: N818
@@ -192,6 +206,20 @@ class CliApp(metaclass=abc.ABCMeta):
         return parser, args
 
     @classmethod
+    def _validate_args(cls, cli_args: argparse.Namespace) -> Literal[True]:
+        for destination_name, argument_value in vars(cli_args).items():
+            if not isinstance(argument_value, str):
+                continue
+
+            try:
+                argument_value.encode()
+            except UnicodeEncodeError:
+                error = f"Unknown encoding for argument {destination_name} value: {argument_value}"
+                raise ArgumentValueEncodingError(error)
+
+        return True
+
+    @classmethod
     def invoke_cli(cls) -> NoReturn:
         os.environ["_CLI_INVOCATION"] = "true"
 
@@ -208,10 +236,12 @@ class CliApp(metaclass=abc.ABCMeta):
                 raise argparse.ArgumentError(args.action, "the following argument is required: action")
             elif cls._action_requires_subcommand(args.action) and not args.action_subcommand:
                 raise argparse.ArgumentError(args.action_subcommand, "the following argument is required: subcommand")
+            elif not cls._validate_args(args):
+                assert_never("Invalid args")  # In case of invalid args validation will raise
             else:
                 CliApp._running_app = cls._create_instance(parser, args)
                 CliApp._running_app._invoke_action(args)
-        except argparse.ArgumentError as argument_error:
+        except (ArgumentValueEncodingError, argparse.ArgumentError) as argument_error:
             parser.error(str(argument_error))
             status = 2
         except cls.CLI_EXCEPTION_TYPE as cli_exception:
@@ -235,7 +265,8 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _log_cli_invoke_started(cls):
-        exec_line = f'Execute {" ".join(map(shlex.quote, sys.argv))}'
+        safe_args = (arg.encode("utf-8", errors="replace").decode() for arg in sys.argv)
+        exec_line = f'Execute {" ".join(map(shlex.quote, safe_args))}'
         install_line = f"From {pathlib.Path(__file__).parent.parent.resolve()}"
         version_line = f"Using Python {platform.python_version()} on {platform.system()} {platform.release()}"
         separator = "-" * max(len(exec_line), len(version_line), len(install_line))
