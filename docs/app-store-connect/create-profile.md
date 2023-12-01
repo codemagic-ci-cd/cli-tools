@@ -17,12 +17,12 @@ app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--vers
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--device-ids DEVICE_RESOURCE_IDS]
     [--type PROFILE_TYPE]
     [--name PROFILE_NAME]
     [--save]
     BUNDLE_ID_RESOURCE_ID
     --certificate-ids CERTIFICATE_RESOURCE_IDS
-    --device-ids DEVICE_RESOURCE_IDS
 ```
 ### Required arguments for action `create-profile`
 
@@ -34,12 +34,12 @@ Alphanumeric ID value of the Bundle ID
 
 
 Alphanumeric ID value of the Signing Certificate. Multiple arguments
+### Optional arguments for action `create-profile`
+
 ##### `--device-ids=DEVICE_RESOURCE_IDS`
 
 
 Alphanumeric ID value of the Device. Multiple arguments
-### Optional arguments for action `create-profile`
-
 ##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 
