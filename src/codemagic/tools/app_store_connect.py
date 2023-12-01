@@ -857,7 +857,7 @@ class AppStoreConnect(
         "create-profile",
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
         CertificateArgument.CERTIFICATE_RESOURCE_IDS,
-        DeviceArgument.DEVICE_RESOURCE_IDS,
+        ProfileArgument.DEVICE_RESOURCE_IDS,
         ProfileArgument.PROFILE_TYPE,
         ProfileArgument.PROFILE_NAME,
         CommonArgument.SAVE,
@@ -866,7 +866,7 @@ class AppStoreConnect(
         self,
         bundle_id_resource_id: ResourceId,
         certificate_resource_ids: Sequence[ResourceId],
-        device_resource_ids: Sequence[ResourceId],
+        device_resource_ids: Optional[Sequence[ResourceId]] = None,
         profile_type: ProfileType = ProfileType.IOS_APP_DEVELOPMENT,
         profile_name: Optional[str] = None,
         save: bool = False,
@@ -893,8 +893,12 @@ class AppStoreConnect(
             omit_keys=["devices"],
         )
         if profile_type.devices_required():
-            create_params["devices"] = device_resource_ids
-        profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
+            create_params["devices"] = list(device_resource_ids) if device_resource_ids else []
+
+        try:
+            profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
+        except ValueError as ve:
+            raise AppStoreConnectError(str(ve)) from ve
 
         if save:
             self._save_profile(profile)
