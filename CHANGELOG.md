@@ -6,6 +6,7 @@ Version 0.47.4
 - Do not require `--device-ids` for action `app-store-connect create-profile` when not creating development or ad-hoc provisioning profiles. [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
 - Fix error handling if device IDs are missing and development or ad-hoc provisioning profiles are being created (applies to actions `app-store-connect create-profile` and `app-store-connect fetch-signing-files`). [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
 - Fix resolving certificate type for Mac Catalyst and In-House provisioning profiles. [PR #378](https://github.com/codemagic-ci-cd/cli-tools/pull/378)
+- Improve error handling for `google-play` actions. Capture `oauth2client.client` errors in Google Play API client so that the action fails gracefully with appropriate error message. [PR #379](https://github.com/codemagic-ci-cd/cli-tools/pull/379)
 
 **Docs**
 - Update option `--device-ids` documentation for action `app-store-connect create-profile`. [PR #377](https://github.com/codemagic-ci-cd/cli-tools/pull/377)
