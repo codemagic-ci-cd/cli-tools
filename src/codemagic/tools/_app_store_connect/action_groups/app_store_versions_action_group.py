@@ -82,16 +82,14 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     )
     def get_app_store_version(
         self,
-        app_store_version: Union[ResourceId, AppStoreVersion],
+        app_store_version_id: Union[ResourceId, AppStoreVersion],
         should_print: bool = True,
     ) -> AppStoreVersion:
         """
         Read App Store Version information
         """
-        if isinstance(app_store_version, AppStoreVersion):
-            app_store_version_id = app_store_version.id
-        else:
-            app_store_version_id = app_store_version
+        if isinstance(app_store_version_id, AppStoreVersion):
+            app_store_version_id = app_store_version_id.id
 
         return self._get_resource(
             app_store_version_id,
