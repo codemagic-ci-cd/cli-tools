@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import enum
-import re
 import shlex
 from typing import TYPE_CHECKING
 from typing import Any
@@ -18,6 +17,7 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
+from codemagic.utilities import case_conversion
 
 if TYPE_CHECKING:
     from codemagic.apple import AppStoreConnectApiClient
@@ -30,12 +30,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     class Filter:
         @classmethod
         def _get_field_name(cls, field_name) -> str:
-            return cls._snake_to_camel(field_name)
-
-        @classmethod
-        def _snake_to_camel(cls, field_name: str) -> str:
-            patt = re.compile(r"_(\w)")
-            return patt.sub(lambda m: m.group(1).upper(), field_name)
+            return case_conversion.snake_to_camel(field_name)
 
         @classmethod
         def _get_param_value(cls, field_value) -> str:

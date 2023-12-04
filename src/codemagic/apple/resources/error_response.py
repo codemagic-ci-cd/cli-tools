@@ -3,6 +3,7 @@ from __future__ import annotations
 import textwrap
 from dataclasses import dataclass
 from typing import Dict
+from typing import Iterable
 from typing import List
 from typing import Optional
 
@@ -43,6 +44,19 @@ class Error(DictSerializable):
     meta: Optional[ErrorMeta] = None
     links: Optional[Dict[str, str]] = None
 
+    @property
+    def associated_errors(self) -> Dict[str, List[Error]]:
+        if not self.meta or not self.meta.associatedErrors:
+            return {}
+        return self.meta.associatedErrors
+
+    @property
+    def source_pointer(self) -> Optional[str]:
+        try:
+            return self.source["pointer"] if self.source else None
+        except KeyError:
+            return None
+
     def __post_init__(self):
         if isinstance(self.meta, dict):
             self.meta = ErrorMeta(**self.meta)
@@ -77,6 +91,11 @@ class ErrorResponse(DictSerializable):
             ),
         )
         return error_response
+
+    def iter_associated_errors(self) -> Iterable[Error]:
+        for error in self.errors:
+            for errors in error.associated_errors.values():
+                yield from errors
 
     def __str__(self):
         return "\n".join(map(str, self.errors))

@@ -672,6 +672,14 @@ class ReviewSubmissionArgument(cli.Argument):
     )
 
 
+class ReviewSubmissionItemArgument(cli.Argument):
+    REVIEW_SUBMISSION_ITEM_ID = cli.ArgumentProperties(
+        key="review_submission_item_id",
+        type=ResourceId,
+        description="UUID value of the review submission",
+    )
+
+
 class AppStoreVersionLocalizationArgument(cli.Argument):
     APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
         key="app_store_version_localization_id",
