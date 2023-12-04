@@ -1,12 +1,12 @@
 
-review-submission-items
-=======================
+delete
+======
 
 
-**Manage the contents of your review submission**
+**Delete specified Review Submission item**
 ### Usage
 ```bash
-app-store-connect review-submission-items [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect review-submission-items delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,21 @@ app-store-connect review-submission-items [-h] [--log-stream STREAM] [--no-color
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--ignore-not-found]
+    REVIEW_SUBMISSION_ITEM_ID
 ```
+### Required arguments for action `delete`
+
+##### `REVIEW_SUBMISSION_ITEM_ID`
+
+
+UUID value of the review submission
+### Optional arguments for action `delete`
+
+##### `--ignore-not-found`
+
+
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,9 +100,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](review-submission-items/create.md)|Add contents to review submission for App Store review request|
-|[`delete`](review-submission-items/delete.md)|Delete specified Review Submission item|

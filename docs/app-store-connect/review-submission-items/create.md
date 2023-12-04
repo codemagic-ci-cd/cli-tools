@@ -17,7 +17,7 @@ app-store-connect review-submission-items create [-h] [--log-stream STREAM] [--n
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    APP_STORE_VERSION_ID
+    REVIEW_SUBMISSION_ID
     --app-custom-product-page-version-id APP_CUSTOM_PRODUCT_PAGE_VERSION_ID
     --app-event-id APP_EVENT_ID
     --version-id APP_STORE_VERSION_ID
@@ -25,10 +25,10 @@ app-store-connect review-submission-items create [-h] [--log-stream STREAM] [--n
 ```
 ### Required arguments for action `create`
 
-##### `APP_STORE_VERSION_ID`
+##### `REVIEW_SUBMISSION_ID`
 
 
-UUID value of the App Store Version
+UUID value of the review submission
 ##### `--app-custom-product-page-version-id=APP_CUSTOM_PRODUCT_PAGE_VERSION_ID`
 
 
