@@ -103,9 +103,9 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
         action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
     )
-    def items(self, review_submission_id: ResourceId) -> List[ReviewSubmissionItem]:
+    def list_review_submission_items(self, review_submission_id: ResourceId) -> List[ReviewSubmissionItem]:
         """
-        List review submission items from Apple Developer Portal for specified review submission
+        List review submission items for specified review submission
         """
         return self._list_related_resources(
             resource_id=review_submission_id,

@@ -3,7 +3,7 @@ items
 =====
 
 
-**List review submission items from Apple Developer Portal for specified review submission**
+**List review submission items for specified review submission**
 ### Usage
 ```bash
 app-store-connect review-submissions items [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

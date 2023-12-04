@@ -95,4 +95,4 @@ Enable verbose logging for commands
 |[`confirm`](review-submissions/confirm.md)|Confirm pending review submission for App Review|
 |[`create`](review-submissions/create.md)|Create a review submission request for application's latest App Store Version|
 |[`get`](review-submissions/get.md)|Read Review Submission information|
-|[`items`](review-submissions/items.md)|List review submission items from Apple Developer Portal for specified review submission|
+|[`items`](review-submissions/items.md)|List review submission items for specified review submission|
