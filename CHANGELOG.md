@@ -1,7 +1,38 @@
 Version 0.48.0
 -------------
 
-TBD
+This PR contains changes from [PR #380](https://github.com/codemagic-ci-cd/cli-tools/pull/380)
+
+**Features**
+- Add new actions:
+  - `app-store-connect app-store-versions get` to show App Store Version information. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_information).
+  - `app-store-connect review-submission-items delete` to remove existing review submission item from App Store Connect. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/delete_v1_reviewsubmissionitems_id).
+  - `app-store-connect review-submissions items` to list review submission items of specified review submission. See official API method [documentation](https://developer.apple.com/documentation/appstoreconnectapi/list_the_items_in_a_review_submission).
+- Add option `--locale` to action `app-store-connect app-store-versions localizations` to filter retrieved localizations by given specified locales.
+- Improve error message for action `app-store-connect review-submission-items create` if creating review submission item fails because required values are missing for application default locale on respective App Store Version.
+
+**Bugfixes**
+- Fix invoking action `app-store-connect review-submission-items create` from command line.
+- Do not require device IDs for action `app-store-connect create-profile` when not creating development or Ad Hoc provisioning profiles.
+
+**Development**
+- Add new module `codemagic.utilities.case_conversion` with public functions `snake_to_camel` and `camel_to_snake`.
+- Add new client method `list_items` to review submissions resource manager in `src/codemagic/apple/app_store_connect/versioning/review_submissions.py` to retrieve submission items list from App Store Connect.
+- `AppStoreConnectError` exceptions now have field `api_error: Optional[ErrorResponse]` to store App Store Connect API error information.
+
+**Documentation**
+- Update documentation for action groups
+  - `app-store-connect app-store-versions`,
+  - `app-store-connect review-submissions`,
+  - `app-store-connect review-submission-items`.
+- Add documentation for actions:
+  - `app-store-connect app-store-versions get`,
+  - `app-store-connect review-submissions items`,
+  - `app-store-connect review-submission-items delete`.
+- Update documentation for actions:
+  - `app-store-connect app-store-versions localizations`,
+  - `app-store-connect review-submission-items create`,
+  - `app-store-connect create-profile`.
 
 Version 0.47.4
 -------------
