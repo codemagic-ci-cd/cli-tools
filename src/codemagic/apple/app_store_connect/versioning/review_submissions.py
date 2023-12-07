@@ -101,7 +101,7 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
         ).json()
         return ReviewSubmission(response["data"])
 
-    def list_items(self, review_submission: Union[LinkedResourceData, ResourceId]):
+    def list_items(self, review_submission: Union[LinkedResourceData, ResourceId]) -> List[ReviewSubmissionItem]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_the_items_in_a_review_submission
         """
