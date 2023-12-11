@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import List
 
 from codemagic import cli
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -94,4 +96,22 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             review_submission_id,
             should_print,
             submitted=True,
+        )
+
+    @cli.action(
+        "items",
+        ReviewSubmissionArgument.REVIEW_SUBMISSION_ID,
+        action_group=AppStoreConnectActionGroup.REVIEW_SUBMISSIONS,
+    )
+    def list_review_submission_items(self, review_submission_id: ResourceId) -> List[ReviewSubmissionItem]:
+        """
+        List review submission items for specified review submission
+        """
+        return self._list_related_resources(
+            resource_id=review_submission_id,
+            resource_type=ReviewSubmission,
+            related_resource_type=ReviewSubmissionItem,
+            list_related_resources_method=self.api_client.review_submissions.list_items,
+            resource_filter=None,
+            should_print=True,
         )

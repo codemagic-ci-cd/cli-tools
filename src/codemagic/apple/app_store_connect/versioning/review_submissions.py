@@ -12,6 +12,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
 from codemagic.apple.resources import ReviewSubmissionState
 
 
@@ -99,3 +100,11 @@ class ReviewSubmissions(ResourceManager[ReviewSubmission]):
             json=payload,
         ).json()
         return ReviewSubmission(response["data"])
+
+    def list_items(self, review_submission: Union[LinkedResourceData, ResourceId]) -> List[ReviewSubmissionItem]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_the_items_in_a_review_submission
+        """
+        review_submission_id = self._get_resource_id(review_submission)
+        url = f"{self.client.API_URL}/reviewSubmissions/{review_submission_id}/items"
+        return [ReviewSubmissionItem(item) for item in self.client.paginate(url)]

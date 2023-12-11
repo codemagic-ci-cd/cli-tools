@@ -39,7 +39,7 @@ Alphanumeric ID value of the Signing Certificate. Multiple arguments
 ##### `--device-ids=DEVICE_RESOURCE_IDS`
 
 
-Alphanumeric ID value of the Device. Multiple arguments
+Alphanumeric ID value of the Device. Required for development profile types. Multiple arguments
 ##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 

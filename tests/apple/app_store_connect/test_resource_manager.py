@@ -43,20 +43,3 @@ class StubFilter(ResourceManager.Filter):
 def test_resource_manager_filter_to_params_conversion(filter_params, expected_query_params):
     test_filter = StubFilter(**filter_params)
     assert test_filter.as_query_params() == expected_query_params
-
-
-@pytest.mark.parametrize(
-    "snake_case_input, expected_camel_case_output",
-    [
-        ("", ""),
-        ("word", "word"),
-        ("_word", "Word"),
-        ("snake_case", "snakeCase"),
-        ("snake_case_", "snakeCase_"),
-        ("snake_case_ snakeCase", "snakeCase_ snakeCase"),
-        ("a_b_c_d_e_f", "aBCDEF"),
-    ],
-)
-def test_resource_manager_filter_camel_case_converter(snake_case_input, expected_camel_case_output):
-    converted_input = ResourceManager.Filter._snake_to_camel(snake_case_input)
-    assert converted_input == expected_camel_case_output

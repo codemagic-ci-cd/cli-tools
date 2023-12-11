@@ -672,6 +672,14 @@ class ReviewSubmissionArgument(cli.Argument):
     )
 
 
+class ReviewSubmissionItemArgument(cli.Argument):
+    REVIEW_SUBMISSION_ITEM_ID = cli.ArgumentProperties(
+        key="review_submission_item_id",
+        type=ResourceId,
+        description="UUID value of the review submission",
+    )
+
+
 class AppStoreVersionLocalizationArgument(cli.Argument):
     APP_STORE_VERSION_LOCALIZATION_ID = cli.ArgumentProperties(
         key="app_store_version_localization_id",
@@ -698,6 +706,16 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
             f"Learn more from {_LOCALE_CODES_URL}"
         ),
         argparse_kwargs={
+            "required": False,
+            "choices": list(Locale),
+        },
+    )
+    LOCALES = cli.ArgumentProperties.duplicate(
+        LOCALE,
+        key="locales",
+        flags=("--locale", "-l"),
+        argparse_kwargs={
+            "nargs": "+",
             "required": False,
             "choices": list(Locale),
         },

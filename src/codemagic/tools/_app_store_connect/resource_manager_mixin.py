@@ -37,7 +37,10 @@ class ResourceManagerMixin:
         try:
             resource = create_resource(**create_params)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error)) from api_error
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
 
         self.printer.print_resource(resource, should_print)
         self.printer.log_created(resource)
@@ -58,7 +61,10 @@ class ResourceManagerMixin:
         try:
             resource = read_resource(resource_id)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
         self.printer.print_resource(resource, should_print)
         return resource
 
@@ -77,7 +83,10 @@ class ResourceManagerMixin:
         try:
             resources = list_resources(resource_filter=resource_filter)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
 
         if filter_predicate is not None:
             resources = list(filter(filter_predicate, resources))
@@ -99,7 +108,10 @@ class ResourceManagerMixin:
         try:
             resource = read_related_resource_method(resource_id)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
 
         if resource is None:
             raise AppStoreConnectError(f"{related_resource_type} was not found for {resource_type} {resource_id}")
@@ -115,6 +127,7 @@ class ResourceManagerMixin:
         list_related_resources_method: Callable[..., List[R2]],
         resource_filter: Optional[ResourceManager.Filter],
         should_print: bool,
+        filter_predicate: Optional[Callable[[R2], bool]] = None,
     ) -> List[R2]:
         self.printer.log_get_related(related_resource_type, resource_type, resource_id)
         kwargs = {"resource_filter": resource_filter} if resource_filter else {}
@@ -122,7 +135,13 @@ class ResourceManagerMixin:
         try:
             resources = list_related_resources_method(resource_id, **kwargs)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
+
+        if filter_predicate is not None:
+            resources = list(filter(filter_predicate, resources))
 
         self.printer.log_found(related_resource_type, resources, resource_filter, resource_type, resource_id)
         self.printer.print_resources(resources, should_print)
@@ -146,7 +165,10 @@ class ResourceManagerMixin:
             if ignore_not_found is True and api_error.status_code == 404:
                 self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
             else:
-                raise AppStoreConnectError(str(api_error))
+                raise AppStoreConnectError(
+                    str(api_error),
+                    api_error_response=api_error.error_response,
+                ) from api_error
         else:
             self.printer.log_deleted(resource_manager.resource_type, resource_id)
 
@@ -166,7 +188,10 @@ class ResourceManagerMixin:
         try:
             resource = modify_resource(resource_id, **update_params)
         except AppStoreConnectApiError as api_error:
-            raise AppStoreConnectError(str(api_error))
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
 
         self.printer.log_modified(resource_manager.resource_type, resource_id)
         self.printer.print_resource(resource, should_print)

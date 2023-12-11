@@ -1,0 +1,47 @@
+{
+    "errors": [
+        {
+            "id": "6d516aab-7949-48e1-9205-89b9bc2e736b",
+            "status": "409",
+            "code": "STATE_ERROR.ENTITY_STATE_INVALID",
+            "title": "appStoreVersions with id '409ebefb-ebd1-4f1a-903d-6ba16e013ebf' is not in valid state.",
+            "detail": "This resource cannot be reviewed, please check associated errors to see why.",
+            "meta": {
+                "associatedErrors": {
+                    "/v1/appStoreVersionLocalizations/253cf0c8-8057-49b7-be16-3b1cc78837e5": [
+                        {
+                            "id": "00190291-bf3a-417d-903c-804640a7df60",
+                            "status": "409",
+                            "code": "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+                            "title": "The provided entity is missing a required attribute",
+                            "detail": "You must provide a value for the attribute 'description' with this request",
+                            "source": {
+                                "pointer": "/data/attributes/description"
+                            }
+                        },
+                        {
+                            "id": "d5e83b1c-85b5-44ea-a9ba-5f2f3aa0cba0",
+                            "status": "409",
+                            "code": "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+                            "title": "The provided entity is missing a required attribute",
+                            "detail": "You must provide a value for the attribute 'keywords' with this request",
+                            "source": {
+                                "pointer": "/data/attributes/keywords"
+                            }
+                        },
+                        {
+                            "id": "5d9f0f60-8791-4bed-bb98-435250599281",
+                            "status": "409",
+                            "code": "ENTITY_ERROR.ATTRIBUTE.REQUIRED",
+                            "title": "The provided entity is missing a required attribute",
+                            "detail": "You must provide a value for the attribute 'supportUrl' with this request",
+                            "source": {
+                                "pointer": "/data/attributes/supportUrl"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

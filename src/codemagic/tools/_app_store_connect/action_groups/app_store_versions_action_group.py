@@ -4,6 +4,7 @@ from abc import ABCMeta
 from datetime import datetime
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Union
 
 from codemagic import cli
@@ -12,6 +13,7 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import Build
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
@@ -19,6 +21,7 @@ from codemagic.apple.resources import ResourceId
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
+from ..arguments import AppStoreVersionLocalizationArgument
 from ..arguments import BuildArgument
 from ..arguments import CommonArgument
 from ..arguments import Types
@@ -70,6 +73,28 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.api_client.app_store_versions,
             should_print,
             **{k: v for k, v in create_params.items() if v is not None},
+        )
+
+    @cli.action(
+        "get",
+        AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
+    )
+    def get_app_store_version(
+        self,
+        app_store_version_id: Union[ResourceId, AppStoreVersion],
+        should_print: bool = True,
+    ) -> AppStoreVersion:
+        """
+        Read App Store Version information
+        """
+        if isinstance(app_store_version_id, AppStoreVersion):
+            app_store_version_id = app_store_version_id.id
+
+        return self._get_resource(
+            app_store_version_id,
+            self.api_client.app_store_versions,
+            should_print,
         )
 
     @cli.action(
@@ -148,17 +173,25 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         "localizations",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        AppStoreVersionLocalizationArgument.LOCALES,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )
     def list_app_store_version_localizations(
         self,
         app_store_version_id: ResourceId,
+        locales: Optional[Sequence[Locale]] = None,
         should_print: bool = True,
     ) -> List[AppStoreVersionLocalization]:
         """
         List All App Store Version Localizations for an App Store Version.
         Get a list of localized, version-level information about an app, for all locales.
         """
+
+        def predicate(app_store_version_localization: AppStoreVersionLocalization) -> bool:
+            if not locales:
+                return True
+            return app_store_version_localization.attributes.locale in locales
+
         return self._list_related_resources(
             app_store_version_id,
             AppStoreVersion,
@@ -166,4 +199,5 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.api_client.app_store_versions.list_app_store_version_localizations,
             None,
             should_print,
+            filter_predicate=predicate,
         )

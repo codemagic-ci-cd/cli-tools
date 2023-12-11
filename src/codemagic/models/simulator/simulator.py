@@ -5,7 +5,6 @@ import pathlib
 import re
 import subprocess
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -13,6 +12,7 @@ from typing import Sequence
 from typing import Union
 
 from codemagic.mixins import RunningCliAppMixin
+from codemagic.utilities import case_conversion
 
 from .runtime import Runtime
 
@@ -46,15 +46,11 @@ class Simulator(RunningCliAppMixin):
 
     @classmethod
     def create(cls, **kwargs) -> Simulator:
-        @lru_cache()
-        def camel_to_snake(s: str) -> str:
-            return re.sub(r"([A-Z])", lambda m: f"_{m.group(1).lower()}", s)
-
         return Simulator(
             **{
-                camel_to_snake(name): value
+                case_conversion.camel_to_snake(name): value
                 for name, value in kwargs.items()
-                if camel_to_snake(name) in cls.__dataclass_fields__  # type: ignore
+                if case_conversion.camel_to_snake(name) in cls.__dataclass_fields__  # type: ignore
             },
         )
 

@@ -264,6 +264,7 @@ class AbstractBaseAction(ResourceManagerMixin, PathFinderMixin, metaclass=ABCMet
     def list_app_store_version_localizations(
         self,
         app_store_version_id: ResourceId,
+        locales: Optional[Sequence[Locale]] = None,
         should_print: bool = True,
     ) -> List[AppStoreVersionLocalization]:
         from .action_groups import AppStoreVersionsActionGroup
