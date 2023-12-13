@@ -1,3 +1,9 @@
+Version 0.48.1
+-------------
+
+**Bugfixes**
+- Fix error handling for invalid App Store Connect API private keys for `app-store-connect` actions. [PR #381](https://github.com/codemagic-ci-cd/cli-tools/pull/381)
+
 Version 0.48.0
 -------------
 
