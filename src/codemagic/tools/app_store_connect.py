@@ -21,6 +21,8 @@ from typing import Tuple
 from typing import Union
 from typing import cast
 
+import jwt
+
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
@@ -49,6 +51,7 @@ from codemagic.mixins import PathFinderMixin
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
 from codemagic.models import ProvisioningProfile
+from codemagic.utilities import log
 from codemagic.utilities import versions
 
 from ._app_store_connect.action_groups import AppsActionGroup
@@ -228,12 +231,33 @@ class AppStoreConnect(
         else:
             raise ValueError()
 
+    def _validate_api_client_key(self, client: AppStoreConnectApiClient):
+        """
+        When running from a CLI context, ensure that App Store Connect API client is using valid
+        private key for JWT generation. In case of invalid key exit with descriptive argument error.
+        """
+
+        if not self.is_cli_invocation():
+            return
+
+        try:
+            client.generate_auth_headers()
+        except jwt.InvalidKeyError:
+            log.get_file_logger(self.__class__).exception("Invalid App Store Connect API key")
+            asc_docs_base_url = "https://developer.apple.com/documentation/appstoreconnectapi"
+            error_message = (
+                "Invalid App Store Connect API key. Make sure to use the private API key downloaded from "
+                "App Store Connect. Read more about creating App Store Connect API keys from "
+                f"{asc_docs_base_url}/creating_api_keys_for_app_store_connect_api"
+            )
+            AppStoreConnectArgument.PRIVATE_KEY.raise_argument_error(error_message)
+
     @lru_cache(1)
     def _get_api_client(self) -> AppStoreConnectApiClient:
         assert self._key_identifier is not None
         assert self._issuer_id is not None
         assert self._private_key is not None
-        return AppStoreConnectApiClient(
+        client = AppStoreConnectApiClient(
             self._key_identifier,
             self._issuer_id,
             self._private_key,
@@ -242,6 +266,8 @@ class AppStoreConnect(
             server_error_retries=self._server_error_retries,
             enable_jwt_cache=self._enable_jwt_cache,
         )
+        self._validate_api_client_key(client)
+        return client
 
     @property
     def api_client(self) -> AppStoreConnectApiClient:
