@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from .enums import BuildAudienceType
 from .enums import BuildProcessingState
 from .resource import DictSerializable
 from .resource import Relationship
@@ -55,8 +56,15 @@ class Build(Resource):
         usesNonExemptEncryption: bool
         uploadedDate: datetime
         expirationDate: datetime
+        buildAudienceType: BuildAudienceType
+
+        computedMinMacOsVersion: Optional[str] = None
+        lsMinimumSystemVersion: Optional[str] = None
+        computedMinVisionOsVersion: Optional[str] = None
 
         def __post_init__(self):
+            if isinstance(self.buildAudienceType, str):
+                self.buildAudienceType = BuildAudienceType(self.buildAudienceType)
             if isinstance(self.processingState, str):
                 self.processingState = BuildProcessingState(self.processingState)
             if isinstance(self.uploadedDate, str):
