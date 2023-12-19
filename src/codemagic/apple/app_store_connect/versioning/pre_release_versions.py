@@ -39,14 +39,6 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
             return "builds"
         raise ValueError(f"Unknown include type {include_type}")
 
-    def read(self, pre_release_version: Union[LinkedResourceData, ResourceId]) -> PreReleaseVersion:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/read_prerelease_version_information
-        """
-        pre_release_version_id = self._get_resource_id(pre_release_version)
-        response = self.client.session.get(f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}").json()
-        return PreReleaseVersion(response["data"])
-
     def list_data(
         self,
         resource_filter: Filter = Filter(),
