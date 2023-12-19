@@ -1,8 +1,18 @@
 Version 0.48.2
 -------------
 
-**Bugfixes**
-- TBD
+This PR contains changes from [PR #382](https://github.com/codemagic-ci-cd/cli-tools/pull/382)
+
+**Features**
+- Speed improvements for `app-store-connect` actions `get-latest-testflight-build-number`, `get-latest-app-store-build-number` and `app-store-connect get-latest-build-number` in case the application has a lot of versions in App Store Connect.
+
+**Development**
+- Add new App Store Connect API Client methods:
+  - `codemagic.apple.app_store_connect.apps.Apps.list_app_store_versions_data` to fetch application's App Store versions as `list[dict]`,
+  - `codemagic.apple.app_store_connect.versioning.AppStoreVersions.read_build_data` to fetch build of App Store version as `dict`,
+  - `codemagic.apple.app_store_connect.versioning.PreReleaseVersions.list_data` to fetch pre-release versions as `list[dict]`,
+  - `codemagic.apple.app_store_connect.versioning.PreReleaseVersions.list_builds_data` to fetch builds of pre-release version as `list[dict]`.
+- Move implementations of latest build number actions from `codemagic.tools.AppStoreConnect` to dedicated classes and plug them back in as mixins.
 
 Version 0.48.1
 -------------
