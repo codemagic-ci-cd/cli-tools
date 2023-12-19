@@ -16,6 +16,7 @@ from .bundle_id_capability import CapabilitySetting
 from .device import Device
 from .enums import AppStoreState
 from .enums import BetaReviewState
+from .enums import BuildAudienceType
 from .enums import BuildProcessingState
 from .enums import BundleIdPlatform
 from .enums import CapabilityOptionKey
@@ -36,6 +37,7 @@ from .enums import ReleaseType
 from .enums import ResourceType
 from .enums import ReviewSubmissionItemState
 from .enums import ReviewSubmissionState
+from .enums import SubscriptionStatusUrlVersion
 from .error_response import ErrorResponse
 from .pre_release_version import PreReleaseVersion
 from .profile import Profile

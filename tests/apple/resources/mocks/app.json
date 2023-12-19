@@ -1,0 +1,218 @@
+{
+    "type": "apps",
+    "id": "1481211155",
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155"
+    },
+    "attributes": {
+        "bundleId": "io.codemagic.banaan",
+        "name": "Banaan Codemagic",
+        "primaryLocale": "en-GB",
+        "sku": "banaanike",
+        "availableInNewTerritories": true,
+        "contentRightsDeclaration": "DOES_NOT_USE_THIRD_PARTY_CONTENT",
+        "isOrEverWasMadeForKids": false,
+        "subscriptionStatusUrl": null,
+        "subscriptionStatusUrlForSandbox": null,
+        "subscriptionStatusUrlVersion": null,
+        "subscriptionStatusUrlVersionForSandbox": null
+    },
+    "relationships": {
+        "appInfos": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appInfos",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appInfos"
+            }
+        },
+        "appStoreVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appStoreVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appStoreVersions"
+            }
+        },
+        "availableTerritories": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/availableTerritories",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/availableTerritories"
+            }
+        },
+        "betaAppLocalizations": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppLocalizations"
+            }
+        },
+        "betaAppReviewDetail": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppReviewDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppReviewDetail"
+            }
+        },
+        "betaGroups": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaGroups",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaGroups"
+            }
+        },
+        "betaLicenseAgreement": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaLicenseAgreement",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaLicenseAgreement"
+            }
+        },
+        "builds": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/builds",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/builds"
+            }
+        },
+        "endUserLicenseAgreement": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/endUserLicenseAgreement",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/endUserLicenseAgreement"
+            }
+        },
+        "gameCenterEnabledVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/gameCenterEnabledVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/gameCenterEnabledVersions"
+            }
+        },
+        "inAppPurchases": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/inAppPurchases",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/inAppPurchases"
+            }
+        },
+        "preOrder": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preOrder",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preOrder"
+            }
+        },
+        "preReleaseVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preReleaseVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preReleaseVersions"
+            }
+        },
+        "prices": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/prices",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/prices"
+            }
+        },
+        "appAvailability": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appAvailability",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appAvailability"
+            }
+        },
+        "appAvailabilityV2": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appAvailabilityV2",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appAvailabilityV2"
+            }
+        },
+        "appClips": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appClips",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appClips"
+            }
+        },
+        "appCustomProductPages": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appCustomProductPages",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appCustomProductPages"
+            }
+        },
+        "appEvents": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appEvents",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appEvents"
+            }
+        },
+        "appPricePoints": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appPricePoints",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appPricePoints"
+            }
+        },
+        "appPriceSchedule": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appPriceSchedule",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appPriceSchedule"
+            }
+        },
+        "appStoreVersionExperimentsV2": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appStoreVersionExperimentsV2",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appStoreVersionExperimentsV2"
+            }
+        },
+        "betaTesters": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaTesters"
+            }
+        },
+        "ciProduct": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/ciProduct",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/ciProduct"
+            }
+        },
+        "customerReviews": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/customerReviews",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/customerReviews"
+            }
+        },
+        "gameCenterDetail": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/gameCenterDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/gameCenterDetail"
+            }
+        },
+        "inAppPurchasesV2": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/inAppPurchasesV2",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/inAppPurchasesV2"
+            }
+        },
+        "perfPowerMetrics": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/perfPowerMetrics"
+            }
+        },
+        "pricePoints": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/pricePoints",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/pricePoints"
+            }
+        },
+        "promotedPurchases": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/promotedPurchases",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/promotedPurchases"
+            }
+        },
+        "reviewSubmissions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/reviewSubmissions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/reviewSubmissions"
+            }
+        },
+        "subscriptionGracePeriod": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/subscriptionGracePeriod",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/subscriptionGracePeriod"
+            }
+        },
+        "subscriptionGroups": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/subscriptionGroups",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/subscriptionGroups"
+            }
+        }
+    }
+}

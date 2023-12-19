@@ -7,12 +7,16 @@
        "expirationDate":"2021-05-03T04:00:19-07:00",
        "expired":false,
        "minOsVersion":"10.2",
+       "lsMinimumSystemVersion":null,
+       "computedMinMacOsVersion":"11.0",
+       "computedMinVisionOsVersion":"1.0",
        "iconAssetToken":{
           "templateUrl":"https://is2-ssl.mzstatic.com/image/thumb/Purple114/v4/80/d3/39/80d339cc-1ce8-0987-e3c0-25fc8de3275a/Icon-83.5@2x.png.png/{w}x{h}bb.{f}",
           "width":167,
           "height":167
        },
        "processingState":"VALID",
+       "buildAudienceType":"APP_STORE_ELIGIBLE",
        "usesNonExemptEncryption":false
     },
     "relationships":{

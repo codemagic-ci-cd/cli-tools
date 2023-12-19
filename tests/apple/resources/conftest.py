@@ -12,6 +12,12 @@ def api_app_store_version() -> Dict:
 
 
 @pytest.fixture
+def api_app() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / "mocks" / "app.json"
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
 def api_build() -> Dict:
     mock_path = pathlib.Path(__file__).parent / "mocks" / "build.json"
     return json.loads(mock_path.read_text())
