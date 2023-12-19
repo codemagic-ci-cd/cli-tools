@@ -1,3 +1,10 @@
+Version 0.48.UNRELEASED
+-------------
+
+**Development**
+- Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`.
+- Define new enumerations `codemagic.apple.resources.enums.BuildAudienceType` and `codemagic.apple.resources.enums.SubscriptionStatusUrlVersion`.
+
 Version 0.48.1
 -------------
 
