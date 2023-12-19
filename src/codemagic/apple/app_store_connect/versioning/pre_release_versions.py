@@ -47,18 +47,15 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         response = self.client.session.get(f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}").json()
         return PreReleaseVersion(response["data"])
 
-    def list(
-        self,
-        resource_filter: Filter = Filter(),
-    ) -> List[PreReleaseVersion]:
+    def list(self, resource_filter: Filter = Filter()) -> List[PreReleaseVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """
-        results = self.client.paginate(
+        results = self.client.paginate_with_included(
             f"{self.client.API_URL}/preReleaseVersions",
             params=resource_filter.as_query_params(),
         )
-        return [PreReleaseVersion(prerelease_version) for prerelease_version in results]
+        return [PreReleaseVersion(prerelease_version) for prerelease_version in results.data]
 
     def list_version_numbers(self, resource_filter: Filter = Filter()) -> List[ResourceVersion]:
         """
@@ -78,8 +75,11 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_a_prerelease_version
         """
-        pre_release_version_id = self._get_resource_id(pre_release_version)
-        url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}/builds"
+        url = None
+        if isinstance(pre_release_version, PreReleaseVersion) and pre_release_version.relationships is not None:
+            url = pre_release_version.relationships.builds.links.related
+        if url is None:
+            url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds"
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
 
     def list_build_version_numbers(

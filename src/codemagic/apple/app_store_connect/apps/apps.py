@@ -96,17 +96,19 @@ class Apps(ResourceManager[App]):
     def list_app_store_versions(
         self,
         app: Union[LinkedResourceData, ResourceId],
-        resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
+        resource_filter: Optional[AppStoreVersions.Filter] = None,
         limit: Optional[int] = None,
     ) -> List[AppStoreVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
-        app_store_versions = self.client.paginate(
-            f"{self.client.API_URL}/apps/{self._get_resource_id(app)}/appStoreVersions",
-            params=resource_filter.as_query_params(),
-            limit=limit,
-        )
+        url = None
+        if isinstance(app, App) and app.relationships is not None:
+            url = app.relationships.appStoreVersions.links.related
+        if url is None:
+            url = f"{self.client.API_URL}/apps/{app}/appStoreVersions"
+        params = resource_filter.as_query_params() if resource_filter else None
+        app_store_versions = self.client.paginate(url, params=params, limit=limit)
         return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
 
     def list_app_store_version_numbers(
