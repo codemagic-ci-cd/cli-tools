@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Type
 from typing import Union
 
@@ -16,7 +17,6 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
-from codemagic.apple.resources import ResourceVersion
 
 
 class Apps(ResourceManager[App]):
@@ -93,42 +93,36 @@ class Apps(ResourceManager[App]):
             url = f"{self.client.API_URL}/apps/{app}/preReleaseVersions"
         return [PreReleaseVersion(version) for version in self.client.paginate(url, page_size=None)]
 
-    def list_app_store_versions(
-        self,
-        app: Union[LinkedResourceData, ResourceId],
-        resource_filter: Optional[AppStoreVersions.Filter] = None,
-        limit: Optional[int] = None,
-    ) -> List[AppStoreVersion]:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
-        """
-        url = None
-        if isinstance(app, App) and app.relationships is not None:
-            url = app.relationships.appStoreVersions.links.related
-        if url is None:
-            url = f"{self.client.API_URL}/apps/{app}/appStoreVersions"
-        params = resource_filter.as_query_params() if resource_filter else None
-        app_store_versions = self.client.paginate(url, params=params, limit=limit)
-        return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
-
-    def list_app_store_version_numbers(
+    def list_app_store_versions_data(
         self,
         app: Union[LinkedResourceData, ResourceId],
         resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
         limit: Optional[int] = None,
-    ):
+        fields: Sequence[str] = tuple(),
+        page_size: Optional[int] = 100,
+    ) -> List[dict]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
-        results = self.client.paginate(
-            f"{self.client.API_URL}/apps/{self._get_resource_id(app)}/appStoreVersions",
-            params={
-                "fields[appStoreVersions]": "versionString",
-                **resource_filter.as_query_params(),
-            },
+        app_id = self._get_resource_id(app)
+        params = resource_filter.as_query_params()
+        if fields:
+            params["fields[appStoreVersions]"] = ",".join(fields)
+        url = f"{self.client.API_URL}/apps/{app_id}/appStoreVersions"
+        return self.client.paginate(url, params=params, limit=limit, page_size=page_size)
+
+    def list_app_store_versions(
+        self,
+        app: Union[LinkedResourceData, ResourceId],
+        resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
+        limit: Optional[int] = None,
+    ) -> List[AppStoreVersion]:
+        app_store_versions_data = self.list_app_store_versions_data(
+            app,
+            resource_filter=resource_filter,
             limit=limit,
         )
-        return [ResourceVersion(ResourceId(v["id"]), v["attributes"]["versionString"]) for v in results]
+        return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions_data]
 
     def list_beta_app_localizations(self, app: Union[App, ResourceId]) -> List[BetaAppLocalization]:
         """

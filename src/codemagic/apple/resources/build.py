@@ -8,6 +8,22 @@ from .enums import BuildProcessingState
 from .resource import DictSerializable
 from .resource import Relationship
 from .resource import Resource
+from .resource import ResourceId
+
+
+@dataclass
+class BuildVersionInfo(DictSerializable):
+    buildId: ResourceId
+    version: str
+    buildNumber: str
+
+    def __str__(self) -> str:
+        lines = (
+            f"Build Id: {self.buildId}",
+            f"Version: {self.version}",
+            f"Build number: {self.buildNumber}",
+        )
+        return "\n".join(lines)
 
 
 @dataclass
