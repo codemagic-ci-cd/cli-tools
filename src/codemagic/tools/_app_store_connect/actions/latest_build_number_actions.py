@@ -121,14 +121,16 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             fields=("version",) if build_expired_status is None else ("version", "expired"),
             page_size=200,
         )
-        build_versions = [
+        build_versions = (
             _ResourceVersion(b["id"], b["attributes"]["version"])
             for b in builds_data
             if build_expired_status is None or b["attributes"]["expired"] is build_expired_status
-        ]
-        if not build_versions:
-            return None
-        return max(build_versions, key=lambda rv: versions.sorting_key(rv.version))
+        )
+        return max(
+            build_versions,
+            key=lambda rv: versions.sorting_key(cast(_ResourceVersion, rv).version),
+            default=None,
+        )
 
     def __get_testflight_latest_build_info(
         self,
