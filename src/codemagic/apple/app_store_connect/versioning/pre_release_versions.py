@@ -75,11 +75,13 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_a_prerelease_version
         """
+
         url = None
         if isinstance(pre_release_version, PreReleaseVersion) and pre_release_version.relationships is not None:
             url = pre_release_version.relationships.builds.links.related
         if url is None:
             url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds"
+
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
 
     def list_build_version_numbers(
