@@ -12,6 +12,7 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceVersion
 
 IncludedResource = TypeVar("IncludedResource", bound=Resource)
 
@@ -38,25 +39,65 @@ class PreReleaseVersions(ResourceManager[PreReleaseVersion]):
             return "builds"
         raise ValueError(f"Unknown include type {include_type}")
 
-    def list(self, resource_filter: Filter = Filter()) -> List[PreReleaseVersion]:
+    def read(self, pre_release_version: Union[LinkedResourceData, ResourceId]) -> PreReleaseVersion:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_prerelease_version_information
+        """
+        pre_release_version_id = self._get_resource_id(pre_release_version)
+        response = self.client.session.get(f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}").json()
+        return PreReleaseVersion(response["data"])
+
+    def list(
+        self,
+        resource_filter: Filter = Filter(),
+    ) -> List[PreReleaseVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
         """
-        results = self.client.paginate_with_included(
+        results = self.client.paginate(
             f"{self.client.API_URL}/preReleaseVersions",
             params=resource_filter.as_query_params(),
         )
-        return [PreReleaseVersion(prerelease_version) for prerelease_version in results.data]
+        return [PreReleaseVersion(prerelease_version) for prerelease_version in results]
+
+    def list_version_numbers(self, resource_filter: Filter = Filter()) -> List[ResourceVersion]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
+        """
+        results = self.client.paginate(
+            f"{self.client.API_URL}/preReleaseVersions",
+            params={
+                "fields[preReleaseVersions]": "version",
+                **resource_filter.as_query_params(),
+            },
+            page_size=200,
+        )
+        return [ResourceVersion(ResourceId(v["id"]), v["attributes"]["version"]) for v in results]
 
     def list_builds(self, pre_release_version: Union[LinkedResourceData, ResourceId]) -> List[Build]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_a_prerelease_version
         """
-
-        url = None
-        if isinstance(pre_release_version, PreReleaseVersion) and pre_release_version.relationships is not None:
-            url = pre_release_version.relationships.builds.links.related
-        if url is None:
-            url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version}/builds"
-
+        pre_release_version_id = self._get_resource_id(pre_release_version)
+        url = f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}/builds"
         return [Build(build) for build in self.client.paginate(url, page_size=None)]
+
+    def list_build_version_numbers(
+        self,
+        pre_release_version: Union[LinkedResourceData, ResourceId],
+        expired: Optional[bool] = None,
+    ) -> List[ResourceVersion]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_builds_of_a_prerelease_version
+        """
+        pre_release_version_id = self._get_resource_id(pre_release_version)
+        results = self.client.paginate(
+            f"{self.client.API_URL}/preReleaseVersions/{pre_release_version_id}/builds",
+            params={"fields[builds]": "version" if expired is None else "version,expired"},
+            page_size=200,
+        )
+        return [
+            ResourceVersion(ResourceId(b["id"]), b["attributes"]["version"])
+            for b in results
+            if expired is None or b["attributes"]["expired"] is expired
+        ]

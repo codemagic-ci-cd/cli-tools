@@ -16,6 +16,7 @@ from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceVersion
 
 
 class Apps(ResourceManager[App]):
@@ -95,20 +96,37 @@ class Apps(ResourceManager[App]):
     def list_app_store_versions(
         self,
         app: Union[LinkedResourceData, ResourceId],
-        resource_filter: Optional[AppStoreVersions.Filter] = None,
+        resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
         limit: Optional[int] = None,
     ) -> List[AppStoreVersion]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
         """
-        url = None
-        if isinstance(app, App) and app.relationships is not None:
-            url = app.relationships.appStoreVersions.links.related
-        if url is None:
-            url = f"{self.client.API_URL}/apps/{app}/appStoreVersions"
-        params = resource_filter.as_query_params() if resource_filter else None
-        app_store_versions = self.client.paginate(url, params=params, limit=limit)
+        app_store_versions = self.client.paginate(
+            f"{self.client.API_URL}/apps/{self._get_resource_id(app)}/appStoreVersions",
+            params=resource_filter.as_query_params(),
+            limit=limit,
+        )
         return [AppStoreVersion(app_store_version) for app_store_version in app_store_versions]
+
+    def list_app_store_version_numbers(
+        self,
+        app: Union[LinkedResourceData, ResourceId],
+        resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
+        limit: Optional[int] = None,
+    ):
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
+        """
+        results = self.client.paginate(
+            f"{self.client.API_URL}/apps/{self._get_resource_id(app)}/appStoreVersions",
+            params={
+                "fields[appStoreVersions]": "versionString",
+                **resource_filter.as_query_params(),
+            },
+            limit=limit,
+        )
+        return [ResourceVersion(ResourceId(v["id"]), v["attributes"]["versionString"]) for v in results]
 
     def list_beta_app_localizations(self, app: Union[App, ResourceId]) -> List[BetaAppLocalization]:
         """

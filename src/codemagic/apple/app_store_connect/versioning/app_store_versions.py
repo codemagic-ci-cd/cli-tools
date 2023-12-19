@@ -20,6 +20,7 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
+from codemagic.apple.resources import ResourceVersion
 
 IncludedResource = TypeVar("IncludedResource", bound=Resource)
 
@@ -109,6 +110,23 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         if response["data"] is None:
             return None
         return Build(response["data"])
+
+    def read_build_version_number(
+        self,
+        app_store_version: Union[AppStoreVersion, ResourceId],
+    ) -> Optional[ResourceVersion]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
+        """
+        app_store_version_id = self._get_resource_id(app_store_version)
+        response = self.client.session.get(
+            f"{self.client.API_URL}/appStoreVersions/{app_store_version_id}/build",
+            params={"fields[builds]": "version"},
+        ).json()
+        build = response["data"]
+        if not build:
+            return None
+        return ResourceVersion(ResourceId(build["id"]), build["attributes"]["version"])
 
     def read_app_store_version_submission(
         self,

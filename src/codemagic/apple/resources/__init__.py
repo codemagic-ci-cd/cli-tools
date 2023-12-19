@@ -8,7 +8,6 @@ from .beta_app_review_submission import BetaAppReviewSubmission
 from .beta_build_localization import BetaBuildLocalization
 from .beta_group import BetaGroup
 from .build import Build
-from .build import BuildVersionInfo
 from .build_beta_detail import BuildBetaDetail
 from .bundle_id import BundleId
 from .bundle_id_capability import BundleIdCapability
@@ -45,3 +44,5 @@ from .resource import ResourceId
 from .review_submission import ReviewSubmission
 from .review_submission_item import ReviewSubmissionItem
 from .signing_certificate import SigningCertificate
+from .version import BuildVersionInfo
+from .version import ResourceVersion
