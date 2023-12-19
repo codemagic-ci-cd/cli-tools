@@ -83,8 +83,11 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             fields=("version",),
             page_size=200,
         )
-        vs = (_ResourceVersion(prv["id"], prv["attributes"]["version"]) for prv in pre_release_versions_data)
-        return sorted(vs, key=lambda rv: versions.sorting_key(rv.version), reverse=True)
+        return sorted(
+            (_ResourceVersion(prv["id"], prv["attributes"]["version"]) for prv in pre_release_versions_data),
+            key=lambda rv: versions.sorting_key(rv.version),
+            reverse=True,
+        )
 
     def __get_ordered_app_store_version_numbers(
         self,
@@ -102,27 +105,38 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             fields=("versionString",),
             page_size=200,
         )
-        vs = (_ResourceVersion(asv["id"], asv["attributes"]["versionString"]) for asv in app_store_versions_data)
-        return sorted(vs, key=lambda rv: versions.sorting_key(rv.version), reverse=True)
+        return sorted(
+            (_ResourceVersion(asv["id"], asv["attributes"]["versionString"]) for asv in app_store_versions_data),
+            key=lambda rv: versions.sorting_key(rv.version),
+            reverse=True,
+        )
+
+    def __get_pre_release_version_max_build(
+        self,
+        pre_release_version_id: str,
+        build_expired_status: Optional[bool],
+    ) -> Optional[_ResourceVersion]:
+        builds_data = self.api_client.pre_release_versions.list_builds_data(
+            ResourceId(pre_release_version_id),
+            fields=("version",) if build_expired_status is None else ("version", "expired"),
+            page_size=200,
+        )
+        build_versions = [
+            _ResourceVersion(b["id"], b["attributes"]["version"])
+            for b in builds_data
+            if build_expired_status is None or b["attributes"]["expired"] is build_expired_status
+        ]
+        if not build_versions:
+            return None
+        return max(build_versions, key=lambda rv: versions.sorting_key(rv.version))
 
     def __get_testflight_latest_build_info(
         self,
         pre_release_versions: List[_ResourceVersion],
         build_expired_status: Optional[bool],
     ) -> Optional[_LatestBuildInfo]:
-        fields = ("version",) if build_expired_status is None else ("version", "expired")
         for pre_release_version in pre_release_versions:
-            builds_data = self.api_client.pre_release_versions.list_builds_data(
-                ResourceId(pre_release_version.id),
-                fields=fields,
-                page_size=200,
-            )
-            build_versions = (
-                _ResourceVersion(b["id"], b["attributes"]["version"])
-                for b in builds_data
-                if build_expired_status is None or b["attributes"]["expired"] is build_expired_status
-            )
-            max_build = max(build_versions, key=lambda b: versions.sorting_key(b.version), default=None)
+            max_build = self.__get_pre_release_version_max_build(pre_release_version.id, build_expired_status)
             if not max_build:
                 continue
             return _LatestBuildInfo(
