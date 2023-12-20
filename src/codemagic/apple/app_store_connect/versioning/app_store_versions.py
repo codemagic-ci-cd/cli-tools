@@ -95,20 +95,25 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         response = self.client.session.get(f"{self.client.API_URL}/appStoreVersions/{app_store_version_id}").json()
         return AppStoreVersion(response["data"])
 
-    def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Optional[Build]:
+    def read_build_data(
+        self,
+        app_store_version: Union[AppStoreVersion, ResourceId],
+        fields: Sequence[str] = tuple(),
+    ) -> Optional[dict]:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/read_the_build_information_of_an_app_store_version
         """
-        url = None
-        if isinstance(app_store_version, AppStoreVersion) and app_store_version.relationships is not None:
-            url = app_store_version.relationships.build.links.related
-        if url is None:
-            url = f"{self.client.API_URL}/appStoreVersions/{app_store_version}/build"
-        response = self.client.session.get(url).json()
+        app_store_version_id = self._get_resource_id(app_store_version)
+        url = f"{self.client.API_URL}/appStoreVersions/{app_store_version_id}/build"
+        params = {"fields[builds]": ",".join(fields)} if fields else {}
+        response = self.client.session.get(url, params=params).json()
+        return response["data"]
 
-        if response["data"] is None:
+    def read_build(self, app_store_version: Union[AppStoreVersion, ResourceId]) -> Optional[Build]:
+        build_data = self.read_build_data(app_store_version)
+        if build_data is None:
             return None
-        return Build(response["data"])
+        return Build(build_data)
 
     def read_app_store_version_submission(
         self,
