@@ -5,8 +5,8 @@ import pathlib
 
 import pytest
 from codemagic.tools.app_store_connect import AppStoreConnect
-from codemagic.tools.app_store_connect import AppStoreConnectArgument
-from codemagic.tools.app_store_connect import Types
+from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
+from codemagic.tools.app_store_connect.arguments import Types
 
 
 @pytest.fixture(autouse=True)

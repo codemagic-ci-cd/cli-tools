@@ -9,6 +9,7 @@ from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -32,12 +33,15 @@ from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources.enums import BetaReviewState
 from codemagic.apple.resources.enums import ReviewSubmissionState
+from codemagic.cli import Argument
 from codemagic.cli import Colors
 from codemagic.utilities import versions
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
+from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionInfo
 from ..arguments import AppStoreVersionLocalizationInfo
@@ -70,6 +74,45 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._get_resource(build_id, self.api_client.builds, should_print)
+
+    @cli.action(
+        "list",
+        AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
+        *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS,
+        action_group=AppStoreConnectActionGroup.BUILDS,
+        deprecated_alias="list-builds",
+    )
+    def list_builds(
+        self,
+        application_id: Optional[ResourceId] = None,
+        expired: Optional[bool] = None,
+        not_expired: Optional[bool] = None,
+        build_id: Optional[ResourceId] = None,
+        pre_release_version: Optional[str] = None,
+        processing_state: Optional[BuildProcessingState] = None,
+        beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
+        build_version_number: Optional[int] = None,
+        should_print: bool = True,
+    ) -> List[Build]:
+        """
+        List Builds from Apple Developer Portal matching given constraints
+        """
+        try:
+            expired_value = Argument.resolve_optional_two_way_switch(expired, not_expired)
+        except ValueError:
+            flags = f"{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}"
+            raise BuildArgument.NOT_EXPIRED.raise_argument_error(f"Using mutually exclusive switches {flags}.")
+
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
+            expired=expired_value,
+            id=build_id,
+            processing_state=processing_state,
+            beta_app_review_submission_beta_review_state=beta_review_state,
+            version=build_version_number,
+            pre_release_version_version=pre_release_version,
+        )
+        return self._list_resources(builds_filter, self.api_client.builds, should_print)
 
     @cli.action(
         "expire",

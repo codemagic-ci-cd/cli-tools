@@ -24,9 +24,9 @@ from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
 from codemagic.models.application_package import MacOsPackage
-from codemagic.tools._app_store_connect.arguments import AppStoreVersionArgument
 
 from ..abstract_base_action import AbstractBaseAction
+from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionInfo
 from ..arguments import AppStoreVersionLocalizationArgument
 from ..arguments import AppStoreVersionLocalizationInfo

@@ -26,6 +26,10 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name="builds",
         description="Manage your builds in App Store Connect",
     )
+    BUNDLE_IDS = cli.ActionGroupProperties(
+        name="bundle-ids",
+        description="Manage bundle identifiers and their capabilities",
+    )
     BETA_BUILDS_LOCALIZATIONS = cli.ActionGroupProperties(
         name="beta-build-localizations",
         description="Manage your beta builds localizations in App Store Connect",
@@ -34,9 +38,21 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name="beta-groups",
         description="Manage your groups of beta testers in App Store Connect",
     )
+    CERTIFICATES = cli.ActionGroupProperties(
+        name="certificates",
+        description="Manage code signing certificates",
+    )
     REVIEW_SUBMISSIONS = cli.ActionGroupProperties(
         name="review-submissions",
         description="Manage your App Store version review submissions",
+    )
+    DEVICES = cli.ActionGroupProperties(
+        name="devices",
+        description="Manage Apple devices",
+    )
+    PROFILES = cli.ActionGroupProperties(
+        name="profiles",
+        description="Manage provisioning profiles",
     )
     REVIEW_SUBMISSION_ITEMS = cli.ActionGroupProperties(
         name="review-submission-items",

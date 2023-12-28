@@ -6,5 +6,9 @@ from .beta_app_review_submissions_action_group import BetaAppReviewSubmissionsAc
 from .beta_build_localizations_action_group import BetaBuildLocalizationsActionGroup
 from .beta_groups_action_group import BetaGroupsActionGroup
 from .builds_action_group import BuildsActionGroup
+from .bundle_ids_action_group import BundleIdsActionGroup
+from .certificates_action_group import CertificatesActionGroup
+from .devices_action_group import DevicesActionGroup
+from .profiles_action_group import ProfilesActionGroup
 from .review_submission_items_actions_group import ReviewSubmissionItemsActionGroup
 from .review_submissions_actions_group import ReviewSubmissionsActionGroup
