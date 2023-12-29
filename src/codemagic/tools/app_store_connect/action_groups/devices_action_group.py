@@ -27,7 +27,7 @@ class DevicesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         DeviceArgument.DEVICE_NAME_OPTIONAL,
         DeviceArgument.DEVICE_STATUS,
         action_group=AppStoreConnectActionGroup.DEVICES,
-        deprecation_info=cli.DeprecationActionInfo("list-devices", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("list-devices", "0.49.0"),
     )
     def list_devices(
         self,
@@ -54,7 +54,7 @@ class DevicesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         DeviceArgument.DEVICE_UDIDS,
         DeviceArgument.IGNORE_REGISTRATION_ERRORS,
         action_group=AppStoreConnectActionGroup.DEVICES,
-        deprecation_info=cli.DeprecationActionInfo("register-device", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("register-device", "0.49.0"),
     )
     def register_device(
         self,

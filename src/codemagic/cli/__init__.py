@@ -1,4 +1,4 @@
-from .action import DeprecationActionInfo
+from .action import ActionDeprecationInfo
 from .action import action
 from .action_group import ActionGroup
 from .action_group import ActionGroupProperties

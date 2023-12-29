@@ -22,7 +22,7 @@ _Fn = TypeVar("_Fn", bound=Callable[..., object])
 
 
 @dataclasses.dataclass(frozen=True)
-class DeprecationActionInfo:
+class ActionDeprecationInfo:
     alias: str
     version: str
 
@@ -43,7 +43,7 @@ def action(
     *arguments: Argument,
     action_group: Optional[ActionGroup] = None,
     action_options: Optional[Dict[str, Any]] = None,
-    deprecation_info: Optional[DeprecationActionInfo] = None,
+    deprecation_info: Optional[ActionDeprecationInfo] = None,
 ) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
@@ -91,7 +91,7 @@ def _notify_deprecated_action_usage(
     cli_app: CliApp,
     action_name: str,
     action_group: Optional[ActionGroup],
-    deprecation_info: DeprecationActionInfo,
+    deprecation_info: ActionDeprecationInfo,
 ):
     executable = cli_app.get_executable_name()
     name_parts = (executable, action_group.name if action_group else None, action_name)

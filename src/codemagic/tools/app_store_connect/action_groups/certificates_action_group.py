@@ -36,7 +36,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         CertificateArgument.P12_CONTAINER_SAVE_PATH,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.CERTIFICATES,
-        deprecation_info=cli.DeprecationActionInfo("create-certificate", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("create-certificate", "0.49.0"),
     )
     def create_certificate(
         self,
@@ -75,7 +75,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         CertificateArgument.P12_CONTAINER_SAVE_PATH,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.CERTIFICATES,
-        deprecation_info=cli.DeprecationActionInfo("get-certificate", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("get-certificate", "0.49.0"),
     )
     def get_certificate(
         self,
@@ -111,7 +111,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         CertificateArgument.CERTIFICATE_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.CERTIFICATES,
-        deprecation_info=cli.DeprecationActionInfo("delete-certificate", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("delete-certificate", "0.49.0"),
     )
     def delete_certificate(
         self,
@@ -134,7 +134,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         CertificateArgument.P12_CONTAINER_PASSWORD,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.CERTIFICATES,
-        deprecation_info=cli.DeprecationActionInfo("list-certificates", "0.49.0"),
+        deprecation_info=cli.ActionDeprecationInfo("list-certificates", "0.49.0"),
     )
     def list_certificates(
         self,
