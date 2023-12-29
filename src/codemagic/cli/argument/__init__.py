@@ -1,4 +1,5 @@
 from .action_callable import ActionCallable
+from .action_callable import DeprecatedActionCallable
 from .argument import Argument
 from .argument_formatter import ArgumentFormatter
 from .argument_parser_builder import ArgumentParserBuilder

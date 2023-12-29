@@ -80,7 +80,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         AppArgument.APPLICATION_ID_RESOURCE_ID_OPTIONAL,
         *ArgumentGroups.LIST_BUILDS_FILTERING_ARGUMENTS,
         action_group=AppStoreConnectActionGroup.BUILDS,
-        deprecated_alias="list-builds",
+        deprecation_info=cli.DeprecationActionInfo("list-builds", "0.49.0"),
     )
     def list_builds(
         self,

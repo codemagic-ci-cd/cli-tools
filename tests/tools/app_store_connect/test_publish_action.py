@@ -23,6 +23,7 @@ def publishing_namespace_kwargs(namespace_kwargs):
             "action": "publish",
         },
     )
+    namespace_kwargs.pop("action_subcommand", None)
     return namespace_kwargs
 
 

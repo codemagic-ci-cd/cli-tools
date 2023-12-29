@@ -31,7 +31,7 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ProfileArgument.PROFILE_NAME,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.PROFILES,
-        deprecated_alias="create-profile",
+        deprecation_info=cli.DeprecationActionInfo("create-profile", "0.49.0"),
     )
     def create_profile(
         self,
@@ -80,7 +80,7 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ProfileArgument.PROFILE_RESOURCE_ID,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.PROFILES,
-        deprecated_alias="get-profile",
+        deprecation_info=cli.DeprecationActionInfo("get-profile", "0.49.0"),
     )
     def get_profile(
         self,
@@ -102,7 +102,7 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ProfileArgument.PROFILE_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.PROFILES,
-        deprecated_alias="delete-profile",
+        deprecation_info=cli.DeprecationActionInfo("delete-profile", "0.49.0"),
     )
     def delete_profile(
         self,
@@ -122,7 +122,7 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ProfileArgument.PROFILE_NAME,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.PROFILES,
-        deprecated_alias="list-profiles",
+        deprecation_info=cli.DeprecationActionInfo("list-profiles", "0.49.0"),
     )
     def list_profiles(
         self,

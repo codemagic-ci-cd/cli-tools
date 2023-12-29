@@ -27,7 +27,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BundleIdArgument.BUNDLE_ID_NAME,
         BundleIdArgument.PLATFORM,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
-        deprecated_alias="create-bundle-id",
+        deprecation_info=cli.DeprecationActionInfo("create-bundle-id", "0.49.0"),
     )
     def create_bundle_id(
         self,
@@ -50,7 +50,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         "get",
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
-        deprecated_alias="get-bundle-id",
+        deprecation_info=cli.DeprecationActionInfo("get-bundle-id", "0.49.0"),
     )
     def get_bundle_id(
         self,
@@ -70,7 +70,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BundleIdArgument.PLATFORM_OPTIONAL,
         BundleIdArgument.IDENTIFIER_STRICT_MATCH,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
-        deprecated_alias="list-bundle-ids",
+        deprecation_info=cli.DeprecationActionInfo("list-bundle-ids", "0.49.0"),
     )
     def list_bundle_ids(
         self,
@@ -106,7 +106,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
         CommonArgument.IGNORE_NOT_FOUND,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
-        deprecated_alias="delete-bundle-id",
+        deprecation_info=cli.DeprecationActionInfo("delete-bundle-id", "0.49.0"),
     )
     def delete_bundle_id(
         self,
@@ -127,7 +127,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         ProfileArgument.PROFILE_NAME,
         CommonArgument.SAVE,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
-        deprecated_alias="list-bundle-id-profiles",
+        deprecation_info=cli.DeprecationActionInfo("list-bundle-id-profiles", "0.49.0"),
     )
     def list_bundle_id_profiles(
         self,
