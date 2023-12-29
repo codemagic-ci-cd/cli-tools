@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import sys
 from functools import wraps
 from typing import TYPE_CHECKING
@@ -9,14 +10,13 @@ from typing import Dict
 from typing import Optional
 from typing import TypeVar
 
-from .action_group import ActionGroup
-from .argument import Argument
 from .colors import Colors
 
 if TYPE_CHECKING:
+    from .action_group import ActionGroup
+    from .argument import Argument
     from .cli_app import CliApp
 
-import dataclasses
 
 _Fn = TypeVar("_Fn", bound=Callable[..., object])
 
