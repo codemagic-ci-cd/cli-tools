@@ -1,12 +1,12 @@
 
-builds
-======
+get
+===
 
 
-**Manage your builds in App Store Connect**
+**Get specified Signing Certificate from Apple Developer portal**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect certificates get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,41 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--certificate-key PRIVATE_KEY]
+    [--certificate-key-password PRIVATE_KEY_PASSWORD]
+    [--p12-password P12_CONTAINER_PASSWORD]
+    [--p12-path P12_CONTAINER_SAVE_PATH]
+    [--save]
+    CERTIFICATE_RESOURCE_ID
 ```
+### Required arguments for action `get`
+
+##### `CERTIFICATE_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Signing Certificate
+### Optional arguments for action `get`
+
+##### `--certificate-key=PRIVATE_KEY`
+
+
+Private key used to generate the certificate. Used together with `--save` or `--create` options. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+
+
+Password of the private key used to generate the certificate. Used together with `--certificate-key` or `--certificate-key-path` options if the provided key is encrypted. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--p12-password=P12_CONTAINER_PASSWORD`
+
+
+If provided, the saved p12 container will be encrypted using this password. Used together with `--save` option.
+##### `--p12-path=P12_CONTAINER_SAVE_PATH`
+
+
+If provided, the exported p12 container will saved at this path. Otherwise it will be saved with a random name in the directory specified by `--certificates-dir`. Used together with `--save` option.
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,17 +120,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

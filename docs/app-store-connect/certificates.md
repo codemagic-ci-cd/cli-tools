@@ -1,12 +1,12 @@
 
-builds
-======
+certificates
+============
 
 
-**Manage your builds in App Store Connect**
+**Manage code signing certificates**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -91,13 +91,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|
+|[`create`](certificates/create.md)|Create code signing certificates of given type|
+|[`delete`](certificates/delete.md)|Delete specified Signing Certificate from Apple Developer portal|
+|[`get`](certificates/get.md)|Get specified Signing Certificate from Apple Developer portal|
+|[`list`](certificates/list.md)|List Signing Certificates from Apple Developer Portal matching given constraints|

@@ -1,12 +1,12 @@
 
-builds
-======
+bundle-ids
+==========
 
 
-**Manage your builds in App Store Connect**
+**Manage bundle identifiers and their capabilities**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -91,13 +91,8 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|
+|[`create`](bundle-ids/create.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
+|[`delete`](bundle-ids/delete.md)|Delete specified Bundle ID from Apple Developer portal|
+|[`get`](bundle-ids/get.md)|Get specified Bundle ID from Apple Developer portal|
+|[`profiles`](bundle-ids/profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
+|[`list`](bundle-ids/list.md)|List Bundle IDs from Apple Developer portal matching given constraints|

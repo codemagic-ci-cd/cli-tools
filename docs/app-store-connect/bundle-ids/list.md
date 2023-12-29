@@ -1,12 +1,12 @@
 
-builds
-======
+list
+====
 
 
-**Manage your builds in App Store Connect**
+**List Bundle IDs from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,29 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--bundle-id-identifier BUNDLE_ID_IDENTIFIER_OPTIONAL]
+    [--name BUNDLE_ID_NAME]
+    [--platform PLATFORM_OPTIONAL]
+    [--strict-match-identifier]
 ```
+### Optional arguments for action `list`
+
+##### `--bundle-id-identifier=BUNDLE_ID_IDENTIFIER_OPTIONAL`
+
+
+Identifier of the Bundle ID. For example `com.example.app`
+##### `--name=BUNDLE_ID_NAME`
+
+
+Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
+
+
+Bundle ID platform
+##### `--strict-match-identifier`
+
+
+Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE_ID_IDENTIFIER`. By default identifier `com.example.app` also matches Bundle IDs with identifier such as `com.example.app.extension`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,17 +108,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

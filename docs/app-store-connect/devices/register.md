@@ -1,12 +1,12 @@
 
-builds
-======
+register
+========
 
 
-**Manage your builds in App Store Connect**
+**Register new Devices for app development**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect devices register [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,31 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--platform PLATFORM]
+    [--udid DEVICE_UDIDS]
+    [--ignore-registration-errors]
+    --name DEVICE_NAME
 ```
+### Required arguments for action `register`
+
+##### `--name, -n=DEVICE_NAME`
+
+
+Common name of Devices
+### Optional arguments for action `register`
+
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
+
+
+Bundle ID platform. Default:&nbsp;`IOS`
+##### `--udid, -u=DEVICE_UDIDS`
+
+
+Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`. Multiple arguments
+##### `--ignore-registration-errors`
+
+
+Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. Proceed registering remaining UDIDs when the flag is set.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,17 +110,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

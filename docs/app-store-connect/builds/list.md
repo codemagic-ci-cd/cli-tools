@@ -1,12 +1,12 @@
 
-builds
-======
+list
+====
 
 
-**Manage your builds in App Store Connect**
+**List Builds from Apple Developer Portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,49 @@ app-store-connect builds [-h] [--log-stream STREAM] [--no-color] [--version] [-s
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--beta-review-state BETA_REVIEW_STATE]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-version-number BUILD_VERSION_NUMBER]
+    [--expired]
+    [--not-expired]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    [--processing-state PROCESSING_STATE]
 ```
+### Optional arguments for action `list`
+
+##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
+
+
+Application Apple ID. An automatically generated ID assigned to your app
+##### `--beta-review-state=APPROVED | IN_REVIEW | REJECTED | WAITING_FOR_REVIEW`
+
+
+Build beta review state. Multiple arguments
+##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
+
+
+Alphanumeric ID value of the Build
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build. For example `46` or `1.0.13.5`.
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
+##### `--pre-release-version=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
+
+
+Build processing state
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,17 +128,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`add-beta-test-info`](builds/add-beta-test-info.md)|Add localized What's new (what to test) information|
-|[`expire`](builds/expire.md)|Expire a specific build, an expired build becomes unavailable for testing|
-|[`get`](builds/get.md)|Get information about a specific build|
-|[`app`](builds/app.md)|Get the App details for a specific build.|
-|[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
-|[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
-|[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
-|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
-|[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
-|[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|
