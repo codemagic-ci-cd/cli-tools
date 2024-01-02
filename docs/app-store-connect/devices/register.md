@@ -1,12 +1,12 @@
 
-create-certificate
-==================
+register
+========
 
 
-**Create code signing certificates of given type**
+**Register new Devices for app development**
 ### Usage
 ```bash
-app-store-connect create-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect devices register [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,39 +17,31 @@ app-store-connect create-certificate [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type CERTIFICATE_TYPE]
-    [--certificate-key PRIVATE_KEY]
-    [--certificate-key-password PRIVATE_KEY_PASSWORD]
-    [--p12-password P12_CONTAINER_PASSWORD]
-    [--p12-path P12_CONTAINER_SAVE_PATH]
-    [--save]
+    [--platform PLATFORM]
+    [--udid DEVICE_UDIDS]
+    [--ignore-registration-errors]
+    --name DEVICE_NAME
 ```
-### Optional arguments for action `create-certificate`
+### Required arguments for action `register`
 
-##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | DEVELOPMENT | DISTRIBUTION | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
-
-
-Type of the certificate. Default:&nbsp;`IOS_DEVELOPMENT`
-##### `--certificate-key=PRIVATE_KEY`
+##### `--name, -n=DEVICE_NAME`
 
 
-Private key used to generate the certificate. Used together with `--save` or `--create` options. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+Common name of Devices
+### Optional arguments for action `register`
+
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
-Password of the private key used to generate the certificate. Used together with `--certificate-key` or `--certificate-key-path` options if the provided key is encrypted. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--p12-password=P12_CONTAINER_PASSWORD`
+Bundle ID platform. Default:&nbsp;`IOS`
+##### `--udid, -u=DEVICE_UDIDS`
 
 
-If provided, the saved p12 container will be encrypted using this password. Used together with `--save` option.
-##### `--p12-path=P12_CONTAINER_SAVE_PATH`
+Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`. Multiple arguments
+##### `--ignore-registration-errors`
 
 
-If provided, the exported p12 container will saved at this path. Otherwise it will be saved with a random name in the directory specified by `--certificates-dir`. Used together with `--save` option.
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. Proceed registering remaining UDIDs when the flag is set.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

@@ -1,12 +1,12 @@
 
-register-device
-===============
+delete
+======
 
 
-**Register new Devices for app development**
+**Delete specified Profile from Apple Developer portal**
 ### Usage
 ```bash
-app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect profiles delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,31 +17,21 @@ app-store-connect register-device [-h] [--log-stream STREAM] [--no-color] [--ver
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--platform PLATFORM]
-    [--udid DEVICE_UDIDS]
-    [--ignore-registration-errors]
-    --name DEVICE_NAME
+    [--ignore-not-found]
+    PROFILE_RESOURCE_ID
 ```
-### Required arguments for action `register-device`
+### Required arguments for action `delete`
 
-##### `--name, -n=DEVICE_NAME`
-
-
-Common name of Devices
-### Optional arguments for action `register-device`
-
-##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
+##### `PROFILE_RESOURCE_ID`
 
 
-Bundle ID platform. Default:&nbsp;`IOS`
-##### `--udid, -u=DEVICE_UDIDS`
+Alphanumeric ID value of the Profile
+### Optional arguments for action `delete`
+
+##### `--ignore-not-found`
 
 
-Device ID (UDID), for example: 00000000-000000000000001E. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_DEVICE_UDIDS`. Alternatively to entering `DEVICE_UDIDS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`. Multiple arguments
-##### `--ignore-registration-errors`
-
-
-Ignore device registration failures, e.g. invalid UDID or duplicate UDID submission. Proceed registering remaining UDIDs when the flag is set.
+Do not raise exceptions if the specified resource does not exist.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

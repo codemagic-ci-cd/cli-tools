@@ -1,12 +1,12 @@
 
-get-bundle-id
-=============
+list
+====
 
 
-**Get specified Bundle ID from Apple Developer portal**
+**List Builds from Apple Developer Portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect builds list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,14 +17,49 @@ app-store-connect get-bundle-id [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    BUNDLE_ID_RESOURCE_ID
+    [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
+    [--beta-review-state BETA_REVIEW_STATE]
+    [--build-id BUILD_ID_RESOURCE_ID_OPTIONAL]
+    [--build-version-number BUILD_VERSION_NUMBER]
+    [--expired]
+    [--not-expired]
+    [--pre-release-version PRE_RELEASE_VERSION]
+    [--processing-state PROCESSING_STATE]
 ```
-### Required arguments for action `get-bundle-id`
+### Optional arguments for action `list`
 
-##### `BUNDLE_ID_RESOURCE_ID`
+##### `--app-id, --application-id=APPLICATION_ID_RESOURCE_ID_OPTIONAL`
 
 
-Alphanumeric ID value of the Bundle ID
+Application Apple ID. An automatically generated ID assigned to your app
+##### `--beta-review-state=APPROVED | IN_REVIEW | REJECTED | WAITING_FOR_REVIEW`
+
+
+Build beta review state. Multiple arguments
+##### `--build-id=BUILD_ID_RESOURCE_ID_OPTIONAL`
+
+
+Alphanumeric ID value of the Build
+##### `--build-version-number=BUILD_VERSION_NUMBER`
+
+
+Build version number is the version number of the uploaded build. For example `46` or `1.0.13.5`.
+##### `--expired`
+
+
+List only expired builds. Mutually exclusive with option `--not-expired`.
+##### `--not-expired`
+
+
+List only not expired builds. Mutually exclusive with option `--expired`.
+##### `--pre-release-version=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
+
+
+Build processing state
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

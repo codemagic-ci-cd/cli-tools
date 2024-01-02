@@ -1,12 +1,12 @@
 
-list-profiles
-=============
+create
+======
 
 
-**List Profiles from Apple Developer portal matching given constraints**
+**Create Bundle ID in Apple Developer portal for specifier identifier**
 ### Usage
 ```bash
-app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,29 +17,26 @@ app-store-connect list-profiles [-h] [--log-stream STREAM] [--no-color] [--versi
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
+    [--name BUNDLE_ID_NAME]
+    [--platform PLATFORM]
+    BUNDLE_ID_IDENTIFIER
 ```
-### Optional arguments for action `list-profiles`
+### Required arguments for action `create`
 
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
-
-
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID | EXPIRED`
+##### `BUNDLE_ID_IDENTIFIER`
 
 
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
+Identifier of the Bundle ID. For example `com.example.app`
+### Optional arguments for action `create`
+
+##### `--name=BUNDLE_ID_NAME`
 
 
-Name of the provisioning profile
-##### `--save`
+Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Bundle ID platform. Default:&nbsp;`IOS`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

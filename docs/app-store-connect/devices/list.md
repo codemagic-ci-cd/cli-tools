@@ -1,12 +1,12 @@
 
-get-certificate
-===============
+list
+====
 
 
-**Get specified Signing Certificate from Apple Developer portal**
+**List Devices from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect get-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect devices list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,41 +17,24 @@ app-store-connect get-certificate [-h] [--log-stream STREAM] [--no-color] [--ver
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--certificate-key PRIVATE_KEY]
-    [--certificate-key-password PRIVATE_KEY_PASSWORD]
-    [--p12-password P12_CONTAINER_PASSWORD]
-    [--p12-path P12_CONTAINER_SAVE_PATH]
-    [--save]
-    CERTIFICATE_RESOURCE_ID
+    [--platform PLATFORM_OPTIONAL]
+    [--name DEVICE_NAME_OPTIONAL]
+    [--status DEVICE_STATUS]
 ```
-### Required arguments for action `get-certificate`
+### Optional arguments for action `list`
 
-##### `CERTIFICATE_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Signing Certificate
-### Optional arguments for action `get-certificate`
-
-##### `--certificate-key=PRIVATE_KEY`
+##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
 
 
-Private key used to generate the certificate. Used together with `--save` or `--create` options. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+Bundle ID platform
+##### `--name, -n=DEVICE_NAME_OPTIONAL`
 
 
-Password of the private key used to generate the certificate. Used together with `--certificate-key` or `--certificate-key-path` options if the provided key is encrypted. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--p12-password=P12_CONTAINER_PASSWORD`
+Common name of Devices
+##### `--status=DISABLED | ENABLED`
 
 
-If provided, the saved p12 container will be encrypted using this password. Used together with `--save` option.
-##### `--p12-path=P12_CONTAINER_SAVE_PATH`
-
-
-If provided, the exported p12 container will saved at this path. Otherwise it will be saved with a random name in the directory specified by `--certificates-dir`. Used together with `--save` option.
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
+Status of the Device
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

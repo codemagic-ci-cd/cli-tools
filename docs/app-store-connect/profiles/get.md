@@ -1,12 +1,12 @@
 
-delete-bundle-id
-================
+get
+===
 
 
-**Delete specified Bundle ID from Apple Developer portal**
+**Get specified Profile from Apple Developer portal**
 ### Usage
 ```bash
-app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect profiles get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,21 +17,21 @@ app-store-connect delete-bundle-id [-h] [--log-stream STREAM] [--no-color] [--ve
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    BUNDLE_ID_RESOURCE_ID
+    [--save]
+    PROFILE_RESOURCE_ID
 ```
-### Required arguments for action `delete-bundle-id`
+### Required arguments for action `get`
 
-##### `BUNDLE_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Bundle ID
-### Optional arguments for action `delete-bundle-id`
-
-##### `--ignore-not-found`
+##### `PROFILE_RESOURCE_ID`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Alphanumeric ID value of the Profile
+### Optional arguments for action `get`
+
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

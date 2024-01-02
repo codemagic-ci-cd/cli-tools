@@ -1,12 +1,12 @@
 
-delete-profile
-==============
+delete
+======
 
 
-**Delete specified Profile from Apple Developer portal**
+**Delete specified Signing Certificate from Apple Developer portal**
 ### Usage
 ```bash
-app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect certificates delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -18,15 +18,15 @@ app-store-connect delete-profile [-h] [--log-stream STREAM] [--no-color] [--vers
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--ignore-not-found]
-    PROFILE_RESOURCE_ID
+    CERTIFICATE_RESOURCE_ID
 ```
-### Required arguments for action `delete-profile`
+### Required arguments for action `delete`
 
-##### `PROFILE_RESOURCE_ID`
+##### `CERTIFICATE_RESOURCE_ID`
 
 
-Alphanumeric ID value of the Profile
-### Optional arguments for action `delete-profile`
+Alphanumeric ID value of the Signing Certificate
+### Optional arguments for action `delete`
 
 ##### `--ignore-not-found`
 

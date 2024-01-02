@@ -1,12 +1,12 @@
 
-list-bundle-id-profiles
-=======================
+certificates
+============
 
 
-**List provisioning profiles from Apple Developer Portal for specified Bundle IDs**
+**Manage code signing certificates**
 ### Usage
 ```bash
-app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,36 +17,8 @@ app-store-connect list-bundle-id-profiles [-h] [--log-stream STREAM] [--no-color
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--type PROFILE_TYPE_OPTIONAL]
-    [--state PROFILE_STATE_OPTIONAL]
-    [--name PROFILE_NAME]
-    [--save]
-    --bundle-ids BUNDLE_ID_RESOURCE_IDS
+    ACTION
 ```
-### Required arguments for action `list-bundle-id-profiles`
-
-##### `--bundle-ids=BUNDLE_ID_RESOURCE_IDS`
-
-
-Alphanumeric ID value of the Bundle ID. Multiple arguments
-### Optional arguments for action `list-bundle-id-profiles`
-
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
-
-
-Type of the provisioning profile
-##### `--state=ACTIVE | INVALID | EXPIRED`
-
-
-State of the provisioning profile
-##### `--name=PROFILE_NAME`
-
-
-Name of the provisioning profile
-##### `--save`
-
-
-Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -115,3 +87,11 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`create`](certificates/create.md)|Create code signing certificates of given type|
+|[`delete`](certificates/delete.md)|Delete specified Signing Certificate from Apple Developer portal|
+|[`get`](certificates/get.md)|Get specified Signing Certificate from Apple Developer portal|
+|[`list`](certificates/list.md)|List Signing Certificates from Apple Developer Portal matching given constraints|

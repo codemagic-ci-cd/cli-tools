@@ -34,10 +34,52 @@ The following actions are deprecated and show a warning message when invoked:
 - Decorator `@action` signature was changed. Optional keyword argument `deprecated_alias: str` was replaced by optional `deprecation_info: ActionDeprecationInfo` which holds both version in which the action was deprecated, and the deprecated name of the action.
 - Decorator `@action` definition was moved from `codemagic.cli.cli_app` to `codemagic.cli.action`. It is still accessible from package `codemagic.cli` as before.
 
+**Documentation**
+- Remove documentation of deprecated actions:
+  - `app-store-connect list-builds` (replaced by `app-store-connect builds list`),
+  - `app-store-connect create-bundle-id` (replaced by `app-store-connect bundle-ids create`),
+  - `app-store-connect delete-bundle-id` (replaced by `app-store-connect bundle-ids delete`),
+  - `app-store-connect get-bundle-id` (replaced by `app-store-connect bundle-ids get`),
+  - `app-store-connect list-bundle-id-profiles` (replaced by `app-store-connect bundle-ids profiles`),
+  - `app-store-connect list-bundle-ids` (replaced by `app-store-connect bundle-ids list`),
+  - `app-store-connect create-certificate` (replaced by `app-store-connect certificates create`),
+  - `app-store-connect delete-certificate` (replaced by `app-store-connect certificates delete`),
+  - `app-store-connect get-certificate` (replaced by `app-store-connect certificates get`),
+  - `app-store-connect list-certificates` (replaced by `app-store-connect certificates list`),
+  - `app-store-connect list-devices` (replaced by `app-store-connect devices list`),
+  - `app-store-connect register-device` (replaced by `app-store-connect devices register`),
+  - `app-store-connect create-profile` (replaced by `app-store-connect profiles create`),
+  - `app-store-connect delete-profile` (replaced by `app-store-connect profiles delete`),
+  - `app-store-connect get-profile` (replaced by `app-store-connect profiles get`),
+  - `app-store-connect list-profiles` (replaced by `app-store-connect profiles list`).
+- Add documentation for new action groups:
+  - `app-store-connect bundle-ids`,
+  - `app-store-connect certificates`,
+  - `app-store-connect devices`,
+  - `app-store-connect profiles`.
+- Update documentation for action groups:
+  - `app-store-connect builds`.
+- Add documentation for actions:
+  - `app-store-connect builds list` (used to be `app-store-connect list-builds`)
+  - `app-store-connect bundle-ids create` (used to be `app-store-connect create-bundle-id`)
+  - `app-store-connect bundle-ids get` (used to be `app-store-connect get-bundle-id`)
+  - `app-store-connect bundle-ids list` (used to be `app-store-connect list-bundle-ids`)
+  - `app-store-connect bundle-ids profiles` (used to be `app-store-connect list-bundle-id-profiles`)
+  - `app-store-connect app-store-connect certificates create` (used to be `app-store-connect create-certificate`)
+  - `app-store-connect app-store-connect certificates delete` (used to be `app-store-connect delete-certificate`)
+  - `app-store-connect app-store-connect certificates get` (used to be `app-store-connect get-certificate`)
+  - `app-store-connect app-store-connect certificates list` (used to be `app-store-connect list-certificates`)
+  - `app-store-connect app-store-connect devices list` (used to be `app-store-connect list-devices`)
+  - `app-store-connect app-store-connect devices register` (used to be `app-store-connect register-device`)
+  - `app-store-connect app-store-connect profiles create` (used to be `app-store-connect create-profile`)
+  - `app-store-connect app-store-connect profiles delete` (used to be `app-store-connect delete-profile`)
+  - `app-store-connect app-store-connect profiles get` (used to be `app-store-connect get-profile`)
+  - `app-store-connect app-store-connect profiles list` (used to be `app-store-connect list-profiles`)
+
 Version 0.48.2
 -------------
 
-This PR contains changes from [PR #382](https://github.com/codemagic-ci-cd/cli-tools/pull/382)
+This release contains changes from [PR #382](https://github.com/codemagic-ci-cd/cli-tools/pull/382)
 
 **Features**
 - Speed improvements for `app-store-connect` actions `get-latest-testflight-build-number`, `get-latest-app-store-build-number` and `app-store-connect get-latest-build-number` in case the application has a lot of versions in App Store Connect.

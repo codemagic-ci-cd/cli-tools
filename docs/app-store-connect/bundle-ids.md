@@ -1,12 +1,12 @@
 
-create-bundle-id
-================
+bundle-ids
+==========
 
 
-**Create Bundle ID in Apple Developer portal for specifier identifier**
+**Manage bundle identifiers and their capabilities**
 ### Usage
 ```bash
-app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,26 +17,8 @@ app-store-connect create-bundle-id [-h] [--log-stream STREAM] [--no-color] [--ve
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--name BUNDLE_ID_NAME]
-    [--platform PLATFORM]
-    BUNDLE_ID_IDENTIFIER
+    ACTION
 ```
-### Required arguments for action `create-bundle-id`
-
-##### `BUNDLE_ID_IDENTIFIER`
-
-
-Identifier of the Bundle ID. For example `com.example.app`
-### Optional arguments for action `create-bundle-id`
-
-##### `--name=BUNDLE_ID_NAME`
-
-
-Name of the Bundle ID. If the resource is being created, the default will be deduced from given Bundle ID identifier.
-##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
-
-
-Bundle ID platform. Default:&nbsp;`IOS`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -105,3 +87,12 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`create`](bundle-ids/create.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
+|[`delete`](bundle-ids/delete.md)|Delete specified Bundle ID from Apple Developer portal|
+|[`get`](bundle-ids/get.md)|Get specified Bundle ID from Apple Developer portal|
+|[`profiles`](bundle-ids/profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
+|[`list`](bundle-ids/list.md)|List Bundle IDs from Apple Developer portal matching given constraints|

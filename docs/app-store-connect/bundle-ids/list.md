@@ -1,12 +1,12 @@
 
-list-bundle-ids
-===============
+list
+====
 
 
 **List Bundle IDs from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect list-bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -22,7 +22,7 @@ app-store-connect list-bundle-ids [-h] [--log-stream STREAM] [--no-color] [--ver
     [--platform PLATFORM_OPTIONAL]
     [--strict-match-identifier]
 ```
-### Optional arguments for action `list-bundle-ids`
+### Optional arguments for action `list`
 
 ##### `--bundle-id-identifier=BUNDLE_ID_IDENTIFIER_OPTIONAL`
 

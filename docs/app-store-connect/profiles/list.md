@@ -1,12 +1,12 @@
 
-delete-certificate
-==================
+list
+====
 
 
-**Delete specified Signing Certificate from Apple Developer portal**
+**List Profiles from Apple Developer portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect delete-certificate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect profiles list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,21 +17,29 @@ app-store-connect delete-certificate [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--ignore-not-found]
-    CERTIFICATE_RESOURCE_ID
+    [--type PROFILE_TYPE_OPTIONAL]
+    [--state PROFILE_STATE_OPTIONAL]
+    [--name PROFILE_NAME]
+    [--save]
 ```
-### Required arguments for action `delete-certificate`
+### Optional arguments for action `list`
 
-##### `CERTIFICATE_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Signing Certificate
-### Optional arguments for action `delete-certificate`
-
-##### `--ignore-not-found`
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 
-Do not raise exceptions if the specified resource does not exist.
+Type of the provisioning profile
+##### `--state=ACTIVE | INVALID | EXPIRED`
+
+
+State of the provisioning profile
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
+##### `--save`
+
+
+Whether to save the resources to disk. See PROFILES_DIRECTORY and CERTIFICATES_DIRECTORY for more information.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

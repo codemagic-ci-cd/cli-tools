@@ -1,12 +1,12 @@
 
-get-profile
-===========
+create
+======
 
 
-**Get specified Profile from Apple Developer portal**
+**Create provisioning profile of given type**
 ### Usage
 ```bash
-app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect profiles create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,17 +17,37 @@ app-store-connect get-profile [-h] [--log-stream STREAM] [--no-color] [--version
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--device-ids DEVICE_RESOURCE_IDS]
+    [--type PROFILE_TYPE]
+    [--name PROFILE_NAME]
     [--save]
-    PROFILE_RESOURCE_ID
+    BUNDLE_ID_RESOURCE_ID
+    --certificate-ids CERTIFICATE_RESOURCE_IDS
 ```
-### Required arguments for action `get-profile`
+### Required arguments for action `create`
 
-##### `PROFILE_RESOURCE_ID`
+##### `BUNDLE_ID_RESOURCE_ID`
 
 
-Alphanumeric ID value of the Profile
-### Optional arguments for action `get-profile`
+Alphanumeric ID value of the Bundle ID
+##### `--certificate-ids=CERTIFICATE_RESOURCE_IDS`
 
+
+Alphanumeric ID value of the Signing Certificate. Multiple arguments
+### Optional arguments for action `create`
+
+##### `--device-ids=DEVICE_RESOURCE_IDS`
+
+
+Alphanumeric ID value of the Device. Required for development profile types. Multiple arguments
+##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+
+
+Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
+##### `--name=PROFILE_NAME`
+
+
+Name of the provisioning profile
 ##### `--save`
 
 

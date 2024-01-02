@@ -1,12 +1,12 @@
 
-list-devices
-============
+devices
+=======
 
 
-**List Devices from Apple Developer portal matching given constraints**
+**Manage Apple devices**
 ### Usage
 ```bash
-app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect devices [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,24 +17,8 @@ app-store-connect list-devices [-h] [--log-stream STREAM] [--no-color] [--versio
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--platform PLATFORM_OPTIONAL]
-    [--name DEVICE_NAME_OPTIONAL]
-    [--status DEVICE_STATUS]
+    ACTION
 ```
-### Optional arguments for action `list-devices`
-
-##### `--platform=IOS | MAC_OS | UNIVERSAL | SERVICES`
-
-
-Bundle ID platform
-##### `--name, -n=DEVICE_NAME_OPTIONAL`
-
-
-Common name of Devices
-##### `--status=DISABLED | ENABLED`
-
-
-Status of the Device
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -103,3 +87,9 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`list`](devices/list.md)|List Devices from Apple Developer portal matching given constraints|
+|[`register`](devices/register.md)|Register new Devices for app development|

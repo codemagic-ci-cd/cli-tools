@@ -1,12 +1,12 @@
 
-create-profile
-==============
+list
+====
 
 
-**Create provisioning profile of given type**
+**List Signing Certificates from Apple Developer Portal matching given constraints**
 ### Usage
 ```bash
-app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect certificates list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,37 +17,40 @@ app-store-connect create-profile [-h] [--log-stream STREAM] [--no-color] [--vers
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--device-ids DEVICE_RESOURCE_IDS]
-    [--type PROFILE_TYPE]
-    [--name PROFILE_NAME]
+    [--type CERTIFICATE_TYPES_OPTIONAL]
+    [--profile-type PROFILE_TYPE_OPTIONAL]
+    [--display-name DISPLAY_NAME]
+    [--certificate-key PRIVATE_KEY]
+    [--certificate-key-password PRIVATE_KEY_PASSWORD]
+    [--p12-password P12_CONTAINER_PASSWORD]
     [--save]
-    BUNDLE_ID_RESOURCE_ID
-    --certificate-ids CERTIFICATE_RESOURCE_IDS
 ```
-### Required arguments for action `create-profile`
+### Optional arguments for action `list`
 
-##### `BUNDLE_ID_RESOURCE_ID`
-
-
-Alphanumeric ID value of the Bundle ID
-##### `--certificate-ids=CERTIFICATE_RESOURCE_IDS`
+##### `--type=DEVELOPER_ID_APPLICATION | DEVELOPER_ID_KEXT | DEVELOPMENT | DISTRIBUTION | IOS_DEVELOPMENT | IOS_DISTRIBUTION | MAC_APP_DEVELOPMENT | MAC_APP_DISTRIBUTION | MAC_INSTALLER_DISTRIBUTION`
 
 
-Alphanumeric ID value of the Signing Certificate. Multiple arguments
-### Optional arguments for action `create-profile`
-
-##### `--device-ids=DEVICE_RESOURCE_IDS`
+Type of the certificate. Multiple arguments
+##### `--profile-type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
 
 
-Alphanumeric ID value of the Device. Required for development profile types. Multiple arguments
-##### `--type=IOS_APP_ADHOC | IOS_APP_DEVELOPMENT | IOS_APP_INHOUSE | IOS_APP_STORE | MAC_APP_DEVELOPMENT | MAC_APP_DIRECT | MAC_APP_STORE | MAC_CATALYST_APP_DEVELOPMENT | MAC_CATALYST_APP_DIRECT | MAC_CATALYST_APP_STORE | TVOS_APP_ADHOC | TVOS_APP_DEVELOPMENT | TVOS_APP_INHOUSE | TVOS_APP_STORE`
+Type of the provisioning profile that the certificate is used with
+##### `--display-name=DISPLAY_NAME`
 
 
-Type of the provisioning profile. Default:&nbsp;`IOS_APP_DEVELOPMENT`
-##### `--name=PROFILE_NAME`
+Code signing certificate display name
+##### `--certificate-key=PRIVATE_KEY`
 
 
-Name of the provisioning profile
+Private key used to generate the certificate. Used together with `--save` or `--create` options. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY`. Alternatively to entering CERTIFICATE_KEY in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--certificate-key-password=PRIVATE_KEY_PASSWORD`
+
+
+Password of the private key used to generate the certificate. Used together with `--certificate-key` or `--certificate-key-path` options if the provided key is encrypted. If not given, the value will be checked from the environment variable `CERTIFICATE_PRIVATE_KEY_PASSWORD`. Alternatively to entering CERTIFICATE_KEY_PASSWORD in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--p12-password=P12_CONTAINER_PASSWORD`
+
+
+If provided, the saved p12 container will be encrypted using this password. Used together with `--save` option.
 ##### `--save`
 
 
