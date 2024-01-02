@@ -48,8 +48,8 @@ if TYPE_CHECKING:
     from codemagic.apple.resources import ReviewSubmissionItem
     from codemagic.apple.resources import ReviewSubmissionState
     from codemagic.apple.resources import SigningCertificate
+    from codemagic.models import PrivateKey
 
-    from ...models import PrivateKey
     from .arguments import AppStoreVersionInfo
     from .arguments import AppStoreVersionLocalizationInfo
     from .arguments import BetaBuildInfo
@@ -396,9 +396,9 @@ class AbstractBaseAction(
         build_version_number: Optional[int] = None,
         should_print: bool = True,
     ) -> List[Build]:
-        from codemagic.tools.app_store_connect import AppStoreConnect
+        from .action_groups import BuildsActionGroup
 
-        _ = AppStoreConnect.list_builds  # Implementation
+        _ = BuildsActionGroup.list_builds  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
