@@ -1,66 +1,61 @@
 from __future__ import annotations
 
+import logging
+import pathlib
 from abc import ABCMeta
 from abc import abstractmethod
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Union
 
+from codemagic.apple import AppStoreConnectApiClient
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import App
+from codemagic.apple.resources import AppStoreState
+from codemagic.apple.resources import AppStoreVersion
+from codemagic.apple.resources import AppStoreVersionLocalization
+from codemagic.apple.resources import AppStoreVersionSubmission
+from codemagic.apple.resources import BetaAppReviewSubmission
+from codemagic.apple.resources import BetaBuildLocalization
+from codemagic.apple.resources import BetaReviewState
+from codemagic.apple.resources import Build
+from codemagic.apple.resources import BuildProcessingState
+from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import BundleIdPlatform
 from codemagic.apple.resources import CertificateType
+from codemagic.apple.resources import Device
+from codemagic.apple.resources import DeviceStatus
+from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import Profile
+from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import ReleaseType
+from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ReviewSubmission
+from codemagic.apple.resources import ReviewSubmissionItem
+from codemagic.apple.resources import ReviewSubmissionState
+from codemagic.apple.resources import SigningCertificate
 from codemagic.mixins import PathFinderMixin
+from codemagic.models import PrivateKey
 
+from .arguments import AppStoreVersionInfo
+from .arguments import AppStoreVersionLocalizationInfo
+from .arguments import BetaBuildInfo
+from .arguments import CertificateArgument
+from .arguments import Types
 from .mixins import ResourceManagerMixin
 from .mixins import SigningFileSaverMixin
+from .resource_printer import ResourcePrinter
 
-if TYPE_CHECKING:
-    import logging
-    import pathlib
-    from datetime import datetime
-    from typing import List
-    from typing import Optional
-    from typing import Sequence
-    from typing import Tuple
-    from typing import Union
-
-    from codemagic.apple import AppStoreConnectApiClient
-    from codemagic.apple.app_store_connect import IssuerId
-    from codemagic.apple.app_store_connect import KeyIdentifier
-    from codemagic.apple.resources import App
-    from codemagic.apple.resources import AppStoreState
-    from codemagic.apple.resources import AppStoreVersion
-    from codemagic.apple.resources import AppStoreVersionLocalization
-    from codemagic.apple.resources import AppStoreVersionSubmission
-    from codemagic.apple.resources import BetaAppReviewSubmission
-    from codemagic.apple.resources import BetaBuildLocalization
-    from codemagic.apple.resources import BetaReviewState
-    from codemagic.apple.resources import Build
-    from codemagic.apple.resources import BuildProcessingState
-    from codemagic.apple.resources import BundleId
-    from codemagic.apple.resources import Device
-    from codemagic.apple.resources import DeviceStatus
-    from codemagic.apple.resources import Locale
-    from codemagic.apple.resources import Profile
-    from codemagic.apple.resources import ProfileState
-    from codemagic.apple.resources import ReleaseType
-    from codemagic.apple.resources import ResourceId
-    from codemagic.apple.resources import ReviewSubmission
-    from codemagic.apple.resources import ReviewSubmissionItem
-    from codemagic.apple.resources import ReviewSubmissionState
-    from codemagic.apple.resources import SigningCertificate
-    from codemagic.models import PrivateKey
-
-    from .arguments import AppStoreVersionInfo
-    from .arguments import AppStoreVersionLocalizationInfo
-    from .arguments import BetaBuildInfo
-    from .arguments import CertificateArgument
-    from .arguments import Types
-    from .resource_printer import ResourcePrinter
-
-    AppStoreVersionLocalizationInfos = Union[
-        List[AppStoreVersionLocalizationInfo],
-        Types.AppStoreVersionLocalizationInfoArgument,
-    ]
+AppStoreVersionLocalizationInfos = Union[
+    List[AppStoreVersionLocalizationInfo],
+    Types.AppStoreVersionLocalizationInfoArgument,
+]
 
 
 class AbstractBaseAction(
