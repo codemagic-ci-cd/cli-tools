@@ -6,18 +6,23 @@ from typing import Optional
 from typing import Sequence
 
 from codemagic import cli
+from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import BundleId
+from codemagic.apple.resources import BundleIdCapability
 from codemagic.apple.resources import BundleIdPlatform
+from codemagic.apple.resources import CapabilityType
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
+from codemagic.cli import Colors
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BundleIdArgument
 from ..arguments import CommonArgument
 from ..arguments import ProfileArgument
+from ..errors import AppStoreConnectError
 
 
 class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -163,3 +168,147 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if save:
             self._save_profiles(profiles)
         return profiles
+
+    @cli.action(
+        "capabilities",
+        BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
+        BundleIdArgument.OPTIONAL_CAPABILITY_TYPES,
+        action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
+    )
+    def list_bundle_id_capabilities(
+        self,
+        bundle_id_resource_id: ResourceId,
+        capability_types: Optional[Sequence[CapabilityType]] = None,
+        should_print: bool = True,
+    ) -> List[BundleIdCapability]:
+        """
+        Check the capabilities that are enabled for identifier
+        """
+
+        def predicate(bundle_id_capability: BundleIdCapability) -> bool:
+            if not capability_types:
+                return True
+            return bundle_id_capability.attributes.capabilityType in capability_types
+
+        return self._list_related_resources(
+            bundle_id_resource_id,
+            BundleId,
+            BundleIdCapability,
+            self.api_client.bundle_ids.list_capabilities,
+            None,
+            should_print,
+            filter_predicate=predicate,
+        )
+
+    @cli.action(
+        "enable-capabilities",
+        BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
+        BundleIdArgument.CAPABILITY_TYPES,
+        action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
+    )
+    def enable_bundle_id_capabilities(
+        self,
+        bundle_id_resource_id: ResourceId,
+        capability_types: Sequence[CapabilityType],
+    ):
+        """
+        Enable capabilities for identifier
+        """
+        bundle_id = self._get_bundle_id(bundle_id_resource_id)
+        self.logger.info(Colors.BLUE(f'Enable {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'))
+
+        for capability_type in capability_types:
+            self._enable_capability(bundle_id, capability_type)
+
+        success_message = f'Successfully enabled {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'
+        self.logger.info(Colors.GREEN(success_message))
+
+    @cli.action(
+        "disable-capabilities",
+        BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
+        BundleIdArgument.CAPABILITY_TYPES,
+        action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
+    )
+    def disable_bundle_id_capabilities(
+        self,
+        bundle_id_resource_id: ResourceId,
+        capability_types: Sequence[CapabilityType],
+    ):
+        """
+        Disable identifier capabilities
+        """
+        bundle_id = self._get_bundle_id(bundle_id_resource_id)
+        self.logger.info(Colors.BLUE(f'Disable {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'))
+
+        capabilities = self._get_capabilities(bundle_id, capability_types)
+        if not capabilities:
+            skip_message = (
+                f"None of the specified {BundleIdCapability.s} are enabled for identifier "
+                f'"{bundle_id.attributes.name}". Skip disabling.'
+            )
+            self.logger.info(Colors.YELLOW(skip_message))
+            return
+
+        for capability in capabilities:
+            self._disable_capability(bundle_id, capability)
+
+        success_message = f'Successfully disabled {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'
+        self.logger.info(Colors.GREEN(success_message))
+
+    def _get_bundle_id(self, bundle_id_resource_id: ResourceId) -> BundleId:
+        try:
+            return self.api_client.bundle_ids.read(bundle_id_resource_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
+
+    def _get_capabilities(
+        self,
+        bundle_id: BundleId,
+        capability_types: Sequence[CapabilityType],
+    ) -> List[BundleIdCapability]:
+        try:
+            capabilities = self.api_client.bundle_ids.list_capabilities(bundle_id)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(
+                str(api_error),
+                api_error_response=api_error.error_response,
+            ) from api_error
+        return [c for c in capabilities if c.attributes.capabilityType in capability_types]
+
+    def _enable_capability(self, bundle_id: BundleId, capability_type: CapabilityType) -> BundleIdCapability:
+        try:
+            capability = self.api_client.bundle_id_capabilities.enable(
+                capability_type,
+                bundle_id=bundle_id.id,
+            )
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(
+                (
+                    f"Failed to enable capability {capability_type.value} for bundle identifier "
+                    f'"{bundle_id.attributes.name}" ({bundle_id.id}): {api_error}'
+                ),
+                api_error_response=api_error.error_response,
+            ) from api_error
+
+        self.echo(Colors.BLUE(f"-- Enabled {capability.__class__} --"))
+        self.echo(f"{capability}")
+        return capability
+
+    def _disable_capability(self, bundle_id: BundleId, capability: BundleIdCapability):
+        try:
+            self.api_client.bundle_id_capabilities.disable(capability)
+        except AppStoreConnectApiError as api_error:
+            raise AppStoreConnectError(
+                (
+                    f"Failed to disable capability {capability.attributes.capabilityType.value} "
+                    f"for bundle identifier "
+                    f'"{bundle_id.attributes.name}" ({bundle_id.id}): {api_error}'
+                ),
+                api_error_response=api_error.error_response,
+            ) from api_error
+
+        self.echo(Colors.BLUE(f"-- Disabled {capability.__class__} --"))
+        self.echo(f"{capability}")
