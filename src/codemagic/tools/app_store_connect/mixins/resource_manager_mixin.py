@@ -11,8 +11,8 @@ from codemagic.apple.app_store_connect.resource_manager import R
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import ResourceId
 
-from .errors import AppStoreConnectError
-from .resource_printer import ResourcePrinter
+from ..errors import AppStoreConnectError
+from ..resource_printer import ResourcePrinter
 
 
 class ResourceManagerMixin:

@@ -5,8 +5,8 @@ import pathlib
 
 import pytest
 from codemagic.tools.app_store_connect import AppStoreConnect
-from codemagic.tools.app_store_connect import AppStoreConnectArgument
-from codemagic.tools.app_store_connect import Types
+from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
+from codemagic.tools.app_store_connect.arguments import Types
 
 
 @pytest.fixture(autouse=True)
@@ -24,7 +24,8 @@ def mock_auth_key() -> pathlib.Path:
 def namespace_kwargs(mock_auth_key):
     args = AppStoreConnectArgument
     ns_kwargs = {
-        "action": "list-devices",
+        "action": "devices",
+        "action_subcommand": "list",
         args.CERTIFICATES_DIRECTORY.key: args.CERTIFICATES_DIRECTORY.get_default(),
         args.PROFILES_DIRECTORY.key: args.PROFILES_DIRECTORY.get_default(),
         args.LOG_REQUESTS.key: True,
