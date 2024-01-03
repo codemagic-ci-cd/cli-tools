@@ -1,7 +1,11 @@
 Version 0.50.0
 -------------
 
-TODO
+**Features**
+- Add new actions to work with bundle identifier capabilities [PR #388](https://github.com/codemagic-ci-cd/cli-tools/pull/388):
+  - `app-store-connect bundle-ids capabilities` to list the capabilities that are enabled for identifier,
+  - `app-store-connect bundle-ids enable-capabilities` to enable capabilities for identifier,
+  - `app-store-connect bundle-ids disable-capabilities` to disable capabilities for identifier.
 
 Version 0.49.0
 -------------
