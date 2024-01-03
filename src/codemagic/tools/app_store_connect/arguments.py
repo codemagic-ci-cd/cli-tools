@@ -23,6 +23,7 @@ from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import BetaReviewState
 from codemagic.apple.resources import BuildProcessingState
 from codemagic.apple.resources import BundleIdPlatform
+from codemagic.apple.resources import CapabilityType
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Locale
@@ -1227,6 +1228,17 @@ class BundleIdArgument(cli.Argument):
             "required": True,
             "nargs": "+",
             "metavar": "bundle-identifier-id",
+        },
+    )
+    CAPABILITY_TYPES = cli.ArgumentProperties(
+        key="capabilities",
+        flags=("--capability",),
+        type=str,
+        description="Name of the identifier capability",
+        argparse_kwargs={
+            "required": True,
+            "choices": [ct.display_name for ct in CapabilityType],
+            "nargs": "+",
         },
     )
     PLATFORM = cli.ArgumentProperties(

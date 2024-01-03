@@ -1,12 +1,12 @@
 
-bundle-ids
-==========
+capabilities
+============
 
 
-**Manage bundle identifiers and their capabilities**
+**Check the capabilities that are enabled for identifier**
 ### Usage
 ```bash
-app-store-connect bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect bundle-ids capabilities [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,21 @@ app-store-connect bundle-ids [-h] [--log-stream STREAM] [--no-color] [--version]
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    [--capability OPTIONAL_CAPABILITY_TYPES]
+    BUNDLE_ID_RESOURCE_ID
 ```
+### Required arguments for action `capabilities`
+
+##### `BUNDLE_ID_RESOURCE_ID`
+
+
+Alphanumeric ID value of the Bundle ID
+### Optional arguments for action `capabilities`
+
+##### `--capability=Access Wi-Fi Information | Sign In with Apple | Apple Pay | App Groups | Associated Domains | Autofill Credential Provider | ClassKit | Low Latency HLS | Data Protection | Game Center | HealthKit | HomeKit | Hotspot | iCloud | Inter-App Audio | In-App Purchase | Maps | Multipath | Custom Network Protocol | Network Extensions | 5G Network Slicing | NFC Tag Reading | Personal VPN | Push Notifications | SiriKit | System Extension | User Management | Wallet | Wireless Accessory Configuration`
+
+
+Name of the identifier capability. Multiple arguments
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,15 +100,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](bundle-ids/create.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
-|[`delete`](bundle-ids/delete.md)|Delete specified Bundle ID from Apple Developer portal|
-|[`disable-capabilities`](bundle-ids/disable-capabilities.md)|Disable identifier capabilities|
-|[`enable-capabilities`](bundle-ids/enable-capabilities.md)|Enable capabilities for identifier|
-|[`get`](bundle-ids/get.md)|Get specified Bundle ID from Apple Developer portal|
-|[`capabilities`](bundle-ids/capabilities.md)|Check the capabilities that are enabled for identifier|
-|[`profiles`](bundle-ids/profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
-|[`list`](bundle-ids/list.md)|List Bundle IDs from Apple Developer portal matching given constraints|
