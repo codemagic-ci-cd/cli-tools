@@ -1241,14 +1241,6 @@ class BundleIdArgument(cli.Argument):
             "nargs": "+",
         },
     )
-    OPTIONAL_CAPABILITY_TYPES = cli.ArgumentProperties.duplicate(
-        CAPABILITY_TYPES,
-        argparse_kwargs={
-            "required": False,
-            "choices": [ct.display_name for ct in CapabilityType],
-            "nargs": "+",
-        },
-    )
     PLATFORM = cli.ArgumentProperties(
         key="platform",
         flags=("--platform",),

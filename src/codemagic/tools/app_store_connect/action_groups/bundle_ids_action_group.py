@@ -173,25 +173,16 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         "capabilities",
         BundleIdArgument.BUNDLE_ID_RESOURCE_ID,
-        BundleIdArgument.OPTIONAL_CAPABILITY_TYPES,
         action_group=AppStoreConnectActionGroup.BUNDLE_IDS,
     )
     def list_bundle_id_capabilities(
         self,
         bundle_id_resource_id: ResourceId,
-        capabilities: Optional[Sequence[Union[CapabilityType, str]]] = None,
         should_print: bool = True,
     ) -> List[BundleIdCapability]:
         """
         Check the capabilities that are enabled for identifier
         """
-        capability_types = self._resolve_capability_types(capabilities)
-
-        def predicate(bundle_id_capability: BundleIdCapability) -> bool:
-            if not capability_types:
-                return True
-            return bundle_id_capability.attributes.capabilityType in capability_types
-
         return self._list_related_resources(
             bundle_id_resource_id,
             BundleId,
@@ -199,7 +190,6 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.api_client.bundle_ids.list_capabilities,
             None,
             should_print,
-            filter_predicate=predicate,
         )
 
     @cli.action(
