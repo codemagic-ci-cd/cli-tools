@@ -103,6 +103,7 @@ class CapabilityType(ResourceEnum):
     MULTIPATH = "MULTIPATH"
     NETWORK_CUSTOM_PROTOCOL = "NETWORK_CUSTOM_PROTOCOL"
     NETWORK_EXTENSIONS = "NETWORK_EXTENSIONS"
+    NETWORK_SLICING = "NETWORK_SLICING"
     NFC_TAG_READING = "NFC_TAG_READING"
     PERSONAL_VPN = "PERSONAL_VPN"
     PUSH_NOTIFICATIONS = "PUSH_NOTIFICATIONS"
@@ -131,12 +132,19 @@ class CapabilityType(ResourceEnum):
                 CapabilityType.INTER_APP_AUDIO: "Inter-App Audio",
                 CapabilityType.IN_APP_PURCHASE: "In-App Purchase",
                 CapabilityType.NETWORK_CUSTOM_PROTOCOL: "Custom Network Protocol",
+                CapabilityType.NETWORK_SLICING: "5G Network Slicing",
                 CapabilityType.NFC_TAG_READING: "NFC Tag Reading",
                 CapabilityType.PERSONAL_VPN: "Personal VPN",
                 CapabilityType.SYSTEM_EXTENSION_INSTALL: "System Extension",
             }[self]
         except KeyError:
-            return re.sub(r"(kit)$", "Kit", " ".join(self.value.split("_")).title())
+            return self.get_default_display_name(self.value)
+
+    @classmethod
+    def get_default_display_name(cls, capability_type_value: str) -> str:
+        parts = capability_type_value.split("_")
+        title = " ".join(parts).title()
+        return re.sub(r"(kit)$", "Kit", title)
 
 
 class CertificateType(ResourceEnum):

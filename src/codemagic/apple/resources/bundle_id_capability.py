@@ -70,5 +70,8 @@ class BundleIdCapability(Resource):
 
     def _format_attribute_value(self, attribute_name: str, value: Any) -> Any:
         if attribute_name == "capabilityType":
-            return self.attributes.capabilityType.display_name
+            # Add graceful fallback for capability types that do not have enumeration mapping
+            if hasattr(self.attributes.capabilityType, "display_name"):
+                return self.attributes.capabilityType.display_name
+            return CapabilityType.get_default_display_name(self.attributes.capabilityType.value)
         return super()._format_attribute_value(attribute_name, value)
