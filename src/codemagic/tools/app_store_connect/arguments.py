@@ -1231,13 +1231,13 @@ class BundleIdArgument(cli.Argument):
         },
     )
     CAPABILITY_TYPES = cli.ArgumentProperties(
-        key="capability_types",
+        key="capabilities",
         flags=("--capability",),
-        type=CapabilityType,
+        type=str,
         description="Lorem ipsum",  # TODO: Add description
         argparse_kwargs={
             "required": True,
-            "choices": list(CapabilityType),
+            "choices": [ct.display_name for ct in CapabilityType],
             "nargs": "+",
         },
     )
@@ -1245,7 +1245,7 @@ class BundleIdArgument(cli.Argument):
         CAPABILITY_TYPES,
         argparse_kwargs={
             "required": False,
-            "choices": list(CapabilityType),
+            "choices": [ct.display_name for ct in CapabilityType],
             "nargs": "+",
         },
     )

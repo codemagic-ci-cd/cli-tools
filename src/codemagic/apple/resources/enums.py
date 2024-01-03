@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Tuple
 
 from codemagic.models.enums import ResourceEnum
@@ -78,29 +79,64 @@ class CapabilitySettingKey(ResourceEnum):
 
 
 class CapabilityType(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/capabilitytype
+    """
+
     ACCESS_WIFI_INFORMATION = "ACCESS_WIFI_INFORMATION"
-    APP_GROUPS = "APP_GROUPS"
+    APPLE_ID_AUTH = "APPLE_ID_AUTH"
     APPLE_PAY = "APPLE_PAY"
+    APP_GROUPS = "APP_GROUPS"
     ASSOCIATED_DOMAINS = "ASSOCIATED_DOMAINS"
     AUTOFILL_CREDENTIAL_PROVIDER = "AUTOFILL_CREDENTIAL_PROVIDER"
     CLASSKIT = "CLASSKIT"
+    COREMEDIA_HLS_LOW_LATENCY = "COREMEDIA_HLS_LOW_LATENCY"
     DATA_PROTECTION = "DATA_PROTECTION"
     GAME_CENTER = "GAME_CENTER"
     HEALTHKIT = "HEALTHKIT"
     HOMEKIT = "HOMEKIT"
     HOT_SPOT = "HOT_SPOT"
     ICLOUD = "ICLOUD"
-    IN_APP_PURCHASE = "IN_APP_PURCHASE"
     INTER_APP_AUDIO = "INTER_APP_AUDIO"
+    IN_APP_PURCHASE = "IN_APP_PURCHASE"
     MAPS = "MAPS"
     MULTIPATH = "MULTIPATH"
+    NETWORK_CUSTOM_PROTOCOL = "NETWORK_CUSTOM_PROTOCOL"
     NETWORK_EXTENSIONS = "NETWORK_EXTENSIONS"
     NFC_TAG_READING = "NFC_TAG_READING"
     PERSONAL_VPN = "PERSONAL_VPN"
     PUSH_NOTIFICATIONS = "PUSH_NOTIFICATIONS"
     SIRIKIT = "SIRIKIT"
+    SYSTEM_EXTENSION_INSTALL = "SYSTEM_EXTENSION_INSTALL"
+    USER_MANAGEMENT = "USER_MANAGEMENT"
     WALLET = "WALLET"
     WIRELESS_ACCESSORY_CONFIGURATION = "WIRELESS_ACCESSORY_CONFIGURATION"
+
+    @classmethod
+    def from_display_name(cls, display_name: str) -> CapabilityType:
+        for capability_type in cls:
+            if capability_type.display_name == display_name:
+                return capability_type
+        raise ValueError("Unknown capability type", display_name)
+
+    @property
+    def display_name(self) -> str:
+        try:
+            return {
+                CapabilityType.ACCESS_WIFI_INFORMATION: "Access Wi-Fi Information",
+                CapabilityType.APPLE_ID_AUTH: "Sign In with Apple",
+                CapabilityType.COREMEDIA_HLS_LOW_LATENCY: "Low Latency HLS",
+                CapabilityType.HOT_SPOT: "Hotspot",
+                CapabilityType.ICLOUD: "iCloud",
+                CapabilityType.INTER_APP_AUDIO: "Inter-App Audio",
+                CapabilityType.IN_APP_PURCHASE: "In-App Purchase",
+                CapabilityType.NETWORK_CUSTOM_PROTOCOL: "Custom Network Protocol",
+                CapabilityType.NFC_TAG_READING: "NFC Tag Reading",
+                CapabilityType.PERSONAL_VPN: "Personal VPN",
+                CapabilityType.SYSTEM_EXTENSION_INSTALL: "System Extension",
+            }[self]
+        except KeyError:
+            return re.sub(r"(kit)$", "Kit", " ".join(self.value.split("_")).title())
 
 
 class CertificateType(ResourceEnum):

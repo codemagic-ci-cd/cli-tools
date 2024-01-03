@@ -4,6 +4,7 @@ from abc import ABCMeta
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -178,12 +179,13 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def list_bundle_id_capabilities(
         self,
         bundle_id_resource_id: ResourceId,
-        capability_types: Optional[Sequence[CapabilityType]] = None,
+        capabilities: Optional[Sequence[Union[CapabilityType, str]]] = None,
         should_print: bool = True,
     ) -> List[BundleIdCapability]:
         """
         Check the capabilities that are enabled for identifier
         """
+        capability_types = self._resolve_capability_types(capabilities)
 
         def predicate(bundle_id_capability: BundleIdCapability) -> bool:
             if not capability_types:
@@ -209,11 +211,12 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def enable_bundle_id_capabilities(
         self,
         bundle_id_resource_id: ResourceId,
-        capability_types: Sequence[CapabilityType],
+        capabilities: Sequence[Union[CapabilityType, str]],
     ):
         """
         Enable capabilities for identifier
         """
+        capability_types = self._resolve_capability_types(capabilities)
         bundle_id = self._get_bundle_id(bundle_id_resource_id)
         self.logger.info(Colors.BLUE(f'Enable {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'))
 
@@ -232,16 +235,17 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     def disable_bundle_id_capabilities(
         self,
         bundle_id_resource_id: ResourceId,
-        capability_types: Sequence[CapabilityType],
+        capabilities: Sequence[Union[CapabilityType, str]],
     ):
         """
         Disable identifier capabilities
         """
+        capability_types = self._resolve_capability_types(capabilities)
         bundle_id = self._get_bundle_id(bundle_id_resource_id)
         self.logger.info(Colors.BLUE(f'Disable {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'))
 
-        capabilities = self._get_capabilities(bundle_id, capability_types)
-        if not capabilities:
+        enabled_capabilities = self._get_capabilities(bundle_id, capability_types)
+        if not enabled_capabilities:
             skip_message = (
                 f"None of the specified {BundleIdCapability.s} are enabled for identifier "
                 f'"{bundle_id.attributes.name}". Skip disabling.'
@@ -249,7 +253,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.YELLOW(skip_message))
             return
 
-        for capability in capabilities:
+        for capability in enabled_capabilities:
             self._disable_capability(bundle_id, capability)
 
         success_message = f'Successfully disabled {BundleIdCapability.s} for identifier "{bundle_id.attributes.name}"'
@@ -263,6 +267,15 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 str(api_error),
                 api_error_response=api_error.error_response,
             ) from api_error
+
+    @classmethod
+    def _resolve_capability_types(
+        cls,
+        capabilities: Optional[Sequence[Union[CapabilityType, str]]],
+    ) -> List[CapabilityType]:
+        if not capabilities:
+            return []
+        return [c if isinstance(c, CapabilityType) else CapabilityType.from_display_name(c) for c in capabilities]
 
     def _get_capabilities(
         self,
