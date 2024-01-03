@@ -26,10 +26,10 @@ app-store-connect bundle-ids disable-capabilities [-h] [--log-stream STREAM] [--
 
 
 Alphanumeric ID value of the Bundle ID
-##### `--capability=ACCESS_WIFI_INFORMATION | APP_GROUPS | APPLE_PAY | ASSOCIATED_DOMAINS | AUTOFILL_CREDENTIAL_PROVIDER | CLASSKIT | DATA_PROTECTION | GAME_CENTER | HEALTHKIT | HOMEKIT | HOT_SPOT | ICLOUD | IN_APP_PURCHASE | INTER_APP_AUDIO | MAPS | MULTIPATH | NETWORK_EXTENSIONS | NFC_TAG_READING | PERSONAL_VPN | PUSH_NOTIFICATIONS | SIRIKIT | WALLET | WIRELESS_ACCESSORY_CONFIGURATION`
+##### `--capability=Access Wi-Fi Information | Sign In with Apple | Apple Pay | App Groups | Associated Domains | Autofill Credential Provider | ClassKit | Low Latency HLS | Data Protection | Game Center | HealthKit | HomeKit | Hotspot | iCloud | Inter-App Audio | In-App Purchase | Maps | Multipath | Custom Network Protocol | Network Extensions | 5G Network Slicing | NFC Tag Reading | Personal VPN | Push Notifications | SiriKit | System Extension | User Management | Wallet | Wireless Accessory Configuration`
 
 
-Lorem ipsum. Multiple arguments
+Name of the identifier capability. Multiple arguments
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

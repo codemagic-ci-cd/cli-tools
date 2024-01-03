@@ -1234,7 +1234,7 @@ class BundleIdArgument(cli.Argument):
         key="capabilities",
         flags=("--capability",),
         type=str,
-        description="Lorem ipsum",  # TODO: Add description
+        description="Name of the identifier capability",
         argparse_kwargs={
             "required": True,
             "choices": [ct.display_name for ct in CapabilityType],
