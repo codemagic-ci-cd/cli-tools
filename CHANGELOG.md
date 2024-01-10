@@ -1,3 +1,9 @@
+Version 0.50.1
+-------------
+
+**Bugfixes**
+- Fix error handling for corrupt Xcresult parsing in `xcode-project` actions. [PR #390](https://github.com/codemagic-ci-cd/cli-tools/pull/390)
+
 Version 0.50.0
 -------------
 
