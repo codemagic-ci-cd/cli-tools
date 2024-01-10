@@ -36,6 +36,7 @@ from codemagic.models.simulator import Runtime
 from codemagic.models.simulator import Simulator
 from codemagic.models.xctests import XcResultCollector
 from codemagic.models.xctests import XcResultConverter
+from codemagic.models.xctests import XcResultToolError
 
 from ._xcode_project.arguments import CustomExportOptions
 from ._xcode_project.arguments import ExportIpaArgument
@@ -501,21 +502,25 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if not xcresult_collector.get_collected_results():
             raise XcodeProjectException("Did not find any test results")
 
-        test_suites, xcresult = self._get_test_suites(
-            xcresult_collector,
-            show_found_result=True,
-            save_xcresult_dir=output_dir,
-        )
-
-        message = (
-            f"Executed {test_suites.tests} tests with "
-            f"{test_suites.failures} failures and "
-            f"{test_suites.errors} errors in "
-            f"{test_suites.time:.2f} seconds.\n"
-        )
-        self.echo(Colors.BLUE(message))
-        TestSuitePrinter(self.echo).print_test_suites(test_suites)
-        self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
+        try:
+            test_suites, xcresult = self._get_test_suites(
+                xcresult_collector,
+                show_found_result=True,
+                save_xcresult_dir=output_dir,
+            )
+        except XcResultToolError as e:
+            test_suites = None
+            self.logger.error(Colors.RED(f"Parsing test results failed\n{e}\n{e.stderr}"))
+        else:
+            message = (
+                f"Executed {test_suites.tests} tests with "
+                f"{test_suites.failures} failures and "
+                f"{test_suites.errors} errors in "
+                f"{test_suites.time:.2f} seconds.\n"
+            )
+            self.echo(Colors.BLUE(message))
+            TestSuitePrinter(self.echo).print_test_suites(test_suites)
+            self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
         if not graceful_exit:
             if testing_failed or (test_suites and test_suites.has_failed_tests()):
@@ -539,7 +544,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if not xcresults:
             raise XcodeProjectException("Did not find any Xcode test results for given patterns")
 
-        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        try:
+            test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        except XcResultToolError as e:
+            self.logger.error(Colors.RED(f"{e}\n{e.stderr}"))
+            raise XcodeProjectException("Parsing test results failed") from e
+
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
 
     @cli.action(
@@ -564,7 +574,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         if not xcresults:
             raise XcodeProjectException("Did not find any Xcode test results for given patterns")
 
-        test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        try:
+            test_suites, xcresult = self._get_test_suites(xcresult_collector, show_found_result=True)
+        except XcResultToolError as e:
+            self.logger.error(Colors.RED(f"{e}\n{e.stderr}"))
+            raise XcodeProjectException("Parsing test results failed") from e
+
         output_dir.mkdir(parents=True, exist_ok=True)
         self._save_test_suite(xcresult, test_suites, output_dir, output_extension)
 
