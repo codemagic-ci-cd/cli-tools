@@ -13,12 +13,19 @@ from typing import Sequence
 
 from codemagic.cli import CommandArg
 from codemagic.mixins import RunningCliAppMixin
+from codemagic.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
     from codemagic.cli import CliApp
 
 
-class XcResultTool(RunningCliAppMixin):
+class XcResultToolError(IOError):
+    def __init__(self, message: str, stderr: str):
+        super().__init__(message)
+        self.stderr = stderr
+
+
+class XcResultTool(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     def get_bundle(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
         cmd_args: List[CommandArg] = [
@@ -66,8 +73,8 @@ class XcResultTool(RunningCliAppMixin):
                 return cls._run_command_with_cli_app(cli_app, command_args)
             else:
                 return subprocess.check_output(command_args)
-        except subprocess.CalledProcessError:
-            raise IOError(error_message)
+        except subprocess.CalledProcessError as cpe:
+            raise XcResultToolError(error_message, cls._str(cpe.stderr)) from cpe
 
     @classmethod
     def _run_command_with_cli_app(cls, cli_app: CliApp, command_args: Sequence[CommandArg]) -> bytes:
