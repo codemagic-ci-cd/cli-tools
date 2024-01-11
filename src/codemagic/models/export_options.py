@@ -107,6 +107,12 @@ ExportOptionValue = Union[
 
 @dataclass
 class ExportOptions(StringConverterMixin):
+    """
+    Definition for Xcode export options. Available keys and their allowed types
+    can be seen from `xcodebuild -help` output under section
+    "Available keys for -exportOptionsPlist"
+    """
+
     compileBitcode: Optional[bool] = None
     destination: Optional[Destination] = None
     distributionBundleIdentifier: Optional[str] = None
@@ -114,8 +120,8 @@ class ExportOptions(StringConverterMixin):
     generateAppStoreInformation: Optional[bool] = None
     iCloudContainerEnvironment: Optional[str] = None
     installerSigningCertificate: Optional[str] = None
-    manifest: Optional[Manifest] = None
     manageAppVersionAndBuildNumber: Optional[bool] = None
+    manifest: Optional[Manifest] = None
     method: Optional[ArchiveMethod] = None
     onDemandResourcesAssetPacksBaseURL: Optional[str] = None
     provisioningProfiles: Optional[List[ProvisioningProfileInfo]] = None
@@ -123,6 +129,7 @@ class ExportOptions(StringConverterMixin):
     signingStyle: Optional[SigningStyle] = None
     stripSwiftSymbols: Optional[bool] = None
     teamID: Optional[str] = None
+    testFlightInternalTestingOnly: Optional[bool] = None
     thinning: Optional[str] = None
     uploadBitcode: Optional[bool] = None
     uploadSymbols: Optional[bool] = None
@@ -132,8 +139,11 @@ class ExportOptions(StringConverterMixin):
             self.set_value(field_name, getattr(self, field_name))
 
     @classmethod
-    def _get_field_type(cls, field_name: str) -> type:
-        type_hint = get_type_hints(cls)[field_name]
+    def _get_field_type(cls, field_name: str) -> Optional[type]:
+        try:
+            type_hint = get_type_hints(cls)[field_name]
+        except KeyError:
+            return None
         if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Union:
             # Optionals are unions of actual type and NoneType
             actual_type = type_hint.__args__[0]
@@ -183,7 +193,8 @@ class ExportOptions(StringConverterMixin):
 
     def set_value(self, field_name: str, value: ExportOptionValue):
         if field_name not in self.__dict__:
-            raise ValueError(f"Invalid filed {field_name}")
+            logger = log.get_logger(self.__class__)
+            logger.warning(Colors.YELLOW(f'Warning: Using unknown export option "{field_name}"'))
 
         field_type = self._get_field_type(field_name)
         if value is None:
@@ -192,7 +203,7 @@ class ExportOptions(StringConverterMixin):
             self._set_manifest(value)
         elif field_name == "provisioningProfiles":
             self._set_provisioning_profiles(value)
-        elif not isinstance(value, field_type):
+        elif field_type and not isinstance(value, field_type):
             with ResourceEnumMeta.without_graceful_fallback():
                 setattr(self, field_name, field_type(value))
         else:
@@ -212,8 +223,12 @@ class ExportOptions(StringConverterMixin):
             try:
                 data = plistlib.load(fd)  # type: ignore
             except plistlib.InvalidFileException:
-                raise ValueError("Invalid plist")
-        return ExportOptions(**data)
+                raise ValueError(f'File "{plist_path}" is not a valid property list')
+
+        export_options = ExportOptions()
+        for key_name, value in data.items():
+            export_options.set_value(field_name=key_name, value=value)
+        return export_options
 
     @classmethod
     def from_profile_assignments(cls, profile_assignments: Sequence[ProvisioningProfileAssignment]) -> ExportOptions:
