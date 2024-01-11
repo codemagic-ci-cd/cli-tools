@@ -684,8 +684,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
                 f'Path "{export_options_plist}" does not exist',
             )
-        except ValueError as ve:
-            raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(str(ve))
+        except ValueError:
+            raise ExportIpaArgument.EXPORT_OPTIONS_PATH.raise_argument_error(
+                f'File "{export_options_plist}" is not a valid property list',
+            )
 
     def _get_test_destinations(
         self,

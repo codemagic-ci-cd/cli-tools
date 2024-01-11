@@ -143,6 +143,7 @@ class ExportOptions(StringConverterMixin):
         try:
             type_hint = get_type_hints(cls)[field_name]
         except KeyError:
+            # Type info is missing for unknown fields
             return None
         if hasattr(type_hint, "__origin__") and type_hint.__origin__ is Union:
             # Optionals are unions of actual type and NoneType
@@ -223,7 +224,7 @@ class ExportOptions(StringConverterMixin):
             try:
                 data = plistlib.load(fd)  # type: ignore
             except plistlib.InvalidFileException:
-                raise ValueError(f'File "{plist_path}" is not a valid property list')
+                raise ValueError("Invalid plist")
 
         export_options = ExportOptions()
         for key_name, value in data.items():
