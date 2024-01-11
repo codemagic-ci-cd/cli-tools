@@ -85,6 +85,10 @@ def test_export_options_set_valid_values(field_name, value, export_options_dict)
         ("provisioningProfiles", [ProvisioningProfileInfo("bundle_id", "name"), {"k": "v"}]),
         ("method", "invalid method"),
         ("destination", "invalid destination"),
+        ("teamID", -1),
+        ("teamID", True),
+        ("stripSwiftSymbols", "false"),
+        ("stripSwiftSymbols", "YES"),
     ],
 )
 def test_export_options_set_invalid_values(field_name, value, export_options_dict):

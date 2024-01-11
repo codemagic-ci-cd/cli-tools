@@ -205,8 +205,11 @@ class ExportOptions(StringConverterMixin):
         elif field_name == "provisioningProfiles":
             self._set_provisioning_profiles(value)
         elif field_type and not isinstance(value, field_type):
-            with ResourceEnumMeta.without_graceful_fallback():
-                setattr(self, field_name, field_type(value))
+            if issubclass(field_type, enum.Enum):
+                with ResourceEnumMeta.without_graceful_fallback():
+                    setattr(self, field_name, field_type(value))
+            else:
+                raise ValueError(f"Invalid value for {field_name!r}")
         else:
             setattr(self, field_name, value)
 
