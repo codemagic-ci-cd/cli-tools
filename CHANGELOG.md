@@ -4,7 +4,7 @@ Version 0.50.2
 **Features**
 - Allow custom export options in export options properly list for `xcode-project build-ipa` actions. [PR #391](https://github.com/codemagic-ci-cd/cli-tools/pull/391)
 
-- Version 0.50.1
+Version 0.50.1
 -------------
 
 **Bugfixes**
