@@ -23,7 +23,6 @@ class App(Resource):
         name: str
         primaryLocale: Locale
         sku: str
-        availableInNewTerritories: bool
         contentRightsDeclaration: ContentRightsDeclaration
         isOrEverWasMadeForKids: bool
 
@@ -39,7 +38,6 @@ class App(Resource):
 
         appInfos: Relationship
         appStoreVersions: Relationship
-        availableTerritories: Relationship
         betaAppLocalizations: Relationship
         betaAppReviewDetail: Relationship
         betaGroups: Relationship
@@ -50,7 +48,6 @@ class App(Resource):
         inAppPurchases: Relationship
         preOrder: Relationship
         preReleaseVersions: Relationship
-        prices: Relationship
 
         betaTesters: Optional[Relationship] = None
         ciProduct: Optional[Relationship] = None

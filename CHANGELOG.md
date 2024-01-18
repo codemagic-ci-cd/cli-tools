@@ -1,3 +1,11 @@
+Version 0.50.3
+-------------
+
+**Bugfixes**
+- Remove deprecated attributes and relationships for App Store Connect [App](https://developer.apple.com/documentation/appstoreconnectapi/app/) data structure. [PR #392](https://github.com/codemagic-ci-cd/cli-tools/pull/392)
+  - `availableInNewTerritories` attribute,
+  - `availableTerritories` and `prices` relationships.
+
 Version 0.50.2
 -------------
 
