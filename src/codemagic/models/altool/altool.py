@@ -7,6 +7,7 @@ import re
 import subprocess
 import time
 from contextlib import contextmanager
+from datetime import datetime
 from functools import lru_cache
 from typing import TYPE_CHECKING
 from typing import AnyStr
@@ -16,9 +17,12 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 import psutil
 
+from codemagic.cli import CliProcess
+from codemagic.cli import CliProcessHealthCheckError
 from codemagic.cli import environment
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -41,6 +45,10 @@ class AltoolCommandError(Exception):
     def __init__(self, error_message: str, process_output: str):
         super().__init__(error_message)
         self.process_output = process_output
+
+
+class CFNetworkingRetryError(AltoolCommandError):
+    pass
 
 
 class Altool(RunningCliAppMixin, StringConverterMixin):
@@ -195,7 +203,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 return self._run_command(command, f'Failed to {action_name} archive at "{artifact_path}"', cli_app)
             except AltoolCommandError as error:
                 has_retries = retries > 0
-                should_retry = self._should_retry_command(error.process_output)
+                should_retry = self._should_retry_command(error)
                 if has_retries and should_retry:
                     if attempt == 1:
                         print_fn(f"Failed to {action_name} archive, but this might be a temporary issue, retrying...")
@@ -234,21 +242,28 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         cli_app: Optional[CliApp],
     ) -> Optional[AltoolResult]:
         obfuscate_patterns = [self._password] if self._password else []
+        process = None
         try:
             if cli_app:
-                process = cli_app.execute(
+                logs_inspector = CFNetworkErrorLogsInspector("altool", datetime.now())
+                process = CliProcess(
                     command,
-                    obfuscate_patterns,
-                    show_output=False,
-                    stderr=subprocess.STDOUT,
+                    cli_app.obfuscate_command(command, obfuscate_patterns),
+                    print_streams=cli_app.verbose,
+                    # Less than 100 should be fine. Retry attempts get to thousands within minutes
+                    process_health_check=lambda _: logs_inspector.get_estimated_errors_count() < 100,
+                    process_health_check_interval=10,
                 )
+                process.execute(stderr=subprocess.STDOUT)
                 stdout = process.stdout
                 process.raise_for_returncode()
             else:
-                stdout = subprocess.check_output(
-                    command,
-                    stderr=subprocess.STDOUT,
-                ).decode()
+                stdout = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()
+        except CliProcessHealthCheckError as hce:
+            raise CFNetworkingRetryError(
+                f"{error_message}: Connection to Apple's cloud storage failed",
+                process.stdout if process else "",
+            ) from hce
         except subprocess.CalledProcessError as cpe:
             result = self._get_action_result(cpe.stdout)
             if result and result.product_errors:
@@ -286,12 +301,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         return output
 
     @classmethod
-    def _should_retry_command(cls, process_output: str):
+    def _should_retry_command(cls, error: Union[AltoolCommandError, CFNetworkingRetryError]):
+        if isinstance(error, CFNetworkingRetryError):
+            return True
+
         patterns = (
             re.compile("Unable to authenticate.*-19209"),
             re.compile("server returned an invalid response.*try your request again"),
             re.compile("The request timed out."),
         )
+        process_output = cast(AltoolCommandError, error).process_output
         return any(pattern.search(process_output) for pattern in patterns)
 
     @classmethod
@@ -317,3 +336,58 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             cli_app.echo(prettified_result)
         else:
             print(prettified_result)
+
+
+class CFNetworkErrorLogsInspector:
+    ERROR_PATTERN = re.compile(r"^Task <[\w-]+>\.<(\d+)> finished with error")
+
+    def __init__(self, process: str, start: datetime):
+        self.logger = log.get_file_logger(self.__class__)
+        predicate = " and ".join(
+            [
+                'subsystem=="com.apple.CFNetwork"',
+                f'process=="{process}"',
+                'eventMessage contains "finished with error"',
+                'eventMessage contains "Error Domain=NSURLErrorDomain"',
+                'eventMessage contains "Code=-1003"',
+            ],
+        )
+        self.logs_command = (
+            "log",
+            "show",
+            "--no-backtrace",
+            "--no-debug",
+            "--no-info",
+            "--no-pager",
+            *("--start", start.strftime("%Y-%m-%d %H:%M:%S")),
+            *("--predicate", predicate),
+            *("--style", "ndjson"),
+        )
+
+    def iter_log_entries(self):
+        start = time.time()
+        try:
+            cp = subprocess.run(
+                self.logs_command,
+                capture_output=True,
+                check=True,
+                timeout=10,
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            self.logger.exception("Checking CFNetwork error logs failed")
+            return
+        finally:
+            self.logger.debug(f"Completed CFNetwork error logs check in {time.time() - start:.2f}s")
+
+        for line in cp.stdout.splitlines():
+            try:
+                log_entry = json.loads(line)
+                if log_entry.get("eventMessage") is not None:
+                    yield log_entry
+            except ValueError:
+                pass
+
+    def get_estimated_errors_count(self) -> int:
+        count = sum(1 for log_entry in self.iter_log_entries() if self.ERROR_PATTERN.match(log_entry["eventMessage"]))
+        self.logger.debug(f"Found {count} log that hint indefinite CFNetwork retry loop")
+        return count
