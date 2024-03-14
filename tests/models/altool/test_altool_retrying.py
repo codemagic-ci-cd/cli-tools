@@ -1,25 +1,38 @@
 import json
 import pathlib
-from types import SimpleNamespace
 from unittest import mock
 
 import pytest
 from codemagic.models import Altool
 from codemagic.models.altool import AltoolResult
 from codemagic.models.altool.altool import AltoolCommandError
+from codemagic.models.altool.altool import CFNetworkErrorLogsInspector
 from codemagic.models.altool.altool import PlatformType
 
 
 @pytest.fixture
-def mock_altool():
+def mock_echo():
+    return mock.MagicMock()
+
+
+@pytest.fixture
+def mock_cli_app(mock_echo):
+    return mock.MagicMock(
+        echo=mock_echo,
+        verbose=False,
+        obfuscate_command=lambda cmd, _: cmd,
+    )
+
+
+@pytest.fixture
+def mock_altool(mock_cli_app):
     Altool._ensure_altool = mock.Mock(return_value=True)
     altool = Altool(
         username="user@example.com",
         password="xxxx-yyyy-zzzz-wwww",
     )
-    mock_echo = mock.MagicMock()
     altool._kill_xcode_processes_for_retrying = mock.Mock()
-    altool.get_current_cli_app = lambda: SimpleNamespace(echo=mock_echo)
+    altool.get_current_cli_app = lambda: mock_cli_app
     return altool
 
 
@@ -145,3 +158,29 @@ def test_retrying_command_immediate_success(mock_altool, mock_success_stdout, mo
     with mock.patch.object(mock_altool, "_run_command", side_effect=[mock_success_result]):
         result = mock_altool.upload_app(pathlib.Path("app.ipa"), retries=100, retry_wait_seconds=0)
     assert result is mock_success_result
+
+
+@mock.patch("codemagic.cli.cli_process.subprocess.Popen")
+@mock.patch.object(CFNetworkErrorLogsInspector, "iter_log_entries")
+@mock.patch.object(PlatformType, "from_path", lambda _artifact_path: PlatformType.IOS)
+def test_cf_networking_error_retrying(mock_iter_log_entries, mock_popen, mock_altool, mock_echo):
+    mock_popen.return_value = mock.MagicMock(
+        poll=mock.MagicMock(return_value=None),
+        stdout=mock.MagicMock(read=mock.MagicMock(return_value=b"")),
+    )
+    event_message = "Task <0E1A3630>.<123> finished with error [-1003] Error Domain=NSURLErrorDomain Code=-1003 "
+    mock_iter_log_entries.return_value = [{"eventMessage": event_message} for _ in range(101)]
+
+    with pytest.raises(IOError) as exc_info:
+        mock_altool.upload_app(
+            pathlib.Path("app.ipa"),
+            retries=2,
+        )
+
+    assert str(exc_info.value) == 'Failed to upload archive at "app.ipa": Connection to Apple\'s cloud storage failed'
+    mock_echo.assert_has_calls(
+        [
+            mock.call("Failed to upload archive, but this might be a temporary issue, retrying..."),
+            mock.call("Attempt #2 to upload failed."),
+        ],
+    )

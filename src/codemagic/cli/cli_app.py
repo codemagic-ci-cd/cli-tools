@@ -392,7 +392,7 @@ class CliApp(metaclass=abc.ABCMeta):
         ArgumentParserBuilder(cls, main_or_group_action, deprecated_action_parsers, for_deprecated_alias=True).build()
         CliHelpFormatter.suppress_deprecated_action(main_or_group_action.deprecation_info.alias)
 
-    def _obfuscate_command(
+    def obfuscate_command(
         self,
         command_args: Sequence[CommandArg],
         obfuscate_patterns: Optional[Iterable[ObfuscationPattern]] = None,
@@ -443,7 +443,7 @@ class CliApp(metaclass=abc.ABCMeta):
 
         return CliProcess(
             command_args,
-            self._obfuscate_command(command_args, obfuscate_patterns),
+            self.obfuscate_command(command_args, obfuscate_patterns),
             dry=self.dry_run,
             print_streams=print_streams,
         ).execute(**execute_kwargs)

@@ -7,6 +7,7 @@ import subprocess
 import sys
 import time
 from typing import IO
+from typing import Callable
 from typing import Dict
 from typing import Optional
 from typing import Sequence
@@ -19,6 +20,10 @@ from .cli_types import CommandArg
 from .cli_types import ObfuscatedCommand
 
 
+class CliProcessHealthCheckError(Exception):
+    pass
+
+
 class CliProcess:
     def __init__(
         self,
@@ -26,6 +31,8 @@ class CliProcess:
         safe_form: Optional[ObfuscatedCommand] = None,
         print_streams: bool = True,
         dry: bool = False,
+        process_health_check: Optional[Callable[[CliProcess], bool]] = None,
+        process_health_check_interval: float = 10,
     ):
         self.logger = log.get_logger(self.__class__)
         self.duration: float = 0
@@ -42,6 +49,9 @@ class CliProcess:
         self._stderr = ""
         self._stdout_stream: Optional[CliProcessStream] = None
         self._stderr_stream: Optional[CliProcessStream] = None
+        self._process_health_check = process_health_check
+        self._process_health_check_interval = process_health_check_interval
+        self._process_health_check_at: Optional[float] = None
 
     @property
     def stdout(self) -> str:
@@ -76,6 +86,18 @@ class CliProcess:
         if self._stderr_stream:
             self._stderr += self._stderr_stream.process_buffer(buffer_size, self._print_streams)
 
+    def _check_process_health(self):
+        if not self._process_health_check:
+            return
+
+        now = time.time()
+        if self._process_health_check_at and now - self._process_health_check_at < self._process_health_check_interval:
+            return
+
+        self._process_health_check_at = now
+        if not self._process_health_check(self):
+            raise CliProcessHealthCheckError("Process health check failed")
+
     def _configure_process_streams(self):
         if self._process.stdout:
             self._stdout_stream = CliProcessStream.create(self._process.stdout, sys.stdout, blocking=False)
@@ -102,6 +124,7 @@ class CliProcess:
                 self._configure_process_streams()
                 while self._process.poll() is None:
                     self._handle_streams(self._buffer_size)
+                    self._check_process_health()
                     time.sleep(poll_interval)
                 self._handle_streams()
         finally:
