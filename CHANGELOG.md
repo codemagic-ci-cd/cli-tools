@@ -1,3 +1,14 @@
+Version 0.50.5
+-------------
+
+This version reverts changes that were introduced in `0.50.4` as they did not have intended effect. [PR #395](https://github.com/codemagic-ci-cd/cli-tools/pull/395)
+
+Version 0.50.4
+-------------
+
+**Bugfixes**
+- Fix `app-store-connect publish` action getting stuck while binary is being uploaded using `altool`. [PR #394](https://github.com/codemagic-ci-cd/cli-tools/pull/394)
+
 Version 0.50.3
 -------------
 
