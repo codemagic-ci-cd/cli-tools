@@ -1,3 +1,9 @@
+Version UNRELEASED
+-------------
+
+**Development**
+- CI: Use test matrix to define Python versions in GitHub actions test workflows.  [PR #396](https://github.com/codemagic-ci-cd/cli-tools/pull/396)
+
 Version 0.50.5
 -------------
 

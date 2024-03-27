@@ -5,90 +5,27 @@ on:
   pull_request:
 
 jobs:
-  test-py-3-7:
+  tests:
+    name: "Python ${{ matrix.python-version }}"
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python 3.7
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.7
+        python-version: "${{ matrix.python-version }}"
 
     - name: Cache Python dependencies
       uses: actions/cache@v3
       with:
         path: .venv
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}-py-3-7
-
-    - name: Install dependencies
-      run: |
-        curl -sSL https://install.python-poetry.org | python - --version 1.5.1
-        poetry config virtualenvs.in-project true
-        poetry install --no-interaction
-
-    - name: Check code formatting
-      run: |
-        poetry run black --check .
-        poetry run ruff check .
-
-    - name: Static type checks with mypy
-      run: poetry run mypy .
-
-    - name: Test with pytest
-      run: poetry run pytest
-
-  test-py-3-11:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-
-    - name: Cache Python dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}-py-3-11
-
-    - name: Install dependencies
-      run: |
-        curl -sSL https://install.python-poetry.org | python
-        poetry config virtualenvs.in-project true
-        poetry install --no-interaction
-
-    - name: Check code formatting
-      run: |
-        poetry run black --check .
-        poetry run ruff check .
-
-    - name: Static type checks with mypy
-      run: poetry run mypy .
-
-    - name: Test with pytest
-      run: poetry run pytest
-
-  test-py-3-12:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
-
-    - name: Cache Python dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}-py-3-12
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}-py-${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
