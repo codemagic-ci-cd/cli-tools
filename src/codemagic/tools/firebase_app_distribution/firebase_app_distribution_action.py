@@ -26,7 +26,7 @@ class FirebaseAppDistributionAction(ABC):
     # Action signatures in alphabetical order
 
     @abstractmethod
-    def get_latest_build_version(self, app_id: str, should_print: bool = True) -> int:
+    def get_latest_build_version(self, app_id: str, should_print: bool = True) -> str:
         from .actions import GetLatestBuildVersionAction
 
         _ = GetLatestBuildVersionAction.get_latest_build_version  # Implementation
