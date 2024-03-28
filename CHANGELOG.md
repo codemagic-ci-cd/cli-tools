@@ -1,8 +1,11 @@
-Version UNRELEASED
+Version 0.50.6
 -------------
 
+**Bugfixes**
+- Fix actions `firebase-app-distribution get-latest-build-version` and `firebase-app-distribution releases list` to support releases with non-integer build version. [PR #397](https://github.com/codemagic-ci-cd/cli-tools/pull/397)
+
 **Development**
-- CI: Use test matrix to define Python versions in GitHub actions test workflows.  [PR #396](https://github.com/codemagic-ci-cd/cli-tools/pull/396)
+- CI: Use test matrix to define Python versions in GitHub actions test workflows. [PR #396](https://github.com/codemagic-ci-cd/cli-tools/pull/396)
 
 Version 0.50.5
 -------------
