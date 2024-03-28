@@ -175,7 +175,7 @@ def test_list_releases_with_limit(firebase_app_distribution, mock_releases_list,
 def test_get_latest_build_version(firebase_app_distribution, mock_releases_list, app_identifier):
     build_number = firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
     mock_releases_list.assert_called_once_with(app_identifier, limit=1)
-    assert build_number == 71
+    assert build_number == "71"
 
 
 def test_get_latest_build_version_no_releases(firebase_app_distribution, app_identifier):
