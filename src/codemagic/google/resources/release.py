@@ -15,7 +15,7 @@ class Release(Resource):
 
     name: str
     displayVersion: str
-    buildVersion: int
+    buildVersion: str
     createTime: datetime
     firebaseConsoleUri: str
     testingUri: str
@@ -25,7 +25,5 @@ class Release(Resource):
     def __post_init__(self):
         if isinstance(self.createTime, str):
             self.createTime = datetime.fromisoformat(self.createTime.rstrip("Z")).replace(tzinfo=timezone.utc)
-        if isinstance(self.buildVersion, str):
-            self.buildVersion = int(self.buildVersion)
         if isinstance(self.releaseNotes, dict):
             self.releaseNotes = ReleaseNotes(self.releaseNotes["text"])
