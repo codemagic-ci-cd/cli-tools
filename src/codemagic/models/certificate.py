@@ -122,7 +122,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         try:
             return self.certificate.not_valid_after_utc
         except AttributeError:
-            # X509.not_valid_after_utc was added in cryptography 42.0.0
+            # x509.Certificate.not_valid_after_utc was added in cryptography 42.0.0
             return self.certificate.not_valid_after.replace(tzinfo=timezone.utc)
 
     @property

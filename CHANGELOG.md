@@ -1,3 +1,9 @@
+Version 0.50.7
+-------------
+
+**Improvements**
+- Remove usages of deprecated datetime properties on `x509.Certificate` instances. [PR #399](https://github.com/codemagic-ci-cd/cli-tools/pull/399)
+
 Version 0.50.6
 -------------
 
