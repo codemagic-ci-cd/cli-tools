@@ -109,7 +109,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def not_before(self) -> str:
-        not_before = self.certificate.not_valid_before
+        try:
+            not_before = self.certificate.not_valid_before_utc
+        except AttributeError:
+            # x509.Certificate.not_valid_before_utc was added in cryptography 42.0.0.
+            # Use the legacy naive datetime instead.
+            not_before = self.certificate.not_valid_before
         return not_before.strftime("%Y%m%d%H%M%SZ")
 
     @property
@@ -122,7 +127,8 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         try:
             return self.certificate.not_valid_after_utc
         except AttributeError:
-            # x509.Certificate.not_valid_after_utc was added in cryptography 42.0.0
+            # x509.Certificate.not_valid_after_utc was added in cryptography 42.0.0.
+            # Use the legacy naive datetime instead.
             return self.certificate.not_valid_after.replace(tzinfo=timezone.utc)
 
     @property
