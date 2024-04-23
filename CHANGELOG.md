@@ -1,3 +1,9 @@
+UNRELEASED
+-------------
+
+**Bugfixes**
+- Fix App Store Connect API responses deserialization for cases when resource contains an empty relationship. [PR #401](https://github.com/codemagic-ci-cd/cli-tools/pull/401)
+
 Version 0.50.7
 -------------
 
