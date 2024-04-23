@@ -60,7 +60,7 @@ def test_list_releases(app_identifier, firebase_client, release, mock_releases):
     releases = firebase_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == release
-    assert releases[1].buildVersion == 71
+    assert releases[1].buildVersion == "71"
 
 
 def test_list_releases_limit(app_identifier, firebase_client, mock_releases):
@@ -91,4 +91,4 @@ def test_list_releases_pagination(app_identifier, release, firebase_client, mock
 
     assert len(releases) == 2
     assert releases[0] == release
-    assert releases[1].buildVersion == 71
+    assert releases[1].buildVersion == "71"

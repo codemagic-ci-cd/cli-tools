@@ -98,5 +98,6 @@ Enable verbose logging for commands
 |[`app-store-version`](builds/app-store-version.md)|Get the App Store version of a specific build.|
 |[`beta-details`](builds/beta-details.md)|Get Build Beta Details Information of a specific build.|
 |[`pre-release-version`](builds/pre-release-version.md)|Get the prerelease version for a specific build|
+|[`list`](builds/list.md)|List Builds from Apple Developer Portal matching given constraints|
 |[`submit-to-app-store`](builds/submit-to-app-store.md)|Submit build to App Store review|
 |[`submit-to-testflight`](builds/submit-to-testflight.md)|Submit build to TestFlight|

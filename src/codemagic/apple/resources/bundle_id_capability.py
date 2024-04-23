@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 from typing import Optional
 
 from .enums import CapabilityOptionKey
@@ -66,3 +67,13 @@ class BundleIdCapability(Resource):
     @dataclass
     class Relationships(Resource.Relationships):
         bundleId: Relationship
+
+    def _format_attribute_value(self, attribute_name: str, value: Any) -> Any:
+        if attribute_name == "capabilityType":
+            # In case we get an unknown capability type from API response, then this is stored as
+            # a runtime-created fallback enumeration `GracefulCapabilityType` which does not have
+            # the properties and methods that `CapabilityType` has.
+            if isinstance(self.attributes.capabilityType, CapabilityType):
+                return self.attributes.capabilityType.display_name
+            return CapabilityType.get_default_display_name(self.attributes.capabilityType.value)
+        return super()._format_attribute_value(attribute_name, value)

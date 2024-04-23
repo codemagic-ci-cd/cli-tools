@@ -105,12 +105,16 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         Get the timestamp at which the certificate stops being valid
         as an ASN.1 TIME YYYYMMDDhhmmssZ
         """
-        not_after = self.certificate.not_valid_after
-        return not_after.strftime("%Y%m%d%H%M%SZ")
+        return self.expires_at.strftime("%Y%m%d%H%M%SZ")
 
     @property
     def not_before(self) -> str:
-        not_before = self.certificate.not_valid_before
+        try:
+            not_before = self.certificate.not_valid_before_utc
+        except AttributeError:
+            # x509.Certificate.not_valid_before_utc was added in cryptography 42.0.0.
+            # Use the legacy naive datetime instead.
+            not_before = self.certificate.not_valid_before
         return not_before.strftime("%Y%m%d%H%M%SZ")
 
     @property
@@ -120,7 +124,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
 
     @property
     def expires_at(self) -> datetime:
-        return self.certificate.not_valid_after.replace(tzinfo=timezone.utc)
+        try:
+            return self.certificate.not_valid_after_utc
+        except AttributeError:
+            # x509.Certificate.not_valid_after_utc was added in cryptography 42.0.0.
+            # Use the legacy naive datetime instead.
+            return self.certificate.not_valid_after.replace(tzinfo=timezone.utc)
 
     @property
     def serial(self) -> int:

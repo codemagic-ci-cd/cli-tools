@@ -39,11 +39,16 @@ class ArgumentParserBuilder:
 
     def _create_action_parser(self, parent_parser: SubParsersAction, for_deprecated_alias: bool):
         if for_deprecated_alias:
-            if self._cli_action.deprecated_alias is None:
+            if self._cli_action.deprecation_info is None:
                 raise RuntimeError(f"Deprecated alias requested for {self._cli_action.action_name} without alias")
-            deprecation_message = Colors.YELLOW(Colors.BOLD(f"Deprecated alias for `{self._full_action_name}`."))
+
+            deprecation_message = self._cli_action.deprecation_info.get_message(
+                self._full_action_name,
+                Colors.YELLOW,
+                Colors.BOLD,
+            )
             return parent_parser.add_parser(
-                self._cli_action.deprecated_alias,
+                self._cli_action.deprecation_info.alias,
                 formatter_class=CliHelpFormatter,
                 description=f"{deprecation_message} {Colors.BOLD(self._cli_action.__doc__)}",
             )

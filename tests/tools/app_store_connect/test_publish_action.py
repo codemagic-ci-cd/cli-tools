@@ -11,9 +11,9 @@ from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.models.application_package import Ipa
 from codemagic.tools.app_store_connect import AppStoreConnect
-from codemagic.tools.app_store_connect import AppStoreConnectArgument
-from codemagic.tools.app_store_connect import PublishArgument
-from codemagic.tools.app_store_connect import Types
+from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
+from codemagic.tools.app_store_connect.arguments import PublishArgument
+from codemagic.tools.app_store_connect.arguments import Types
 
 
 @pytest.fixture()
@@ -23,6 +23,7 @@ def publishing_namespace_kwargs(namespace_kwargs):
             "action": "publish",
         },
     )
+    namespace_kwargs.pop("action_subcommand", None)
     return namespace_kwargs
 
 
@@ -82,7 +83,7 @@ def test_publish_action_without_app_store_connect_key_and_beta_locales(missing_a
     assert missing_argument.flag in error_info.value.argument_name
 
 
-@mock.patch("codemagic.tools._app_store_connect.actions.publish_action.Altool")
+@mock.patch("codemagic.tools.app_store_connect.actions.publish_action.Altool")
 def test_publish_action_with_username_and_password(_mock_altool, publishing_namespace_kwargs):
     publishing_namespace_kwargs.update(
         {
@@ -256,7 +257,7 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
         mock_add_beta_test_info.assert_not_called()
 
 
-@mock.patch("codemagic.tools._app_store_connect.actions.publish_action.Altool")
+@mock.patch("codemagic.tools.app_store_connect.actions.publish_action.Altool")
 @pytest.mark.parametrize(
     "enable_package_validation, should_validate",
     [

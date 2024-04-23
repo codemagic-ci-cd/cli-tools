@@ -1,9 +1,158 @@
-Version 0.48.UNRELEASED
+UNRELEASED
 -------------
 
 **Development**
 - Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`.
 - Define new enumerations `codemagic.apple.resources.enums.BuildAudienceType` and `codemagic.apple.resources.enums.SubscriptionStatusUrlVersion`.
+
+Version 0.50.7
+-------------
+
+**Improvements**
+- Remove usages of deprecated datetime properties on `x509.Certificate` instances. [PR #399](https://github.com/codemagic-ci-cd/cli-tools/pull/399)
+
+Version 0.50.6
+-------------
+
+**Bugfixes**
+- Fix actions `firebase-app-distribution get-latest-build-version` and `firebase-app-distribution releases list` to support releases with non-integer build version. [PR #397](https://github.com/codemagic-ci-cd/cli-tools/pull/397)
+
+**Development**
+- CI: Use test matrix to define Python versions in GitHub actions test workflows. [PR #396](https://github.com/codemagic-ci-cd/cli-tools/pull/396)
+
+Version 0.50.5
+-------------
+
+This version reverts changes that were introduced in `0.50.4` as they did not have intended effect. [PR #395](https://github.com/codemagic-ci-cd/cli-tools/pull/395)
+
+Version 0.50.4
+-------------
+
+**Bugfixes**
+- Fix `app-store-connect publish` action getting stuck while binary is being uploaded using `altool`. [PR #394](https://github.com/codemagic-ci-cd/cli-tools/pull/394)
+
+Version 0.50.3
+-------------
+
+**Bugfixes**
+- Remove deprecated attributes and relationships for App Store Connect [App](https://developer.apple.com/documentation/appstoreconnectapi/app/) data structure. [PR #392](https://github.com/codemagic-ci-cd/cli-tools/pull/392)
+  - `availableInNewTerritories` attribute,
+  - `availableTerritories` and `prices` relationships.
+
+Version 0.50.2
+-------------
+
+**Features**
+- Allow custom export options in export options properly list for `xcode-project build-ipa` actions. [PR #391](https://github.com/codemagic-ci-cd/cli-tools/pull/391)
+
+Version 0.50.1
+-------------
+
+**Bugfixes**
+- Fix error handling for corrupt Xcresult parsing in `xcode-project` actions. [PR #390](https://github.com/codemagic-ci-cd/cli-tools/pull/390)
+
+Version 0.50.0
+-------------
+
+**Features**
+- Add new actions to work with bundle identifier capabilities [PR #388](https://github.com/codemagic-ci-cd/cli-tools/pull/388):
+  - `app-store-connect bundle-ids capabilities` to list the capabilities that are enabled for identifier,
+  - `app-store-connect bundle-ids enable-capabilities` to enable capabilities for identifier,
+  - `app-store-connect bundle-ids disable-capabilities` to disable capabilities for identifier.
+
+Version 0.49.0
+-------------
+
+This release contains changes from [PR #386](https://github.com/codemagic-ci-cd/cli-tools/pull/386) and [PR #387](https://github.com/codemagic-ci-cd/cli-tools/pull/387).
+
+**Features**
+- Unify `app-store-connect` command line API experience by gathering similar actions under respective action groups.
+- New action groups were added to group similar actions together:
+  - `app-store-connect bundle-ids`,
+  - `app-store-connect certificates`,
+  - `app-store-connect devices`,
+  - `app-store-connect profiles`.
+
+**Deprecations**
+The following actions are deprecated and show a warning message when invoked:
+  - `app-store-connect list-builds` (replaced by `app-store-connect builds list`),
+  - `app-store-connect create-bundle-id` (replaced by `app-store-connect bundle-ids create`),
+  - `app-store-connect delete-bundle-id` (replaced by `app-store-connect bundle-ids delete`),
+  - `app-store-connect get-bundle-id` (replaced by `app-store-connect bundle-ids get`),
+  - `app-store-connect list-bundle-id-profiles` (replaced by `app-store-connect bundle-ids profiles`),
+  - `app-store-connect list-bundle-ids` (replaced by `app-store-connect bundle-ids list`),
+  - `app-store-connect create-certificate` (replaced by `app-store-connect certificates create`),
+  - `app-store-connect delete-certificate` (replaced by `app-store-connect certificates delete`),
+  - `app-store-connect get-certificate` (replaced by `app-store-connect certificates get`),
+  - `app-store-connect list-certificates` (replaced by `app-store-connect certificates list`),
+  - `app-store-connect list-devices` (replaced by `app-store-connect devices list`),
+  - `app-store-connect register-device` (replaced by `app-store-connect devices register`),
+  - `app-store-connect create-profile` (replaced by `app-store-connect profiles create`),
+  - `app-store-connect delete-profile` (replaced by `app-store-connect profiles delete`),
+  - `app-store-connect get-profile` (replaced by `app-store-connect profiles get`),
+  - `app-store-connect list-profiles` (replaced by `app-store-connect profiles list`).
+
+**Development**
+- Decorator `@action` signature was changed. Optional keyword argument `deprecated_alias: str` was replaced by optional `deprecation_info: ActionDeprecationInfo` which holds both version in which the action was deprecated, and the deprecated name of the action.
+- Decorator `@action` definition was moved from `codemagic.cli.cli_app` to `codemagic.cli.action`. It is still accessible from package `codemagic.cli` as before.
+
+**Documentation**
+- Remove documentation of deprecated actions:
+  - `app-store-connect list-builds` (replaced by `app-store-connect builds list`),
+  - `app-store-connect create-bundle-id` (replaced by `app-store-connect bundle-ids create`),
+  - `app-store-connect delete-bundle-id` (replaced by `app-store-connect bundle-ids delete`),
+  - `app-store-connect get-bundle-id` (replaced by `app-store-connect bundle-ids get`),
+  - `app-store-connect list-bundle-id-profiles` (replaced by `app-store-connect bundle-ids profiles`),
+  - `app-store-connect list-bundle-ids` (replaced by `app-store-connect bundle-ids list`),
+  - `app-store-connect create-certificate` (replaced by `app-store-connect certificates create`),
+  - `app-store-connect delete-certificate` (replaced by `app-store-connect certificates delete`),
+  - `app-store-connect get-certificate` (replaced by `app-store-connect certificates get`),
+  - `app-store-connect list-certificates` (replaced by `app-store-connect certificates list`),
+  - `app-store-connect list-devices` (replaced by `app-store-connect devices list`),
+  - `app-store-connect register-device` (replaced by `app-store-connect devices register`),
+  - `app-store-connect create-profile` (replaced by `app-store-connect profiles create`),
+  - `app-store-connect delete-profile` (replaced by `app-store-connect profiles delete`),
+  - `app-store-connect get-profile` (replaced by `app-store-connect profiles get`),
+  - `app-store-connect list-profiles` (replaced by `app-store-connect profiles list`).
+- Add documentation for new action groups:
+  - `app-store-connect bundle-ids`,
+  - `app-store-connect certificates`,
+  - `app-store-connect devices`,
+  - `app-store-connect profiles`.
+- Update documentation for action groups:
+  - `app-store-connect builds`.
+- Add documentation for actions:
+  - `app-store-connect builds list` (used to be `app-store-connect list-builds`)
+  - `app-store-connect bundle-ids create` (used to be `app-store-connect create-bundle-id`)
+  - `app-store-connect bundle-ids get` (used to be `app-store-connect get-bundle-id`)
+  - `app-store-connect bundle-ids list` (used to be `app-store-connect list-bundle-ids`)
+  - `app-store-connect bundle-ids profiles` (used to be `app-store-connect list-bundle-id-profiles`)
+  - `app-store-connect app-store-connect certificates create` (used to be `app-store-connect create-certificate`)
+  - `app-store-connect app-store-connect certificates delete` (used to be `app-store-connect delete-certificate`)
+  - `app-store-connect app-store-connect certificates get` (used to be `app-store-connect get-certificate`)
+  - `app-store-connect app-store-connect certificates list` (used to be `app-store-connect list-certificates`)
+  - `app-store-connect app-store-connect devices list` (used to be `app-store-connect list-devices`)
+  - `app-store-connect app-store-connect devices register` (used to be `app-store-connect register-device`)
+  - `app-store-connect app-store-connect profiles create` (used to be `app-store-connect create-profile`)
+  - `app-store-connect app-store-connect profiles delete` (used to be `app-store-connect delete-profile`)
+  - `app-store-connect app-store-connect profiles get` (used to be `app-store-connect get-profile`)
+  - `app-store-connect app-store-connect profiles list` (used to be `app-store-connect list-profiles`)
+
+Version 0.48.2
+-------------
+
+This release contains changes from [PR #382](https://github.com/codemagic-ci-cd/cli-tools/pull/382)
+
+**Features**
+- Speed improvements for `app-store-connect` actions `get-latest-testflight-build-number`, `get-latest-app-store-build-number` and `app-store-connect get-latest-build-number` in case the application has a lot of versions in App Store Connect.
+
+**Development**
+- Add new App Store Connect API Client methods:
+  - `codemagic.apple.app_store_connect.apps.Apps.list_app_store_versions_data` to fetch application's App Store versions as `list[dict]`,
+  - `codemagic.apple.app_store_connect.versioning.AppStoreVersions.read_build_data` to fetch build of App Store version as `dict`,
+  - `codemagic.apple.app_store_connect.versioning.PreReleaseVersions.list_data` to fetch pre-release versions as `list[dict]`,
+  - `codemagic.apple.app_store_connect.versioning.PreReleaseVersions.list_builds_data` to fetch builds of pre-release version as `list[dict]`.
+- Move implementations of latest build number actions from `codemagic.tools.AppStoreConnect` to dedicated classes and plug them back in as mixins.
 
 Version 0.48.1
 -------------

@@ -7,8 +7,8 @@ from unittest import mock
 
 import pytest
 from codemagic.tools.app_store_connect import AppStoreConnect
-from codemagic.tools.app_store_connect import AppStoreConnectArgument
-from codemagic.tools.app_store_connect import Types
+from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
+from codemagic.tools.app_store_connect.arguments import Types
 
 
 def _test_missing_argument(argument, _namespace_kwargs):
@@ -46,7 +46,7 @@ def test_missing_private_key_arg(namespace_kwargs):
         (AppStoreConnectArgument.ISSUER_ID, 1),
     ],
 )
-@mock.patch("codemagic.tools.app_store_connect.AppStoreConnectApiClient")
+@mock.patch("codemagic.tools.app_store_connect.app_store_connect.AppStoreConnectApiClient")
 def test_missing_arg_from_env(mock_appstore_api_client, namespace_kwargs, argument, api_client_arg_index):
     namespace_kwargs[argument.key] = None
 
@@ -110,7 +110,7 @@ def test_private_key_invalid_path(namespace_kwargs):
     assert str(exception_info.value) == 'argument --private-key: File "this-is-not-a-file" does not exist'
 
 
-@mock.patch("codemagic.tools.app_store_connect.AppStoreConnectApiClient")
+@mock.patch("codemagic.tools.app_store_connect.app_store_connect.AppStoreConnectApiClient")
 def test_read_private_key(mock_appstore_api_client, namespace_kwargs, mock_auth_key):
     pk = mock_auth_key.read_text()
     namespace_kwargs[AppStoreConnectArgument.PRIVATE_KEY.key] = Types.PrivateKeyArgument(pk)
@@ -128,7 +128,7 @@ def test_read_private_key(mock_appstore_api_client, namespace_kwargs, mock_auth_
         ),
     ],
 )
-@mock.patch("codemagic.tools.app_store_connect.AppStoreConnectApiClient")
+@mock.patch("codemagic.tools.app_store_connect.app_store_connect.AppStoreConnectApiClient")
 def test_private_key_path_arg(mock_appstore_api_client, configure_variable, namespace_kwargs, mock_auth_key):
     pk = mock_auth_key.read_text()
     with NamedTemporaryFile(mode="w") as tf:
@@ -150,7 +150,7 @@ def test_private_key_path_arg(mock_appstore_api_client, configure_variable, name
         ),
     ],
 )
-@mock.patch("codemagic.tools.app_store_connect.AppStoreConnectApiClient")
+@mock.patch("codemagic.tools.app_store_connect.app_store_connect.AppStoreConnectApiClient")
 def test_private_key_env_arg(mock_appstore_api_client, configure_variable, namespace_kwargs, mock_auth_key):
     pk = mock_auth_key.read_text()
     os.environ["PK_VALUE"] = pk

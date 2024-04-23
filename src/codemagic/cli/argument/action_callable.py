@@ -9,6 +9,7 @@ from typing import Optional
 from typing import Sequence
 
 if TYPE_CHECKING:
+    from ..action import ActionDeprecationInfo
     from ..action_group import ActionGroup
     from .argument import Argument
 
@@ -19,6 +20,10 @@ class ActionCallable:
     arguments: Sequence[Argument]
     is_cli_action: bool
     action_options: Dict[str, Any]
-    deprecated_alias: Optional[str]
+    deprecation_info: Optional[ActionDeprecationInfo]
     __name__: str
     __call__: Callable
+
+
+class DeprecatedActionCallable(ActionCallable):
+    deprecation_info: ActionDeprecationInfo
