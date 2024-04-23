@@ -1,0 +1,99 @@
+{
+    "type": "apps",
+    "id": "1481211155",
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155"
+    },
+    "attributes": {
+        "bundleId": "io.codemagic.banaan",
+        "name": "Banaan Codemagic",
+        "primaryLocale": "en-GB",
+        "sku": "banaanike",
+        "contentRightsDeclaration": "DOES_NOT_USE_THIRD_PARTY_CONTENT",
+        "isOrEverWasMadeForKids": false
+    },
+    "relationships": {
+        "appInfos": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appInfos",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appInfos"
+            }
+        },
+        "appStoreVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appStoreVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appStoreVersions"
+            }
+        },
+        "betaAppLocalizations": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppLocalizations",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppLocalizations"
+            }
+        },
+        "betaAppReviewDetail": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaAppReviewDetail",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaAppReviewDetail"
+            }
+        },
+        "betaGroups": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaGroups",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaGroups"
+            }
+        },
+        "betaLicenseAgreement": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaLicenseAgreement",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/betaLicenseAgreement"
+            }
+        },
+        "builds": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/builds",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/builds"
+            }
+        },
+        "endUserLicenseAgreement": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/endUserLicenseAgreement",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/endUserLicenseAgreement"
+            }
+        },
+        "gameCenterEnabledVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/gameCenterEnabledVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/gameCenterEnabledVersions"
+            }
+        },
+        "inAppPurchases": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/inAppPurchases",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/inAppPurchases"
+            }
+        },
+        "preOrder": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preOrder",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preOrder"
+            }
+        },
+        "preReleaseVersions": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preReleaseVersions",
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preReleaseVersions"
+            }
+        },
+        "betaTesters": {
+            "links": {
+                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/betaTesters"
+            }
+        },
+        "perfPowerMetrics": {
+            "links": {
+                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/perfPowerMetrics"
+            }
+        }
+    }
+}
