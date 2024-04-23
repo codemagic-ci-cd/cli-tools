@@ -9,7 +9,6 @@
         "name": "Banaan Codemagic",
         "primaryLocale": "en-GB",
         "sku": "banaanike",
-        "availableInNewTerritories": true,
         "contentRightsDeclaration": "DOES_NOT_USE_THIRD_PARTY_CONTENT",
         "isOrEverWasMadeForKids": false,
         "subscriptionStatusUrl": null,
@@ -28,12 +27,6 @@
             "links": {
                 "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/appStoreVersions",
                 "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/appStoreVersions"
-            }
-        },
-        "availableTerritories": {
-            "links": {
-                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/availableTerritories",
-                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/availableTerritories"
             }
         },
         "betaAppLocalizations": {
@@ -94,12 +87,6 @@
             "links": {
                 "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/preReleaseVersions",
                 "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/preReleaseVersions"
-            }
-        },
-        "prices": {
-            "links": {
-                "self": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/relationships/prices",
-                "related": "https://api.appstoreconnect.apple.com/v1/apps/1481211155/prices"
             }
         },
         "appAvailability": {
