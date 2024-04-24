@@ -207,9 +207,14 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
     class Relationships(DictSerializable, GracefulDataclassMixin):
         def __post_init__(self):
             for field in self.__dict__:
-                value = getattr(self, field)
-                if not isinstance(value, (Relationship, type(None))):
-                    setattr(self, field, Relationship(**value))
+                current_value = getattr(self, field)
+                if current_value is None or isinstance(current_value, Relationship):
+                    continue
+
+                # Relationships should have at least 'links' attribute.
+                # Set the value to none for empty relationships.
+                updated_value = Relationship(**current_value) if current_value else None
+                setattr(self, field, updated_value)
 
     @classmethod
     def _create_attributes(cls, api_response) -> Attributes:
