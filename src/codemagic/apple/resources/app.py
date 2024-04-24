@@ -47,6 +47,8 @@ class App(Resource):
     @dataclass
     class Relationships(Resource.Relationships):
         _OMIT_IF_NONE_KEYS = (
+            "alternativeDistributionKey",
+            "analyticsReportRequests",
             "appAvailability",
             "appAvailabilityV2",
             "appClips",
@@ -60,6 +62,7 @@ class App(Resource):
             "customerReviews",
             "gameCenterDetail",
             "inAppPurchasesV2",
+            "marketplaceSearchDetail",
             "perfPowerMetrics",
             "pricePoints",
             "promotedPurchases",
@@ -81,6 +84,8 @@ class App(Resource):
         preOrder: Relationship
         preReleaseVersions: Relationship
 
+        alternativeDistributionKey: Optional[Relationship] = None
+        analyticsReportRequests: Optional[Relationship] = None
         appAvailability: Optional[Relationship] = None
         appAvailabilityV2: Optional[Relationship] = None
         appClips: Optional[Relationship] = None
@@ -94,6 +99,7 @@ class App(Resource):
         customerReviews: Optional[Relationship] = None
         gameCenterDetail: Optional[Relationship] = None
         inAppPurchasesV2: Optional[Relationship] = None
+        marketplaceSearchDetail: Optional[Relationship] = None
         perfPowerMetrics: Optional[Relationship] = None
         pricePoints: Optional[Relationship] = None
         promotedPurchases: Optional[Relationship] = None
