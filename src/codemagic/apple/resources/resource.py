@@ -339,3 +339,6 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             value = self._format_attribute_value(attribute_name, value)
             s += f"\n{name}: {value}"
         return s
+
+
+ResourceReference = Union[ResourceId, LinkedResourceData]

@@ -10,6 +10,7 @@ from codemagic.apple.app_store_connect.resource_manager import R2
 from codemagic.apple.app_store_connect.resource_manager import R
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceReference
 
 from ..errors import AppStoreConnectError
 from ..resource_printer import ResourcePrinter
@@ -150,32 +151,32 @@ class ResourceManagerMixin:
     def _delete_resource(
         self,
         resource_manager: ResourceManager[R],
-        resource_id: ResourceId,
+        resource_reference: ResourceReference,
         ignore_not_found: bool,
     ):
         try:
-            delete_resource: Callable[[ResourceId], None] = getattr(resource_manager, "delete")
+            delete_resource: Callable[[ResourceReference], None] = getattr(resource_manager, "delete")
         except AttributeError:
             raise RuntimeError("Resource manager cannot delete resources", resource_manager)
 
-        self.printer.log_delete(resource_manager.resource_type, resource_id)
+        self.printer.log_delete(resource_manager.resource_type, resource_reference)
         try:
-            delete_resource(resource_id)
+            delete_resource(resource_reference)
         except AppStoreConnectApiError as api_error:
             if ignore_not_found is True and api_error.status_code == 404:
-                self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_id)
+                self.printer.log_ignore_not_deleted(resource_manager.resource_type, resource_reference)
             else:
                 raise AppStoreConnectError(
                     str(api_error),
                     api_error_response=api_error.error_response,
                 ) from api_error
         else:
-            self.printer.log_deleted(resource_manager.resource_type, resource_id)
+            self.printer.log_deleted(resource_manager.resource_type, resource_reference)
 
     def _modify_resource(
         self,
         resource_manager: ResourceManager[R],
-        resource_id: ResourceId,
+        resource_reference: ResourceReference,
         should_print: bool,
         **update_params,
     ) -> R:
@@ -184,15 +185,15 @@ class ResourceManagerMixin:
         except AttributeError:
             raise RuntimeError("Resource manager cannot modify resources", resource_manager)
 
-        self.printer.log_modify(resource_manager.resource_type, resource_id)
+        self.printer.log_modify(resource_manager.resource_type, resource_reference)
         try:
-            resource = modify_resource(resource_id, **update_params)
+            resource = modify_resource(resource_reference, **update_params)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(
                 str(api_error),
                 api_error_response=api_error.error_response,
             ) from api_error
 
-        self.printer.log_modified(resource_manager.resource_type, resource_id)
+        self.printer.log_modified(resource_manager.resource_type, resource_reference)
         self.printer.print_resource(resource, should_print)
         return resource

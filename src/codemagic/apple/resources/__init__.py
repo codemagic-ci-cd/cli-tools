@@ -44,6 +44,7 @@ from .profile import Profile
 from .resource import LinkedResourceData
 from .resource import Resource
 from .resource import ResourceId
+from .resource import ResourceReference
 from .review_submission import ReviewSubmission
 from .review_submission_item import ReviewSubmissionItem
 from .signing_certificate import SigningCertificate

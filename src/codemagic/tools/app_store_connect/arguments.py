@@ -27,6 +27,7 @@ from codemagic.apple.resources import CapabilityType
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import PhasedReleaseState
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -557,6 +558,11 @@ class AppStoreVersionArgument(cli.Argument):
             "required": False,
         },
     )
+    APP_STORE_VERSION_PHASED_RELEASE_ID = cli.ArgumentProperties(
+        key="app_store_version_phased_release",
+        type=ResourceId,
+        description="UUID value of the App Store Version Phased Release",
+    )
     APP_STORE_VERSION_SUBMISSION_ID = cli.ArgumentProperties(
         key="app_store_version_submission_id",
         type=ResourceId,
@@ -583,6 +589,27 @@ class AppStoreVersionArgument(cli.Argument):
             f'for example "{Colors.WHITE("2021-11-10T14:00:00+00:00")}".'
         ),
         argparse_kwargs={"required": False},
+    )
+    PHASED_RELEASE_STATE = cli.ArgumentProperties(
+        key="phased_release_state",
+        flags=("--state",),
+        type=PhasedReleaseState,
+        description=(
+            "Choose when to release the app. You can either manually release the app at a later date on "
+            "the App Store Connect website, or the app version can be automatically released right after "
+            "it has been approved by App Review."
+        ),
+        argparse_kwargs={
+            "required": True,
+            "choices": list(PhasedReleaseState),
+        },
+    )
+    PHASED_RELEASE_STATE_OPTIONAL = cli.ArgumentProperties.duplicate(
+        PHASED_RELEASE_STATE,
+        argparse_kwargs={
+            "required": False,
+            "choices": list(PhasedReleaseState),
+        },
     )
     PLATFORM = cli.ArgumentProperties(
         key="platform",

@@ -3,7 +3,6 @@ from typing import Type
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
-from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import PhasedReleaseState
@@ -23,7 +22,7 @@ class AppStoreVersionPhasedReleases(ResourceManager[AppStoreVersionPhasedRelease
 
     def create(
         self,
-        app_store_version: Union[ResourceId, AppStoreVersion],
+        app_store_version: Union[ResourceId, LinkedResourceData],
         phased_release_state: Optional[PhasedReleaseState] = None,
     ) -> AppStoreVersionPhasedRelease:
         """

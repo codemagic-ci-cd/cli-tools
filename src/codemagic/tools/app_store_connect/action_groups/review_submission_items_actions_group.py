@@ -75,9 +75,6 @@ class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         Delete specified Review Submission item
         """
-        if isinstance(review_submission_item_id, ReviewSubmissionItem):
-            review_submission_item_id = review_submission_item_id.id
-
         self._delete_resource(
             self.api_client.review_submissions_items,
             review_submission_item_id,
