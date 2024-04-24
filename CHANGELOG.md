@@ -1,9 +1,12 @@
 UNRELEASED
 -------------
 
-**Development**
-- Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`.
-- Define new enumerations `codemagic.apple.resources.enums.BuildAudienceType` and `codemagic.apple.resources.enums.SubscriptionStatusUrlVersion`.
+**Bugfixes**
+- Fix App Store Connect API responses deserialization for cases when resource contains an empty relationship. [PR #401](https://github.com/codemagic-ci-cd/cli-tools/pull/401)
+
+- **Development**
+- Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`. [PR #383](https://github.com/codemagic-ci-cd/cli-tools/pull/383)
+- Define new enumerations `codemagic.apple.resources.enums.BuildAudienceType` and `codemagic.apple.resources.enums.SubscriptionStatusUrlVersion`. [PR #383](https://github.com/codemagic-ci-cd/cli-tools/pull/383)
 
 Version 0.50.7
 -------------
