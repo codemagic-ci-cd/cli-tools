@@ -97,21 +97,21 @@ class PagingInformation(DictSerializable):
             self.paging = PagingInformation.Paging(**self.paging)
 
 
+@dataclass
 class Links(DictSerializable):
     _OMIT_IF_NONE_KEYS = ("self", "related")
 
-    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):  # noqa: N805
-        _self.self = self
-        _self.related = related
+    self: Optional[str] = None
+    related: Optional[str] = None
 
 
+@dataclass
 class ResourceLinks(DictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
     """
 
-    def __init__(_self, self):  # noqa: N805
-        _self.self = self
+    self: str
 
 
 @dataclass
