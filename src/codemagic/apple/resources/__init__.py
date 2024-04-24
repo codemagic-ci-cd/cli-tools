@@ -1,6 +1,7 @@
 from .app import App
 from .app_store_version import AppStoreVersion
 from .app_store_version_localization import AppStoreVersionLocalization
+from .app_store_version_phased_release import AppStoreVersionPhasedRelease
 from .app_store_version_submission import AppStoreVersionSubmission
 from .beta_app_localization import BetaAppLocalization
 from .beta_app_review_detail import BetaAppReviewDetail
@@ -29,6 +30,7 @@ from .enums import DeviceStatus
 from .enums import ExternalBetaState
 from .enums import InternalBetaState
 from .enums import Locale
+from .enums import PhasedReleaseState
 from .enums import Platform
 from .enums import ProfileState
 from .enums import ProfileType

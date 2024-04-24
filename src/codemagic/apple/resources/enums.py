@@ -251,6 +251,17 @@ class InternalBetaState(ResourceEnum):
     READY_FOR_BETA_TESTING = "READY_FOR_BETA_TESTING"
 
 
+class PhasedReleaseState(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/phasedreleasestate
+    """
+
+    ACTIVE = "ACTIVE"
+    COMPLETE = "COMPLETE"
+    INACTIVE = "INACTIVE"
+    PAUSED = "PAUSED"
+
+
 class Platform(ResourceEnum):
     IOS = "IOS"
     MAC_OS = "MAC_OS"
@@ -323,6 +334,7 @@ class ResourceType(ResourceEnum):
     APP_STORE_VERSIONS = "appStoreVersions"
     APP_STORE_VERSION_EXPERIMENTS = "appStoreVersionExperiments"
     APP_STORE_VERSION_LOCALIZATIONS = "appStoreVersionLocalizations"
+    APP_STORE_VERSION_PHASED_RELEASES = "appStoreVersionPhasedReleases"
     APP_STORE_VERSION_SUBMISSIONS = "appStoreVersionSubmissions"
     BETA_APP_LOCALIZATIONS = "betaAppLocalizations"
     BETA_APP_REVIEW_DETAILS = "betaAppReviewDetails"
