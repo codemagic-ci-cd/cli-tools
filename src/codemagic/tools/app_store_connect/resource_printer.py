@@ -20,7 +20,6 @@ from codemagic.apple.resources import Profile
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import SigningCertificate
 from codemagic.apple.resources.resource import DictSerializable
-from codemagic.apple.resources.resource import LinkedResourceData
 from codemagic.apple.resources.resource import ResourceReference
 from codemagic.cli import Colors
 from codemagic.models import JsonSerializable
@@ -44,12 +43,6 @@ class ResourcePrinter:
         self.print_json = print_json
         self.logger = log.get_logger(self.__class__)
         self.print = print_function
-
-    @classmethod
-    def _get_id(cls, resource_reference: ResourceReference) -> str:
-        if isinstance(resource_reference, LinkedResourceData):
-            return resource_reference.id
-        return resource_reference
 
     def print_value(self, value: JsonSerializableT, should_print: bool):
         if not should_print:
@@ -106,7 +99,7 @@ class ResourcePrinter:
         self.logger.info(Colors.GREEN(f"Created {resource.__class__} {resource.id}"))
 
     def log_get(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(f"Get {resource_type} {self._get_id(resource_reference)}")
+        self.logger.info(f"Get {resource_type} {Resource.get_id(resource_reference)}")
 
     def log_get_related(
         self,
@@ -114,7 +107,7 @@ class ResourcePrinter:
         resource_type: Type[R2],
         resource_reference: ResourceReference,
     ):
-        self.logger.info(f"Get {related_resource_type.s} for {resource_type} {self._get_id(resource_reference)}")
+        self.logger.info(f"Get {related_resource_type.s} for {resource_type} {Resource.get_id(resource_reference)}")
 
     def log_found(
         self,
@@ -125,7 +118,7 @@ class ResourcePrinter:
         related_resource_reference: Optional[ResourceReference] = None,
     ):
         if related_resource_type is not None and related_resource_reference:
-            related = f" for {related_resource_type} {self._get_id(related_resource_reference)}"
+            related = f" for {related_resource_type} {Resource.get_id(related_resource_reference)}"
         elif related_resource_type is not None:
             related = f" for {related_resource_type}"
         else:
@@ -152,20 +145,20 @@ class ResourcePrinter:
             self.logger.info(Colors.GREEN(f"Filtered out {count} {name} {constraint}"))
 
     def log_delete(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(Colors.BLUE(f"Delete {resource_type} {self._get_id(resource_reference)}"))
+        self.logger.info(Colors.BLUE(f"Delete {resource_type} {Resource.get_id(resource_reference)}"))
 
     def log_ignore_not_deleted(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(f"{resource_type} {self._get_id(resource_reference)} does not exist, did not delete.")
+        self.logger.info(f"{resource_type} {Resource.get_id(resource_reference)} does not exist, did not delete.")
 
     def log_deleted(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(Colors.GREEN(f"Successfully deleted {resource_type} {self._get_id(resource_reference)}"))
+        self.logger.info(Colors.GREEN(f"Successfully deleted {resource_type} {Resource.get_id(resource_reference)}"))
 
     def log_saved(self, resource: Union[SigningCertificate, Profile], path: pathlib.Path):
         destination = shlex.quote(str(path))
         self.logger.info(Colors.GREEN(f"Saved {resource.__class__} {resource.get_display_info()} to {destination}"))
 
     def log_modify(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(Colors.BLUE(f"Modify {resource_type} {self._get_id(resource_reference)}"))
+        self.logger.info(Colors.BLUE(f"Modify {resource_type} {Resource.get_id(resource_reference)}"))
 
     def log_modified(self, resource_type: Type[R], resource_reference: ResourceReference):
-        self.logger.info(Colors.GREEN(f"Successfully modified {resource_type} {self._get_id(resource_reference)}"))
+        self.logger.info(Colors.GREEN(f"Successfully modified {resource_type} {Resource.get_id(resource_reference)}"))

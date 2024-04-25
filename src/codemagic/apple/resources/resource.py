@@ -221,6 +221,12 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         return cls.Attributes(**defined_fields)
 
     @classmethod
+    def get_id(cls, resource_reference: ResourceReference) -> ResourceId:
+        if isinstance(resource_reference, LinkedResourceData):
+            return resource_reference.id
+        return resource_reference
+
+    @classmethod
     def _create_relationships(cls, api_response) -> Relationships:
         if cls.Relationships is Resource.Relationships:
             # In case the resource does not have relationships

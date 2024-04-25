@@ -9,6 +9,7 @@ from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.resource_manager import R2
 from codemagic.apple.app_store_connect.resource_manager import R
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceReference
 
@@ -98,16 +99,16 @@ class ResourceManagerMixin:
 
     def _get_related_resource(
         self,
-        resource_id: ResourceId,
+        resource_reference: ResourceReference,
         resource_type: Type[R],
         related_resource_type: Type[R2],
         read_related_resource_method: Callable[..., Optional[R2]],
         should_print: bool,
     ) -> R2:
-        self.printer.log_get_related(related_resource_type, resource_type, resource_id)
+        self.printer.log_get_related(related_resource_type, resource_type, resource_reference)
 
         try:
-            resource = read_related_resource_method(resource_id)
+            resource = read_related_resource_method(resource_reference)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(
                 str(api_error),
@@ -115,6 +116,7 @@ class ResourceManagerMixin:
             ) from api_error
 
         if resource is None:
+            resource_id = Resource.get_id(resource_reference)
             raise AppStoreConnectError(f"{related_resource_type} was not found for {resource_type} {resource_id}")
 
         self.printer.print_resource(resource, should_print)

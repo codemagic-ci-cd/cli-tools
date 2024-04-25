@@ -14,12 +14,11 @@ from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
 from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import Build
-from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Locale
-from codemagic.apple.resources import PhasedReleaseState
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceReference
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -206,68 +205,22 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
 
     @cli.action(
-        "enable-phased-release",
+        "phased-release",
         AppStoreVersionArgument.APP_STORE_VERSION_ID,
-        AppStoreVersionArgument.PHASED_RELEASE_STATE_OPTIONAL,
         action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
     )
-    def enable_app_store_version_phased_release(
+    def get_app_store_version_phased_release(
         self,
-        app_store_version_id: Union[LinkedResourceData, ResourceId],
-        *,
-        phased_release_state: Optional[PhasedReleaseState] = None,
+        app_store_version_id: ResourceReference,
         should_print: bool = True,
     ) -> AppStoreVersionPhasedRelease:
         """
-        Enable phased release for an App Store version
+        Read the phased release status and configuration for a version with phased release enabled.
         """
-
-        return self._create_resource(
-            self.api_client.app_store_version_phased_releases,
+        return self._get_related_resource(
+            app_store_version_id,
+            AppStoreVersion,
+            AppStoreVersionPhasedRelease,
+            self.api_client.app_store_versions.read_app_store_version_phased_release,
             should_print,
-            app_store_version=app_store_version_id,
-            **({"phased_release_state": phased_release_state} if phased_release_state else {}),
-        )
-
-    @cli.action(
-        "set-phased-release-state",
-        AppStoreVersionArgument.APP_STORE_VERSION_PHASED_RELEASE_ID,
-        AppStoreVersionArgument.PHASED_RELEASE_STATE,
-        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
-    )
-    def set_app_store_version_phased_release_state(
-        self,
-        app_store_version_phased_release: Union[LinkedResourceData, ResourceId],
-        *,
-        phased_release_state: PhasedReleaseState,
-        should_print: bool = True,
-    ) -> AppStoreVersionPhasedRelease:
-        """
-        Pause or resume a App Store version phased release, or immediately release an app
-        """
-        return self._modify_resource(
-            self.api_client.app_store_version_phased_releases,
-            app_store_version_phased_release,
-            should_print,
-            phased_release_state=phased_release_state,
-        )
-
-    @cli.action(
-        "cancel-phased-release",
-        AppStoreVersionArgument.APP_STORE_VERSION_PHASED_RELEASE_ID,
-        CommonArgument.IGNORE_NOT_FOUND,
-        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
-    )
-    def cancel_app_store_version_phased_release(
-        self,
-        app_store_version_phased_release: Union[LinkedResourceData, ResourceId],
-        ignore_not_found: bool = False,
-    ) -> None:
-        """
-        Cancel a planned App Store version phased release that has not been started
-        """
-        self._delete_resource(
-            self.api_client.app_store_version_phased_releases,
-            app_store_version_phased_release,
-            ignore_not_found,
         )

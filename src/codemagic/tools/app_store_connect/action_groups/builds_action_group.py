@@ -724,8 +724,13 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         app_store_version: AppStoreVersion,
         localization: AppStoreVersionLocalizationInfo,
     ):
+        if localization.locale:
+            locale_description = f"locale {localization.locale}"
+        else:
+            locale_description = f"default locale ({app.attributes.primaryLocale})"
+
         if existing_localization_id is None:
-            self.echo(Colors.GREEN(f"Create new {AppStoreVersionLocalization} for locale {localization.locale}"))
+            self.echo(Colors.GREEN(f"Create new {AppStoreVersionLocalization} for {locale_description}"))
             app_store_version_localization = self.api_client.app_store_version_localizations.create(
                 app_store_version,
                 localization.locale or app.attributes.primaryLocale,  # Use app's primary locale if not defined
@@ -737,7 +742,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 whats_new=localization.whats_new,
             )
         else:
-            self.echo(Colors.GREEN(f"Update {AppStoreVersionLocalization} for locale {localization.locale}"))
+            self.echo(Colors.GREEN(f"Update {AppStoreVersionLocalization} for {locale_description}"))
             app_store_version_localization = self.api_client.app_store_version_localizations.modify(
                 existing_localization_id,
                 description=localization.description,
