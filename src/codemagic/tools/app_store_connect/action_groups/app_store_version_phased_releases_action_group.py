@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import Optional
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import AppStoreVersionPhasedRelease
@@ -13,6 +15,10 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionPhasedReleaseArgument
 from ..arguments import CommonArgument
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
 
 
 class AppStoreVersionPhasedReleasesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -34,7 +40,10 @@ class AppStoreVersionPhasedReleasesActionGroup(AbstractBaseAction, metaclass=ABC
         """
 
         return self._create_resource(
-            self.api_client.app_store_version_phased_releases,
+            cast(
+                "CreatingResourceManager[AppStoreVersionPhasedRelease]",
+                self.api_client.app_store_version_phased_releases,
+            ),
             should_print,
             app_store_version=app_store_version_id,
             **({"phased_release_state": phased_release_state} if phased_release_state else {}),
@@ -57,7 +66,10 @@ class AppStoreVersionPhasedReleasesActionGroup(AbstractBaseAction, metaclass=ABC
         Pause or resume an App Store version phased release, or immediately release an app
         """
         return self._modify_resource(
-            self.api_client.app_store_version_phased_releases,
+            cast(
+                "ModifyingResourceManager[AppStoreVersionPhasedRelease]",
+                self.api_client.app_store_version_phased_releases,
+            ),
             app_store_version_phased_release,
             should_print,
             phased_release_state=phased_release_state,

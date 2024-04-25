@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import Optional
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import AppStoreVersionLocalization
@@ -15,6 +17,10 @@ from ..arguments import AppStoreVersionArgument
 from ..arguments import AppStoreVersionLocalizationArgument
 from ..arguments import CommonArgument
 from ..arguments import Types
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
 
 
 class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -77,7 +83,10 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
             whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
         )
         return self._create_resource(
-            self.api_client.app_store_version_localizations,
+            cast(
+                "CreatingResourceManager[AppStoreVersionLocalization]",
+                self.api_client.app_store_version_localizations,
+            ),
             should_print,
             **{k: v for k, v in create_params.items() if v is not None},
         )
@@ -109,7 +118,10 @@ class AppStoreVersionLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCM
         Edit localized version-level information for a particular language.
         """
         return self._modify_resource(
-            self.api_client.app_store_version_localizations,
+            cast(
+                "ModifyingResourceManager[AppStoreVersionLocalization]",
+                self.api_client.app_store_version_localizations,
+            ),
             app_store_version_localization_id,
             should_print,
             description=description,

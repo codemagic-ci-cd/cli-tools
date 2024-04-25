@@ -16,6 +16,7 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Type
+from typing import TypeVar
 from typing import Union
 from typing import overload
 
@@ -24,6 +25,9 @@ from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
 
 from .enums import ResourceType
+
+LRD = TypeVar("LRD", bound="LinkedResourceData")
+ResourceReference = Union["ResourceId", LRD]
 
 
 class ResourceId(str):
@@ -345,6 +349,3 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             value = self._format_attribute_value(attribute_name, value)
             s += f"\n{name}: {value}"
         return s
-
-
-ResourceReference = Union[ResourceId, LinkedResourceData]

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import BetaAppReviewSubmission
@@ -12,6 +14,10 @@ from codemagic.apple.resources import ResourceId
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -30,7 +36,7 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
         """
 
         return self._create_resource(
-            self.api_client.beta_app_review_submissions,
+            cast("CreatingResourceManager[BetaAppReviewSubmission]", self.api_client.beta_app_review_submissions),
             should_print,
             build=build_id,
         )
@@ -56,6 +62,6 @@ class BetaAppReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta)
         )
         return self._list_resources(
             beta_app_review_submissions_filter,
-            self.api_client.beta_app_review_submissions,
+            cast("ListingResourceManager[BetaAppReviewSubmission]", self.api_client.beta_app_review_submissions),
             should_print,
         )

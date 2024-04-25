@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -17,6 +19,11 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import BuildArgument
 from ..arguments import CommonArgument
 from ..arguments import Types
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
 
 
 class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -52,7 +59,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         return self._list_resources(
             BetaBuildLocalizations.Filter(build=build_id, locale=locale),
-            self.api_client.beta_build_localizations,
+            cast("ListingResourceManager[BetaBuildLocalization]", self.api_client.beta_build_localizations),
             should_print,
         )
 
@@ -92,7 +99,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         # locales, we need to create the BetaBuildLocalization resource by ourselves.
         if not beta_build_localizations:
             return self._create_resource(
-                self.api_client.beta_build_localizations,
+                cast("CreatingResourceManager[BetaBuildLocalization]", self.api_client.beta_build_localizations),
                 should_print,
                 build=build_id,
                 locale=locale,
@@ -130,7 +137,7 @@ class BetaBuildLocalizationsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Update a beta build localization
         """
         return self._modify_resource(
-            self.api_client.beta_build_localizations,
+            cast("ModifyingResourceManager[BetaBuildLocalization]", self.api_client.beta_build_localizations),
             localization_id,
             should_print,
             whats_new=self._get_whats_new_value(whats_new),

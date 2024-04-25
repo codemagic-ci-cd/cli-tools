@@ -5,6 +5,7 @@ import shlex
 import time
 from abc import ABCMeta
 from datetime import datetime
+from typing import TYPE_CHECKING
 from typing import Dict
 from typing import Iterator
 from typing import List
@@ -12,6 +13,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -51,6 +53,11 @@ from ..arguments import BuildArgument
 from ..arguments import PublishArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
+
 
 AppStoreVersionLocalizationInfos = Union[
     List[AppStoreVersionLocalizationInfo],
@@ -112,7 +119,11 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             version=build_version_number,
             pre_release_version_version=pre_release_version,
         )
-        return self._list_resources(builds_filter, self.api_client.builds, should_print)
+        return self._list_resources(
+            builds_filter,
+            cast("ListingResourceManager[Build]", self.api_client.builds),
+            should_print,
+        )
 
     @cli.action(
         "expire",
@@ -129,7 +140,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
 
         return self._modify_resource(
-            self.api_client.builds,
+            cast("ModifyingResourceManager[Build]", self.api_client.builds),
             build_id,
             should_print,
             expired=True,
