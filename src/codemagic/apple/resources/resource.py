@@ -317,7 +317,8 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         type_prefix = self.type.value.rstrip("s")
         name = re.sub(f"{type_prefix}s?", "", name)
         name = re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
-        return name.lower().capitalize()
+        name = name.lower().capitalize()
+        return re.sub("(i|vision|mac) os ", r"\1OS", name)
 
     def _hide_attribute_value(self, attribute_name: str) -> bool:
         if not hasattr(self.attributes, "__dataclass_fields__"):

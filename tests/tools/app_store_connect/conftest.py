@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import os
 import pathlib
 
@@ -42,3 +43,27 @@ def namespace_kwargs(mock_auth_key):
             continue
         os.environ.pop(arg.type.environment_variable_key, None)
     return ns_kwargs
+
+
+@pytest.fixture()
+def app_store_connect(namespace_kwargs) -> AppStoreConnect:
+    args = AppStoreConnectArgument
+    if "TEST_APPLE_PRIVATE_KEY_PATH" in os.environ:
+        key_path = pathlib.Path(os.environ["TEST_APPLE_PRIVATE_KEY_PATH"])
+        private_key = key_path.expanduser().read_text()
+        key_identifier = os.environ["TEST_APPLE_KEY_IDENTIFIER"]
+        issuer_id = os.environ["TEST_APPLE_ISSUER_ID"]
+    elif "TEST_APPLE_PRIVATE_KEY_CONTENT" in os.environ:
+        private_key = os.environ["TEST_APPLE_PRIVATE_KEY_CONTENT"]
+        key_identifier = os.environ["TEST_APPLE_KEY_IDENTIFIER"]
+        issuer_id = os.environ["TEST_APPLE_ISSUER_ID"]
+    else:
+        raise RuntimeError("Missing App Store Connect authentication information")
+
+    ns = namespace_kwargs | {
+        args.ISSUER_ID.key: Types.IssuerIdArgument(issuer_id),
+        args.KEY_IDENTIFIER.key: Types.KeyIdentifierArgument(key_identifier),
+        args.PRIVATE_KEY.key: Types.PrivateKeyArgument(private_key),
+    }
+    cli_args = argparse.Namespace(**ns)
+    return AppStoreConnect.from_cli_args(cli_args)
