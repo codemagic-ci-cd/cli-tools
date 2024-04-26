@@ -52,6 +52,15 @@ class BuildProcessingState(ResourceEnum):
     VALID = "VALID"
 
 
+class BuildAudienceType(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/buildaudiencetype
+    """
+
+    INTERNAL_ONLY = "INTERNAL_ONLY"
+    APP_STORE_ELIGIBLE = "APP_STORE_ELIGIBLE"
+
+
 class BundleIdPlatform(ResourceEnum):
     IOS = "IOS"
     MAC_OS = "MAC_OS"
@@ -404,3 +413,14 @@ class Locale(ResourceEnum):
     VI = "vi"
     ZH_HANS = "zh-Hans"
     ZH_HANT = "zh-Hant"
+
+
+class SubscriptionStatusUrlVersion(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/subscriptionstatusurlversion
+    """
+
+    V1 = "V1"
+    V2 = "V2"
+    v1 = "v1"
+    v2 = "v2"
