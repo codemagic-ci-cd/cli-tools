@@ -20,6 +20,7 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.cli import Argument
 from codemagic.cli import Colors
 from codemagic.models import Altool
 from codemagic.models.application_package import Ipa
@@ -46,7 +47,7 @@ AppStoreVersionLocalizationInfos = Union[
 class AddBetaTestInfoOptions:
     beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None
     locale: Optional[Locale] = None
-    whats_new: Optional[Types.WhatsNewArgument] = None
+    whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None
 
 
 @dataclass
@@ -80,6 +81,9 @@ class SubmitToAppStoreOptions:
     support_url: Optional[str] = None
     whats_new: Optional[str] = None
     app_store_version_localizations: Optional[List[AppStoreVersionLocalizationInfo]] = None
+    # App Store Version Phased Release arguments
+    enable_phased_release: Optional[bool] = None
+    disable_phased_release: Optional[bool] = None
 
 
 ACTION_ARGUMENTS = (
@@ -137,6 +141,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         submit_to_testflight: Optional[bool] = None,
         submit_to_app_store: Optional[bool] = None,
         beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
+        enable_phased_release: Optional[bool] = None,
+        disable_phased_release: Optional[bool] = None,
+        **_other_args,
     ) -> None:
         if not (apple_id and app_specific_password):
             self._assert_api_client_credentials(
@@ -152,6 +159,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 )
             if submit_to_app_store:
                 self._assert_api_client_credentials("It is required for submitting an app to App Store review.")
+
+        try:
+            Argument.resolve_optional_two_way_switch(enable_phased_release, disable_phased_release)
+        except ValueError:
+            enable_argument = AppStoreVersionArgument.ENABLE_PHASED_RELEASE
+            disable_argument = AppStoreVersionArgument.DISABLE_PHASED_RELEASE
+            raise AppStoreVersionArgument.ENABLE_PHASED_RELEASE.raise_argument_error(
+                f'Using mutually exclusive switches "{enable_argument.flag}" and "{disable_argument.flag}".',
+            )
 
     def _get_altool(
         self,
@@ -183,7 +199,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         # Beta test info arguments
         beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
         locale: Optional[Locale] = None,
-        whats_new: Optional[Types.WhatsNewArgument] = None,
+        whats_new: Optional[Union[Types.WhatsNewArgument, str]] = None,
         # Add build to beta group arguments
         beta_group_names: Optional[List[str]] = None,
         # Submit to App Store arguments
@@ -201,6 +217,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         promotional_text: Optional[str] = None,
         support_url: Optional[str] = None,
         app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
+        # App Store Version Phased Release arguments
+        enable_phased_release: Optional[bool] = None,
+        disable_phased_release: Optional[bool] = None,
     ):
         submit_to_testflight_options = None
         submit_to_app_store_options = None
@@ -241,6 +260,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 support_url=support_url,
                 whats_new=whats_new.value if isinstance(whats_new, Types.WhatsNewArgument) else whats_new,
                 app_store_version_localizations=app_store_version_localizations,
+                # App Store Version Phased Release arguments
+                enable_phased_release=enable_phased_release,
+                disable_phased_release=disable_phased_release,
             )
         if submit_to_testflight and beta_group_names:
             # Only builds submitted to TestFlight can be added to beta groups
@@ -302,7 +324,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             app_specific_password,
             submit_to_testflight,
             submit_to_app_store,
-            app_store_connect_submit_options.get("beta_build_localizations"),
+            **app_store_connect_submit_options,
         )
 
         application_packages = self._get_publishing_application_packages(application_package_path_patterns)

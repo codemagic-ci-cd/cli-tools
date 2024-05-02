@@ -629,6 +629,30 @@ class AppStoreVersionArgument(cli.Argument):
         ),
         argparse_kwargs={"required": False},
     )
+    ENABLE_PHASED_RELEASE = cli.ArgumentProperties(
+        key="enable_phased_release",
+        flags=("--phased-release",),
+        type=bool,
+        description=(
+            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
+    DISABLE_PHASED_RELEASE = cli.ArgumentProperties(
+        key="disable_phased_release",
+        flags=("--no-phased-release",),
+        type=bool,
+        description=(
+            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
 
 
 class AppStoreVersionPhasedReleaseArgument(cli.Argument):
@@ -1604,6 +1628,9 @@ class ArgumentGroups:
         AppStoreVersionLocalizationArgument.SUPPORT_URL,
         AppStoreVersionLocalizationArgument.WHATS_NEW,
         AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_INFOS,
+        # App Store Version Phased Release arguments
+        AppStoreVersionArgument.ENABLE_PHASED_RELEASE,
+        AppStoreVersionArgument.DISABLE_PHASED_RELEASE,
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,

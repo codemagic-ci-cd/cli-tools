@@ -49,6 +49,8 @@ class AppStoreConnect(
     actions.GetLatestBuildNumberAction,
     actions.GetLatestTestflightBuildNumberAction,
     actions.PublishAction,
+    actions.SubmitToAppStoreAction,
+    actions.SubmitToTestFlightAction,
     mixins.ResourceManagerMixin,
     mixins.SigningFileSaverMixin,
     PathFinderMixin,
