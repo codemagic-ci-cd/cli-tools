@@ -253,6 +253,9 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
             promotional_text=None,
             support_url=None,
             whats_new=None,
+            # App Store Version Phased Release arguments
+            enable_phased_release=None,
+            disable_phased_release=None,
         )
         mock_add_beta_test_info.assert_not_called()
 

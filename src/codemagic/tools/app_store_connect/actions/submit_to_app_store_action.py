@@ -477,11 +477,11 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
     def _manage_app_store_version_phased_release(
         self,
         app_store_version: AppStoreVersion,
-        enable_phased_release: Optional[bool],
+        should_enable_phased_release: Optional[bool],
     ):
-        if enable_phased_release is True:
+        if should_enable_phased_release is True:
             self._enable_app_store_version_phased_release(app_store_version)
-        elif enable_phased_release is False:
+        elif should_enable_phased_release is False:
             self._disable_app_store_version_phased_release(app_store_version)
         else:
             pass  # Leave it as is without changing anything
