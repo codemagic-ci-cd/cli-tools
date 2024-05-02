@@ -53,19 +53,6 @@ class AppStoreVersionPhasedReleases(ResourceManager[AppStoreVersionPhasedRelease
         ).json()
         return AppStoreVersionPhasedRelease(response["data"], created=True)
 
-    def read(
-        self,
-        app_store_version_phased_release: Union[LinkedResourceData, ResourceId],
-    ) -> AppStoreVersionPhasedRelease:
-        """
-        https://developer.apple.com/documentation/appstoreconnectapi/app_store/app_store_version_phased_releases
-        """
-        app_store_version_phased_release_id = self._get_resource_id(app_store_version_phased_release)
-        response = self.client.session.get(
-            f"{self.client.API_URL}/appStoreVersionPhasedReleases/{app_store_version_phased_release_id}",
-        ).json()
-        return AppStoreVersionPhasedRelease(response["data"])
-
     def modify(
         self,
         app_store_version_phased_release: Union[LinkedResourceData, ResourceId],
