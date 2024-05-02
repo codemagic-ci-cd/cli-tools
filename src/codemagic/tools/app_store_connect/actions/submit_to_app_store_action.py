@@ -203,7 +203,6 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
         )
 
         app_store_version = self._ensure_app_store_version(app, build, app_store_version_info)
-        self.echo("")
 
         self._manage_app_store_version_phased_release(app_store_version, phased_release)
 
@@ -485,20 +484,21 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
             self._disable_app_store_version_phased_release(app_store_version)
         else:
             pass  # Leave it as is without changing anything
+        self.echo("")
 
     def _enable_app_store_version_phased_release(self, app_store_version: AppStoreVersion):
-        self.echo(Colors.BLUE(f"\nEnable phased release for App Store Version {app_store_version.id}\n"))
+        self.echo(Colors.BLUE(f"\nEnable phased release for App Store Version {app_store_version.id}"))
         phased_release = self.api_client.app_store_versions.read_app_store_version_phased_release(app_store_version)
         if phased_release:
-            self.echo(Colors.BLUE(f"Phased release is already enabled for App Store Version {app_store_version.id}"))
+            self.echo(Colors.GREEN(f"Phased release is already enabled for App Store Version {app_store_version.id}"))
         else:
             phased_release = self.enable_app_store_version_phased_release(app_store_version, should_print=False)
         self.printer.print_resource(phased_release, should_print=True)
 
     def _disable_app_store_version_phased_release(self, app_store_version: AppStoreVersion):
-        self.echo(Colors.BLUE(f"\nDisable phased release for App Store Version {app_store_version.id}\n"))
+        self.echo(Colors.BLUE(f"\nDisable phased release for App Store Version {app_store_version.id}"))
         phased_release = self.api_client.app_store_versions.read_app_store_version_phased_release(app_store_version)
         if not phased_release:
-            self.echo(Colors.BLUE(f"Phased release is already disabled for App Store Version {app_store_version.id}"))
+            self.echo(Colors.GREEN(f"Phased release is already disabled for App Store Version {app_store_version.id}"))
         else:
             self.cancel_app_store_version_phased_release(phased_release)

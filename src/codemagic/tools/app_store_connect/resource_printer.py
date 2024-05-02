@@ -81,6 +81,7 @@ class ResourcePrinter:
     def log_creating(self, resource_type: Type[R], **params):
         def fmt(item: Tuple[str, Any]):
             name, value = item
+            value = Resource.get_id(value) if isinstance(value, Resource) else value
             name = name.replace("_", " ").replace("app store", "App Store")
             if isinstance(value, list):
                 return f"{name}: {[shlex.quote(str(el)) for el in value]}"
