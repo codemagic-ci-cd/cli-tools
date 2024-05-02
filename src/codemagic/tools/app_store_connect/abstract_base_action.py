@@ -377,17 +377,6 @@ class AbstractBaseAction(
         raise NotImplementedError()
 
     @abstractmethod
-    def get_bundle_id(
-        self,
-        bundle_id_resource_id: ResourceId,
-        should_print: bool = True,
-    ) -> BundleId:
-        from .action_groups import BundleIdsActionGroup
-
-        _ = BundleIdsActionGroup.get_bundle_id  # Implementation
-        raise NotImplementedError()
-
-    @abstractmethod
     def get_build_pre_release_version(
         self,
         build_id: ResourceId,
@@ -396,6 +385,17 @@ class AbstractBaseAction(
         from .action_groups import BuildsActionGroup
 
         _ = BuildsActionGroup.get_build_pre_release_version  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_bundle_id(
+        self,
+        bundle_id_resource_id: ResourceId,
+        should_print: bool = True,
+    ) -> BundleId:
+        from .action_groups import BundleIdsActionGroup
+
+        _ = BundleIdsActionGroup.get_bundle_id  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
