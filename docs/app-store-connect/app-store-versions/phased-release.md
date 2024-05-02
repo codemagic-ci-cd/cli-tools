@@ -1,12 +1,12 @@
 
-app-store-versions
-==================
+phased-release
+==============
 
 
-**Manage the information related to an App Store version of your app**
+**Read the phased release status and configuration for a version with phased release enabled.**
 ### Usage
 ```bash
-app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-versions phased-release [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,14 @@ app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    APP_STORE_VERSION_ID
 ```
+### Required arguments for action `phased-release`
+
+##### `APP_STORE_VERSION_ID`
+
+
+UUID value of the App Store Version
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,13 +93,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app using specified build.|
-|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
-|[`get`](app-store-versions/get.md)|Read App Store Version information|
-|[`phased-release`](app-store-versions/phased-release.md)|Read the phased release status and configuration for a version with phased release enabled.|
-|[`localizations`](app-store-versions/localizations.md)|List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.|
-|[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|

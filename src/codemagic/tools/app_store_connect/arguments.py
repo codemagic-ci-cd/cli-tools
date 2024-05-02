@@ -384,6 +384,9 @@ _API_DOCS_REFERENCE = f"Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_UR
 _LOCALE_CODES_URL = (
     "https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes"
 )
+_PHASED_RELEASE_DOCS_URL = (
+    "https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases"
+)
 
 
 class AppArgument(cli.Argument):
@@ -634,7 +637,11 @@ class AppStoreVersionArgument(cli.Argument):
         flags=("--phased-release",),
         type=bool,
         description=(
-            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+            "Release App Store version update in phases. With this option your version update "
+            "will be released over a 7-day period to a percentage of your users "
+            "(selected at random by their Apple ID) on iOS or macOS with automatic updates turned on. "
+            f"Learon more from {_PHASED_RELEASE_DOCS_URL}. "
+            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--no-phased-release")}`.'
         ),
         argparse_kwargs={
             "required": False,
@@ -646,7 +653,9 @@ class AppStoreVersionArgument(cli.Argument):
         flags=("--no-phased-release",),
         type=bool,
         description=(
-            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+            "Turn off phased release for your App Store version update. "
+            f"Learon more about phased releases from {_PHASED_RELEASE_DOCS_URL}. "
+            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--no-phased-release")}`.'
         ),
         argparse_kwargs={
             "required": False,

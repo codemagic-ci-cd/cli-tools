@@ -102,6 +102,7 @@ Enable verbose logging for commands
 |Action group|Description|
 | :--- | :--- |
 |[`app-store-version-localizations`](app-store-version-localizations.md)|Create and maintain version-specific App Store metadata that is localized.|
+|[`app-store-version-phased-releases`](app-store-version-phased-releases.md)|Manage App Store phased releases of updates to your app|
 |[`app-store-version-submissions`](app-store-version-submissions.md)|Manage your application's App Store version review process|
 |[`app-store-versions`](app-store-versions.md)|Manage the information related to an App Store version of your app|
 |[`apps`](apps.md)|Manage your apps in App Store Connect|
