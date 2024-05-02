@@ -180,37 +180,19 @@ def test_publish_action_testflight_with_localization(publishing_namespace_kwargs
 
 def test_publish_action_app_store_submit(publishing_namespace_kwargs):
     cli_args = argparse.Namespace(**publishing_namespace_kwargs)
-    with mock.patch.object(AppStoreConnect, "find_paths") as mock_find_paths, mock.patch.object(
-        AppStoreConnect,
-        "_get_publishing_application_packages",
-    ) as mock_get_packages, mock.patch.object(
-        AppStoreConnect,
-        "_upload_artifact_with_altool",
-    ) as mock_upload, mock.patch.object(
-        AppStoreConnect,
-        "_validate_artifact_with_altool",
-    ) as mock_validate, mock.patch.object(
-        AppStoreConnect,
-        "_assert_app_has_testflight_information",
-    ), mock.patch.object(
-        AppStoreConnect,
-        "_get_uploaded_build_application",
-    ) as mock_get_app, mock.patch.object(
-        AppStoreConnect,
-        "_get_uploaded_build",
-    ) as mock_get_build, mock.patch.object(
-        AppStoreConnect,
-        "wait_until_build_is_processed",
-    ) as mock_wait_until_build_is_processed, mock.patch.object(
-        AppStoreConnect,
-        "submit_to_testflight",
-    ) as mock_submit_to_testflight, mock.patch.object(
-        AppStoreConnect,
-        "submit_to_app_store",
-    ) as mock_submit_to_app_store, mock.patch.object(
-        AppStoreConnect,
-        "add_beta_test_info",
-    ) as mock_add_beta_test_info:
+    with (
+        mock.patch.object(AppStoreConnect, "find_paths") as mock_find_paths,
+        mock.patch.object(AppStoreConnect, "_get_publishing_application_packages") as mock_get_packages,
+        mock.patch.object(AppStoreConnect, "_upload_artifact_with_altool") as mock_upload,
+        mock.patch.object(AppStoreConnect, "_validate_artifact_with_altool") as mock_validate,
+        mock.patch.object(AppStoreConnect, "_assert_app_has_testflight_information"),
+        mock.patch.object(AppStoreConnect, "_get_uploaded_build_application") as mock_get_app,
+        mock.patch.object(AppStoreConnect, "_get_uploaded_build") as mock_get_build,
+        mock.patch.object(AppStoreConnect, "wait_until_build_is_processed") as mock_wait_until_build_is_processed,
+        mock.patch.object(AppStoreConnect, "submit_to_testflight") as mock_submit_to_testflight,
+        mock.patch.object(AppStoreConnect, "submit_to_app_store") as mock_submit_to_app_store,
+        mock.patch.object(AppStoreConnect, "add_beta_test_info") as mock_add_beta_test_info,
+    ):
         ipa_path = pathlib.Path("app.ipa")
         mock_find_paths.return_value = [ipa_path]
         mock_ipa = mock.create_autospec(Ipa, instance=True, path=ipa_path, version="1.2.3")
@@ -253,6 +235,9 @@ def test_publish_action_app_store_submit(publishing_namespace_kwargs):
             promotional_text=None,
             support_url=None,
             whats_new=None,
+            # App Store Version Phased Release arguments
+            enable_phased_release=None,
+            disable_phased_release=None,
         )
         mock_add_beta_test_info.assert_not_called()
 
