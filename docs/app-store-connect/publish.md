@@ -172,7 +172,7 @@ Release App Store version update in phases. With this option your version update
 ##### `--no-phased-release`
 
 
-Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--no-phased-release`.
+Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--phased-release`.
 ### Optional arguments to add localized meta information about build for TestFlight or App Store review submission
 
 ##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`

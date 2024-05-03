@@ -116,7 +116,7 @@ Release App Store version update in phases. With this option your version update
 ##### `--no-phased-release`
 
 
-Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--no-phased-release`.
+Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--phased-release`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

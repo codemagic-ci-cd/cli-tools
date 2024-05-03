@@ -655,7 +655,7 @@ class AppStoreVersionArgument(cli.Argument):
         description=(
             "Turn off phased release for your App Store version update. "
             f"Learon more about phased releases from {_PHASED_RELEASE_DOCS_URL}. "
-            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--no-phased-release")}`.'
+            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--phased-release")}`.'
         ),
         argparse_kwargs={
             "required": False,
