@@ -554,10 +554,13 @@ class AbstractBaseAction(
         support_url: Optional[str] = None,
         whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
+        # App Store Version Phased Release arguments
+        enable_phased_release: Optional[bool] = None,
+        disable_phased_release: Optional[bool] = None,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
-        from .action_groups import BuildsActionGroup
+        from .actions import SubmitToAppStoreAction
 
-        _ = BuildsActionGroup.submit_to_app_store  # Implementation
+        _ = SubmitToAppStoreAction.submit_to_app_store  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -567,9 +570,9 @@ class AbstractBaseAction(
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
         expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
-        from .action_groups import BuildsActionGroup
+        from .actions import SubmitToTestFlightAction
 
-        _ = BuildsActionGroup.submit_to_testflight  # Implementation
+        _ = SubmitToTestFlightAction.submit_to_testflight  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
