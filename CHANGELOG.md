@@ -25,6 +25,7 @@ The highlight of this release is added support for phased releases when publishi
 
 **Bugfixes**
 - Fix App Store Connect API responses deserialization for cases when resource contains an empty relationship. [PR #401](https://github.com/codemagic-ci-cd/cli-tools/pull/401)
+- Fix globbing files using current path pattern. [PR #403](https://github.com/codemagic-ci-cd/cli-tools/pull/403)
 
 **Development**
 - Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`. [PR #383](https://github.com/codemagic-ci-cd/cli-tools/pull/383)
