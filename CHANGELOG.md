@@ -1,15 +1,40 @@
 Version 0.51.0
 -------------
 
+The highlight of this release is added support for phased releases when publishing application to App Store Connect, which was added in [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402).
+
 **Features**
-- TODO!
+- Add new actions to work with phased releases in App Store Connect ([PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)):
+  - `app-store-connect app-store-version-phased-releases enable`
+  - `app-store-connect app-store-version-phased-releases set-state`
+  - `app-store-connect app-store-version-phased-releases cancel`
+  - `app-store-connect app-store-versions phased-release`
+- Update actions `app-store-connect builds submit-to-app-store` and `app-store-connect publish` support enabling and disabling releasing App Store version in phases. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+
+**Documentation**
+- Add documentation for new action group ([PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)):
+  - `app-store-connect app-store-version-phased-releases`
+- Update documentation for action groups ([PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)):
+  - `app-store-connect builds submit-to-app-store`
+  - `app-store-connect publish`
+- Add documentation for actions ([PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)):
+  - `app-store-connect app-store-version-phased-releases enable`
+  - `app-store-connect app-store-version-phased-releases set-state`
+  - `app-store-connect app-store-version-phased-releases cancel`
+  - `app-store-connect app-store-versions phased-release`
 
 **Bugfixes**
 - Fix App Store Connect API responses deserialization for cases when resource contains an empty relationship. [PR #401](https://github.com/codemagic-ci-cd/cli-tools/pull/401)
 
-- **Development**
+**Development**
 - Add missing attributes and relationships to `codemagic.apple.resources.App` and `codemagic.apple.resources.Build`. [PR #383](https://github.com/codemagic-ci-cd/cli-tools/pull/383)
 - Define new enumerations `codemagic.apple.resources.enums.BuildAudienceType` and `codemagic.apple.resources.enums.SubscriptionStatusUrlVersion`. [PR #383](https://github.com/codemagic-ci-cd/cli-tools/pull/383)
+- Add new model definition `codemagic.apple.resources.AppStoreVersionPhasedRelease`. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+- Add new App Store Connect API resource manager  `AppStoreVersionPhasedReleases` that implements HTTP client methods to work with App Store version phased releases. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+- Add new HTTP client methods `read_app_store_version_phased_release` and `read_app_store_version_phased_release_data` to App Store Connect API resource manager `AppStoreVersions`. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+- Refactor `BuildsActionGroup` of `AppStoreConnect` by moving methods `submit_to_testflight` and `submit_to_app_store` along used private methods to dedicated action classes `SubmitToTestFlightAction` and `SubmitToAppStoreAction` respectively. Python API via parent `AppStoreConnect` class remains identical to what it was. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+- Update public methods in `ResourceManagerMixin` to take both `ResourceId` and `Resource` instances as methods arguments where only IDs were allowed before. [PR #402](https://github.com/codemagic-ci-cd/cli-tools/pull/402)
+
 
 Version 0.50.7
 -------------
