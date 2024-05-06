@@ -1,22 +1,30 @@
+from __future__ import annotations
+
 import abc
 import logging
 import pathlib
-from typing import Generator
+from typing import Iterator
 
 
 class PathFinderMixin(metaclass=abc.ABCMeta):
     logger: logging.Logger
 
-    def glob(self, pattern: pathlib.Path) -> Generator[pathlib.Path, None, None]:
-        if pattern.is_absolute():
+    def glob(self, pattern: pathlib.Path) -> Iterator[pathlib.Path]:
+        if pattern == pathlib.Path("."):
+            self.logger.info(f"Searching for files matching {pattern.resolve()}")
+            # `Path('.').glob('.')` which this would essentially cause is erroneous.
+            # Return empty iterator as we cannot possibly find current directory from
+            # within the same directory.
+            return iter([])
+        elif pattern.is_absolute():
             self.logger.info(f"Searching for files matching {pattern}")
             # absolute globs are not supported, match them as relative to root
             relative_pattern = pattern.relative_to(pattern.anchor)
             return pathlib.Path(pattern.anchor).glob(str(relative_pattern))
-        self.logger.info(f"Searching for files matching {pattern.resolve()}")
-        return pathlib.Path().glob(str(pattern))
+        else:
+            self.logger.info(f"Searching for files matching {pattern.resolve()}")
+            return pathlib.Path().glob(str(pattern))
 
-    def find_paths(self, *patterns: pathlib.Path) -> Generator[pathlib.Path, None, None]:
+    def find_paths(self, *patterns: pathlib.Path) -> Iterator[pathlib.Path]:
         for pattern in patterns:
-            for path in self.glob(pattern.expanduser()):
-                yield path
+            yield from self.glob(pattern.expanduser())
