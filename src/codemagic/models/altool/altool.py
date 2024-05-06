@@ -8,6 +8,7 @@ import subprocess
 import time
 from contextlib import contextmanager
 from functools import lru_cache
+from itertools import chain
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Callable
@@ -296,11 +297,14 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
 
     @classmethod
     def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:
-        try:
-            parsed_result = json.loads(action_stdout)
-            return AltoolResult.create(**parsed_result)
-        except (TypeError, ValueError):
-            return None
+        # Try to parse the whole stdout at once first, and then do it backwards line by line
+        for line in chain([action_stdout], reversed(action_stdout.splitlines())):
+            try:
+                parsed_result = json.loads(line)
+                return AltoolResult.create(**parsed_result)
+            except (TypeError, ValueError):
+                continue
+        return None
 
     @classmethod
     def _log_process_output(cls, output: Optional[AnyStr], cli_app: Optional[CliApp]):

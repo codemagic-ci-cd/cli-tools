@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Generic
+from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Type
@@ -16,14 +17,61 @@ from typing import Union
 from codemagic.apple.resources import LinkedResourceData
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceReference
 from codemagic.apple.resources import ResourceType
 from codemagic.utilities import case_conversion
 
+R = TypeVar("R", bound=Resource)
+R_co = TypeVar("R_co", bound=Resource, covariant=True)
+R2 = TypeVar("R2", bound=Resource)
+
 if TYPE_CHECKING:
+    from typing_extensions import Protocol
+
     from codemagic.apple import AppStoreConnectApiClient
 
-R = TypeVar("R", bound=Resource)
-R2 = TypeVar("R2", bound=Resource)
+    class PResourceManager(Protocol[R_co]):
+        @property
+        def resource_type(self) -> Type[R_co]:
+            ...
+
+    class CreatingResourceManager(PResourceManager[R_co], Protocol):
+        def create(self, **create_params) -> R_co:
+            ...
+
+    class ReadingResourceManager(PResourceManager[R_co], Protocol):
+        def read(self, ref: ResourceReference) -> R_co:
+            ...
+
+    class ListingResourceManager(PResourceManager[R], Protocol):
+        def list(self, *, resource_filter: ResourceManager.Filter, **listing_options) -> List[R]:
+            ...
+
+    class DeletingResourceManager(PResourceManager[R_co], Protocol):
+        def delete(self, ref: ResourceReference) -> None:
+            ...
+
+    class ModifyingResourceManager(PResourceManager[R_co], Protocol):
+        def modify(self, ref: ResourceReference, **update_params) -> R_co:
+            ...
+
+else:
+    # TODO: Once Python 3.7 support is removed and we have Protocols
+    #   available in runtime, then those can be removed.
+    class CreatingResourceManager(Generic[R]):
+        ...
+
+    class ReadingResourceManager(Generic[R]):
+        ...
+
+    class ListingResourceManager(Generic[R]):
+        ...
+
+    class DeletingResourceManager(Generic[R]):
+        ...
+
+    class ModifyingResourceManager(Generic[R]):
+        ...
 
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):

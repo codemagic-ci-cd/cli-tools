@@ -1,12 +1,12 @@
 
-app-store-versions
-==================
+set-state
+=========
 
 
-**Manage the information related to an App Store version of your app**
+**Pause or resume an App Store version phased release, or immediately release an app**
 ### Usage
 ```bash
-app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-version-phased-releases set-state [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -17,8 +17,19 @@ app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    ACTION
+    APP_STORE_VERSION_PHASED_RELEASE_ID
+    --state PHASED_RELEASE_STATE
 ```
+### Required arguments for action `set-state`
+
+##### `APP_STORE_VERSION_PHASED_RELEASE_ID`
+
+
+UUID value of the App Store Version Phased Release
+##### `--state=ACTIVE | COMPLETE | INACTIVE | PAUSED`
+
+
+Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
@@ -87,13 +98,3 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
-### Actions
-
-|Action|Description|
-| :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app using specified build.|
-|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
-|[`get`](app-store-versions/get.md)|Read App Store Version information|
-|[`phased-release`](app-store-versions/phased-release.md)|Read the phased release status and configuration for a version with phased release enabled.|
-|[`localizations`](app-store-versions/localizations.md)|List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.|
-|[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|

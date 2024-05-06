@@ -27,6 +27,7 @@ from codemagic.apple.resources import CapabilityType
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import PhasedReleaseState
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
@@ -383,6 +384,9 @@ _API_DOCS_REFERENCE = f"Learn more at {AppStoreConnectApiClient.API_KEYS_DOCS_UR
 _LOCALE_CODES_URL = (
     "https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes"
 )
+_PHASED_RELEASE_DOCS_URL = (
+    "https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases"
+)
 
 
 class AppArgument(cli.Argument):
@@ -627,6 +631,65 @@ class AppStoreVersionArgument(cli.Argument):
             f'For example `{Colors.WHITE("3.2.46")}`'
         ),
         argparse_kwargs={"required": False},
+    )
+    ENABLE_PHASED_RELEASE = cli.ArgumentProperties(
+        key="enable_phased_release",
+        flags=("--phased-release",),
+        type=bool,
+        description=(
+            "Release App Store version update in phases. With this option your version update "
+            "will be released over a 7-day period to a percentage of your users "
+            "(selected at random by their Apple ID) on iOS or macOS with automatic updates turned on. "
+            f"Learon more from {_PHASED_RELEASE_DOCS_URL}. "
+            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--no-phased-release")}`.'
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
+    DISABLE_PHASED_RELEASE = cli.ArgumentProperties(
+        key="disable_phased_release",
+        flags=("--no-phased-release",),
+        type=bool,
+        description=(
+            "Turn off phased release for your App Store version update. "
+            f"Learon more about phased releases from {_PHASED_RELEASE_DOCS_URL}. "
+            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--phased-release")}`.'
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
+
+
+class AppStoreVersionPhasedReleaseArgument(cli.Argument):
+    APP_STORE_VERSION_PHASED_RELEASE_ID = cli.ArgumentProperties(
+        key="app_store_version_phased_release",
+        type=ResourceId,
+        description="UUID value of the App Store Version Phased Release",
+    )
+    PHASED_RELEASE_STATE = cli.ArgumentProperties(
+        key="phased_release_state",
+        flags=("--state",),
+        type=PhasedReleaseState,
+        description=(
+            "Choose when to release the app. You can either manually release the app at a later date on "
+            "the App Store Connect website, or the app version can be automatically released right after "
+            "it has been approved by App Review."
+        ),
+        argparse_kwargs={
+            "required": True,
+            "choices": list(PhasedReleaseState),
+        },
+    )
+    PHASED_RELEASE_STATE_OPTIONAL = cli.ArgumentProperties.duplicate(
+        PHASED_RELEASE_STATE,
+        argparse_kwargs={
+            "required": False,
+            "choices": list(PhasedReleaseState),
+        },
     )
 
 
@@ -1574,6 +1637,9 @@ class ArgumentGroups:
         AppStoreVersionLocalizationArgument.SUPPORT_URL,
         AppStoreVersionLocalizationArgument.WHATS_NEW,
         AppStoreVersionLocalizationArgument.APP_STORE_VERSION_LOCALIZATION_INFOS,
+        # App Store Version Phased Release arguments
+        AppStoreVersionArgument.ENABLE_PHASED_RELEASE,
+        AppStoreVersionArgument.DISABLE_PHASED_RELEASE,
     )
     SUBMIT_TO_TESTFLIGHT_OPTIONAL_ARGUMENTS = (
         PublishArgument.MAX_BUILD_PROCESSING_WAIT,

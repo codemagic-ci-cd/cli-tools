@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import time
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import Profile
@@ -19,6 +21,10 @@ from ..arguments import CertificateArgument
 from ..arguments import CommonArgument
 from ..arguments import ProfileArgument
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -67,7 +73,11 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             create_params["devices"] = list(device_resource_ids) if device_resource_ids else []
 
         try:
-            profile = self._create_resource(self.api_client.profiles, should_print, **create_params)
+            profile = self._create_resource(
+                cast("CreatingResourceManager[Profile]", self.api_client.profiles),
+                should_print,
+                **create_params,
+            )
         except ValueError as ve:
             raise AppStoreConnectError(str(ve)) from ve
 
@@ -140,7 +150,11 @@ class ProfilesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             profile_state=profile_state,
             name=profile_name,
         )
-        profiles = self._list_resources(profile_filter, self.api_client.profiles, should_print)
+        profiles = self._list_resources(
+            profile_filter,
+            cast("ListingResourceManager[Profile]", self.api_client.profiles),
+            should_print,
+        )
 
         if save:
             self._save_profiles(profiles)

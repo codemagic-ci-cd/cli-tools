@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import AppStoreVersionLocalization
@@ -19,6 +21,9 @@ from ..arguments import CommonArgument
 from ..arguments import ReviewSubmissionArgument
 from ..arguments import ReviewSubmissionItemArgument
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
 
 
 class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -51,7 +56,7 @@ class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         }
         try:
             return self._create_resource(
-                self.api_client.review_submissions_items,
+                cast("CreatingResourceManager[ReviewSubmissionItem]", self.api_client.review_submissions_items),
                 should_print,
                 review_submission=review_submission_id,
                 **{k: v for k, v in optional_kwargs.items() if v is not None},
@@ -75,9 +80,6 @@ class ReviewSubmissionItemsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         """
         Delete specified Review Submission item
         """
-        if isinstance(review_submission_item_id, ReviewSubmissionItem):
-            review_submission_item_id = review_submission_item_id.id
-
         self._delete_resource(
             self.api_client.review_submissions_items,
             review_submission_item_id,

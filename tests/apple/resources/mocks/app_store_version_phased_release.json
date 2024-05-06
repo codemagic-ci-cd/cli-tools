@@ -1,0 +1,13 @@
+{
+    "type": "appStoreVersionPhasedReleases",
+    "id": "409ebefb-ebd1-4f1a-903d-6ba16e013ebf",
+    "attributes": {
+        "phasedReleaseState": "ACTIVE",
+        "startDate": "2024-04-24T12:00:00.000+0000",
+        "totalPauseDuration": 3,
+        "currentDayNumber": 1
+    },
+    "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/appStoreVersionPhasedReleases/409ebefb-ebd1-4f1a-903d-6ba16e013ebf"
+    }
+}

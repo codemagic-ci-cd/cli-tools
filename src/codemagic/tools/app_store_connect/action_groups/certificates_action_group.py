@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -24,6 +25,10 @@ from ..arguments import CertificateArgument
 from ..arguments import CommonArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -60,7 +65,11 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         csr_content = Certificate.get_certificate_signing_request_content(csr)
 
         create_params = dict(csr_content=csr_content, certificate_type=certificate_type, omit_keys=["csr_content"])
-        certificate = self._create_resource(self.api_client.signing_certificates, should_print, **create_params)
+        certificate = self._create_resource(
+            cast("CreatingResourceManager[SigningCertificate]", self.api_client.signing_certificates),
+            should_print,
+            **create_params,
+        )
 
         if save:
             self._save_certificate(certificate, private_key, p12_container_password, p12_container_save_path)
@@ -165,7 +174,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
         certificates = self._list_resources(
             certificate_filter,
-            self.api_client.signing_certificates,
+            cast("ListingResourceManager[SigningCertificate]", self.api_client.signing_certificates),
             should_print,
         )
 

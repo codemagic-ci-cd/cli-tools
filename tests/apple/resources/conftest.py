@@ -81,3 +81,9 @@ def api_profile() -> Dict:
 def api_mock_resource() -> Dict:
     mock_path = pathlib.Path(__file__).parent / "mocks" / "mock_resource.json"
     return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
+def api_app_store_version_phased_release() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / "mocks" / "app_store_version_phased_release.json"
+    return json.loads(mock_path.read_text())

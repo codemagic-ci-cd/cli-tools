@@ -8,6 +8,7 @@ from urllib import parse
 from codemagic.utilities import log
 
 from .api_session import AppStoreConnectApiSession
+from .app_store_publishing import AppStoreVersionPhasedReleases
 from .apps import Apps
 from .builds import Builds
 from .json_web_token_manager import JsonWebTokenManager
@@ -123,6 +124,10 @@ class AppStoreConnectApiClient:
     @property
     def app_store_version_localizations(self) -> AppStoreVersionLocalizations:
         return AppStoreVersionLocalizations(self)
+
+    @property
+    def app_store_version_phased_releases(self) -> AppStoreVersionPhasedReleases:
+        return AppStoreVersionPhasedReleases(self)
 
     @property
     def app_store_version_submissions(self) -> AppStoreVersionSubmissions:

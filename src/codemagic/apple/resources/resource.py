@@ -16,6 +16,7 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 from typing import Type
+from typing import TypeVar
 from typing import Union
 from typing import overload
 
@@ -24,6 +25,9 @@ from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
 
 from .enums import ResourceType
+
+LRD = TypeVar("LRD", bound="LinkedResourceData")
+ResourceReference = Union["ResourceId", LRD]
 
 
 class ResourceId(str):
@@ -97,21 +101,21 @@ class PagingInformation(DictSerializable):
             self.paging = PagingInformation.Paging(**self.paging)
 
 
+@dataclass
 class Links(DictSerializable):
     _OMIT_IF_NONE_KEYS = ("self", "related")
 
-    def __init__(_self, self: Optional[str] = None, related: Optional[str] = None):  # noqa: N805
-        _self.self = self
-        _self.related = related
+    self: Optional[str] = None
+    related: Optional[str] = None
 
 
+@dataclass
 class ResourceLinks(DictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
     """
 
-    def __init__(_self, self):  # noqa: N805
-        _self.self = self
+    self: str
 
 
 @dataclass
@@ -224,6 +228,12 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         else:
             defined_fields = cls.Attributes.get_defined_fields(cls, api_response["attributes"])
         return cls.Attributes(**defined_fields)
+
+    @classmethod
+    def get_id(cls, resource_reference: ResourceReference) -> ResourceId:
+        if isinstance(resource_reference, LinkedResourceData):
+            return resource_reference.id
+        return resource_reference
 
     @classmethod
     def _create_relationships(cls, api_response) -> Relationships:
