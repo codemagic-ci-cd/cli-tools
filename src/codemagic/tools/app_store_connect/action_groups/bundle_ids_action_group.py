@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
@@ -24,6 +26,10 @@ from ..arguments import BundleIdArgument
 from ..arguments import CommonArgument
 from ..arguments import ProfileArgument
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -50,7 +56,11 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             bundle_id_name = bundle_id_identifier.replace(".", " ")
 
         create_params = dict(identifier=bundle_id_identifier, name=bundle_id_name, platform=platform)
-        return self._create_resource(self.api_client.bundle_ids, should_print, **create_params)
+        return self._create_resource(
+            cast("CreatingResourceManager[BundleId]", self.api_client.bundle_ids),
+            should_print,
+            **create_params,
+        )
 
     @cli.action(
         "get",
@@ -100,7 +110,7 @@ class BundleIdsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         )
         bundle_ids = self._list_resources(
             bundle_id_filter,
-            self.api_client.bundle_ids,
+            cast("ListingResourceManager[BundleId]", self.api_client.bundle_ids),
             should_print,
             filter_predicate=predicate if bundle_id_identifier_strict_match else None,
         )

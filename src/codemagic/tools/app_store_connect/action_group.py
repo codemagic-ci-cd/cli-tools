@@ -14,6 +14,10 @@ class AppStoreConnectActionGroup(cli.ActionGroup):
         name="app-store-version-localizations",
         description="Create and maintain version-specific App Store metadata that is localized.",
     )
+    APP_STORE_VERSION_PHASED_RELEASES = cli.ActionGroupProperties(
+        name="app-store-version-phased-releases",
+        description="Manage App Store phased releases of updates to your app",
+    )
     APP_STORE_VERSION_SUBMISSIONS = cli.ActionGroupProperties(
         name="app-store-version-submissions",
         description="Manage your application's App Store version review process",

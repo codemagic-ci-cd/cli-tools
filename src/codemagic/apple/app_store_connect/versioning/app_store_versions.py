@@ -12,6 +12,7 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
+from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import LinkedResourceData
@@ -114,6 +115,29 @@ class AppStoreVersions(ResourceManager[AppStoreVersion]):
         if build_data is None:
             return None
         return Build(build_data)
+
+    def read_app_store_version_phased_release_data(
+        self,
+        app_store_version: Union[AppStoreVersion, ResourceId],
+        fields: Sequence[str] = tuple(),
+    ) -> Optional[dict]:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_phased_release_information_of_an_app_store_version
+        """
+        app_store_version_id = self._get_resource_id(app_store_version)
+        url = f"{self.client.API_URL}/appStoreVersions/{app_store_version_id}/appStoreVersionPhasedRelease"
+        params = {"fields[appStoreVersionPhasedReleases]": ",".join(fields)} if fields else {}
+        response = self.client.session.get(url, params=params).json()
+        return response["data"]
+
+    def read_app_store_version_phased_release(
+        self,
+        app_store_version: Union[AppStoreVersion, ResourceId],
+    ) -> Optional[AppStoreVersionPhasedRelease]:
+        app_store_version_phased_release_data = self.read_app_store_version_phased_release_data(app_store_version)
+        if app_store_version_phased_release_data is None:
+            return None
+        return AppStoreVersionPhasedRelease(app_store_version_phased_release_data)
 
     def read_app_store_version_submission(
         self,

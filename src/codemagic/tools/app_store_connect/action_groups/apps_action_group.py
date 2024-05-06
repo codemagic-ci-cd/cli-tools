@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Set
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import App
@@ -27,6 +29,9 @@ from ..arguments import ArgumentGroups
 from ..arguments import BuildArgument
 from ..arguments import BundleIdArgument
 from ..arguments import ReviewSubmissionArgument
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -81,7 +86,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         return self._list_resources(
             apps_filter,
-            self.api_client.apps,
+            cast("ListingResourceManager[App]", self.api_client.apps),
             should_print,
             filter_predicate=predicate if bundle_id_identifier and bundle_id_identifier_strict_match else None,
         )
@@ -272,6 +277,6 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
 
         return self._list_resources(
             review_submissions_filter,
-            self.api_client.review_submissions,
+            cast("ListingResourceManager[ReviewSubmission]", self.api_client.review_submissions),
             should_print,
         )

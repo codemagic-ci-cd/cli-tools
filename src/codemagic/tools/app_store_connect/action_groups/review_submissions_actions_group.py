@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import Platform
@@ -14,6 +16,10 @@ from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppArgument
 from ..arguments import AppStoreVersionArgument
 from ..arguments import ReviewSubmissionArgument
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
 
 
 class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -33,7 +39,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Create a review submission request for application's latest App Store Version
         """
         return self._create_resource(
-            self.api_client.review_submissions,
+            cast("CreatingResourceManager[ReviewSubmission]", self.api_client.review_submissions),
             should_print,
             app=application_id,
             platform=platform,
@@ -72,7 +78,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Discard a specific review submission from App Review
         """
         return self._modify_resource(
-            self.api_client.review_submissions,
+            cast("ModifyingResourceManager[ReviewSubmission]", self.api_client.review_submissions),
             review_submission_id,
             should_print,
             canceled=True,
@@ -92,7 +98,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         Confirm pending review submission for App Review
         """
         return self._modify_resource(
-            self.api_client.review_submissions,
+            cast("ModifyingResourceManager[ReviewSubmission]", self.api_client.review_submissions),
             review_submission_id,
             should_print,
             submitted=True,
@@ -108,7 +114,7 @@ class ReviewSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         List review submission items for specified review submission
         """
         return self._list_related_resources(
-            resource_id=review_submission_id,
+            resource_reference=review_submission_id,
             resource_type=ReviewSubmission,
             related_resource_type=ReviewSubmissionItem,
             list_related_resources_method=self.api_client.review_submissions.list_items,

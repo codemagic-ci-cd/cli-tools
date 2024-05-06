@@ -30,6 +30,7 @@ from .resource_printer import ResourcePrinter
 class AppStoreConnect(
     cli.CliApp,
     action_groups.AppStoreVersionLocalizationsActionGroup,
+    action_groups.AppStoreVersionPhasedReleasesActionGroup,
     action_groups.AppStoreVersionSubmissionsActionGroup,
     action_groups.AppStoreVersionsActionGroup,
     action_groups.AppsActionGroup,
@@ -48,6 +49,8 @@ class AppStoreConnect(
     actions.GetLatestBuildNumberAction,
     actions.GetLatestTestflightBuildNumberAction,
     actions.PublishAction,
+    actions.SubmitToAppStoreAction,
+    actions.SubmitToTestFlightAction,
     mixins.ResourceManagerMixin,
     mixins.SigningFileSaverMixin,
     PathFinderMixin,

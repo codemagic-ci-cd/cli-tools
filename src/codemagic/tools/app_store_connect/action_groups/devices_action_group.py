@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import BundleIdPlatform
@@ -18,6 +20,10 @@ from ..arguments import BundleIdArgument
 from ..arguments import DeviceArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ListingResourceManager
 
 
 class DevicesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -45,7 +51,11 @@ class DevicesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             platform=platform,
             status=device_status,
         )
-        return self._list_resources(device_filter, self.api_client.devices, should_print)
+        return self._list_resources(
+            device_filter,
+            cast("ListingResourceManager[Device]", self.api_client.devices),
+            should_print,
+        )
 
     @cli.action(
         "register",
@@ -96,7 +106,7 @@ class DevicesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         for device_udid in device_udids_values:
             try:
                 device = self._create_resource(
-                    self.api_client.devices,
+                    cast("CreatingResourceManager[Device]", self.api_client.devices),
                     should_print,
                     udid=device_udid,
                     name=device_name,

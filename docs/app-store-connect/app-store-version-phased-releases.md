@@ -1,12 +1,12 @@
 
-app-store-versions
-==================
+app-store-version-phased-releases
+=================================
 
 
-**Manage the information related to an App Store version of your app**
+**Manage App Store phased releases of updates to your app**
 ### Usage
 ```bash
-app-store-connect app-store-versions [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+app-store-connect app-store-version-phased-releases [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--log-api-calls]
     [--api-unauthorized-retries UNAUTHORIZED_REQUEST_RETRIES]
     [--api-server-error-retries SERVER_ERROR_RETRIES]
@@ -91,9 +91,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](app-store-versions/create.md)|Add a new App Store version to an app using specified build.|
-|[`delete`](app-store-versions/delete.md)|Delete specified App Store version from Apple Developer portal|
-|[`get`](app-store-versions/get.md)|Read App Store Version information|
-|[`phased-release`](app-store-versions/phased-release.md)|Read the phased release status and configuration for a version with phased release enabled.|
-|[`localizations`](app-store-versions/localizations.md)|List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.|
-|[`modify`](app-store-versions/modify.md)|Update the app store version for a specific app.|
+|[`cancel`](app-store-version-phased-releases/cancel.md)|Cancel a planned App Store version phased release that has not been started|
+|[`enable`](app-store-version-phased-releases/enable.md)|Enable phased release for an App Store version|
+|[`set-state`](app-store-version-phased-releases/set-state.md)|Pause or resume an App Store version phased release, or immediately release an app|

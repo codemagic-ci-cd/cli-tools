@@ -2,21 +2,25 @@ from __future__ import annotations
 
 from abc import ABCMeta
 from datetime import datetime
+from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
+from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceReference
 
 from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
@@ -26,6 +30,10 @@ from ..arguments import BuildArgument
 from ..arguments import CommonArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
+    from codemagic.apple.app_store_connect.resource_manager import ModifyingResourceManager
 
 
 class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -70,7 +78,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             version=self._get_build_version(version_string, build),
         )
         return self._create_resource(
-            self.api_client.app_store_versions,
+            cast("CreatingResourceManager[AppStoreVersion]", self.api_client.app_store_versions),
             should_print,
             **{k: v for k, v in create_params.items() if v is not None},
         )
@@ -123,7 +131,7 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         if isinstance(earliest_release_date, Types.EarliestReleaseDate):
             earliest_release_date = earliest_release_date.value
         return self._modify_resource(
-            self.api_client.app_store_versions,
+            cast("ModifyingResourceManager[AppStoreVersion]", self.api_client.app_store_versions),
             app_store_version_id,
             should_print,
             build=build_id,
@@ -200,4 +208,25 @@ class AppStoreVersionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             None,
             should_print,
             filter_predicate=predicate,
+        )
+
+    @cli.action(
+        "phased-release",
+        AppStoreVersionArgument.APP_STORE_VERSION_ID,
+        action_group=AppStoreConnectActionGroup.APP_STORE_VERSIONS,
+    )
+    def get_app_store_version_phased_release(
+        self,
+        app_store_version_id: ResourceReference,
+        should_print: bool = True,
+    ) -> AppStoreVersionPhasedRelease:
+        """
+        Read the phased release status and configuration for a version with phased release enabled.
+        """
+        return self._get_related_resource(
+            app_store_version_id,
+            AppStoreVersion,
+            AppStoreVersionPhasedRelease,
+            self.api_client.app_store_versions.read_app_store_version_phased_release,
+            should_print,
         )

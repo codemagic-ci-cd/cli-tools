@@ -33,6 +33,8 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--support-url SUPPORT_URL]
     [--whats-new WHATS_NEW]
     [--app-store-version-localizations APP_STORE_VERSION_LOCALIZATION_INFOS]
+    [--phased-release]
+    [--no-phased-release]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `submit-to-app-store`
@@ -107,6 +109,14 @@ Describe what's new in this version of your app, such as new features, improveme
 
 
 Localized App Store version meta information for App Store version submission as a JSON encoded list. Alternative to individually defining version release notes and other options via dedicated CLI options such as `--whats-new`. Definitions for duplicate locales are not allowed. For example, `[{"description": "App description", "keywords": "keyword, other keyword", "locale": "en-US", "marketing_url": "https://example.com", "promotional_text": "Promotional text", "support_url": "https://example.com", "whats_new": "Fixes an issue .."}]`. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_APP_STORE_VERSION_LOCALIZATIONS`. Alternatively to entering APP_STORE_VERSION_LOCALIZATIONS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--phased-release`
+
+
+Release App Store version update in phases. With this option your version update will be released over a 7-day period to a percentage of your users (selected at random by their Apple ID) on iOS or macOS with automatic updates turned on. Learon more from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--no-phased-release`.
+##### `--no-phased-release`
+
+
+Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--phased-release`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

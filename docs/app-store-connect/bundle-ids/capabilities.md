@@ -17,7 +17,6 @@ app-store-connect bundle-ids capabilities [-h] [--log-stream STREAM] [--no-color
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--capability OPTIONAL_CAPABILITY_TYPES]
     BUNDLE_ID_RESOURCE_ID
 ```
 ### Required arguments for action `capabilities`
@@ -26,12 +25,6 @@ app-store-connect bundle-ids capabilities [-h] [--log-stream STREAM] [--no-color
 
 
 Alphanumeric ID value of the Bundle ID
-### Optional arguments for action `capabilities`
-
-##### `--capability=Access Wi-Fi Information | Sign In with Apple | Apple Pay | App Groups | Associated Domains | Autofill Credential Provider | ClassKit | Low Latency HLS | Data Protection | Game Center | HealthKit | HomeKit | Hotspot | iCloud | Inter-App Audio | In-App Purchase | Maps | Multipath | Custom Network Protocol | Network Extensions | 5G Network Slicing | NFC Tag Reading | Personal VPN | Push Notifications | SiriKit | System Extension | User Management | Wallet | Wireless Accessory Configuration`
-
-
-Name of the identifier capability. Multiple arguments
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

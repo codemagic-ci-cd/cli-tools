@@ -18,6 +18,7 @@ from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import AppStoreVersionLocalization
+from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import AppStoreVersionSubmission
 from codemagic.apple.resources import BetaAppReviewSubmission
 from codemagic.apple.resources import BetaBuildLocalization
@@ -30,12 +31,15 @@ from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Locale
+from codemagic.apple.resources import PhasedReleaseState
 from codemagic.apple.resources import Platform
+from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ReleaseType
 from codemagic.apple.resources import ResourceId
+from codemagic.apple.resources import ResourceReference
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionItem
 from codemagic.apple.resources import ReviewSubmissionState
@@ -109,7 +113,7 @@ class AbstractBaseAction(
         build_id: ResourceId,
         beta_build_localizations: Optional[Union[List[BetaBuildInfo], Types.BetaBuildLocalizations]] = None,
         locale: Optional[Locale] = None,
-        whats_new: Optional[Types.WhatsNewArgument] = None,
+        whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
     ):
         from .action_groups import BuildsActionGroup
 
@@ -125,6 +129,17 @@ class AbstractBaseAction(
         from .action_groups import BetaGroupsActionGroup
 
         _ = BetaGroupsActionGroup.add_build_to_beta_groups  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def cancel_app_store_version_phased_release(
+        self,
+        app_store_version_phased_release: ResourceReference,
+        ignore_not_found: bool = False,
+    ) -> None:
+        from .action_groups import AppStoreVersionPhasedReleasesActionGroup
+
+        _ = AppStoreVersionPhasedReleasesActionGroup.cancel_app_store_version_phased_release  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -291,6 +306,19 @@ class AbstractBaseAction(
         raise NotImplementedError()
 
     @abstractmethod
+    def enable_app_store_version_phased_release(
+        self,
+        app_store_version_id: ResourceReference,
+        *,
+        phased_release_state: Optional[PhasedReleaseState] = None,
+        should_print: bool = True,
+    ) -> AppStoreVersionPhasedRelease:
+        from .action_groups import AppStoreVersionPhasedReleasesActionGroup
+
+        _ = AppStoreVersionPhasedReleasesActionGroup.enable_app_store_version_phased_release  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def expire_app_builds(
         self,
         application_id: ResourceId,
@@ -335,6 +363,28 @@ class AbstractBaseAction(
         from .action_groups import AppsActionGroup
 
         _ = AppsActionGroup.cancel_review_submissions  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_app_store_version_phased_release(
+        self,
+        app_store_version_id: ResourceReference,
+        should_print: bool = True,
+    ) -> AppStoreVersionPhasedRelease:
+        from .action_groups import AppStoreVersionsActionGroup
+
+        _ = AppStoreVersionsActionGroup.get_app_store_version_phased_release
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_build_pre_release_version(
+        self,
+        build_id: ResourceId,
+        should_print: bool = True,
+    ) -> PreReleaseVersion:
+        from .action_groups import BuildsActionGroup
+
+        _ = BuildsActionGroup.get_build_pre_release_version  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -470,6 +520,19 @@ class AbstractBaseAction(
         raise NotImplementedError()
 
     @abstractmethod
+    def set_app_store_version_phased_release_state(
+        self,
+        app_store_version_phased_release: ResourceReference,
+        *,
+        phased_release_state: PhasedReleaseState,
+        should_print: bool = True,
+    ) -> AppStoreVersionPhasedRelease:
+        from .action_groups import AppStoreVersionPhasedReleasesActionGroup
+
+        _ = AppStoreVersionPhasedReleasesActionGroup.set_app_store_version_phased_release_state  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
     def submit_to_app_store(
         self,
         build_id: ResourceId,
@@ -491,10 +554,13 @@ class AbstractBaseAction(
         support_url: Optional[str] = None,
         whats_new: Optional[Union[str, Types.WhatsNewArgument]] = None,
         app_store_version_localizations: Optional[AppStoreVersionLocalizationInfos] = None,
+        # App Store Version Phased Release arguments
+        enable_phased_release: Optional[bool] = None,
+        disable_phased_release: Optional[bool] = None,
     ) -> Tuple[ReviewSubmission, ReviewSubmissionItem]:
-        from .action_groups import BuildsActionGroup
+        from .actions import SubmitToAppStoreAction
 
-        _ = BuildsActionGroup.submit_to_app_store  # Implementation
+        _ = SubmitToAppStoreAction.submit_to_app_store  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
@@ -504,9 +570,9 @@ class AbstractBaseAction(
         max_build_processing_wait: Optional[Union[int, Types.MaxBuildProcessingWait]] = None,
         expire_build_submitted_for_review: bool = False,
     ) -> BetaAppReviewSubmission:
-        from .action_groups import BuildsActionGroup
+        from .actions import SubmitToTestFlightAction
 
-        _ = BuildsActionGroup.submit_to_testflight  # Implementation
+        _ = SubmitToTestFlightAction.submit_to_testflight  # Implementation
         raise NotImplementedError()
 
     @abstractmethod

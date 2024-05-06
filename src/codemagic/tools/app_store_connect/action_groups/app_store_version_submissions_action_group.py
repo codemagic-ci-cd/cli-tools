@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from abc import ABCMeta
+from typing import TYPE_CHECKING
+from typing import cast
 
 from codemagic import cli
 from codemagic.apple.resources import AppStoreVersionSubmission
@@ -10,6 +12,9 @@ from ..abstract_base_action import AbstractBaseAction
 from ..action_group import AppStoreConnectActionGroup
 from ..arguments import AppStoreVersionArgument
 from ..arguments import CommonArgument
+
+if TYPE_CHECKING:
+    from codemagic.apple.app_store_connect.resource_manager import CreatingResourceManager
 
 
 class AppStoreVersionSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
@@ -27,7 +32,7 @@ class AppStoreVersionSubmissionsActionGroup(AbstractBaseAction, metaclass=ABCMet
         Submit an App Store Version to App Review
         """
         return self._create_resource(
-            self.api_client.app_store_version_submissions,
+            cast("CreatingResourceManager[AppStoreVersionSubmission]", self.api_client.app_store_version_submissions),
             should_print,
             app_store_version=app_store_version_id,
         )
