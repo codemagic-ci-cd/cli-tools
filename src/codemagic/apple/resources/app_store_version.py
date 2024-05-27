@@ -53,7 +53,6 @@ class AppStoreVersion(Resource):
         appStoreVersionPhasedRelease: Relationship
         appStoreVersionSubmission: Relationship
         build: Relationship
-        idfaDeclaration: Relationship
         routingAppCoverage: Relationship
 
         app: Optional[Relationship] = None
