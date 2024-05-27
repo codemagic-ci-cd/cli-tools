@@ -1,3 +1,22 @@
+Version 0.51.1
+-------------
+
+This is a bugfix release containing changes from [PR #405](https://github.com/codemagic-ci-cd/cli-tools/pull/405). Apple removed `idfaDeclaration` key from the data structure that represents App Store Version resources, which caused failures in App Store Connect client methods. Consequently, CLI actions started to fail.
+
+**Bugfixes**
+- Fix actions:
+  - `app-store-connect app-store-versions create`,
+  - `app-store-connect app-store-versions update`,
+  - `app-store-connect apps app-store-versions`,
+  - `app-store-connect builds app-store-version`,
+  - `app-store-connect builds submit-to-app-store`,
+  - `app-store-connect publish` when executed with `--app-store` option.
+
+**Development**
+- Remove attribute `idfaDeclaration` from `AppStoreVersion.Relationships`.
+- Update App Store Connect API mock response for App Store Version.
+
+
 Version 0.51.0
 -------------
 
