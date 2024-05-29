@@ -197,11 +197,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         "expire-build-submitted-for-review",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
+        BuildArgument.PRE_RELEASE_VERSION_PLATFORM,
         action_group=AppStoreConnectActionGroup.APPS,
     )
     def expire_build_submitted_for_review(
         self,
         application_id: ResourceId,
+        pre_release_version_platform: Optional[Platform] = None,
         should_print: bool = False,
     ) -> Optional[Build]:
         """
@@ -217,11 +219,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             application_id=application_id,
             not_expired=True,
             beta_review_state=states_to_cancel,
+            pre_release_version_platform=pre_release_version_platform,
             should_print=should_print,
         )
         try:
             return self.expire_build(builds[0].id)
         except IndexError:
+            self.logger.info(f'Did not find any builds for application "{application_id}" that can be expired')
             return None
 
     @cli.action(

@@ -1148,6 +1148,16 @@ class BuildArgument(cli.Argument):
         ),
         argparse_kwargs={"required": False},
     )
+    PRE_RELEASE_VERSION_PLATFORM = cli.ArgumentProperties(
+        key="pre_release_version_platform",
+        flags=("--pre-release-version-platform",),
+        type=Platform,
+        description="Platform of build's pre release version",
+        argparse_kwargs={
+            "required": False,
+            "choices": list(Platform),
+        },
+    )
     PROCESSING_STATE = cli.ArgumentProperties(
         key="processing_state",
         flags=("--processing-state",),
@@ -1611,6 +1621,7 @@ class ArgumentGroups:
         BuildArgument.EXPIRED,
         BuildArgument.NOT_EXPIRED,
         BuildArgument.PRE_RELEASE_VERSION,
+        BuildArgument.PRE_RELEASE_VERSION_PLATFORM,
         BuildArgument.PROCESSING_STATE,
     )
     PACKAGE_UPLOAD_ARGUMENTS = (

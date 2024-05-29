@@ -22,6 +22,7 @@ from codemagic.apple.resources import Locale
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources.enums import BetaReviewState
+from codemagic.apple.resources.enums import Platform
 from codemagic.cli import Argument
 from codemagic.cli import Colors
 
@@ -76,6 +77,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         processing_state: Optional[BuildProcessingState] = None,
         beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
+        pre_release_version_platform: Optional[Platform] = None,
         should_print: bool = True,
     ) -> List[Build]:
         """
@@ -95,6 +97,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             beta_app_review_submission_beta_review_state=beta_review_state,
             version=build_version_number,
             pre_release_version_version=pre_release_version,
+            pre_release_version_platform=pre_release_version_platform,
         )
         return self._list_resources(
             builds_filter,
