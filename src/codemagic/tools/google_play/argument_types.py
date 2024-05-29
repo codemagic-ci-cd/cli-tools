@@ -9,8 +9,10 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
     @classmethod
     def _is_valid(cls, value: str) -> bool:
         try:
-            json_content = json.loads(value)
-        except json.decoder.JSONDecodeError:
+            decoded = json.loads(value)
+            return decoded["type"] == "service_account"
+        except (ValueError, TypeError, KeyError):
+            # ValueError - Call to json.loads fails
+            # TypeError - Decoded object is not subscriptable, i.e. not a dictionary
+            # KeyError - Key "type" is missing from decoded dictionary
             return False
-        else:
-            return json_content.get("type") == "service_account"
