@@ -1,3 +1,9 @@
+Version UNRELEASED
+-------------
+
+**Bugfixes**
+- Fix argument `--credentials` validation for tool `google-play`. [PR #405](https://github.com/codemagic-ci-cd/cli-tools/pull/405)
+
 Version 0.51.1
 -------------
 
