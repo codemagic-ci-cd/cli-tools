@@ -11,5 +11,8 @@ class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
         try:
             decoded = json.loads(value)
             return decoded["type"] == "service_account"
-        except (KeyError, TypeError, ValueError):
+        except (ValueError, TypeError, KeyError):
+            # ValueError - Call to json.loads fails
+            # TypeError - Decoded object is not a dictionary
+            # KeyError - Key "type" is missing from decoded dictionary
             return False
