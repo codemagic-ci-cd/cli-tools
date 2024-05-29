@@ -1,8 +1,20 @@
-Version UNRELEASED
+Version 0.52.0
 -------------
 
+**Feature**
+- Add optional argument `--platform` to action `app-store-connect apps builds` to list builds only for selected platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
+- Add optional argument `--platform` to action `app-store-connect builds list` to list builds only for selected platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
+- Add optional argument `--platform` to action `app-store-connect apps expire-build-submitted-for-review` to expire builds only for specified platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
+
 **Bugfixes**
-- Fix argument `--credentials` validation for tool `google-play`. [PR #405](https://github.com/codemagic-ci-cd/cli-tools/pull/405)
+- Action `app-store-connect publish` will only expire builds for the same platform that is being published when invoked with option `--expire-build-submitted-for-review`. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
+- Fix argument `--credentials` validation for tool `google-play`. [PR #406](https://github.com/codemagic-ci-cd/cli-tools/pull/406)
+
+**Documentation**
+- Update documentation for actions: [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
+  - `app-store-connect apps builds`,
+  - `app-store-connect apps expire-build-submitted-for-review`,
+  - `app-store-connect builds list`.
 
 Version 0.51.1
 -------------
