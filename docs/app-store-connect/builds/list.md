@@ -25,6 +25,7 @@ app-store-connect builds list [-h] [--log-stream STREAM] [--no-color] [--version
     [--not-expired]
     [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
+    [--platform PLATFORM]
 ```
 ### Optional arguments for action `list`
 
@@ -60,6 +61,10 @@ Version of the build published to Testflight that identifies an iteration of the
 
 
 Build processing state
+##### `--platform=IOS | MAC_OS | TV_OS`
+
+
+Apple operating systems
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
