@@ -77,7 +77,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         processing_state: Optional[BuildProcessingState] = None,
         beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
-        pre_release_version_platform: Optional[Platform] = None,
+        platform: Optional[Platform] = None,
         should_print: bool = True,
     ) -> List[Build]:
         """
@@ -97,7 +97,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             beta_app_review_submission_beta_review_state=beta_review_state,
             version=build_version_number,
             pre_release_version_version=pre_release_version,
-            pre_release_version_platform=pre_release_version_platform,
+            pre_release_version_platform=platform,
         )
         return self._list_resources(
             builds_filter,

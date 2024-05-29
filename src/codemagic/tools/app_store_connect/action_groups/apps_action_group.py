@@ -28,6 +28,7 @@ from ..arguments import AppStoreVersionArgument
 from ..arguments import ArgumentGroups
 from ..arguments import BuildArgument
 from ..arguments import BundleIdArgument
+from ..arguments import CommonArgument
 from ..arguments import ReviewSubmissionArgument
 
 if TYPE_CHECKING:
@@ -197,13 +198,13 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
     @cli.action(
         "expire-build-submitted-for-review",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        BuildArgument.PRE_RELEASE_VERSION_PLATFORM,
+        CommonArgument.PLATFORM,
         action_group=AppStoreConnectActionGroup.APPS,
     )
     def expire_build_submitted_for_review(
         self,
         application_id: ResourceId,
-        pre_release_version_platform: Optional[Platform] = None,
+        platform: Optional[Platform] = None,
         should_print: bool = False,
     ) -> Optional[Build]:
         """
@@ -219,7 +220,7 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             application_id=application_id,
             not_expired=True,
             beta_review_state=states_to_cancel,
-            pre_release_version_platform=pre_release_version_platform,
+            platform=platform,
             should_print=should_print,
         )
         try:

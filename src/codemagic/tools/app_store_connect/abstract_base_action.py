@@ -334,7 +334,7 @@ class AbstractBaseAction(
     def expire_build_submitted_for_review(
         self,
         application_id: ResourceId,
-        pre_release_version_platform: Optional[Platform] = None,
+        platform: Optional[Platform] = None,
         should_print: bool = False,
     ) -> Optional[Build]:
         from .action_groups import AppsActionGroup
@@ -440,7 +440,7 @@ class AbstractBaseAction(
         processing_state: Optional[BuildProcessingState] = None,
         beta_review_state: Optional[Union[BetaReviewState, Sequence[BetaReviewState]]] = None,
         build_version_number: Optional[int] = None,
-        pre_release_version_platform: Optional[Platform] = None,
+        platform: Optional[Platform] = None,
         should_print: bool = True,
     ) -> List[Build]:
         from .action_groups import BuildsActionGroup

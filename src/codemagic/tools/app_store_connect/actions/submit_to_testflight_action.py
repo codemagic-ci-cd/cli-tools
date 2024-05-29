@@ -56,8 +56,13 @@ class SubmitToTestFlightAction(AbstractBaseAction, metaclass=ABCMeta):
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
 
         if expire_build_submitted_for_review:
+            pre_release_version = self.api_client.builds.read_pre_release_version(build)
             self.logger.info(Colors.BLUE("\nExpire previous build before creating submission"))
-            self.expire_build_submitted_for_review(application_id=app.id, should_print=False)
+            self.expire_build_submitted_for_review(
+                application_id=app.id,
+                platform=pre_release_version.attributes.platform if pre_release_version else None,
+                should_print=False,
+            )
 
         return self.create_beta_app_review_submission(build.id)
 
