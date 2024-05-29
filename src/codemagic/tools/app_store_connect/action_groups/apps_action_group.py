@@ -226,7 +226,6 @@ class AppsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         try:
             return self.expire_build(builds[0].id)
         except IndexError:
-            self.logger.info(f'Did not find any builds for application "{application_id}" that can be expired')
             return None
 
     @cli.action(
