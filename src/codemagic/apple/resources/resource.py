@@ -355,3 +355,6 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
             value = self._format_attribute_value(attribute_name, value)
             s += f"\n{name}: {value}"
         return s
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__}: "{self.id}">'

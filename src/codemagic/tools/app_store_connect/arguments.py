@@ -1612,6 +1612,7 @@ class ArgumentGroups:
         BuildArgument.NOT_EXPIRED,
         BuildArgument.PRE_RELEASE_VERSION,
         BuildArgument.PROCESSING_STATE,
+        CommonArgument.PLATFORM,
     )
     PACKAGE_UPLOAD_ARGUMENTS = (
         PublishArgument.ENABLE_PACKAGE_VALIDATION,

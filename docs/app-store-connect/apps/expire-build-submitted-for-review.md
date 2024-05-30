@@ -17,6 +17,7 @@ app-store-connect apps expire-build-submitted-for-review [-h] [--log-stream STRE
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
+    [--platform PLATFORM]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `expire-build-submitted-for-review`
@@ -25,6 +26,12 @@ app-store-connect apps expire-build-submitted-for-review [-h] [--log-stream STRE
 
 
 Application Apple ID. An automatically generated ID assigned to your app
+### Optional arguments for action `expire-build-submitted-for-review`
+
+##### `--platform=IOS | MAC_OS | TV_OS`
+
+
+Apple operating systems
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
