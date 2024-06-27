@@ -2,6 +2,12 @@ Version 0.52.0
 -------------
 
 **Feature**
+- Update action `app-store-connect publish` to allow adding builds to beta groups without submitting to TestFlight. [PR #410](https://github.com/codemagic-ci-cd/cli-tools/pull/410)
+
+Version 0.52.0
+-------------
+
+**Feature**
 - Add optional argument `--platform` to action `app-store-connect apps builds` to list builds only for selected platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
 - Add optional argument `--platform` to action `app-store-connect builds list` to list builds only for selected platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
 - Add optional argument `--platform` to action `app-store-connect apps expire-build-submitted-for-review` to expire builds only for specified platform. [PR #407](https://github.com/codemagic-ci-cd/cli-tools/pull/407)
