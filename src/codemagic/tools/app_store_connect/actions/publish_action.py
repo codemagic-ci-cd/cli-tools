@@ -259,7 +259,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 enable_phased_release=enable_phased_release,
                 disable_phased_release=disable_phased_release,
             )
-        if submit_to_testflight and beta_group_names:
+        if beta_group_names:
             # Only builds submitted to TestFlight can be added to beta groups
             add_build_to_beta_group_options = AddBuildToBetaGroupOptions(
                 beta_group_names=beta_group_names,
@@ -411,6 +411,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if testflight_options or app_store_options or beta_group_options:
             self.wait_until_build_is_processed(build, max_build_processing_wait)
 
+        if beta_group_options:
+            self.add_build_to_beta_groups(
+                build.id,
+                beta_group_names=beta_group_options.beta_group_names,
+            )
+
         if testflight_options:
             # Overwrite waiting since we already waited above.
             self.submit_to_testflight(
@@ -418,9 +424,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 max_build_processing_wait=0,
                 **dataclasses.asdict(testflight_options),
             )
-
-        if beta_group_options:
-            self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)
 
         if app_store_options:
             if not app_store_options.version_string:
