@@ -435,7 +435,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 build.id,
                 max_build_processing_wait=0,
                 **dataclasses.asdict(app_store_options),
-            )  # type: ignore
+            )
 
     def _find_build(
         self,
