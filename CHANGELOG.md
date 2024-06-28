@@ -1,3 +1,9 @@
+Version 0.53.0
+-------------
+
+**Feature**
+- Update action `app-store-connect publish` to allow adding builds to beta groups without submitting to TestFlight. [PR #410](https://github.com/codemagic-ci-cd/cli-tools/pull/410)
+
 Version 0.52.0
 -------------
 

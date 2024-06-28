@@ -57,13 +57,11 @@ class AddBuildToBetaGroupOptions:
 
 @dataclass
 class SubmitToTestFlightOptions:
-    max_build_processing_wait: int
     expire_build_submitted_for_review: bool
 
 
 @dataclass
 class SubmitToAppStoreOptions:
-    max_build_processing_wait: int
     cancel_previous_submissions: bool
     # App Store Version information arguments
     copyright: Optional[str] = None
@@ -194,7 +192,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         submit_to_testflight: Optional[bool],
         submit_to_app_store: Optional[bool],
         # Submit to TestFlight arguments
-        max_build_processing_wait: Optional[Types.MaxBuildProcessingWait] = None,
         expire_build_submitted_for_review: bool = False,
         # Beta test info arguments
         beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
@@ -231,7 +228,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
 
         if submit_to_testflight:
             submit_to_testflight_options = SubmitToTestFlightOptions(
-                max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
                 expire_build_submitted_for_review=expire_build_submitted_for_review,
             )
         if submit_to_app_store:
@@ -242,7 +238,6 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             if isinstance(app_store_version_localizations, Types.AppStoreVersionLocalizationInfoArgument):
                 app_store_version_localizations = app_store_version_localizations.value
             submit_to_app_store_options = SubmitToAppStoreOptions(
-                max_build_processing_wait=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
                 cancel_previous_submissions=cancel_previous_submissions,
                 # Non localized app metadata
                 copyright=copyright,
@@ -264,7 +259,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 enable_phased_release=enable_phased_release,
                 disable_phased_release=disable_phased_release,
             )
-        if submit_to_testflight and beta_group_names:
+        if beta_group_names:
             # Only builds submitted to TestFlight can be added to beta groups
             add_build_to_beta_group_options = AddBuildToBetaGroupOptions(
                 beta_group_names=beta_group_names,
@@ -311,6 +306,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
         altool_verbose_logging: Optional[bool] = None,
         max_find_build_wait: Union[Types.MaxFindBuildWait, int] = PublishArgument.MAX_BUILD_FIND_WAIT.get_default(),
+        max_build_processing_wait: Optional[Union[Types.MaxBuildProcessingWait, int]] = None,
         **app_store_connect_submit_options,
     ) -> None:
         """
@@ -344,6 +340,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self._process_application_after_upload(
                     application_package,
                     Types.MaxFindBuildWait.resolve_value(max_find_build_wait),
+                    Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
                     *self._get_app_store_connect_submit_options(
                         application_package,
                         submit_to_testflight,
@@ -396,6 +393,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self,
         application_package: Union[Ipa, MacOsPackage],
         max_find_build_wait: int,
+        max_build_processing_wait: int,
         testflight_options: Optional[SubmitToTestFlightOptions],
         app_store_options: Optional[SubmitToAppStoreOptions],
         beta_test_info_options: Optional[AddBetaTestInfoOptions],
@@ -410,26 +408,34 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         if beta_test_info_options:
             self.add_beta_test_info(build.id, **beta_test_info_options.__dict__)
 
-        if testflight_options:
-            self.wait_until_build_is_processed(build, testflight_options.max_build_processing_wait)
-        elif app_store_options:
-            self.wait_until_build_is_processed(build, app_store_options.max_build_processing_wait)
+        if testflight_options or app_store_options or beta_group_options:
+            self.wait_until_build_is_processed(build, max_build_processing_wait)
+
+        if beta_group_options:
+            self.add_build_to_beta_groups(
+                build.id,
+                beta_group_names=beta_group_options.beta_group_names,
+            )
 
         if testflight_options:
             # Overwrite waiting since we already waited above.
-            tf_options = dataclasses.replace(testflight_options, max_build_processing_wait=0)
-            self.submit_to_testflight(build.id, **tf_options.__dict__)
-
-        if beta_group_options:
-            self.add_build_to_beta_groups(build.id, **beta_group_options.__dict__)
+            self.submit_to_testflight(
+                build.id,
+                max_build_processing_wait=0,
+                **dataclasses.asdict(testflight_options),
+            )
 
         if app_store_options:
-            app_store_submission_kwargs = {
-                **app_store_options.__dict__,
-                "max_build_processing_wait": 0,  # Overwrite waiting since we already waited above.
-                "version_string": app_store_options.version_string or application_package.version,
-            }
-            self.submit_to_app_store(build.id, **app_store_submission_kwargs)  # type: ignore
+            if not app_store_options.version_string:
+                app_store_options = dataclasses.replace(
+                    app_store_options,
+                    version_string=application_package.version,
+                )
+            self.submit_to_app_store(
+                build.id,
+                max_build_processing_wait=0,
+                **dataclasses.asdict(app_store_options),
+            )
 
     def _find_build(
         self,
