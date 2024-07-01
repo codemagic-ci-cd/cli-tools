@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import contextlib
 import pathlib
+import re
 import shutil
 import subprocess
 import tempfile
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Generator
+from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -15,6 +17,7 @@ from typing import Union
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives._serialization import PrivateFormat
 from cryptography.hazmat.primitives.serialization import pkcs12
+from packaging.version import Version
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -22,6 +25,42 @@ from codemagic.mixins import StringConverterMixin
 if TYPE_CHECKING:
     from .certificate import Certificate
     from .private_key import PrivateKey
+
+
+class _OpenSsl:
+    def __init__(self):
+        self._executable = shutil.which("openssl")
+
+    def ensure_installed(self):
+        if self._executable is None:
+            raise IOError("OpenSSL executable is not present on system")
+
+    def get_version(self) -> Optional[Version]:
+        if not self._executable:
+            return None
+
+        try:
+            version_output = subprocess.check_output([self._executable, "version"])
+        except subprocess.CalledProcessError:
+            version_output = b""
+
+        version_match = re.search(r"\d+\.\d+\.\d+", version_output.decode(errors="ignore"))
+        if not version_match:
+            return None
+
+        return Version(version_match.group())
+
+    @property
+    def no_encryption_flag(self) -> Literal["-nodes", "-noenc"]:
+        # Starting from OpenSSL version 3.0.0 `-nodes` is deprecated for disabling encryption
+        # when invoking `openssl pkcs12`. It is replaced with `-noenc`.
+        # See https://www.openssl.org/docs/man3.0/man1/openssl-pkcs12.html
+
+        openssl_version = self.get_version()
+        if openssl_version and openssl_version < Version("3.0.0"):
+            # Use legacy flag only if we are sure that the version is earlier than 3.0.0
+            return "-nodes"
+        return "-noenc"
 
 
 class P12Exporter(RunningCliAppMixin, StringConverterMixin):
@@ -34,6 +73,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
         self._password = container_password
         self._certificate = certificate
         self._private_key = private_key
+        self._openssl = _OpenSsl()
 
     @contextlib.contextmanager
     def _temp_container(self) -> Generator[pathlib.Path, None, None]:
@@ -46,11 +86,6 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
             return export_path
         with tempfile.NamedTemporaryFile(prefix="certificate", suffix=".p12", delete=False) as tf:
             return pathlib.Path(tf.name)
-
-    @classmethod
-    def _ensure_openssl(cls):
-        if shutil.which("openssl") is None:
-            raise IOError("OpenSSL executable is not present on system")
 
     def _run_openssl_command(self, command: Sequence[Union[str, pathlib.Path]]):
         process = None
@@ -110,7 +145,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
         with self._temp_container() as encrypted, self._temp_container() as decrypted:
             encrypted.write_bytes(pkcs12_container)
             decrypt_args = (
-                *("openssl", "pkcs12", "-noenc"),
+                *("openssl", "pkcs12", self._openssl.no_encryption_flag),
                 *("-passin", f"pass:{self._str(password)}"),
                 *("-in", encrypted),  # type: ignore
                 *("-out", decrypted),  # type: ignore
@@ -126,7 +161,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
         return b"".join(line for line in lines if not line.startswith(b"subject="))
 
     def export(self, export_path: Optional[pathlib.Path] = None) -> pathlib.Path:
-        self._ensure_openssl()
+        self._openssl.ensure_installed()
 
         if self._password:
             pkcs12_container = self.create_encrypted_pkcs12_container(self._password)
