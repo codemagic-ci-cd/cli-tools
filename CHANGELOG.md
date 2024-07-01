@@ -1,8 +1,10 @@
 Version 0.53.1
 -------------
 
+This bugfix release contains changes from [PR #411](https://github.com/codemagic-ci-cd/cli-tools/pull/411).
+
 **Bugfixes**
-- TBD
+- Fix saving code signing certificates fetched from App Store Connect if the certificate subject line contains non-ascii characters and export is done using OpenSSL version 3.2+.
 
 Version 0.53.0
 -------------
