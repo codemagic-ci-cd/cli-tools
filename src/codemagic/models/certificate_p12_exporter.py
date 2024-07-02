@@ -92,7 +92,7 @@ class P12Exporter(RunningCliAppMixin, StringConverterMixin):
         cli_app = self.get_current_cli_app()
         try:
             if cli_app:
-                obfuscate_patterns = [arg for arg in command if str(arg)[:5] == "pass:"]
+                obfuscate_patterns = [arg for arg in command if str(arg).startswith("pass:")]
                 process = cli_app.execute(command, obfuscate_patterns)
                 process.raise_for_returncode()
             else:
