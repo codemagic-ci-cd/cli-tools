@@ -9,7 +9,6 @@ import tempfile
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Generator
-from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -23,6 +22,8 @@ from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from .certificate import Certificate
     from .private_key import PrivateKey
 

@@ -1,3 +1,11 @@
+Version 0.53.2
+-------------
+
+This is a bugfix release to resolve a regression that was introduced in version 0.53.1. [PR #413](https://github.com/codemagic-ci-cd/cli-tools/pull/413)
+
+**Bugfixes**
+- Remove type-checking import statement that is not available on Python 3.7.
+
 Version 0.53.1
 -------------
 
