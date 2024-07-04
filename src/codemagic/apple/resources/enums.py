@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import re
+from collections import OrderedDict
+from typing import List
+from typing import Optional
+from typing import Sequence
 from typing import Tuple
+from typing import Union
 
 from codemagic.models.enums import ResourceEnum
 from codemagic.utilities.decorators import deprecated
@@ -157,7 +162,13 @@ class CapabilityType(ResourceEnum):
 
 
 class CertificateType(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/certificatetype
+    """
+
     DEVELOPER_ID_APPLICATION = "DEVELOPER_ID_APPLICATION"
+    # Undocumented developer ID certificate with profile type "G2 Sub-CA"
+    DEVELOPER_ID_APPLICATION_G2 = "DEVELOPER_ID_APPLICATION_G2"
     DEVELOPER_ID_KEXT = "DEVELOPER_ID_KEXT"
     DEVELOPMENT = "DEVELOPMENT"
     DISTRIBUTION = "DISTRIBUTION"
@@ -199,6 +210,39 @@ class CertificateType(ResourceEnum):
             return CertificateType.DISTRIBUTION
         else:
             raise ValueError(f"Certificate type for profile type {profile_type} is unknown")
+
+    @classmethod
+    def resolve(
+        cls,
+        certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
+        profile_type: Optional[ProfileType] = None,
+    ) -> List[CertificateType]:
+        types: List[CertificateType] = []
+
+        if isinstance(certificate_types, CertificateType):
+            types.append(certificate_types)
+        elif certificate_types is not None:
+            types.extend(certificate_types)
+
+        if profile_type:
+            types.append(CertificateType.from_profile_type(profile_type))
+            # Include iOS and Mac App distribution certificate types backwards compatibility.
+            # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
+            # certificates, and consequently they too can be used with those profiles.
+            if profile_type is ProfileType.IOS_APP_STORE or profile_type is ProfileType.IOS_APP_ADHOC:
+                types.append(CertificateType.IOS_DISTRIBUTION)
+            elif profile_type is ProfileType.MAC_APP_STORE:
+                types.append(CertificateType.MAC_APP_DISTRIBUTION)
+
+            # Developer ID profiles can also be used with undocumented (as of 04.07.24) flavor
+            # of developer ID application certificates that have special G2 suffix in the type name.
+            # Said profiles themselves have the same type as before regardless of whether they
+            # are of type "G2 Sub-GA" or "Previous Sub-GA".
+            if profile_type in (ProfileType.MAC_APP_DIRECT, ProfileType.MAC_CATALYST_APP_DIRECT):
+                types.append(CertificateType.DEVELOPER_ID_APPLICATION_G2)
+
+        # Remove duplicate entries from the list in order-preserving way.
+        return list(OrderedDict.fromkeys(types))
 
 
 class ContentRightsDeclaration(ResourceEnum):
