@@ -1,3 +1,9 @@
+Version 0.53.3
+-------------
+
+**Bugfixes**
+- Support signing certificates with type `DEVELOPER_ID_APPLICATION_G2` for `app-store-connect`. [PR #415](https://github.com/codemagic-ci-cd/cli-tools/pull/415)
+
 Version 0.53.2
 -------------
 
