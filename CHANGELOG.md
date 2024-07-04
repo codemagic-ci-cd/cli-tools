@@ -1,8 +1,14 @@
 Version 0.53.3
 -------------
 
+This release contains changes from [PR #415](https://github.com/codemagic-ci-cd/cli-tools/pull/415).
+
 **Bugfixes**
-- Support signing certificates with type `DEVELOPER_ID_APPLICATION_G2` for `app-store-connect`. [PR #415](https://github.com/codemagic-ci-cd/cli-tools/pull/415)
+- Support signing certificates with type `DEVELOPER_ID_APPLICATION_G2` for `app-store-connect`.
+
+**Development**
+- Update `ruff` settings to be compatible with latest version.
+- Update `pre-commit` hook versions.
 
 Version 0.53.2
 -------------
