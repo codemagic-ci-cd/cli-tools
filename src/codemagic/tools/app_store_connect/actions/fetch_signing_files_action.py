@@ -121,7 +121,7 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
         create_resource: bool,
     ) -> List[SigningCertificate]:
-        certificate_types = CertificateType.resolve(profile_type=profile_type)
+        certificate_types = CertificateType.resolve_applicable_types(profile_type=profile_type)
 
         certificates = self.list_certificates(
             certificate_types=certificate_types,
@@ -207,7 +207,7 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         platform: Optional[BundleIdPlatform] = None,
     ) -> Iterator[Profile]:
         if not bundle_ids_without_profiles:
-            return []
+            return
         if platform is None:
             platform = bundle_ids_without_profiles[0].attributes.platform
 

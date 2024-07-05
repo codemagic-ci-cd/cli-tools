@@ -212,11 +212,19 @@ class CertificateType(ResourceEnum):
             raise ValueError(f"Certificate type for profile type {profile_type} is unknown")
 
     @classmethod
-    def resolve(
+    def resolve_applicable_types(
         cls,
         certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None,
         profile_type: Optional[ProfileType] = None,
     ) -> List[CertificateType]:
+        """
+        Construct a list of unique certificate types based on the provided certificate and
+        provisioning profile types. Resolved types are ordered so that
+        - provided `certificate_types` come first in original ordering (if given),
+        - which is followed by `profile_type` primary accompanying certificate type and
+          finally `profile_type`'s secondary matching certificate type in case it exists.
+        """
+
         types: List[CertificateType] = []
 
         if isinstance(certificate_types, CertificateType):

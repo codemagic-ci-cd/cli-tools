@@ -16,13 +16,13 @@ def test_from_profile_type(profile_type: ProfileType):
 
 
 @pytest.mark.parametrize("certificate_type", list(CertificateType))
-def test_resolve_using_literal_certificate_type(certificate_type: CertificateType):
+def test_resolve_applicable_types_using_literal_certificate_type(certificate_type: CertificateType):
     """
     Check that type can be resolved when CertificateType literal instance is passed via
     `certificate_types` keyword argument. Expected result is to have a list that contains
     only the passed type.
     """
-    resolved_types = CertificateType.resolve(certificate_types=certificate_type)
+    resolved_types = CertificateType.resolve_applicable_types(certificate_types=certificate_type)
     assert resolved_types == [certificate_type]
 
 
@@ -40,23 +40,23 @@ def test_resolve_using_literal_certificate_type(certificate_type: CertificateTyp
         ],
     ),
 )
-def test_resolve_using_multiple_certificate_types(certificate_types: Sequence[CertificateType]):
+def test_resolve_applicable_types_using_multiple_certificate_types(certificate_types: Sequence[CertificateType]):
     """
     Check that type can be resolved when number of CertificateType instances are passed via
     `certificate_types` keyword argument as a sequence. Expected result is to have a list that
     contains all the passed types without duplicates and nothing else.
     """
-    resolved_types = CertificateType.resolve(certificate_types=certificate_types)
+    resolved_types = CertificateType.resolve_applicable_types(certificate_types=certificate_types)
     assert resolved_types == list(certificate_types)
 
 
-def test_resolve_using_multiple_certificate_types_omit_duplicates():
+def test_resolve_applicable_types_using_multiple_certificate_types_omit_duplicates():
     """
     Check that duplicates are removed from given certificate types when resolving result.
     Return value should contain each resolved type only once and in the order in which they
     appeared first.
     """
-    resolved_types = CertificateType.resolve(
+    resolved_types = CertificateType.resolve_applicable_types(
         certificate_types=[
             CertificateType.MAC_INSTALLER_DISTRIBUTION,
             CertificateType.MAC_APP_DEVELOPMENT,
@@ -87,7 +87,7 @@ def test_resolve_using_multiple_certificate_types_omit_duplicates():
         (ProfileType.TVOS_APP_STORE, CertificateType.DISTRIBUTION),
     ),
 )
-def test_resolve_using_profile_type_with_one_match(
+def test_resolve_applicable_types_using_profile_type_with_one_match(
     profile_type: ProfileType,
     expected_certificate_type: CertificateType,
 ):
@@ -96,7 +96,7 @@ def test_resolve_using_profile_type_with_one_match(
     certificate type. Check that expected certificate type is resolved for such profiles,
     and nothing else.
     """
-    resolved_types = CertificateType.resolve(profile_type=profile_type)
+    resolved_types = CertificateType.resolve_applicable_types(profile_type=profile_type)
     assert resolved_types == [expected_certificate_type]
 
 
@@ -125,7 +125,7 @@ def test_resolve_using_profile_type_with_one_match(
         ),
     ),
 )
-def test_resolve_using_profile_type_with_many_matches(
+def test_resolve_applicable_types_using_profile_type_with_many_matches(
     profile_type: ProfileType,
     expected_certificate_types: List[CertificateType],
 ):
@@ -134,16 +134,16 @@ def test_resolve_using_profile_type_with_many_matches(
     Check that for those profile types all the allowed certificate types are resolved,
     and nothing else. Additionally, the secondary resolved type should be always last.
     """
-    resolved_types = CertificateType.resolve(profile_type=profile_type)
+    resolved_types = CertificateType.resolve_applicable_types(profile_type=profile_type)
     assert resolved_types == expected_certificate_types
 
 
-def test_resolve_with_multiple_arguments():
+def test_resolve_applicable_types_with_multiple_arguments():
     """
     Check that when different arguments are passed to the resolver at once, then
     all of them are respected and used accordingly.
     """
-    resolved_types = CertificateType.resolve(
+    resolved_types = CertificateType.resolve_applicable_types(
         profile_type=ProfileType.IOS_APP_STORE,
         certificate_types=[
             CertificateType.DEVELOPER_ID_APPLICATION,

@@ -175,7 +175,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(warning))
             certificate_types = _certificate_type
 
-        certificate_types_filter = CertificateType.resolve(
+        certificate_types_filter = CertificateType.resolve_applicable_types(
             certificate_types=certificate_types,
             profile_type=profile_type,
         )
