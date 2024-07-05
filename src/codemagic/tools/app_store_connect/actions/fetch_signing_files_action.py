@@ -121,18 +121,7 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         certificate_key_password: Optional[Types.CertificateKeyPasswordArgument],
         create_resource: bool,
     ) -> List[SigningCertificate]:
-        certificate_types = [CertificateType.from_profile_type(profile_type)]
-        # Include iOS and Mac App distribution certificate types backwards compatibility.
-        # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
-        # certificates, and we want to keep using existing certificates for as long as possible.
-        if profile_type is ProfileType.IOS_APP_STORE:
-            certificate_types.append(CertificateType.IOS_DISTRIBUTION)
-        elif profile_type is ProfileType.IOS_APP_ADHOC:
-            certificate_types.append(CertificateType.IOS_DISTRIBUTION)
-        elif profile_type is ProfileType.MAC_APP_STORE:
-            certificate_types.append(CertificateType.MAC_APP_DISTRIBUTION)
-        elif profile_type is ProfileType.MAC_APP_DIRECT:
-            certificate_types.append(CertificateType.DEVELOPER_ID_APPLICATION)
+        certificate_types = CertificateType.resolve_applicable_types(profile_type=profile_type)
 
         certificates = self.list_certificates(
             certificate_types=certificate_types,
@@ -218,7 +207,7 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         platform: Optional[BundleIdPlatform] = None,
     ) -> Iterator[Profile]:
         if not bundle_ids_without_profiles:
-            return []
+            return
         if platform is None:
             platform = bundle_ids_without_profiles[0].attributes.platform
 

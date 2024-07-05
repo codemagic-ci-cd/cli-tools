@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Set
 from typing import Union
 from typing import cast
 
@@ -166,10 +165,23 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError("Cannot create or save resource without certificate private key")
 
         _certificate_type: Optional[CertificateType] = _deprecated_kwargs.get("certificate_type")
-        certificate_types_filter = self._resolve_certificate_types(_certificate_type, certificate_types, profile_type)
+        if isinstance(_certificate_type, CertificateType):
+            warning = (
+                "Deprecation warning! Keyword argument "
+                '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
+                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]]", '
+                "and is subject for removal."
+            )
+            self.logger.warning(Colors.RED(warning))
+            certificate_types = _certificate_type
+
+        certificate_types_filter = CertificateType.resolve_applicable_types(
+            certificate_types=certificate_types,
+            profile_type=profile_type,
+        )
 
         certificate_filter = self.api_client.signing_certificates.Filter(
-            certificate_type=certificate_types_filter,
+            certificate_type=certificate_types_filter if certificate_types_filter else None,
             display_name=display_name,
         )
         certificates = self._list_resources(
@@ -196,42 +208,3 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             )
 
         return certificates
-
-    def _resolve_certificate_types(
-        self,
-        certificate_type: Optional[CertificateType],
-        certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]],
-        profile_type: Optional[ProfileType],
-    ) -> Optional[List[CertificateType]]:
-        types: Set[CertificateType] = set()
-
-        if isinstance(certificate_types, CertificateType):
-            types.add(certificate_types)
-        elif certificate_types is not None:
-            types.update(certificate_types)
-
-        if isinstance(certificate_type, CertificateType):
-            warning = (
-                "Deprecation warning! Keyword argument "
-                '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
-                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None", '
-                "and is subject for removal."
-            )
-            self.logger.warning(Colors.RED(warning))
-            types.add(certificate_type)
-
-        if profile_type:
-            types.add(CertificateType.from_profile_type(profile_type))
-            # Include iOS and Mac App distribution certificate types backwards compatibility.
-            # In the past iOS and Mac App Store profiles used to map to iOS and Mac App distribution
-            # certificates, and consequently they too can be used with those profiles.
-            if profile_type is ProfileType.IOS_APP_STORE:
-                types.add(CertificateType.IOS_DISTRIBUTION)
-            elif profile_type is ProfileType.IOS_APP_ADHOC:
-                types.add(CertificateType.IOS_DISTRIBUTION)
-            elif profile_type is ProfileType.MAC_APP_STORE:
-                types.add(CertificateType.MAC_APP_DISTRIBUTION)
-            elif profile_type is ProfileType.MAC_APP_DIRECT:
-                types.add(CertificateType.DEVELOPER_ID_APPLICATION)
-
-        return list(types) if types else None
