@@ -169,7 +169,7 @@ class CertificatesActionGroup(AbstractBaseAction, metaclass=ABCMeta):
             warning = (
                 "Deprecation warning! Keyword argument "
                 '"certificate_type: Optional[CertificateType]" is deprecated in favor of '
-                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]] = None", '
+                '"certificate_types: Optional[Union[CertificateType, Sequence[CertificateType]]]", '
                 "and is subject for removal."
             )
             self.logger.warning(Colors.RED(warning))

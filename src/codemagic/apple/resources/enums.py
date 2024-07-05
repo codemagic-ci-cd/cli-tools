@@ -229,7 +229,7 @@ class CertificateType(ResourceEnum):
 
         if isinstance(certificate_types, CertificateType):
             types.append(certificate_types)
-        elif certificate_types is not None:
+        elif certificate_types:
             types.extend(certificate_types)
 
         if profile_type:
