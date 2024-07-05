@@ -1,5 +1,5 @@
 from typing import List
-from typing import Set
+from typing import Sequence
 
 import pytest
 from codemagic.apple.resources import CertificateType
@@ -33,7 +33,6 @@ def test_resolve_using_literal_certificate_type(certificate_type: CertificateTyp
         (CertificateType.IOS_DISTRIBUTION, CertificateType.IOS_DEVELOPMENT),
         [CertificateType.IOS_DISTRIBUTION, CertificateType.IOS_DEVELOPMENT],
         [CertificateType.MAC_APP_DEVELOPMENT, CertificateType.MAC_APP_DISTRIBUTION],
-        [CertificateType.MAC_APP_DEVELOPMENT, CertificateType.MAC_APP_DEVELOPMENT],
         [
             CertificateType.MAC_APP_DEVELOPMENT,
             CertificateType.MAC_INSTALLER_DISTRIBUTION,
@@ -41,14 +40,37 @@ def test_resolve_using_literal_certificate_type(certificate_type: CertificateTyp
         ],
     ),
 )
-def test_resolve_using_multiple_certificate_types(certificate_types: List[CertificateType]):
+def test_resolve_using_multiple_certificate_types(certificate_types: Sequence[CertificateType]):
     """
     Check that type can be resolved when number of CertificateType instances are passed via
     `certificate_types` keyword argument as a sequence. Expected result is to have a list that
     contains all the passed types without duplicates and nothing else.
     """
     resolved_types = CertificateType.resolve(certificate_types=certificate_types)
-    assert set(resolved_types) == set(certificate_types)
+    assert resolved_types == list(certificate_types)
+
+
+def test_resolve_using_multiple_certificate_types_omit_duplicates():
+    """
+    Check that duplicates are removed from given certificate types when resolving result.
+    Return value should contain each resolved type only once and in the order in which they
+    appeared first.
+    """
+    resolved_types = CertificateType.resolve(
+        certificate_types=[
+            CertificateType.MAC_INSTALLER_DISTRIBUTION,
+            CertificateType.MAC_APP_DEVELOPMENT,
+            CertificateType.MAC_APP_DEVELOPMENT,
+            CertificateType.MAC_INSTALLER_DISTRIBUTION,
+            CertificateType.MAC_APP_DEVELOPMENT,
+            CertificateType.MAC_APP_DISTRIBUTION,
+        ],
+    )
+    assert resolved_types == [
+        CertificateType.MAC_INSTALLER_DISTRIBUTION,
+        CertificateType.MAC_APP_DEVELOPMENT,
+        CertificateType.MAC_APP_DISTRIBUTION,
+    ]
 
 
 @pytest.mark.parametrize(
@@ -83,37 +105,37 @@ def test_resolve_using_profile_type_with_one_match(
     (
         (
             ProfileType.IOS_APP_ADHOC,
-            {CertificateType.DISTRIBUTION, CertificateType.IOS_DISTRIBUTION},
+            [CertificateType.DISTRIBUTION, CertificateType.IOS_DISTRIBUTION],
         ),
         (
             ProfileType.IOS_APP_STORE,
-            {CertificateType.DISTRIBUTION, CertificateType.IOS_DISTRIBUTION},
+            [CertificateType.DISTRIBUTION, CertificateType.IOS_DISTRIBUTION],
         ),
         (
             ProfileType.MAC_APP_DIRECT,
-            {CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2},
+            [CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2],
         ),
         (
             ProfileType.MAC_CATALYST_APP_DIRECT,
-            {CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2},
+            [CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2],
         ),
         (
             ProfileType.MAC_APP_STORE,
-            {CertificateType.MAC_APP_DISTRIBUTION, CertificateType.DISTRIBUTION},
+            [CertificateType.DISTRIBUTION, CertificateType.MAC_APP_DISTRIBUTION],
         ),
     ),
 )
 def test_resolve_using_profile_type_with_many_matches(
     profile_type: ProfileType,
-    expected_certificate_types: Set[CertificateType],
+    expected_certificate_types: List[CertificateType],
 ):
     """
     Some provisioning profile types can be used with more than one type of certificates.
     Check that for those profile types all the allowed certificate types are resolved,
-    and nothing else.
+    and nothing else. Additionally, the secondary resolved type should be always last.
     """
     resolved_types = CertificateType.resolve(profile_type=profile_type)
-    assert set(resolved_types) == expected_certificate_types
+    assert resolved_types == expected_certificate_types
 
 
 def test_resolve_with_multiple_arguments():
@@ -128,10 +150,10 @@ def test_resolve_with_multiple_arguments():
             CertificateType.DEVELOPER_ID_APPLICATION_G2,
         ],
     )
-    expected_certificate_types = {
-        CertificateType.DISTRIBUTION,  # From given profile type
-        CertificateType.IOS_DISTRIBUTION,  # From given profile type
+    expected_certificate_types = [
         CertificateType.DEVELOPER_ID_APPLICATION,  # From "certificate_types" argument
         CertificateType.DEVELOPER_ID_APPLICATION_G2,  # From "certificate_types" argument
-    }
-    assert set(resolved_types) == expected_certificate_types
+        CertificateType.DISTRIBUTION,  # From given profile type
+        CertificateType.IOS_DISTRIBUTION,  # From given profile type
+    ]
+    assert resolved_types == expected_certificate_types
