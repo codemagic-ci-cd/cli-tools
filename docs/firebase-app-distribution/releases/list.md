@@ -7,7 +7,7 @@ list
 ### Usage
 ```bash
 firebase-app-distribution releases list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --project-id PROJECT_ID
+    --project-number PROJECT_NUMBER
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     [--limit LIMIT]
     [--order-by ORDER_BY]
@@ -36,7 +36,7 @@ Sort resources in the specified order. Default:&nbsp;`createTimeDesc`
 Whether to show the request response in JSON format
 ### Required arguments for command `firebase-app-distribution`
 
-##### `--project-id, -p=PROJECT_ID`
+##### `--project-number, -p=PROJECT_NUMBER`
 
 
 Project ID in Firebase. For example `228333310124`

@@ -6,10 +6,10 @@ from .argument_types import CredentialsArgument
 
 
 class FirebaseArgument(cli.Argument):
-    PROJECT_ID = cli.ArgumentProperties(
-        key="project_id",
-        flags=("--project-id", "-p"),
-        description=f'Project ID in Firebase. For example `{Colors.WHITE("228333310124")}`',
+    PROJECT_NUMBER = cli.ArgumentProperties(
+        key="project_number",
+        flags=("--project-number", "-p"),
+        description=f'Project Number in Firebase. For example `{Colors.WHITE("228333310124")}`',
         argparse_kwargs={"required": True},
     )
     FIREBASE_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
