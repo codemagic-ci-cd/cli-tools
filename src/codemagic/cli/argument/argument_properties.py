@@ -19,6 +19,7 @@ class ArgumentProperties(NamedTuple):
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, Any]] = None
     argument_group_name: Optional[str] = None
+    mutually_exclusive_required_group: Optional[str] = None
 
     @classmethod
     def duplicate(cls, template: Union[Tuple, ArgumentProperties], **overwrites) -> ArgumentProperties:
