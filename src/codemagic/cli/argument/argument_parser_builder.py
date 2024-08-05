@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import TYPE_CHECKING
 from typing import Dict
+from typing import Optional
 from typing import Type
 
 from codemagic.cli.cli_help_formatter import CliHelpFormatter
@@ -112,10 +113,14 @@ class ArgumentParserBuilder:
             verbose=False,
         )
 
-    def _get_custom_argument_group(self, optional_group_name: str, mutually_exclusive_required_group: str) -> ArgumentGroup:
+    def _get_custom_argument_group(
+        self,
+        optional_group_name: Optional[str],
+        mutually_exclusive_required_group: Optional[str],
+    ) -> ArgumentGroup:
         if optional_group_name:
             return self._get_custom_optional_argument_group(optional_group_name)
-        return self._get_custom_mutually_exclusive_required_group(mutually_exclusive_required_group)
+        return self._get_custom_mutually_exclusive_required_group(str(mutually_exclusive_required_group))
 
     def _get_custom_optional_argument_group(self, group_name: str) -> ArgumentGroup:
         try:
