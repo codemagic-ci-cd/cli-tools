@@ -12,6 +12,11 @@ from typing import Type
 from typing import Union
 
 
+class MutuallyExclusiveGroup(NamedTuple):
+    group_name: str
+    required: bool
+
+
 class ArgumentProperties(NamedTuple):
     key: str
     description: str
@@ -19,7 +24,7 @@ class ArgumentProperties(NamedTuple):
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, Any]] = None
     argument_group_name: Optional[str] = None
-    mutually_exclusive_required_group: Optional[str] = None
+    mutually_exclusive_group: Optional[MutuallyExclusiveGroup] = None
 
     @classmethod
     def duplicate(cls, template: Union[Tuple, ArgumentProperties], **overwrites) -> ArgumentProperties:
