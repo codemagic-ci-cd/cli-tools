@@ -1,3 +1,12 @@
+Version 0.53.4
+-------------
+
+This release contains changes from [PR #422](https://github.com/codemagic-ci-cd/cli-tools/pull/422).
+
+**Development**
+- Add support for mutually exclusive groups on argument parser.
+
+
 Version 0.53.3
 -------------
 
