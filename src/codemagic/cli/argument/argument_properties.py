@@ -13,7 +13,7 @@ from typing import Union
 
 
 class MutuallyExclusiveGroup(NamedTuple):
-    group_name: str
+    name: str
     required: bool
 
 

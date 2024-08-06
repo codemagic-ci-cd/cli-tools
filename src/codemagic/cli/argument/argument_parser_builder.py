@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import TYPE_CHECKING
 from typing import Dict
+from typing import Tuple
 from typing import Type
 
 from codemagic.cli.cli_help_formatter import CliHelpFormatter
@@ -124,26 +125,34 @@ class ArgumentParserBuilder:
             self._custom_arguments_groups[group_name] = argument_group
         return argument_group
 
-    def _get_custom_mutually_exclusive_group(
-        self,
-        mutually_exclusive_group: MutuallyExclusiveGroup,
-    ) -> ArgumentGroup:
+    def _get_mutually_exclusive_group_texts(self, group: MutuallyExclusiveGroup) -> Tuple[str, str]:
+        if group.required:
+            title_prefix, description_prefix, description_verb = "Required", "Exactly", "must"
+        else:
+            title_prefix, description_prefix, description_verb = "Optional", "Only", "can"
+
+        title = (
+            f"{title_prefix} mutually exclusive arguments "
+            f"for command {self._cli_action.action_name} to {Colors.BOLD(group.name)}"
+        )
+        description = f"{description_prefix} one of those options {description_verb} be selected"
+        return title, description
+
+    def _get_mutually_exclusive_group(self, group: MutuallyExclusiveGroup) -> ArgumentGroup:
         try:
-            argument_group = self._custom_arguments_groups[mutually_exclusive_group.group_name]
+            mutually_exclusive_argument_group = self._custom_arguments_groups[group.name]
         except KeyError:
-            group_description = Colors.UNDERLINE(
-                f"Following arguments are mutually exclusive for {Colors.BOLD(self._cli_action.action_name)}",
-            )
-            group = self._action_parser.add_argument_group(group_description)
-            argument_group = group.add_mutually_exclusive_group(required=mutually_exclusive_group.required)
-            self._custom_arguments_groups[mutually_exclusive_group.group_name] = argument_group
-        return argument_group
+            title, description = self._get_mutually_exclusive_group_texts(group)
+            argument_group = self._action_parser.add_argument_group(Colors.UNDERLINE(title), description)
+            mutually_exclusive_argument_group = argument_group.add_mutually_exclusive_group(required=group.required)
+            self._custom_arguments_groups[group.name] = mutually_exclusive_argument_group
+        return mutually_exclusive_argument_group
 
     def _get_argument_group(self, argument) -> ArgumentGroup:
         if argument.argument_group_name:
             argument_group = self._get_custom_argument_group(argument.argument_group_name)
         elif argument.mutually_exclusive_group:
-            argument_group = self._get_custom_mutually_exclusive_group(argument.mutually_exclusive_group)
+            argument_group = self._get_mutually_exclusive_group(argument.mutually_exclusive_group)
         elif argument.is_required():
             argument_group = self._required_arguments
         else:
@@ -152,13 +161,13 @@ class ArgumentParserBuilder:
         return argument_group
 
     def _setup_cli_app_mutually_exclusive_groups(self) -> Dict[str, ArgumentGroup]:
-        required_groups = {}
+        mutually_exclusive_groups = {}
         for argument in self._cli_app.CLASS_ARGUMENTS:
             if argument.mutually_exclusive_group:
                 mutually_exclusive_group = argument.mutually_exclusive_group
-                group_name = mutually_exclusive_group.group_name
-                required_groups[group_name] = self._get_custom_mutually_exclusive_group(mutually_exclusive_group)
-        return required_groups
+                group_name = mutually_exclusive_group.name
+                mutually_exclusive_groups[group_name] = self._get_mutually_exclusive_group(mutually_exclusive_group)
+        return mutually_exclusive_groups
 
     def _setup_cli_app_options(self):
         executable = self._action_parser.prog.split()[0]
@@ -168,12 +177,12 @@ class ArgumentParserBuilder:
         tool_optional_arguments = self._action_parser.add_argument_group(
             Colors.UNDERLINE(f"Optional arguments for {Colors.BOLD(executable)}"),
         )
-        tool_mutually_exclusive_group = self._setup_cli_app_mutually_exclusive_groups()
+        tool_mutually_exclusive_groups = self._setup_cli_app_mutually_exclusive_groups()
 
         for argument in self._cli_app.CLASS_ARGUMENTS:
-            group_name = argument.mutually_exclusive_group.group_name if argument.mutually_exclusive_group else None
-            if group_name:
-                argument.register(tool_mutually_exclusive_group[group_name])
+            if argument.mutually_exclusive_group:
+                mutually_exclusive_group = tool_mutually_exclusive_groups[argument.mutually_exclusive_group.name]
+                argument.register(mutually_exclusive_group)
             elif argument.is_required():
                 argument.register(tool_required_arguments)
             else:
