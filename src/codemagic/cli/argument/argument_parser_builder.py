@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from argparse import _ArgumentGroup as ArgumentGroup
     from argparse import _SubParsersAction as SubParsersAction
 
+    from codemagic.cli import MutuallyExclusiveGroup
     from codemagic.cli.argument import ActionCallable
-    from codemagic.cli.argument.argument_properties import MutuallyExclusiveGroup
     from codemagic.cli.cli_app import CliApp
 
 
