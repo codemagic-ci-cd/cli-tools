@@ -168,7 +168,7 @@ class ArgumentParserBuilder:
         tool_optional_arguments = self._action_parser.add_argument_group(
             Colors.UNDERLINE(f"Optional arguments for {Colors.BOLD(executable)}"),
         )
-        tool_mutually_exclusive_group = self._setup_cli_app_mutually_exclusive_groups(executable)
+        tool_mutually_exclusive_group = self._setup_cli_app_mutually_exclusive_groups()
 
         for argument in self._cli_app.CLASS_ARGUMENTS:
             group_name = argument.mutually_exclusive_group.group_name if argument.mutually_exclusive_group else None
