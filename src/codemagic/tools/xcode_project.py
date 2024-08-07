@@ -552,16 +552,6 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         TestSuitePrinter(self.echo).print_test_suites(test_suites)
 
-    @cli.action("xcresulttool-version")
-    def get_xcresulttool_version(self):
-        """
-        Show xcresulttool version
-        """
-        from codemagic.models.xctests import XcResultTool
-
-        version = XcResultTool.get_version()
-        self.echo(str(version) if version else "N/A")
-
     @cli.action(
         "junit-test-results",
         TestResultArgument.XCRESULT_PATTERNS,

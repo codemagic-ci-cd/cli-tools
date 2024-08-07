@@ -66,7 +66,6 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
         """
 
         version = cls.get_tool_version()
-        print(version)
         if not version:
             return False
         return version >= Version("23021")
