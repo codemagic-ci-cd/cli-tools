@@ -9,7 +9,6 @@ This is a bugfix version containing changes from [PR #424](https://github.com/co
     - `xcode-project test-summary`,
     - `xcode-project junit-test-results`.
 
-
 **Development**
 - Add `get_tool_version` method to `codemagic.models.xctests.XcResultTool` which can be used to detect `xcresulttool` version from currently active Xcode developer directory.
 
