@@ -50,7 +50,7 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
         version_output = cls._str(stdout.strip())
         # Expected version output of xcresulttool (bundled with Xcode 16.0 beta 3) is as follows:
         # xcresulttool version 23024, format version 3.53 (current)
-        match = re.match(r"^xcresulttool version (?P<version>\d+)", version_output)
+        match = re.match(r"^xcresulttool version (?P<version>\d+(\.\d+)?)", version_output)
 
         if not match:
             log.get_file_logger(cls).error("Failed to capture xcresulttool version from %r", version_output)
