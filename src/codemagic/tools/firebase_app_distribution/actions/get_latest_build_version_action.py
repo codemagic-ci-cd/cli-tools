@@ -18,7 +18,7 @@ class GetLatestBuildVersionAction(FirebaseAppDistributionAction, ABC):
         """
         Get latest build version from Firebase
         """
-        app_identifier = AppIdentifier(self.project_id, app_id)
+        app_identifier = AppIdentifier(self.project_number, app_id)
         try:
             releases = self.client.releases.list(app_identifier, limit=1)
         except GoogleError as e:

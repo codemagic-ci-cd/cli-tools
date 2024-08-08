@@ -38,7 +38,7 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         List releases for the Firebase application
         """
 
-        app_identifier = AppIdentifier(self.project_id, app_id)
+        app_identifier = AppIdentifier(self.project_number, app_id)
         try:
             releases = self.client.releases.list(app_identifier, order_by, limit)
         except GoogleError as e:

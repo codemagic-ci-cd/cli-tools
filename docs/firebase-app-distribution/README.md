@@ -7,16 +7,16 @@ firebase-app-distribution
 ### Usage
 ```bash
 firebase-app-distribution [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --project-id PROJECT_ID
+    --project-number PROJECT_NUMBER
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     ACTION
 ```
 ### Required arguments for command `firebase-app-distribution`
 
-##### `--project-id, -p=PROJECT_ID`
+##### `--project-number, -p=PROJECT_NUMBER`
 
 
-Project ID in Firebase. For example `228333310124`
+Project Number in Firebase. For example `228333310124`
 ### Optional arguments for command `firebase-app-distribution`
 
 ##### `--credentials, -c=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`
