@@ -1,3 +1,17 @@
+Version 0.53.4
+-------------
+
+This is a bugfix version containing changes from [PR #424](https://github.com/codemagic-ci-cd/cli-tools/pull/424) to fix test result parsing with Xcode 16.0 beta 3+.
+
+**Bugfixes**
+- The following actions were fixed when used in conjunction with Xcode 16.0 beta 3+:
+    - `xcode-project run-tests`,
+    - `xcode-project test-summary`,
+    - `xcode-project junit-test-results`.
+
+**Development**
+- Add `get_tool_version` method to `codemagic.models.xctests.XcResultTool` which can be used to detect `xcresulttool` version from currently active Xcode developer directory.
+
 Version 0.53.3
 -------------
 
