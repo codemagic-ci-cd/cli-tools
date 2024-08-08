@@ -34,11 +34,8 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     @lru_cache(1)
     def get_tool_version(cls) -> Optional[Version]:
-        # Cache the return value as it is not expected that chosen Xcode version,
-        # and consequently xcresulttool version, is changed during the execution
-        # of the action which requires xcresulttool. As there are possibly quite
-        # a few xcresulttool invocations for which we also need to know the used
-        # version, it is better to do the version check only once.
+        # Cache xcresulttool version to avoid repeated checks.
+        # Assumes Xcode (and thus xcresulttool) version remains constant during execution.
 
         cmd_args = ["xcrun", "xcresulttool", "version"]
         try:
