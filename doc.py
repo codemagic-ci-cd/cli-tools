@@ -17,7 +17,6 @@ from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
-from typing import Tuple
 
 from mdutils.mdutils import MdUtils
 from mdutils.tools.Table import Table
@@ -50,6 +49,7 @@ class Action(NamedTuple):
     required_args: List[SerializedArgument]
     optional_args: List[SerializedArgument]
     custom_args: Dict[str, List[SerializedArgument]]
+    mutually_exclusive_args: List[SerializedArgument] = None
 
 
 class ActionGroup(NamedTuple):
@@ -179,9 +179,7 @@ class ToolDocumentationGenerator:
         self.tool_optional_args = class_args_serializer.optional_args
         self.tool_required_args = class_args_serializer.required_args
         self.tool_options = self._serialize_default_options(self.tool)
-        self.tool_serialized_mutually_exclusive_groups = self._serialize_mutually_exclusive_groups(
-            class_args_serializer.mutually_exclusive_group_args,
-        )
+        self.tool_mutually_exclusive_group_args = class_args_serializer.mutually_exclusive_group_args
         self.tool_serialized_actions = self._serialize_actions(self.tool)
         self.tool_serialized_action_groups = self._serialize_action_groups(self.tool)
 
@@ -200,7 +198,7 @@ class ToolDocumentationGenerator:
             self.tool_optional_args,
             self.tool_required_args,
             {},
-            self.tool_serialized_mutually_exclusive_groups,
+            self.tool_mutually_exclusive_group_args,
         )
         writer.write_options(self.tool_options)
 
@@ -241,7 +239,7 @@ class ToolDocumentationGenerator:
             action.optional_args,
             action.required_args,
             action.custom_args,
-            {},
+            action.mutually_exclusive_args,
         )
         self._write_tool_command_arguments_and_options(writer)
         writer.ensure_empty_line_at_end()
@@ -281,6 +279,7 @@ class ToolDocumentationGenerator:
                 required_args=action_args_serializer.required_args,
                 optional_args=action_args_serializer.optional_args,
                 custom_args=action_args_serializer.custom_args,
+                mutually_exclusive_args=action_args_serializer.mutually_exclusive_group_args,
             )
 
         return list(map(_serialize_action, tool.iter_class_cli_actions(action_group=action_group)))
@@ -324,7 +323,9 @@ class CommandUsageGenerator:
         action_args = (
             [
                 *map(self._get_formatted_flag, action.optional_args),
+                self._get_mutually_exclusive_group_formatted_flag(action.mutually_exclusive_args, False),
                 *map(self._get_formatted_flag, action.required_args),
+                self._get_mutually_exclusive_group_formatted_flag(action.mutually_exclusive_args),
                 *map(self._get_formatted_flag, reduce(operator.add, action.custom_args.values(), [])),
             ]
             if action
@@ -341,27 +342,39 @@ class CommandUsageGenerator:
         return " ".join(map(self._get_formatted_flag, self.doc_generator.tool_options))
 
     def _get_tool_arguments_and_flags(self) -> Iterable[str]:
-        return map(
-            self._get_formatted_flag,
-            [
-                *self.doc_generator.tool_required_args,
-                *self.doc_generator.tool_serialized_mutually_exclusive_groups.items(),
-                *self.doc_generator.tool_optional_args,
-            ],
-        )
+        return [
+            *map(self._get_formatted_flag, self.doc_generator.tool_required_args),
+            self._get_mutually_exclusive_group_formatted_flag(self.doc_generator.tool_mutually_exclusive_group_args),
+            *map(self._get_formatted_flag, self.doc_generator.tool_optional_args),
+            self._get_mutually_exclusive_group_formatted_flag(
+                self.doc_generator.tool_mutually_exclusive_group_args,
+                False,
+            ),
+        ]
 
-    def _get_formatted_flag(self, arg_or_group: SerializedArgument | Tuple[str, SerializedArgument]) -> str:
-        if isinstance(arg_or_group, SerializedArgument):
-            return self._get_formatted_flag_for_arg(arg_or_group)
+    def _get_mutually_exclusive_group_formatted_flag(
+        self,
+        mutually_exclusive_args: List[SerializedArgument],
+        required: bool = True,
+    ):
+        serialized_mutually_exclusive_groups = defaultdict(list)
+        for arg in mutually_exclusive_args:
+            if arg.mutually_exclusive_group and arg.required == required:
+                serialized_mutually_exclusive_groups[arg.mutually_exclusive_group.name].append(arg)
+
         flags = ""
-        for group_name, args in self.doc_generator.tool_serialized_mutually_exclusive_groups.items():
+        for group_name, args in serialized_mutually_exclusive_groups.items():
             group_flags_list = [self._get_formatted_flag_text(arg) for arg in args]
             group_flags_str = " | ".join(group_flags_list)
-            if args[0].required:
+            if required:
                 flags += f"({group_flags_str}) "
             else:
                 flags += f"[{group_flags_str}] "
         return flags
+
+    def _get_formatted_flag(self, arg: SerializedArgument) -> str:
+        flag = self._get_formatted_flag_text(arg)
+        return flag if arg.required else f"[{flag}]"
 
     @classmethod
     def _get_formatted_flag_text(cls, arg: SerializedArgument) -> str:
@@ -452,15 +465,26 @@ class Writer:
         optional: List[SerializedArgument],
         required: List[SerializedArgument],
         custom: Dict[str, List[SerializedArgument]],
-        mutually_exclusive_groups: Dict[str, List[SerializedArgument]],
+        mutually_exclusive_groups: List[SerializedArgument],
     ):
         self._write_arguments(self.file, f"Required arguments for {obj}", required)
+        mutually_exclusive_required_args = [arg for arg in mutually_exclusive_groups if arg.required]
+        self._write_arguments(
+            self.file,
+            f"Required mutually exclusive arguments for {obj}",
+            mutually_exclusive_required_args,
+        )
+
         self._write_arguments(self.file, f"Optional arguments for {obj}", optional)
         for group_name, custom_arguments in custom.items():
             self._write_arguments(self.file, f"Optional arguments to {group_name}", custom_arguments)
-        for group_name, args in mutually_exclusive_groups.items():
-            prefix = "Required" if args[0].mutually_exclusive_group.required else "Optional"
-            self._write_arguments(self.file, f"{prefix} mutually exclusive arguments for {obj}", args)
+
+        mutually_exclusive_optional_args = [arg for arg in mutually_exclusive_groups if not arg.required]
+        self._write_arguments(
+            self.file,
+            f"Optional mutually exclusive arguments for {obj}",
+            mutually_exclusive_optional_args,
+        )
 
     def write_options(self, options: List[SerializedArgument]):
         self._write_arguments(self.file, "Common options", options)
@@ -468,7 +492,7 @@ class Writer:
     @classmethod
     def _write_command_usage(cls, file: MdUtils, lines: List[str]):
         file.new_header(level=3, title="Usage", add_table_of_contents="n")
-        main_lines = "".join([f"    {line}\n" for line in lines[1:]])
+        main_lines = "".join([f"    {line}\n" for line in lines[1:] if line])
         file.write(f"```bash\n{lines[0]}\n{main_lines}```", wrap_width=0)
 
     @classmethod
