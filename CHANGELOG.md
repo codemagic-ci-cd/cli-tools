@@ -2,19 +2,17 @@ Version 0.53.5
 -------------
 
 This release contains changes from [PR #421](https://github.com/codemagic-ci-cd/cli-tools/pull/421)
+and [PR #422](https://github.com/codemagic-ci-cd/cli-tools/pull/422)
+
+**Development**
+- Add support for mutually exclusive groups on argument parser.
 
 **Deprecations**
 
-The argument `--project-id` has been deprecated in favor of `--project-number` on all actions
+- The argument `--project-id` has been deprecated in favor of `--project-number` on all actions
 of the tool `firebase-app-distribution` to be compliant with the [Firebase documentation](https://firebase.google.com/docs/projects/learn-more#project-number).
 
-A warning message is shown if commands are invoked with the deprecated argument.
-
-Version UNRELEASED
--------------
-
-**Development**
-- Add support for mutually exclusive groups on argument parser. [PR #422](https://github.com/codemagic-ci-cd/cli-tools/pull/422)
+- A warning message is shown if commands are invoked with the deprecated argument.
 
 Version 0.53.4
 -------------
