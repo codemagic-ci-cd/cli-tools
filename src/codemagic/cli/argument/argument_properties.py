@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -11,6 +12,9 @@ from typing import Tuple
 from typing import Type
 from typing import Union
 
+if TYPE_CHECKING:
+    from codemagic.cli import MutuallyExclusiveGroup
+
 
 class ArgumentProperties(NamedTuple):
     key: str
@@ -19,6 +23,7 @@ class ArgumentProperties(NamedTuple):
     flags: Tuple[str, ...] = tuple()
     argparse_kwargs: Optional[Dict[str, Any]] = None
     argument_group_name: Optional[str] = None
+    mutually_exclusive_group: Optional[MutuallyExclusiveGroup] = None
 
     @classmethod
     def duplicate(cls, template: Union[Tuple, ArgumentProperties], **overwrites) -> ArgumentProperties:
