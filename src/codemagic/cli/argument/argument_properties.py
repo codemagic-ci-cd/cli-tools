@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Dict
@@ -11,10 +12,8 @@ from typing import Tuple
 from typing import Type
 from typing import Union
 
-
-class MutuallyExclusiveGroup(NamedTuple):
-    group_name: str
-    required: bool
+if TYPE_CHECKING:
+    from codemagic.cli import MutuallyExclusiveGroup
 
 
 class ArgumentProperties(NamedTuple):
