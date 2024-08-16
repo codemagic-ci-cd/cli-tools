@@ -39,11 +39,11 @@ Whether to show the request response in JSON format
 ##### `--project-id=PROJECT_ID`
 
 
-Deprecated on version 0.53.5. Use `--project-number` instead.
+Deprecated in version 0.53.5. Use `--project-number` instead
 ##### `--project-number, -p=PROJECT_NUMBER`
 
 
-Project Number in Firebase. For example `228333310124`
+Project number in Firebase. For example `228333310124`
 ### Optional arguments for command `firebase-app-distribution`
 
 ##### `--credentials, -c=FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`
