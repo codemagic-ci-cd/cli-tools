@@ -8,6 +8,8 @@ from typing import Optional
 
 from codemagic import cli
 from codemagic.google.firebase_client import FirebaseClient
+from codemagic.utilities import log
+from codemagic.utilities.decorators import deprecated
 
 from .action_groups import ReleasesActionGroup
 from .actions import GetLatestBuildVersionAction
@@ -28,24 +30,30 @@ class FirebaseAppDistribution(
     Utility to list releases and retrieve the latest release build version number from Firebase
     """
 
-    def __init__(self, credentials: Dict, project_number: Optional[str], project_id: Optional[str], **kwargs):
+    def __init__(
+        self,
+        credentials: Dict,
+        project_number: Optional[str] = None,
+        project_id: Optional[str] = None,
+        **kwargs,
+    ):
+        if not project_id and not project_number:
+            raise ValueError("Missing project_number")
         super().__init__(**kwargs)
         self.client = FirebaseClient(credentials)
-        if not project_id and not project_number:
-            raise FirebaseArgument.PROJECT_NUMBER.raise_argument_error()
         self._project_id = project_id
         self._project_number = project_number
+        if project_id:
+            _ = self.project_id  # Just to trigger deprecation warning
+
+    @property
+    @deprecated("0.53.5", 'Use "FirebaseAppDistribution.project_number" instead.')
+    def project_id(self):
+        return self.project_number
 
     @property
     def project_number(self):
         if not self._project_number:
-            message = (
-                "Deprecation warning! "
-                'Flag "--project-id" was deprecated in version 0.53.5 '
-                "and is subject for removal in future releases. "
-                'Use "--project-number" instead.'
-            )
-            self.logger.warning(cli.Colors.YELLOW(message))
             return self._project_id
         return self._project_number
 
@@ -54,11 +62,24 @@ class FirebaseAppDistribution(
         credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS.from_args(cli_args)
         if credentials_argument is None:
             raise FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS.raise_argument_error()
+        project_id = FirebaseArgument.PROJECT_ID.from_args(cli_args)
+        if project_id:
+            message = (
+                "Deprecation warning! "
+                f'Flag "{FirebaseArgument.get_flag(FirebaseArgument.PROJECT_ID)}" was deprecated in version 0.53.5 '
+                "and is subject for removal in future releases. "
+                f'Use "{FirebaseArgument.get_flag(FirebaseArgument.PROJECT_NUMBER)}" instead.'
+            )
+            log.get_logger(cls).warning(cli.Colors.YELLOW(message))
+
+        project_number = FirebaseArgument.PROJECT_NUMBER.from_args(cli_args)
+
+        if not project_id and not project_number:
+            raise FirebaseArgument.PROJECT_NUMBER.raise_argument_error()
 
         return FirebaseAppDistribution(
             credentials_argument.value,
-            FirebaseArgument.PROJECT_NUMBER.from_args(cli_args),
-            FirebaseArgument.PROJECT_ID.from_args(cli_args),
+            project_number=project_id or project_number,
             **cls._parent_class_kwargs(cli_args),
         )
 
