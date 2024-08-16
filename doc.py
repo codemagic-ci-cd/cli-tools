@@ -99,9 +99,7 @@ class ArgumentsSerializer:
             description = self._replace_quotes(description)
 
         kwargs = self._proccess_kwargs(getattr(arg._value_, "argparse_kwargs"))
-        mutually_exclusive_group = (
-            arg._value_.mutually_exclusive_group if arg._value_.mutually_exclusive_group else None
-        )
+        mutually_exclusive_group = arg._value_.mutually_exclusive_group
         required = mutually_exclusive_group.required if mutually_exclusive_group else kwargs.required
 
         return SerializedArgument(
@@ -325,7 +323,7 @@ class CommandUsageGenerator:
                 *map(self._get_formatted_flag, action.optional_args),
                 self._get_mutually_exclusive_group_formatted_flag(action.mutually_exclusive_args, False),
                 *map(self._get_formatted_flag, action.required_args),
-                self._get_mutually_exclusive_group_formatted_flag(action.mutually_exclusive_args),
+                self._get_mutually_exclusive_group_formatted_flag(action.mutually_exclusive_args, True),
                 *map(self._get_formatted_flag, reduce(operator.add, action.custom_args.values(), [])),
             ]
             if action
@@ -344,7 +342,10 @@ class CommandUsageGenerator:
     def _get_tool_arguments_and_flags(self) -> Iterable[str]:
         return [
             *map(self._get_formatted_flag, self.doc_generator.tool_required_args),
-            self._get_mutually_exclusive_group_formatted_flag(self.doc_generator.tool_mutually_exclusive_group_args),
+            self._get_mutually_exclusive_group_formatted_flag(
+                self.doc_generator.tool_mutually_exclusive_group_args,
+                True,
+            ),
             *map(self._get_formatted_flag, self.doc_generator.tool_optional_args),
             self._get_mutually_exclusive_group_formatted_flag(
                 self.doc_generator.tool_mutually_exclusive_group_args,
@@ -355,7 +356,7 @@ class CommandUsageGenerator:
     def _get_mutually_exclusive_group_formatted_flag(
         self,
         mutually_exclusive_args: List[SerializedArgument],
-        required: bool = True,
+        required: bool,
     ):
         serialized_mutually_exclusive_groups = defaultdict(list)
         for arg in mutually_exclusive_args:
@@ -388,11 +389,6 @@ class CommandUsageGenerator:
         elif arg.name:
             flag = f"{flag} {arg.name}"
         return flag
-
-    @classmethod
-    def _get_formatted_flag_for_arg(cls, arg: SerializedArgument) -> str:
-        flag = cls._get_formatted_flag_text(arg)
-        return flag if arg.required else f"[{flag}]"
 
 
 class Writer:
