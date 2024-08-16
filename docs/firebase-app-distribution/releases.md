@@ -7,12 +7,16 @@ releases
 ### Usage
 ```bash
 firebase-app-distribution releases [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --project-number PROJECT_NUMBER
+    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER) 
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     ACTION
 ```
-### Required arguments for command `firebase-app-distribution`
+### Required mutually exclusive arguments for command `firebase-app-distribution`
 
+##### `--project-id=PROJECT_ID`
+
+
+Deprecated on version 0.53.5. Use `--project-number` instead.
 ##### `--project-number, -p=PROJECT_NUMBER`
 
 

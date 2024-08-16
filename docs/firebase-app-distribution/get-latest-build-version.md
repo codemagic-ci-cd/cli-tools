@@ -7,7 +7,7 @@ get-latest-build-version
 ### Usage
 ```bash
 firebase-app-distribution get-latest-build-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    --project-number PROJECT_NUMBER
+    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER) 
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     --app-id APP_ID
 ```
@@ -17,8 +17,12 @@ firebase-app-distribution get-latest-build-version [-h] [--log-stream STREAM] [-
 
 
 Application ID in Firebase. For example `1:228333310124:ios:5e439e0d0231a788ac8f09`
-### Required arguments for command `firebase-app-distribution`
+### Required mutually exclusive arguments for command `firebase-app-distribution`
 
+##### `--project-id=PROJECT_ID`
+
+
+Deprecated on version 0.53.5. Use `--project-number` instead.
 ##### `--project-number, -p=PROJECT_NUMBER`
 
 
