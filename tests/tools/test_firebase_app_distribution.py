@@ -21,6 +21,7 @@ from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
+project_number_argument = FirebaseArgument.PROJECT_NUMBER
 project_id_argument = FirebaseArgument.PROJECT_ID
 
 
@@ -41,7 +42,8 @@ def register_args(cli_argument_group):
 def namespace_kwargs():
     ns_kwargs = {
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
-        project_id_argument.key: "228333310124",
+        project_number_argument.key: "228333310124",
+        project_id_argument.key: None,
     }
     for arg in FirebaseAppDistribution.CLASS_ARGUMENTS:
         if not hasattr(arg.type, "environment_variable_key"):
@@ -158,7 +160,7 @@ def app_identifier():
 
 @pytest.fixture
 def firebase_app_distribution(app_identifier):
-    return FirebaseAppDistribution({"type": "service_account"}, app_identifier.project_id)
+    return FirebaseAppDistribution({"type": "service_account"}, app_identifier.project_id, None)
 
 
 def test_list_releases(firebase_app_distribution, mock_releases_list, releases, app_identifier):

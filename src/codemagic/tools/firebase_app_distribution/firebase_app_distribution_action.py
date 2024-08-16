@@ -16,7 +16,7 @@ class FirebaseAppDistributionAction(ABC):
 
     @property
     @abstractmethod
-    def project_id(self):
+    def project_number(self):
         ...
 
     @classmethod

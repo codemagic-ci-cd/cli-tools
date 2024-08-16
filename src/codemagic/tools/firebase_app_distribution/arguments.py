@@ -4,13 +4,24 @@ from codemagic.google.resources import OrderBy
 
 from .argument_types import CredentialsArgument
 
+select_project_group = cli.MutuallyExclusiveGroup(
+    name="select project",
+    required=True,
+)
+
 
 class FirebaseArgument(cli.Argument):
     PROJECT_ID = cli.ArgumentProperties(
         key="project_id",
-        flags=("--project-id", "-p"),
-        description=f'Project ID in Firebase. For example `{Colors.WHITE("228333310124")}`',
-        argparse_kwargs={"required": True},
+        flags=("--project-id",),
+        description=f'Deprecated in version 0.53.5. Use `{Colors.BRIGHT_BLUE("--project-number")}` instead',
+        mutually_exclusive_group=select_project_group,
+    )
+    PROJECT_NUMBER = cli.ArgumentProperties(
+        key="project_number",
+        flags=("--project-number", "-p"),
+        description=f'Project number in Firebase. For example `{Colors.WHITE("228333310124")}`',
+        mutually_exclusive_group=select_project_group,
     )
     FIREBASE_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key="credentials",
