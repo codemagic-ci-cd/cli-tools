@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.53.5"
+version = "0.53.6"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
