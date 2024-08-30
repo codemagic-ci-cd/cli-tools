@@ -44,3 +44,12 @@ def test_context_manager(is_graceful_before):
         with pytest.raises(ValueError):
             MockEnum("invalid value")
     assert ResourceEnumMeta.graceful_fallback is is_graceful_before
+
+
+def test_graceful_fallback_identity():
+    ResourceEnumMeta.graceful_fallback = True
+    e1 = MockEnum("undefined-value")
+    e2 = MockEnum("undefined-value")
+    assert e1 is e2  # Enumerations with the same value should persist identity
+    assert e1 == e2  # Enumerations with the same value should be equal
+    assert e1.value == e2.value  # And of course their values should also be equal
