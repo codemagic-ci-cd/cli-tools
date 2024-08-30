@@ -28,7 +28,7 @@ app-store-connect app-store-versions localizations [-h] [--log-stream STREAM] [-
 UUID value of the App Store Version
 ### Optional arguments for action `localizations`
 
-##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `--locale, -l=ar-SA | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | he | hi | hr | hu | id | it | ja | ko | ms | nl-NL | no | pl | pt-BR | pt-PT | ro | ru | sk | sv | th | tr | uk | zh-Hans | zh-Hant`
 
 
 The locale code name for App Store metadata in different languages. See available locale code names from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes. Multiple arguments

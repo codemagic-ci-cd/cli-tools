@@ -3,7 +3,6 @@ from __future__ import annotations
 import contextlib
 import enum
 import re
-from typing import Any
 from typing import Dict
 from typing import Tuple
 
@@ -24,7 +23,7 @@ class ResourceEnumMeta(enum.EnumMeta):
     graceful_fallback = True
     enable_name_transformation = False
 
-    __graceful_fallback_cache: Dict[Tuple[str, Any], Any] = {}
+    __graceful_fallback_cache: Dict[Tuple[str, str], str] = {}
 
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
         try:
