@@ -434,37 +434,47 @@ class ReviewSubmissionItemState(ResourceEnum):
 
 class Locale(ResourceEnum):
     """
-    Referenced in https://developer.apple.com/documentation/appstoreconnectapi/betaapplocalization/attributes#discussion
+    https://developer.apple.com/documentation/appstoreconnectapi/app_store/app_metadata/app_info_localizations/managing_metadata_in_your_app_by_using_locale_shortcodes
     """
 
-    DA = "da"
-    DE_DE = "de-DE"
-    EL = "el"
-    EN_AU = "en-AU"
-    EN_CA = "en-CA"
-    EN_GB = "en-GB"
-    EN_US = "en-US"
-    ES_ES = "es-ES"
-    ES_MX = "es-MX"
-    FI = "fi"
-    FR_CA = "fr-CA"
-    FR_FR = "fr-FR"
-    ID = "id"
-    IT = "it"
-    JA = "ja"
-    KO = "ko"
-    MS = "ms"
-    NL_NL = "nl-NL"
-    NO = "no"
-    PT_BR = "pt-BR"
-    PT_PT = "pt-PT"
-    RU = "ru"
-    SV = "sv"
-    TH = "th"
-    TR = "tr"
-    VI = "vi"
-    ZH_HANS = "zh-Hans"
-    ZH_HANT = "zh-Hant"
+    AR_SA = "ar-SA"  # Arabic
+    CA = "ca"  # Catalan
+    CS = "cs"  # Czech
+    DA = "da"  # Danish
+    DE_DE = "de-DE"  # German
+    EL = "el"  # Greek
+    EN_AU = "en-AU"  # English (Australia)
+    EN_CA = "en-CA"  # English (Canada)
+    EN_GB = "en-GB"  # English (U.K.)
+    EN_US = "en-US"  # English (U.S.)
+    ES_ES = "es-ES"  # Spanish (Spain)
+    ES_MX = "es-MX"  # Spanish (Mexico)
+    FI = "fi"  # Finnish
+    FR_CA = "fr-CA"  # French (Canada)
+    FR_FR = "fr-FR"  # French
+    HE = "he"  # Hebrew
+    HI = "hi"  # Hindi
+    HR = "hr"  # Croatian
+    HU = "hu"  # Hungarian
+    ID = "id"  # Indonesian
+    IT = "it"  # Italian
+    JA = "ja"  # Japanese
+    KO = "ko"  # Korean
+    MS = "ms"  # Malay
+    NL_NL = "nl-NL"  # Dutch
+    NO = "no"  # Norwegian
+    PL = "pl"  # Polish
+    PT_BR = "pt-BR"  # Portuguese (Brazil)
+    PT_PT = "pt-PT"  # Portuguese (Portugal)
+    RO = "ro"  # Romanian
+    RU = "ru"  # Russian
+    SK = "sk"  # Slovak
+    SV = "sv"  # Swedish
+    TH = "th"  # Thai
+    TR = "tr"  # Turkish
+    UK = "uk"  # Ukrainian
+    ZH_HANS = "zh-Hans"  # Chinese (Simplified)
+    ZH_HANT = "zh-Hant"  # Chinese (Traditional)
 
 
 class SubscriptionStatusUrlVersion(ResourceEnum):

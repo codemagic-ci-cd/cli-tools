@@ -28,7 +28,7 @@ app-store-connect beta-build-localizations list [-h] [--log-stream STREAM] [--no
 Alphanumeric ID value of the Build
 ### Optional arguments for action `list`
 
-##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `--locale, -l=ar-SA | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | he | hi | hr | hu | id | it | ja | ko | ms | nl-NL | no | pl | pt-BR | pt-PT | ro | ru | sk | sv | th | tr | uk | zh-Hans | zh-Hant`
 
 
 The locale code name for displaying localized "What's new" content in TestFlight. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes

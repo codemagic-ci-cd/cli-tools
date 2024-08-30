@@ -1,3 +1,21 @@
+Version 0.53.6
+-------------
+
+**Features**
+- Update tool `app-store-connect` to support all Apple's [locales](https://developer.apple.com/documentation/appstoreconnectapi/app_store/app_metadata/app_info_localizations/managing_metadata_in_your_app_by_using_locale_shortcodes). [PR #425](https://github.com/codemagic-ci-cd/cli-tools/pull/425)
+
+**Bugfixes**
+- Cache generated fallback enumeration types so that enum identity checks work for undefined, but allowed enumerations. [PR #425](https://github.com/codemagic-ci-cd/cli-tools/pull/425)
+
+**Docs**
+- Update documentations for the following actions: [PR #425](https://github.com/codemagic-ci-cd/cli-tools/pull/425)
+  - `app-store-connect app-store-versions localizations`,
+  - `app-store-connect beta-build-localizations create`,
+  - `app-store-connect beta-build-localizations list`,
+  - `app-store-connect builds add-beta-test-info`,
+  - `app-store-connect builds submit-to-app-store`,
+  - `app-store-connect publish`.
+
 Version 0.53.5
 -------------
 

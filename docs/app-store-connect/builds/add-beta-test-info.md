@@ -34,7 +34,7 @@ Alphanumeric ID value of the Build
 
 
 Localized beta test info for what's new in the uploaded build as a JSON encoded list. For example, `[{"locale": "en-US", "whats_new": "What's new in English"}]`. See `--locale` for possible locale options. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_BETA_BUILD_LOCALIZATIONS`. Alternatively to entering `BETA_BUILD_LOCALIZATIONS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
-##### `--locale, -l=da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | id | it | ja | ko | ms | nl-NL | no | pt-BR | pt-PT | ru | sv | th | tr | vi | zh-Hans | zh-Hant`
+##### `--locale, -l=ar-SA | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | he | hi | hr | hu | id | it | ja | ko | ms | nl-NL | no | pl | pt-BR | pt-PT | ro | ru | sk | sv | th | tr | uk | zh-Hans | zh-Hant`
 
 
 The locale code name for displaying localized "What's new" content in TestFlight. In case not provided, application's primary locale from test information is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes

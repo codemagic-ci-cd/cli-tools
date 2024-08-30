@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import contextlib
 import enum
 import re
+from typing import Dict
+from typing import Tuple
 
 from codemagic.utilities import log
 
@@ -19,6 +23,8 @@ class ResourceEnumMeta(enum.EnumMeta):
     graceful_fallback = True
     enable_name_transformation = False
 
+    __graceful_fallback_cache: Dict[Tuple[str, str], str] = {}
+
     def __call__(cls, value, *args, **kwargs):  # noqa: N805
         try:
             return super().__call__(value, *args, **kwargs)
@@ -29,10 +35,20 @@ class ResourceEnumMeta(enum.EnumMeta):
             logger = log.get_logger(cls, log_to_stream=False)
             logger.warning("Undefined Resource enumeration: %s", ve)
             try:
-                enum_class = ResourceEnum(f"Graceful{cls.__name__}", {value: value})
-                return enum_class(value)
+                return cls._create_graceful_fallback_instance(value)
             except TypeError:
                 raise ve
+
+    def _create_graceful_fallback_instance(cls, value):  # noqa: N805
+        cache_key = (cls.__name__, value)
+
+        try:
+            enum_class = cls.__graceful_fallback_cache[cache_key]
+        except KeyError:
+            enum_class = ResourceEnum(f"Graceful{cls.__name__}", {value: value})
+            cls.__graceful_fallback_cache[cache_key] = enum_class
+
+        return enum_class(value)
 
     def _transform_class_name(cls):  # noqa: N805
         """
