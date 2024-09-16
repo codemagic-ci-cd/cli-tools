@@ -1,4 +1,4 @@
-Version 0.53.6
+Version 0.53.7
 -------------
 
 **Bugfixes**
