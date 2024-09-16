@@ -1,3 +1,9 @@
+Version 0.53.7
+-------------
+
+**Bugfixes**
+- Fix saving Apple code signing certificates to disk when using LibreSSL 3.0.0+. [PR #427](https://github.com/codemagic-ci-cd/cli-tools/pull/427)
+
 Version 0.53.6
 -------------
 
