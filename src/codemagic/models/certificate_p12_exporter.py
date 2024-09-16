@@ -54,6 +54,9 @@ class _OpenSsl:
                 capture_output=True,
                 check=False,
             )
+            # Check both stdout and stderr because LibreSSL doesn't have help commands per-se.
+            # Execution fails, and it just outputs "unknown option '-help'" along with full
+            # command usage to stderr.
             self.__SUPPORTS_NOENC__ = b"-noenc" in completed_process.stdout or b"-noenc" in completed_process.stderr
 
         return self.__SUPPORTS_NOENC__
