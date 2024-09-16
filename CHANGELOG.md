@@ -1,6 +1,12 @@
 Version 0.53.6
 -------------
 
+**Bugfixes**
+- Fix saving Apple code signing certificates to disk when using LibreSSL 3.0.0+. [PR #427](https://github.com/codemagic-ci-cd/cli-tools/pull/427)
+
+Version 0.53.6
+-------------
+
 **Features**
 - Update tool `app-store-connect` to support all Apple's [locales](https://developer.apple.com/documentation/appstoreconnectapi/app_store/app_metadata/app_info_localizations/managing_metadata_in_your_app_by_using_locale_shortcodes). [PR #425](https://github.com/codemagic-ci-cd/cli-tools/pull/425)
 
