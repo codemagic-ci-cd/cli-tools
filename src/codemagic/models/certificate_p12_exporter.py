@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import pathlib
-import re
 import shutil
 import subprocess
 import tempfile
@@ -16,7 +15,6 @@ from typing import Union
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives._serialization import PrivateFormat
 from cryptography.hazmat.primitives.serialization import pkcs12
-from packaging.version import Version
 
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
@@ -29,6 +27,8 @@ if TYPE_CHECKING:
 
 
 class _OpenSsl:
+    __SUPPORTS_NOENC__: Optional[bool] = None
+
     def __init__(self):
         self._executable = shutil.which("openssl")
 
@@ -36,32 +36,33 @@ class _OpenSsl:
         if self._executable is None:
             raise IOError("OpenSSL executable is not present on system")
 
-    def get_version(self) -> Optional[Version]:
-        if not self._executable:
-            return None
+    def _is_noenc_flag_supported(self) -> bool:
+        """
+        OpenSSL version 3.0.0 deprecated option `-nodes` for disabling encryption
+        when invoking `openssl pkcs12`. It is replaced with `-noenc`.
+        See https://www.openssl.org/docs/man3.0/man1/openssl-pkcs12.html
 
-        try:
-            version_output = subprocess.check_output([self._executable, "version"])
-        except subprocess.CalledProcessError:
-            version_output = b""
+        Vanilla macOS (at least up to version 14.6) however still bundles `openssl`
+        executable that is using LibreSSL version that does not support `-noenc`.
 
-        version_match = re.search(r"\d+\.\d+\.\d+", version_output.decode(errors="ignore"))
-        if not version_match:
-            return None
+        Check the `-noenc` support by just parsing help message.
+        """
 
-        return Version(version_match.group())
+        if self.__SUPPORTS_NOENC__ is None:
+            completed_process = subprocess.run(
+                (self._executable, "pkcs12", "-help"),
+                capture_output=True,
+                check=False,
+            )
+            self.__SUPPORTS_NOENC__ = b"-noenc" in completed_process.stdout or b"-noenc" in completed_process.stderr
+
+        return self.__SUPPORTS_NOENC__
 
     @property
     def no_encryption_flag(self) -> Literal["-nodes", "-noenc"]:
-        # Starting from OpenSSL version 3.0.0 `-nodes` is deprecated for disabling encryption
-        # when invoking `openssl pkcs12`. It is replaced with `-noenc`.
-        # See https://www.openssl.org/docs/man3.0/man1/openssl-pkcs12.html
-
-        openssl_version = self.get_version()
-        if openssl_version and openssl_version < Version("3.0.0"):
-            # Use legacy flag only if we are sure that the version is earlier than 3.0.0
-            return "-nodes"
-        return "-noenc"
+        if self._is_noenc_flag_supported():
+            return "-noenc"
+        return "-nodes"
 
 
 class P12Exporter(RunningCliAppMixin, StringConverterMixin):
