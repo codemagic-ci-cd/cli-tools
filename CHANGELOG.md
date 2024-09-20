@@ -1,3 +1,9 @@
+Version 0.53.8
+-------------
+
+**Bugfixes**
+- Fix action `keychain add-certificates` on macOS 15.0. [PR #428](https://github.com/codemagic-ci-cd/cli-tools/pull/428)
+
 Version 0.53.7
 -------------
 
