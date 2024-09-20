@@ -1,3 +1,9 @@
+Version 0.53.9
+-------------
+
+**Development**
+- Change release pipeline not to include source distributions in PyPI releases. Those are still available from GitHub. [PR #429](https://github.com/codemagic-ci-cd/cli-tools/pull/429)
+
 Version 0.53.8
 -------------
 
