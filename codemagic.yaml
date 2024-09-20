@@ -84,6 +84,7 @@ workflows:
           rm dist/codemagic_cli_tools-latest-py3-none-any.whl
       - name: Publish release to PyPI Test environment
         script: |
+          rm dist/codemagic_cli_tools-*.tar.gz
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry publish \
             --repository test-pypi \
@@ -127,5 +128,7 @@ workflows:
               dist/codemagic*.tar.gz
           rm dist/codemagic_cli_tools-latest-py3-none-any.whl
       - name: Publish release to PyPI
-        script: poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
+        script: |
+          rm dist/codemagic_cli_tools-*.tar.gz
+          poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
     artifacts: *artifacts
