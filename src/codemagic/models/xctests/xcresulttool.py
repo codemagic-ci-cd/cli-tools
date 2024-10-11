@@ -12,6 +12,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Union
 
 from packaging.version import Version
 
@@ -68,6 +69,16 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
         return version >= Version("23021")
 
     @classmethod
+    def is_legacy(cls) -> bool:
+        """
+        From Xcode 16.0 xcresulttool CLI API was changed
+        """
+        version = cls.get_tool_version()
+        if not version:
+            return False
+        return version < Version("23021")
+
+    @classmethod
     def get_bundle(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
         cmd_args: List[CommandArg] = [
             "xcrun",
@@ -103,6 +114,50 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
             cmd_args.append("--legacy")
 
         stdout = cls._run_command(cmd_args, f"Failed to get result bundle object {object_id} from {xcresult}")
+        return json.loads(stdout)
+
+    @classmethod
+    def get_test_report_summary(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
+        cmd_args: List[CommandArg] = [
+            "xcrun",
+            "xcresulttool",
+            "get",
+            "test-results",
+            "summary",
+            "--path",
+            xcresult.expanduser(),
+        ]
+        stdout = cls._run_command(cmd_args, f"Failed to get tests from test report {xcresult}")
+        return json.loads(stdout)
+
+    @classmethod
+    def get_test_report_test_details(cls, xcresult: pathlib.Path, test_id: Union[int, str]) -> Dict:
+        cmd_args: List[CommandArg] = [
+            "xcrun",
+            "xcresulttool",
+            "get",
+            "test-results",
+            "test-details",
+            "--path",
+            xcresult.expanduser(),
+            "--test-id",
+            str(test_id),
+        ]
+        stdout = cls._run_command(cmd_args, f"Failed to get test details from test report {xcresult}")
+        return json.loads(stdout)
+
+    @classmethod
+    def get_test_report_tests(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
+        cmd_args: List[CommandArg] = [
+            "xcrun",
+            "xcresulttool",
+            "get",
+            "test-results",
+            "tests",
+            "--path",
+            xcresult.expanduser(),
+        ]
+        stdout = cls._run_command(cmd_args, f"Failed to get tests from test report {xcresult}")
         return json.loads(stdout)
 
     @classmethod

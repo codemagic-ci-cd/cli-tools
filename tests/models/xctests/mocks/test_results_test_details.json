@@ -1,0 +1,45 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "D4A58F38-8890-43BE-93F9-3D268010475D",
+      "deviceName" : "iPhone SE (3rd generation)",
+      "modelName" : "iPhone SE (3rd generation)",
+      "osVersion" : "18.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "duration" : "Ran for 2,6 seconds",
+  "hasMediaAttachments" : false,
+  "hasPerformanceMetrics" : false,
+  "startTime" : 1728473285.429,
+  "testDescription" : "Test case with 1 run",
+  "testIdentifier" : "banaanUITests/testUIExample()",
+  "testName" : "testUIExample()",
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ],
+  "testResult" : "Passed",
+  "testRuns" : [
+    {
+      "children" : [
+        {
+          "duration" : "2s",
+          "name" : "Test Scheme Action",
+          "nodeIdentifier" : "1",
+          "nodeType" : "Test Plan Configuration",
+          "result" : "Passed"
+        }
+      ],
+      "details" : "iOS Simulator 18.0",
+      "duration" : "2s",
+      "name" : "iPhone SE (3rd generation)",
+      "nodeIdentifier" : "D4A58F38-8890-43BE-93F9-3D268010475D",
+      "nodeType" : "Device",
+      "result" : "Passed"
+    }
+  ]
+}
