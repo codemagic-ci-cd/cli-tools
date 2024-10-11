@@ -1,4 +1,4 @@
-import pathlib
+from typing import List
 from unittest import mock
 
 import pytest
@@ -6,15 +6,9 @@ from codemagic.models.junit import Failure
 from codemagic.models.junit import Property
 from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
-from codemagic.models.junit import TestSuite
 from codemagic.models.junit import TestSuites
 from codemagic.models.xctests import XcResultTool
 from codemagic.models.xctests.converter import Xcode16XcResultConverter
-
-
-@pytest.fixture
-def xcresult() -> pathlib.Path:
-    return pathlib.Path(__file__).parent / "mocks" / "Test.xcresult"
 
 
 def _get_test_report_tests(_):
@@ -221,153 +215,116 @@ def _get_test_report_summary(_):
     }
 
 
+@pytest.fixture
+def expected_device_properties() -> List[Property]:
+    return [
+        Property(name="device_architecture", value="arm64"),
+        Property(name="device_identifier", value="D4A58F38-8890-43BE-93F9-3D268010475D"),
+        Property(name="device_name", value="iPhone SE (3rd generation)"),
+        Property(name="device_operating_system", value="18.0"),
+        Property(name="device_platform", value="iOS Simulator"),
+    ]
+
+
 @mock.patch.object(XcResultTool, "get_test_report_tests", _get_test_report_tests)
 @mock.patch.object(XcResultTool, "get_test_report_summary", _get_test_report_summary)
-def test_converter(xcresult):
-    test_suites: TestSuites = Xcode16XcResultConverter(xcresult).convert()
+def test_converter(expected_device_properties):
+    test_suites: TestSuites = Xcode16XcResultConverter(...).convert()
 
-    expected_test_suites = TestSuites(
-        name="Test - banaan",
-        test_suites=[
-            TestSuite(
-                name="banaanTests [iOS 18.0 iPhone SE (3rd generation)]",
-                tests=6,
-                disabled=0,
-                errors=0,
-                failures=2,
-                package="banaanTests",
-                skipped=1,
-                time=0.46875,
-                timestamp="2024-10-09T14:28:25",
-                properties=[
-                    Property(name="device_architecture", value="arm64"),
-                    Property(name="device_identifier", value="D4A58F38-8890-43BE-93F9-3D268010475D"),
-                    Property(name="device_name", value="iPhone SE (3rd generation)"),
-                    Property(name="device_operating_system", value="18.0"),
-                    Property(name="device_platform", value="iOS Simulator"),
-                    Property(name="ended_time", value="2024-10-09T14:28:25"),
-                    Property(name="started_time", value="2024-10-09T14:27:02"),
-                    Property(name="title", value="banaanTests"),
-                ],
-                testcases=[
-                    TestCase(
-                        classname="banaanTests",
-                        name="testDisabledExample()",
-                        assertions=None,
-                        status="Passed",
-                        time=0.0011,
-                        error=None,
-                        failure=None,
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanTests",
-                        name="testExample()",
-                        assertions=None,
-                        status="Passed",
-                        time=0.00045,
-                        error=None,
-                        failure=None,
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanTests",
-                        name="testExceptionExample()",
-                        assertions=None,
-                        status="Failed",
-                        time=0.2,
-                        error=None,
-                        failure=Failure(
-                            message='banaanTests.swift:50: failed: caught error: "badInput"',
-                            type="Error",
-                            failure_description=None,
-                        ),
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanTests",
-                        name="testFailExample()",
-                        assertions=None,
-                        status="Failed",
-                        time=0.002,
-                        error=None,
-                        failure=Failure(
-                            message="banaanTests.swift:44: failed - This won't make the cut",
-                            type="Failure",
-                            failure_description=None,
-                        ),
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanTests",
-                        name="testPerformanceExample()",
-                        assertions=None,
-                        status="Passed",
-                        time=0.26,
-                        error=None,
-                        failure=None,
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanTests",
-                        name="testSkippedExample()",
-                        assertions=None,
-                        status="Skipped",
-                        time=0.0052,
-                        error=None,
-                        failure=None,
-                        skipped=Skipped(message="Test skipped - This test is skipped"),
-                    ),
-                ],
-            ),
-            TestSuite(
-                name="banaanUITests [iOS 18.0 iPhone SE (3rd generation)]",
-                tests=2,
-                disabled=0,
-                errors=0,
-                failures=1,
-                package="banaanUITests",
-                skipped=0,
-                time=5.0,
-                timestamp="2024-10-09T14:28:25",
-                properties=[
-                    Property(name="device_architecture", value="arm64"),
-                    Property(name="device_identifier", value="D4A58F38-8890-43BE-93F9-3D268010475D"),
-                    Property(name="device_name", value="iPhone SE (3rd generation)"),
-                    Property(name="device_operating_system", value="18.0"),
-                    Property(name="device_platform", value="iOS Simulator"),
-                    Property(name="ended_time", value="2024-10-09T14:28:25"),
-                    Property(name="started_time", value="2024-10-09T14:27:02"),
-                    Property(name="title", value="banaanUITests"),
-                ],
-                testcases=[
-                    TestCase(
-                        classname="banaanUITests",
-                        name="testUIExample()",
-                        assertions=None,
-                        status="Passed",
-                        time=2.0,
-                        error=None,
-                        failure=None,
-                        skipped=None,
-                    ),
-                    TestCase(
-                        classname="banaanUITests",
-                        name="testUIFailExample()",
-                        assertions=None,
-                        status="Failed",
-                        time=3.0,
-                        error=None,
-                        failure=Failure(
-                            message="banaanUITests.swift:40: failed - Bad UI",
-                            type="Failure",
-                            failure_description=None,
-                        ),
-                        skipped=None,
-                    ),
-                ],
-            ),
-        ],
+    assert test_suites.name == "Test - banaan"
+    assert test_suites.disabled == 0
+    assert test_suites.errors == 0
+    assert test_suites.failures == 3
+    assert test_suites.skipped == 1
+    assert test_suites.tests == 8
+    assert test_suites.time == 5.46875
+    assert len(test_suites.test_suites) == 2
+
+    ts = test_suites.test_suites[0]  # Unit tests testsuite assertions
+    assert ts.disabled == 0
+    assert ts.errors == 0
+    assert ts.failures == 2
+    assert ts.name == "banaanTests [iOS 18.0 iPhone SE (3rd generation)]"
+    assert ts.package == "banaanTests"
+    assert ts.skipped == 1
+    assert ts.tests == 6
+    assert ts.time == 0.46875
+    assert ts.timestamp == "2024-10-09T14:28:25"
+    assert ts.properties == [
+        *expected_device_properties,
+        Property(name="ended_time", value="2024-10-09T14:28:25"),
+        Property(name="started_time", value="2024-10-09T14:27:02"),
+        Property(name="title", value="banaanTests"),
+    ]
+    assert len(ts.testcases) == 6
+    assert ts.testcases[0] == TestCase(
+        classname="banaanTests",
+        name="testDisabledExample()",
+        status="Passed",
+        time=0.0011,
+    )
+    assert ts.testcases[1] == TestCase(
+        classname="banaanTests",
+        name="testExample()",
+        status="Passed",
+        time=0.00045,
+    )
+    assert ts.testcases[2] == TestCase(
+        classname="banaanTests",
+        name="testExceptionExample()",
+        status="Failed",
+        time=0.2,
+        failure=Failure(message='banaanTests.swift:50: failed: caught error: "badInput"', type="Error"),
+    )
+    assert ts.testcases[3] == TestCase(
+        classname="banaanTests",
+        name="testFailExample()",
+        status="Failed",
+        time=0.002,
+        failure=Failure(message="banaanTests.swift:44: failed - This won't make the cut", type="Failure"),
+    )
+    assert ts.testcases[4] == TestCase(
+        classname="banaanTests",
+        name="testPerformanceExample()",
+        status="Passed",
+        time=0.26,
+    )
+    assert ts.testcases[5] == TestCase(
+        classname="banaanTests",
+        name="testSkippedExample()",
+        status="Skipped",
+        time=0.0052,
+        skipped=Skipped(message="Test skipped - This test is skipped"),
     )
 
-    assert test_suites == expected_test_suites
+    ts = test_suites.test_suites[1]  # UI tests testsuite assertions
+    assert ts.disabled == 0
+    assert ts.errors == 0
+    assert ts.failures == 1
+    assert ts.name == "banaanUITests [iOS 18.0 iPhone SE (3rd generation)]"
+    assert ts.package == "banaanUITests"
+    assert ts.skipped == 0
+    assert ts.tests == 2
+    assert ts.time == 5.0
+    assert ts.timestamp == "2024-10-09T14:28:25"
+    assert ts.properties == [
+        *expected_device_properties,
+        Property(name="ended_time", value="2024-10-09T14:28:25"),
+        Property(name="started_time", value="2024-10-09T14:27:02"),
+        Property(name="title", value="banaanUITests"),
+    ]
+
+    assert len(ts.testcases) == 2
+    assert ts.testcases[0] == TestCase(
+        classname="banaanUITests",
+        name="testUIExample()",
+        status="Passed",
+        time=2.0,
+    )
+    assert ts.testcases[1] == TestCase(
+        classname="banaanUITests",
+        name="testUIFailExample()",
+        status="Failed",
+        time=3.0,
+        failure=Failure(message="banaanUITests.swift:40: failed - Bad UI", type="Failure"),
+    )
