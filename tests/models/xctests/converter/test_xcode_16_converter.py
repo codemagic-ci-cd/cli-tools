@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone
 from typing import List
 from unittest import mock
 
@@ -216,19 +218,24 @@ def _get_test_report_summary(_):
 
 
 @pytest.fixture
-def expected_device_properties() -> List[Property]:
+def expected_properties() -> List[Property]:
     return [
         Property(name="device_architecture", value="arm64"),
         Property(name="device_identifier", value="D4A58F38-8890-43BE-93F9-3D268010475D"),
         Property(name="device_name", value="iPhone SE (3rd generation)"),
         Property(name="device_operating_system", value="18.0"),
         Property(name="device_platform", value="iOS Simulator"),
+        Property(name="ended_time", value="2024-10-15T00:00:00"),
+        Property(name="started_time", value="2024-10-15T00:00:00"),
     ]
 
 
 @mock.patch.object(XcResultTool, "get_test_report_tests", _get_test_report_tests)
 @mock.patch.object(XcResultTool, "get_test_report_summary", _get_test_report_summary)
-def test_converter(expected_device_properties):
+@mock.patch("codemagic.models.xctests.converter.datetime")
+def test_converter(mock_datetime, expected_properties):
+    mock_datetime.fromtimestamp.return_value = datetime(2024, 10, 15, tzinfo=timezone.utc)
+
     test_suites: TestSuites = Xcode16XcResultConverter(...).convert()
 
     assert test_suites.name == "Test - banaan"
@@ -249,13 +256,8 @@ def test_converter(expected_device_properties):
     assert ts.skipped == 1
     assert ts.tests == 6
     assert ts.time == 0.46875
-    assert ts.timestamp == "2024-10-09T14:28:25"
-    assert ts.properties == [
-        *expected_device_properties,
-        Property(name="ended_time", value="2024-10-09T14:28:25"),
-        Property(name="started_time", value="2024-10-09T14:27:02"),
-        Property(name="title", value="banaanTests"),
-    ]
+    assert ts.timestamp == "2024-10-15T00:00:00"
+    assert ts.properties == [*expected_properties, Property(name="title", value="banaanTests")]
     assert len(ts.testcases) == 6
     assert ts.testcases[0] == TestCase(
         classname="banaanTests",
@@ -306,13 +308,8 @@ def test_converter(expected_device_properties):
     assert ts.skipped == 0
     assert ts.tests == 2
     assert ts.time == 5.0
-    assert ts.timestamp == "2024-10-09T14:28:25"
-    assert ts.properties == [
-        *expected_device_properties,
-        Property(name="ended_time", value="2024-10-09T14:28:25"),
-        Property(name="started_time", value="2024-10-09T14:27:02"),
-        Property(name="title", value="banaanUITests"),
-    ]
+    assert ts.timestamp == "2024-10-15T00:00:00"
+    assert ts.properties == [*expected_properties, Property(name="title", value="banaanUITests")]
 
     assert len(ts.testcases) == 2
     assert ts.testcases[0] == TestCase(
