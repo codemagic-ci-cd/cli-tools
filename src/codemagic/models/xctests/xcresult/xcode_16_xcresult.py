@@ -299,7 +299,8 @@ class XcTestRunAction(XcTestNode):
     duration: str
     node_identifier: str
 
-    __literal_attribute_name_mapping__ = XcTestNode.__literal_attribute_name_mapping__ | {
+    __literal_attribute_name_mapping__ = {
+        **XcTestNode.__literal_attribute_name_mapping__,
         "duration": "duration",
         "node_identifier": "nodeIdentifier",
     }
@@ -384,7 +385,8 @@ class XcTestRun(XcTestNode):
     duration: str
     node_identifier: str
 
-    __literal_attribute_name_mapping__ = XcTestNode.__literal_attribute_name_mapping__ | {
+    __literal_attribute_name_mapping__ = {
+        **XcTestNode.__literal_attribute_name_mapping__,
         "details": "details",
         "duration": "duration",
         "node_identifier": "nodeIdentifier",
