@@ -4,7 +4,7 @@ from typing import List
 from unittest import mock
 
 import pytest
-from codemagic.models.junit import Failure
+from codemagic.models.junit import Error
 from codemagic.models.junit import Property
 from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
@@ -276,14 +276,14 @@ def test_converter(mock_datetime, expected_properties):
         name="testExceptionExample()",
         status="Failed",
         time=0.2,
-        failure=Failure(message='banaanTests.swift:50: failed: caught error: "badInput"', type="Error"),
+        error=Error(message='banaanTests.swift:50: failed: caught error: "badInput"', type="Error"),
     )
     assert ts.testcases[3] == TestCase(
         classname="banaanTests",
         name="testFailExample()",
         status="Failed",
         time=0.002,
-        failure=Failure(message="banaanTests.swift:44: failed - This won't make the cut", type="Failure"),
+        error=Error(message="banaanTests.swift:44: failed - This won't make the cut", type="Failure"),
     )
     assert ts.testcases[4] == TestCase(
         classname="banaanTests",
@@ -323,5 +323,5 @@ def test_converter(mock_datetime, expected_properties):
         name="testUIFailExample()",
         status="Failed",
         time=3.0,
-        failure=Failure(message="banaanUITests.swift:40: failed - Bad UI", type="Failure"),
+        error=Error(message="banaanUITests.swift:40: failed - Bad UI", type="Failure"),
     )
