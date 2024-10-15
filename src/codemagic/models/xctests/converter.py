@@ -212,15 +212,15 @@ class Xcode16XcResultConverter(XcResultConverter):
         return name or device_info
 
     @classmethod
-    def _get_test_case_failure(cls, xc_test_case: XcTestCase) -> Optional[Failure]:
+    def _get_test_case_error(cls, xc_test_case: XcTestCase) -> Optional[Error]:
         if not xc_test_case.is_failed():
             return None
 
         messages = xc_test_case.get_failure_messages()
-        return Failure(
+        return Error(
             message=messages[0] if messages else "",
             type="Error" if any("caught error" in m for m in messages) else "Failure",
-            failure_description="\n".join(messages) if len(messages) > 1 else None,
+            error_description="\n".join(messages) if len(messages) > 1 else None,
         )
 
     @classmethod
@@ -235,7 +235,7 @@ class Xcode16XcResultConverter(XcResultConverter):
         return TestCase(
             name=xc_test_case.get_method_name(),
             classname=xc_test_case.get_classname(),
-            failure=cls._get_test_case_failure(xc_test_case),
+            error=cls._get_test_case_error(xc_test_case),
             time=xc_test_case.get_duration(),
             status=xc_test_case.result,
             skipped=cls._get_test_case_skipped(xc_test_case),
