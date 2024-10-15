@@ -22,6 +22,8 @@ from codemagic.mixins import StringConverterMixin
 from codemagic.utilities import log
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from codemagic.cli import CliApp
 
 
@@ -57,21 +59,10 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
         return Version(match.group("version"))
 
     @classmethod
-    def _requires_legacy_flag(cls) -> bool:
-        """
-        Starting from Xcode 16 beta 3 'xcresulttool get --format json' has been deprecated and
-        cannot be used without '--legacy' flag.
-        """
-
-        version = cls.get_tool_version()
-        if not version:
-            return False
-        return version >= Version("23021")
-
-    @classmethod
     def is_legacy(cls) -> bool:
         """
-        From Xcode 16.0 xcresulttool CLI API was changed
+        With Xcode 16.0 `xcresulttool get` API was changed. Check if activated
+        xcresulttool is from Xcode 16.0+ (not legacy) or otherwise (is legacy).
         """
         version = cls.get_tool_version()
         if not version:
@@ -79,7 +70,20 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
         return version < Version("23021")
 
     @classmethod
+    def _get_legacy_method_error_message(cls, method_name: Literal["get_bundle", "get_object"]) -> str:
+        return (
+            f"XcResultTool.{method_name} is deprecated using selected Xcode version. "
+            "Use updated xcresulttool bindings XcResultTool.get_test_report_summary, "
+            "XcResultTool.get_test_report_test_details or "
+            "XcResultTool.get_test_report_tests instead"
+        )
+
+    @classmethod
     def get_bundle(cls, xcresult: pathlib.Path) -> Dict[str, Any]:
+        if not cls.is_legacy():
+            # Prohibit legacy API usage with non-legacy xcresulttool
+            raise RuntimeError(cls._get_legacy_method_error_message("get_bundle"))
+
         cmd_args: List[CommandArg] = [
             "xcrun",
             "xcresulttool",
@@ -90,14 +94,15 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
             xcresult.expanduser(),
         ]
 
-        if cls._requires_legacy_flag():
-            cmd_args.append("--legacy")
-
         stdout = cls._run_command(cmd_args, f"Failed to get result bundle object from {xcresult}")
         return json.loads(stdout)
 
     @classmethod
     def get_object(cls, xcresult: pathlib.Path, object_id: str) -> Dict[str, Any]:
+        if not cls.is_legacy():
+            # Prohibit legacy API usage with non-legacy xcresulttool
+            raise RuntimeError(cls._get_legacy_method_error_message("get_object"))
+
         cmd_args: List[CommandArg] = [
             "xcrun",
             "xcresulttool",
@@ -109,9 +114,6 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
             "--id",
             object_id,
         ]
-
-        if cls._requires_legacy_flag():
-            cmd_args.append("--legacy")
 
         stdout = cls._run_command(cmd_args, f"Failed to get result bundle object {object_id} from {xcresult}")
         return json.loads(stdout)
