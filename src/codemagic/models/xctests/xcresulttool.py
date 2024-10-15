@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import pathlib
-import re
 import subprocess
 from functools import lru_cache
 from tempfile import NamedTemporaryFile
@@ -19,7 +18,7 @@ from packaging.version import Version
 from codemagic.cli import CommandArg
 from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
-from codemagic.utilities import log
+from codemagic.models import Xcode
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -36,38 +35,13 @@ class XcResultToolError(IOError):
 class XcResultTool(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     @lru_cache(1)
-    def get_tool_version(cls) -> Optional[Version]:
-        # Cache xcresulttool version to avoid repeated checks.
-        # Assumes Xcode (and thus xcresulttool) version remains constant during execution.
-
-        cmd_args = ["xcrun", "xcresulttool", "version"]
-        try:
-            stdout = cls._run_command(cmd_args, "Failed to obtain xcresulttool version")
-        except XcResultToolError as e:
-            log.get_file_logger(cls).exception(str(e))
-            return None
-
-        version_output = cls._str(stdout.strip())
-        # Expected version output of xcresulttool (bundled with Xcode 16.0 beta 3) is as follows:
-        # xcresulttool version 23024, format version 3.53 (current)
-        match = re.match(r"^xcresulttool version (?P<version>\d+(\.\d+)?)", version_output)
-
-        if not match:
-            log.get_file_logger(cls).error("Failed to capture xcresulttool version from %r", version_output)
-            return None
-
-        return Version(match.group("version"))
-
-    @classmethod
     def is_legacy(cls) -> bool:
         """
         With Xcode 16.0 `xcresulttool get` API was changed. Check if activated
         xcresulttool is from Xcode 16.0+ (not legacy) or otherwise (is legacy).
         """
-        version = cls.get_tool_version()
-        if not version:
-            return False
-        return version < Version("23021")
+        xcode = Xcode.get_selected()
+        return Version("16") > xcode.version
 
     @classmethod
     def _get_legacy_method_error_message(cls, method_name: Literal["get_bundle", "get_object"]) -> str:
