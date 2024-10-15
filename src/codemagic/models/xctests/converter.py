@@ -272,7 +272,7 @@ class Xcode16XcResultConverter(XcResultConverter):
             name=cls._get_test_suite_name(xc_test_suite),
             tests=len(xc_test_suite.test_cases),
             disabled=sum(xc_test_case.is_disabled() for xc_test_case in xc_test_suite.test_cases),
-            errors=sum(xc_test_case.is_error() for xc_test_case in xc_test_suite.test_cases),
+            errors=None,  # Xcode doesn't differentiate errors from failures
             failures=sum(xc_test_case.is_failed() for xc_test_case in xc_test_suite.test_cases),
             package=xc_test_suite.name,
             skipped=sum(xc_test_case.is_skipped() for xc_test_case in xc_test_suite.test_cases),

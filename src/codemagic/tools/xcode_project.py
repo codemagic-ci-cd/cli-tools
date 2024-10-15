@@ -512,12 +512,12 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
             test_suites = None
             self.logger.error(Colors.RED(f"Parsing test results failed\n{e}\n{e.stderr}"))
         else:
-            message = (
-                f"Executed {test_suites.tests} tests with "
-                f"{test_suites.failures} failures and "
-                f"{test_suites.errors} errors in "
-                f"{test_suites.time:.2f} seconds.\n"
-            )
+            if test_suites.errors is not None:
+                failures_message = f"{test_suites.failures} failures and {test_suites.errors} errors"
+            else:
+                failures_message = f"{test_suites.failures} failures"
+
+            message = f"Executed {test_suites.tests} tests with {failures_message} in {test_suites.time:.2f} seconds.\n"
             self.echo(Colors.BLUE(message))
             TestSuitePrinter(self.echo).print_test_suites(test_suites)
             self._save_test_suite(xcresult, test_suites, output_dir, output_extension)

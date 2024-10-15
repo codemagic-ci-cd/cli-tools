@@ -240,7 +240,7 @@ def test_converter(mock_datetime, expected_properties):
 
     assert test_suites.name == "Test - banaan"
     assert test_suites.disabled == 0
-    assert test_suites.errors == 0
+    assert test_suites.errors is None
     assert test_suites.failures == 3
     assert test_suites.skipped == 1
     assert test_suites.tests == 8
@@ -249,7 +249,7 @@ def test_converter(mock_datetime, expected_properties):
 
     ts = test_suites.test_suites[0]  # Unit tests testsuite assertions
     assert ts.disabled == 0
-    assert ts.errors == 0
+    assert ts.errors is None
     assert ts.failures == 2
     assert ts.name == "banaanTests [iOS 18.0 iPhone SE (3rd generation)]"
     assert ts.package == "banaanTests"
@@ -301,7 +301,7 @@ def test_converter(mock_datetime, expected_properties):
 
     ts = test_suites.test_suites[1]  # UI tests testsuite assertions
     assert ts.disabled == 0
-    assert ts.errors == 0
+    assert ts.errors is None
     assert ts.failures == 1
     assert ts.name == "banaanUITests [iOS 18.0 iPhone SE (3rd generation)]"
     assert ts.package == "banaanUITests"
