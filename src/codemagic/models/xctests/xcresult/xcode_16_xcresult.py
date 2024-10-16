@@ -1,358 +1,248 @@
 from __future__ import annotations
 
 import dataclasses
+import enum
 from abc import ABC
 from abc import abstractmethod
-from typing import TYPE_CHECKING
 from typing import Any
-from typing import ClassVar
 from typing import Dict
+from typing import Iterator
 from typing import List
+from typing import Optional
 from typing import Type
 from typing import TypeVar
-from typing import cast
+from typing import Union
 
-if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
-    AttributeName: TypeAlias = str
-    DictKey: TypeAlias = str
+XcSchemaModelT = TypeVar("XcSchemaModelT", bound="XcSchemaModel")
 
 
-XcResultModelT = TypeVar("XcResultModelT", bound="XcResultModel")
-LiteralValueT = TypeVar("LiteralValueT", bool, str, int, float)
+class XcTestResult(enum.StrEnum):
+    PASSED = "Passed"
+    FAILED = "Failed"
+    SKIPPED = "Skipped"
+    EXPECTED_FAILURE = "Expected Failure"
+    UNKNOWN = "unknown"
+
+
+class XcTestNodeType(enum.StrEnum):
+    TEST_PLAN = "Test Plan"
+    UNIT_TEST_BUNDLE = "Unit test bundle"
+    UI_TEST_BUNDLE = "UI test bundle"
+    TEST_SUITE = "Test Suite"
+    TEST_CASE = "Test Case"
+    DEVICE = "Device"
+    TEST_PLAN_CONFIGURATION = "Test Plan Configuration"
+    ARGUMENTS = "Arguments"
+    REPETITION = "Repetition"
+    TEST_CASE_RUN = "Test Case Run"
+    FAILURE_MESSAGE = "Failure Message"
+    SOURCE_CODE_REFERENCE = "Source Code Reference"
+    ATTACHMENT = "Attachment"
+    EXPRESSION = "Expression"
+    TEST_VALUE = "Test Value"
 
 
 @dataclasses.dataclass
-class XcResultModel(ABC):
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]]
-
-    @classmethod
-    def _resolve_literal_values(cls, d: Dict[DictKey, Any]) -> Dict[AttributeName, LiteralValueT]:
-        return {
-            attr_name: cast(LiteralValueT, d[dict_key])
-            for attr_name, dict_key in cls.__literal_attribute_name_mapping__.items()
-        }
-
+class XcSchemaModel(ABC):
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type[XcResultModelT], d: Dict[DictKey, Any]) -> XcResultModelT:
+    def from_dict(cls: Type[XcSchemaModelT], d: Dict[str, Any]) -> XcSchemaModelT:
         """
         Load model from `xcresulttool get test-results <subcommand>` output
         """
-        literal_values = cls._resolve_literal_values(d)
-        return cls(**literal_values)
+        raise NotImplementedError()
 
 
 @dataclasses.dataclass
-class XcTestDetails(XcResultModel):
-    devices: List[XcDevice]
-    duration: str
-    has_media_attachments: bool
-    has_performance_metrics: bool
-    start_time: float
-    test_description: str
-    test_identifier: str
-    test_name: str
-    test_plan_configurations: List[XcTestPlanConfiguration]
-    test_result: str
-    test_runs: List[XcTestRun]
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "duration": "duration",
-        "has_media_attachments": "hasMediaAttachments",
-        "has_performance_metrics": "hasPerformanceMetrics",
-        "start_time": "startTime",
-        "test_description": "testDescription",
-        "test_identifier": "testIdentifier",
-        "test_name": "testName",
-        "test_result": "testResult",
-    }
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestDetails:
-        return cls(
-            devices=[XcDevice.from_dict(device) for device in d["devices"]],
-            test_plan_configurations=[
-                XcTestPlanConfiguration.from_dict(config) for config in d["testPlanConfigurations"]
-            ],
-            test_runs=[XcTestRun.from_dict(run) for run in d["testRuns"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
-        )
-
-
-@dataclasses.dataclass
-class XcTestResultsSummary(XcResultModel):
+class XcSummary(XcSchemaModel):
     """
-    Model definitions for `xcresulttool get test-results summary` output
+    Model definitions for `xcresulttool get test-results summary` output.
+    Check schema with `xcrun xcresulttool help get test-results summary`.
     """
 
-    devices_and_configurations: List[XcDevicesAndConfigurations]
-    environment_description: str
-    expected_failures: int
-    failed_tests: int
-    finish_time: float
-    passed_tests: int
-    result: str
-    skipped_tests: int
-    start_time: float
-    statistics: List[XcTestStatistic]
-    test_failures: List[XcTestFailure]
     title: str
+    environment_description: str
     top_insights: List[XcTestInsight]
+    result: XcTestResult
     total_test_count: int
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "environment_description": "environmentDescription",
-        "expected_failures": "expectedFailures",
-        "failed_tests": "failedTests",
-        "finish_time": "finishTime",
-        "passed_tests": "passedTests",
-        "result": "result",
-        "skipped_tests": "skippedTests",
-        "start_time": "startTime",
-        "title": "title",
-        "total_test_count": "totalTestCount",
-    }
+    passed_tests: int
+    failed_tests: int
+    skipped_tests: int
+    expected_failures: int
+    statistics: List[XcTestStatistic]
+    devices_and_configurations: List[XcTestPlanConfiguration]
+    test_failures: List[XcTestFailure]
+    start_time: Optional[float] = None
+    finish_time: Optional[float] = None
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestResultsSummary:
+    def from_dict(cls, d: Dict[str, Any]) -> XcSummary:
         return cls(
-            devices_and_configurations=[
-                XcDevicesAndConfigurations.from_dict(dc) for dc in d["devicesAndConfigurations"]
-            ],
-            statistics=[XcTestStatistic.from_dict(statistic) for statistic in d["statistics"]],
-            test_failures=[XcTestFailure.from_dict(failure) for failure in d["testFailures"]],
+            title=d["title"],
+            environment_description=d["environmentDescription"],
             top_insights=[XcTestInsight.from_dict(insight) for insight in d["topInsights"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
+            result=XcTestResult(d["result"]),
+            total_test_count=d["totalTestCount"],
+            passed_tests=d["passedTests"],
+            failed_tests=d["failedTests"],
+            skipped_tests=d["skippedTests"],
+            expected_failures=d["expectedFailures"],
+            statistics=[XcTestStatistic.from_dict(statistic) for statistic in d["statistics"]],
+            devices_and_configurations=[XcTestPlanConfiguration.from_dict(dc) for dc in d["devicesAndConfigurations"]],
+            test_failures=[XcTestFailure.from_dict(failure) for failure in d["testFailures"]],
+            start_time=d.get("startTime"),
+            finish_time=d.get("finishTime"),
         )
 
 
 @dataclasses.dataclass
-class XcDevicesAndConfigurations(XcResultModel):
+class XcTestPlanConfiguration(XcSchemaModel):
     device: XcDevice
-    expected_failures: int
-    failed_tests: int
+    test_plan_configuration: XcConfiguration
     passed_tests: int
+    failed_tests: int
     skipped_tests: int
-    test_plan_configuration: XcTestPlanConfiguration
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "expected_failures": "expectedFailures",
-        "failed_tests": "failedTests",
-        "passed_tests": "passedTests",
-        "skipped_tests": "skippedTests",
-    }
+    expected_failures: int
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> XcDevicesAndConfigurations:
+    def from_dict(cls, d: Dict[str, Any]) -> XcTestPlanConfiguration:
         return cls(
             device=XcDevice.from_dict(d["device"]),
-            test_plan_configuration=XcTestPlanConfiguration.from_dict(d["testPlanConfiguration"]),
-            **cls._resolve_literal_values(d),
+            test_plan_configuration=XcConfiguration.from_dict(d["testPlanConfiguration"]),
+            passed_tests=d["passedTests"],
+            failed_tests=d["failedTests"],
+            skipped_tests=d["skippedTests"],
+            expected_failures=d["expectedFailures"],
         )
 
 
 @dataclasses.dataclass
-class XcTestStatistic(XcResultModel):
+class XcTestStatistic(XcSchemaModel):
     subtitle: str
     title: str
 
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "subtitle": "subtitle",
-        "title": "title",
-    }
-
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestStatistic:
-        return super().from_dict(d)
+    def from_dict(cls, d: Dict[str, Any]) -> XcTestStatistic:
+        return cls(
+            title=d["title"],
+            subtitle=d["subtitle"],
+        )
 
 
 @dataclasses.dataclass
-class XcTestFailure(XcResultModel):
-    failure_text: str
-    target_name: str
-    test_identifier: int
+class XcTestFailure(XcSchemaModel):
     test_name: str
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "failure_text": "failureText",
-        "target_name": "targetName",
-        "test_identifier": "testIdentifier",
-        "test_name": "testName",
-    }
+    target_name: str
+    failure_text: str
+    test_identifier: int
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestFailure:
-        return super().from_dict(d)
+    def from_dict(cls, d: Dict[str, Any]) -> XcTestFailure:
+        return cls(
+            test_name=d["testName"],
+            target_name=d["targetName"],
+            failure_text=d["failureText"],
+            test_identifier=d["testIdentifier"],
+        )
 
 
 @dataclasses.dataclass
-class XcTestInsight(XcResultModel):
-    """
-    Attributes unknown
-    """
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {}
+class XcTestInsight(XcSchemaModel):
+    impact: str
+    category: str
+    text: str
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestInsight:
-        return super().from_dict(d)
+    def from_dict(cls, d: Dict[str, Any]) -> XcTestInsight:
+        return cls(
+            impact=d["impact"],
+            category=d["category"],
+            text=d["text"],
+        )
 
 
 @dataclasses.dataclass
-class XcTestResultsTests(XcResultModel):
+class XcTests(XcSchemaModel):
     """
-    Model definitions for `xcresulttool get test-results tests` output
+    Model definitions for `xcresulttool get test-results tests` output.
+    Check schema with `xcrun xcresulttool help get test-results tests.
     """
 
     devices: List[XcDevice]
-    test_plans: List[XcTestPlan]
-    test_plan_configurations: List[XcTestPlanConfiguration]
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {}
+    test_nodes: List[XcTestNode]
+    test_plan_configurations: List[XcConfiguration]
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestResultsTests:
-        test_results_tests = cls(
+    def from_dict(cls, d: Dict[str, Any]) -> XcTests:
+        tests = cls(
             devices=[XcDevice.from_dict(device) for device in d["devices"]],
-            test_plans=[XcTestPlan.from_dict(plan) for plan in d["testNodes"]],
-            test_plan_configurations=[XcTestPlanConfiguration.from_dict(conf) for conf in d["testPlanConfigurations"]],
+            test_nodes=[XcTestNode.from_dict(node) for node in d["testNodes"]],
+            test_plan_configurations=[XcConfiguration.from_dict(conf) for conf in d["testPlanConfigurations"]],
         )
-        for plan in test_results_tests.test_plans:
-            plan.parent = test_results_tests
-        return test_results_tests
+        for node in tests.test_nodes:
+            node.parent = tests
+        return tests
 
 
 @dataclasses.dataclass
-class XcTestNode(XcResultModel, ABC):
+class XcTestNode(XcSchemaModel):
+    # Required properties
+    node_type: XcTestNodeType
     name: str
-    node_type: str
-    result: str
+    # Optional properties with defaults
+    tags: List[str] = dataclasses.field(default_factory=list)
+    children: List[XcTestNode] = dataclasses.field(default_factory=list)
+    # Optional properties
+    node_identifier: Optional[str] = None
+    details: Optional[str] = None
+    duration: Optional[str] = None
+    result: Optional[XcTestResult] = None
 
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "name": "name",
-        "node_type": "nodeType",
-        "result": "result",
-    }
-
-    def is_failed(self) -> bool:
-        return self.result.casefold() == "Failed".casefold()
-
-    def is_skipped(self) -> bool:
-        return self.result.casefold() == "Skipped".casefold()
-
-    def is_passed(self) -> bool:
-        return self.result.casefold() == "Passed".casefold()
-
-
-@dataclasses.dataclass
-class XcTestPlan(XcTestNode):
-    test_bundles: List[XcTestBundle]
-    parent: XcTestResultsTests = dataclasses.field(init=False, repr=False, compare=False)
+    parent: Union[XcTests, XcTestNode] = dataclasses.field(init=False, repr=False, compare=False)
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestPlan:
-        test_plan = cls(
-            test_bundles=[XcTestBundle.from_dict(bundle) for bundle in d["children"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
+    def from_dict(cls, d: Dict[str, Any]) -> XcTestNode:
+        result_value = d.get("result")
+        node = cls(
+            node_type=XcTestNodeType(d["nodeType"]),
+            name=d["name"],
+            tags=d.get("tags", []),
+            children=[XcTestNode.from_dict(child) for child in d.get("children", [])],
+            node_identifier=d.get("nodeIdentifier"),
+            details=d.get("details"),
+            duration=d.get("duration"),
+            result=XcTestResult(result_value) if result_value else None,
         )
-        for test_bundle in test_plan.test_bundles:
-            test_bundle.parent = test_plan
-        return test_plan
+        for child in node.children:
+            child.parent = node
+        return node
 
+    def iter_children(self, child_type: XcTestNodeType) -> Iterator[XcTestNode]:
+        if self.node_type is child_type:
+            yield self
+        else:
+            for child in self.children:
+                yield from child.iter_children(child_type)
 
-@dataclasses.dataclass
-class XcTestBundle(XcTestNode):
-    test_suites: List[XcTestSuite]
-    parent: XcTestPlan = dataclasses.field(init=False, repr=False, compare=False)
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestBundle:
-        test_bundle = cls(
-            test_suites=[XcTestSuite.from_dict(suite) for suite in d["children"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
-        )
-        for test_suite in test_bundle.test_suites:
-            test_suite.parent = test_bundle
-        return test_bundle
-
-
-@dataclasses.dataclass
-class XcTestSuite(XcTestNode):
-    test_cases: List[XcTestCase]
-    parent: XcTestBundle = dataclasses.field(init=False, repr=False, compare=False)
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestSuite:
-        test_suite = cls(
-            test_cases=[XcTestCase.from_dict(case) for case in d["children"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
-        )
-        for test_case in test_suite.test_cases:
-            test_case.parent = test_suite
-        return test_suite
-
-
-@dataclasses.dataclass
-class XcTestRunAction(XcTestNode):
-    duration: str
-    node_identifier: str
-
-    __literal_attribute_name_mapping__ = {
-        **XcTestNode.__literal_attribute_name_mapping__,
-        "duration": "duration",
-        "node_identifier": "nodeIdentifier",
-    }
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestRunAction:
-        return super().from_dict(d)
-
-
-@dataclasses.dataclass
-class XcTestCaseDetail(XcTestNode):
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestCaseDetail:
-        return super().from_dict(d)
-
-    def _is_failure_message_node(self) -> bool:
-        return self.node_type.casefold() == "Failure Message".casefold()
-
-    def is_failure_message(self) -> bool:
-        return self._is_failure_message_node() and self.is_failed()
-
-    def is_skipped_message(self) -> bool:
-        return self._is_failure_message_node() and self.is_skipped()
-
-
-@dataclasses.dataclass
-class XcTestCase(XcTestRunAction):
-    details: List[XcTestCaseDetail] = dataclasses.field(default_factory=list)
-    parent: XcTestSuite = dataclasses.field(init=False, repr=False, compare=False)
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestCase:
-        return cls(
-            details=[XcTestCaseDetail.from_dict(detail) for detail in d.get("children", [])],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
-        )
-
-    def get_failure_messages(self) -> List[str]:
-        return [detail.name for detail in self.details if detail.is_failure_message() and detail.name]
-
-    def get_skipped_messages(self) -> List[str]:
-        return [detail.name for detail in self.details if detail.is_skipped_message() and detail.name]
+    def get_parent(self, parent_type: XcTestNodeType) -> Optional[XcTestNode]:
+        if not isinstance(self.parent, XcTestNode):
+            return None
+        if self.parent.node_type is parent_type:
+            return self.parent
+        return self.parent.get_parent(parent_type)
 
     @classmethod
     def is_disabled(cls) -> bool:
-        # Disabled tests are completely excluded from reports
-        return False
+        return False  # Disabled tests are completely excluded from reports
 
-    @classmethod
-    def is_error(cls) -> bool:
-        # Errors are classified as failures
-        return False
+    def is_failed(self) -> bool:
+        return self.result is XcTestResult.FAILED
+
+    def is_skipped(self) -> bool:
+        return self.result is XcTestResult.SKIPPED
+
+    def is_passed(self) -> bool:
+        return self.result is XcTestResult.PASSED
 
     def get_duration(self) -> float:
         if not self.duration:
@@ -362,77 +252,36 @@ class XcTestCase(XcTestRunAction):
             duration = duration[:-1]
         return float(duration)
 
-    def get_classname(self) -> str:
-        if self.node_identifier:
-            return self.node_identifier.split("/", maxsplit=1)[0]
-        test_suite = self.parent
-        if test_suite.name:
-            return test_suite.name
-        return ""
-
-    def get_method_name(self) -> str:
-        if self.name:
-            return self.name
-        elif self.node_identifier:
-            return self.node_identifier.split("/")[-1]
-        return ""
-
 
 @dataclasses.dataclass
-class XcTestRun(XcTestNode):
-    test_run_actions: List[XcTestRunAction]
-    details: str
-    duration: str
-    node_identifier: str
-
-    __literal_attribute_name_mapping__ = {
-        **XcTestNode.__literal_attribute_name_mapping__,
-        "details": "details",
-        "duration": "duration",
-        "node_identifier": "nodeIdentifier",
-    }
+class XcDevice(XcSchemaModel):
+    device_name: str
+    architecture: str
+    model_name: str
+    os_version: str
+    device_id: Optional[str] = None
+    platform: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestRun:
+    def from_dict(cls, d: Dict[str, Any]) -> XcDevice:
         return cls(
-            test_run_actions=[XcTestRunAction.from_dict(action) for action in d["children"]],
-            **cls._resolve_literal_values(d),  # type: ignore[arg-type]
+            device_name=d["deviceName"],
+            architecture=d["architecture"],
+            model_name=d["modelName"],
+            os_version=d["osVersion"],
+            device_id=d.get("deviceId"),
+            platform=d.get("platform"),
         )
 
 
 @dataclasses.dataclass
-class XcDevice(XcResultModel):
-    architecture: str
-    device_id: str
-    device_name: str
-    model_name: str
-    os_version: str
-    platform: str
-
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "architecture": "architecture",
-        "device_id": "deviceId",
-        "device_name": "deviceName",
-        "model_name": "modelName",
-        "os_version": "osVersion",
-        "platform": "platform",
-    }
-
-    @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcDevice:
-        return super().from_dict(d)
-
-
-@dataclasses.dataclass
-class XcTestPlanConfiguration(XcResultModel):
+class XcConfiguration(XcSchemaModel):
     configuration_id: str
     configuration_name: str
 
-    __literal_attribute_name_mapping__: ClassVar[Dict[AttributeName, DictKey]] = {
-        "configuration_id": "configurationId",
-        "configuration_name": "configurationName",
-    }
-
     @classmethod
-    def from_dict(cls, d: Dict[DictKey, Any]) -> XcTestPlanConfiguration:
-        return super().from_dict(d)
+    def from_dict(cls, d: Dict[str, Any]) -> XcConfiguration:
+        return cls(
+            configuration_id=d["configurationId"],
+            configuration_name=d["configurationName"],
+        )

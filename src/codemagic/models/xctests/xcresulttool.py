@@ -11,7 +11,6 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
-from typing import Union
 
 from packaging.version import Version
 
@@ -51,9 +50,8 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
     def _get_legacy_method_error_message(cls, method_name: Literal["get_bundle", "get_object"]) -> str:
         return (
             f"XcResultTool.{method_name} is deprecated using selected Xcode version. "
-            "Use updated xcresulttool bindings XcResultTool.get_test_report_summary, "
-            "XcResultTool.get_test_report_test_details or "
-            "XcResultTool.get_test_report_tests instead"
+            "Use updated xcresulttool bindings XcResultTool.get_test_report_summary "
+            "or XcResultTool.get_test_report_tests instead"
         )
 
     @classmethod
@@ -108,22 +106,6 @@ class XcResultTool(RunningCliAppMixin, StringConverterMixin):
             xcresult.expanduser(),
         ]
         stdout = cls._run_command(cmd_args, f"Failed to get tests from test report {xcresult}")
-        return json.loads(stdout)
-
-    @classmethod
-    def get_test_report_test_details(cls, xcresult: pathlib.Path, test_id: Union[int, str]) -> Dict:
-        cmd_args: List[CommandArg] = [
-            "xcrun",
-            "xcresulttool",
-            "get",
-            "test-results",
-            "test-details",
-            "--path",
-            xcresult.expanduser(),
-            "--test-id",
-            str(test_id),
-        ]
-        stdout = cls._run_command(cmd_args, f"Failed to get test details from test report {xcresult}")
         return json.loads(stdout)
 
     @classmethod

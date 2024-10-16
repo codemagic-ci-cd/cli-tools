@@ -5,11 +5,11 @@ import re
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
-from typing import Iterable
 from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import cast
 
 from codemagic.models.junit import Error
 from codemagic.models.junit import Failure
@@ -24,11 +24,11 @@ from .xcresult import ActionRecord
 from .xcresult import ActionsInvocationRecord
 from .xcresult import ActionTestableSummary
 from .xcresult import ActionTestMetadata
-from .xcresult import XcTestResultsSummary
-from .xcresult import XcTestResultsTests
-from .xcresult import XcTestSuite as XcTestSuite
+from .xcresult import XcSummary
+from .xcresult import XcTestNodeType
+from .xcresult import XcTests
 from .xcresult.xcode_16_xcresult import XcDevice
-from .xcresult.xcode_16_xcresult import XcTestCase
+from .xcresult.xcode_16_xcresult import XcTestNode
 from .xcresulttool import XcResultTool
 
 
@@ -180,29 +180,28 @@ class LegacyXcResultConverter(XcResultConverter):
 
 class Xcode16XcResultConverter(XcResultConverter):
     @classmethod
-    def _iter_test_suite_nodes(cls, tests_results_tests: XcTestResultsTests) -> Iterable[XcTestSuite]:
-        for test_plan in tests_results_tests.test_plans:
-            for test_bundle in test_plan.test_bundles:
-                yield from test_bundle.test_suites
-
-    @classmethod
-    def _get_test_suite_run_destination(cls, xc_test_suite: XcTestSuite) -> Optional[XcDevice]:
+    def _get_test_node_run_destination(cls, xc_test_node: XcTestNode) -> Optional[XcDevice]:
         # TODO: support multiple run destinations
         #  As a first iteration only one test destination is supported as in legacy mode
 
-        test_bundle = xc_test_suite.parent
-        test_plan = test_bundle.parent
-        tests = test_plan.parent
+        parent: Union[XcTests, XcTestNode] = xc_test_node
+        while isinstance(parent, XcTestNode):
+            parent = parent.parent
+
+        tests = cast(XcTests, parent)
         if not tests.devices:
             return None
         return tests.devices[0]
 
     @classmethod
-    def _get_test_suite_name(cls, xc_test_suite: XcTestSuite) -> str:
+    def _get_test_suite_name(cls, xc_test_suite: XcTestNode) -> str:
+        if xc_test_suite.node_type is not XcTestNodeType.TEST_SUITE:
+            raise ValueError("Not a test suite node", xc_test_suite.node_type)
+
         name = xc_test_suite.name or ""
         device_info = ""
 
-        device = cls._get_test_suite_run_destination(xc_test_suite)
+        device = cls._get_test_node_run_destination(xc_test_suite)
         if device:
             platform = re.sub("simulator", "", device.platform, flags=re.IGNORECASE).strip()
             device_info = f"{platform} {device.os_version} {device.model_name}"
@@ -212,29 +211,57 @@ class Xcode16XcResultConverter(XcResultConverter):
         return name or device_info
 
     @classmethod
-    def _get_test_case_error(cls, xc_test_case: XcTestCase) -> Optional[Error]:
+    def _get_test_case_error(cls, xc_test_case: XcTestNode) -> Optional[Error]:
+        if xc_test_case.node_type is not XcTestNodeType.TEST_CASE:
+            raise ValueError("Not a test case node", xc_test_case.node_type)
+
         if not xc_test_case.is_failed():
             return None
 
-        messages = xc_test_case.get_failure_messages()
+        failure_messages_nodes = xc_test_case.iter_children(XcTestNodeType.FAILURE_MESSAGE)
+        failure_messages = [node.name for node in failure_messages_nodes if node.name]
         return Error(
-            message=messages[0] if messages else "",
-            type="Error" if any("caught error" in m for m in messages) else "Failure",
-            error_description="\n".join(messages) if len(messages) > 1 else None,
+            message=failure_messages[0] if failure_messages else "",
+            type="Error" if any("caught error" in m for m in failure_messages) else "Failure",
+            error_description="\n".join(failure_messages) if len(failure_messages) > 1 else None,
         )
 
     @classmethod
-    def _get_test_case_skipped(cls, xc_test_case: XcTestCase) -> Optional[Skipped]:
+    def _get_test_case_skipped(cls, xc_test_case: XcTestNode) -> Optional[Skipped]:
+        if xc_test_case.node_type is not XcTestNodeType.TEST_CASE:
+            raise ValueError("Not a test case node", xc_test_case.node_type)
+
         if not xc_test_case.is_skipped():
             return None
-        messages = xc_test_case.get_skipped_messages()
-        return Skipped(message="\n".join(messages))
+
+        failure_messages_nodes = xc_test_case.iter_children(XcTestNodeType.FAILURE_MESSAGE)
+        skipped_message_nodes = [node for node in failure_messages_nodes if node.is_skipped()]
+        skipped_messages = [node.name for node in skipped_message_nodes if node.name]
+
+        return Skipped(message="\n".join(skipped_messages))
 
     @classmethod
-    def _get_test_case(cls, xc_test_case: XcTestCase) -> TestCase:
+    def _get_test_case(cls, xc_test_case: XcTestNode, xc_test_suite: XcTestNode) -> TestCase:
+        if xc_test_case.node_type is not XcTestNodeType.TEST_CASE:
+            raise ValueError("Not a test case node", xc_test_case.node_type)
+        if xc_test_suite.node_type is not XcTestNodeType.TEST_SUITE:
+            raise ValueError("Not a test suite node", xc_test_suite.node_type)
+
+        method_name = ""
+        if xc_test_case.name:
+            method_name = xc_test_case.name
+        elif xc_test_case.node_identifier:
+            method_name = xc_test_case.node_identifier.split("/")[-1]
+
+        classname = ""
+        if xc_test_case.node_identifier:
+            classname = xc_test_case.node_identifier.split("/", maxsplit=1)[0]
+        elif xc_test_suite.name:
+            classname = xc_test_suite.name
+
         return TestCase(
-            name=xc_test_case.get_method_name(),
-            classname=xc_test_case.get_classname(),
+            name=method_name,
+            classname=classname,
             error=cls._get_test_case_error(xc_test_case),
             time=xc_test_case.get_duration(),
             status=xc_test_case.result,
@@ -244,41 +271,54 @@ class Xcode16XcResultConverter(XcResultConverter):
     @classmethod
     def _get_test_suite_properties(
         cls,
-        xc_test_suite: XcTestSuite,
-        xc_test_result_summary: XcTestResultsSummary,
+        xc_test_suite: XcTestNode,
+        xc_test_result_summary: XcSummary,
     ) -> List[Property]:
-        properties: List[Property] = [
-            Property(name="started_time", value=cls._timestamp(xc_test_result_summary.start_time)),
-            Property(name="ended_time", value=cls._timestamp(xc_test_result_summary.finish_time)),
-            Property(name="title", value=xc_test_suite.name),
-        ]
-        device = cls._get_test_suite_run_destination(xc_test_suite)
-        if device:
-            properties.extend(
-                [
-                    Property(name="device_name", value=device.model_name),
-                    Property(name="device_architecture", value=device.architecture),
-                    Property(name="device_identifier", value=device.device_id),
-                    Property(name="device_operating_system", value=device.os_version),
-                    Property(name="device_platform", value=device.platform),
-                ],
-            )
+        if xc_test_suite.node_type is not XcTestNodeType.TEST_SUITE:
+            raise ValueError("Not a test suite node", xc_test_suite.node_type)
+
+        device = cls._get_test_node_run_destination(xc_test_suite)
+
+        properties: List[Property] = [Property(name="title", value=xc_test_suite.name)]
+        if xc_test_result_summary.start_time:
+            Property(name="started_time", value=cls._timestamp(xc_test_result_summary.start_time))
+        if xc_test_result_summary.finish_time:
+            Property(name="ended_time", value=cls._timestamp(xc_test_result_summary.finish_time))
+        if device and device.model_name:
+            properties.append(Property(name="device_name", value=device.model_name))
+        if device and device.architecture:
+            properties.append(Property(name="device_architecture", value=device.architecture))
+        if device and device.device_id:
+            properties.append(Property(name="device_identifier", value=device.device_id))
+        if device and device.os_version:
+            properties.append(Property(name="device_operating_system", value=device.os_version))
+        if device and device.platform:
+            properties.append(Property(name="device_platform", value=device.platform))
 
         return sorted(properties, key=lambda p: p.name)
 
     @classmethod
-    def _get_test_suite(cls, xc_test_suite: XcTestSuite, xc_test_result_summary: XcTestResultsSummary) -> TestSuite:
+    def _get_test_suite(cls, xc_test_suite: XcTestNode, xc_test_result_summary: XcSummary) -> TestSuite:
+        if xc_test_suite.node_type is not XcTestNodeType.TEST_SUITE:
+            raise ValueError("Not a test suite node", xc_test_suite.node_type)
+
+        xc_test_cases = list(xc_test_suite.iter_children(XcTestNodeType.TEST_CASE))
+
+        timestamp = None
+        if xc_test_result_summary.finish_time:
+            timestamp = cls._timestamp(xc_test_result_summary.finish_time)
+
         return TestSuite(
             name=cls._get_test_suite_name(xc_test_suite),
-            tests=len(xc_test_suite.test_cases),
-            disabled=sum(xc_test_case.is_disabled() for xc_test_case in xc_test_suite.test_cases),
-            errors=sum(xc_test_case.is_failed() for xc_test_case in xc_test_suite.test_cases),
+            tests=len(xc_test_cases),
+            disabled=sum(xc_test_case.is_disabled() for xc_test_case in xc_test_cases),
+            errors=sum(xc_test_case.is_failed() for xc_test_case in xc_test_cases),
             failures=None,  # Xcode doesn't differentiate errors from failures, consider everything as error
             package=xc_test_suite.name,
-            skipped=sum(xc_test_case.is_skipped() for xc_test_case in xc_test_suite.test_cases),
-            time=sum(xc_test_case.get_duration() for xc_test_case in xc_test_suite.test_cases),
-            timestamp=cls._timestamp(xc_test_result_summary.finish_time),
-            testcases=[cls._get_test_case(xc_test_case) for xc_test_case in xc_test_suite.test_cases],
+            skipped=sum(xc_test_case.is_skipped() for xc_test_case in xc_test_cases),
+            time=sum(xc_test_case.get_duration() for xc_test_case in xc_test_cases),
+            timestamp=timestamp,
+            testcases=[cls._get_test_case(xc_test_case, xc_test_suite) for xc_test_case in xc_test_cases],
             properties=cls._get_test_suite_properties(xc_test_suite, xc_test_result_summary),
         )
 
@@ -286,14 +326,16 @@ class Xcode16XcResultConverter(XcResultConverter):
         tests_output = XcResultTool.get_test_report_tests(self.xcresult)
         summary_output = XcResultTool.get_test_report_summary(self.xcresult)
 
-        test_results_tests = XcTestResultsTests.from_dict(tests_output)
-        test_results_summary = XcTestResultsSummary.from_dict(summary_output)
+        xc_tests = XcTests.from_dict(tests_output)
+        xc_summary = XcSummary.from_dict(summary_output)
 
-        test_suites: List[TestSuite] = []
-        for test_suite in self._iter_test_suite_nodes(test_results_tests):
-            test_suites.append(self._get_test_suite(test_suite, test_results_summary))
+        test_suites = [
+            self._get_test_suite(xc_test_suite_node, xc_summary)
+            for xc_test_node in xc_tests.test_nodes
+            for xc_test_suite_node in xc_test_node.iter_children(XcTestNodeType.TEST_SUITE)
+        ]
 
         return TestSuites(
-            name=test_results_summary.title,
+            name=xc_summary.title,
             test_suites=test_suites,
         )

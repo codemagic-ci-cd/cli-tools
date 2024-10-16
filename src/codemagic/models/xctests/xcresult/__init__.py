@@ -35,7 +35,7 @@ from .legacy_xcresult import SourceCodeSymbolInfo
 from .legacy_xcresult import TestAssociatedError
 from .legacy_xcresult import TestFailureIssueSummary
 from .legacy_xcresult import TypeDefinition
-from .xcode_16_xcresult import XcTestDetails
-from .xcode_16_xcresult import XcTestResultsSummary
-from .xcode_16_xcresult import XcTestResultsTests
-from .xcode_16_xcresult import XcTestSuite
+from .xcode_16_xcresult import XcSummary
+from .xcode_16_xcresult import XcTestNode
+from .xcode_16_xcresult import XcTestNodeType
+from .xcode_16_xcresult import XcTests
