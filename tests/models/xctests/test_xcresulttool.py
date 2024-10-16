@@ -1,8 +1,8 @@
 from unittest import mock
 
 import pytest
-from codemagic.models import Xcode
 from codemagic.models.xctests import XcResultTool
+from codemagic.models.xctests.xcresulttool import Xcode
 from packaging.version import Version
 
 
