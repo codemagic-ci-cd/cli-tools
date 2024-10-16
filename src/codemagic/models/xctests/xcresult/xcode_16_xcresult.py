@@ -6,14 +6,13 @@ from abc import ABC
 from abc import abstractmethod
 from typing import Any
 from typing import Dict
-from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Type
 from typing import TypeVar
 from typing import Union
 
-XcSchemaModelT = TypeVar("XcSchemaModelT", bound="XcSchemaModel")
+XcModelT = TypeVar("XcModelT", bound="XcModel")
 
 
 class XcTestResult(str, enum.Enum):
@@ -43,10 +42,10 @@ class XcTestNodeType(str, enum.Enum):
 
 
 @dataclasses.dataclass
-class XcSchemaModel(ABC):
+class XcModel(ABC):
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type[XcSchemaModelT], d: Dict[str, Any]) -> XcSchemaModelT:
+    def from_dict(cls: Type[XcModelT], d: Dict[str, Any]) -> XcModelT:
         """
         Load model from `xcresulttool get test-results <subcommand>` output
         """
@@ -54,7 +53,7 @@ class XcSchemaModel(ABC):
 
 
 @dataclasses.dataclass
-class XcSummary(XcSchemaModel):
+class XcSummary(XcModel):
     """
     Model definitions for `xcresulttool get test-results summary` output.
     Check schema with `xcrun xcresulttool help get test-results summary`.
@@ -96,7 +95,7 @@ class XcSummary(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTestPlanConfiguration(XcSchemaModel):
+class XcTestPlanConfiguration(XcModel):
     device: XcDevice
     test_plan_configuration: XcConfiguration
     passed_tests: int
@@ -117,7 +116,7 @@ class XcTestPlanConfiguration(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTestStatistic(XcSchemaModel):
+class XcTestStatistic(XcModel):
     subtitle: str
     title: str
 
@@ -130,7 +129,7 @@ class XcTestStatistic(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTestFailure(XcSchemaModel):
+class XcTestFailure(XcModel):
     test_name: str
     target_name: str
     failure_text: str
@@ -147,7 +146,7 @@ class XcTestFailure(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTestInsight(XcSchemaModel):
+class XcTestInsight(XcModel):
     impact: str
     category: str
     text: str
@@ -162,7 +161,7 @@ class XcTestInsight(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTests(XcSchemaModel):
+class XcTests(XcModel):
     """
     Model definitions for `xcresulttool get test-results tests` output.
     Check schema with `xcrun xcresulttool help get test-results tests.
@@ -185,14 +184,11 @@ class XcTests(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcTestNode(XcSchemaModel):
-    # Required properties
+class XcTestNode(XcModel):
     node_type: XcTestNodeType
     name: str
-    # Optional properties with defaults
     tags: List[str] = dataclasses.field(default_factory=list)
     children: List[XcTestNode] = dataclasses.field(default_factory=list)
-    # Optional properties
     node_identifier: Optional[str] = None
     details: Optional[str] = None
     duration: Optional[str] = None
@@ -217,44 +213,9 @@ class XcTestNode(XcSchemaModel):
             child.parent = node
         return node
 
-    def iter_children(self, child_type: XcTestNodeType) -> Iterator[XcTestNode]:
-        if self.node_type is child_type:
-            yield self
-        else:
-            for child in self.children:
-                yield from child.iter_children(child_type)
-
-    def get_parent(self, parent_type: XcTestNodeType) -> Optional[XcTestNode]:
-        if not isinstance(self.parent, XcTestNode):
-            return None
-        if self.parent.node_type is parent_type:
-            return self.parent
-        return self.parent.get_parent(parent_type)
-
-    @classmethod
-    def is_disabled(cls) -> bool:
-        return False  # Disabled tests are completely excluded from reports
-
-    def is_failed(self) -> bool:
-        return self.result is XcTestResult.FAILED
-
-    def is_skipped(self) -> bool:
-        return self.result is XcTestResult.SKIPPED
-
-    def is_passed(self) -> bool:
-        return self.result is XcTestResult.PASSED
-
-    def get_duration(self) -> float:
-        if not self.duration:
-            return 0.0
-        duration = self.duration.replace(",", ".")
-        if duration.endswith("s"):
-            duration = duration[:-1]
-        return float(duration)
-
 
 @dataclasses.dataclass
-class XcDevice(XcSchemaModel):
+class XcDevice(XcModel):
     device_name: str
     architecture: str
     model_name: str
@@ -275,7 +236,7 @@ class XcDevice(XcSchemaModel):
 
 
 @dataclasses.dataclass
-class XcConfiguration(XcSchemaModel):
+class XcConfiguration(XcModel):
     configuration_id: str
     configuration_name: str
 
