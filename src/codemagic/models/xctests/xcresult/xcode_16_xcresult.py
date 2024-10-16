@@ -16,7 +16,7 @@ from typing import Union
 XcSchemaModelT = TypeVar("XcSchemaModelT", bound="XcSchemaModel")
 
 
-class XcTestResult(enum.StrEnum):
+class XcTestResult(str, enum.Enum):
     PASSED = "Passed"
     FAILED = "Failed"
     SKIPPED = "Skipped"
@@ -24,7 +24,7 @@ class XcTestResult(enum.StrEnum):
     UNKNOWN = "unknown"
 
 
-class XcTestNodeType(enum.StrEnum):
+class XcTestNodeType(str, enum.Enum):
     TEST_PLAN = "Test Plan"
     UNIT_TEST_BUNDLE = "Unit test bundle"
     UI_TEST_BUNDLE = "UI test bundle"
