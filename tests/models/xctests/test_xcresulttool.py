@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 from codemagic.models.xctests import XcResultTool
-from codemagic.models.xctests.xcresulttool import Xcode
 from packaging.version import Version
 
 
@@ -12,8 +11,8 @@ from packaging.version import Version
 )
 def test_is_legacy(xcode_version: str):
     mock_xcode = mock.MagicMock(version=Version(xcode_version))
-    with mock.patch.object(Xcode, "get_selected", new=mock.MagicMock(return_value=mock_xcode)):
-        assert XcResultTool.is_legacy()
+    with mock.patch.object(XcResultTool, "_get_selected_xcode", new=mock.MagicMock(return_value=mock_xcode)):
+        assert XcResultTool.is_legacy() is True
 
 
 @pytest.mark.parametrize(
@@ -22,5 +21,5 @@ def test_is_legacy(xcode_version: str):
 )
 def test_is_not_legacy(xcode_version: str):
     mock_xcode = mock.MagicMock(version=Version(xcode_version))
-    with mock.patch.object(Xcode, "get_selected", new=mock.MagicMock(return_value=mock_xcode)):
-        assert not XcResultTool.is_legacy()
+    with mock.patch.object(XcResultTool, "_get_selected_xcode", new=mock.MagicMock(return_value=mock_xcode)):
+        assert XcResultTool.is_legacy() is False

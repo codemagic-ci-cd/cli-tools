@@ -35,12 +35,16 @@ class XcResultToolError(IOError):
 class XcResultTool(RunningCliAppMixin, StringConverterMixin):
     @classmethod
     @lru_cache(1)
+    def _get_selected_xcode(cls):
+        return Xcode.get_selected()
+
+    @classmethod
     def is_legacy(cls) -> bool:
         """
         With Xcode 16.0 `xcresulttool get` API was changed. Check if activated
         xcresulttool is from Xcode 16.0+ (not legacy) or otherwise (is legacy).
         """
-        xcode = Xcode.get_selected()
+        xcode = cls._get_selected_xcode()
         return Version("16") > xcode.version
 
     @classmethod
