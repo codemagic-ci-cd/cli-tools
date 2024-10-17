@@ -1,7 +1,3 @@
-import json
-from typing import Dict
-
-import pytest
 from codemagic.models.xctests.xcresult import XcTestNode
 from codemagic.models.xctests.xcresult import XcTestNodeType
 from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcConfiguration
@@ -12,18 +8,6 @@ from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestPlanConfig
 from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestResult
 from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTests
 from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestStatistic
-
-
-@pytest.fixture
-def test_results_summary_dict(mocks_dir) -> Dict:
-    mock_path = mocks_dir / "test_results_summary.json"
-    return json.loads(mock_path.read_text())
-
-
-@pytest.fixture
-def test_results_tests_dict(mocks_dir) -> Dict:
-    mock_path = mocks_dir / "test_results_tests.json"
-    return json.loads(mock_path.read_text())
 
 
 def test_load_test_results_summary(test_results_summary_dict):
