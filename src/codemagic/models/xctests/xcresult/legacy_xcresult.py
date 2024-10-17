@@ -4,6 +4,7 @@ JSON bundle as Python classes. Result Bundle Format Description
 is created according to the description from
 `xcrun xcresulttool formatDescription get`.
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -18,6 +19,8 @@ from typing import Optional
 from typing import Type
 from typing import TypeVar
 from typing import Union
+
+from codemagic.models.xctests.xcresulttool import XcResultTool
 
 
 class _BaseAbstractRecord(metaclass=ABCMeta):
@@ -34,8 +37,6 @@ SchemaSerializable = Union[bool, float, int, str]
 
 @lru_cache()
 def _get_cached_object_from_bundle(xcresult: pathlib.Path, object_id: Optional[str] = None) -> Dict[str, Any]:
-    from .xcresulttool import XcResultTool
-
     if object_id is None:
         return XcResultTool.get_bundle(xcresult)
     else:

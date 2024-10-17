@@ -1,5 +1,7 @@
 from typing import Callable
+from typing import Iterable
 from typing import List
+from typing import Union
 
 from codemagic.cli import Colors
 from codemagic.models.table import Header
@@ -18,17 +20,11 @@ class TestSuitePrinter:
         self.print = print_function
 
     def _print_test_suites_summary(self, test_suites: TestSuites):
-        tests_color = Colors.GREEN if test_suites.tests else Colors.RED
-        fails_color = Colors.RED if test_suites.failures else Colors.GREEN
-        errors_color = Colors.RED if test_suites.errors else Colors.GREEN
         table = Table(
             [
                 Header("Test run summary"),
                 Line("Test suites", len(test_suites.test_suites)),
-                Line("Total tests ran", test_suites.tests, value_color=tests_color),
-                Line("Total tests failed", test_suites.failures, value_color=fails_color),
-                Line("Total tests errored", test_suites.errors, value_color=errors_color),
-                Line("Total tests skipped", test_suites.skipped),
+                *self._iter_total_test_lines(test_suites),
             ],
             align_values_left=False,
         )
@@ -56,20 +52,13 @@ class TestSuitePrinter:
         return [Header("Skipped tests"), *map(to_line, skipped_tests)] if skipped_tests else []
 
     def _print_test_suite(self, test_suite: TestSuite):
-        tests_color = Colors.GREEN if test_suite.tests else Colors.RED
-        fails_color = Colors.RED if test_suite.failures else Colors.GREEN
-        errors_color = Colors.RED if test_suite.errors else Colors.GREEN
-
         table = Table(
             [
                 Header("Testsuite summary"),
                 Line("Name", test_suite.name),
                 *(Line(p.name.replace("_", " ").title(), p.value) for p in test_suite.properties),
                 Spacer(),
-                Line("Total tests ran", test_suite.tests or 0, value_color=tests_color),
-                Line("Total tests failed", test_suite.failures or 0, value_color=fails_color),
-                Line("Total tests errored", test_suite.errors or 0, value_color=errors_color),
-                Line("Total tests skipped", test_suite.skipped or 0),
+                *self._iter_total_test_lines(test_suite),
                 *self._get_test_suite_errored_lines(test_suite),
                 *self._get_test_suite_failed_lines(test_suite),
                 *self._get_test_suite_skipped_lines(test_suite),
@@ -77,6 +66,21 @@ class TestSuitePrinter:
         )
 
         self.print(table.construct())
+
+    @classmethod
+    def _iter_total_test_lines(cls, suite: Union[TestSuite, TestSuites]) -> Iterable[Line]:
+        tests_color = Colors.GREEN if suite.tests else Colors.RED
+        yield Line("Total tests ran", suite.tests or 0, value_color=tests_color)
+
+        if suite.failures is not None:
+            fails_color = Colors.RED if suite.failures else Colors.GREEN
+            yield Line("Total tests failed", suite.failures or 0, value_color=fails_color)
+
+        if suite.errors is not None:
+            errors_color = Colors.RED if suite.errors else Colors.GREEN
+            yield Line("Total tests errored", suite.errors or 0, value_color=errors_color)
+
+        yield Line("Total tests skipped", suite.skipped or 0)
 
     @classmethod
     def _truncate(cls, s: str, max_width: int = 80) -> str:
