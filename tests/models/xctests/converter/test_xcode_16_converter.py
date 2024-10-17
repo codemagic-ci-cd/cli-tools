@@ -225,6 +225,8 @@ def expected_properties() -> List[Property]:
         Property(name="device_name", value="iPhone SE (3rd generation)"),
         Property(name="device_operating_system", value="18.0"),
         Property(name="device_platform", value="iOS Simulator"),
+        Property(name="ended_time", value="2024-10-15T00:00:00"),
+        Property(name="started_time", value="2024-10-15T00:00:00"),
     ]
 
 

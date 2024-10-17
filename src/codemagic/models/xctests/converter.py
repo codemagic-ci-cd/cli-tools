@@ -285,9 +285,9 @@ class Xcode16XcResultConverter(XcResultConverter):
 
         properties: List[Property] = [Property(name="title", value=xc_test_suite.name)]
         if xc_test_result_summary.start_time:
-            Property(name="started_time", value=cls._timestamp(xc_test_result_summary.start_time))
+            properties.append(Property(name="started_time", value=cls._timestamp(xc_test_result_summary.start_time)))
         if xc_test_result_summary.finish_time:
-            Property(name="ended_time", value=cls._timestamp(xc_test_result_summary.finish_time))
+            properties.append(Property(name="ended_time", value=cls._timestamp(xc_test_result_summary.finish_time)))
         if device and device.model_name:
             properties.append(Property(name="device_name", value=device.model_name))
         if device and device.architecture:
