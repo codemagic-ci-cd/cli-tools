@@ -6,6 +6,9 @@ This release contains changes from [PR #431](https://github.com/codemagic-ci-cd/
 **Features**
 - Use new `xcresulttool` APIs for XcResult parsing when Xcode 16+ is selected. Applies to `xcode-project` actions `run-tests`, `test-summary` and `junit-test-results`.
 
+**Bugfixes**
+- Omit `failures` and `errors` attributes from JUnit `<testsuites>` in case none of the child `<testsuite>` elements specify those values instead of setting them to `0`.
+
 **Development**
 - Add new XcResult to JUnit test results converter implementation `Xcode16XcResultConverter`.
 - Rename `XcResultConverter` to `LegacyXcResultConverter`.
