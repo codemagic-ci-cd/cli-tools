@@ -1,0 +1,139 @@
+{
+  "devices" : [
+    {
+      "architecture" : "arm64",
+      "deviceId" : "D4A58F38-8890-43BE-93F9-3D268010475D",
+      "deviceName" : "iPhone SE (3rd generation)",
+      "modelName" : "iPhone SE (3rd generation)",
+      "osVersion" : "18.0",
+      "platform" : "iOS Simulator"
+    }
+  ],
+  "testNodes" : [
+    {
+      "children" : [
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "0,0011s",
+                  "name" : "testDisabledExample()",
+                  "nodeIdentifier" : "banaanTests/testDisabledExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "duration" : "0,00045s",
+                  "name" : "testExample()",
+                  "nodeIdentifier" : "banaanTests/testExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "children" : [
+                    {
+                      "name" : "banaanTests.swift:50: failed: caught error: \"badInput\"",
+                      "nodeType" : "Failure Message",
+                      "result" : "Failed"
+                    }
+                  ],
+                  "duration" : "0,2s",
+                  "name" : "testExceptionExample()",
+                  "nodeIdentifier" : "banaanTests/testExceptionExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                },
+                {
+                  "children" : [
+                    {
+                      "name" : "banaanTests.swift:44: failed - This won't make the cut",
+                      "nodeType" : "Failure Message",
+                      "result" : "Failed"
+                    }
+                  ],
+                  "duration" : "0,002s",
+                  "name" : "testFailExample()",
+                  "nodeIdentifier" : "banaanTests/testFailExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                },
+                {
+                  "duration" : "0,26s",
+                  "name" : "testPerformanceExample()",
+                  "nodeIdentifier" : "banaanTests/testPerformanceExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "children" : [
+                    {
+                      "name" : "Test skipped - This test is skipped",
+                      "nodeType" : "Failure Message",
+                      "result" : "Skipped"
+                    }
+                  ],
+                  "duration" : "0,0052s",
+                  "name" : "testSkippedExample()",
+                  "nodeIdentifier" : "banaanTests/testSkippedExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Skipped"
+                }
+              ],
+              "name" : "banaanTests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "banaanTests",
+          "nodeType" : "Unit test bundle",
+          "result" : "Failed"
+        },
+        {
+          "children" : [
+            {
+              "children" : [
+                {
+                  "duration" : "2s",
+                  "name" : "testUIExample()",
+                  "nodeIdentifier" : "banaanUITests/testUIExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Passed"
+                },
+                {
+                  "children" : [
+                    {
+                      "name" : "banaanUITests.swift:40: failed - Bad UI",
+                      "nodeType" : "Failure Message",
+                      "result" : "Failed"
+                    }
+                  ],
+                  "duration" : "3s",
+                  "name" : "testUIFailExample()",
+                  "nodeIdentifier" : "banaanUITests/testUIFailExample()",
+                  "nodeType" : "Test Case",
+                  "result" : "Failed"
+                }
+              ],
+              "name" : "banaanUITests",
+              "nodeType" : "Test Suite",
+              "result" : "Failed"
+            }
+          ],
+          "name" : "banaanUITests",
+          "nodeType" : "UI test bundle",
+          "result" : "Failed"
+        }
+      ],
+      "name" : "banaan",
+      "nodeType" : "Test Plan",
+      "result" : "Failed"
+    }
+  ],
+  "testPlanConfigurations" : [
+    {
+      "configurationId" : "1",
+      "configurationName" : "Test Scheme Action"
+    }
+  ]
+}

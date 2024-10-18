@@ -1,3 +1,24 @@
+Version 0.54.0
+-------------
+
+This release contains changes from [PR #431](https://github.com/codemagic-ci-cd/cli-tools/pull/431)
+
+**Features**
+- Use new `xcresulttool` APIs for XcResult parsing when Xcode 16+ is selected. Applies to `xcode-project` actions `run-tests`, `test-summary` and `junit-test-results`.
+
+**Bugfixes**
+- Omit `failures` and `errors` attributes from JUnit `<testsuites>` in case none of the child `<testsuite>` elements specify those values instead of setting them to `0`.
+
+**Development**
+- Add new XcResult to JUnit test results converter implementation `Xcode16XcResultConverter`.
+- Rename `XcResultConverter` to `LegacyXcResultConverter`.
+- Add abstract `XcResultConverter` which automatically chooses correct implementation.
+- Refactor module `codemagic.models.xctest.xcresult` to a package and move its contents to submodule `legacy_xcresult`. All public definitions remain accessible using the old namespace.
+- Add submodule `xcode_16_xcresult` to package `codemagic.models.xctest.xcresult`.
+- Remove method `get_tool_version` from `XcResultTool`.
+- Add methods `is_legacy`, `get_test_report_summary` and `get_test_report_tests` to `XcResultTool`.
+- Prohibit using `XcResultTool` methods `get_object` and `get_bundle` when Xcode 16 or newer is selected.
+
 Version 0.53.9
 -------------
 

@@ -12,17 +12,8 @@ from codemagic.models.junit import Property
 from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
 from codemagic.models.junit import TestSuites
-from codemagic.models.xctests import XcResultConverter
 from codemagic.models.xctests import XcResultTool
-
-
-def _mock_get_object(_xcresult: pathlib.Path, object_id: str) -> Dict[str, Any]:
-    valid_chars = f"-_.{string.ascii_letters}{string.digits}"
-    filename = "".join(c if c in valid_chars else "_" for c in object_id)
-    mock_path = pathlib.Path(__file__).parent / "mocks" / f"{filename}.json"
-    if not mock_path.exists():
-        raise ValueError(f"Cannot mock object with ID {object_id!r}")
-    return json.loads(mock_path.read_text())
+from codemagic.models.xctests.converter import LegacyXcResultConverter
 
 
 @pytest.fixture()
@@ -158,9 +149,20 @@ def expected_ui_testcases():
     ]
 
 
+def _mock_get_object(_xcresult: pathlib.Path, object_id: str) -> Dict[str, Any]:
+    valid_chars = f"-_.{string.ascii_letters}{string.digits}"
+    filename = "".join(c if c in valid_chars else "_" for c in object_id)
+    mock_path = pathlib.Path(__file__).parent.parent / "mocks" / f"{filename}.json"
+    if not mock_path.exists():
+        raise ValueError(f"Cannot mock object with ID {object_id!r}")
+    return json.loads(mock_path.read_text())
+
+
 @mock.patch.object(XcResultTool, "get_object", _mock_get_object)
 def test_converter(action_invocations_record, expected_ui_testcases, expected_unit_testcases, testsuite_properties):
-    test_suites: TestSuites = XcResultConverter.actions_invocation_record_to_junit(action_invocations_record)
+    test_suites: TestSuites = LegacyXcResultConverter.actions_invocation_record_to_junit(
+        action_invocations_record,
+    )
 
     # Full XML assertions
     assert test_suites.disabled == 0

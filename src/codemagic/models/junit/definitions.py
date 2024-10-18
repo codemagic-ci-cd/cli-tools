@@ -30,13 +30,17 @@ class TestSuites:
         return sum(suite.disabled for suite in self.test_suites if suite.disabled)
 
     @property
-    def errors(self) -> int:
+    def errors(self) -> Optional[int]:
         """Total number of tests with error result from all testsuites."""
+        if all(suite.errors is None for suite in self.test_suites):
+            return None
         return sum(suite.errors for suite in self.test_suites if suite.errors)
 
     @property
-    def failures(self) -> int:
+    def failures(self) -> Optional[int]:
         """Total number of failed tests from all testsuites."""
+        if all(suite.failures is None for suite in self.test_suites):
+            return None
         return sum(suite.failures for suite in self.test_suites if suite.failures)
 
     @property
