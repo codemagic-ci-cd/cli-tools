@@ -5,6 +5,7 @@ import re
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
+from datetime import timedelta
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -241,14 +242,29 @@ class Xcode16XcResultConverter(XcResultConverter):
         return Skipped(message="\n".join(skipped_messages))
 
     @classmethod
+    def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:
+        duration = timedelta()
+
+        try:
+            for part in xc_duration.split():
+                part_value = float(part[:-1].replace(",", "."))
+                if part.endswith("s"):
+                    duration += timedelta(seconds=part_value)
+                elif part.endswith("m"):
+                    duration += timedelta(minutes=part_value)
+                else:
+                    raise ValueError("Unknown duration unit")
+        except ValueError as ve:
+            raise ValueError("Invalid duration", xc_duration) from ve
+
+        return duration.total_seconds()
+
+    @classmethod
     def _get_test_node_duration(cls, xc_test_case: XcTestNode) -> float:
         if not xc_test_case.duration:
             return 0.0
 
-        duration = xc_test_case.duration.replace(",", ".")
-        if duration.endswith("s"):
-            duration = duration[:-1]
-        return float(duration)
+        return cls.parse_xcresult_test_node_duration_value(xc_test_case.duration)
 
     @classmethod
     def _get_test_case(cls, xc_test_case: XcTestNode, xc_test_suite: XcTestNode) -> TestCase:

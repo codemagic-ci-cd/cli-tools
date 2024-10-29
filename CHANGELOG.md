@@ -1,3 +1,9 @@
+Version 0.54.1
+-------------
+
+**Bugfixes**
+- Fix testcase duration parsing from `XCResult` bundle when using Xcode 16.0+. [PR #433](https://github.com/codemagic-ci-cd/cli-tools/pull/433)
+
 Version 0.54.0
 -------------
 

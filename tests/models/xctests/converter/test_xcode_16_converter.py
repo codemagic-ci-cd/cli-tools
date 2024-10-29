@@ -127,3 +127,26 @@ def test_converter(mock_datetime, expected_properties):
         time=3.0,
         error=Error(message="banaanUITests.swift:40: failed - Bad UI", type="Failure"),
     )
+
+
+@pytest.mark.parametrize(
+    ("duration", "expected_value"),
+    (
+        ("0,00045s", 0.00045),
+        ("0,002s", 0.002),
+        ("0,0052s", 0.0052),
+        ("0,26s", 0.26),
+        ("0,2s", 0.2),
+        ("2s", 2.0),
+        ("3s", 3.0),
+        ("1m 3,01s", 63.01),
+        ("1m 3.01s", 63.01),
+        ("1m 4s", 64.0),
+        ("2m 26s", 146.0),
+        ("5m 3s", 303.0),
+        ("6m", 360.0),
+    ),
+)
+def test_parse_xcresult_test_node_duration_value(duration, expected_value):
+    value = Xcode16XcResultConverter.parse_xcresult_test_node_duration_value(duration)
+    assert value == pytest.approx(expected_value)
