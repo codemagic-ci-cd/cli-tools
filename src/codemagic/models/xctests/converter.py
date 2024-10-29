@@ -4,7 +4,9 @@ import pathlib
 import re
 from abc import ABC
 from abc import abstractmethod
+from collections import defaultdict
 from datetime import datetime
+from typing import Dict
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -241,14 +243,29 @@ class Xcode16XcResultConverter(XcResultConverter):
         return Skipped(message="\n".join(skipped_messages))
 
     @classmethod
+    def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:
+        counters: Dict[str, float] = defaultdict(float)
+
+        try:
+            for part in xc_duration.split():
+                if part.endswith("s"):
+                    counter = "seconds"
+                elif part.endswith("m"):
+                    counter = "minutes"
+                else:
+                    raise ValueError("Unknown duration unit")
+                counters[counter] = float(part[:-1].replace(",", "."))
+        except ValueError as ve:
+            raise ValueError("Invalid duration", xc_duration) from ve
+
+        return counters["minutes"] * 60.0 + counters["seconds"]
+
+    @classmethod
     def _get_test_node_duration(cls, xc_test_case: XcTestNode) -> float:
         if not xc_test_case.duration:
             return 0.0
 
-        duration = xc_test_case.duration.replace(",", ".")
-        if duration.endswith("s"):
-            duration = duration[:-1]
-        return float(duration)
+        return cls.parse_xcresult_test_node_duration_value(xc_test_case.duration)
 
     @classmethod
     def _get_test_case(cls, xc_test_case: XcTestNode, xc_test_suite: XcTestNode) -> TestCase:

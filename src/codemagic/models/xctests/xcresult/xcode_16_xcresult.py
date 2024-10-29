@@ -164,7 +164,7 @@ class XcTestInsight(XcModel):
 class XcTests(XcModel):
     """
     Model definitions for `xcresulttool get test-results tests` output.
-    Check schema with `xcrun xcresulttool help get test-results tests.
+    Check schema with `xcrun xcresulttool help get test-results tests`.
     """
 
     devices: List[XcDevice]
