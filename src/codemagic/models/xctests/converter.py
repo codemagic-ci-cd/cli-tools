@@ -4,9 +4,8 @@ import pathlib
 import re
 from abc import ABC
 from abc import abstractmethod
-from collections import defaultdict
 from datetime import datetime
-from typing import Dict
+from datetime import timedelta
 from typing import Iterator
 from typing import List
 from typing import Optional
@@ -244,21 +243,21 @@ class Xcode16XcResultConverter(XcResultConverter):
 
     @classmethod
     def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:
-        counters: Dict[str, float] = defaultdict(float)
+        duration = timedelta()
 
         try:
             for part in xc_duration.split():
+                part_value = float(part[:-1].replace(",", "."))
                 if part.endswith("s"):
-                    counter = "seconds"
+                    duration += timedelta(seconds=part_value)
                 elif part.endswith("m"):
-                    counter = "minutes"
+                    duration += timedelta(minutes=part_value)
                 else:
                     raise ValueError("Unknown duration unit")
-                counters[counter] = float(part[:-1].replace(",", "."))
         except ValueError as ve:
             raise ValueError("Invalid duration", xc_duration) from ve
 
-        return counters["minutes"] * 60.0 + counters["seconds"]
+        return duration.total_seconds()
 
     @classmethod
     def _get_test_node_duration(cls, xc_test_case: XcTestNode) -> float:

@@ -139,6 +139,8 @@ def test_converter(mock_datetime, expected_properties):
         ("0,2s", 0.2),
         ("2s", 2.0),
         ("3s", 3.0),
+        ("1m 3,01s", 63.01),
+        ("1m 3.01s", 63.01),
         ("1m 4s", 64.0),
         ("2m 26s", 146.0),
         ("5m 3s", 303.0),
