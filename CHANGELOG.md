@@ -2,8 +2,8 @@ Version 0.54.2
 -------------
 
 **Bugfixes**
+- Fix action `keychain add-certificates` for macOS 15.1 when adding certificates with empty password. [PR #436](https://github.com/codemagic-ci-cd/cli-tools/pull/436)
 - Introduce a new retrying condition for `altool` commands as part of `app-store-connect` action when unexpected return codes occurs. [PR #435](https://github.com/codemagic-ci-cd/cli-tools/pull/435)
-
 
 Version 0.54.1
 -------------
