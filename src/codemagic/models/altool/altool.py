@@ -39,9 +39,10 @@ StrTuple = Union[Tuple[()], Tuple[str, ...]]  # Empty or variable length tuple w
 
 
 class AltoolCommandError(Exception):
-    def __init__(self, error_message: str, process_output: str):
+    def __init__(self, error_message: str, process_output: str, return_code: int = 1):
         super().__init__(error_message)
         self.process_output = process_output
+        self.return_code = return_code
 
 
 class Altool(RunningCliAppMixin, StringConverterMixin):
@@ -196,7 +197,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 return self._run_command(command, f'Failed to {action_name} archive at "{artifact_path}"', cli_app)
             except AltoolCommandError as error:
                 has_retries = retries > 0
-                should_retry = self._should_retry_command(error.process_output)
+                should_retry = self._should_retry_command(error)
                 if has_retries and should_retry:
                     if attempt == 1:
                         print_fn(f"Failed to {action_name} archive, but this might be a temporary issue, retrying...")
@@ -258,6 +259,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             raise AltoolCommandError(
                 error_message,
                 self._hide_environment_variable_values(cpe.stdout),
+                cpe.returncode,
             )
 
         self._log_process_output(stdout, cli_app)
@@ -286,14 +288,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
 
         return output
 
-    @classmethod
-    def _should_retry_command(cls, process_output: str):
+    def _should_retry_command(self, command_error: AltoolCommandError) -> bool:
+        if command_error.return_code in [-5, -11]:
+            self.logger.info(f"Unexpected altool exit code {command_error.return_code}, retrying...")
+            return True
         patterns = (
             re.compile("Unable to authenticate.*-19209"),
             re.compile("server returned an invalid response.*try your request again"),
             re.compile("The request timed out."),
         )
-        return any(pattern.search(process_output) for pattern in patterns)
+        return any(pattern.search(command_error.process_output) for pattern in patterns)
 
     @classmethod
     def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:

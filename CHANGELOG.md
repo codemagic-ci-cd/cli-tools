@@ -1,3 +1,10 @@
+Version 0.54.2
+-------------
+
+**Bugfixes**
+- Introduce a new retrying condition for `altool` commands as part of `app-store-connect` action when unexpected return codes occurs. [PR #435](https://github.com/codemagic-ci-cd/cli-tools/pull/435)
+
+
 Version 0.54.1
 -------------
 
