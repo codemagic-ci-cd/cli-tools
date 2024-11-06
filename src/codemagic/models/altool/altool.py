@@ -290,7 +290,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
 
     def _should_retry_command(self, command_error: AltoolCommandError) -> bool:
         if command_error.return_code in [-5, -11]:
-            self.logger.info(f"Unknown altool exit code {command_error.return_code}, retrying...")
+            self.logger.info(f"Unexpected altool exit code {command_error.return_code}, retrying...")
             return True
         patterns = (
             re.compile("Unable to authenticate.*-19209"),

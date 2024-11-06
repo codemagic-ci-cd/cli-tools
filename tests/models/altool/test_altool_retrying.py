@@ -155,8 +155,8 @@ def test_retrying_command_by_return_code_and_success(caplog, mock_altool, mock_s
         result = mock_altool.upload_app(pathlib.Path("app.ipa"), retries=4, retry_wait_seconds=0)
 
     assert result is mock_success_result
-    assert caplog.text.count("Unknown altool exit code -11, retrying...") == 1
-    assert caplog.text.count("Unknown altool exit code -5, retrying...") == 2
+    assert caplog.text.count("Unexpected altool exit code -11, retrying...") == 1
+    assert caplog.text.count("Unexpected altool exit code -5, retrying...") == 2
 
 
 @mock.patch.object(PlatformType, "from_path", lambda _artifact_path: PlatformType.IOS)
