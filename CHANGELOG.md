@@ -1,3 +1,10 @@
+Version 0.54.2
+-------------
+
+**Bugfixes**
+- Introduce a new retrying condition for `altool` commands as part of `app-store-connect` action when unknown return codes occurs.
+
+
 Version 0.54.1
 -------------
 

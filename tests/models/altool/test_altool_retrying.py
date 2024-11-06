@@ -141,6 +141,25 @@ def test_retrying_command_success(mock_altool, mock_auth_error_stdout, mock_succ
 
 
 @mock.patch.object(PlatformType, "from_path", lambda _artifact_path: PlatformType.IOS)
+def test_retrying_command_by_return_code_and_success(caplog, mock_altool, mock_success_result):
+    raise_errors = mock.Mock(
+        side_effect=(
+            AltoolCommandError("my error", "process output", -11),
+            AltoolCommandError("my error", "process output", -5),
+            AltoolCommandError("my error", "process output", -5),
+            mock_success_result,
+        ),
+    )
+
+    with mock.patch.object(mock_altool, "_run_command", side_effect=raise_errors):
+        result = mock_altool.upload_app(pathlib.Path("app.ipa"), retries=4, retry_wait_seconds=0)
+
+    assert result is mock_success_result
+    assert caplog.text.count("Unknown altool exit code -11, retrying...") == 1
+    assert caplog.text.count("Unknown altool exit code -5, retrying...") == 2
+
+
+@mock.patch.object(PlatformType, "from_path", lambda _artifact_path: PlatformType.IOS)
 def test_retrying_command_immediate_success(mock_altool, mock_success_stdout, mock_success_result):
     with mock.patch.object(mock_altool, "_run_command", side_effect=[mock_success_result]):
         result = mock_altool.upload_app(pathlib.Path("app.ipa"), retries=100, retry_wait_seconds=0)
