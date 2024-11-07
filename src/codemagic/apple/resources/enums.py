@@ -259,6 +259,7 @@ class ContentRightsDeclaration(ResourceEnum):
 
 
 class DeviceClass(ResourceEnum):
+    APPLE_SILICON_MAC = "APPLE_SILICON_MAC"
     APPLE_TV = "APPLE_TV"
     APPLE_VISION_PRO = "APPLE_VISION_PRO"
     APPLE_WATCH = "APPLE_WATCH"
