@@ -272,10 +272,7 @@ class DeviceClass(ResourceEnum):
         if profile_type.is_tvos_profile:
             return self is DeviceClass.APPLE_TV
         elif profile_type.is_macos_profile:
-            return self in (
-                DeviceClass.APPLE_SILICON_MAC,
-                DeviceClass.MAC,
-            )
+            return self is DeviceClass.MAC
         else:
             return self in (
                 DeviceClass.APPLE_VISION_PRO,

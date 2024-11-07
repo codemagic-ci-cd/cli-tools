@@ -1,3 +1,9 @@
+Version 0.54.3
+-------------
+
+**Bugfixes**
+- Support device class `APPLE_SILICON_MAC` on App Store Connect API [`Device`](https://developer.apple.com/documentation/appstoreconnectapi/device) responses. [PR #437](https://github.com/codemagic-ci-cd/cli-tools/pull/437)
+
 Version 0.54.2
 -------------
 
