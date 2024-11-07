@@ -80,8 +80,6 @@ class App(Resource):
         builds: Relationship
         endUserLicenseAgreement: Relationship
         gameCenterEnabledVersions: Relationship
-        inAppPurchases: Relationship
-        preOrder: Relationship
         preReleaseVersions: Relationship
 
         alternativeDistributionKey: Optional[Relationship] = None
@@ -98,9 +96,11 @@ class App(Resource):
         ciProduct: Optional[Relationship] = None
         customerReviews: Optional[Relationship] = None
         gameCenterDetail: Optional[Relationship] = None
+        inAppPurchases: Optional[Relationship] = None
         inAppPurchasesV2: Optional[Relationship] = None
         marketplaceSearchDetail: Optional[Relationship] = None
         perfPowerMetrics: Optional[Relationship] = None
+        preOrder: Optional[Relationship] = None
         pricePoints: Optional[Relationship] = None
         promotedPurchases: Optional[Relationship] = None
         reviewSubmissions: Optional[Relationship] = None

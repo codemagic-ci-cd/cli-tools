@@ -3,6 +3,7 @@ Version 0.54.3
 
 **Bugfixes**
 - Support device class `APPLE_SILICON_MAC` on App Store Connect API [`Device`](https://developer.apple.com/documentation/appstoreconnectapi/device) responses. [PR #437](https://github.com/codemagic-ci-cd/cli-tools/pull/437)
+- Make undocumented `preOrder` and deprecated `inAppPurchases` relationships on App Store connect https://developer.apple.com/documentation/appstoreconnectapi/app/relationships-data.dictionary model optional . [PR #439](https://github.com/codemagic-ci-cd/cli-tools/pull/439)
 
 **Improvements**
 - Fail action `app-store-connect fetch-signing-files` early with descriptive error message if bundle ID identifier is not given. [PR #438](https://github.com/codemagic-ci-cd/cli-tools/pull/438)
