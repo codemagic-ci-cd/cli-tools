@@ -259,6 +259,7 @@ class ContentRightsDeclaration(ResourceEnum):
 
 
 class DeviceClass(ResourceEnum):
+    APPLE_SILICON_MAC = "APPLE_SILICON_MAC"
     APPLE_TV = "APPLE_TV"
     APPLE_VISION_PRO = "APPLE_VISION_PRO"
     APPLE_WATCH = "APPLE_WATCH"
@@ -271,7 +272,10 @@ class DeviceClass(ResourceEnum):
         if profile_type.is_tvos_profile:
             return self is DeviceClass.APPLE_TV
         elif profile_type.is_macos_profile:
-            return self is DeviceClass.MAC
+            return self in (
+                DeviceClass.APPLE_SILICON_MAC,
+                DeviceClass.MAC,
+            )
         else:
             return self in (
                 DeviceClass.APPLE_VISION_PRO,
