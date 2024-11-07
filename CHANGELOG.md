@@ -1,3 +1,9 @@
+Version 0.54.3
+-------------
+
+**Improvements**
+- Fail action `app-store-connect fetch-signing-files` early with descriptive error message if bundle ID identifier is not given. [PR #438](https://github.com/codemagic-ci-cd/cli-tools/pull/438)
+
 Version 0.54.2
 -------------
 
