@@ -59,6 +59,11 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         for Bundle ID with given identifier
         """
 
+        if not bundle_id_identifier:
+            raise BundleIdArgument.BUNDLE_ID_IDENTIFIER.raise_argument_error(
+                'Bundle ID identifier must be specified, empty values are not allowed. For example "com.example.app".',
+            )
+
         private_key = self._get_certificate_key(certificate_key, certificate_key_password)
         if private_key is None:
             raise AppStoreConnectError(f"Cannot save {SigningCertificate.s} without certificate private key")
