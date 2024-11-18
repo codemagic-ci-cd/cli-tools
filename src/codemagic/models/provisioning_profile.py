@@ -86,7 +86,8 @@ class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterM
 
     @property
     def team_identifier(self) -> str:
-        return self._plist.get("TeamIdentifier", [None])[0]
+        team_identifiers = self._plist.get("TeamIdentifier") or [""]
+        return team_identifiers[0]
 
     @property
     def team_name(self) -> str:
