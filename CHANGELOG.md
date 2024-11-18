@@ -1,3 +1,9 @@
+Version 0.54.4
+-------------
+
+**Bugfixes**
+- Fix `team_identifier` property on `codemagic.models.ProvisioningProfile` to always return a string as the type hint suggests. [PR #440](https://github.com/codemagic-ci-cd/cli-tools/pull/440)
+
 Version 0.54.3
 -------------
 
