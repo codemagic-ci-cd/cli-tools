@@ -1,8 +1,6 @@
-Version 0.54.5
+Version 0.55.0
 -------------
 Changes in this release are from [PR #441](https://github.com/codemagic-ci-cd/cli-tools/pull/441).
-
-**None of the breaking changes have an effect on command line usage**, only the Python API is affected.
 
 **Development**
 - **Breaking**: Deprecate Python 3.7, and Python 3.8 is now the minimum version of Python required.
