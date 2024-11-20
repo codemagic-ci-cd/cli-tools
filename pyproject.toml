@@ -35,7 +35,7 @@ universal-apk = "codemagic.tools:UniversalApkGenerator.invoke_cli"
 xcode-project = "codemagic.tools:XcodeProject.invoke_cli"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 cryptography = ">= 38.0.0"
 google-api-python-client = ">= 2.84.0"
 httplib2 = ">= 0.19.0"
