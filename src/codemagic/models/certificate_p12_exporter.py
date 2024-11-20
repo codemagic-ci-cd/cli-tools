@@ -20,7 +20,7 @@ from codemagic.mixins import RunningCliAppMixin
 from codemagic.mixins import StringConverterMixin
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from typing import Literal
 
     from .certificate import Certificate
     from .private_key import PrivateKey

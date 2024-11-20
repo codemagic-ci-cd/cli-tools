@@ -55,7 +55,6 @@ pytest = "*"
 pytest-cov = "*"
 ruff = "*"
 types-requests = "*"
-typing-extensions = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

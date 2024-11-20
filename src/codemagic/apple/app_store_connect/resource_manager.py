@@ -26,7 +26,7 @@ R_co = TypeVar("R_co", bound=Resource, covariant=True)
 R2 = TypeVar("R2", bound=Resource)
 
 if TYPE_CHECKING:
-    from typing_extensions import Protocol
+    from typing import Protocol
 
     from codemagic.apple import AppStoreConnectApiClient
 

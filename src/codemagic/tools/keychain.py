@@ -20,7 +20,7 @@ from codemagic.mixins import PathFinderMixin
 from codemagic.models import Certificate
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from typing import Literal
 
 
 class Seconds(int):

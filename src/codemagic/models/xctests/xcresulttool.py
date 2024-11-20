@@ -20,7 +20,7 @@ from codemagic.mixins import StringConverterMixin
 from codemagic.models import Xcode
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from typing import Literal
 
     from codemagic.cli import CliApp
 
