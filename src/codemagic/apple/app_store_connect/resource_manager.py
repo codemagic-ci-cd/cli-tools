@@ -55,24 +55,6 @@ if TYPE_CHECKING:
         def modify(self, ref: ResourceReference, **update_params) -> R_co:
             ...
 
-else:
-    # TODO: Once Python 3.7 support is removed and we have Protocols
-    #   available in runtime, then those can be removed.
-    class CreatingResourceManager(Generic[R]):
-        ...
-
-    class ReadingResourceManager(Generic[R]):
-        ...
-
-    class ListingResourceManager(Generic[R]):
-        ...
-
-    class DeletingResourceManager(Generic[R]):
-        ...
-
-    class ModifyingResourceManager(Generic[R]):
-        ...
-
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
     class Filter:

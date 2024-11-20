@@ -12,7 +12,7 @@ and can be installed and updated using [pip](https://pip.pypa.io/en/stable/getti
 python -m pip install codemagic-cli-tools
 ```
 
-The package requires Python version 3.7+.
+The package requires Python version 3.8+.
 
 # Command line usage
 
