@@ -53,7 +53,6 @@ except ImportError:
 
 if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
-
     from typing import Literal
 
 
