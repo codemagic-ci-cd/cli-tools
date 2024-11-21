@@ -53,8 +53,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from argparse import _SubParsersAction as SubParsersAction
-
-    from typing_extensions import Literal
+    from typing import Literal
 
 
 class ArgumentValueEncodingError(Exception):

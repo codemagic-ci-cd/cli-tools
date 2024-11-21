@@ -26,7 +26,7 @@ R_co = TypeVar("R_co", bound=Resource, covariant=True)
 R2 = TypeVar("R2", bound=Resource)
 
 if TYPE_CHECKING:
-    from typing_extensions import Protocol
+    from typing import Protocol
 
     from codemagic.apple import AppStoreConnectApiClient
 
@@ -54,24 +54,6 @@ if TYPE_CHECKING:
     class ModifyingResourceManager(PResourceManager[R_co], Protocol):
         def modify(self, ref: ResourceReference, **update_params) -> R_co:
             ...
-
-else:
-    # TODO: Once Python 3.7 support is removed and we have Protocols
-    #   available in runtime, then those can be removed.
-    class CreatingResourceManager(Generic[R]):
-        ...
-
-    class ReadingResourceManager(Generic[R]):
-        ...
-
-    class ListingResourceManager(Generic[R]):
-        ...
-
-    class DeletingResourceManager(Generic[R]):
-        ...
-
-    class ModifyingResourceManager(Generic[R]):
-        ...
 
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
