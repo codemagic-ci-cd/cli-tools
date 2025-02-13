@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+
 from codemagic.cli import Colors
 from codemagic.utilities.decorators import deprecated
 

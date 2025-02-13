@@ -2,8 +2,9 @@ import pathlib
 from unittest import mock
 
 import pytest
-from codemagic.models import Xcode
 from packaging.version import Version
+
+from codemagic.models import Xcode
 
 
 @pytest.fixture

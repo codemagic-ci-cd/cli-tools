@@ -23,5 +23,4 @@ class ResourceManager(Generic[ResourceT, GoogleResourceT], ABC):
 
     @property
     @abstractmethod
-    def resource_type(self) -> Type[ResourceT]:
-        ...
+    def resource_type(self) -> Type[ResourceT]: ...

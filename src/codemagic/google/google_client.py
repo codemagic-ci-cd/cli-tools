@@ -27,8 +27,7 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
 
     @property
     @abstractmethod
-    def google_service_name(self) -> str:
-        ...
+    def google_service_name(self) -> str: ...
 
     def _build_google_resource(self) -> GoogleResourceT:
         try:

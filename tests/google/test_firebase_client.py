@@ -3,6 +3,7 @@ from unittest.mock import PropertyMock
 from unittest.mock import patch
 
 import pytest
+
 from codemagic.google import FirebaseClient
 from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.resource_managers import ReleaseManager

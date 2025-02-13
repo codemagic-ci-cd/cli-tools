@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.utilities.levenshtein_distance import levenshtein_distance
 
 

@@ -3,6 +3,7 @@ import shutil
 from tempfile import NamedTemporaryFile
 
 import pytest
+
 from codemagic.shell_tools import Keytool
 
 

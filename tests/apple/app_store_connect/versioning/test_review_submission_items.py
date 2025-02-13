@@ -1,10 +1,10 @@
 import os
 
 import pytest
+
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import ReviewSubmissionItem
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

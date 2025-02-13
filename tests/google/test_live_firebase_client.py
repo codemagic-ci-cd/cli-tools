@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import pytest
+
 from codemagic.google import FirebaseClient
 from codemagic.google.resources import OrderBy
 

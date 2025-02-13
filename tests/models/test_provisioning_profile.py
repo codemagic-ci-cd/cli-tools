@@ -2,6 +2,7 @@ from datetime import datetime
 from datetime import timezone
 
 import pytest
+
 from codemagic.models import ProvisioningProfile
 
 

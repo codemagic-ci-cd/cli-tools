@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.tools.google_play.argument_types import CredentialsArgument
 
 

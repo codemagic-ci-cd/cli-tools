@@ -3,6 +3,7 @@ import pathlib
 from typing import Dict
 
 import pytest
+
 from codemagic.models.xctests.xcresult import ActionsInvocationRecord
 
 

@@ -5,6 +5,7 @@ import os
 import pathlib
 
 import pytest
+
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
 from codemagic.tools.app_store_connect.arguments import Types

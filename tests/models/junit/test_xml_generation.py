@@ -2,6 +2,7 @@ import pathlib
 from xml.etree import ElementTree
 
 import pytest
+
 from codemagic.models.junit import Error
 from codemagic.models.junit import Failure
 from codemagic.models.junit import Property

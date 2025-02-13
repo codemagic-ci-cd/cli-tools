@@ -1,10 +1,11 @@
 from unittest import mock
 
 import pytest
-from codemagic.apple import AppStoreConnectApiError
-from codemagic.apple.app_store_connect import AppStoreConnectApiSession
 from requests import Response
 from requests import Session
+
+from codemagic.apple import AppStoreConnectApiError
+from codemagic.apple.app_store_connect import AppStoreConnectApiSession
 
 
 def _get_failed_response_mock(payload: dict, status_code: int):

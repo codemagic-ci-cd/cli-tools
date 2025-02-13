@@ -1,13 +1,13 @@
 import os
 
 import pytest
+
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect.apps import Apps
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

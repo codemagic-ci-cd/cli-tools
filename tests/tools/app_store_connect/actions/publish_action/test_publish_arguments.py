@@ -6,6 +6,7 @@ import pathlib
 from unittest import mock
 
 import pytest
+
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType

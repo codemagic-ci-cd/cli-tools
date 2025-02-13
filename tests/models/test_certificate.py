@@ -7,11 +7,12 @@ from unittest.mock import PropertyMock
 
 import cryptography
 import pytest
-from codemagic.models import Certificate
-from codemagic.models import PrivateKey
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from packaging.version import Version
+
+from codemagic.models import Certificate
+from codemagic.models import PrivateKey
 
 
 @pytest.fixture

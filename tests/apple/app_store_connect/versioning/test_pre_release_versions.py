@@ -1,10 +1,10 @@
 import os
 
 import pytest
+
 from codemagic.apple.resources import Build
 from codemagic.apple.resources import PreReleaseVersion
 from codemagic.apple.resources import ResourceId
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

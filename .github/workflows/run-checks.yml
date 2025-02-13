@@ -27,9 +27,11 @@ jobs:
         path: .venv
         key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}-py-${{ matrix.python-version }}
 
+    - name: Install Poetry
+      run: pipx install poetry
+
     - name: Install dependencies
       run: |
-        curl -sSL https://install.python-poetry.org | python
         poetry config virtualenvs.in-project true
         poetry install --no-interaction
 

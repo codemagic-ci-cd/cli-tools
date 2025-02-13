@@ -4,6 +4,7 @@ from typing import List
 from unittest import mock
 
 import pytest
+
 from codemagic.models.junit import Error
 from codemagic.models.junit import Property
 from codemagic.models.junit import Skipped

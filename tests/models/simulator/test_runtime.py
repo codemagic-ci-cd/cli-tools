@@ -1,6 +1,7 @@
 import pytest
-from codemagic.models.simulator import Runtime
 from packaging.version import Version
+
+from codemagic.models.simulator import Runtime
 
 
 @pytest.mark.parametrize(

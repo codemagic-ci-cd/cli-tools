@@ -6,6 +6,7 @@ from typing import Union
 from unittest import mock
 
 import pytest
+
 from codemagic.models.simulator import Runtime
 from codemagic.models.simulator import Simulator
 

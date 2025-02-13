@@ -16,12 +16,10 @@ class FirebaseAppDistributionAction(ABC):
 
     @property
     @abstractmethod
-    def project_number(self):
-        ...
+    def project_number(self): ...
 
     @classmethod
-    def echo(cls, message: str, *args, **kwargs) -> None:
-        ...
+    def echo(cls, message: str, *args, **kwargs) -> None: ...
 
     # Action signatures in alphabetical order
 

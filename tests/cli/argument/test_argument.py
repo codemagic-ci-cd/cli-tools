@@ -7,6 +7,7 @@ from typing import Type
 from typing import Union
 
 import pytest
+
 from codemagic import cli
 from codemagic.cli import Argument
 from codemagic.cli import Colors

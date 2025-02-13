@@ -1,8 +1,9 @@
 from unittest import mock
 
 import pytest
-from codemagic.models.xctests import XcResultTool
 from packaging.version import Version
+
+from codemagic.models.xctests import XcResultTool
 
 
 @pytest.mark.parametrize(

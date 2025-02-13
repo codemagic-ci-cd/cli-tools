@@ -12,6 +12,7 @@ from typing import NamedTuple
 from typing import Optional
 
 import pytest
+
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier

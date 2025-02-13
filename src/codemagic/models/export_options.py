@@ -154,12 +154,10 @@ class ExportOptions(StringConverterMixin):
         return actual_type
 
     @overload
-    def _set_manifest(self, new_manifest: Union[enum.Enum, bool, str, List[ProvisioningProfileInfo]]) -> NoReturn:
-        ...
+    def _set_manifest(self, new_manifest: Union[enum.Enum, bool, str, List[ProvisioningProfileInfo]]) -> NoReturn: ...
 
     @overload
-    def _set_manifest(self, new_manifest: Union[Dict[str, str], Manifest]) -> None:
-        ...
+    def _set_manifest(self, new_manifest: Union[Dict[str, str], Manifest]) -> None: ...
 
     def _set_manifest(self, new_manifest):
         if isinstance(new_manifest, Manifest):
@@ -173,12 +171,13 @@ class ExportOptions(StringConverterMixin):
             raise ValueError(f"Invalid value for manifest: {new_manifest!r}")
 
     @overload
-    def _set_provisioning_profiles(self, new_profiles: Union[enum.Enum, bool, str, Manifest]) -> NoReturn:
-        ...
+    def _set_provisioning_profiles(self, new_profiles: Union[enum.Enum, bool, str, Manifest]) -> NoReturn: ...
 
     @overload
-    def _set_provisioning_profiles(self, new_profiles: Union[Dict[str, str], List[ProvisioningProfileInfo]]) -> None:
-        ...
+    def _set_provisioning_profiles(
+        self,
+        new_profiles: Union[Dict[str, str], List[ProvisioningProfileInfo]],
+    ) -> None: ...
 
     def _set_provisioning_profiles(self, new_profiles):
         if isinstance(new_profiles, list):

@@ -206,12 +206,15 @@ class Xcode16XcResultConverter(XcResultConverter):
     @classmethod
     def _get_test_suite_name(cls, xc_test_suite: XcTestNode) -> str:
         name = xc_test_suite.name or ""
-        device_info = ""
 
         device = cls._get_run_destination(xc_test_suite)
-        if device:
+        if device and device.platform is not None:
             platform = re.sub("simulator", "", device.platform, flags=re.IGNORECASE).strip()
             device_info = f"{platform} {device.os_version} {device.model_name}"
+        elif device:
+            device_info = f"{device.os_version} {device.model_name}"
+        else:
+            device_info = ""
 
         if name and device_info:
             return f"{name} [{device_info}]"

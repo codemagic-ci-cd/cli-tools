@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.models.enums import ResourceEnum
 from codemagic.models.enums import ResourceEnumMeta
 

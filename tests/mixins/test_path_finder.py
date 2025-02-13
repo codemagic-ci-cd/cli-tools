@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
+
 from codemagic.mixins import PathFinderMixin
 
 

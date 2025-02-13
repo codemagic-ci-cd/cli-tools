@@ -16,8 +16,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     # Define signatures for self-reference to other action groups
 
     @classmethod
-    def echo(cls, message: str, *args, **kwargs) -> None:
-        ...
+    def echo(cls, message: str, *args, **kwargs) -> None: ...
 
     # Action signatures in alphabetical order
 

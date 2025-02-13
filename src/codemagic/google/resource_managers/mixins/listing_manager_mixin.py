@@ -43,8 +43,7 @@ class ListingManagerMixin(Generic[ResourceT, ResourceIdentifierT], ActingManager
             }
 
     @abstractmethod
-    def _get_resources_page_request(self, arguments: PageRequestArguments) -> HttpRequest:
-        ...
+    def _get_resources_page_request(self, arguments: PageRequestArguments) -> HttpRequest: ...
 
     def list(
         self,

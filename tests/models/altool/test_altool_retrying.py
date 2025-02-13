@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 import pytest
+
 from codemagic.models import Altool
 from codemagic.models.altool import AltoolResult
 from codemagic.models.altool.altool import AltoolCommandError

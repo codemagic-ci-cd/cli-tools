@@ -2,6 +2,7 @@ import pathlib
 import shutil
 
 import pytest
+
 from codemagic.models import CodeSignEntitlements
 
 _expected_entitlements = {

@@ -5,6 +5,7 @@ from datetime import timedelta
 from datetime import timezone
 
 import pytest
+
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources.resource import PrettyNameMeta
@@ -81,8 +82,7 @@ def test_pretty_name_meta(class_name, pretty_name):
     ],
 )
 def test_pretty_name(class_name, pretty_name):
-    class K(metaclass=PrettyNameMeta):
-        ...
+    class K(metaclass=PrettyNameMeta): ...
 
     K.__name__ = class_name
     assert str(K) == pretty_name
@@ -99,8 +99,7 @@ def test_pretty_name(class_name, pretty_name):
     ],
 )
 def test_pretty_name_plural(class_name, plural_name):
-    class K(metaclass=PrettyNameMeta):
-        ...
+    class K(metaclass=PrettyNameMeta): ...
 
     K.__name__ = class_name
     assert K.plural() == plural_name

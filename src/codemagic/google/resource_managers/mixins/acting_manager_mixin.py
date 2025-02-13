@@ -29,13 +29,11 @@ class ActingManagerMixin(Generic[ResourceT], ABC):
 
     @property
     @abstractmethod
-    def manager_action(self) -> str:
-        ...
+    def manager_action(self) -> str: ...
 
     @property
     @abstractmethod
-    def resource_type(self) -> Type[ResourceT]:
-        ...
+    def resource_type(self) -> Type[ResourceT]: ...
 
     def _execute_request(self, request: HttpRequest) -> Dict[str, Any]:
         self._logger.info(f">>> {request.method} {request.uri} {request.body}")

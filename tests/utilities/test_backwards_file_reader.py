@@ -4,6 +4,7 @@ import string
 import tempfile
 
 import pytest
+
 from codemagic.utilities.backwards_file_reader import iter_backwards
 
 

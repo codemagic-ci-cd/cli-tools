@@ -3,6 +3,7 @@ from datetime import timezone
 from unittest import mock
 
 import pytest
+
 from codemagic.google.resources import Release
 from codemagic.google.resources import ReleaseNotes
 from codemagic.google.resources.identifiers import AppIdentifier

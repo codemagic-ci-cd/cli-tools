@@ -9,6 +9,7 @@ from typing import List
 from unittest import mock
 
 import pytest
+
 from codemagic.google_play.resources import Track
 from codemagic.tools.google_play import GooglePlay
 from codemagic.tools.google_play.argument_types import CredentialsArgument

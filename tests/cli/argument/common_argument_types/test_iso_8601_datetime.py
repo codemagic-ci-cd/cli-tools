@@ -4,6 +4,7 @@ from datetime import timedelta
 from datetime import timezone
 
 import pytest
+
 from codemagic.cli.argument import CommonArgumentTypes
 
 

@@ -2,6 +2,7 @@ import logging
 import unittest
 
 import pytest
+
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 
 

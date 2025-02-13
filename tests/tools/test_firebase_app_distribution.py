@@ -9,6 +9,9 @@ from typing import List
 from unittest import mock
 
 import pytest
+from googleapiclient import discovery
+from oauth2client.service_account import ServiceAccountCredentials
+
 from codemagic.google.resource_managers.release_manager import ReleaseManager
 from codemagic.google.resources import OrderBy
 from codemagic.google.resources import Release
@@ -17,8 +20,6 @@ from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
 from codemagic.tools.firebase_app_distribution.errors import FirebaseAppDistributionError
-from googleapiclient import discovery
-from oauth2client.service_account import ServiceAccountCredentials
 
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_number_argument = FirebaseArgument.PROJECT_NUMBER
