@@ -1,3 +1,12 @@
+UNRELEASED
+-------------
+
+**Development**
+- Update `black`, `mypy` and `ruff` development dependencies. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
+- Reformat sources to comply with latest `black` and `ruff` versions. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
+- Remove old type stubs for `psutil` package and `re` module. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
+- Add new development dependency `types-psutil`. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
+
 Version 0.55.0
 -------------
 Changes in this release are from [PR #441](https://github.com/codemagic-ci-cd/cli-tools/pull/441).
