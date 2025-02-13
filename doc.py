@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import operator
 import os
+import pathlib
 import re
+import shutil
 import sys
 import textwrap
 from collections import defaultdict
@@ -14,7 +17,6 @@ from pathlib import Path
 from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
 
@@ -28,7 +30,8 @@ from codemagic import tools
 from codemagic.cli import MutuallyExclusiveGroup
 
 
-class SerializedArgument(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class SerializedArgument:
     key: str
     description: str
     flags: str
@@ -42,23 +45,26 @@ class SerializedArgument(NamedTuple):
     mutually_exclusive_group: Optional[MutuallyExclusiveGroup] = None
 
 
-class Action(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class Action:
     action_name: str
     name: str
     description: str
     required_args: List[SerializedArgument]
     optional_args: List[SerializedArgument]
     custom_args: Dict[str, List[SerializedArgument]]
-    mutually_exclusive_args: List[SerializedArgument] = None
+    mutually_exclusive_args: List[SerializedArgument] = dataclasses.field(default_factory=list)
 
 
-class ActionGroup(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class ActionGroup:
     name: str
     description: str
     actions: List[Action]
 
 
-class ArgumentKwargs(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class ArgumentKwargs:
     nargs: bool
     required: bool
     default: str
@@ -213,8 +219,8 @@ class ToolDocumentationGenerator:
         md.create_md_file()
 
     def _write_action_group_page(self, action_group: ActionGroup):
-        group_path = f"{self.tool_prefix}/{action_group.name}"
-        md = MdUtils(file_name=group_path, title=action_group.name)
+        group_path = pathlib.Path(self.tool_prefix, action_group.name)
+        md = MdUtils(file_name=str(group_path), title=action_group.name)
         writer = Writer(md)
         writer.write_description(action_group.description)
         writer.write_command_usage(self, action_group=action_group)
@@ -222,7 +228,8 @@ class ToolDocumentationGenerator:
         writer.write_actions_table(action_group.actions, action_group=action_group)
         writer.ensure_empty_line_at_end()
         md.create_md_file()
-        os.makedirs(group_path, exist_ok=True)
+        group_path.mkdir(exist_ok=True)
+        shutil.copy(group_path.with_suffix(".md"), group_path / "README.md")
         for action in action_group.actions:
             self._write_action_page(action, action_group=action_group)
 
@@ -379,7 +386,7 @@ class CommandUsageGenerator:
 
     @classmethod
     def _get_formatted_flag_text(cls, arg: SerializedArgument) -> str:
-        flag = f'{arg.flags.split(",")[0]}'
+        flag = f"{arg.flags.split(',')[0]}"
         if arg.store_boolean:
             pass
         elif not arg.flags and arg.name:
