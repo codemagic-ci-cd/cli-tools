@@ -31,7 +31,9 @@ jobs:
       run: pipx install poetry
 
     - name: Install dependencies
-      run: poetry install --no-interaction
+      run: |
+        poetry config virtualenvs.in-project true
+        poetry install --no-interaction
 
     - name: Check code formatting
       run: |
