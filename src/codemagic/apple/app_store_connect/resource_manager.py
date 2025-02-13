@@ -32,28 +32,22 @@ if TYPE_CHECKING:
 
     class PResourceManager(Protocol[R_co]):
         @property
-        def resource_type(self) -> Type[R_co]:
-            ...
+        def resource_type(self) -> Type[R_co]: ...
 
     class CreatingResourceManager(PResourceManager[R_co], Protocol):
-        def create(self, **create_params) -> R_co:
-            ...
+        def create(self, **create_params) -> R_co: ...
 
     class ReadingResourceManager(PResourceManager[R_co], Protocol):
-        def read(self, ref: ResourceReference) -> R_co:
-            ...
+        def read(self, ref: ResourceReference) -> R_co: ...
 
     class ListingResourceManager(PResourceManager[R], Protocol):
-        def list(self, *, resource_filter: ResourceManager.Filter, **listing_options) -> List[R]:
-            ...
+        def list(self, *, resource_filter: ResourceManager.Filter, **listing_options) -> List[R]: ...
 
     class DeletingResourceManager(PResourceManager[R_co], Protocol):
-        def delete(self, ref: ResourceReference) -> None:
-            ...
+        def delete(self, ref: ResourceReference) -> None: ...
 
     class ModifyingResourceManager(PResourceManager[R_co], Protocol):
-        def modify(self, ref: ResourceReference, **update_params) -> R_co:
-            ...
+        def modify(self, ref: ResourceReference, **update_params) -> R_co: ...
 
 
 class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
@@ -111,7 +105,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
     @classmethod
     def _get_include_field_name(cls, include_type: Type[R]) -> str:
-        raise NotImplemented  # noqa: F901
+        raise NotImplementedError()  # noqa: F901
 
     @classmethod
     def _get_update_payload(

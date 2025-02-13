@@ -244,7 +244,7 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
             )
 
             try:
-                existing_submission_match: re.Match = next(filter(bool, existing_submission_matches))
+                existing_submission_match: re.Match = next(m for m in existing_submission_matches if m)
             except StopIteration:
                 raise AppStoreConnectError(str(api_error)) from api_error
 
