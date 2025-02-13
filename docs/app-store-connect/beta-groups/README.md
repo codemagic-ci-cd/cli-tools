@@ -91,5 +91,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`add-build`](beta-groups/add-build.md)|Add build to Beta groups|
-|[`remove-build`](beta-groups/remove-build.md)|Remove build from Beta groups|
+|[`add-build`](add-build.md)|Add build to Beta groups|
+|[`remove-build`](remove-build.md)|Remove build from Beta groups|

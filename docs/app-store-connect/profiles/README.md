@@ -91,7 +91,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](profiles/create.md)|Create provisioning profile of given type|
-|[`delete`](profiles/delete.md)|Delete specified Profile from Apple Developer portal|
-|[`get`](profiles/get.md)|Get specified Profile from Apple Developer portal|
-|[`list`](profiles/list.md)|List Profiles from Apple Developer portal matching given constraints|
+|[`create`](create.md)|Create provisioning profile of given type|
+|[`delete`](delete.md)|Delete specified Profile from Apple Developer portal|
+|[`get`](get.md)|Get specified Profile from Apple Developer portal|
+|[`list`](list.md)|List Profiles from Apple Developer portal matching given constraints|

@@ -91,7 +91,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](certificates/create.md)|Create code signing certificates of given type|
-|[`delete`](certificates/delete.md)|Delete specified Signing Certificate from Apple Developer portal|
-|[`get`](certificates/get.md)|Get specified Signing Certificate from Apple Developer portal|
-|[`list`](certificates/list.md)|List Signing Certificates from Apple Developer Portal matching given constraints|
+|[`create`](create.md)|Create code signing certificates of given type|
+|[`delete`](delete.md)|Delete specified Signing Certificate from Apple Developer portal|
+|[`get`](get.md)|Get specified Signing Certificate from Apple Developer portal|
+|[`list`](list.md)|List Signing Certificates from Apple Developer Portal matching given constraints|

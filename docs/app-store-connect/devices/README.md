@@ -91,5 +91,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`list`](devices/list.md)|List Devices from Apple Developer portal matching given constraints|
-|[`register`](devices/register.md)|Register new Devices for app development|
+|[`list`](list.md)|List Devices from Apple Developer portal matching given constraints|
+|[`register`](register.md)|Register new Devices for app development|
