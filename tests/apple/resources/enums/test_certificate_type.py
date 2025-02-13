@@ -2,6 +2,7 @@ from typing import List
 from typing import Sequence
 
 import pytest
+
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import ProfileType
 

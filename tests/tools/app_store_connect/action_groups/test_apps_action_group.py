@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from codemagic.apple.resources import App
 from codemagic.apple.resources import ResourceId
 from codemagic.tools import AppStoreConnect

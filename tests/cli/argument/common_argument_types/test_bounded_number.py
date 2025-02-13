@@ -1,6 +1,7 @@
 from argparse import ArgumentTypeError
 
 import pytest
+
 from codemagic.cli.argument import CommonArgumentTypes
 
 

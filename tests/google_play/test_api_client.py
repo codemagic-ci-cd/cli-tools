@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
 
 

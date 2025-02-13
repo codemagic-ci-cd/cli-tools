@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import pytest
+
 from codemagic.apple.resources import BundleId
 from codemagic.apple.resources import Device
 from codemagic.apple.resources import LinkedResourceData
@@ -10,7 +11,6 @@ from codemagic.apple.resources import ProfileType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import SigningCertificate
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

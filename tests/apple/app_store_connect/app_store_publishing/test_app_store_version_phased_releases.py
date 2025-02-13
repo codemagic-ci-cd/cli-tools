@@ -1,11 +1,11 @@
 import os
 
 import pytest
+
 from codemagic.apple.resources import AppStoreVersionPhasedRelease
 from codemagic.apple.resources import PhasedReleaseState
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

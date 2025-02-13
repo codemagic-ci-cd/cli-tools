@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.models import CertificateAttributes
 
 

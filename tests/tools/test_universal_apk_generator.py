@@ -5,6 +5,7 @@ import itertools
 from pathlib import Path
 
 import pytest
+
 from codemagic.tools.universal_apk_generator import UniversalApkGenerator
 from codemagic.tools.universal_apk_generator import UniversalApkGeneratorArgument
 

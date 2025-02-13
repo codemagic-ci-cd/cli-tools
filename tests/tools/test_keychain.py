@@ -4,6 +4,7 @@ from unittest import mock
 from unittest.mock import Mock
 
 import pytest
+
 from codemagic.cli import CliProcess
 from codemagic.tools.keychain import Keychain
 from codemagic.tools.keychain import KeychainArgument

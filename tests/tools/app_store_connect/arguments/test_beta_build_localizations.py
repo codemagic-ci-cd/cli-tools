@@ -4,6 +4,7 @@ import tempfile
 from argparse import ArgumentTypeError
 
 import pytest
+
 from codemagic.apple.resources import Locale
 from codemagic.models.enums import ResourceEnumMeta
 from codemagic.tools.app_store_connect.arguments import BetaBuildInfo

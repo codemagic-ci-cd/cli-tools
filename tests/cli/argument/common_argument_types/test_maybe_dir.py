@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
+
 from codemagic.cli.argument import CommonArgumentTypes
 from codemagic.cli.argument import common_argument_types
 

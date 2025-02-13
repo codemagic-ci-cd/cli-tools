@@ -1,6 +1,7 @@
 import pytest
-from codemagic.utilities import versions
 from packaging import version
+
+from codemagic.utilities import versions
 
 
 def test_versions_sort_key():

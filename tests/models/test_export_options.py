@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from unittest import mock
 
 import pytest
+
 from codemagic.cli import Colors
 from codemagic.models import ExportOptions
 from codemagic.models.export_options import ProvisioningProfileInfo

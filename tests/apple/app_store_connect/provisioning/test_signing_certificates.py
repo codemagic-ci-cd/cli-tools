@@ -1,13 +1,13 @@
 import os
 
 import pytest
+
 from codemagic.apple.resources import CertificateType
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import SigningCertificate
 from codemagic.models import Certificate
 from codemagic.models import PrivateKey
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

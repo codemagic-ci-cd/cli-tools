@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 
 import pytest
+
 from codemagic.models.altool import AltoolResult
 
 

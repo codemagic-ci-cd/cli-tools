@@ -5,13 +5,13 @@ from typing import Optional
 from typing import Union
 
 import pytest
+
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 
 StubEnum = enum.Enum("StubEnum", {"A": "a", "B": "b"})
 
 
-class CustomString(str):
-    ...
+class CustomString(str): ...
 
 
 @dataclass

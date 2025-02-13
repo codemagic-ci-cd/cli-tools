@@ -1,6 +1,7 @@
 import argparse
 
 import pytest
+
 from codemagic import cli
 
 
@@ -36,12 +37,10 @@ def test_class_arguments_inclusion():
 
 def test_class_arguments_inheritance():
     @cli.common_arguments(_TestArgument.ARG1, _TestArgument.ARG2)
-    class BaseCliApp(cli.CliApp):
-        ...
+    class BaseCliApp(cli.CliApp): ...
 
     @cli.common_arguments(_TestArgument.ARG3, _TestArgument.ARG4)
-    class CliApp(BaseCliApp):
-        ...
+    class CliApp(BaseCliApp): ...
 
     for argument in _TestArgument:
         assert argument in CliApp.CLASS_ARGUMENTS
@@ -51,25 +50,21 @@ def test_class_arguments_duplicates():
     with pytest.raises(ValueError):
 
         @cli.common_arguments(_TestArgument.ARG1, _TestArgument.ARG1)
-        class CliApp(cli.CliApp):
-            ...
+        class CliApp(cli.CliApp): ...
 
 
 def test_class_arguments_duplicates_on_inheritance():
     @cli.common_arguments(_TestArgument.ARG1)
-    class BaseCliApp(cli.CliApp):
-        ...
+    class BaseCliApp(cli.CliApp): ...
 
     with pytest.raises(ValueError):
 
         @cli.common_arguments(_TestArgument.ARG1)
-        class CliApp(BaseCliApp):
-            ...
+        class CliApp(BaseCliApp): ...
 
 
 def test_invalid_class_argument():
     with pytest.raises(TypeError):
 
         @cli.common_arguments("ARGUMENT")
-        class CliApp(cli.CliApp):
-            ...
+        class CliApp(cli.CliApp): ...

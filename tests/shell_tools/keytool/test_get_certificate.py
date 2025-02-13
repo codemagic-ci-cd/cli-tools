@@ -2,6 +2,7 @@ import pathlib
 import shutil
 
 import pytest
+
 from codemagic.shell_tools import Keytool
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.apple.resources import ProfileType
 
 

@@ -6,6 +6,7 @@ from unittest import mock
 from unittest.mock import PropertyMock
 
 import pytest
+
 from codemagic.apple.app_store_connect import ApiKey
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier

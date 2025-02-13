@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
@@ -9,7 +10,6 @@ from codemagic.apple.resources import ExternalBetaState
 from codemagic.apple.resources import InternalBetaState
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

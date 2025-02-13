@@ -3,6 +3,7 @@ import subprocess
 from tempfile import NamedTemporaryFile
 
 import pytest
+
 from codemagic import cli
 
 

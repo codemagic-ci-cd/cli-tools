@@ -2,13 +2,13 @@ import os
 from typing import List
 
 import pytest
+
 from codemagic.apple.app_store_connect.versioning.review_submissions import ReviewSubmissions
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import ResourceType
 from codemagic.apple.resources import ReviewSubmission
 from codemagic.apple.resources import ReviewSubmissionState
-
 from tests.apple.app_store_connect.resource_manager_test_base import ResourceManagerTestsBase
 
 

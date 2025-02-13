@@ -3,6 +3,7 @@ from typing import List
 from unittest import mock
 
 import pytest
+
 from codemagic.models.xctests import XcResultCollector
 from codemagic.models.xctests import XcResultTool
 

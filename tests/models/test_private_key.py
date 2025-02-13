@@ -5,6 +5,7 @@ import hashlib
 import pathlib
 
 import pytest
+
 from codemagic.models import PrivateKey
 
 

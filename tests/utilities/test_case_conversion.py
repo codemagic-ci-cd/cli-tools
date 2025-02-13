@@ -1,4 +1,5 @@
 import pytest
+
 from codemagic.utilities import case_conversion
 
 

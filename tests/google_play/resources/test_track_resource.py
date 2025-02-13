@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
+
 from codemagic.google_play.resources import Release
 from codemagic.google_play.resources import ReleaseStatus
 from codemagic.google_play.resources import Track

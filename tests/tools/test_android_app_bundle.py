@@ -7,6 +7,7 @@ import re
 from unittest import mock
 
 import pytest
+
 from codemagic.tools.android_app_bundle import AndroidAppBundle
 from codemagic.tools.android_app_bundle import AndroidAppBundleArgument
 from codemagic.tools.android_app_bundle import AndroidAppBundleTypes

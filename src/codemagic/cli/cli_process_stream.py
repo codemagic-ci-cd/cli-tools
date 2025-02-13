@@ -9,9 +9,8 @@ from typing import Optional
 from codemagic.mixins import StringConverterMixin
 
 if os.name == "nt":
-    import msvcrt
-
     import _winapi as winapi
+    import msvcrt
 
 
 class CliProcessStream(StringConverterMixin, metaclass=ABCMeta):
