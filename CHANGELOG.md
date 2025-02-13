@@ -1,6 +1,9 @@
 UNRELEASED
 -------------
 
+**Documentation**
+- Duplicate action group documentation in respective action group documentation directory in `README.md`. [PR #444](https://github.com/codemagic-ci-cd/cli-tools/pull/444)
+
 **Development**
 - Update `black`, `mypy` and `ruff` development dependencies. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
 - Reformat sources to comply with latest `black` and `ruff` versions. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
