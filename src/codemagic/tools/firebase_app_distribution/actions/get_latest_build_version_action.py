@@ -2,7 +2,7 @@ from abc import ABC
 
 from codemagic import cli
 from codemagic.google.errors import GoogleError
-from codemagic.google.resources.identifiers import AppIdentifier
+from codemagic.google.resources.firebase_resources import AppIdentifier
 
 from ..arguments import ReleasesArgument
 from ..errors import FirebaseAppDistributionError

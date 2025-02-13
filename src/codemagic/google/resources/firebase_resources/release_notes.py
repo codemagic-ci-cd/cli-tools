@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .resource import Resource
+from codemagic.google.resources.resource import Resource
 
 
 @dataclass

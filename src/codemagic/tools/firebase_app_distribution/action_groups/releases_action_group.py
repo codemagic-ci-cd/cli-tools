@@ -5,8 +5,8 @@ from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google.errors import GoogleError
 from codemagic.google.resources import OrderBy
-from codemagic.google.resources import Release
-from codemagic.google.resources.identifiers import AppIdentifier
+from codemagic.google.resources.firebase_resources import AppIdentifier
+from codemagic.google.resources.firebase_resources import Release
 
 from ..arguments import FirebaseArgument
 from ..arguments import ReleasesArgument

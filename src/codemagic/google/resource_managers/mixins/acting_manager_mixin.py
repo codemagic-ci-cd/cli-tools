@@ -19,7 +19,7 @@ from codemagic.google.errors import GoogleClientError
 from codemagic.google.errors import GoogleHttpError
 
 if TYPE_CHECKING:
-    from ...resources.resource import Resource
+    from codemagic.google.resources.resource import Resource  # noqa: F401
 
 ResourceT = TypeVar("ResourceT", bound="Resource")
 

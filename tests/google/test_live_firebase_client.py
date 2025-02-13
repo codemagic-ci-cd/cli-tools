@@ -31,7 +31,7 @@ def test_list_releases(app_identifier, firebase_client, release):
     releases = firebase_client.releases.list(app_identifier, order_by=order_by, page_size=2)
 
     assert releases[0] == release
-    assert releases[1].buildVersion == 71
+    assert releases[1].buildVersion == "2"
 
 
 @pytest.mark.skipif(not os.environ.get("RUN_LIVE_API_TESTS"), reason="Live Firebase access")

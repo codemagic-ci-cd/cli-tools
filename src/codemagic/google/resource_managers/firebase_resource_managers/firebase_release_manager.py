@@ -4,11 +4,10 @@ from typing import TYPE_CHECKING
 from typing import ClassVar
 from typing import Type
 
-from codemagic.google.resources.identifiers import AppIdentifier
-
-from ..resources import Release
-from .mixins import ListingManagerMixin
-from .resource_manager import ResourceManager
+from codemagic.google.resource_managers.mixins import ListingManagerMixin
+from codemagic.google.resource_managers.resource_manager import ResourceManager
+from codemagic.google.resources.firebase_resources import AppIdentifier
+from codemagic.google.resources.firebase_resources import Release
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
@@ -17,7 +16,7 @@ if TYPE_CHECKING:
     )
 
 
-class ReleaseManager(
+class FirebaseReleaseManager(
     ResourceManager[Release, "FirebaseAppDistributionResource"],
     ListingManagerMixin[Release, AppIdentifier],
 ):

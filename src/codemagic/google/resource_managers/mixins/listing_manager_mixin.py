@@ -17,8 +17,8 @@ from codemagic.google.resources import OrderBy
 from .acting_manager_mixin import ActingManagerMixin
 
 if TYPE_CHECKING:
-    from codemagic.google.resources.identifiers import ResourceIdentifier
-    from codemagic.google.resources.resource import Resource
+    from codemagic.google.resources import Resource  # noqa: F401
+    from codemagic.google.resources import ResourceIdentifier  # noqa: F401
 
 ResourceT = TypeVar("ResourceT", bound="Resource")
 ResourceIdentifierT = TypeVar("ResourceIdentifierT", bound="ResourceIdentifier")

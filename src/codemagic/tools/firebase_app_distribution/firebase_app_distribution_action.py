@@ -5,7 +5,7 @@ from typing import List
 
 from codemagic.google.firebase_client import FirebaseClient
 from codemagic.google.resources import OrderBy
-from codemagic.google.resources import Release
+from codemagic.google.resources.firebase_resources import Release
 
 
 class FirebaseAppDistributionAction(ABC):
