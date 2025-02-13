@@ -91,6 +91,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`cancel`](app-store-version-phased-releases/cancel.md)|Cancel a planned App Store version phased release that has not been started|
-|[`enable`](app-store-version-phased-releases/enable.md)|Enable phased release for an App Store version|
-|[`set-state`](app-store-version-phased-releases/set-state.md)|Pause or resume an App Store version phased release, or immediately release an app|
+|[`cancel`](cancel.md)|Cancel a planned App Store version phased release that has not been started|
+|[`enable`](enable.md)|Enable phased release for an App Store version|
+|[`set-state`](set-state.md)|Pause or resume an App Store version phased release, or immediately release an app|

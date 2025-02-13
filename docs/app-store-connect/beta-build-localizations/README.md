@@ -91,8 +91,8 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](beta-build-localizations/create.md)|Create a beta build localization if it doesn't exist or update existing beta build localization for specified locale|
-|[`delete`](beta-build-localizations/delete.md)|Delete a beta build localization|
-|[`get`](beta-build-localizations/get.md)|Get beta build localization|
-|[`list`](beta-build-localizations/list.md)|List beta build localizations|
-|[`modify`](beta-build-localizations/modify.md)|Update a beta build localization|
+|[`create`](create.md)|Create a beta build localization if it doesn't exist or update existing beta build localization for specified locale|
+|[`delete`](delete.md)|Delete a beta build localization|
+|[`get`](get.md)|Get beta build localization|
+|[`list`](list.md)|List beta build localizations|
+|[`modify`](modify.md)|Update a beta build localization|

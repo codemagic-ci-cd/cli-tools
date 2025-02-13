@@ -8,7 +8,6 @@ import operator
 import os
 import pathlib
 import re
-import shutil
 import sys
 import textwrap
 from collections import defaultdict
@@ -219,17 +218,23 @@ class ToolDocumentationGenerator:
         md.create_md_file()
 
     def _write_action_group_page(self, action_group: ActionGroup):
+        def create_action_group_page(file_name: pathlib.Path):
+            md = MdUtils(file_name=str(file_name), title=action_group.name)
+            writer = Writer(md)
+            writer.write_description(action_group.description)
+            writer.write_command_usage(self, action_group=action_group)
+            self._write_tool_command_arguments_and_options(writer)
+            writer.write_actions_table(
+                action_group.actions,
+                action_group=None if file_name.stem == "README" else action_group,
+            )
+            writer.ensure_empty_line_at_end()
+            md.create_md_file()
+
         group_path = pathlib.Path(self.tool_prefix, action_group.name)
-        md = MdUtils(file_name=str(group_path), title=action_group.name)
-        writer = Writer(md)
-        writer.write_description(action_group.description)
-        writer.write_command_usage(self, action_group=action_group)
-        self._write_tool_command_arguments_and_options(writer)
-        writer.write_actions_table(action_group.actions, action_group=action_group)
-        writer.ensure_empty_line_at_end()
-        md.create_md_file()
         group_path.mkdir(exist_ok=True)
-        shutil.copy(group_path.with_suffix(".md"), group_path / "README.md")
+        create_action_group_page(group_path.with_suffix(".md"))
+        create_action_group_page(group_path / "README.md")
         for action in action_group.actions:
             self._write_action_page(action, action_group=action_group)
 

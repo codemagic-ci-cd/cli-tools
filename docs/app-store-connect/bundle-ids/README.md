@@ -91,11 +91,11 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](bundle-ids/create.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
-|[`delete`](bundle-ids/delete.md)|Delete specified Bundle ID from Apple Developer portal|
-|[`disable-capabilities`](bundle-ids/disable-capabilities.md)|Disable identifier capabilities|
-|[`enable-capabilities`](bundle-ids/enable-capabilities.md)|Enable capabilities for identifier|
-|[`get`](bundle-ids/get.md)|Get specified Bundle ID from Apple Developer portal|
-|[`capabilities`](bundle-ids/capabilities.md)|Check the capabilities that are enabled for identifier|
-|[`profiles`](bundle-ids/profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
-|[`list`](bundle-ids/list.md)|List Bundle IDs from Apple Developer portal matching given constraints|
+|[`create`](create.md)|Create Bundle ID in Apple Developer portal for specifier identifier|
+|[`delete`](delete.md)|Delete specified Bundle ID from Apple Developer portal|
+|[`disable-capabilities`](disable-capabilities.md)|Disable identifier capabilities|
+|[`enable-capabilities`](enable-capabilities.md)|Enable capabilities for identifier|
+|[`get`](get.md)|Get specified Bundle ID from Apple Developer portal|
+|[`capabilities`](capabilities.md)|Check the capabilities that are enabled for identifier|
+|[`profiles`](profiles.md)|List provisioning profiles from Apple Developer Portal for specified Bundle IDs|
+|[`list`](list.md)|List Bundle IDs from Apple Developer portal matching given constraints|

@@ -91,5 +91,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](beta-app-review-submissions/create.md)|Submit an app for beta app review to allow external testing|
-|[`list`](beta-app-review-submissions/list.md)|Find and list beta app review submissions of a build|
+|[`create`](create.md)|Submit an app for beta app review to allow external testing|
+|[`list`](list.md)|Find and list beta app review submissions of a build|
