@@ -256,21 +256,17 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
 
     @property
     @abstractmethod
-    def attributes(self) -> Attributes:
-        ...
+    def attributes(self) -> Attributes: ...
 
     @attributes.setter
-    def attributes(self, value: Attributes) -> None:
-        ...
+    def attributes(self, value: Attributes) -> None: ...
 
     @property
     @abstractmethod
-    def relationships(self) -> Optional[Relationships]:
-        ...
+    def relationships(self) -> Optional[Relationships]: ...
 
     @relationships.setter
-    def relationships(self, value: Optional[Relationships]) -> None:
-        ...
+    def relationships(self, value: Optional[Relationships]) -> None: ...
 
     @property
     def created(self) -> bool:
@@ -278,13 +274,11 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
 
     @classmethod
     @overload
-    def from_iso_8601(cls, iso_8601_timestamp: None) -> None:
-        ...
+    def from_iso_8601(cls, iso_8601_timestamp: None) -> None: ...
 
     @classmethod
     @overload
-    def from_iso_8601(cls, iso_8601_timestamp: str) -> datetime:
-        ...
+    def from_iso_8601(cls, iso_8601_timestamp: str) -> datetime: ...
 
     @classmethod
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
@@ -300,13 +294,11 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
 
     @classmethod
     @overload
-    def to_iso_8601(cls, dt: None, with_fractional_seconds: bool = True) -> None:
-        ...
+    def to_iso_8601(cls, dt: None, with_fractional_seconds: bool = True) -> None: ...
 
     @classmethod
     @overload
-    def to_iso_8601(cls, dt: datetime, with_fractional_seconds: bool = True) -> str:
-        ...
+    def to_iso_8601(cls, dt: datetime, with_fractional_seconds: bool = True) -> str: ...
 
     @classmethod
     def to_iso_8601(cls, dt: Optional[datetime], with_fractional_seconds: bool = True):

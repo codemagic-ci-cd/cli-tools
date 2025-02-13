@@ -46,12 +46,10 @@ class Colors(enum.Enum):
     BRIGHT_WHITE_BG = "\033[107m"
 
     @overload
-    def __call__(self, string: None) -> None:
-        ...
+    def __call__(self, string: None) -> None: ...
 
     @overload
-    def __call__(self, string: str) -> str:
-        ...
+    def __call__(self, string: str) -> str: ...
 
     def __call__(self, string: Optional[str]):
         if string is None:

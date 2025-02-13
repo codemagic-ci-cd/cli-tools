@@ -176,13 +176,11 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
     @classmethod
     @overload
-    def _get_password_value(cls, password: Union[KeyPassword, KeystorePassword]) -> str:
-        ...
+    def _get_password_value(cls, password: Union[KeyPassword, KeystorePassword]) -> str: ...
 
     @classmethod
     @overload
-    def _get_password_value(cls, password: None) -> None:
-        ...
+    def _get_password_value(cls, password: None) -> None: ...
 
     @classmethod
     def _get_password_value(cls, password: Optional[Union[KeyPassword, KeystorePassword]]) -> Optional[str]:
@@ -202,8 +200,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         keystore_password: KeystorePassword,
         key_alias: KeyAlias,
         key_password: KeyPassword,
-    ) -> AndroidSigningInfo:
-        ...
+    ) -> AndroidSigningInfo: ...
 
     @classmethod
     @overload
@@ -213,8 +210,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         keystore_password: Optional[KeystorePassword],
         key_alias: Optional[KeyAlias],
         key_password: Optional[KeyPassword],
-    ) -> Optional[AndroidSigningInfo]:
-        ...
+    ) -> Optional[AndroidSigningInfo]: ...
 
     @classmethod
     def _convert_cli_args_to_signing_info(
