@@ -46,6 +46,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`get`](tracks/get.md)|Get information about specified track from Google Play Developer API|
-|[`list`](tracks/list.md)|Get information about specified track from Google Play Developer API|
-|[`promote-release`](tracks/promote-release.md)|Promote releases from source track to target track. If filters for source track release are not specified, then the latest release will be promoted|
+|[`get`](get.md)|Get information about specified track from Google Play Developer API|
+|[`list`](list.md)|Get information about specified track from Google Play Developer API|
+|[`promote-release`](promote-release.md)|Promote releases from source track to target track. If filters for source track release are not specified, then the latest release will be promoted|

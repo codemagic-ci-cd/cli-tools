@@ -91,5 +91,5 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](app-store-version-submissions/create.md)|Submit an App Store Version to App Review|
-|[`delete`](app-store-version-submissions/delete.md)|Remove a version submission from App Store review|
+|[`create`](create.md)|Submit an App Store Version to App Review|
+|[`delete`](delete.md)|Remove a version submission from App Store review|
