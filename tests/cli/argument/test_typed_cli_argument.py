@@ -55,10 +55,7 @@ def test_value_from_file_with_environment_variables(mock_path: mock.MagicMock):
     path.is_file.return_value = True
     path.read_text.return_value = "value from file with environment variables"
 
-    with (
-        environment_variable_value("DIRPATH", "/path/to"),
-        environment_variable_value("FILENAME", "filename.txt"),
-    ):
+    with environment_variable_value("DIRPATH", "/path/to"), environment_variable_value("FILENAME", "filename.txt"):
         argument_value = MyEnvironmentArgumentValue("@file:$DIRPATH/$FILENAME")
 
     assert argument_value.value == "value from file with environment variables"
