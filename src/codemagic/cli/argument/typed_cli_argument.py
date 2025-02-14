@@ -19,6 +19,7 @@ from typing import TypeVar
 from typing import Union
 
 from codemagic.cli.colors import Colors
+from codemagic.utilities import log
 
 from .argument_formatter import ArgumentFormatter
 
@@ -32,6 +33,15 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     enable_name_transformation: bool = False
     type_name_in_argparse_error: Optional[str] = None
+
+    def __init__(cls, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        deprecated_environment_variable_key = getattr(cls, "deprecated_environment_variable_key", None)
+        environment_variable_key = getattr(cls, "environment_variable_key", None)
+        if deprecated_environment_variable_key and not environment_variable_key:
+            raise ValueError(
+                "deprecated_environment_variable_key can only be set if environment_variable_key is also set",
+            )
 
     def __call__(cls, *args, **kwargs):  # noqa: N805
         try:
@@ -80,6 +90,7 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
 class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
     environment_variable_key: Optional[str] = None
+    deprecated_environment_variable_key: Optional[str] = None
     default_value: Optional[T] = None
     type_name_in_argparse_error: Optional[str] = None
 
@@ -108,10 +119,23 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
     def from_environment_variable_default(cls) -> Optional["TypedCliArgument[T]"]:
         if cls.environment_variable_key is None:
             return None
-        elif cls.environment_variable_key not in os.environ:
+        elif isinstance(cls.environment_variable_key, str) and cls.environment_variable_key in os.environ:
+            environment_value = os.environ[cls.environment_variable_key]
+        elif (
+            isinstance(cls.deprecated_environment_variable_key, str)
+            and cls.deprecated_environment_variable_key in os.environ
+        ):
+            warning = (
+                f"Warning: Using environment variable {cls.deprecated_environment_variable_key} "
+                "to define argument value is deprecated and will be removed in a future release. "
+                f"Use environment variable {cls.environment_variable_key} instead."
+            )
+            log.get_logger(cls).warning(Colors.YELLOW(warning))
+            environment_value = os.environ[cls.deprecated_environment_variable_key]
+        else:
             return None
         try:
-            return cls(os.environ[cls.environment_variable_key], from_environment=True)
+            return cls(environment_value, from_environment=True)
         except argparse.ArgumentTypeError as ate:
             raise ValueError(str(ate)) from ate
 
@@ -131,7 +155,7 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
 
     @classmethod
     def get_description(cls, properties: "ArgumentProperties", include_default=True) -> str:
-        description = f'{properties.description.rstrip(".")}.'
+        description = f"{properties.description.rstrip('.')}."
         if cls.environment_variable_key is not None:
             description += (
                 "\nIf not given, the value will be checked from the "
@@ -189,7 +213,8 @@ class EnvironmentArgumentValue(TypedCliArgument[T], metaclass=TypedCliArgumentMe
             raise argparse.ArgumentTypeError(error_message) from ate
 
     def _get_from_file(self) -> T:
-        path = Path(self._raw_value[6:])
+        raw_file_path = os.path.expandvars(self._raw_value[6:])
+        path = Path(raw_file_path).expanduser()
         if not path.exists():
             raise argparse.ArgumentTypeError(f'File "{path}" does not exist')
         if not path.is_file():

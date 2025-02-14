@@ -3,8 +3,9 @@ from datetime import datetime
 from datetime import timezone
 from typing import Optional
 
+from codemagic.google.resources.resource import Resource
+
 from .release_notes import ReleaseNotes
-from .resource import Resource
 
 
 @dataclass

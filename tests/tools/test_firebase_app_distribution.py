@@ -12,10 +12,10 @@ import pytest
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.google.resource_managers.release_manager import ReleaseManager
+from codemagic.google.resource_managers import FirebaseReleaseManager
 from codemagic.google.resources import OrderBy
-from codemagic.google.resources import Release
-from codemagic.google.resources.identifiers import AppIdentifier
+from codemagic.google.resources.firebase_resources import AppIdentifier
+from codemagic.google.resources.firebase_resources import Release
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
@@ -150,7 +150,7 @@ def mock_discovery_build():
 
 @pytest.fixture
 def mock_releases_list(releases, app_identifier):
-    with mock.patch.object(ReleaseManager, "list", return_value=releases) as mock_releases_list:
+    with mock.patch.object(FirebaseReleaseManager, "list", return_value=releases) as mock_releases_list:
         yield mock_releases_list
 
 
@@ -182,7 +182,7 @@ def test_get_latest_build_version(firebase_app_distribution, mock_releases_list,
 
 
 def test_get_latest_build_version_no_releases(firebase_app_distribution, app_identifier):
-    with mock.patch.object(ReleaseManager, "list", return_value=[]) as mock_releases_list:
+    with mock.patch.object(FirebaseReleaseManager, "list", return_value=[]) as mock_releases_list:
         with pytest.raises(FirebaseAppDistributionError):
             firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
     mock_releases_list.assert_called_once_with(app_identifier, limit=1)
