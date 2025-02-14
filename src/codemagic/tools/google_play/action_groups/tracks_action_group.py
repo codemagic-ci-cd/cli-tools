@@ -63,6 +63,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
         Get information about specified track from Google Play Developer API
         """
+        # FIXME: Action description is wrong
 
         try:
             tracks = self.api_client.list_tracks(package_name)

@@ -4,7 +4,8 @@ from codemagic import cli
 
 
 class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
-    environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
+    environment_variable_key = "GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS"
+    deprecated_environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
 
     @classmethod
     def _is_valid(cls, value: str) -> bool:
