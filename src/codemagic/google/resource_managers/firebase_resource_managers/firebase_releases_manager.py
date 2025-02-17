@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     )
 
 
-class FirebaseReleaseManager(
+class FirebaseReleasesManager(
     ResourceManager[Release, "FirebaseAppDistributionResource"],
     ListingManagerMixin[Release, AppIdentifier],
 ):
