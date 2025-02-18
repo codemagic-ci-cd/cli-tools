@@ -1,14 +1,20 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+import dataclasses
 from datetime import datetime
 from datetime import timezone
+from typing import TYPE_CHECKING
 from typing import Optional
 
 from codemagic.google.resources.resource import Resource
 
 from .release_notes import ReleaseNotes
 
+if TYPE_CHECKING:
+    pass
 
-@dataclass
+
+@dataclasses.dataclass
 class Release(Resource):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases

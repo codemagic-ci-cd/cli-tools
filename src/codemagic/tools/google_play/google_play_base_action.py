@@ -1,19 +1,29 @@
+import contextlib
 import logging
 from abc import ABCMeta
 from abc import abstractmethod
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Sequence
 
-from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
-from codemagic.google_play.resources import Track
+from codemagic.google import GooglePlayClient
+from codemagic.google.resources.google_play_resources import Edit
+from codemagic.google.resources.google_play_resources import Track
 
 
 class GooglePlayBaseAction(metaclass=ABCMeta):
-    api_client: GooglePlayDeveloperAPIClient
+    client: GooglePlayClient
     logger: logging.Logger
 
     # Define signatures for self-reference to other action groups
+
+    @contextlib.contextmanager
+    def _app_edit(self, package_name: str) -> Generator[Edit, None, None]:
+        from ..google_play import GooglePlay
+
+        _ = GooglePlay._app_edit  # Implementation
+        raise NotImplementedError()
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs) -> None: ...

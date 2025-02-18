@@ -6,10 +6,10 @@ from typing import Optional
 
 from codemagic import cli
 from codemagic.cli import Colors
-from codemagic.google_play import GooglePlayDeveloperAPIClientError
-from codemagic.google_play.resources import Release
-from codemagic.google_play.resources import ReleaseStatus
-from codemagic.google_play.resources import Track
+from codemagic.google import GoogleError
+from codemagic.google.resources.google_play_resources import Release
+from codemagic.google.resources.google_play_resources import ReleaseStatus
+from codemagic.google.resources.google_play_resources import Track
 
 from ..arguments import GooglePlayArgument
 from ..arguments import PromoteArgument
@@ -35,13 +35,15 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         should_print: bool = True,
     ) -> Track:
         """
-        Get information about specified track from Google Play Developer API
+        Get information about release track from Google Play for an app
         """
 
         try:
-            track = self.api_client.get_track(package_name, track_name)
-        except GooglePlayDeveloperAPIClientError as api_error:
-            raise GooglePlayError(str(api_error))
+            with self._app_edit(package_name) as edit:
+                track = self.client.tracks.get(package_name, track_name, edit.id)
+        except GoogleError as ge:
+            self.echo(Colors.RED(f'Getting track "{track_name}" from Google Play for package "{package_name}" failed.'))
+            raise GooglePlayError(str(ge))
 
         if should_print:
             self.logger.info(track.json() if json_output else str(track))
@@ -61,14 +63,15 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         should_print: bool = True,
     ) -> List[Track]:
         """
-        Get information about specified track from Google Play Developer API
+        List information about release tracks from Google Play for an app
         """
-        # FIXME: Action description is wrong
 
         try:
-            tracks = self.api_client.list_tracks(package_name)
-        except GooglePlayDeveloperAPIClientError as api_error:
-            raise GooglePlayError(str(api_error))
+            with self._app_edit(package_name) as edit:
+                tracks = self.client.tracks.list(package_name, edit.id)
+        except GoogleError as ge:
+            self.echo(Colors.RED(f'Listing tracks from Google Play for package "{package_name}" failed.'))
+            raise GooglePlayError(str(ge))
 
         if should_print:
             if json_output:
@@ -107,6 +110,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         Promote releases from source track to target track. If filters for source
         track release are not specified, then the latest release will be promoted
         """
+
         source_track = self.get_track(package_name, source_track_name, should_print=False)
         target_track = self.get_track(package_name, target_track_name, should_print=False)
 
@@ -135,12 +139,19 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         )
 
         try:
-            updated_track = self.api_client.update_track(
-                package_name,
-                dataclasses.replace(target_track, releases=[release_to_promote]),
+            with self._app_edit(package_name) as edit:
+                updated_track = self.client.tracks.update(
+                    dataclasses.replace(target_track, releases=[release_to_promote]),
+                    package_name,
+                    edit.id,
+                )
+        except GoogleError as ge:
+            error = (
+                f"Promoting release {release_to_promote.name} from "
+                f'track "{source_track.track}" to track "{target_track.track}" failed.'
             )
-        except GooglePlayDeveloperAPIClientError as api_error:
-            raise GooglePlayError(str(api_error))
+            self.echo(Colors.RED(error))
+            raise GooglePlayError(str(ge))
 
         self.logger.info(Colors.GREEN(f"Successfully completed release promotion to track {target_track.track}"))
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING
 from typing import ClassVar
 
@@ -12,7 +13,8 @@ if TYPE_CHECKING:
 
 class FirebaseClient(GoogleClient["FirebaseAppDistributionResource"]):
     google_service_name: ClassVar[str] = "firebaseappdistribution"
+    google_service_version: ClassVar[str] = "v1"
 
-    @property
+    @cached_property
     def releases(self) -> FirebaseReleasesManager:
         return FirebaseReleasesManager(self.google_resource)

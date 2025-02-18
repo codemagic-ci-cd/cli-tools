@@ -13,8 +13,8 @@ from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
 from codemagic.google.resource_managers import FirebaseReleasesManager
-from codemagic.google.resources import OrderBy
 from codemagic.google.resources.firebase_resources import AppIdentifier
+from codemagic.google.resources.firebase_resources import OrderBy
 from codemagic.google.resources.firebase_resources import Release
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument

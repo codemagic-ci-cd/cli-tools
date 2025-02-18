@@ -5,6 +5,7 @@ from .certificate import Certificate
 from .certificate_attributes import CertificateAttributes
 from .code_sign_entitlements import CodeSignEntitlements
 from .code_signing_settings_manager import CodeSigningSettingsManager
+from .dict_serializable import DictSerializable
 from .export_options import ArchiveMethod
 from .export_options import ExportOptions
 from .json_serializable import JsonSerializable

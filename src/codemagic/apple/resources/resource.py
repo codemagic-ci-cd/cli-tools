@@ -14,12 +14,12 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Set
-from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
 from typing import overload
 
+from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
@@ -34,34 +34,12 @@ class ResourceId(str):
     pass
 
 
-class DictSerializable:
-    _OMIT_KEYS: Tuple[str, ...] = ("_raw",)
-    _OMIT_IF_NONE_KEYS: Tuple[str, ...] = tuple()
-
+class AppleDictSerializable(DictSerializable):
     @classmethod
     def _serialize(cls, obj):
-        if isinstance(obj, enum.Enum):
-            return obj.value
         if isinstance(obj, datetime):
             return Resource.to_iso_8601(obj)
-        if isinstance(obj, DictSerializable):
-            return obj.dict()
-        if isinstance(obj, (list, tuple)):
-            return [cls._serialize(item) for item in obj]
-        return obj
-
-    @classmethod
-    def _should_omit(cls, key, value) -> bool:
-        if key.startswith("_"):
-            return True
-        if key in cls._OMIT_KEYS:
-            return True
-        if key in cls._OMIT_IF_NONE_KEYS and value is None:
-            return True
-        return False
-
-    def dict(self) -> Dict:
-        return {k: self._serialize(v) for k, v in self.__dict__.items() if not self._should_omit(k, v)}
+        return super()._serialize(obj)
 
 
 @dataclass
@@ -84,13 +62,13 @@ class GracefulDataclassMixin(ABC):
 
 
 @dataclass
-class PagingInformation(DictSerializable):
+class PagingInformation(AppleDictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/paginginformation
     """
 
     @dataclass
-    class Paging(DictSerializable):
+    class Paging(AppleDictSerializable):
         total: int
         limit: int
 
@@ -102,7 +80,7 @@ class PagingInformation(DictSerializable):
 
 
 @dataclass
-class Links(DictSerializable):
+class Links(AppleDictSerializable):
     _OMIT_IF_NONE_KEYS = ("self", "related")
 
     self: Optional[str] = None
@@ -110,7 +88,7 @@ class Links(DictSerializable):
 
 
 @dataclass
-class ResourceLinks(DictSerializable):
+class ResourceLinks(AppleDictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/resourcelinks
     """
@@ -119,7 +97,7 @@ class ResourceLinks(DictSerializable):
 
 
 @dataclass
-class Data(DictSerializable):
+class Data(AppleDictSerializable):
     id: str
     type: ResourceType
 
@@ -129,7 +107,7 @@ class Data(DictSerializable):
 
 
 @dataclass
-class Relationship(DictSerializable):
+class Relationship(AppleDictSerializable):
     _OMIT_IF_NONE_KEYS = ("data", "meta")
 
     links: Links
@@ -148,7 +126,7 @@ class Relationship(DictSerializable):
             self.meta = PagingInformation(**self.meta)
 
 
-class LinkedResourceData(DictSerializable, JsonSerializable):
+class LinkedResourceData(AppleDictSerializable, JsonSerializable):
     def __init__(self, api_response: Dict):
         self._raw = api_response
         self.type = ResourceType(api_response["type"])
@@ -204,11 +182,11 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
         super().__init_subclass__()
 
     @dataclass
-    class Attributes(DictSerializable, GracefulDataclassMixin):
+    class Attributes(AppleDictSerializable, GracefulDataclassMixin):
         pass
 
     @dataclass
-    class Relationships(DictSerializable, GracefulDataclassMixin):
+    class Relationships(AppleDictSerializable, GracefulDataclassMixin):
         def __post_init__(self):
             for field in self.__dict__:
                 current_value = getattr(self, field)

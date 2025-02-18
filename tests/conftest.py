@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
 import pathlib
@@ -16,7 +15,6 @@ import pytest
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
-from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
 from codemagic.utilities import log
 
 log.initialize_logging(
@@ -85,21 +83,6 @@ def _appstore_api_client() -> AppStoreConnectApiClient:
     )
 
 
-@lru_cache(1)
-def _google_play_api_credentials() -> dict:
-    if "TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH" in os.environ:
-        credentials_path = pathlib.Path(os.environ["TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH"])
-        credentials = credentials_path.expanduser().read_text()
-    elif "TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT" in os.environ:
-        credentials = os.environ["TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT"]
-    else:
-        raise KeyError(
-            "TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_PATH",
-            "TEST_GCLOUD_SERVICE_ACCOUNT_CREDENTIALS_CONTENT",
-        )
-    return json.loads(credentials)
-
-
 def _logger():
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
@@ -119,12 +102,6 @@ def _logger():
 @pytest.fixture
 def app_store_api_client() -> AppStoreConnectApiClient:
     return _appstore_api_client()
-
-
-@pytest.fixture
-def google_play_api_client() -> GooglePlayDeveloperAPIClient:
-    credentials = _google_play_api_credentials()
-    return GooglePlayDeveloperAPIClient(credentials)
 
 
 @pytest.fixture(scope="class")

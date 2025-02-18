@@ -9,11 +9,11 @@ from typing import Optional
 
 from requests import Response
 
-from .resource import DictSerializable
+from .resource import AppleDictSerializable
 
 
 @dataclass
-class ErrorMeta(DictSerializable):
+class ErrorMeta(AppleDictSerializable):
     associatedErrors: Optional[Dict[str, List[Error]]] = None
 
     def __post_init__(self):
@@ -32,7 +32,7 @@ class ErrorMeta(DictSerializable):
 
 
 @dataclass
-class Error(DictSerializable):
+class Error(AppleDictSerializable):
     _OMIT_IF_NONE_KEYS = ("meta", "source", "links")
 
     code: str
@@ -74,7 +74,7 @@ class Error(DictSerializable):
         return s
 
 
-class ErrorResponse(DictSerializable):
+class ErrorResponse(AppleDictSerializable):
     def __init__(self, api_response: Dict):
         self._raw = api_response
         self.errors = [Error(**error) for error in api_response["errors"]]

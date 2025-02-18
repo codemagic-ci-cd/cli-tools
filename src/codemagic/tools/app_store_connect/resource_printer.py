@@ -19,9 +19,9 @@ from codemagic.apple.app_store_connect.resource_manager import ResourceManager
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import Resource
 from codemagic.apple.resources import SigningCertificate
-from codemagic.apple.resources.resource import DictSerializable
 from codemagic.apple.resources.resource import ResourceReference
 from codemagic.cli import Colors
+from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
 from codemagic.utilities import log
 
@@ -74,7 +74,7 @@ class ResourcePrinter:
         if self.print_json:
             self.print(resource.json())
         else:
-            header = f'-- {resource.__class__}{" (Created)" if resource.created else ""} --'
+            header = f"-- {resource.__class__}{' (Created)' if resource.created else ''} --"
             self.print(Colors.BLUE(header))
             self.print(str(resource))
 
@@ -93,7 +93,7 @@ class ResourcePrinter:
 
         message = f"Creating new {resource_type}"
         if params:
-            message = f'{message}: {", ".join(map(fmt, params.items()))}'
+            message = f"{message}: {', '.join(map(fmt, params.items()))}"
         self.logger.info(Colors.BLUE(message))
 
     def log_created(self, resource: Resource):
