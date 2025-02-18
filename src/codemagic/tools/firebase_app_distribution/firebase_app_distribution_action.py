@@ -4,8 +4,8 @@ from abc import abstractmethod
 from typing import List
 
 from codemagic.google.firebase_client import FirebaseClient
-from codemagic.google.resources.firebase_resources import OrderBy
-from codemagic.google.resources.firebase_resources import Release
+from codemagic.google.resources.firebase import OrderBy
+from codemagic.google.resources.firebase import Release
 
 
 class FirebaseAppDistributionAction(ABC):

@@ -5,10 +5,10 @@ from pathlib import Path
 import pytest
 
 from codemagic.google import GooglePlayClient
-from codemagic.google.resources.google_play_resources import Release
-from codemagic.google.resources.google_play_resources import ReleaseStatus
-from codemagic.google.resources.google_play_resources import Track
-from codemagic.google.resources.google_play_resources.localized_text import LocalizedText
+from codemagic.google.resources.google_play import LocalizedText
+from codemagic.google.resources.google_play import Release
+from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Track
 
 
 @pytest.fixture(scope="module")

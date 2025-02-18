@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import textwrap
 
-from codemagic.google.resources.firebase_resources import Release
+from codemagic.google.resources.firebase import Release
 
 
 def test_release_initialization(api_firebase_release: dict):

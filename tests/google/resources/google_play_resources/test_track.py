@@ -4,11 +4,11 @@ import dataclasses
 
 import pytest
 
-from codemagic.google.resources.google_play_resources import Release
-from codemagic.google.resources.google_play_resources import ReleaseStatus
-from codemagic.google.resources.google_play_resources import Track
-from codemagic.google.resources.google_play_resources.country_targeting import CountryTargeting
-from codemagic.google.resources.google_play_resources.localized_text import LocalizedText
+from codemagic.google.resources.google_play import CountryTargeting
+from codemagic.google.resources.google_play import LocalizedText
+from codemagic.google.resources.google_play import Release
+from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Track
 
 
 def test_track_initialization(api_google_play_track: dict):

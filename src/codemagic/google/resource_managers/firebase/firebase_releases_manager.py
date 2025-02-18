@@ -8,9 +8,9 @@ from typing import Type
 from typing import cast
 
 from codemagic.google.resource_managers.resource_manager import ResourceManager
-from codemagic.google.resources.firebase_resources import AppIdentifier
-from codemagic.google.resources.firebase_resources import OrderBy
-from codemagic.google.resources.firebase_resources import Release
+from codemagic.google.resources.firebase import AppIdentifier
+from codemagic.google.resources.firebase import OrderBy
+from codemagic.google.resources.firebase import Release
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1 import GoogleFirebaseAppdistroV1ListReleasesResponse

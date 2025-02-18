@@ -4,9 +4,9 @@ from unittest import mock
 
 import pytest
 
-from codemagic.google.resources.firebase_resources import AppIdentifier
-from codemagic.google.resources.firebase_resources import Release
-from codemagic.google.resources.firebase_resources import ReleaseNotes
+from codemagic.google.resources.firebase import AppIdentifier
+from codemagic.google.resources.firebase import Release
+from codemagic.google.resources.firebase import ReleaseNotes
 
 
 @pytest.fixture

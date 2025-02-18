@@ -7,9 +7,9 @@ from typing import Optional
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google import GoogleError
-from codemagic.google.resources.google_play_resources import Release
-from codemagic.google.resources.google_play_resources import ReleaseStatus
-from codemagic.google.resources.google_play_resources import Track
+from codemagic.google.resources.google_play import Release
+from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Track
 
 from ..arguments import GooglePlayArgument
 from ..arguments import PromoteArgument

@@ -7,7 +7,7 @@ from typing import Union
 from typing import cast
 
 from codemagic.google.resource_managers.resource_manager import ResourceManager
-from codemagic.google.resources.google_play_resources import Edit
+from codemagic.google.resources.google_play import Edit
 
 if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import AndroidPublisherResource

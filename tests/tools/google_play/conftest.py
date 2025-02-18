@@ -6,7 +6,7 @@ from typing import List
 
 import pytest
 
-from codemagic.google.resources.google_play_resources import Track
+from codemagic.google.resources.google_play import Track
 
 
 @pytest.fixture

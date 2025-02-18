@@ -7,8 +7,8 @@ import pytest
 from codemagic.google import FirebaseClient
 from codemagic.google.errors import GoogleCredentialsError
 from codemagic.google.resource_managers import FirebaseReleasesManager
-from codemagic.google.resources.firebase_resources import OrderBy
-from codemagic.google.resources.firebase_resources import Release
+from codemagic.google.resources.firebase import OrderBy
+from codemagic.google.resources.firebase import Release
 
 
 def test_release(release_response, release):

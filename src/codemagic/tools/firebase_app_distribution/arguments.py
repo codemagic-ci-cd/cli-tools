@@ -1,6 +1,6 @@
 from codemagic import cli
 from codemagic.cli.colors import Colors
-from codemagic.google.resources.firebase_resources import OrderBy
+from codemagic.google.resources.firebase import OrderBy
 
 from .argument_types import CredentialsArgument
 

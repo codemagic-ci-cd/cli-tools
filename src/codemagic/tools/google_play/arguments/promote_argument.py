@@ -1,6 +1,6 @@
 from codemagic import cli
 from codemagic.cli import Colors
-from codemagic.google.resources.google_play_resources import ReleaseStatus
+from codemagic.google.resources.google_play import ReleaseStatus
 
 
 class PromoteArgument(cli.Argument):

@@ -6,10 +6,11 @@ import argparse
 import contextlib
 from typing import Generator
 from typing import Optional
+from typing import cast
 
 from codemagic import cli
 from codemagic.google import GooglePlayClient
-from codemagic.google.resources.google_play_resources import Edit
+from codemagic.google.resources.google_play import Edit
 
 from .action_groups import TracksActionGroup
 from .actions import GetLatestBuildNumberAction
@@ -46,7 +47,7 @@ class GooglePlay(
         edit: Optional[Edit] = None
         try:
             edit = self.client.edits.create(package_name=package_name)
-            yield edit
+            yield cast(Edit, edit)
         finally:
             if edit is not None:
                 self.client.edits.delete(edit, package_name=package_name)

@@ -1,3 +1,3 @@
-from .firebase_resource_managers import FirebaseReleasesManager
-from .google_play_resource_managers import GooglePlayEditsManager
-from .google_play_resource_managers import GooglePlayTracksManager
+from .firebase import FirebaseReleasesManager
+from .google_play import GooglePlayEditsManager
+from .google_play import GooglePlayTracksManager

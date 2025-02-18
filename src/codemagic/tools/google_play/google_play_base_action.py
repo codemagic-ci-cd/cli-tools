@@ -8,8 +8,8 @@ from typing import Optional
 from typing import Sequence
 
 from codemagic.google import GooglePlayClient
-from codemagic.google.resources.google_play_resources import Edit
-from codemagic.google.resources.google_play_resources import Track
+from codemagic.google.resources.google_play import Edit
+from codemagic.google.resources.google_play import Track
 
 
 class GooglePlayBaseAction(metaclass=ABCMeta):

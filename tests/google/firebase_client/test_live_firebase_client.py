@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from codemagic.google import FirebaseClient
-from codemagic.google.resources.firebase_resources import OrderBy
+from codemagic.google.resources.firebase import OrderBy
 
 
 @pytest.fixture(scope="module")
