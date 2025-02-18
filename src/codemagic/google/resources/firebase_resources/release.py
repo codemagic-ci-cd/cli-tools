@@ -3,15 +3,11 @@ from __future__ import annotations
 import dataclasses
 from datetime import datetime
 from datetime import timezone
-from typing import TYPE_CHECKING
 from typing import Optional
 
-from codemagic.google.resources.resource import Resource
+from codemagic.google.resources import Resource
 
 from .release_notes import ReleaseNotes
-
-if TYPE_CHECKING:
-    pass
 
 
 @dataclasses.dataclass

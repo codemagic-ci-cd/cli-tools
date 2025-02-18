@@ -1,6 +1,7 @@
 import dataclasses
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic.google.resources import Resource
 
@@ -41,7 +42,7 @@ class Release(Resource):
             self.countryTargeting = CountryTargeting(**self.countryTargeting)
 
     @classmethod
-    def _typed_note(cls, note: LocalizedText | dict) -> LocalizedText:
+    def _typed_note(cls, note: Union[LocalizedText, dict]) -> LocalizedText:
         if isinstance(note, LocalizedText):
             return note
         elif isinstance(note, dict):

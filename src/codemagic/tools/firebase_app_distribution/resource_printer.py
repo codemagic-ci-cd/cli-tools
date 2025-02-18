@@ -5,7 +5,7 @@ from typing import Callable
 from typing import Sequence
 
 from codemagic.cli import Colors
-from codemagic.google.resources.resource import Resource
+from codemagic.google.resources import Resource
 
 
 class ResourcePrinter:

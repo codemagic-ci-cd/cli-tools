@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 
-from codemagic.google.resources.resource_identifier import ResourceIdentifier
-
 
 @dataclass
-class AppIdentifier(ResourceIdentifier):
+class AppIdentifier:
     project_id: str
     app_id: str
 
