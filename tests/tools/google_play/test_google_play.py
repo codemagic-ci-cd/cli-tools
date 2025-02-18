@@ -8,8 +8,8 @@ from unittest import mock
 import pytest
 
 from codemagic.tools.google_play import GooglePlay
+from codemagic.tools.google_play.argument_types import CredentialsArgument
 from codemagic.tools.google_play.arguments import GooglePlayArgument
-from codemagic.tools.google_play.arguments.argument_types import CredentialsArgument
 
 credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
 

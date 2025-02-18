@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from codemagic.tools.google_play.arguments.argument_types import CredentialsArgument
+from codemagic.tools.google_play.argument_types import CredentialsArgument
 
 
 def test_valid_google_play_credentials():

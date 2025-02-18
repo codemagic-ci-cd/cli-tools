@@ -23,6 +23,7 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
         """
         Get latest build number from Google Play Developer API matching given constraints
         """
+        # TODO: Restore this functionality
         return None
 
     # @cli.action(

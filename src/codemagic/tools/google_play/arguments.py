@@ -1,6 +1,43 @@
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.tools.google_play.argument_types import CredentialsArgument
+
+
+class GooglePlayArgument(cli.Argument):
+    GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
+        key="credentials",
+        flags=("--credentials",),
+        type=CredentialsArgument,
+        description="Google Play service account credentials with JSON key type to access Google Play API",
+        argparse_kwargs={"required": False},
+    )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key="json_output",
+        flags=("--json", "-j"),
+        type=bool,
+        description="Whether to show the request response in JSON format",
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
+
+
+class TracksArgument(cli.Argument):
+    PACKAGE_NAME = cli.ArgumentProperties(
+        key="package_name",
+        flags=("--package-name", "-p"),
+        type=cli.CommonArgumentTypes.non_empty_string,
+        description=(
+            f"Package name of the app in Google Play Console. For example `{Colors.WHITE('com.example.app')}`"
+        ),
+        argparse_kwargs={"required": True},
+    )
+    TRACK_NAME = cli.ArgumentProperties(
+        key="track_name",
+        flags=("--track", "-t"),
+        type=cli.CommonArgumentTypes.non_empty_string,
+        description=f"Release track name. For example `{Colors.WHITE('alpha')}` or `{Colors.WHITE('production')}`",
+        argparse_kwargs={"required": True},
+    )
 
 
 class PromoteArgument(cli.Argument):
@@ -54,5 +91,21 @@ class PromoteArgument(cli.Argument):
         argparse_kwargs={
             "required": False,
             "choices": list(ReleaseStatus),
+        },
+    )
+
+
+class LatestBuildNumberArgument(cli.Argument):
+    TRACKS = cli.ArgumentProperties(
+        key="tracks",
+        flags=("--tracks", "-t"),
+        type=cli.CommonArgumentTypes.non_empty_string,
+        description=(
+            "Get the build number from the specified track(s). "
+            "If not specified, the highest build number across all tracks is returned"
+        ),
+        argparse_kwargs={
+            "required": False,
+            "nargs": "+",
         },
     )
