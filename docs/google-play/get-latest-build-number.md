@@ -3,11 +3,11 @@ get-latest-build-number
 =======================
 
 
-**Get latest build number from Google Play Developer API matching given constraints**
+**Get latest build number from Google Play matching given constraints**
 ### Usage
 ```bash
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    [--credentials GCLOUD_SERVICE_ACCOUNT_CREDENTIALS]
+    [--credentials GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS]
     [--tracks TRACKS]
     --package-name PACKAGE_NAME
 ```
@@ -25,10 +25,10 @@ Package name of the app in Google Play Console. For example `com.example.app`
 Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments
 ### Optional arguments for command `google-play`
 
-##### `--credentials=GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`
+##### `--credentials=GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`
 
 
-Gcloud service account credentials with the `JSON` key type to access Google Play Developer API. If not given, the value will be checked from the environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+Google Play service account credentials with JSON key type to access Google Play API. If not given, the value will be checked from the environment variable `GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
 ### Common options
 
 ##### `-h, --help`
