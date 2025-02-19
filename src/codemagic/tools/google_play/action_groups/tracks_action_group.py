@@ -122,13 +122,11 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             f'from track "{source_track.track}" to track "{target_track.track}"',
         )
 
+        update_track = dataclasses.replace(target_track, releases=[release_to_promote])
         try:
-            with self.using_app_edit(package_name) as edit:
-                updated_track = self.client.tracks.update(
-                    dataclasses.replace(target_track, releases=[release_to_promote]),
-                    package_name,
-                    edit.id,
-                )
+            edit = self.client.edits.create(package_name)
+            updated_track = self.client.tracks.update(update_track, package_name, edit.id)
+            self.client.edits.commit(edit, package_name)
         except GoogleError as ge:
             error = (
                 f"Promoting release {release_to_promote.name} from "

@@ -48,6 +48,23 @@ class GooglePlayEditsManager(ResourceManager[Edit, "AndroidPublisherResource"]):
         self._logger.debug("Created edit %s", response["id"])
         return Edit(**response)
 
+    def commit(self, edit: Union[Edit, str], package_name: str) -> Edit:
+        """
+        https://developers.google.com/android-publisher/api-ref/rest/v3/edits/commit
+        """
+        edit_id = self._resolve_id(edit)
+        self._logger.debug("Commit edit %s for %r", edit_id, package_name)
+        commit_request = self._edits.commit(
+            packageName=package_name,
+            editId=edit_id,
+        )
+        response = cast(
+            "AppEdit",
+            self._execute_request(commit_request, "commit"),
+        )
+        self._logger.debug("Commited edit %s", response["id"])
+        return Edit(**response)
+
     def delete(self, edit: Union[Edit, str], package_name: str) -> None:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/delete

@@ -38,7 +38,7 @@ class ResourceManager(Generic[ResourceT, GoogleServiceT], ABC):
     def _execute_request(
         self,
         request: HttpRequest,
-        request_type: Literal["insert", "get", "list", "update", "delete"],
+        request_type: Literal["commit", "delete", "get", "insert", "list", "update"],
     ) -> Dict[str, Any]:
         self._logger.info(f">>> {request.method} {request.uri} {request.body}")
         try:
