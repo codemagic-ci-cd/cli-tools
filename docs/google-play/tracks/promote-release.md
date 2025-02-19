@@ -8,11 +8,11 @@ promote-release
 ```bash
 google-play tracks promote-release [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS]
+    [--json]
     [--release-status PROMOTED_STATUS]
     [--user-fraction PROMOTED_USER_FRACTION]
     [--version-code-filter PROMOTE_VERSION_CODE]
     [--release-status-filter PROMOTE_STATUS]
-    [--json]
     --package-name PACKAGE_NAME
     --source-track SOURCE_TRACK_NAME
     --target-track TARGET_TRACK_NAME
@@ -49,16 +49,16 @@ Promote only a source track release that contains the specified version code
 
 
 Promote only a source track release with the specified status
-##### `--json, -j`
-
-
-Whether to show the request response in JSON format
 ### Optional arguments for command `google-play`
 
 ##### `--credentials=GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`
 
 
 Google Play service account credentials with JSON key type to access Google Play API. If not given, the value will be checked from the environment variable `GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--json, -j`
+
+
+Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`

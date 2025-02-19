@@ -8,6 +8,7 @@ get-latest-build-number
 ```bash
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS]
+    [--json]
     [--tracks TRACKS]
     --package-name PACKAGE_NAME
 ```
@@ -29,6 +30,10 @@ Get the build number from the specified track(s). If not specified, the highest 
 
 
 Google Play service account credentials with JSON key type to access Google Play API. If not given, the value will be checked from the environment variable `GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--json, -j`
+
+
+Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`
