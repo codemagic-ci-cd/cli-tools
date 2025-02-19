@@ -92,10 +92,10 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
     @classmethod
     def _get_missing_version_error(cls, package_name: str, requested_tracks: Sequence[str]) -> str:
         if not requested_tracks:
-            return f'Version code info is missing from all tracks for package "{package_name}'
+            return f'Version code info is missing from all tracks for package "{package_name}"'
         elif len(requested_tracks) == 1:
             _track = requested_tracks[0]
-            return f'Version code info is missing from track "{_track}" for package "{package_name}'
+            return f'Version code info is missing from track "{_track}" for package "{package_name}"'
         else:
             _tracks = ", ".join(f'"{track}"' for track in requested_tracks)
-            return f'Version code info is missing from tracks {_tracks} for package "{package_name}'
+            return f'Version code info is missing from tracks {_tracks} for package "{package_name}"'
