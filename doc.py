@@ -383,7 +383,7 @@ class CommandUsageGenerator:
                 flags += f"({group_flags_str}) "
             else:
                 flags += f"[{group_flags_str}] "
-        return flags
+        return flags.rstrip()
 
     def _get_formatted_flag(self, arg: SerializedArgument) -> str:
         flag = self._get_formatted_flag_text(arg)

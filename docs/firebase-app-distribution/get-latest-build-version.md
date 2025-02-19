@@ -7,7 +7,7 @@ get-latest-build-version
 ### Usage
 ```bash
 firebase-app-distribution get-latest-build-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER) 
+    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER)
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     --app-id APP_ID
 ```

@@ -7,7 +7,7 @@ list
 ### Usage
 ```bash
 firebase-app-distribution releases list [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER) 
+    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER)
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
     [--limit LIMIT]
     [--order-by ORDER_BY]
