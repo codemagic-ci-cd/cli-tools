@@ -24,6 +24,7 @@ from codemagic.tools.firebase_app_distribution.errors import FirebaseAppDistribu
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_number_argument = FirebaseArgument.PROJECT_NUMBER
 project_id_argument = FirebaseArgument.PROJECT_ID
+json_output_argument = FirebaseArgument.JSON_OUTPUT
 
 
 @pytest.fixture
@@ -45,11 +46,14 @@ def namespace_kwargs():
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
         project_number_argument.key: "228333310124",
         project_id_argument.key: None,
+        json_output_argument.key: None,
     }
     for arg in FirebaseAppDistribution.CLASS_ARGUMENTS:
-        if not hasattr(arg.type, "environment_variable_key"):
-            continue
-        os.environ.pop(arg.type.environment_variable_key, None)
+        if environment_variable_key := getattr(arg.type, "environment_variable_key", None):
+            os.environ.pop(environment_variable_key, None)
+        if deprecated_environment_variable_key := getattr(arg.type, "deprecated_environment_variable_key", None):
+            os.environ.pop(deprecated_environment_variable_key, None)
+
     return ns_kwargs
 
 
