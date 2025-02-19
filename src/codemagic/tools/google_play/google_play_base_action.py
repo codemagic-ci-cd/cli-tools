@@ -8,6 +8,7 @@ from typing import Optional
 from typing import Sequence
 
 from codemagic.google import GooglePlayClient
+from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import Edit
 from codemagic.google.resources.google_play import Track
 
@@ -15,14 +16,15 @@ from codemagic.google.resources.google_play import Track
 class GooglePlayBaseAction(metaclass=ABCMeta):
     client: GooglePlayClient
     logger: logging.Logger
+    printer: ResourcePrinter
 
     # Define signatures for self-reference to other action groups
 
     @contextlib.contextmanager
-    def _app_edit(self, package_name: str) -> Generator[Edit, None, None]:
+    def using_app_edit(self, package_name: str) -> Generator[Edit, None, None]:
         from ..google_play import GooglePlay
 
-        _ = GooglePlay._app_edit  # Implementation
+        _ = GooglePlay.using_app_edit  # Implementation
         raise NotImplementedError()
 
     @classmethod
@@ -46,7 +48,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         self,
         package_name: str,
         track_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> Track:
         from .action_groups import TracksActionGroup
@@ -58,7 +59,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     def list_tracks(
         self,
         package_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> List[Track]:
         from .action_groups import TracksActionGroup

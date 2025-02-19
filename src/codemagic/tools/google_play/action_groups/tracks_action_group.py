@@ -1,5 +1,4 @@
 import dataclasses
-import json
 from abc import ABCMeta
 from typing import List
 from typing import Optional
@@ -11,7 +10,6 @@ from codemagic.google.resources.google_play import Release
 from codemagic.google.resources.google_play import ReleaseStatus
 from codemagic.google.resources.google_play import Track
 
-from ..arguments import GooglePlayArgument
 from ..arguments import PromoteArgument
 from ..arguments import TracksArgument
 from ..errors import GooglePlayError
@@ -24,14 +22,12 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         "get",
         TracksArgument.PACKAGE_NAME,
         TracksArgument.TRACK_NAME,
-        GooglePlayArgument.JSON_OUTPUT,
         action_group=GooglePlayActionGroups.TRACKS,
     )
     def get_track(
         self,
         package_name: str,
         track_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> Track:
         """
@@ -39,27 +35,23 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
 
         try:
-            with self._app_edit(package_name) as edit:
+            with self.using_app_edit(package_name) as edit:
                 track = self.client.tracks.get(package_name, track_name, edit.id)
         except GoogleError as ge:
             self.echo(Colors.RED(f'Getting track "{track_name}" from Google Play for package "{package_name}" failed.'))
             raise GooglePlayError(str(ge))
 
-        if should_print:
-            self.logger.info(track.json() if json_output else str(track))
-
+        self.printer.print_resource(track, should_print)
         return track
 
     @cli.action(
         "list",
         TracksArgument.PACKAGE_NAME,
-        GooglePlayArgument.JSON_OUTPUT,
         action_group=GooglePlayActionGroups.TRACKS,
     )
     def list_tracks(
         self,
         package_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> List[Track]:
         """
@@ -67,19 +59,13 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
 
         try:
-            with self._app_edit(package_name) as edit:
+            with self.using_app_edit(package_name) as edit:
                 tracks = self.client.tracks.list(package_name, edit.id)
         except GoogleError as ge:
             self.echo(Colors.RED(f'Listing tracks from Google Play for package "{package_name}" failed.'))
             raise GooglePlayError(str(ge))
 
-        if should_print:
-            if json_output:
-                self.echo(json.dumps([t.dict() for t in tracks], indent=4))
-            else:
-                for track in tracks:
-                    self.echo(f"{track}\n")
-
+        self.printer.print_resources(tracks, should_print)
         return tracks
 
     @cli.action(
@@ -91,7 +77,6 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         PromoteArgument.PROMOTED_USER_FRACTION,
         PromoteArgument.PROMOTE_VERSION_CODE,
         PromoteArgument.PROMOTE_STATUS,
-        GooglePlayArgument.JSON_OUTPUT,
         action_group=GooglePlayActionGroups.TRACKS,
     )
     def promote_release(
@@ -103,7 +88,6 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         promoted_user_fraction: Optional[float] = None,
         promote_version_code: Optional[str] = None,
         promote_status: Optional[ReleaseStatus] = None,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> Track:
         """
@@ -139,7 +123,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         )
 
         try:
-            with self._app_edit(package_name) as edit:
+            with self.using_app_edit(package_name) as edit:
                 updated_track = self.client.tracks.update(
                     dataclasses.replace(target_track, releases=[release_to_promote]),
                     package_name,
@@ -154,8 +138,5 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             raise GooglePlayError(str(ge))
 
         self.logger.info(Colors.GREEN(f"Successfully completed release promotion to track {target_track.track}"))
-
-        if should_print:
-            self.echo(updated_track.json() if json_output else str(updated_track))
-
+        self.printer.print_resource(updated_track, should_print)
         return updated_track

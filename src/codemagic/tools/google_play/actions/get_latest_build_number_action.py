@@ -23,6 +23,7 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
         self,
         package_name: str,
         tracks: Optional[Sequence[str]] = None,
+        should_print: bool = True,
     ) -> Optional[int]:
         """
         Get latest build number from Google Play matching given constraints
@@ -35,7 +36,9 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
         self._show_missing_tracks_warnings(requested_track_names, tuple(track_version_codes.keys()))
         latest_build_number = self._get_latest_build_number(package_name, requested_track_names, track_version_codes)
 
-        self.echo(str(latest_build_number))
+        if should_print:
+            self.echo(str(latest_build_number))
+
         return latest_build_number
 
     def _log_get_package_action_started(self, package_name: str, requested_tracks: Sequence[str]):

@@ -14,7 +14,7 @@ class ResourcePrinter:
         self.print = print_function
 
     def print_resources(self, resources: Sequence[Resource], should_print: bool):
-        if should_print is not True:
+        if not should_print:
             return
         if self.print_json:
             items = [resource.dict() for resource in resources]

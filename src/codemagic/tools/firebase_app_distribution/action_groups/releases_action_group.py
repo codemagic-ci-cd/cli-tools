@@ -8,12 +8,10 @@ from codemagic.google.resources.firebase import AppIdentifier
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
 
-from ..arguments import FirebaseArgument
 from ..arguments import ReleasesArgument
 from ..arguments import ResourcesArgument
 from ..errors import FirebaseAppDistributionError
 from ..firebase_app_distribution_action import FirebaseAppDistributionAction
-from ..resource_printer import ResourcePrinter
 from .firebase_action_groups import FirebaseActionGroups
 
 
@@ -23,7 +21,6 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         ReleasesArgument.APP_ID,
         ResourcesArgument.LIMIT,
         ResourcesArgument.ORDER_BY,
-        FirebaseArgument.JSON_OUTPUT,
         action_group=FirebaseActionGroups.RELEASES,
     )
     def list_releases(
@@ -31,7 +28,6 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         app_id: str,
         limit: int = ResourcesArgument.LIMIT.get_default(),
         order_by: OrderBy = ResourcesArgument.ORDER_BY.get_default(),
-        json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:
         """
@@ -47,7 +43,6 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         if not releases:
             self.logger.info(Colors.YELLOW(f"No releases available for {app_identifier.app_id}"))
         else:
-            printer = ResourcePrinter(json_output, self.echo)
-            printer.print_resources(releases, should_print)
+            self.printer.print_resources(releases, should_print)
 
         return releases

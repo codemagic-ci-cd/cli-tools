@@ -10,6 +10,7 @@ from typing import cast
 
 from codemagic import cli
 from codemagic.google import GooglePlayClient
+from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import Edit
 
 from .action_groups import TracksActionGroup
@@ -17,7 +18,10 @@ from .actions import GetLatestBuildNumberAction
 from .arguments import GooglePlayArgument
 
 
-@cli.common_arguments(GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS)
+@cli.common_arguments(
+    GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS,
+    GooglePlayArgument.JSON_OUTPUT,
+)
 class GooglePlay(
     cli.CliApp,
     GetLatestBuildNumberAction,
@@ -27,9 +31,15 @@ class GooglePlay(
     Utility to get the latest build numbers from Google Play using Google Play Developer API
     """
 
-    def __init__(self, credentials: dict, **kwargs):
+    def __init__(
+        self,
+        credentials: dict,
+        json_output: bool = False,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         self.client = GooglePlayClient(credentials)
+        self.printer = ResourcePrinter(json_output, self.echo)
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> GooglePlay:
@@ -39,11 +49,12 @@ class GooglePlay(
 
         return GooglePlay(
             credentials=credentials_argument.value,
+            json_output=bool(cli_args.json_output),
             **cls._parent_class_kwargs(cli_args),
         )
 
     @contextlib.contextmanager
-    def _app_edit(self, package_name: str) -> Generator[Edit, None, None]:
+    def using_app_edit(self, package_name: str) -> Generator[Edit, None, None]:
         edit: Optional[Edit] = None
         try:
             edit = self.client.edits.create(package_name=package_name)

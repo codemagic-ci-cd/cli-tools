@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import List
 
 from codemagic.google.firebase_client import FirebaseClient
+from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
 
@@ -11,6 +12,7 @@ from codemagic.google.resources.firebase import Release
 class FirebaseAppDistributionAction(ABC):
     client: FirebaseClient
     logger: logging.Logger
+    printer: ResourcePrinter
 
     # Define signatures for self-reference to other action groups
 
@@ -36,7 +38,6 @@ class FirebaseAppDistributionAction(ABC):
         app_id: str,
         limit: int = 25,
         order_by: OrderBy = OrderBy.CREATE_TIME_DESC,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> List[Release]:
         from .action_groups.releases_action_group import ReleasesActionGroup

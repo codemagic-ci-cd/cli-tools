@@ -8,6 +8,7 @@ from typing import Optional
 
 from codemagic import cli
 from codemagic.google.firebase_client import FirebaseClient
+from codemagic.google.resources import ResourcePrinter
 from codemagic.utilities import log
 from codemagic.utilities.decorators import deprecated
 
@@ -20,6 +21,7 @@ from .arguments import FirebaseArgument
     FirebaseArgument.PROJECT_ID,
     FirebaseArgument.PROJECT_NUMBER,
     FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS,
+    FirebaseArgument.JSON_OUTPUT,
 )
 class FirebaseAppDistribution(
     cli.CliApp,
@@ -35,6 +37,7 @@ class FirebaseAppDistribution(
         credentials: Dict,
         project_number: Optional[str] = None,
         project_id: Optional[str] = None,
+        json_output: bool = False,
         **kwargs,
     ):
         if not project_id and not project_number:
@@ -43,6 +46,7 @@ class FirebaseAppDistribution(
         self.client = FirebaseClient(credentials)
         self._project_id = project_id
         self._project_number = project_number
+        self.printer = ResourcePrinter(json_output, self.echo)
         if project_id:
             _ = self.project_id  # Just to trigger deprecation warning
 
@@ -80,6 +84,7 @@ class FirebaseAppDistribution(
         return FirebaseAppDistribution(
             credentials_argument.value,
             project_number=project_id or project_number,
+            json_output=bool(cli_args.json_output),
             **cls._parent_class_kwargs(cli_args),
         )
 
