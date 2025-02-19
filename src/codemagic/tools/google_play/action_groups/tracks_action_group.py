@@ -38,7 +38,8 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             with self.using_app_edit(package_name) as edit:
                 track = self.client.tracks.get(package_name, track_name, edit.id)
         except GoogleError as ge:
-            self.echo(Colors.RED(f'Getting track "{track_name}" from Google Play for package "{package_name}" failed.'))
+            error_message = f'Getting track "{track_name}" from Google Play for package "{package_name}" failed.'
+            self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
         self.printer.print_resource(track, should_print)
@@ -62,7 +63,8 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             with self.using_app_edit(package_name) as edit:
                 tracks = self.client.tracks.list(package_name, edit.id)
         except GoogleError as ge:
-            self.echo(Colors.RED(f'Listing tracks from Google Play for package "{package_name}" failed.'))
+            error_message = f'Listing tracks from Google Play for package "{package_name}" failed.'
+            self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
         self.printer.print_resources(tracks, should_print)
@@ -105,10 +107,10 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             source_releases = [r for r in source_releases if r.status is promote_status]
 
         if not source_releases:
-            error = f'Source track "{source_track_name}" does not have any releases'
+            error_message = f'Source track "{source_track_name}" does not have any releases'
             if promote_version_code or promote_status:
-                error = f"{error} matching specified filters"
-            raise GooglePlayError(error)
+                error_message = f"{error_message} matching specified filters"
+            raise GooglePlayError(error_message)
 
         release_to_promote = dataclasses.replace(
             source_releases[0],
@@ -128,11 +130,11 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             updated_track = self.client.tracks.update(update_track, package_name, edit.id)
             self.client.edits.commit(edit, package_name)
         except GoogleError as ge:
-            error = (
+            error_message = (
                 f"Promoting release {release_to_promote.name} from "
                 f'track "{source_track.track}" to track "{target_track.track}" failed.'
             )
-            self.echo(Colors.RED(error))
+            self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
         self.logger.info(Colors.GREEN(f"Successfully completed release promotion to track {target_track.track}"))
