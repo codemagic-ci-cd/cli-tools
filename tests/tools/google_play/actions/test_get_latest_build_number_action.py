@@ -8,7 +8,7 @@ credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIAL
 
 
 @pytest.mark.parametrize(
-    "tracks, expected_version_code",
+    "track_names, expected_version_code",
     [
         ("alpha", 65),
         ("beta", 66),
@@ -21,7 +21,7 @@ credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIAL
         (("alpha", "beta", "internal", "production"), 67),
     ],
 )
-def test_get_latest_build_number(tracks, expected_version_code, mock_tracks):
+def test_get_latest_build_number(track_names, expected_version_code, tracks):
     # FIXME: Update tests
     pass
 
@@ -45,7 +45,7 @@ def test_get_latest_build_number_no_tracks():
 
 
 @pytest.mark.parametrize("track_releases", [None, []])
-def test_get_latest_build_number_no_releases(track_releases, mock_tracks):
+def test_get_latest_build_number_no_releases(track_releases, tracks):
     # FIXME: Update tests
     pass
 
@@ -59,7 +59,7 @@ def test_get_latest_build_number_no_releases(track_releases, mock_tracks):
 
 
 @pytest.mark.parametrize("track_releases", [None, []])
-def test_get_latest_build_number_no_version_codes(track_releases, mock_tracks):
+def test_get_latest_build_number_no_version_codes(track_releases, tracks):
     # FIXME: Update tests
     pass
 
