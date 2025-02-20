@@ -4,7 +4,6 @@ from typing import List
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google.errors import GoogleError
-from codemagic.google.resources.firebase import AppIdentifier
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
 
@@ -34,14 +33,13 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         List releases for the Firebase application
         """
 
-        app_identifier = AppIdentifier(self.project_number, app_id)
         try:
-            releases = self.client.releases.list(app_identifier, order_by, limit)
+            releases = self.client.releases.list(self.project_number, app_id, order_by, limit)
         except GoogleError as e:
             raise FirebaseAppDistributionError(str(e))
 
         if not releases:
-            self.logger.info(Colors.YELLOW(f"No releases available for {app_identifier.app_id}"))
+            self.logger.info(Colors.YELLOW(f"No releases available for {app_id}"))
         else:
             self.printer.print_resources(releases, should_print)
 

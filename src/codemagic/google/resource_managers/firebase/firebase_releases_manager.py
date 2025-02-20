@@ -8,7 +8,6 @@ from typing import Type
 from typing import cast
 
 from codemagic.google.resource_managers.resource_manager import ResourceManager
-from codemagic.google.resources.firebase import AppIdentifier
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
 
@@ -34,7 +33,8 @@ class FirebaseReleasesManager(ResourceManager[Release, "FirebaseAppDistributionR
 
     def list(
         self,
-        app_identifier: AppIdentifier,
+        project_number: str,
+        app_id: str,
         order_by: OrderBy = OrderBy.CREATE_TIME_DESC,
         limit: Optional[int] = None,
         page_size: int = 25,
@@ -43,17 +43,14 @@ class FirebaseReleasesManager(ResourceManager[Release, "FirebaseAppDistributionR
         https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases/list
         """
 
-        self._logger.debug(
-            "List Firebase releases for app %r",
-            app_identifier.app_id,
-        )
+        self._logger.debug("List Firebase releases for project %r app %r", project_number, app_id)
 
         firebase_releases: List[GoogleFirebaseAppdistroV1Release] = []
         next_page_token = ""
         while True:
             list_request: GoogleFirebaseAppdistroV1ListReleasesResponseHttpRequest = self._releases.list(
                 orderBy=order_by.value,
-                parent=app_identifier.uri,
+                parent=f"projects/{project_number}/apps/{app_id}",
                 pageSize=min(limit, page_size) if limit else page_size,
                 pageToken=next_page_token,
             )
@@ -69,9 +66,5 @@ class FirebaseReleasesManager(ResourceManager[Release, "FirebaseAppDistributionR
                 break
             next_page_token = response["nextPageToken"]
 
-        self._logger.debug(
-            "Listed %d Firebase releases for app %r",
-            len(firebase_releases[:limit]),
-            app_identifier.app_id,
-        )
+        self._logger.debug("Listed %d Firebase releases for app %r", len(firebase_releases[:limit]), app_id)
         return [Release(**cast(dict, firebase_release)) for firebase_release in firebase_releases[:limit]]

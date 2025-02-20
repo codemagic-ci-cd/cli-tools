@@ -2,7 +2,6 @@ from abc import ABC
 
 from codemagic import cli
 from codemagic.google.errors import GoogleError
-from codemagic.google.resources.firebase import AppIdentifier
 
 from ..arguments import ReleasesArgument
 from ..errors import FirebaseAppDistributionError
@@ -18,13 +17,12 @@ class GetLatestBuildVersionAction(FirebaseAppDistributionAction, ABC):
         """
         Get latest build version from Firebase
         """
-        app_identifier = AppIdentifier(self.project_number, app_id)
         try:
-            releases = self.client.releases.list(app_identifier, limit=1)
+            releases = self.client.releases.list(self.project_number, app_id, limit=1)
         except GoogleError as e:
             raise FirebaseAppDistributionError(str(e))
         if not releases:
-            raise FirebaseAppDistributionError(f"No releases available for {app_identifier.app_id}")
+            raise FirebaseAppDistributionError(f"No releases available for {app_id}")
 
         build_version = releases[0].buildVersion
         if should_print:

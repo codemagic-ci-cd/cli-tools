@@ -30,9 +30,9 @@ def test_release(release_response, release):
         },
     ],
 )
-def test_invalid_credentials(credentials, app_identifier):
+def test_invalid_credentials(credentials):
     with pytest.raises(GoogleCredentialsError):
-        FirebaseClient(credentials).releases.list(app_identifier)
+        FirebaseClient(credentials).releases.list("firebase-project-id", "firebase-app-id")
 
 
 @pytest.fixture(scope="module")
@@ -56,17 +56,25 @@ def mock_releases(release_response):
         yield mock_resource
 
 
-def test_list_releases(app_identifier, firebase_client, release, mock_releases):
+def test_list_releases(firebase_client, release, mock_releases):
     order_by = OrderBy.CREATE_TIME_ASC
-    releases = firebase_client.releases.list(app_identifier, order_by=order_by, page_size=2)
+    releases = firebase_client.releases.list(
+        "firebase-project-id",
+        "firebase-app-id",
+        order_by=order_by,
+        page_size=2,
+    )
 
     assert releases[0] == release
     assert releases[1].buildVersion == "71"
 
 
-def test_list_releases_limit(app_identifier, firebase_client, mock_releases):
-    releases = firebase_client.releases.list(app_identifier, limit=1)
-
+def test_list_releases_limit(firebase_client, mock_releases):
+    releases = firebase_client.releases.list(
+        "firebase-project-number",
+        "firebase-app-id",
+        limit=1,
+    )
     assert len(releases) == 1
 
 
@@ -87,8 +95,12 @@ def mock_releases_pagination(release_response):
         yield mock_resource
 
 
-def test_list_releases_pagination(app_identifier, release, firebase_client, mock_releases_pagination):
-    releases = firebase_client.releases.list(app_identifier, page_size=1)
+def test_list_releases_pagination(release, firebase_client, mock_releases_pagination):
+    releases = firebase_client.releases.list(
+        "firebase-project-number",
+        "firebase-app-id",
+        page_size=1,
+    )
 
     assert len(releases) == 2
     assert releases[0] == release
