@@ -6,8 +6,8 @@ from typing import List
 from typing import Type
 from typing import cast
 
-from codemagic.google.resource_managers.resource_manager import ResourceManager
 from codemagic.google.resources.google_play import Track
+from codemagic.google.services.resource_service import ResourceService
 
 if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import TrackHttpRequest
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3.resources import TracksListResponseHttpRequest
 
 
-class GooglePlayTracksManager(ResourceManager[Track, "AndroidPublisherResource"]):
+class GooglePlayTracksService(ResourceService[Track, "AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks
     """

@@ -6,8 +6,8 @@ from typing import Type
 from typing import Union
 from typing import cast
 
-from codemagic.google.resource_managers.resource_manager import ResourceManager
 from codemagic.google.resources.google_play import AppEdit
+from codemagic.google.services.resource_service import ResourceService
 
 if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import AndroidPublisherResource
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import AppEditHttpRequest
 
 
-class GooglePlayEditsManager(ResourceManager[AppEdit, "AndroidPublisherResource"]):
+class GooglePlayEditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits
     """

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from typing import ClassVar
 
 from .google_client import GoogleClient
-from .resource_managers import FirebaseReleasesManager
+from .services import FirebaseReleasesService
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource  # noqa: F401
@@ -16,5 +16,5 @@ class FirebaseClient(GoogleClient["FirebaseAppDistributionResource"]):
     google_service_version: ClassVar[str] = "v1"
 
     @cached_property
-    def releases(self) -> FirebaseReleasesManager:
-        return FirebaseReleasesManager(self.google_resource)
+    def releases(self) -> FirebaseReleasesService:
+        return FirebaseReleasesService(self.google_resource)

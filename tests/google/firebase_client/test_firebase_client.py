@@ -6,9 +6,9 @@ import pytest
 
 from codemagic.google import FirebaseClient
 from codemagic.google.errors import GoogleCredentialsError
-from codemagic.google.resource_managers import FirebaseReleasesManager
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
+from codemagic.google.services import FirebaseReleasesService
 
 
 def test_release(release_response, release):
@@ -47,7 +47,7 @@ def mock_releases(release_response):
     release_0 = release_response.copy()
     release_1 = release_response.copy()
     release_1["buildVersion"] = "71"
-    with patch.object(FirebaseReleasesManager, "_releases", new_callable=PropertyMock) as mock_resource:
+    with patch.object(FirebaseReleasesService, "_releases", new_callable=PropertyMock) as mock_resource:
         google_request_mock_class = MagicMock()
         google_request_mock_class.execute.return_value = {"releases": [release_0, release_1]}
         google_resource_mock_class = MagicMock()
@@ -83,7 +83,7 @@ def mock_releases_pagination(release_response):
     release_0 = release_response.copy()
     release_1 = release_response.copy()
     release_1["buildVersion"] = "71"
-    with patch.object(FirebaseReleasesManager, "_releases", new_callable=PropertyMock) as mock_resource:
+    with patch.object(FirebaseReleasesService, "_releases", new_callable=PropertyMock) as mock_resource:
         google_request_mock_class = MagicMock()
         google_request_mock_class.execute.side_effect = [
             {"releases": [release_0], "nextPageToken": "next-page-token"},

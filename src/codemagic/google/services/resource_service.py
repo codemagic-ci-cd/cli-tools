@@ -25,7 +25,7 @@ ResourceT = TypeVar("ResourceT", bound=Resource)
 GoogleServiceT = TypeVar("GoogleServiceT", bound=discovery.Resource)
 
 
-class ResourceManager(Generic[ResourceT, GoogleServiceT], ABC):
+class ResourceService(Generic[ResourceT, GoogleServiceT], ABC):
     def __init__(self, google_service: GoogleServiceT):
         self._google_service = google_service
         self._logger = log.get_file_logger(self.__class__)

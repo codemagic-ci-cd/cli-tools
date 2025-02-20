@@ -7,9 +7,9 @@ from typing import Optional
 from typing import Type
 from typing import cast
 
-from codemagic.google.resource_managers.resource_manager import ResourceManager
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
+from codemagic.google.services.resource_service import ResourceService
 
 if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1 import GoogleFirebaseAppdistroV1ListReleasesResponse
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
 
 
-class FirebaseReleasesManager(ResourceManager[Release, "FirebaseAppDistributionResource"]):
+class FirebaseReleasesService(ResourceService[Release, "FirebaseAppDistributionResource"]):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases
     """

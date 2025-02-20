@@ -12,9 +12,9 @@ import pytest
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.google.resource_managers import FirebaseReleasesManager
 from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
+from codemagic.google.services import FirebaseReleasesService
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
@@ -153,7 +153,7 @@ def mock_discovery_build():
 
 @pytest.fixture
 def mock_releases_list(releases):
-    with mock.patch.object(FirebaseReleasesManager, "list", return_value=releases) as mock_releases_list:
+    with mock.patch.object(FirebaseReleasesService, "list", return_value=releases) as mock_releases_list:
         yield mock_releases_list
 
 
@@ -202,7 +202,7 @@ def test_get_latest_build_version(firebase_app_distribution, mock_releases_list)
 
 
 def test_get_latest_build_version_no_releases(firebase_app_distribution: FirebaseAppDistribution):
-    with mock.patch.object(FirebaseReleasesManager, "list", return_value=[]) as mock_releases_list:
+    with mock.patch.object(FirebaseReleasesService, "list", return_value=[]) as mock_releases_list:
         with pytest.raises(FirebaseAppDistributionError):
             firebase_app_distribution.get_latest_build_version("firebase-app-id")
     mock_releases_list.assert_called_once_with(
