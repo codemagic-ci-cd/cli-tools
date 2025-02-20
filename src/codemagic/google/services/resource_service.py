@@ -17,9 +17,8 @@ from oauth2client.client import Error as OAuth2ClientError
 from codemagic.google.errors import GoogleAuthenticationError
 from codemagic.google.errors import GoogleClientError
 from codemagic.google.errors import GoogleHttpError
+from codemagic.google.resources import Resource
 from codemagic.utilities import log
-
-from ..resources import Resource
 
 ResourceT = TypeVar("ResourceT", bound=Resource)
 GoogleServiceT = TypeVar("GoogleServiceT", bound=discovery.Resource)
