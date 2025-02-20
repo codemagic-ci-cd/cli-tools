@@ -1,7 +1,7 @@
 Version 0.56.0
 -------------
 
-This is release contains changes from [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442), [PR #443](https://github.com/codemagic-ci-cd/cli-tools/pull/443) and [PR #444](https://github.com/codemagic-ci-cd/cli-tools/pull/444). The aim of this release is to unify Firebase and Google Play API clients to use the same modular resource management architecture with shared authentication backend.
+This release contains changes from [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442), [PR #443](https://github.com/codemagic-ci-cd/cli-tools/pull/443) and [PR #444](https://github.com/codemagic-ci-cd/cli-tools/pull/444). The aim of this release is to unify Firebase and Google Play API clients to use the same modular resource management architecture with shared authentication backend.
 
 Some of the changes to **Python API are backwards incompatible**.
 
