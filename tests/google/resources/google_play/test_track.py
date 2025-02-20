@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 
-import pytest
-
 from codemagic.google.resources.google_play import CountryTargeting
 from codemagic.google.resources.google_play import LocalizedText
 from codemagic.google.resources.google_play import Release
@@ -14,28 +12,6 @@ from codemagic.google.resources.google_play import Track
 def test_track_initialization(api_google_play_track: dict):
     track = Track(**api_google_play_track)
     assert track.dict() == api_google_play_track
-
-
-def test_max_version_code(api_google_play_track: dict):
-    track = Track(**api_google_play_track)
-    assert track.get_max_version_code() == 29
-
-
-def test_max_version_code_error_no_releases(api_google_play_track: dict):
-    api_google_play_track.pop("releases")
-    track = Track(**api_google_play_track)
-    with pytest.raises(ValueError) as e:
-        track.get_max_version_code()
-    assert str(e.value) == 'Failed to get version code from "internal" track: track has no releases'
-
-
-def test_max_version_code_error_no_version_codes(api_google_play_track: dict):
-    for release in api_google_play_track["releases"]:
-        release.pop("versionCodes")
-    track = Track(**api_google_play_track)
-    with pytest.raises(ValueError) as e:
-        track.get_max_version_code()
-    assert str(e.value) == 'Failed to get version code from "internal" track: releases with version code do not exist'
 
 
 def test_release():

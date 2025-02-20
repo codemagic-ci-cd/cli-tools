@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from itertools import chain
 from typing import Dict
 from typing import Optional
 from typing import Sequence
@@ -32,7 +33,7 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
         requested_track_names = tuple(tracks or [])
         self._log_get_package_action_started(package_name, requested_track_names)
         package_tracks = self.list_tracks(package_name, should_print=False)
-        track_version_codes = self._get_track_version_codes(requested_track_names, package_tracks)
+        track_version_codes = self._get_max_track_version_codes(requested_track_names, package_tracks)
         self._show_missing_tracks_warnings(requested_track_names, tuple(track_version_codes.keys()))
         latest_build_number = self._get_latest_build_number(package_name, requested_track_names, track_version_codes)
 
@@ -51,7 +52,7 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
             message = f'Get package "{package_name}" latest build number from tracks {formatted_specified_tracks}'
         self.logger.info(Colors.BLUE(message))
 
-    def _get_track_version_codes(
+    def _get_max_track_version_codes(
         self,
         requested_tracks: Sequence[str],
         package_tracks: Sequence[Track],
@@ -64,15 +65,25 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
                 continue
 
             try:
-                version_code = track.get_max_version_code()
+                max_version_code = self.get_max_version_code(track)
             except ValueError as ve:
                 self.logger.warning(ve)
                 track_version_codes[track_name] = None
             else:
-                self.logger.info(f'Found latest version code from "{track_name}" track: {version_code}')
-                track_version_codes[track_name] = version_code
+                self.logger.info(f'Found latest version code from "{track_name}" track: {max_version_code}')
+                track_version_codes[track_name] = max_version_code
 
         return track_version_codes
+
+    @classmethod
+    def get_max_version_code(cls, track: Track) -> int:
+        error_prefix = f'Failed to get version code from "{track.track}" track'
+        if not track.releases:
+            raise ValueError(f"{error_prefix}: track has no releases")
+        version_codes = [release.versionCodes for release in track.releases if release.versionCodes]
+        if not version_codes:
+            raise ValueError(f"{error_prefix}: releases with version code do not exist")
+        return max(map(int, chain(*version_codes)))
 
     def _show_missing_tracks_warnings(self, requested_tracks: Sequence[str], found_tracks: Sequence[str]):
         missing_track_names = set(requested_tracks).difference(found_tracks)

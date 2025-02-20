@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-from itertools import chain
 from typing import List
 from typing import Optional
 
@@ -33,13 +32,3 @@ class Track(Resource):
             return Release(**release)
         else:
             raise ValueError(f"Unsupported release type: {type(release)}")
-
-    def get_max_version_code(self) -> int:
-        # TODO: Remove business logic from model
-        error_prefix = f'Failed to get version code from "{self.track}" track'
-        if not self.releases:
-            raise ValueError(f"{error_prefix}: track has no releases")
-        version_codes = [release.versionCodes for release in self.releases if release.versionCodes]
-        if not version_codes:
-            raise ValueError(f"{error_prefix}: releases with version code do not exist")
-        return max(map(int, chain(*version_codes)))
