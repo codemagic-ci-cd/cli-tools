@@ -7,7 +7,7 @@ from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import Release
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 
 from ..arguments import PromoteArgument
@@ -86,10 +86,10 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         package_name: str,
         source_track_name: str,
         target_track_name: str,
-        promoted_status: ReleaseStatus = PromoteArgument.PROMOTED_STATUS.get_default(),
+        promoted_status: Status = PromoteArgument.PROMOTED_STATUS.get_default(),
         promoted_user_fraction: Optional[float] = None,
         promote_version_code: Optional[str] = None,
-        promote_status: Optional[ReleaseStatus] = None,
+        promote_status: Optional[Status] = None,
         should_print: bool = True,
     ) -> Track:
         """

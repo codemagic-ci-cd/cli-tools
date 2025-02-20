@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.fixture
-def api_google_play_edit() -> dict:
+def api_google_play_app_edit() -> dict:
     mock_path = pathlib.Path(__file__).parent / "mocks" / "google_play_edit.json"
     return json.loads(mock_path.read_text())
 

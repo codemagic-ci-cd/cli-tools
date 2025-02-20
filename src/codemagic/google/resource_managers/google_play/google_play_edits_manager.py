@@ -7,32 +7,32 @@ from typing import Union
 from typing import cast
 
 from codemagic.google.resource_managers.resource_manager import ResourceManager
-from codemagic.google.resources.google_play import Edit
+from codemagic.google.resources.google_play import AppEdit
 
 if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import AndroidPublisherResource
-    from googleapiclient._apis.androidpublisher.v3 import AppEdit
+    from googleapiclient._apis.androidpublisher.v3 import AppEdit as GooglePlayAppEdit
     from googleapiclient._apis.androidpublisher.v3 import AppEditHttpRequest
 
 
-class GooglePlayEditsManager(ResourceManager[Edit, "AndroidPublisherResource"]):
+class GooglePlayEditsManager(ResourceManager[AppEdit, "AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits
     """
 
-    resource_type: ClassVar[Type[Edit]] = Edit
+    resource_type: ClassVar[Type[AppEdit]] = AppEdit
 
     @property
     def _edits(self) -> AndroidPublisherResource.EditsResource:
         return self._google_service.edits()
 
     @classmethod
-    def _resolve_id(cls, edit: Union[Edit, str]) -> str:
-        if isinstance(edit, Edit):
+    def _resolve_id(cls, edit: Union[AppEdit, str]) -> str:
+        if isinstance(edit, AppEdit):
             return edit.id
         return edit
 
-    def create(self, package_name: str) -> Edit:
+    def create(self, package_name: str) -> AppEdit:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/insert
         """
@@ -42,13 +42,13 @@ class GooglePlayEditsManager(ResourceManager[Edit, "AndroidPublisherResource"]):
             packageName=package_name,
         )
         response = cast(
-            "AppEdit",
+            "GooglePlayAppEdit",
             self._execute_request(insert_request, "insert"),
         )
         self._logger.debug("Created edit %s", response["id"])
-        return Edit(**response)
+        return AppEdit(**response)
 
-    def commit(self, edit: Union[Edit, str], package_name: str) -> Edit:
+    def commit(self, edit: Union[AppEdit, str], package_name: str) -> AppEdit:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/commit
         """
@@ -59,13 +59,13 @@ class GooglePlayEditsManager(ResourceManager[Edit, "AndroidPublisherResource"]):
             editId=edit_id,
         )
         response = cast(
-            "AppEdit",
+            "GooglePlayAppEdit",
             self._execute_request(commit_request, "commit"),
         )
         self._logger.debug("Commited edit %s", response["id"])
-        return Edit(**response)
+        return AppEdit(**response)
 
-    def delete(self, edit: Union[Edit, str], package_name: str) -> None:
+    def delete(self, edit: Union[AppEdit, str], package_name: str) -> None:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/delete
         """

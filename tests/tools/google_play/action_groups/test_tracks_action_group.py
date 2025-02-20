@@ -5,11 +5,11 @@ from unittest import mock
 
 import pytest
 
+from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import CountryTargeting
-from codemagic.google.resources.google_play import Edit
 from codemagic.google.resources.google_play import LocalizedText
 from codemagic.google.resources.google_play import Release
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 from codemagic.tools import GooglePlay
 from codemagic.tools.google_play.arguments import GooglePlayArgument
@@ -23,7 +23,7 @@ def test_get_track():
         track="alpha",
         releases=[
             Release(
-                status=ReleaseStatus.COMPLETED,
+                status=Status.COMPLETED,
                 name="1.0",
                 userFraction=0.5,
                 countryTargeting=CountryTargeting(
@@ -44,12 +44,12 @@ def test_get_track():
                 ],
             ),
             Release(
-                status=ReleaseStatus.STATUS_UNSPECIFIED,
+                status=Status.STATUS_UNSPECIFIED,
             ),
         ],
     )
     google_play = GooglePlay({"type": "service_account"})
-    edit = Edit(id="mock-edit-id", expiryTimeSeconds="10")
+    edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
 
     with mock.patch.object(google_play, "client") as mock_google_play_client:
         mock_google_play_client.tracks.get.return_value = track
@@ -64,7 +64,7 @@ def test_get_track():
 
 def test_list_tracks(tracks: List[Track]):
     google_play = GooglePlay({"type": "service_account"})
-    edit = Edit(id="mock-edit-id", expiryTimeSeconds="10")
+    edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
 
     with mock.patch.object(google_play, "client") as mock_google_play_client:
         mock_google_play_client.tracks.list.return_value = tracks
@@ -98,12 +98,12 @@ def test_promote_release_no_source_releases(empty_releases):
 
 def test_promote_release():
     google_play = GooglePlay({"type": "service_account"})
-    edit = Edit(id="mock-edit-id", expiryTimeSeconds="10")
+    edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
     source_track = Track(
         track="alpha",
         releases=[
             Release(
-                status=ReleaseStatus.DRAFT,
+                status=Status.DRAFT,
                 name="1.2.3",
                 versionCodes=["1", "2"],
                 countryTargeting=CountryTargeting(
@@ -117,7 +117,7 @@ def test_promote_release():
         track="beta",
         releases=[
             Release(
-                status=ReleaseStatus.IN_PROGRESS,
+                status=Status.IN_PROGRESS,
                 name="1.2.3",
                 versionCodes=["1", "2"],
                 countryTargeting=CountryTargeting(
@@ -140,7 +140,7 @@ def test_promote_release():
             package_name="com.example.app",
             source_track_name="alpha",
             target_track_name="beta",
-            promoted_status=ReleaseStatus.IN_PROGRESS,
+            promoted_status=Status.IN_PROGRESS,
             promoted_user_fraction=0.7,
         )
 

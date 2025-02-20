@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from codemagic.google.resources.google_play import Release
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 from codemagic.tools import GooglePlay
 from codemagic.tools.google_play.arguments import GooglePlayArgument
@@ -82,7 +82,7 @@ def test_get_latest_build_number_no_releases(track_releases):
 
 
 def test_get_latest_build_number_no_version_codes():
-    track_without_version_code = Track(track="production", releases=[Release(status=ReleaseStatus.DRAFT)])
+    track_without_version_code = Track(track="production", releases=[Release(status=Status.DRAFT)])
     google_play = GooglePlay({"type": "service_account"})
     mock_edit = mock.MagicMock(id="mock-edit-id")
 

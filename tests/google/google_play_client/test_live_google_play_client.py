@@ -7,7 +7,7 @@ import pytest
 from codemagic.google import GooglePlayClient
 from codemagic.google.resources.google_play import LocalizedText
 from codemagic.google.resources.google_play import Release
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 
 
@@ -51,7 +51,7 @@ def test_get_track(google_play_client: GooglePlayClient):
         track="alpha",
         releases=[
             Release(
-                status=ReleaseStatus.COMPLETED,
+                status=Status.COMPLETED,
                 name="5 (1.0)",
                 versionCodes=["5"],
                 releaseNotes=[

@@ -7,7 +7,7 @@ from codemagic.google.resources import Resource
 
 from .country_targeting import CountryTargeting
 from .localized_text import LocalizedText
-from .release_status import ReleaseStatus
+from .status import Status
 
 
 @dataclasses.dataclass
@@ -25,7 +25,7 @@ class Release(Resource):
         "releaseNotes",
     )
 
-    status: ReleaseStatus
+    status: Status
     name: Optional[str] = None
     userFraction: Optional[float] = None
     countryTargeting: Optional[CountryTargeting] = None
@@ -37,7 +37,7 @@ class Release(Resource):
         if isinstance(self.releaseNotes, list):
             self.releaseNotes = [self._typed_note(note) for note in self.releaseNotes]
         if isinstance(self.status, str):
-            self.status = ReleaseStatus(self.status)
+            self.status = Status(self.status)
         if isinstance(self.countryTargeting, dict):
             self.countryTargeting = CountryTargeting(**self.countryTargeting)
 

@@ -13,7 +13,7 @@ from .release_notes import ReleaseNotes
 @dataclasses.dataclass
 class Release(Resource):
     """
-    https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases
+    https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases#resource:-release
     """
 
     name: str

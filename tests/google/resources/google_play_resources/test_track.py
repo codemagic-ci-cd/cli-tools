@@ -7,7 +7,7 @@ import pytest
 from codemagic.google.resources.google_play import CountryTargeting
 from codemagic.google.resources.google_play import LocalizedText
 from codemagic.google.resources.google_play import Release
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 
 
@@ -51,19 +51,19 @@ def test_release():
     assert release.name == "1.2.3"
     assert release.versionCodes == ["123"]
     assert release.releaseNotes == [LocalizedText(language="en-US", text="* Release\n\nnotes")]
-    assert release.status is ReleaseStatus.DRAFT
+    assert release.status is Status.DRAFT
     assert release.countryTargeting is None
 
     updated_release = dataclasses.replace(
         release,
-        status=ReleaseStatus.COMPLETED,
+        status=Status.COMPLETED,
         countryTargeting={"countries": ["EE", "GB"], "includeRestOfWorld": False},  # type: ignore
     )
 
     assert updated_release.name == release.name
     assert updated_release.versionCodes == release.versionCodes
     assert updated_release.releaseNotes == release.releaseNotes
-    assert updated_release.status is ReleaseStatus.COMPLETED
+    assert updated_release.status is Status.COMPLETED
     assert updated_release.countryTargeting == CountryTargeting(countries=["EE", "GB"], includeRestOfWorld=False)
 
 

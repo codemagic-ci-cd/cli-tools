@@ -11,7 +11,7 @@ from typing import cast
 from codemagic import cli
 from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
-from codemagic.google.resources.google_play import Edit
+from codemagic.google.resources.google_play import AppEdit
 
 from .action_groups import TracksActionGroup
 from .actions import GetLatestBuildNumberAction
@@ -54,11 +54,11 @@ class GooglePlay(
         )
 
     @contextlib.contextmanager
-    def using_app_edit(self, package_name: str) -> Generator[Edit, None, None]:
-        edit: Optional[Edit] = None
+    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
+        edit: Optional[AppEdit] = None
         try:
             edit = self.client.edits.create(package_name=package_name)
-            yield cast(Edit, edit)
+            yield cast(AppEdit, edit)
         finally:
             if edit is not None:
                 self.client.edits.delete(edit, package_name=package_name)

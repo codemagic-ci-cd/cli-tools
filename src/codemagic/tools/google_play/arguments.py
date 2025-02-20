@@ -1,6 +1,6 @@
 from codemagic import cli
 from codemagic.cli import Colors
-from codemagic.google.resources.google_play import ReleaseStatus
+from codemagic.google.resources.google_play import Status
 from codemagic.tools.google_play.argument_types import CredentialsArgument
 
 
@@ -58,12 +58,12 @@ class PromoteArgument(cli.Argument):
     PROMOTED_STATUS = cli.ArgumentProperties(
         key="promoted_status",
         flags=("--release-status",),
-        type=ReleaseStatus,
+        type=Status,
         description="Status of the promoted release in the target track",
         argparse_kwargs={
             "required": False,
-            "default": ReleaseStatus.COMPLETED,
-            "choices": list(ReleaseStatus),
+            "default": Status.COMPLETED,
+            "choices": list(Status),
         },
     )
     PROMOTED_USER_FRACTION = cli.ArgumentProperties(
@@ -73,7 +73,7 @@ class PromoteArgument(cli.Argument):
         description=(
             "Fraction of users who are eligible for a staged promoted release in the target track. "
             f"Number from interval `{Colors.WHITE('0 < fraction < 1')}`. Can only be set when status is "
-            f"`{Colors.WHITE(str(ReleaseStatus.IN_PROGRESS))}` or `{Colors.WHITE(str(ReleaseStatus.HALTED))}`"
+            f"`{Colors.WHITE(str(Status.IN_PROGRESS))}` or `{Colors.WHITE(str(Status.HALTED))}`"
         ),
         argparse_kwargs={"required": False},
     )
@@ -86,11 +86,11 @@ class PromoteArgument(cli.Argument):
     PROMOTE_STATUS = cli.ArgumentProperties(
         key="promote_status",
         flags=("--release-status-filter",),
-        type=ReleaseStatus,
+        type=Status,
         description="Promote only a source track release with the specified status",
         argparse_kwargs={
             "required": False,
-            "choices": list(ReleaseStatus),
+            "choices": list(Status),
         },
     )
 

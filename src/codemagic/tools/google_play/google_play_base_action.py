@@ -9,7 +9,7 @@ from typing import Sequence
 
 from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
-from codemagic.google.resources.google_play import Edit
+from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import Track
 
 
@@ -21,7 +21,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     # Define signatures for self-reference to other action groups
 
     @contextlib.contextmanager
-    def using_app_edit(self, package_name: str) -> Generator[Edit, None, None]:
+    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
         from ..google_play import GooglePlay
 
         _ = GooglePlay.using_app_edit  # Implementation
