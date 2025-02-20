@@ -14,6 +14,7 @@ Some of the changes to **Python API are backwards incompatible**.
 **Development**
 - **Breaking**: Remove old Google Play API client `GooglePlayDeveloperAPIClient` and whole `codemagic.google_play` package.
 - Add new Google Play API client `codemagic.google.GooglePlayClient`.
+- Refactor package `codemagic.google.resource_managers` to `codemagic.google.services`.
 - Unify `codemagic.apple.resources.DictSerializable` and `codemagic.google_play.resources.resource.DictSerializable` into reusable `codemagic.models.DictSerializable`.
 - Update `black`, `mypy` and `ruff` development dependencies.
 - Reformat sources to comply with latest `black` and `ruff` versions.
