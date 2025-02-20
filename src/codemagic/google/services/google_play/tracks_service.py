@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3.resources import TracksListResponseHttpRequest
 
 
-class GooglePlayTracksService(ResourceService[Track, "AndroidPublisherResource"]):
+class TracksService(ResourceService[Track, "AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks
     """

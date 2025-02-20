@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import AppEditHttpRequest
 
 
-class GooglePlayEditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
+class EditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits
     """

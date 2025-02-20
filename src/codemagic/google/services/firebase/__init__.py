@@ -1,1 +1,1 @@
-from .firebase_releases_service import FirebaseReleasesService
+from .releases_service import ReleasesService

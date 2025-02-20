@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.firebaseappdistribution.v1.resources import FirebaseAppDistributionResource
 
 
-class FirebaseReleasesService(ResourceService[Release, "FirebaseAppDistributionResource"]):
+class ReleasesService(ResourceService[Release, "FirebaseAppDistributionResource"]):
     """
     https://firebase.google.com/docs/reference/app-distribution/rest/v1/projects.apps.releases
     """
