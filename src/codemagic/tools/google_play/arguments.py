@@ -19,9 +19,6 @@ class GooglePlayArgument(cli.Argument):
         description="Whether to show the request response in JSON format",
         argparse_kwargs={"required": False, "action": "store_true"},
     )
-
-
-class TracksArgument(cli.Argument):
     PACKAGE_NAME = cli.ArgumentProperties(
         key="package_name",
         flags=("--package-name", "-p"),
@@ -31,6 +28,9 @@ class TracksArgument(cli.Argument):
         ),
         argparse_kwargs={"required": True},
     )
+
+
+class TracksArgument(cli.Argument):
     TRACK_NAME = cli.ArgumentProperties(
         key="track_name",
         flags=("--track", "-t"),
@@ -108,4 +108,24 @@ class LatestBuildNumberArgument(cli.Argument):
             "required": False,
             "nargs": "+",
         },
+    )
+
+
+class ApksArgument(cli.Argument):
+    APK_PATH = cli.ArgumentProperties(
+        key="apk_path",
+        flags=("--apk",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Path to APK file (*.apk)",
+        argparse_kwargs={"required": True},
+    )
+
+
+class BundlesArgument(cli.Argument):
+    BUNDLE_PATH = cli.ArgumentProperties(
+        key="bundle_path",
+        flags=("--bundle",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Path to App Bundle file (*.aab)",
+        argparse_kwargs={"required": True},
     )

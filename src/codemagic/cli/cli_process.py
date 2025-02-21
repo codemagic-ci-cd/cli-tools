@@ -118,4 +118,9 @@ class CliProcess:
         else:
             stdout = ""
             stderr = ""
-        raise subprocess.CalledProcessError(self.returncode, self._command_args, stdout, stderr)
+        raise subprocess.CalledProcessError(
+            self.returncode,
+            shlex.split(self.safe_form),
+            stdout,
+            stderr,
+        )

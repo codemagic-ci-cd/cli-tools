@@ -37,9 +37,13 @@ class ResourceService(Generic[ResourceT, GoogleServiceT], ABC):
     def _execute_request(
         self,
         request: HttpRequest,
-        request_type: Literal["commit", "delete", "get", "insert", "list", "update"],
+        request_type: Literal["commit", "delete", "get", "insert", "list", "update", "upload"],
     ) -> Dict[str, Any]:
-        self._logger.info(f">>> {request.method} {request.uri} {request.body}")
+        if isinstance(request.body, bytes):
+            self._logger.info(f">>> {request.method} {request.uri} <{len(request.body)} bytes>")
+        else:
+            self._logger.info(f">>> {request.method} {request.uri} {request.body}")
+
         try:
             response = request.execute()
         except OAuth2ClientError as e:

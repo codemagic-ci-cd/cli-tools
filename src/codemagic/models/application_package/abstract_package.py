@@ -31,7 +31,7 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def get_text_summary(self) -> str:
         summary: List[str] = []
         for property_name, property_value in self.get_summary().items():
-            name = property_name.replace("_", " ").capitalize()
+            name = property_name.replace("_", " ").replace(" os ", " OS ").capitalize()
             value: Optional[str] = None
 
             if isinstance(property_value, bool):
@@ -48,6 +48,6 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
                     value = f"\n{lines}"
             else:
                 value = str(property_value)
-            summary.append(f'{name}: {"N/A" if value is None else value}')
+            summary.append(f"{name}: {'N/A' if value is None else value}")
 
         return "\n".join(sorted(summary))

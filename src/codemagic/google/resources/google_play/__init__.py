@@ -1,4 +1,7 @@
+from .apk import Apk
+from .apk_binary import ApkBinary
 from .app_edit import AppEdit
+from .bundle import Bundle
 from .country_targeting import CountryTargeting
 from .localized_text import LocalizedText
 from .release import Release
