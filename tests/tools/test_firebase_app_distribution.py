@@ -12,10 +12,9 @@ import pytest
 from googleapiclient import discovery
 from oauth2client.service_account import ServiceAccountCredentials
 
-from codemagic.google.resource_managers.release_manager import ReleaseManager
-from codemagic.google.resources import OrderBy
-from codemagic.google.resources import Release
-from codemagic.google.resources.identifiers import AppIdentifier
+from codemagic.google.resources.firebase import OrderBy
+from codemagic.google.resources.firebase import Release
+from codemagic.google.services.firebase import ReleasesService
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
@@ -24,6 +23,7 @@ from codemagic.tools.firebase_app_distribution.errors import FirebaseAppDistribu
 credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_number_argument = FirebaseArgument.PROJECT_NUMBER
 project_id_argument = FirebaseArgument.PROJECT_ID
+json_output_argument = FirebaseArgument.JSON_OUTPUT
 
 
 @pytest.fixture
@@ -45,11 +45,14 @@ def namespace_kwargs():
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
         project_number_argument.key: "228333310124",
         project_id_argument.key: None,
+        json_output_argument.key: None,
     }
     for arg in FirebaseAppDistribution.CLASS_ARGUMENTS:
-        if not hasattr(arg.type, "environment_variable_key"):
-            continue
-        os.environ.pop(arg.type.environment_variable_key, None)
+        if environment_variable_key := getattr(arg.type, "environment_variable_key", None):
+            os.environ.pop(environment_variable_key, None)
+        if deprecated_environment_variable_key := getattr(arg.type, "deprecated_environment_variable_key", None):
+            os.environ.pop(deprecated_environment_variable_key, None)
+
     return ns_kwargs
 
 
@@ -149,40 +152,61 @@ def mock_discovery_build():
 
 
 @pytest.fixture
-def mock_releases_list(releases, app_identifier):
-    with mock.patch.object(ReleaseManager, "list", return_value=releases) as mock_releases_list:
+def mock_releases_list(releases):
+    with mock.patch.object(ReleasesService, "list", return_value=releases) as mock_releases_list:
         yield mock_releases_list
 
 
 @pytest.fixture
-def app_identifier():
-    return AppIdentifier("228333310124", "1:228333310124:ios:5e439e0d0231a788ac8f09")
+def firebase_app_distribution():
+    return FirebaseAppDistribution(
+        {"type": "service_account"},
+        "firebase-project-id",
+        None,
+    )
 
 
-@pytest.fixture
-def firebase_app_distribution(app_identifier):
-    return FirebaseAppDistribution({"type": "service_account"}, app_identifier.project_id, None)
-
-
-def test_list_releases(firebase_app_distribution, mock_releases_list, releases, app_identifier):
-    result = firebase_app_distribution.list_releases(app_identifier.app_id)
-    mock_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 25)
+def test_list_releases(
+    firebase_app_distribution,
+    mock_releases_list,
+    releases,
+):
+    result = firebase_app_distribution.list_releases("firebase-app-id")
+    mock_releases_list.assert_called_once_with(
+        firebase_app_distribution.project_number,
+        "firebase-app-id",
+        OrderBy.CREATE_TIME_DESC,
+        25,
+    )
     assert releases == result
 
 
-def test_list_releases_with_limit(firebase_app_distribution, mock_releases_list, app_identifier):
-    firebase_app_distribution.list_releases(app_identifier.app_id, limit=1)
-    mock_releases_list.assert_called_once_with(app_identifier, OrderBy.CREATE_TIME_DESC, 1)
+def test_list_releases_with_limit(firebase_app_distribution, mock_releases_list):
+    firebase_app_distribution.list_releases("firebase-app-id", limit=1)
+    mock_releases_list.assert_called_once_with(
+        firebase_app_distribution.project_number,
+        "firebase-app-id",
+        OrderBy.CREATE_TIME_DESC,
+        1,
+    )
 
 
-def test_get_latest_build_version(firebase_app_distribution, mock_releases_list, app_identifier):
-    build_number = firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
-    mock_releases_list.assert_called_once_with(app_identifier, limit=1)
+def test_get_latest_build_version(firebase_app_distribution, mock_releases_list):
+    build_number = firebase_app_distribution.get_latest_build_version("firebase-app-id")
+    mock_releases_list.assert_called_once_with(
+        firebase_app_distribution.project_number,
+        "firebase-app-id",
+        limit=1,
+    )
     assert build_number == "71"
 
 
-def test_get_latest_build_version_no_releases(firebase_app_distribution, app_identifier):
-    with mock.patch.object(ReleaseManager, "list", return_value=[]) as mock_releases_list:
+def test_get_latest_build_version_no_releases(firebase_app_distribution: FirebaseAppDistribution):
+    with mock.patch.object(ReleasesService, "list", return_value=[]) as mock_releases_list:
         with pytest.raises(FirebaseAppDistributionError):
-            firebase_app_distribution.get_latest_build_version(app_identifier.app_id)
-    mock_releases_list.assert_called_once_with(app_identifier, limit=1)
+            firebase_app_distribution.get_latest_build_version("firebase-app-id")
+    mock_releases_list.assert_called_once_with(
+        firebase_app_distribution.project_number,
+        "firebase-app-id",
+        limit=1,
+    )

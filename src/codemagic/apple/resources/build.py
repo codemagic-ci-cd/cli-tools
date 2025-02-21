@@ -6,14 +6,14 @@ from typing import Optional
 
 from .enums import BuildAudienceType
 from .enums import BuildProcessingState
-from .resource import DictSerializable
+from .resource import AppleDictSerializable
 from .resource import Relationship
 from .resource import Resource
 from .resource import ResourceId
 
 
 @dataclass
-class BuildVersionInfo(DictSerializable):
+class BuildVersionInfo(AppleDictSerializable):
     buildId: ResourceId
     version: str
     buildNumber: str
@@ -28,7 +28,7 @@ class BuildVersionInfo(DictSerializable):
 
 
 @dataclass
-class ImageAsset(DictSerializable):
+class ImageAsset(AppleDictSerializable):
     """
     https://developer.apple.com/documentation/appstoreconnectapi/imageasset
     """

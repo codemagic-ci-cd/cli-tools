@@ -1,3 +1,6 @@
+import argparse
+import json
+
 import pytest
 
 from codemagic.tools.google_play.argument_types import CredentialsArgument
@@ -16,7 +19,8 @@ def test_valid_google_play_credentials():
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/project-id.iam.gserviceaccount.com"
     }"""
-    assert CredentialsArgument._is_valid(argument_value)
+    credentials_argument = CredentialsArgument(argument_value)
+    assert credentials_argument.value == json.loads(argument_value)
 
 
 @pytest.mark.parametrize(
@@ -33,4 +37,5 @@ def test_valid_google_play_credentials():
     ),
 )
 def test_invalid_google_play_credentials(argument_value: str):
-    assert CredentialsArgument._is_valid(argument_value) is False
+    with pytest.raises(argparse.ArgumentTypeError):
+        assert CredentialsArgument(argument_value)

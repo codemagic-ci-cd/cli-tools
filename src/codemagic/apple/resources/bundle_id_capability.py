@@ -8,13 +8,13 @@ from .enums import CapabilityOptionKey
 from .enums import CapabilitySettingAllowedInstance
 from .enums import CapabilitySettingKey
 from .enums import CapabilityType
-from .resource import DictSerializable
+from .resource import AppleDictSerializable
 from .resource import Relationship
 from .resource import Resource
 
 
 @dataclass
-class CapabilityOption(DictSerializable):
+class CapabilityOption(AppleDictSerializable):
     description: str
     enabled: bool
     enabledByDefault: bool
@@ -28,7 +28,7 @@ class CapabilityOption(DictSerializable):
 
 
 @dataclass
-class CapabilitySetting(DictSerializable):
+class CapabilitySetting(AppleDictSerializable):
     allowedInstances: CapabilitySettingAllowedInstance
     description: str
     enabledByDefault: bool

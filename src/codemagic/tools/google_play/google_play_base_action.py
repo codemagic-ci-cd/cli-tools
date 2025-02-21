@@ -1,19 +1,31 @@
+import contextlib
 import logging
 from abc import ABCMeta
 from abc import abstractmethod
+from typing import Generator
 from typing import List
 from typing import Optional
 from typing import Sequence
 
-from codemagic.google_play.api_client import GooglePlayDeveloperAPIClient
-from codemagic.google_play.resources import Track
+from codemagic.google import GooglePlayClient
+from codemagic.google.resources import ResourcePrinter
+from codemagic.google.resources.google_play import AppEdit
+from codemagic.google.resources.google_play import Track
 
 
 class GooglePlayBaseAction(metaclass=ABCMeta):
-    api_client: GooglePlayDeveloperAPIClient
+    client: GooglePlayClient
     logger: logging.Logger
+    printer: ResourcePrinter
 
     # Define signatures for self-reference to other action groups
+
+    @contextlib.contextmanager
+    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
+        from ..google_play import GooglePlay
+
+        _ = GooglePlay.using_app_edit  # Implementation
+        raise NotImplementedError()
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs) -> None: ...
@@ -36,7 +48,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         self,
         package_name: str,
         track_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> Track:
         from .action_groups import TracksActionGroup
@@ -48,7 +59,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     def list_tracks(
         self,
         package_name: str,
-        json_output: bool = False,
         should_print: bool = True,
     ) -> List[Track]:
         from .action_groups import TracksActionGroup

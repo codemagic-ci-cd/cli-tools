@@ -1,18 +1,20 @@
+import argparse
 import json
+from typing import Dict
 
 from codemagic import cli
 
 
-class CredentialsArgument(cli.EnvironmentArgumentValue[str]):
-    environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
+class CredentialsArgument(cli.EnvironmentArgumentValue[dict]):
+    environment_variable_key = "GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS"
+    deprecated_environment_variable_key = "GCLOUD_SERVICE_ACCOUNT_CREDENTIALS"
 
-    @classmethod
-    def _is_valid(cls, value: str) -> bool:
+    def _apply_type(self, non_typed_value: str) -> Dict[str, str]:
         try:
-            decoded = json.loads(value)
-            return decoded["type"] == "service_account"
-        except (ValueError, TypeError, KeyError):
-            # ValueError - Call to json.loads fails
-            # TypeError - Decoded object is not subscriptable, i.e. not a dictionary
-            # KeyError - Key "type" is missing from decoded dictionary
-            return False
+            value = json.loads(non_typed_value)
+        except json.decoder.JSONDecodeError as e:
+            raise argparse.ArgumentTypeError("Provided value is not a valid JSON") from e
+
+        if isinstance(value, dict) and value.get("type") == "service_account":
+            return value
+        raise argparse.ArgumentTypeError("Provided value is not a service account object")

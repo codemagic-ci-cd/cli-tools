@@ -1,16 +1,15 @@
 from codemagic import cli
 from codemagic.cli import Colors
-from codemagic.google_play.resources import ReleaseStatus
-
-from .argument_types import CredentialsArgument
+from codemagic.google.resources.google_play import Status
+from codemagic.tools.google_play.argument_types import CredentialsArgument
 
 
 class GooglePlayArgument(cli.Argument):
-    GCLOUD_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
+    GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS = cli.ArgumentProperties(
         key="credentials",
         flags=("--credentials",),
         type=CredentialsArgument,
-        description="Gcloud service account credentials with the `JSON` key type to access Google Play Developer API",
+        description="Google Play service account credentials with JSON key type to access Google Play API",
         argparse_kwargs={"required": False},
     )
     JSON_OUTPUT = cli.ArgumentProperties(
@@ -59,12 +58,12 @@ class PromoteArgument(cli.Argument):
     PROMOTED_STATUS = cli.ArgumentProperties(
         key="promoted_status",
         flags=("--release-status",),
-        type=ReleaseStatus,
+        type=Status,
         description="Status of the promoted release in the target track",
         argparse_kwargs={
             "required": False,
-            "default": ReleaseStatus.COMPLETED,
-            "choices": list(ReleaseStatus),
+            "default": Status.COMPLETED,
+            "choices": list(Status),
         },
     )
     PROMOTED_USER_FRACTION = cli.ArgumentProperties(
@@ -74,7 +73,7 @@ class PromoteArgument(cli.Argument):
         description=(
             "Fraction of users who are eligible for a staged promoted release in the target track. "
             f"Number from interval `{Colors.WHITE('0 < fraction < 1')}`. Can only be set when status is "
-            f"`{Colors.WHITE(str(ReleaseStatus.IN_PROGRESS))}` or `{Colors.WHITE(str(ReleaseStatus.HALTED))}`"
+            f"`{Colors.WHITE(str(Status.IN_PROGRESS))}` or `{Colors.WHITE(str(Status.HALTED))}`"
         ),
         argparse_kwargs={"required": False},
     )
@@ -87,11 +86,11 @@ class PromoteArgument(cli.Argument):
     PROMOTE_STATUS = cli.ArgumentProperties(
         key="promote_status",
         flags=("--release-status-filter",),
-        type=ReleaseStatus,
+        type=Status,
         description="Promote only a source track release with the specified status",
         argparse_kwargs={
             "required": False,
-            "choices": list(ReleaseStatus),
+            "choices": list(Status),
         },
     )
 

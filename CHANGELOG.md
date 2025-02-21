@@ -1,14 +1,25 @@
-UNRELEASED
+Version 0.56.0
 -------------
 
+This release contains changes from [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442), [PR #443](https://github.com/codemagic-ci-cd/cli-tools/pull/443) and [PR #444](https://github.com/codemagic-ci-cd/cli-tools/pull/444). The aim of this release is to unify Firebase and Google Play API clients to use the same modular resource management architecture with shared authentication backend.
+
+Some of the changes to **Python API are backwards incompatible**.
+
+**Deprecations**
+- Using environment variable `GCLOUD_SERVICE_ACCOUNT_CREDENTIALS` is deprecated in favor of `GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS` to specify Google Play service account key for `google-play` instead of explicitly passing `--credentials`. A warning message is shown if deprecated environment variable is used.
+
 **Documentation**
-- Duplicate action group documentation in respective action group documentation directory in `README.md`. [PR #444](https://github.com/codemagic-ci-cd/cli-tools/pull/444)
+- Duplicate action group documentation in respective action group documentation directory in `README.md`.
 
 **Development**
-- Update `black`, `mypy` and `ruff` development dependencies. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
-- Reformat sources to comply with latest `black` and `ruff` versions. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
-- Remove old type stubs for `psutil` package and `re` module. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
-- Add new development dependency `types-psutil`. [PR #442](https://github.com/codemagic-ci-cd/cli-tools/pull/442)
+- **Breaking**: Remove old Google Play API client `GooglePlayDeveloperAPIClient` and whole `codemagic.google_play` package.
+- Add new Google Play API client `codemagic.google.GooglePlayClient`.
+- Refactor package `codemagic.google.resource_managers` to `codemagic.google.services`.
+- Unify `codemagic.apple.resources.DictSerializable` and `codemagic.google_play.resources.resource.DictSerializable` into reusable `codemagic.models.DictSerializable`.
+- Update `black`, `mypy` and `ruff` development dependencies.
+- Reformat sources to comply with latest `black` and `ruff` versions.
+- Remove old type stubs for `psutil` package and `re` module.
+- Add new development dependency `types-psutil`.
 
 Version 0.55.0
 -------------

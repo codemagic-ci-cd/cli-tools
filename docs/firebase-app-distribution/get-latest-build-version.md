@@ -7,8 +7,9 @@ get-latest-build-version
 ### Usage
 ```bash
 firebase-app-distribution get-latest-build-version [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
-    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER) 
+    (--project-id PROJECT_ID | --project-number PROJECT_NUMBER)
     [--credentials FIREBASE_SERVICE_ACCOUNT_CREDENTIALS]
+    [--json]
     --app-id APP_ID
 ```
 ### Required arguments for action `get-latest-build-version`
@@ -33,6 +34,10 @@ Project number in Firebase. For example `228333310124`
 
 
 Firebase service account credentials with JSON key type to access Firebase. If not given, the value will be checked from the environment variable `FIREBASE_SERVICE_ACCOUNT_CREDENTIALS`. Alternatively to entering CREDENTIALS in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+##### `--json, -j`
+
+
+Whether to show the request response in JSON format
 ### Common options
 
 ##### `-h, --help`

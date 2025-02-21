@@ -22,4 +22,4 @@ class GoogleClientError(GoogleError):
 
 class GoogleHttpError(GoogleError):
     def __init__(self, message: str):
-        super().__init__(f"Failed to communicate with Google. {message}")
+        super().__init__(message)
