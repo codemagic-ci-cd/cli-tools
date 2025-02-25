@@ -180,3 +180,12 @@ class ExpansionFileArgument(cli.Argument):
             "choices": [t for t in ExpansionFileType if t is not ExpansionFileType.UNSPECIFIED],
         },
     )
+    REFERENCES_APK_VERSION_CODE = cli.ArgumentProperties(
+        key="references_apk_version_code",
+        flags=("--reference-version", "-r"),
+        type=int,
+        description=(
+            "Update an APK's expansion file to reference another APK's expansion file specified by this version code"
+        ),
+        argparse_kwargs={"required": True},
+    )

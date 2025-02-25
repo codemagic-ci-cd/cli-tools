@@ -10,5 +10,5 @@ class ExpansionFile(Resource):
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.expansionfiles
     """
 
-    fileSize: str
+    fileSize: Optional[str] = None
     referencesVersion: Optional[int] = None

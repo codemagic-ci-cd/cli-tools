@@ -40,7 +40,8 @@ class DeobfuscationFilesService(
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits.deobfuscationfiles/upload
         """
         self._logger.debug(
-            "Upload deobfuscation file for %r version %r using edit %s",
+            "Upload %s deobfuscation file for %r version %r using edit %s",
+            deobfuscation_file_type,
             package_name,
             apk_version_code,
             edit_id,

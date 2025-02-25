@@ -40,7 +40,8 @@ class ExpansionFilesService(
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits.expansionfiles/upload
         """
         self._logger.debug(
-            "Upload expansion file for %r version %r using edit %s",
+            "Upload %s expansion file for %r version %r using edit %s",
+            expansion_file_type,
             package_name,
             apk_version_code,
             edit_id,
@@ -60,4 +61,39 @@ class ExpansionFilesService(
             self._execute_request(upload_request, "upload", retries=3),
         )
         self._logger.debug("Uploaded expansion file for %r", package_name)
-        return ExpansionFile(**cast(dict, response["expansionFile"]))
+        return ExpansionFile(**response["expansionFile"])
+
+    def update(
+        self,
+        package_name: str,
+        edit_id: str,
+        apk_version_code: int,
+        expansion_file_type: ExpansionFileType,
+        references_version: int,
+    ):
+        """
+        https://developers.google.com/android-publisher/api-ref/rest/v3/edits.expansionfiles/update
+        """
+        self._logger.debug(
+            "Update %s expansion file for %r version %r using edit %s",
+            expansion_file_type,
+            package_name,
+            apk_version_code,
+            edit_id,
+        )
+
+        update_request: android_publisher_resources.ExpansionFileHttpRequest = self._expansion_files.update(
+            packageName=package_name,
+            editId=edit_id,
+            apkVersionCode=apk_version_code,
+            expansionFileType=expansion_file_type.value,
+            body={
+                "referencesVersion": references_version,
+            },
+        )
+        response = cast(
+            "android_publisher_resources.ExpansionFile",
+            self._execute_request(update_request, "update", retries=3),
+        )
+        self._logger.debug("Updated expansion file for %r", package_name)
+        return ExpansionFile(**response)

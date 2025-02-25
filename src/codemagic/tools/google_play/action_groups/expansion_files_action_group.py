@@ -52,3 +52,44 @@ class ExpansionFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
         self.printer.print_resource(expansion_file, should_print=should_print)
         return expansion_file
+
+    @cli.action(
+        "reference",
+        ApksArgument.APK_VERSION_CODE,
+        ExpansionFileArgument.EXPANSION_FILE_TYPE,
+        ExpansionFileArgument.REFERENCES_APK_VERSION_CODE,
+        action_group=GooglePlayActionGroups.EXPANSION_FILES,
+    )
+    def update_expansion_file(
+        self,
+        apk_version_code: int,
+        references_apk_version_code: int,
+        expansion_file_type: ExpansionFileType = ExpansionFileArgument.EXPANSION_FILE_TYPE.get_default(),
+        edit: Optional[AppEdit] = None,
+        should_print: bool = True,
+    ) -> ExpansionFile:
+        """
+        Update the APK's expansion file configuration to reference another APK's expansion file.
+        """
+
+        message = (
+            f"Update APK {apk_version_code} {expansion_file_type} expansion file configuration to reference "
+            f"APK {references_apk_version_code} expansion file"
+        )
+        self.logger.info(Colors.BLUE(message))
+        try:
+            with self.using_app_edit(edit) as edit:
+                expansion_file = self.client.expansion_files.update(
+                    self.package_name,
+                    edit.id,
+                    apk_version_code=apk_version_code,
+                    expansion_file_type=expansion_file_type,
+                    references_version=references_apk_version_code,
+                )
+        except GoogleError as ge:
+            error_message = f"Updating {expansion_file_type} expansion file in Google Play failed."
+            self.logger.warning(Colors.RED(error_message))
+            raise GooglePlayError(str(ge))
+
+        self.printer.print_resource(expansion_file, should_print=should_print)
+        return expansion_file
