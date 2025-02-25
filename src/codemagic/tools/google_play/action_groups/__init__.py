@@ -1,3 +1,5 @@
 from .apks_action_group import ApksActionGroup
 from .bundles_action_group import BundlesActionGroup
+from .deobfuscation_files_action_group import DeobfuscationFilesActionGroup
+from .expansion_files_action_group import ExpansionFilesActionGroup
 from .tracks_action_group import TracksActionGroup

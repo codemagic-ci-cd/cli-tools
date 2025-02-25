@@ -13,10 +13,8 @@ from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import AppEdit
 
-from .action_groups import ApksActionGroup
-from .action_groups import BundlesActionGroup
-from .action_groups import TracksActionGroup
-from .actions import GetLatestBuildNumberAction
+from . import action_groups
+from . import actions
 from .arguments import GooglePlayArgument
 
 
@@ -27,10 +25,12 @@ from .arguments import GooglePlayArgument
 )
 class GooglePlay(
     cli.CliApp,
-    ApksActionGroup,
-    BundlesActionGroup,
-    GetLatestBuildNumberAction,
-    TracksActionGroup,
+    action_groups.ApksActionGroup,
+    action_groups.BundlesActionGroup,
+    action_groups.DeobfuscationFilesActionGroup,
+    action_groups.ExpansionFilesActionGroup,
+    action_groups.TracksActionGroup,
+    actions.GetLatestBuildNumberAction,
 ):
     """
     Utility to get the latest build numbers from Google Play using Google Play Developer API

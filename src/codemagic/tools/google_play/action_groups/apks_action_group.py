@@ -1,4 +1,3 @@
-import pathlib
 from abc import ABCMeta
 from pathlib import Path
 from typing import List
@@ -9,14 +8,8 @@ from codemagic.cli import Colors
 from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import Apk
 from codemagic.google.resources.google_play import AppEdit
-from codemagic.google.resources.google_play import DeobfuscationFile
-from codemagic.google.resources.google_play import DeobfuscationFileType
-from codemagic.google.resources.google_play import ExpansionFile
-from codemagic.google.resources.google_play import ExpansionFileType
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import ApksArgument
-from codemagic.tools.google_play.arguments import ExpansionFileArgument
-from codemagic.tools.google_play.arguments import ProguardMapArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
@@ -80,75 +73,3 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
         self.printer.print_resource(apk, should_print=should_print)
         return apk
-
-    @cli.action(
-        "upload-proguard-map",
-        ProguardMapArgument.PROGUARD_MAP_PATH,
-        ApksArgument.APK_VERSION_CODE,
-        action_group=GooglePlayActionGroups.APKS,
-    )
-    def upload_proguard_map(
-        self,
-        proguard_map_path: pathlib.Path,
-        apk_version_code: int,
-        edit: Optional[AppEdit] = None,
-        should_print: bool = True,
-    ) -> DeobfuscationFile:
-        """
-        Upload a new ProGuard mapping deobfuscation file and attach it to the specified APK.
-        """
-
-        self.logger.info(Colors.BLUE(f'Upload ProGuard mapping "{proguard_map_path}'))
-        try:
-            with self.using_app_edit(edit) as edit:
-                deobfuscation_file = self.client.deobfuscation_files.upload(
-                    self.package_name,
-                    edit.id,
-                    apk_version_code=apk_version_code,
-                    deobfuscation_file_path=proguard_map_path,
-                    deobfuscation_file_type=DeobfuscationFileType.PROGUARD,
-                )
-        except GoogleError as ge:
-            error_message = f"Uploading ProGuard mapping {proguard_map_path} to Google Play failed."
-            self.logger.warning(Colors.RED(error_message))
-            raise GooglePlayError(str(ge))
-
-        self.printer.print_resource(deobfuscation_file, should_print=should_print)
-        return deobfuscation_file
-
-    @cli.action(
-        "upload-expansion-file",
-        ExpansionFileArgument.EXPANSION_FILE_PATH,
-        ApksArgument.APK_VERSION_CODE,
-        ExpansionFileArgument.EXPANSION_FILE_TYPE,
-        action_group=GooglePlayActionGroups.APKS,
-    )
-    def upload_expansion_file(
-        self,
-        expansion_file_path: pathlib.Path,
-        apk_version_code: int,
-        expansion_file_type: ExpansionFileType = ExpansionFileArgument.EXPANSION_FILE_TYPE.get_default(),
-        edit: Optional[AppEdit] = None,
-        should_print: bool = True,
-    ) -> ExpansionFile:
-        """
-        Upload a new expansion file and attach it to the specified APK.
-        """
-
-        self.logger.info(Colors.BLUE(f'Upload expansion file "{expansion_file_path}'))
-        try:
-            with self.using_app_edit(edit) as edit:
-                expansion_file = self.client.expansion_files.upload(
-                    self.package_name,
-                    edit.id,
-                    apk_version_code=apk_version_code,
-                    expansion_file_path=expansion_file_path,
-                    expansion_file_type=expansion_file_type,
-                )
-        except GoogleError as ge:
-            error_message = f"Uploading expansion file {expansion_file_path} to Google Play failed."
-            self.logger.warning(Colors.RED(error_message))
-            raise GooglePlayError(str(ge))
-
-        self.printer.print_resource(expansion_file, should_print=should_print)
-        return expansion_file

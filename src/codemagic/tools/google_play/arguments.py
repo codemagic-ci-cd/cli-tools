@@ -1,5 +1,6 @@
 from codemagic import cli
 from codemagic.cli import Colors
+from codemagic.google.resources.google_play import DeobfuscationFileType
 from codemagic.google.resources.google_play import ExpansionFileType
 from codemagic.google.resources.google_play import Status
 from codemagic.tools.google_play.argument_types import CredentialsArgument
@@ -139,13 +140,24 @@ class BundlesArgument(cli.Argument):
     )
 
 
-class ProguardMapArgument(cli.Argument):
-    PROGUARD_MAP_PATH = cli.ArgumentProperties(
-        key="proguard_map_path",
-        flags=("--proguard-map", "-m"),
+class DeobfuscationsArgument(cli.Argument):
+    DEOBFUSCATION_FILE_PATH = cli.ArgumentProperties(
+        key="deobfuscation_file_path",
+        flags=("--deobfuscation-file", "-d"),
         type=cli.CommonArgumentTypes.existing_path,
-        description="Path to ProGuard mapping file",
+        description="Path to deobfuscation file",
         argparse_kwargs={"required": True},
+    )
+    DEOBFUSCATION_FILE_TYPE = cli.ArgumentProperties(
+        key="deobfuscation_file_type",
+        flags=("--type", "-t"),
+        type=ExpansionFileType,
+        description="The type of APK deobfuscation file which is being updated",
+        argparse_kwargs={
+            "required": False,
+            "default": DeobfuscationFileType.PROGUARD,
+            "choices": [t for t in DeobfuscationFileType if t is not DeobfuscationFileType.UNSPECIFIED],
+        },
     )
 
 

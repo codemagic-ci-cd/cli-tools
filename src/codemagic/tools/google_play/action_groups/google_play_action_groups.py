@@ -14,3 +14,11 @@ class GooglePlayActionGroups(cli.ActionGroup):
         name="bundles",
         description="Work with App Bundles in Google Play",
     )
+    DEOBFUSCATION_FILES = cli.ActionGroupProperties(
+        name="deobfuscation-files",
+        description="Manage APK deobfuscation files in Google Play",
+    )
+    EXPANSION_FILES = cli.ActionGroupProperties(
+        name="expansion-files",
+        description="Manage APK expansion files in Google Play",
+    )
