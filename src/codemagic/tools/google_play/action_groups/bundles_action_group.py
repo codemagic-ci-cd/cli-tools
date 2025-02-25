@@ -8,9 +8,11 @@ from codemagic.cli import Colors
 from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import Bundle
+from codemagic.google.resources.google_play import InternalAppSharingArtifact
 from codemagic.models.application_package import Aab
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import BundlesArgument
+from codemagic.tools.google_play.arguments import InternalAppSharingArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
@@ -46,37 +48,53 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
         "upload",
         BundlesArgument.BUNDLE_PATH,
+        InternalAppSharingArgument.INTERNAL_APP_SHARING,
         action_group=GooglePlayActionGroups.BUNDLES,
     )
     def upload_bundle(
         self,
         bundle_path: Path,
+        internal_app_sharing: Optional[bool] = None,
         edit: Optional[AppEdit] = None,
         should_print: bool = True,
-    ) -> Bundle:
+    ) -> Bundle | InternalAppSharingArtifact:
         """
         Upload App Bundle at given path to Google Play
         """
+
+        if edit and internal_app_sharing:
+            raise ValueError("Cannot use App edit to upload bundle to internal app sharing")
 
         try:
             aab = Aab(bundle_path)
         except IOError:
             raise BundlesArgument.BUNDLE_PATH.raise_argument_error("Not a valid App Bundle file")
 
-        self.logger.info(Colors.BLUE('Upload App Bundle "%s" to Google Play'), bundle_path)
+        if internal_app_sharing:
+            message = f'Upload App Bundle "{bundle_path}" to Google Play through internal app sharing'
+        else:
+            message = f'Upload App Bundle "{bundle_path}" to Google Play'
+        self.logger.info(Colors.BLUE(message))
         self.logger.info(aab.get_text_summary())
 
+        uploaded_artifact: Bundle | InternalAppSharingArtifact
         try:
-            with self.using_app_edit(edit) as edit:
-                bundle = self.client.bundles.upload(
+            if internal_app_sharing:
+                uploaded_artifact = self.client.internal_app_sharing_artifacts.upload_bundle(
                     self.package_name,
-                    edit.id,
                     bundle_path=bundle_path,
                 )
+            else:
+                with self.using_app_edit(edit) as edit:
+                    uploaded_artifact = self.client.bundles.upload(
+                        self.package_name,
+                        edit.id,
+                        bundle_path=bundle_path,
+                    )
         except GoogleError as ge:
             error_message = f"Uploading App Bundle {bundle_path} to Google Play failed."
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
-        self.printer.print_resource(bundle, should_print=should_print)
-        return bundle
+        self.printer.print_resource(uploaded_artifact, should_print=should_print)
+        return uploaded_artifact

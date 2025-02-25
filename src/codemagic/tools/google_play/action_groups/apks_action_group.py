@@ -8,8 +8,10 @@ from codemagic.cli import Colors
 from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import Apk
 from codemagic.google.resources.google_play import AppEdit
+from codemagic.google.resources.google_play import InternalAppSharingArtifact
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import ApksArgument
+from codemagic.tools.google_play.arguments import InternalAppSharingArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
@@ -45,31 +47,46 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
         "upload",
         ApksArgument.APK_PATH,
+        InternalAppSharingArgument.INTERNAL_APP_SHARING,
         action_group=GooglePlayActionGroups.APKS,
     )
     def upload_apk(
         self,
         apk_path: Path,
+        internal_app_sharing: Optional[bool] = None,
         edit: Optional[AppEdit] = None,
         should_print: bool = True,
-    ) -> Apk:
+    ) -> Apk | InternalAppSharingArtifact:
         """
         Upload APK at given path to Google Play
         """
 
-        self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}"'))
+        if edit and internal_app_sharing:
+            raise ValueError("Cannot use App edit to upload APK to internal app sharing")
 
+        if internal_app_sharing:
+            self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}" through internal app sharing'))
+        else:
+            self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}"'))
+
+        uploaded_artifact: Apk | InternalAppSharingArtifact
         try:
-            with self.using_app_edit(edit) as edit:
-                apk = self.client.apks.upload(
+            if internal_app_sharing:
+                uploaded_artifact = self.client.internal_app_sharing_artifacts.upload_apk(
                     self.package_name,
-                    edit.id,
                     apk_path=apk_path,
                 )
+            else:
+                with self.using_app_edit(edit) as edit:
+                    uploaded_artifact = self.client.apks.upload(
+                        self.package_name,
+                        edit.id,
+                        apk_path=apk_path,
+                    )
         except GoogleError as ge:
             error_message = f"Uploading APK {apk_path} to Google Play failed."
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
-        self.printer.print_resource(apk, should_print=should_print)
-        return apk
+        self.printer.print_resource(uploaded_artifact, should_print=should_print)
+        return uploaded_artifact

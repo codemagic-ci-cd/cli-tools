@@ -42,6 +42,19 @@ class TracksArgument(cli.Argument):
     )
 
 
+class InternalAppSharingArgument(cli.Argument):
+    INTERNAL_APP_SHARING = cli.ArgumentProperties(
+        key="internal_app_sharing",
+        flags=("--internal-app-sharing", "-i"),
+        type=bool,
+        description="Whether to upload an APK or Android App Bundle through internal app sharing",
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
+
+
 class PromoteArgument(cli.Argument):
     SOURCE_TRACK_NAME = cli.ArgumentProperties(
         key="source_track_name",

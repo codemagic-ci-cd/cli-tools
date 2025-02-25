@@ -54,7 +54,7 @@ class InternalAppSharingArtifactsService(
     def upload_bundle(
         self,
         package_name: str,
-        apk_path: pathlib.Path,
+        bundle_path: pathlib.Path,
     ) -> InternalAppSharingArtifact:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/internalappsharingartifacts/uploadbundle
@@ -64,7 +64,7 @@ class InternalAppSharingArtifactsService(
         upload_request: android_publisher_resources.InternalAppSharingArtifactHttpRequest = (
             self._internal_app_sharing_artifacts.uploadbundle(
                 packageName=package_name,
-                media_body=str(apk_path),
+                media_body=str(bundle_path),
                 media_mime_type="application/octet-stream",
             )
         )
