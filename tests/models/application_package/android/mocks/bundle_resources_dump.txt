@@ -1,0 +1,19 @@
+Package 'io.codemagic.cli_tools_google_play':
+0x7f010000 - attr/alpha
+	(default) - [ATTR] {}
+0x7f02000e - color/white
+	(default) - [COLOR_ARGB8] #ffffffff
+0x7f090001 - string/app_name
+	(default) - [STR] "CLI tools test app"
+0x7f090002 - string/call_notification_answer_action
+	(default) - [STR] "Answer"
+	locale: "ca" - [STR] "Respon"
+	locale: "da" - [STR] "Besvar"
+	locale: "fa" - [STR] "پاسخ دادن"
+	locale: "ja" - [STR] "応答"
+0x7f0b0005 - styleable/GradientColorItem
+	(default) - [STYLEABLE] [@android:attr/offset, @android:attr/color]
+0x7f0c0000 - xml/backup_rules
+	(default) - [FILE] res/xml/backup_rules.xml
+0x7f0c0001 - xml/data_extraction_rules
+	(default) - [FILE] res/xml/data_extraction_rules.xml

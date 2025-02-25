@@ -13,19 +13,24 @@ from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import AppEdit
 
-from .action_groups import TracksActionGroup
-from .actions import GetLatestBuildNumberAction
+from . import action_groups
+from . import actions
 from .arguments import GooglePlayArgument
 
 
 @cli.common_arguments(
     GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS,
+    GooglePlayArgument.PACKAGE_NAME,
     GooglePlayArgument.JSON_OUTPUT,
 )
 class GooglePlay(
     cli.CliApp,
-    GetLatestBuildNumberAction,
-    TracksActionGroup,
+    action_groups.ApksActionGroup,
+    action_groups.BundlesActionGroup,
+    action_groups.DeobfuscationFilesActionGroup,
+    action_groups.ExpansionFilesActionGroup,
+    action_groups.TracksActionGroup,
+    actions.GetLatestBuildNumberAction,
 ):
     """
     Utility to get the latest build numbers from Google Play using Google Play Developer API
@@ -34,11 +39,13 @@ class GooglePlay(
     def __init__(
         self,
         credentials: dict,
+        package_name: str,
         json_output: bool = False,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.client = GooglePlayClient(credentials)
+        self.package_name = package_name
         self.printer = ResourcePrinter(json_output, self.echo)
 
     @classmethod
@@ -50,18 +57,22 @@ class GooglePlay(
         return GooglePlay(
             credentials=credentials_argument.value,
             json_output=bool(cli_args.json_output),
+            package_name=cli_args.package_name,
             **cls._parent_class_kwargs(cli_args),
         )
 
     @contextlib.contextmanager
-    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
-        edit: Optional[AppEdit] = None
+    def using_app_edit(self, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
+        created_edit: Optional[AppEdit] = None
         try:
-            edit = self.client.edits.create(package_name=package_name)
-            yield cast(AppEdit, edit)
+            if edit is None:
+                created_edit = self.client.edits.create(package_name=self.package_name)
+                yield cast(AppEdit, created_edit)
+            else:
+                yield edit
         finally:
-            if edit is not None:
-                self.client.edits.delete(edit, package_name=package_name)
+            if created_edit is not None:
+                self.client.edits.delete(created_edit, package_name=self.package_name)
 
 
 if __name__ == "__main__":

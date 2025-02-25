@@ -44,6 +44,7 @@ packaging = ">=22.0"
 psutil = ">= 5.8.0"
 pyjwt = "^2.4.0"
 requests = ">= 2.25"
+androguard = ">=4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -106,6 +107,8 @@ exclude = [
 module = [
     "mdutils.mdutils",
     "mdutils.tools.Table",
+    "androguard.core.apk",
+    "androguard.util",
 ]
 ignore_missing_imports = true
 

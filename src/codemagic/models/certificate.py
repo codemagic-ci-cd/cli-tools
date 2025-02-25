@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import timezone
 from typing import AnyStr
 from typing import Dict
+from typing import Final
 from typing import List
 from typing import Optional
 from typing import Union
@@ -25,6 +26,16 @@ from .certificate_p12_exporter import P12Exporter
 from .json_serializable import JsonSerializable
 from .private_key import SUPPORTED_PUBLIC_KEY_TYPES
 from .private_key import PrivateKey
+
+CERTIFICATE_NAME_COMPONENT_TRANSFORMATION: Final = {
+    "CN": "Common name",
+    "OU": "Organizational unit",
+    "O": "Organization",
+    "L": "Locality",
+    "S": "State or province",
+    "ST": "State",
+    "C": "Country",
+}
 
 
 class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
@@ -226,21 +237,12 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
         }
 
     def get_text_summary(self) -> str:
-        issuer_name_transformation = {
-            "CN": "Common name",
-            "OU": "Organizational unit",
-            "O": "Organization",
-            "L": "Locality",
-            "S": "State or province",
-            "ST": "State",
-            "C": "Country",
-        }
         return "\n".join(
             [
                 "-- Certificate --",
                 f"Common name: {self.common_name}",
                 "Issuer:",
-                *(f"    {issuer_name_transformation[k]}: {v}" for k, v in self.issuer.items()),
+                *(f"    {CERTIFICATE_NAME_COMPONENT_TRANSFORMATION[k]}: {v}" for k, v in self.issuer.items()),
                 f"Expires at: {self.expires_at}",
                 f"Has expired: {self.has_expired}",
                 f"Serial number: {self.serial}",

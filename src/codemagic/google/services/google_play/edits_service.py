@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from typing import ClassVar
-from typing import Type
+from typing import Final
 from typing import Union
 from typing import cast
 
@@ -10,20 +9,18 @@ from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.services.resource_service import ResourceService
 
 if TYPE_CHECKING:
-    from googleapiclient._apis.androidpublisher.v3 import AndroidPublisherResource
-    from googleapiclient._apis.androidpublisher.v3 import AppEdit as GooglePlayAppEdit
-    from googleapiclient._apis.androidpublisher.v3 import AppEditHttpRequest
+    from googleapiclient._apis.androidpublisher.v3 import resources as android_publisher_resources
 
 
-class EditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
+class EditsService(ResourceService[AppEdit, "android_publisher_resources.AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits
     """
 
-    resource_type: ClassVar[Type[AppEdit]] = AppEdit
+    resource_type: Final = AppEdit
 
     @property
-    def _edits(self) -> AndroidPublisherResource.EditsResource:
+    def _edits(self) -> android_publisher_resources.AndroidPublisherResource.EditsResource:
         return self._google_service.edits()
 
     @classmethod
@@ -37,12 +34,12 @@ class EditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/insert
         """
         self._logger.debug("Create edit for %r", package_name)
-        insert_request: AppEditHttpRequest = self._edits.insert(
+        insert_request: android_publisher_resources.AppEditHttpRequest = self._edits.insert(
             body={},
             packageName=package_name,
         )
         response = cast(
-            "GooglePlayAppEdit",
+            "android_publisher_resources.AppEdit",
             self._execute_request(insert_request, "insert"),
         )
         self._logger.debug("Created edit %s", response["id"])
@@ -54,12 +51,12 @@ class EditsService(ResourceService[AppEdit, "AndroidPublisherResource"]):
         """
         edit_id = self._resolve_id(edit)
         self._logger.debug("Commit edit %s for %r", edit_id, package_name)
-        commit_request = self._edits.commit(
+        commit_request: android_publisher_resources.AppEditHttpRequest = self._edits.commit(
             packageName=package_name,
             editId=edit_id,
         )
         response = cast(
-            "GooglePlayAppEdit",
+            "android_publisher_resources.AppEdit",
             self._execute_request(commit_request, "commit"),
         )
         self._logger.debug("Commited edit %s", response["id"])

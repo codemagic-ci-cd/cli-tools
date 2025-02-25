@@ -12,10 +12,7 @@ from codemagic.google.resources.google_play import Release
 from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 from codemagic.tools import GooglePlay
-from codemagic.tools.google_play.arguments import GooglePlayArgument
 from codemagic.tools.google_play.errors import GooglePlayError
-
-credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
 
 
 @pytest.fixture
@@ -39,7 +36,10 @@ def version_codes_track() -> Track:
 
 @pytest.fixture
 def google_play() -> GooglePlay:
-    return GooglePlay({"type": "service_account"})
+    return GooglePlay(
+        credentials={"type": "service_account"},
+        package_name="com.example.app",
+    )
 
 
 @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ def test_get_latest_build_number(
     with mock.patch.object(google_play, "client") as mock_google_play_client:
         mock_google_play_client.tracks.list.return_value = tracks
         mock_google_play_client.edits.create.return_value = mock_edit
-        build_number = google_play.get_latest_build_number("com.example.app", track_names)
+        build_number = google_play.get_latest_build_number(track_names)
 
     mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")
     mock_google_play_client.tracks.list.assert_called_once_with("com.example.app", "mock-edit-id")
@@ -84,7 +84,7 @@ def test_get_latest_build_number_no_tracks(google_play: GooglePlay):
         mock_google_play_client.edits.create.return_value = edit
 
         with pytest.raises(GooglePlayError) as exc_info:
-            google_play.get_latest_build_number("com.example.app")
+            google_play.get_latest_build_number()
 
     assert str(exc_info.value) == 'Version code info is missing from all tracks for package "com.example.app"'
     mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")
@@ -101,7 +101,7 @@ def test_get_latest_build_number_no_releases(track_releases, google_play: Google
         mock_google_play_client.edits.create.return_value = edit
 
         with pytest.raises(GooglePlayError) as exc_info:
-            google_play.get_latest_build_number("com.example.app")
+            google_play.get_latest_build_number()
 
     assert str(exc_info.value) == 'Version code info is missing from all tracks for package "com.example.app"'
     mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")
@@ -118,7 +118,7 @@ def test_get_latest_build_number_no_version_codes(google_play: GooglePlay):
         mock_google_play_client.edits.create.return_value = edit
 
         with pytest.raises(GooglePlayError) as exc_info:
-            google_play.get_latest_build_number("com.example.app")
+            google_play.get_latest_build_number()
 
         assert str(exc_info.value) == 'Version code info is missing from all tracks for package "com.example.app"'
         mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")

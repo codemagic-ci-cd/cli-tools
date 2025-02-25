@@ -1,57 +1,33 @@
 import pathlib
+import shutil
 import subprocess
 from tempfile import NamedTemporaryFile
 from typing import AnyStr
-from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import NoReturn
 from typing import Optional
-from typing import Sequence
-from typing import Union
 
-from codemagic.cli import CliProcess
 from codemagic.models import Certificate
 from codemagic.models import Keystore
 
-from .abstract_shell_tool import AbstractShellTool
+from .shell_tool import ShellTool
 
 
-class Keytool(AbstractShellTool):
+class Keytool(ShellTool):
     """
     Minimal Python bindings for key and certificate management tool "keytool"
     """
 
-    _executable_name = "keytool"
-
-    def _run_command(
-        self,
-        command: Sequence[str],
-        command_env: Optional[Dict[str, str]] = None,
-        suppress_output: bool = False,
-    ) -> Union[subprocess.CompletedProcess, CliProcess]:
-        cli_app = self.get_current_cli_app()
-
-        if cli_app:
-            cli_process = cli_app.execute(
-                command,
-                env=command_env,
-                suppress_output=suppress_output,
-            )
-            cli_process.raise_for_returncode()
-            return cli_process
-        else:
-            completed_process = subprocess.run(
-                command,
-                capture_output=True,
-                env=command_env,
-            )
-            completed_process.check_returncode()
-            return completed_process
+    def __init__(self):
+        self._executable = shutil.which("keytool")
+        if not self._executable:
+            raise IOError('"keytool" executable is not present on the system')
+        super().__init__()
 
     def generate_keystore(self, keystore: Keystore):
         command = (
-            self.executable,
+            self._executable,
             "-genkey",
             "-alias",
             keystore.key_alias,
@@ -86,7 +62,7 @@ class Keytool(AbstractShellTool):
         key_alias: str,
     ) -> bool:
         command = (
-            self.executable,
+            self._executable,
             "-rfc",
             "-list",
             "-alias",
@@ -115,7 +91,7 @@ class Keytool(AbstractShellTool):
     ) -> Certificate:
         with NamedTemporaryFile(mode="wb") as tf:
             command = (
-                self.executable,
+                self._executable,
                 "-exportcert",
                 "-storepass:env",
                 "STORE_PASSWORD",
@@ -148,7 +124,7 @@ class Keytool(AbstractShellTool):
         alias_command_arguments = ("-alias", key_alias) if key_alias is not None else tuple()
 
         command = (
-            self.executable,
+            self._executable,
             "-rfc",
             "-list",
             "-storepass:env",

@@ -15,13 +15,14 @@ from codemagic.google.resources.google_play import Track
 
 class GooglePlayBaseAction(metaclass=ABCMeta):
     client: GooglePlayClient
+    package_name: str
     logger: logging.Logger
     printer: ResourcePrinter
 
     # Define signatures for self-reference to other action groups
 
     @contextlib.contextmanager
-    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
+    def using_app_edit(self, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
         from ..google_play import GooglePlay
 
         _ = GooglePlay.using_app_edit  # Implementation
@@ -35,7 +36,6 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     @abstractmethod
     def get_latest_build_number(
         self,
-        package_name: str,
         tracks: Optional[Sequence[str]] = None,
     ) -> Optional[int]:
         from .actions import GetLatestBuildNumberAction
@@ -46,8 +46,8 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     @abstractmethod
     def get_track(
         self,
-        package_name: str,
         track_name: str,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> Track:
         from .action_groups import TracksActionGroup
@@ -58,7 +58,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     @abstractmethod
     def list_tracks(
         self,
-        package_name: str,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> List[Track]:
         from .action_groups import TracksActionGroup
