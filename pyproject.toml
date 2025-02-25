@@ -107,6 +107,8 @@ exclude = [
 module = [
     "mdutils.mdutils",
     "mdutils.tools.Table",
+    "androguard.core.apk",
+    "androguard.util",
 ]
 ignore_missing_imports = true
 

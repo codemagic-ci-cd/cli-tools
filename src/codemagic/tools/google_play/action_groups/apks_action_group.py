@@ -2,6 +2,7 @@ from abc import ABCMeta
 from pathlib import Path
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -57,7 +58,7 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         internal_app_sharing: Optional[bool] = None,
         edit: Optional[AppEdit] = None,
         should_print: bool = True,
-    ) -> Apk | InternalAppSharingArtifact:
+    ) -> Union[Apk, InternalAppSharingArtifact]:
         """
         Upload APK at given path to Google Play
         """
@@ -76,7 +77,7 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}"'))
         self.logger.info(apk.get_text_summary())
 
-        uploaded_artifact: Apk | InternalAppSharingArtifact
+        uploaded_artifact: Union[Apk, InternalAppSharingArtifact]
         try:
             if internal_app_sharing:
                 uploaded_artifact = self.client.internal_app_sharing_artifacts.upload_apk(

@@ -2,6 +2,7 @@ from abc import ABCMeta
 from pathlib import Path
 from typing import List
 from typing import Optional
+from typing import Union
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -57,7 +58,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         internal_app_sharing: Optional[bool] = None,
         edit: Optional[AppEdit] = None,
         should_print: bool = True,
-    ) -> Bundle | InternalAppSharingArtifact:
+    ) -> Union[Bundle, InternalAppSharingArtifact]:
         """
         Upload App Bundle at given path to Google Play
         """
@@ -77,7 +78,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         self.logger.info(Colors.BLUE(message))
         self.logger.info(aab.get_text_summary())
 
-        uploaded_artifact: Bundle | InternalAppSharingArtifact
+        uploaded_artifact: Union[Bundle, InternalAppSharingArtifact]
         try:
             if internal_app_sharing:
                 uploaded_artifact = self.client.internal_app_sharing_artifacts.upload_bundle(
