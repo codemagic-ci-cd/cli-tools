@@ -10,6 +10,6 @@ class InternalAppSharingArtifact(Resource):
     https://developers.google.com/android-publisher/api-ref/rest/v3/internalappsharingartifacts#resource:-internalappsharingartifact
     """
 
-    downloadUrl: Optional[int] = None
+    downloadUrl: Optional[str] = None
     certificateFingerprint: Optional[str] = None
     sha256: Optional[str] = None
