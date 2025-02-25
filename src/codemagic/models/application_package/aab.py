@@ -129,7 +129,7 @@ class Aab(AbstractPackage):
         if label.startswith("@") and (resource_value := self._resources.get_resource(label[1:])):
             label = resource_value
         if label.startswith("@string/"):
-            string_reference = label.removeprefix("@string/")
+            string_reference = label[8:]
             return self._strings.get_value(string_reference) or string_reference
         return label
 
