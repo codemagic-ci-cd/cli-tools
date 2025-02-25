@@ -9,6 +9,7 @@ from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import Apk
 from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import InternalAppSharingArtifact
+from codemagic.models.application_package import ApkPackage
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import ApksArgument
 from codemagic.tools.google_play.arguments import InternalAppSharingArgument
@@ -64,10 +65,16 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         if edit and internal_app_sharing:
             raise ValueError("Cannot use App edit to upload APK to internal app sharing")
 
+        try:
+            apk = ApkPackage(apk_path)
+        except IOError:
+            raise ApksArgument.APK_PATH.raise_argument_error("Not a valid APK file")
+
         if internal_app_sharing:
             self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}" through internal app sharing'))
         else:
             self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}"'))
+        self.logger.info(apk.get_text_summary())
 
         uploaded_artifact: Apk | InternalAppSharingArtifact
         try:

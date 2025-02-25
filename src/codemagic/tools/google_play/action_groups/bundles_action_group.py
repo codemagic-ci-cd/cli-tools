@@ -9,7 +9,7 @@ from codemagic.google import GoogleError
 from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import Bundle
 from codemagic.google.resources.google_play import InternalAppSharingArtifact
-from codemagic.models.application_package import Aab
+from codemagic.models.application_package import AabPackage
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import BundlesArgument
 from codemagic.tools.google_play.arguments import InternalAppSharingArgument
@@ -66,7 +66,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             raise ValueError("Cannot use App edit to upload bundle to internal app sharing")
 
         try:
-            aab = Aab(bundle_path)
+            aab = AabPackage(bundle_path)
         except IOError:
             raise BundlesArgument.BUNDLE_PATH.raise_argument_error("Not a valid App Bundle file")
 

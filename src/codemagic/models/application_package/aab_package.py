@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from codemagic.shell_tools.bundletool import Bundletool
 
 
-class Aab(AbstractPackage):
+class AabPackage(AbstractPackage):
     def _validate_package(self):
         try:
             self._bundletool.validate(
@@ -156,26 +156,9 @@ class Aab(AbstractPackage):
             "app_name": self.get_app_name(),
             "package_name": self.get_package_name(),
             "min_os_version": self.get_minimum_os_version(),
-            "certificate_issuer": self._get_formatted_certificate_issuer(),
-            "certificate_subject": self._get_formatted_certificate_subject(),
+            "certificate_issuer": self._format_name(self.certificate.issuer) if self.certificate else None,
+            "certificate_subject": self._format_name(self.certificate.subject) if self.certificate else None,
             "debuggable": self.is_debuggable(),
             "version": self.get_version(),
             "version_code": self.get_version_code(),
         }
-
-    @classmethod
-    def _format_name(cls, name: Dict[str, str]) -> str:
-        from codemagic.models.certificate import CERTIFICATE_NAME_COMPONENT_TRANSFORMATION
-
-        parts = (f"{CERTIFICATE_NAME_COMPONENT_TRANSFORMATION[k]}: {v}" for k, v in name.items())
-        return ", ".join(parts)
-
-    def _get_formatted_certificate_issuer(self) -> Optional[str]:
-        if not self.certificate:
-            return None
-        return self._format_name(self.certificate.issuer)
-
-    def _get_formatted_certificate_subject(self) -> Optional[str]:
-        if not self.certificate:
-            return None
-        return self._format_name(self.certificate.subject)
