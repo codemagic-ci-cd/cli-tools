@@ -6,6 +6,7 @@ from typing import Optional
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google import GoogleError
+from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import Release
 from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
@@ -26,6 +27,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     def get_track(
         self,
         track_name: str,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> Track:
         """
@@ -33,7 +35,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
 
         try:
-            with self.using_app_edit() as edit:
+            with self.using_app_edit(edit) as edit:
                 track = self.client.tracks.get(self.package_name, track_name, edit.id)
         except GoogleError as ge:
             error_message = f'Getting track "{track_name}" from Google Play for package "{self.package_name}" failed.'
@@ -49,6 +51,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     )
     def list_tracks(
         self,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> List[Track]:
         """
@@ -56,7 +59,7 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
 
         try:
-            with self.using_app_edit() as edit:
+            with self.using_app_edit(edit) as edit:
                 tracks = self.client.tracks.list(self.package_name, edit.id)
         except GoogleError as ge:
             error_message = f'Listing tracks from Google Play for package "{self.package_name}" failed.'

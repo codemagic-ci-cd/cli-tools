@@ -53,7 +53,7 @@ class BundlesService(ResourceService[Bundle, "android_publisher_resources.Androi
         )
         response = cast(
             "android_publisher_resources.Bundle",
-            self._execute_request(upload_request, "upload"),
+            self._execute_request(upload_request, "upload", retries=3),
         )
         self._logger.debug("Uploaded App Bundle for %r", package_name)
         return Bundle(**response)

@@ -1,10 +1,12 @@
 from abc import ABCMeta
 from pathlib import Path
 from typing import List
+from typing import Optional
 
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google import GoogleError
+from codemagic.google.resources.google_play import AppEdit
 from codemagic.google.resources.google_play import Bundle
 from codemagic.models.application_package import Aab
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
@@ -20,6 +22,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     )
     def list_bundles(
         self,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> List[Bundle]:
         """
@@ -27,7 +30,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         """
 
         try:
-            with self.using_app_edit() as edit:
+            with self.using_app_edit(edit) as edit:
                 bundles = self.client.bundles.list(self.package_name, edit.id)
         except GoogleError as ge:
             error_message = f'Listing APKS from Google Play for package "{self.package_name}" failed.'
@@ -48,6 +51,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     def upload_bundle(
         self,
         bundle_path: Path,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> Bundle:
         """
@@ -63,7 +67,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         self.logger.info(aab.get_text_summary())
 
         try:
-            with self.using_app_edit() as edit:
+            with self.using_app_edit(edit) as edit:
                 bundle = self.client.bundles.upload(
                     self.package_name,
                     edit.id,

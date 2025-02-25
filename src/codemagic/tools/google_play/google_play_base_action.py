@@ -22,7 +22,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     # Define signatures for self-reference to other action groups
 
     @contextlib.contextmanager
-    def using_app_edit(self) -> Generator[AppEdit, None, None]:
+    def using_app_edit(self, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
         from ..google_play import GooglePlay
 
         _ = GooglePlay.using_app_edit  # Implementation
@@ -47,6 +47,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     def get_track(
         self,
         track_name: str,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> Track:
         from .action_groups import TracksActionGroup
@@ -57,6 +58,7 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
     @abstractmethod
     def list_tracks(
         self,
+        edit: Optional[AppEdit] = None,
         should_print: bool = True,
     ) -> List[Track]:
         from .action_groups import TracksActionGroup

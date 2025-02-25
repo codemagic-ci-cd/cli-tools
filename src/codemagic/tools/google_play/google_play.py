@@ -62,14 +62,17 @@ class GooglePlay(
         )
 
     @contextlib.contextmanager
-    def using_app_edit(self) -> Generator[AppEdit, None, None]:
-        edit: Optional[AppEdit] = None
+    def using_app_edit(self, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
+        created_edit: Optional[AppEdit] = None
         try:
-            edit = self.client.edits.create(package_name=self.package_name)
-            yield cast(AppEdit, edit)
+            if edit is None:
+                created_edit = self.client.edits.create(package_name=self.package_name)
+                yield cast(AppEdit, created_edit)
+            else:
+                yield edit
         finally:
-            if edit is not None:
-                self.client.edits.delete(edit, package_name=self.package_name)
+            if created_edit is not None:
+                self.client.edits.delete(created_edit, package_name=self.package_name)
 
 
 if __name__ == "__main__":

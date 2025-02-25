@@ -38,6 +38,7 @@ class ResourceService(Generic[ResourceT, GoogleServiceT], ABC):
         self,
         request: HttpRequest,
         request_type: Literal["commit", "delete", "get", "insert", "list", "update", "upload"],
+        retries: int = 0,
     ) -> Dict[str, Any]:
         if isinstance(request.body, bytes):
             self._logger.info(f">>> {request.method} {request.uri} <{len(request.body)} bytes>")
@@ -45,7 +46,7 @@ class ResourceService(Generic[ResourceT, GoogleServiceT], ABC):
             self._logger.info(f">>> {request.method} {request.uri} {request.body}")
 
         try:
-            response = request.execute()
+            response = request.execute(num_retries=retries)
         except OAuth2ClientError as e:
             self._logger.exception(f"Failed to {request_type} {self.resource_type.__name__}")
             raise GoogleAuthenticationError(str(e)) from e

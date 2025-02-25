@@ -119,6 +119,13 @@ class ApksArgument(cli.Argument):
         description="Path to APK file (*.apk)",
         argparse_kwargs={"required": True},
     )
+    VERSION_CODE = cli.ArgumentProperties(
+        key="apk_version_code",
+        flags=("--version-code",),
+        type=int,
+        description="Version code of the APK file",
+        argparse_kwargs={"required": True},
+    )
 
 
 class BundlesArgument(cli.Argument):
@@ -127,5 +134,15 @@ class BundlesArgument(cli.Argument):
         flags=("--bundle",),
         type=cli.CommonArgumentTypes.existing_path,
         description="Path to App Bundle file (*.aab)",
+        argparse_kwargs={"required": True},
+    )
+
+
+class ProguardMapArgument(cli.Argument):
+    PROGUARD_MAP_PATH = cli.ArgumentProperties(
+        key="proguard_map_path",
+        flags=("--proguard-map",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Path to ProGuard mapping file",
         argparse_kwargs={"required": True},
     )
