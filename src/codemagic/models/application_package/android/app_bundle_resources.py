@@ -36,54 +36,26 @@ class AppBundleResources:
     Parse output from `bundletool dump resources --bundle app.aab --values`
     Example output is as follows:
 
-    Package 'biz.ontime.taxi.polotrip.driver':
-    0x7f010000 - anim/abc_fade_in
-        (default) - [FILE] res/anim/abc_fade_in.xml
-    0x7f010001 - anim/abc_fade_out
-        (default) - [FILE] res/anim/abc_fade_out.xml
-    0x7f010002 - anim/abc_grow_fade_in_from_bottom
-        (default) - [FILE] res/anim/abc_grow_fade_in_from_bottom.xml
-    0x7f020027 - attr/alpha
+    Package 'io.codemagic.cli_tools_google_play':
+    0x7f010000 - attr/alpha
         (default) - [ATTR] {}
-    0x7f020028 - attr/alphabeticModifiers
-        (default) - [ATTR] {id/ALT=2, id/CTRL=4096, id/FUNCTION=8, id/META=65536, id/SHIFT=1, id/SYM=4}
-    0x7f020029 - attr/ambientEnabled
+    0x7f010001 - attr/font
         (default) - [ATTR] {}
-    0x7f0d0000 - string/abc_action_bar_home_description
-        (default) - [STR] "Navigate home"
-        locale: "ca" - [STR] "Navega a la pàgina d'inici"
-        locale: "da" - [STR] "Find hjem"
-        locale: "fa" - [STR] "پیمایش به صفحه اصلی"
-        locale: "ja" - [STR] "ホームに戻る"
-        locale: "ka" - [STR] "მთავარზე გადასვლა"
-        locale: "pa" - [STR] "ਹੋਮ 'ਤੇ ਜਾਓ"
-    0x7f0e004f - style/Base.ThemeOverlay.AppCompat.Dialog.Alert
-        (default) - [STYLE] [@dimen/abc_dialog_min_width_major, @dimen/abc_dialog_min_width_minor]
-    0x7f0e0050 - style/Base.ThemeOverlay.AppCompat.Light
-        (default) - [STYLE] [
-            @color/background_material_light,
-            @color/foreground_material_light,
-            @color/foreground_material_dark,
-            @color/background_material_light,
-            @color/background_floating_material_light,
-            @color/abc_primary_text_material_light,
-            @color/abc_primary_text_material_dark,
-            @color/abc_secondary_text_material_light,
-            @color/abc_secondary_text_material_dark,
-            @color/abc_secondary_text_material_light,
-            @color/abc_secondary_text_material_dark,
-            @color/abc_primary_text_disable_only_material_light,
-            @color/abc_hint_foreground_material_light,
-            @color/abc_hint_foreground_material_dark,
-            @color/highlighted_text_material_light,
-            ?android:attr/textColorSecondary,
-            @color/ripple_material_light,
-            @color/button_material_light,
-            @color/switch_thumb_material_light,
-            true,
-            @color/abc_primary_text_disable_only_material_dark,
-            @color/abc_background_cache_hint_selector_material_light,
-        ]
+    0x7f010005 - attr/fontProviderFetchStrategy
+        (default) - [ATTR] {id/blocking=0, id/async=1}
+    0x7f020000 - color/androidx_core_ripple_material_light
+        (default) - [COLOR_ARGB8] #1f000000
+    0x7f020001 - color/androidx_core_secondary_text_default_material_light
+        (default) - [COLOR_ARGB8] #8a000000
+    0x7f020002 - color/black
+        (default) - [COLOR_ARGB8] #ff000000
+    0x7f020005 - color/notification_action_color_filter
+        (default) - [REF] @color/androidx_core_secondary_text_default_material_light
+    0x7f02000c - color/vector_tint_color
+        (default) - [FILE] res/color/vector_tint_color.xml
+    0x7f02000d - color/vector_tint_theme_color
+        (default) - [FILE] res/color/vector_tint_theme_color.xml
+    ...
     """
 
     def __init__(self, dump_output: str):

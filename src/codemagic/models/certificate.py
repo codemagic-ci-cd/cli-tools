@@ -27,7 +27,7 @@ from .json_serializable import JsonSerializable
 from .private_key import SUPPORTED_PUBLIC_KEY_TYPES
 from .private_key import PrivateKey
 
-_NAME_TRANSFORMATION: Final = {
+CERTIFICATE_NAME_COMPONENT_TRANSFORMATION: Final = {
     "CN": "Common name",
     "OU": "Organizational unit",
     "O": "Organization",
@@ -242,7 +242,7 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
                 "-- Certificate --",
                 f"Common name: {self.common_name}",
                 "Issuer:",
-                *(f"    {_NAME_TRANSFORMATION[k]}: {v}" for k, v in self.issuer.items()),
+                *(f"    {CERTIFICATE_NAME_COMPONENT_TRANSFORMATION[k]}: {v}" for k, v in self.issuer.items()),
                 f"Expires at: {self.expires_at}",
                 f"Has expired: {self.has_expired}",
                 f"Serial number: {self.serial}",
@@ -250,12 +250,6 @@ class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
                 f"SHA256: {self.get_fingerprint(hashes.SHA256())}",
             ],
         )
-
-    def get_human_friendly_issuer(self) -> str:
-        return ", ".join(f"{_NAME_TRANSFORMATION[k]}: {v}" for k, v in self.issuer.items())
-
-    def get_human_friendly_subject(self) -> str:
-        return ", ".join(f"{_NAME_TRANSFORMATION[k]}: {v}" for k, v in self.subject.items())
 
     @staticmethod
     def _get_rfc_4514_attribute_name(name_attribute: x509.NameAttribute) -> str:
