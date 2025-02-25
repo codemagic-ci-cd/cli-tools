@@ -14,10 +14,11 @@ def app_bundle_resources() -> AppBundleResources:
 @pytest.mark.parametrize(
     ("label", "expected_resource_value"),
     (
-        ("string/app_name", "CLI tools test app"),
-        ("color/white", "#ffffffff"),
-        ("xml/backup_rules", "res/xml/backup_rules.xml"),
-        ("styleable/GradientColorItem", "[@android:attr/offset, @android:attr/color]"),
+        ("color/white", "#ffffffff"),  # l 66
+        ("string/app_name", "CLI tools test app"),  # l378
+        ("string/call_notification_answer_action", "Answer"),
+        ("xml/backup_rules", "res/xml/backup_rules.xml"),  # l 7635
+        ("styleable/GradientColorItem", "[@android:attr/offset, @android:attr/color]"),  # l 7633
     ),
 )
 def test_get_resources(label: str, expected_resource_value: str, app_bundle_resources: AppBundleResources):
