@@ -13,9 +13,7 @@ if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3 import resources as android_publisher_resources
 
 
-class ExpansionFilesService(
-    ResourceService[ExpansionFile, "android_publisher_resources.AndroidPublisherResource"],
-):
+class ExpansionFilesService(ResourceService[ExpansionFile, "android_publisher_resources.AndroidPublisherResource"]):
     """
     https://developers.google.com/android-publisher/api-ref/rest/v3/edits.expansionfiles
     """
