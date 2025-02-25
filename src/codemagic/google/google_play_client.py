@@ -10,6 +10,7 @@ from .services.google_play import BundlesService
 from .services.google_play import DeobfuscationFilesService
 from .services.google_play import EditsService
 from .services.google_play import TracksService
+from .services.google_play.expansion_files_service import ExpansionFilesService
 
 if TYPE_CHECKING:
     from googleapiclient._apis.androidpublisher.v3.resources import AndroidPublisherResource  # noqa: F401
@@ -38,3 +39,7 @@ class GooglePlayClient(GoogleClient["AndroidPublisherResource"]):
     @cached_property
     def deobfuscation_files(self) -> DeobfuscationFilesService:
         return DeobfuscationFilesService(self.google_resource)
+
+    @cached_property
+    def expansion_files(self) -> ExpansionFilesService:
+        return ExpansionFilesService(self.google_resource)

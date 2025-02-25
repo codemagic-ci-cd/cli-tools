@@ -5,6 +5,8 @@ from .bundle import Bundle
 from .country_targeting import CountryTargeting
 from .deobfuscation_file import DeobfuscationFile
 from .deobfuscation_file_type import DeobfuscationFileType
+from .expansion_file import ExpansionFile
+from .expansion_file_type import ExpansionFileType
 from .localized_text import LocalizedText
 from .release import Release
 from .status import Status

@@ -1,5 +1,6 @@
 from codemagic import cli
 from codemagic.cli import Colors
+from codemagic.google.resources.google_play import ExpansionFileType
 from codemagic.google.resources.google_play import Status
 from codemagic.tools.google_play.argument_types import CredentialsArgument
 
@@ -114,14 +115,14 @@ class LatestBuildNumberArgument(cli.Argument):
 class ApksArgument(cli.Argument):
     APK_PATH = cli.ArgumentProperties(
         key="apk_path",
-        flags=("--apk",),
+        flags=("--apk", "-a"),
         type=cli.CommonArgumentTypes.existing_path,
         description="Path to APK file (*.apk)",
         argparse_kwargs={"required": True},
     )
-    VERSION_CODE = cli.ArgumentProperties(
+    APK_VERSION_CODE = cli.ArgumentProperties(
         key="apk_version_code",
-        flags=("--version-code",),
+        flags=("--version-code", "-c"),
         type=int,
         description="Version code of the APK file",
         argparse_kwargs={"required": True},
@@ -131,7 +132,7 @@ class ApksArgument(cli.Argument):
 class BundlesArgument(cli.Argument):
     BUNDLE_PATH = cli.ArgumentProperties(
         key="bundle_path",
-        flags=("--bundle",),
+        flags=("--bundle", "-b"),
         type=cli.CommonArgumentTypes.existing_path,
         description="Path to App Bundle file (*.aab)",
         argparse_kwargs={"required": True},
@@ -141,8 +142,29 @@ class BundlesArgument(cli.Argument):
 class ProguardMapArgument(cli.Argument):
     PROGUARD_MAP_PATH = cli.ArgumentProperties(
         key="proguard_map_path",
-        flags=("--proguard-map",),
+        flags=("--proguard-map", "-m"),
         type=cli.CommonArgumentTypes.existing_path,
         description="Path to ProGuard mapping file",
         argparse_kwargs={"required": True},
+    )
+
+
+class ExpansionFileArgument(cli.Argument):
+    EXPANSION_FILE_PATH = cli.ArgumentProperties(
+        key="expansion_file_path",
+        flags=("--expansion-file", "-e"),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Path to APK expansion file",
+        argparse_kwargs={"required": True},
+    )
+    EXPANSION_FILE_TYPE = cli.ArgumentProperties(
+        key="expansion_file_type",
+        flags=("--type", "-t"),
+        type=ExpansionFileType,
+        description="The file type of the expansion file configuration which is being updated",
+        argparse_kwargs={
+            "required": False,
+            "default": ExpansionFileType.MAIN,
+            "choices": [t for t in ExpansionFileType if t is not ExpansionFileType.UNSPECIFIED],
+        },
     )
