@@ -71,6 +71,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN("\nUploaded APK to Google Play internal app sharing"))
         self.printer.print_resource(internal_app_sharing_artifact, should_print=should_print)
         return internal_app_sharing_artifact
 
@@ -106,5 +107,6 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN("\nUploaded App Bundle to Google Play internal app sharing"))
         self.printer.print_resource(internal_app_sharing_artifact, should_print=should_print)
         return internal_app_sharing_artifact

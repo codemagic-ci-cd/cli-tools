@@ -143,6 +143,27 @@ class ApksArgument(cli.Argument):
         description="Version code of the APK file",
         argparse_kwargs={"required": True},
     )
+    PROGUARD_MAPPING_PATH = cli.ArgumentProperties(
+        key="proguard_mapping_path",
+        flags=("--proguard-mapping",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Path to the ProGuard mapping deobfuscation file to be uploaded for the published APK",
+        argparse_kwargs={"required": False},
+    )
+    MAIN_EXPANSION_FILE_PATH = cli.ArgumentProperties(
+        key="main_expansion_file_path",
+        flags=("--main-expansion-file",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Main expansion file to be uploaded for the published APK",
+        argparse_kwargs={"required": False},
+    )
+    PATCH_EXPANSION_FILE_PATH = cli.ArgumentProperties(
+        key="patch_expansion_file_path",
+        flags=("--patch-expansion-file",),
+        type=cli.CommonArgumentTypes.existing_path,
+        description="Patch expansion file to be uploaded for the published APK",
+        argparse_kwargs={"required": False},
+    )
 
 
 class BundlesArgument(cli.Argument):

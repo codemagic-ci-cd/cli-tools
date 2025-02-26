@@ -38,7 +38,7 @@ class ExpansionFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         Upload a new expansion file and attach it to the specified APK.
         """
 
-        self.logger.info(Colors.BLUE(f'Upload {expansion_file_type.value} expansion file "{expansion_file_path}'))
+        self.logger.info(Colors.BLUE(f'Upload {expansion_file_type} expansion file "{expansion_file_path}'))
         try:
             with self.using_app_edit(package_name, edit) as edit:
                 expansion_file = self.client.expansion_files.upload(
@@ -53,6 +53,7 @@ class ExpansionFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN(f"\nUploaded {expansion_file_type} expansion file {expansion_file_path}"))
         self.printer.print_resource(expansion_file, should_print=should_print)
         return expansion_file
 
@@ -64,7 +65,7 @@ class ExpansionFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         ExpansionFileArgument.REFERENCES_APK_VERSION_CODE,
         action_group=GooglePlayActionGroups.EXPANSION_FILES,
     )
-    def update_expansion_file(
+    def reference_expansion_file(
         self,
         package_name: str,
         apk_version_code: int,
@@ -96,5 +97,6 @@ class ExpansionFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN(f"\nUpdated {expansion_file_type} expansion file"))
         self.printer.print_resource(expansion_file, should_print=should_print)
         return expansion_file

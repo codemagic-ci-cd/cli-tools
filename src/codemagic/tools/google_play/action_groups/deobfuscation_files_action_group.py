@@ -38,7 +38,7 @@ class DeobfuscationFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         Upload a new deobfuscation file and attach it to the specified APK.
         """
 
-        upload_message = f'Upload {deobfuscation_file_type.value} deobfuscation file "{deobfuscation_file_path}'
+        upload_message = f'Upload {deobfuscation_file_type} deobfuscation file "{deobfuscation_file_path}'
         self.logger.info(Colors.BLUE(upload_message))
         try:
             with self.using_app_edit(package_name, edit) as edit:
@@ -54,5 +54,6 @@ class DeobfuscationFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN(f"\nUploaded {deobfuscation_file_type} deobfuscation file"))
         self.printer.print_resource(deobfuscation_file, should_print=should_print)
         return deobfuscation_file

@@ -47,6 +47,8 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
         if not bundles:
             self.logger.warning(Colors.YELLOW(f'No App Bundles found for package "{package_name}"'))
+        else:
+            self.logger.info(Colors.GREEN(f'Found {len(bundles)} App Bundles for package "{package_name}"'))
         self.printer.print_resources(bundles, should_print)
 
         return bundles
@@ -124,7 +126,7 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         except IOError:
             raise BundlesArgument.BUNDLE_PATH.raise_argument_error("Not a valid App Bundle")
 
-        self.logger.info(f'Publishing App Bundle "{bundle_path}" to Google Play track {track_name}\n')
+        self.logger.info(Colors.BLUE(f'Publishing App Bundle "{bundle_path}" to Google Play track {track_name}\n'))
 
         package_name = aab_package.get_package_name()
         try:
@@ -153,4 +155,4 @@ class BundlesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
-        self.logger.info(Colors.GREEN(f"Successfully published App Bundle to Google Play track {track_name}"))
+        self.logger.info(Colors.GREEN(f"\nSuccessfully published App Bundle to Google Play track {track_name}"))

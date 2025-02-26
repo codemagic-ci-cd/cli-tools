@@ -216,5 +216,6 @@ class TracksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
+        self.logger.info(Colors.GREEN(f"\nUpdated release for track {track_name}"))
         self.printer.print_resource(track, should_print=should_print)
         return track

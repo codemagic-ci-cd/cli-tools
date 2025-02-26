@@ -1,5 +1,6 @@
 import contextlib
 import logging
+import pathlib
 from abc import ABCMeta
 from abc import abstractmethod
 from typing import Generator
@@ -11,9 +12,15 @@ from typing import Union
 from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import AppEdit
+from codemagic.google.resources.google_play import DeobfuscationFile
+from codemagic.google.resources.google_play import DeobfuscationFileType
+from codemagic.google.resources.google_play import ExpansionFile
+from codemagic.google.resources.google_play import ExpansionFileType
 from codemagic.google.resources.google_play import LocalizedText
 from codemagic.google.resources.google_play import Track
 from codemagic.tools.google_play.argument_types import ReleaseNotesArgument
+from codemagic.tools.google_play.arguments import DeobfuscationsArgument
+from codemagic.tools.google_play.arguments import ExpansionFileArgument
 
 
 class GooglePlayBaseAction(metaclass=ABCMeta):
@@ -69,6 +76,51 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         from .action_groups import TracksActionGroup
 
         _ = TracksActionGroup.list_tracks  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def upload_deobfuscation_file(
+        self,
+        package_name: str,
+        deobfuscation_file_path: pathlib.Path,
+        apk_version_code: int,
+        deobfuscation_file_type: DeobfuscationFileType = DeobfuscationsArgument.DEOBFUSCATION_FILE_TYPE.get_default(),
+        edit: Optional[AppEdit] = None,
+        should_print: bool = True,
+    ) -> DeobfuscationFile:
+        from .action_groups import DeobfuscationFilesActionGroup
+
+        _ = DeobfuscationFilesActionGroup.upload_deobfuscation_file  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def upload_expansion_file(
+        self,
+        package_name: str,
+        expansion_file_path: pathlib.Path,
+        apk_version_code: int,
+        expansion_file_type: ExpansionFileType = ExpansionFileArgument.EXPANSION_FILE_TYPE.get_default(),
+        edit: Optional[AppEdit] = None,
+        should_print: bool = True,
+    ) -> ExpansionFile:
+        from .action_groups import ExpansionFilesActionGroup
+
+        _ = ExpansionFilesActionGroup.upload_expansion_file  # Implementation
+        raise NotImplementedError()
+
+    @abstractmethod
+    def reference_expansion_file(
+        self,
+        package_name: str,
+        apk_version_code: int,
+        references_apk_version_code: int,
+        expansion_file_type: ExpansionFileType = ExpansionFileArgument.EXPANSION_FILE_TYPE.get_default(),
+        edit: Optional[AppEdit] = None,
+        should_print: bool = True,
+    ) -> ExpansionFile:
+        from .action_groups import ExpansionFilesActionGroup
+
+        _ = ExpansionFilesActionGroup.reference_expansion_file  # Implementation
         raise NotImplementedError()
 
     @abstractmethod
