@@ -274,7 +274,6 @@ class CliApp(metaclass=abc.ABCMeta):
 
     @classmethod
     def _log_cli_invoke_started(cls):
-        log.get_logger(cls).warning(Colors.YELLOW("--- RUNNING IN DEBUG MODE ---"))  # TODO: Remove this
         safe_args = (arg.encode("utf-8", errors="replace").decode() for arg in sys.argv)
         exec_line = f"Execute {' '.join(map(shlex.quote, safe_args))}"
         install_line = f"From {pathlib.Path(__file__).parent.parent.resolve()}"
