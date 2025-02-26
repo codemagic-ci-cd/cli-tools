@@ -36,7 +36,7 @@ def version_codes_track() -> Track:
 
 @pytest.fixture
 def google_play() -> GooglePlay:
-    return GooglePlay(credentials={"type": "service_account"})
+    return GooglePlay({"type": "service_account"})
 
 
 @pytest.mark.parametrize(

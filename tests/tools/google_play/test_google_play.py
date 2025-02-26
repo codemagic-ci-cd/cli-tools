@@ -13,7 +13,6 @@ from codemagic.tools.google_play.arguments import GooglePlayArgument
 
 credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
 json_output_argument = GooglePlayArgument.JSON_OUTPUT
-package_name_argument = GooglePlayArgument.PACKAGE_NAME
 
 
 @pytest.fixture(autouse=True)
@@ -27,7 +26,6 @@ def namespace_kwargs():
     ns_kwargs = {
         credentials_argument.key: CredentialsArgument('{"type":"service_account"}'),
         json_output_argument.key: None,
-        package_name_argument.key: "com.example.app",
     }
     for arg in GooglePlay.CLASS_ARGUMENTS:
         if environment_variable_key := getattr(arg.type, "environment_variable_key", None):
