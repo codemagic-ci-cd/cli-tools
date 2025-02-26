@@ -1,3 +1,63 @@
+Version 0.57.0
+-------------
+
+This release contains changes from [PR #446](https://github.com/codemagic-ci-cd/cli-tools/pull/446) and adds new features to tool `google-play` to manage Google Play releases and application uploads.
+
+**Features**
+- Update action `android-app-bundle dump` to be fully compatible with [Bundletool](https://developer.android.com/tools/bundletool) dump options.
+- Add new actions to tool `google-play`:
+  - `google-play apks list` to list uploaded APKs,
+  - `google-play apks upload` to upload new APK,
+  - `google-play bundles list` to list uploaded App Bundles,
+  - `google-play bundles publish` to publish App Bundle as a new release,
+  - `google-play bundles upload` to upload new App Bundle,
+  - `google-play deobfuscation-files upload` to upload new deobfuscation file for an APK,
+  - `google-play expansion-files reference` to reference existing expansion file for an APK,
+  - `google-play expansion-files upload` to upload new expansion file for an APK,
+  - `google-play internal-app-sharing upload-apk` to upload an APK for internal app sharing,
+  - `google-play internal-app-sharing upload-bundle` to upload an App Bundle for internal app sharing,
+  - `google-play internal-app-sharing upload` to upload either an APK or App Bundle for internal app sharing,
+  - `google-play tracks set-release` to set latest release for a track.
+
+
+**Dependencies**
+- Add new Python dependency [`androguard`](https://github.com/androguard/androguard) to work with APK files.
+- Update included Bundletool.jar version from 1.13.1 to 1.18.0.
+
+**Development**
+- Add new `AabPackage` and `ApkPackage` classes to `codemagic.models.application_package` to gather meta information from Android App Bundles and APKs.
+- Add new Python services to package `codemagic.google.services.google_play` along with relevant resource definitions:
+  - `ApksService` to interact with [`edits.apks`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.apks) in Google Play Developer API.
+  - `BundlesService` to interact with [`edits.bundles`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.bundles) in Google Play Developer API.
+  - `DeobfuscationFilesService` to interact with [`edits.deobfuscationfiles`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.deobfuscationfiles) in Google Play Developer API.
+  - `ExpansionFilesService` to interact with [`edits.expansionfiles`](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.expansionfiles) in Google Play Developer API.
+  - `InternalAppSharingArtifactsService` to interact with [`internalappsharingartifacts`](https://developers.google.com/android-publisher/api-ref/rest/v3/internalappsharingartifacts) in Google Play Developer API.
+- Extract direct `jarsigner` and `bundletool` calls from `AndroidAppBundle` class into standalone shell tool implementations in `codemagic.shell_tools`.
+
+**Documentation**
+- Update documentation for actions:
+  - `android-app-bundle dump`,
+  - `google-play tracks promote-release`.
+- Add documentation for new action groups:
+  - `google-play apks`,
+  - `google-play bundles`,
+  - `google-play deobfuscation-files`,
+  - `google-play expansion-files`,
+  - `google-play internal-app-sharing`.
+- Add documentation for new actions:
+  - `google-play apks list`,
+  - `google-play apks upload`,
+  - `google-play bundles list`,
+  - `google-play bundles publish`,
+  - `google-play bundles upload`,
+  - `google-play deobfuscation-files upload`,
+  - `google-play expansion-files reference`,
+  - `google-play expansion-files upload`,
+  - `google-play internal-app-sharing upload-apk`,
+  - `google-play internal-app-sharing upload-bundle`,
+  - `google-play internal-app-sharing upload`,
+  - `google-play tracks set-release`.
+
 Version 0.56.0
 -------------
 
