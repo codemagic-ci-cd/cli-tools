@@ -22,7 +22,6 @@ credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIAL
 def google_play() -> GooglePlay:
     return GooglePlay(
         credentials={"type": "service_account"},
-        package_name="com.example.app",
     )
 
 
@@ -61,7 +60,7 @@ def test_get_track(google_play: GooglePlay):
     with mock.patch.object(google_play, "client") as mock_google_play_client:
         mock_google_play_client.tracks.get.return_value = track
         mock_google_play_client.edits.create.return_value = edit
-        track = google_play.get_track(track.track)
+        track = google_play.get_track("com.example.app", track.track)
 
     mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")
     mock_google_play_client.tracks.get.assert_called_once_with("com.example.app", track.track, "mock-edit-id")
@@ -75,7 +74,7 @@ def test_list_tracks(google_play: GooglePlay, tracks: List[Track]):
     with mock.patch.object(google_play, "client") as mock_google_play_client:
         mock_google_play_client.tracks.list.return_value = tracks
         mock_google_play_client.edits.create.return_value = edit
-        tracks = google_play.list_tracks()
+        tracks = google_play.list_tracks("com.example.app")
 
     mock_google_play_client.edits.create.assert_called_once_with(package_name="com.example.app")
     mock_google_play_client.tracks.list.assert_called_once_with("com.example.app", "mock-edit-id")
@@ -93,6 +92,7 @@ def test_promote_release_no_source_releases(empty_releases, google_play: GoogleP
         ]
         with pytest.raises(GooglePlayError) as exc_info:
             google_play.promote_release(
+                package_name="com.example.app",
                 source_track_name="alpha",
                 target_track_name="beta",
             )
@@ -140,6 +140,7 @@ def test_promote_release(google_play: GooglePlay):
         mock_get_track.side_effect = [source_track, target_track]
 
         updated_track = google_play.promote_release(
+            package_name="com.example.app",
             source_track_name="alpha",
             target_track_name="beta",
             promoted_status=Status.IN_PROGRESS,

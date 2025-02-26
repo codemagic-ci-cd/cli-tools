@@ -62,7 +62,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
         try:
             internal_app_sharing_artifact = self.client.internal_app_sharing_artifacts.upload_apk(
-                self.package_name,
+                apk_package.get_package_name(),
                 apk_path=apk_path,
             )
         except GoogleError as ge:
@@ -97,7 +97,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
         try:
             internal_app_sharing_artifact = self.client.internal_app_sharing_artifacts.upload_bundle(
-                self.package_name,
+                aab_package.get_package_name(),
                 bundle_path=bundle_path,
             )
         except GoogleError as ge:

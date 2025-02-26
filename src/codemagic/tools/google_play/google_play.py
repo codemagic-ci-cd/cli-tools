@@ -20,7 +20,6 @@ from .arguments import GooglePlayArgument
 
 @cli.common_arguments(
     GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS,
-    GooglePlayArgument.PACKAGE_NAME,
     GooglePlayArgument.JSON_OUTPUT,
 )
 class GooglePlay(
@@ -40,13 +39,11 @@ class GooglePlay(
     def __init__(
         self,
         credentials: dict,
-        package_name: str,
         json_output: bool = False,
         **kwargs,
     ):
         super().__init__(**kwargs)
         self.client = GooglePlayClient(credentials)
-        self.package_name = package_name
         self.printer = ResourcePrinter(json_output, self.echo)
 
     @classmethod
@@ -58,22 +55,21 @@ class GooglePlay(
         return GooglePlay(
             credentials=credentials_argument.value,
             json_output=bool(cli_args.json_output),
-            package_name=cli_args.package_name,
             **cls._parent_class_kwargs(cli_args),
         )
 
     @contextlib.contextmanager
-    def using_app_edit(self, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
+    def using_app_edit(self, package_name: str, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
         created_edit: Optional[AppEdit] = None
         try:
             if edit is None:
-                created_edit = self.client.edits.create(package_name=self.package_name)
+                created_edit = self.client.edits.create(package_name=package_name)
                 yield cast(AppEdit, created_edit)
             else:
                 yield edit
         finally:
             if created_edit is not None:
-                self.client.edits.delete(created_edit, package_name=self.package_name)
+                self.client.edits.delete(created_edit, package_name=package_name)
 
 
 if __name__ == "__main__":

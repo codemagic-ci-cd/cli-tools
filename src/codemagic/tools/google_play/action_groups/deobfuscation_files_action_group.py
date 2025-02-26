@@ -11,6 +11,7 @@ from codemagic.google.resources.google_play import DeobfuscationFileType
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
 from codemagic.tools.google_play.arguments import ApksArgument
 from codemagic.tools.google_play.arguments import DeobfuscationsArgument
+from codemagic.tools.google_play.arguments import GooglePlayArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
@@ -18,6 +19,7 @@ from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAc
 class DeobfuscationFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
         "upload",
+        GooglePlayArgument.PACKAGE_NAME,
         DeobfuscationsArgument.DEOBFUSCATION_FILE_PATH,
         ApksArgument.APK_VERSION_CODE,
         DeobfuscationsArgument.DEOBFUSCATION_FILE_TYPE,
@@ -25,6 +27,7 @@ class DeobfuscationFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     )
     def upload_deobfuscation_file(
         self,
+        package_name: str,
         deobfuscation_file_path: pathlib.Path,
         apk_version_code: int,
         deobfuscation_file_type: DeobfuscationFileType = DeobfuscationsArgument.DEOBFUSCATION_FILE_TYPE.get_default(),
@@ -38,9 +41,9 @@ class DeobfuscationFilesActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         upload_message = f'Upload {deobfuscation_file_type.value} deobfuscation file "{deobfuscation_file_path}'
         self.logger.info(Colors.BLUE(upload_message))
         try:
-            with self.using_app_edit(edit) as edit:
+            with self.using_app_edit(package_name, edit) as edit:
                 deobfuscation_file = self.client.deobfuscation_files.upload(
-                    self.package_name,
+                    package_name,
                     edit.id,
                     apk_version_code=apk_version_code,
                     deobfuscation_file_path=deobfuscation_file_path,
