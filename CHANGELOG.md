@@ -46,6 +46,7 @@ This release contains changes from [PR #446](https://github.com/codemagic-ci-cd/
   - `google-play internal-app-sharing`.
 - Add documentation for new actions:
   - `google-play apks list`,
+  - `google-play apks publish`,
   - `google-play apks upload`,
   - `google-play bundles list`,
   - `google-play bundles publish`,

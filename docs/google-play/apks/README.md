@@ -52,4 +52,5 @@ Enable verbose logging for commands
 |Action|Description|
 | :--- | :--- |
 |[`list`](list.md)|List APKs from Google Play for an app|
+|[`publish`](publish.md)|Publish APK at given path to Google Play as a release to specified track|
 |[`upload`](upload.md)|Upload APK at given path to Google Play|
