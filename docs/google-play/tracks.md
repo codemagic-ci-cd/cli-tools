@@ -54,3 +54,4 @@ Enable verbose logging for commands
 |[`get`](tracks/get.md)|Get information about release track from Google Play for an app|
 |[`list`](tracks/list.md)|List information about release tracks from Google Play for an app|
 |[`promote-release`](tracks/promote-release.md)|Promote releases from source track to target track. If filters for source track release are not specified, then the latest release will be promoted|
+|[`set-release`](tracks/set-release.md)|Set a new release for Google Play track|

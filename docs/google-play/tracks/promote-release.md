@@ -33,19 +33,19 @@ Name of the track from where releases are promoted. For example `internal`
 Name of the track to which releases are promoted. For example `alpha`
 ### Optional arguments for action `promote-release`
 
-##### `--release-status=statusUnspecified | draft | inProgress | halted | completed`
+##### `--release-status=draft | inProgress | halted | completed`
 
 
 Status of the promoted release in the target track. Default:&nbsp;`completed`
 ##### `--user-fraction=PROMOTED_USER_FRACTION`
 
 
-Fraction of users who are eligible for a staged promoted release in the target track. Number from interval `0 < fraction < 1`. Can only be set when status is `inProgress` or `halted`
+Fraction of users who are eligible for a staged promoted release in the target track. Number from interval `0 < fraction < 1`. Can only be set when status is `inProgress` or `halted`.
 ##### `--version-code-filter=PROMOTE_VERSION_CODE`
 
 
 Promote only a source track release that contains the specified version code
-##### `--release-status-filter=statusUnspecified | draft | inProgress | halted | completed`
+##### `--release-status-filter=draft | inProgress | halted | completed`
 
 
 Promote only a source track release with the specified status
