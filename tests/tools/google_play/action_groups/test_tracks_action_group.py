@@ -12,20 +12,10 @@ from codemagic.google.resources.google_play import Release
 from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 from codemagic.tools import GooglePlay
-from codemagic.tools.google_play.arguments import GooglePlayArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 
-credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
 
-
-@pytest.fixture
-def google_play() -> GooglePlay:
-    return GooglePlay(
-        credentials={"type": "service_account"},
-    )
-
-
-def test_get_track(google_play: GooglePlay):
+def test_get_track():
     track = Track(
         track="alpha",
         releases=[
@@ -55,6 +45,7 @@ def test_get_track(google_play: GooglePlay):
             ),
         ],
     )
+    google_play = GooglePlay({"type": "service_account"})
     edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
 
     with mock.patch.object(google_play, "client") as mock_google_play_client:
@@ -68,7 +59,8 @@ def test_get_track(google_play: GooglePlay):
     assert track == track
 
 
-def test_list_tracks(google_play: GooglePlay, tracks: List[Track]):
+def test_list_tracks(tracks: List[Track]):
+    google_play = GooglePlay({"type": "service_account"})
     edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
 
     with mock.patch.object(google_play, "client") as mock_google_play_client:
@@ -84,7 +76,8 @@ def test_list_tracks(google_play: GooglePlay, tracks: List[Track]):
 
 
 @pytest.mark.parametrize("empty_releases", (None, [], ()))
-def test_promote_release_no_source_releases(empty_releases, google_play: GooglePlay):
+def test_promote_release_no_source_releases(empty_releases):
+    google_play = GooglePlay({"type": "service_account"})
     with mock.patch.object(google_play, "get_track") as mock_get_track:
         mock_get_track.side_effect = [
             Track(track="alpha", releases=empty_releases),
@@ -100,7 +93,8 @@ def test_promote_release_no_source_releases(empty_releases, google_play: GoogleP
     assert str(exc_info.value) == 'Source track "alpha" does not have any releases'
 
 
-def test_promote_release(google_play: GooglePlay):
+def test_promote_release():
+    google_play = GooglePlay({"type": "service_account"})
     edit = AppEdit(id="mock-edit-id", expiryTimeSeconds="10")
     source_track = Track(
         track="alpha",
