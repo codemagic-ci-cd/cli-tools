@@ -17,7 +17,7 @@ class DeobfuscationFilesService(
     ResourceService[DeobfuscationFile, "android_publisher_resources.AndroidPublisherResource"],
 ):
     """
-    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.deobfuscationfiles#DeobfuscationFileType
+    https://developers.google.com/android-publisher/api-ref/rest/v3/edits.deobfuscationfiles
     """
 
     resource_type: Final = DeobfuscationFile

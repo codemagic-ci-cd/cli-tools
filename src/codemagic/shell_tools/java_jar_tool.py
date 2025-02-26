@@ -7,7 +7,7 @@ from typing import Optional
 from codemagic.shell_tools.shell_tool import ShellTool
 
 
-class JarTool(ShellTool, metaclass=ABCMeta):
+class JavaJarTool(ShellTool, metaclass=ABCMeta):
     def __init__(self, java: Optional[pathlib.Path] = None):
         self._java = self._get_java_path(java)
         if not self._jar.exists():

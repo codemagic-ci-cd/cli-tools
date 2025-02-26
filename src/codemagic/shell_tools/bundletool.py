@@ -5,7 +5,7 @@ from typing import Optional
 
 import codemagic
 
-from .jar_tool import JarTool
+from .java_jar_tool import JavaJarTool
 
 
 @lru_cache(1)
@@ -17,7 +17,7 @@ def _find_bundletool_jar() -> pathlib.Path:
     return bundletool_jar.resolve()
 
 
-class Bundletool(JarTool):
+class Bundletool(JavaJarTool):
     """
     Python bindings for Bundletool
     https://developer.android.com/tools/bundletool
