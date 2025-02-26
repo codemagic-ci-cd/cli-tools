@@ -42,19 +42,6 @@ class TracksArgument(cli.Argument):
     )
 
 
-class InternalAppSharingArgument(cli.Argument):
-    INTERNAL_APP_SHARING = cli.ArgumentProperties(
-        key="internal_app_sharing",
-        flags=("--internal-app-sharing", "-i"),
-        type=bool,
-        description="Whether to upload an APK or Android App Bundle through internal app sharing",
-        argparse_kwargs={
-            "required": False,
-            "action": "store_true",
-        },
-    )
-
-
 class PromoteArgument(cli.Argument):
     SOURCE_TRACK_NAME = cli.ArgumentProperties(
         key="source_track_name",
@@ -150,6 +137,25 @@ class BundlesArgument(cli.Argument):
         type=cli.CommonArgumentTypes.existing_path,
         description="Path to App Bundle file (*.aab)",
         argparse_kwargs={"required": True},
+    )
+
+
+application_binary_path_group = cli.MutuallyExclusiveGroup(
+    name="select project",
+    required=True,
+)
+
+
+class InternalAppSharingArgument(cli.Argument):
+    BUNDLE_PATH = cli.ArgumentProperties.duplicate(
+        BundlesArgument.BUNDLE_PATH,
+        argparse_kwargs={"required": False},
+        mutually_exclusive_group=application_binary_path_group,
+    )
+    APK_PATH = cli.ArgumentProperties.duplicate(
+        ApksArgument.APK_PATH,
+        argparse_kwargs={"required": False},
+        mutually_exclusive_group=application_binary_path_group,
     )
 
 

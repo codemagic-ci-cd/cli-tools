@@ -22,3 +22,7 @@ class GooglePlayActionGroups(cli.ActionGroup):
         name="expansion-files",
         description="Manage APK expansion files in Google Play",
     )
+    INTERNAL_APP_SHARING = cli.ActionGroupProperties(
+        name="internal-app-sharing",
+        description="Share app bundles and APKs with your internal team using a Google Play link",
+    )

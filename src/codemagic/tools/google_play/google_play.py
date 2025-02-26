@@ -28,6 +28,7 @@ class GooglePlay(
     action_groups.ApksActionGroup,
     action_groups.BundlesActionGroup,
     action_groups.DeobfuscationFilesActionGroup,
+    action_groups.InternalAppSharingActionGroup,
     action_groups.ExpansionFilesActionGroup,
     action_groups.TracksActionGroup,
     actions.GetLatestBuildNumberAction,
