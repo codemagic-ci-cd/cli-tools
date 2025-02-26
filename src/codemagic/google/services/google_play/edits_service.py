@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 from typing import Final
+from typing import Optional
 from typing import Union
 from typing import cast
 
@@ -45,16 +46,28 @@ class EditsService(ResourceService[AppEdit, "android_publisher_resources.Android
         self._logger.debug("Created edit %s", response["id"])
         return AppEdit(**response)
 
-    def commit(self, edit: Union[AppEdit, str], package_name: str) -> AppEdit:
+    def commit(
+        self,
+        edit: Union[AppEdit, str],
+        package_name: str,
+        changes_not_sent_for_review: Optional[bool] = None,
+    ) -> AppEdit:
         """
         https://developers.google.com/android-publisher/api-ref/rest/v3/edits/commit
         """
         edit_id = self._resolve_id(edit)
         self._logger.debug("Commit edit %s for %r", edit_id, package_name)
+
+        request_kwargs = {}
+        if changes_not_sent_for_review is not None:
+            request_kwargs["changesNotSentForReview"] = changes_not_sent_for_review
+
         commit_request: android_publisher_resources.AppEditHttpRequest = self._edits.commit(
             packageName=package_name,
             editId=edit_id,
+            **request_kwargs,
         )
+
         response = cast(
             "android_publisher_resources.AppEdit",
             self._execute_request(commit_request, "commit"),

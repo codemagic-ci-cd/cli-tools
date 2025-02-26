@@ -9,7 +9,8 @@ from codemagic.google.resources.google_play import InternalAppSharingArtifact
 from codemagic.models.application_package import AabPackage
 from codemagic.models.application_package import ApkPackage
 from codemagic.tools.google_play.action_groups.google_play_action_groups import GooglePlayActionGroups
-from codemagic.tools.google_play.arguments import InternalAppSharingArgument
+from codemagic.tools.google_play.arguments import ApksArgument
+from codemagic.tools.google_play.arguments import BundlesArgument
 from codemagic.tools.google_play.errors import GooglePlayError
 from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
@@ -17,8 +18,8 @@ from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAc
 class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
         "upload",
-        InternalAppSharingArgument.APK_PATH,
-        InternalAppSharingArgument.BUNDLE_PATH,
+        ApksArgument.APK_PATH_MUTUALLY_EXCLUSIVE,
+        BundlesArgument.BUNDLE_PATH_MUTUALLY_EXCLUSIVE,
         action_group=GooglePlayActionGroups.INTERNAL_APP_SHARING,
     )
     def upload_to_internal_app_sharing(
@@ -40,7 +41,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
     @cli.action(
         "upload-apk",
-        InternalAppSharingArgument.APK_PATH,
+        ApksArgument.APK_PATH,
         action_group=GooglePlayActionGroups.INTERNAL_APP_SHARING,
     )
     def upload_apk_to_internal_app_sharing(
@@ -55,7 +56,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         try:
             apk_package = ApkPackage(apk_path)
         except IOError:
-            raise InternalAppSharingArgument.APK_PATH.raise_argument_error("Not a valid APK file")
+            raise ApksArgument.APK_PATH.raise_argument_error("Not a valid APK")
 
         self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}" to Google Play internal app sharing'))
         self.logger.info(apk_package.get_text_summary())
@@ -75,7 +76,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
 
     @cli.action(
         "upload-bundle",
-        InternalAppSharingArgument.BUNDLE_PATH,
+        BundlesArgument.BUNDLE_PATH,
         action_group=GooglePlayActionGroups.INTERNAL_APP_SHARING,
     )
     def upload_bundle_to_internal_app_sharing(
@@ -90,7 +91,7 @@ class InternalAppSharingActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         try:
             aab_package = AabPackage(bundle_path)
         except IOError:
-            raise InternalAppSharingArgument.BUNDLE_PATH.raise_argument_error("Not a valid App Bundle file")
+            raise BundlesArgument.BUNDLE_PATH.raise_argument_error("Not a valid App Bundle")
 
         self.logger.info(Colors.BLUE(f'Upload App Bundle "{bundle_path}" to Google Play internal app sharing'))
         self.logger.info(aab_package.get_text_summary())

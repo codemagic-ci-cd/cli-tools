@@ -63,7 +63,7 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
         try:
             apk_package = ApkPackage(apk_path)
         except IOError:
-            raise ApksArgument.APK_PATH.raise_argument_error("Not a valid APK file")
+            raise ApksArgument.APK_PATH.raise_argument_error("Not a valid APK")
 
         self.logger.info(Colors.BLUE(f'Upload APK "{apk_path}" to Google Play'))
         self.logger.info(apk_package.get_text_summary())

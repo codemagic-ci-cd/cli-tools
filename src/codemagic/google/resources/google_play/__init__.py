@@ -8,6 +8,7 @@ from .deobfuscation_file_type import DeobfuscationFileType
 from .expansion_file import ExpansionFile
 from .expansion_file_type import ExpansionFileType
 from .internal_app_sharing_artifact import InternalAppSharingArtifact
+from .language import Language
 from .localized_text import LocalizedText
 from .release import Release
 from .status import Status
