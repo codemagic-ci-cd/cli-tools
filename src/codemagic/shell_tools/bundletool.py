@@ -127,7 +127,7 @@ class Bundletool(JavaJarTool):
 
         obfuscate_patterns = []
         if keystore:
-            cmd.extend(("--keystore", keystore))
+            cmd.extend(("--ks", keystore))
         if keystore_password:
             obfuscate_patterns.append(f"pass:{keystore_password}")
             cmd.extend(("--ks-pass", f"pass:{keystore_password}"))
@@ -135,7 +135,7 @@ class Bundletool(JavaJarTool):
             cmd.extend(("--ks-key-alias", key_alias))
         if key_password:
             obfuscate_patterns.append(f"pass:{key_password}")
-            cmd.extend(("--key-password", f"pass:{key_password}"))
+            cmd.extend(("--key-pass", f"pass:{key_password}"))
 
         self._run_command(
             cmd,
