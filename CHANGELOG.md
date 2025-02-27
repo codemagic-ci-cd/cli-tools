@@ -1,3 +1,9 @@
+Version 0.57.1
+-------------
+
+**Bugfixes**
+- Fix actions `android-app-bundle build-apks` and `android-app-bundle build-universal-apk` when invoked with keystore arguments. [PR #447](https://github.com/codemagic-ci-cd/cli-tools/pull/447)
+
 Version 0.57.0
 -------------
 
