@@ -10,6 +10,7 @@ import platform
 import re
 import shlex
 import shutil
+import subprocess
 import sys
 import time
 from itertools import chain
@@ -61,17 +62,26 @@ class ArgumentValueEncodingError(Exception):
 
 
 class CliAppException(Exception):  # noqa: N818
-    def __init__(self, message: str, cli_process: Optional[CliProcess] = None):
+    def __init__(
+        self,
+        message: str,
+        cli_process: Optional[CliProcess] = None,
+        called_process_error: Optional[subprocess.CalledProcessError] = None,
+    ):
         self.cli_process = cli_process
+        self.called_process_error = called_process_error
         self.message = message
 
     def __str__(self):
-        if not self.cli_process:
+        if self.cli_process:
+            cmd_args = self.cli_process.safe_form
+            exit_code = self.cli_process.returncode
+        elif self.called_process_error:
+            cmd_args = shlex.join(self.called_process_error.args)
+            exit_code = self.called_process_error.returncode
+        else:
             return self.message
-        return (
-            f"Running {self.cli_process.safe_form} failed with "
-            f"exit code {self.cli_process.returncode}: {self.message}"
-        )
+        return f"Running {cmd_args} failed with exit code {exit_code}: {self.message}"
 
 
 class CliApp(metaclass=abc.ABCMeta):
@@ -128,7 +138,7 @@ class CliApp(metaclass=abc.ABCMeta):
         message = (
             f'Executing "{executed_command}" failed unexpectedly. '
             f'Detailed logs are available at "{log.get_log_path()}". '
-            f'{"" if args.verbose else verbose_log_suggestion}'
+            f"{'' if args.verbose else verbose_log_suggestion}"
         )
 
         log.get_logger(cls).warning(Colors.RED(message))
@@ -265,7 +275,7 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def _log_cli_invoke_started(cls):
         safe_args = (arg.encode("utf-8", errors="replace").decode() for arg in sys.argv)
-        exec_line = f'Execute {" ".join(map(shlex.quote, safe_args))}'
+        exec_line = f"Execute {' '.join(map(shlex.quote, safe_args))}"
         install_line = f"From {pathlib.Path(__file__).parent.parent.resolve()}"
         version_line = f"Using Python {platform.python_version()} on {platform.system()} {platform.release()}"
         separator = "-" * max(len(exec_line), len(version_line), len(install_line))

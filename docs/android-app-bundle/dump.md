@@ -7,6 +7,9 @@ dump
 ### Usage
 ```bash
 android-app-bundle dump [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    [--module DUMP_MODULE]
+    [--resource DUMP_RESOURCE]
+    [--values]
     [--xpath DUMP_XPATH]
     DUMP_TARGET
     --bundle BUNDLE_PATH
@@ -23,6 +26,18 @@ Target of the dump
 Path to Android app bundle file
 ### Optional arguments for action `dump`
 
+##### `--module=DUMP_MODULE`
+
+
+Name of the module to apply the dump for. Only applies when dumping the manifest. Defaults to 'base'.
+##### `--resource=DUMP_RESOURCE`
+
+
+Name or ID of the resource to lookup. Only applies when dumping resources. If a resource ID is provided, it can be specified either as a decimal or hexadecimal integer. If a resource name is provided, it must follow the format '<type>/<name>', e.g. 'drawable/icon'
+##### `--values`
+
+
+When set, also prints the values of the resources. Defaults to false. Only applies when dumping the resources.
 ##### `--xpath=DUMP_XPATH`
 
 

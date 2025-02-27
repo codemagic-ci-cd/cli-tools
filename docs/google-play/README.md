@@ -57,4 +57,9 @@ Enable verbose logging for commands
 
 |Action group|Description|
 | :--- | :--- |
+|[`apks`](apks.md)|Work with APKs in Google Play|
+|[`bundles`](bundles.md)|Work with App Bundles in Google Play|
+|[`deobfuscation-files`](deobfuscation-files.md)|Manage APK deobfuscation files in Google Play|
+|[`expansion-files`](expansion-files.md)|Manage APK expansion files in Google Play|
+|[`internal-app-sharing`](internal-app-sharing.md)|Share app bundles and APKs with your internal team using a Google Play link|
 |[`tracks`](tracks.md)|Manage your Google Play release tracks|

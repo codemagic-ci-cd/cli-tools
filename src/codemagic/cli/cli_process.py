@@ -34,10 +34,11 @@ class CliProcess:
         self._dry_run = dry
         self._print_streams = print_streams
         self._buffer_size = 8192
-        self.safe_form = safe_form
         if safe_form is None:
             full_command = " ".join(shlex.quote(str(arg)) for arg in command_args)
             self.safe_form = ObfuscatedCommand(full_command)
+        else:
+            self.safe_form = safe_form
         self._stdout = ""
         self._stderr = ""
         self._stdout_stream: Optional[CliProcessStream] = None
@@ -118,4 +119,9 @@ class CliProcess:
         else:
             stdout = ""
             stderr = ""
-        raise subprocess.CalledProcessError(self.returncode, self._command_args, stdout, stderr)
+        raise subprocess.CalledProcessError(
+            self.returncode,
+            shlex.split(self.safe_form),
+            stdout,
+            stderr,
+        )

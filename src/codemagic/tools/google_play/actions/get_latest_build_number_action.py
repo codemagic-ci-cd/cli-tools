@@ -7,17 +7,16 @@ from typing import Sequence
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google.resources.google_play import Track
-
-from ..arguments import LatestBuildNumberArgument
-from ..arguments import TracksArgument
-from ..errors import GooglePlayError
-from ..google_play_base_action import GooglePlayBaseAction
+from codemagic.tools.google_play.arguments import GooglePlayArgument
+from codemagic.tools.google_play.arguments import LatestBuildNumberArgument
+from codemagic.tools.google_play.errors import GooglePlayError
+from codemagic.tools.google_play.google_play_base_action import GooglePlayBaseAction
 
 
 class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
     @cli.action(
         "get-latest-build-number",
-        TracksArgument.PACKAGE_NAME,
+        GooglePlayArgument.PACKAGE_NAME,
         LatestBuildNumberArgument.TRACKS,
     )
     def get_latest_build_number(

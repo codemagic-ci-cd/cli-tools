@@ -13,8 +13,8 @@ from codemagic.google import GooglePlayClient
 from codemagic.google.resources import ResourcePrinter
 from codemagic.google.resources.google_play import AppEdit
 
-from .action_groups import TracksActionGroup
-from .actions import GetLatestBuildNumberAction
+from . import action_groups
+from . import actions
 from .arguments import GooglePlayArgument
 
 
@@ -24,8 +24,13 @@ from .arguments import GooglePlayArgument
 )
 class GooglePlay(
     cli.CliApp,
-    GetLatestBuildNumberAction,
-    TracksActionGroup,
+    action_groups.ApksActionGroup,
+    action_groups.BundlesActionGroup,
+    action_groups.DeobfuscationFilesActionGroup,
+    action_groups.InternalAppSharingActionGroup,
+    action_groups.ExpansionFilesActionGroup,
+    action_groups.TracksActionGroup,
+    actions.GetLatestBuildNumberAction,
 ):
     """
     Utility to get the latest build numbers from Google Play using Google Play Developer API
@@ -54,14 +59,17 @@ class GooglePlay(
         )
 
     @contextlib.contextmanager
-    def using_app_edit(self, package_name: str) -> Generator[AppEdit, None, None]:
-        edit: Optional[AppEdit] = None
+    def using_app_edit(self, package_name: str, edit: Optional[AppEdit] = None) -> Generator[AppEdit, None, None]:
+        created_edit: Optional[AppEdit] = None
         try:
-            edit = self.client.edits.create(package_name=package_name)
-            yield cast(AppEdit, edit)
+            if edit is None:
+                created_edit = self.client.edits.create(package_name=package_name)
+                yield cast(AppEdit, created_edit)
+            else:
+                yield edit
         finally:
-            if edit is not None:
-                self.client.edits.delete(edit, package_name=package_name)
+            if created_edit is not None:
+                self.client.edits.delete(created_edit, package_name=package_name)
 
 
 if __name__ == "__main__":

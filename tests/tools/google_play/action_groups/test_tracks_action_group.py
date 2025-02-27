@@ -12,10 +12,7 @@ from codemagic.google.resources.google_play import Release
 from codemagic.google.resources.google_play import Status
 from codemagic.google.resources.google_play import Track
 from codemagic.tools import GooglePlay
-from codemagic.tools.google_play.arguments import GooglePlayArgument
 from codemagic.tools.google_play.errors import GooglePlayError
-
-credentials_argument = GooglePlayArgument.GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS
 
 
 def test_get_track():

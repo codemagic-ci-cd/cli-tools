@@ -1,15 +1,17 @@
 import pathlib
-import shutil
+import subprocess
 import zipfile
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Union
 from typing import overload
 
-import codemagic
 from codemagic import cli
 from codemagic.mixins import PathFinderMixin
 from codemagic.models import AndroidSigningInfo
+from codemagic.shell_tools import Bundletool
+from codemagic.shell_tools.jarsigner import Jarsigner
 
 
 class AndroidAppBundleTypes:
@@ -126,7 +128,12 @@ class AndroidAppBundleArgument(cli.Argument):
         key="target",
         description="Target of the dump",
         argparse_kwargs={
-            "choices": ["manifest", "resources", "config"],
+            "choices": [
+                "manifest",
+                "resources",
+                "config",
+                "runtime-enabled-sdk-config",
+            ],
         },
     )
     DUMP_XPATH = cli.ArgumentProperties(
@@ -139,6 +146,41 @@ class AndroidAppBundleArgument(cli.Argument):
         ),
         argparse_kwargs={
             "required": False,
+        },
+    )
+    DUMP_MODULE = cli.ArgumentProperties(
+        flags=("--module",),
+        key="module",
+        description=(
+            "Name of the module to apply the dump for. Only applies when dumping the manifest. Defaults to 'base'."
+        ),
+        argparse_kwargs={
+            "required": False,
+        },
+    )
+    DUMP_RESOURCE = cli.ArgumentProperties(
+        key="resource",
+        flags=("--resource",),
+        description=(
+            "Name or ID of the resource to lookup. Only applies when dumping resources. "
+            "If a resource ID is provided, it can be specified either as a decimal or hexadecimal integer. "
+            "If a resource name is provided, it must follow the format '<type>/<name>', e.g. 'drawable/icon'"
+        ),
+        argparse_kwargs={
+            "required": False,
+        },
+    )
+    DUMP_VALUES = cli.ArgumentProperties(
+        key="values",
+        flags=("--values",),
+        type=bool,
+        description=(
+            "When set, also prints the values of the resources. Defaults to false. "
+            "Only applies when dumping the resources."
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
         },
     )
 
@@ -154,25 +196,6 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     Manage Android App Bundles using
     [Bundletool](https://developer.android.com/studio/command-line/bundletool)
     """
-
-    def __init__(self, *args, **kwargs) -> None:
-        super(AndroidAppBundle, self).__init__(*args, **kwargs)
-        self.__bundletool_jar: Optional[pathlib.Path] = None
-
-    @property
-    def _bundletool_jar(self) -> pathlib.Path:
-        if self.__bundletool_jar is None:
-            data_dir = pathlib.Path(codemagic.__file__).parent / "data"
-            bundletool_jar = next(data_dir.rglob("bundletool*.jar"), None)
-            if not bundletool_jar:
-                raise IOError(f"Bundletool jar not available in {data_dir}")
-            self.__bundletool_jar = bundletool_jar.resolve()
-        return self.__bundletool_jar
-
-    @classmethod
-    def _ensure_jarsigner(cls):
-        if shutil.which("jarsigner") is None:
-            raise IOError('Missing executable "jarsigner"')
 
     @classmethod
     @overload
@@ -266,7 +289,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         keystore_password: Optional[KeystorePassword] = None,
         key_alias: Optional[KeyAlias] = None,
         key_password: Optional[KeyPassword] = None,
-        mode: Optional[str] = None,
+        mode: Optional[Literal["default", "universal", "system", "persistent", "instant", "archive"]] = None,
         should_print: bool = True,
     ) -> List[pathlib.Path]:
         """
@@ -283,7 +306,11 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
 
         apks_paths = []
         for aab_path in self._get_aab_paths_from_pattern(aab_pattern):
-            apks_path = self._build_apk_set_archive(aab_path, signing_info=signing_info, mode=mode)
+            apks_path = self._build_apk_set_archive(
+                aab_path,
+                signing_info=signing_info,
+                mode=mode,
+            )
             apks_paths.append(apks_path)
             if should_print:
                 self.echo(str(apks_path))
@@ -332,33 +359,53 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         "dump",
         AndroidAppBundleArgument.DUMP_TARGET,
         AndroidAppBundleArgument.BUNDLE_PATH,
+        AndroidAppBundleArgument.DUMP_MODULE,
+        AndroidAppBundleArgument.DUMP_RESOURCE,
+        AndroidAppBundleArgument.DUMP_VALUES,
         AndroidAppBundleArgument.DUMP_XPATH,
     )
-    def dump(self, target: str, aab_path: pathlib.Path, xpath: Optional[str] = None) -> str:
+    def dump(
+        self,
+        target: Literal["manifest", "resources", "config", "runtime-enabled-sdk-config"],
+        aab_path: pathlib.Path,
+        xpath: Optional[str] = None,
+        module: Optional[str] = None,
+        resource: Optional[str] = None,
+        values: Optional[bool] = None,
+    ) -> str:
         """
         Get files list or extract values from the bundle in a human-readable form
         """
+        if target != "manifest" and xpath:
+            error = "XPath expression can only be used when dumping manifest"
+            raise AndroidAppBundleArgument.DUMP_XPATH.raise_argument_error(error)
+        elif target != "manifest" and module:
+            error = "Module can only be used when dumping manifest"
+            raise AndroidAppBundleArgument.DUMP_MODULE.raise_argument_error(error)
+        elif target != "resources" and values:
+            error = "Printing resource values can only be requested when dumping resources"
+            raise AndroidAppBundleArgument.DUMP_VALUES.raise_argument_error(error)
+        elif target != "resources" and resource:
+            error = "The resource name or id can only be used when dumping resources"
+            raise AndroidAppBundleArgument.DUMP_RESOURCE.raise_argument_error(error)
+
         if xpath:
             self.logger.info(f'Dump attribute "{xpath}" from target "{target}" from {aab_path}')
         else:
             self.logger.info(f'Dump target "{target}" from {aab_path}')
 
-        command = [
-            "java",
-            "-jar",
-            str(self._bundletool_jar),
-            "dump",
-            target,
-            "--bundle",
-            aab_path,
-        ]
-        if xpath:
-            command.extend(["--xpath", xpath])
-
-        process = self.execute(command)
-        if process.returncode != 0:
-            raise AndroidAppBundleError(f"Unable to dump {target} for bundle {aab_path}", process)
-        return process.stdout
+        try:
+            return Bundletool().dump(
+                target,
+                aab_path,
+                module=module,
+                resource=resource,
+                values=values,
+                xpath=xpath,
+            )
+        except subprocess.CalledProcessError as cpe:
+            message = f"Unable to dump {target} for bundle {aab_path}"
+            raise AndroidAppBundleError(message, called_process_error=cpe) from cpe
 
     @cli.action(
         "sign",
@@ -379,7 +426,6 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         """
         Sign Android app bundle with specified key and keystore
         """
-        self._ensure_jarsigner()
         signing_info = self._convert_cli_args_to_signing_info(
             keystore_path,
             keystore_password,
@@ -388,35 +434,38 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         )
 
         self.logger.info(f"Sign {aab_path}")
-        command = [
-            "jarsigner",
-            "-verbose",
-            "-sigalg",
-            "SHA1withRSA",
-            "-digestalg",
-            "SHA1",
-            "-keystore",
-            str(signing_info.store_path),
-            "-storepass",
-            signing_info.store_pass,
-            "-keypass",
-            signing_info.key_pass,
-            str(aab_path),
-            signing_info.key_alias,
-        ]
-        obfuscate_patterns = [signing_info.store_pass, signing_info.key_pass]
-        process = self.execute(command, obfuscate_patterns=obfuscate_patterns, show_output=False)
-        if process.returncode != 0:
-            raise AndroidAppBundleError(f"Unable to sign bundle {aab_path}", process)
+        try:
+            Jarsigner().sign(
+                aab_path,
+                keystore=signing_info.store_path,
+                keystore_password=signing_info.store_pass,
+                key_alias=signing_info.key_alias,
+                key_password=signing_info.key_pass,
+                verbose=True,
+                show_output=False,
+            )
+        except subprocess.CalledProcessError as cpe:
+            message = f"Unable to sign bundle {aab_path}"
+            raise AndroidAppBundleError(message, called_process_error=cpe) from cpe
 
     @cli.action("is-signed", AndroidAppBundleArgument.BUNDLE_PATH)
     def is_signed(self, aab_path: pathlib.Path):
-        """Check if given Android app bundle is signed"""
-        self._ensure_jarsigner()
-        command = ["jarsigner", "-verbose", "-verify", str(aab_path)]
-        process = self.execute(command, show_output=False)
-        if "jar is unsigned" in process.stdout:
+        """
+        Check if given Android app bundle is signed
+        """
+        try:
+            verify_output = Jarsigner().verify(
+                aab_path,
+                verbose=True,
+                show_output=False,
+            )
+        except subprocess.CalledProcessError as cpe:
+            message = f"Unable to check if {aab_path} is signed"
+            raise AndroidAppBundleError(message, called_process_error=cpe) from cpe
+
+        if "jar is unsigned" in verify_output:
             raise AndroidAppBundleError(f"Bundle {aab_path} is not signed")
+
         self.echo(f"Bundle {aab_path} is signed")
 
     @cli.action("validate", AndroidAppBundleArgument.BUNDLE_PATH)
@@ -425,72 +474,46 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         Verify that given Android App Bundle is valid and print out information about it
         """
         self.logger.info(f"Validate {aab_path}")
-        command = [
-            "java",
-            "-jar",
-            str(self._bundletool_jar),
-            "validate",
-            "--bundle",
-            aab_path,
-        ]
-        process = self.execute(command)
-        if process.returncode != 0:
-            raise AndroidAppBundleError(f"Unable to validate bundle {aab_path}", process)
-        return process.stdout
+        try:
+            return Bundletool().validate(aab_path)
+        except subprocess.CalledProcessError as cpe:
+            raise AndroidAppBundleError(f"Unable to validate {aab_path}", called_process_error=cpe) from cpe
 
     @cli.action("bundletool-version")
     def bundletool_version(self) -> str:
-        """Get Bundletool version"""
+        """
+        Get Bundletool version
+        """
         self.logger.info("Get Bundletool version")
-        process = self.execute(("java", "-jar", str(self._bundletool_jar), "version"), show_output=False)
-        if process.returncode != 0:
-            raise AndroidAppBundleError("Unable to get Bundletool version", process)
-        version = process.stdout.strip()
-        self.echo(version)
-        return version
+        try:
+            return Bundletool().version()
+        except subprocess.CalledProcessError as cpe:
+            raise AndroidAppBundleError("Unable to get Bundletool version", called_process_error=cpe) from cpe
 
     def _build_apk_set_archive(
         self,
         aab_path: pathlib.Path,
         *,
         signing_info: Optional[AndroidSigningInfo] = None,
-        mode: Optional[str] = None,
+        mode: Optional[Literal["default", "universal", "system", "persistent", "instant", "archive"]] = None,
     ) -> pathlib.Path:
         self.logger.info(f"Generating APKs from bundle {aab_path}")
         apks_path = aab_path.parent / f"{aab_path.stem}.apks"
-        command = [
-            "java",
-            "-jar",
-            str(self._bundletool_jar),
-            "build-apks",
-            "--bundle",
-            str(aab_path),
-            "--output",
-            str(apks_path),
-            *(["--mode", mode] if mode else []),
-        ]
-        if signing_info:
-            store_pass_arg = f"pass:{signing_info.store_pass}"
-            key_pass_arg = f"pass:{signing_info.key_pass}"
-            command.extend(
-                [
-                    "--ks",
-                    str(signing_info.store_path),
-                    "--ks-pass",
-                    store_pass_arg,
-                    "--ks-key-alias",
-                    signing_info.key_alias,
-                    "--key-pass",
-                    key_pass_arg,
-                ],
-            )
-            obfuscate_patterns = [key_pass_arg, store_pass_arg]
-        else:
-            obfuscate_patterns = []
 
-        process = self.execute(command, obfuscate_patterns=obfuscate_patterns)
-        if process.returncode != 0:
-            raise AndroidAppBundleError(f"Unable to generate apks file for bundle {aab_path}", process)
+        try:
+            Bundletool().build_apks(
+                aab_path,
+                apks_path,
+                mode=mode,
+                keystore=signing_info.store_path if signing_info else None,
+                keystore_password=signing_info.store_pass if signing_info else None,
+                key_alias=signing_info.key_alias if signing_info else None,
+                key_password=signing_info.key_pass if signing_info else None,
+            )
+        except subprocess.CalledProcessError as cpe:
+            message = f"Unable to generate apks file for bundle {aab_path}"
+            raise AndroidAppBundleError(message, called_process_error=cpe) from cpe
+
         self.logger.info(f"Generated {apks_path}")
         return apks_path
 
