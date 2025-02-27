@@ -14,12 +14,12 @@ def certificate_der() -> bytes:
 
 @pytest.fixture
 def mock_apk(certificate_der: bytes):
-    with mock.patch("codemagic.models.application_package.apk_package.APK") as mock_apk_class:
+    with mock.patch("codemagic.models.application_package.apk_package._get_androguard_apk") as mock_get_androguard_apk:
         mock_apk = mock.MagicMock(
             get_signature_name=mock.MagicMock(return_value="META-INF/CERT.RSA"),
             get_certificate_der=mock.MagicMock(return_value=certificate_der),
         )
-        mock_apk_class.return_value = mock_apk
+        mock_get_androguard_apk.return_value = mock_apk
         yield mock_apk
 
 

@@ -1,3 +1,9 @@
+Version 0.57.2
+-------------
+
+**Dependencies**
+- Make [`androguard`](https://github.com/androguard/androguard) Python dependency optional and install it during runtime when it is needed. [PR #448](https://github.com/codemagic-ci-cd/cli-tools/pull/448)
+
 Version 0.57.1
 -------------
 
