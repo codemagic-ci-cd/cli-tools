@@ -1,6 +1,12 @@
 Version 0.57.0
 -------------
 
+**Bugfixes**
+- Fix actions `android-app-bundle build-apks` and `android-app-bundle build-universal-apk` when invoked with keystore arguments. [PR #447](https://github.com/codemagic-ci-cd/cli-tools/pull/447)
+
+Version 0.57.0
+-------------
+
 This release contains changes from [PR #446](https://github.com/codemagic-ci-cd/cli-tools/pull/446) and adds new features to tool `google-play` to manage Google Play releases and application uploads.
 
 **Features**
