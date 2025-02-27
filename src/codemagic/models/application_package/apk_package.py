@@ -1,27 +1,64 @@
 from __future__ import annotations
 
+import pathlib
+import subprocess
+import sys
 from functools import cached_property
 from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Optional
 
-from androguard.core.apk import APK
-from androguard.util import set_log
 from cryptography import x509
 from cryptography.x509 import load_der_x509_certificate
+
+from codemagic.cli import CliApp
+from codemagic.cli import Colors
 
 from .abstract_package import AbstractPackage
 
 if TYPE_CHECKING:
+    from androguard.core.apk import APK
+
     from codemagic.models import Certificate
+
+
+def _install_missing_androguard():
+    commands = [
+        [sys.executable, "-m", "ensurepip"],
+        [sys.executable, "-m", "pip", "install", "androguard"],
+    ]
+    if cli_app := CliApp.get_running_app():
+        cli_app.logger.info(Colors.WHITE("Installing missing tools to work with APK files..."))
+        try:
+            for command in commands:
+                cli_process = cli_app.execute(command, show_output=False)
+                cli_process.raise_for_returncode()
+        except subprocess.CalledProcessError:
+            cli_app.logger.error("Installing Androguard failed.")
+            raise
+    else:
+        for command in commands:
+            subprocess.run(command, check=True)
+
+
+def _get_androguard_apk(apk_path: pathlib.Path, _install_androguard: bool = True) -> APK:
+    try:
+        from androguard.core.apk import APK
+        from androguard.util import set_log
+    except ImportError:
+        if not _install_androguard:
+            raise
+        _install_missing_androguard()
+        return _get_androguard_apk(apk_path, _install_androguard=False)
+
+    # Silence androguard warnings
+    set_log("ERROR")
+    return APK(str(apk_path))
 
 
 class ApkPackage(AbstractPackage):
     def _validate_package(self):
-        # Silence androguard warnings
-        set_log("ERROR")
-
         try:
             _ = self._apk
         except ValueError as ve:
@@ -32,8 +69,8 @@ class ApkPackage(AbstractPackage):
             raise IOError(f"Not a valid APK at {self.path}")
 
     @cached_property
-    def _apk(self) -> APK:
-        return APK(str(self.path))
+    def _apk(self) -> "APK":
+        return _get_androguard_apk(self.path)
 
     @cached_property
     def certificate(self) -> Optional[Certificate]:
