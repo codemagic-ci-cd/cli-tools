@@ -35,7 +35,7 @@ def _install_missing_androguard():
                 cli_process = cli_app.execute(command, show_output=False)
                 cli_process.raise_for_returncode()
         except subprocess.CalledProcessError:
-            cli_app.logger.error("Installing Androguard failed.")
+            cli_app.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
             raise
     else:
         for command in commands:
