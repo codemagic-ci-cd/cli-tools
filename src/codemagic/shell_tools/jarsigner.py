@@ -33,7 +33,7 @@ class Jarsigner(ShellTool):
                 *("-sigalg", "SHA1withRSA"),
                 *("-digestalg", "SHA1"),
                 *("-keystore", keystore),
-                *("-storepass", *keystore_password),
+                *("-storepass", keystore_password),
                 *("-keypass", key_password),
                 file_to_sign,
                 key_alias,
