@@ -1,3 +1,9 @@
+Version 0.57.3
+-------------
+
+**Bugfixes**
+- Fix action `android-app-bundle sign` when invoked with keystore arguments. [PR #449](https://github.com/codemagic-ci-cd/cli-tools/pull/449)
+
 Version 0.57.2
 -------------
 
