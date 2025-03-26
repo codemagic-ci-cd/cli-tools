@@ -1,3 +1,9 @@
+Version 0.57.4
+-------------
+
+**Bugfixes**
+- Fix submitting uploaded application to App Store when running action `app-store-connect publish` using `--app-store` flag. [PR #452](https://github.com/codemagic-ci-cd/cli-tools/pull/452)
+
 Version 0.57.3
 -------------
 
