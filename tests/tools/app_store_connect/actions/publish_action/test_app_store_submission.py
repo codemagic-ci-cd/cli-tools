@@ -1,6 +1,8 @@
 import pathlib
 from unittest import mock
 
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
@@ -9,7 +11,12 @@ from codemagic.tools.app_store_connect.arguments import AppStoreVersionLocalizat
 from codemagic.tools.app_store_connect.arguments import Types
 
 
-def test_app_store_submission(app_store_connect: AppStoreConnect):
+def test_app_store_submission():
+    app_store_connect = AppStoreConnect(
+        issuer_id=IssuerId("issuer-id"),
+        key_identifier=KeyIdentifier("key-identifier"),
+        private_key="private-key",
+    )
     mock_ipa = mock.MagicMock(version="1.2.3", is_for_tvos=lambda: False)
     mock_build = mock.MagicMock(id="mock-build-id")
 
