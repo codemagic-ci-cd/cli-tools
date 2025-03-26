@@ -353,12 +353,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                 self.logger.error(Colors.RED(error.args[0]))
 
         if failed_packages:
-            raise AppStoreConnectError(f'Failed to publish {", ".join(failed_packages)}')
+            raise AppStoreConnectError(f"Failed to publish {', '.join(failed_packages)}")
 
     def _log_skip_validation_deprecation(self):
         flag = PublishArgument.SKIP_PACKAGE_VALIDATION.flag
         message = (
-            f'{Colors.YELLOW("Deprecation warning!")} Support for {Colors.WHITE(flag)} is deprecated'
+            f"{Colors.YELLOW('Deprecation warning!')} Support for {Colors.WHITE(flag)} is deprecated"
             "and this flag will be removed in future releases."
             "\n"
             f"Starting from version 0.14.0 package validation "
@@ -406,7 +406,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         build = self._get_uploaded_build(app, application_package, max_find_build_wait)
 
         if beta_test_info_options:
-            self.add_beta_test_info(build.id, **beta_test_info_options.__dict__)
+            self.add_beta_test_info(
+                build.id,
+                beta_build_localizations=beta_test_info_options.beta_build_localizations,
+                locale=beta_test_info_options.locale,
+                whats_new=beta_test_info_options.whats_new,
+            )
 
         if testflight_options or app_store_options or beta_group_options:
             self.wait_until_build_is_processed(build, max_build_processing_wait)
@@ -422,7 +427,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.submit_to_testflight(
                 build.id,
                 max_build_processing_wait=0,
-                **dataclasses.asdict(testflight_options),
+                expire_build_submitted_for_review=testflight_options.expire_build_submitted_for_review,
             )
 
         if app_store_options:
@@ -434,7 +439,26 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             self.submit_to_app_store(
                 build.id,
                 max_build_processing_wait=0,
-                **dataclasses.asdict(app_store_options),
+                cancel_previous_submissions=app_store_options.cancel_previous_submissions,
+                # App Store Version information arguments
+                copyright=app_store_options.copyright,
+                earliest_release_date=app_store_options.earliest_release_date,
+                platform=app_store_options.platform,
+                release_type=app_store_options.release_type,
+                version_string=app_store_options.version_string,
+                app_store_version_info=app_store_options.app_store_version_info,
+                # App Store Version Localization arguments
+                description=app_store_options.description,
+                keywords=app_store_options.keywords,
+                locale=app_store_options.locale,
+                marketing_url=app_store_options.marketing_url,
+                promotional_text=app_store_options.promotional_text,
+                support_url=app_store_options.support_url,
+                whats_new=app_store_options.whats_new,
+                app_store_version_localizations=app_store_options.app_store_version_localizations,
+                # App Store Version Phased Release arguments
+                enable_phased_release=app_store_options.enable_phased_release,
+                disable_phased_release=app_store_options.disable_phased_release,
             )
 
     def _find_build(
