@@ -88,7 +88,7 @@ def test_submit_to_app_store_platform_using_version_info(mock_api_client: mock.M
         )
 
     mock_api_client.builds.read_with_include.assert_called_once_with(build.id, App)
-    mock_cancel_previous_submissions.assert_called_once_with(build, Platform.MAC_OS)
+    mock_cancel_previous_submissions.assert_called_once_with(application_id=app.id, platform=Platform.MAC_OS)
     mock_wait_until_build_is_processed.assert_called_once_with(build, 23)
     mock_manage_app_store_version_phased_release.assert_called_once_with(app_store_version, True)
     mock_create_review_submission.assert_called_once_with(app, Platform.MAC_OS)
