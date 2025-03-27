@@ -2,6 +2,12 @@ Version 0.57.4
 -------------
 
 **Bugfixes**
+- Fix Python API for `AppStoreConnect.submit_to_app_store` for macOS applications when platform was specified only via version info and not directly as method argument. [PR #453](https://github.com/codemagic-ci-cd/cli-tools/pull/453)
+
+Version 0.57.4
+-------------
+
+**Bugfixes**
 - Fix submitting uploaded application to App Store when running action `app-store-connect publish` using `--app-store` flag. [PR #452](https://github.com/codemagic-ci-cd/cli-tools/pull/452)
 
 Version 0.57.3
