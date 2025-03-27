@@ -1,4 +1,4 @@
-Version 0.57.4
+Version 0.57.5
 -------------
 
 **Bugfixes**
