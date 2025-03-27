@@ -114,7 +114,6 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
 
         return self._submit_to_app_store(
             build_id=build_id,
-            platform=platform,
             max_processing_minutes=Types.MaxBuildProcessingWait.resolve_value(max_build_processing_wait),
             app_store_version_info=app_store_version_info,
             app_store_version_localization_infos=app_store_version_localization_infos,
@@ -173,7 +172,6 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
     def _submit_to_app_store(
         self,
         build_id: ResourceId,
-        platform: Platform,
         max_processing_minutes: int,
         app_store_version_info: AppStoreVersionInfo,
         app_store_version_localization_infos: List[AppStoreVersionLocalizationInfo],
@@ -188,7 +186,7 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
             raise AppStoreConnectError(str(api_error)) from api_error
 
         if cancel_previous_submissions:
-            self._cancel_previous_submissions(application_id=app.id, platform=platform)
+            self._cancel_previous_submissions(application_id=app.id, platform=app_store_version_info.platform)
 
         if max_processing_minutes:
             build = self.wait_until_build_is_processed(build, max_processing_minutes)
@@ -212,7 +210,7 @@ class SubmitToAppStoreAction(AbstractBaseAction, metaclass=ABCMeta):
             app_store_version_localization_infos,
         )
 
-        review_submission = self._create_review_submission(app, platform)
+        review_submission = self._create_review_submission(app, app_store_version_info.platform)
         review_submission_item = self.create_review_submission_item(
             review_submission_id=review_submission.id,
             app_store_version_id=app_store_version.id,
