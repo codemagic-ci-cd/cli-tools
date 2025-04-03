@@ -1,3 +1,9 @@
+Version 0.57.6
+-------------
+
+**Bugfixes**
+- Fix `ValueError` when initializing more than one `ApkPackage` instances using Python APIs. [PR #454](https://github.com/codemagic-ci-cd/cli-tools/pull/454)
+
 Version 0.57.5
 -------------
 
