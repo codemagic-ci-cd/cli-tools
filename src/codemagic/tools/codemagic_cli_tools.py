@@ -44,7 +44,7 @@ class CodemagicCliTools(cli.CliApp):
             self.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
             raise
 
-    @cli.action("ensure-apk-tools")
+    @cli.action("ensure-apk-tools", suppress_help=True)
     def ensure_apk_tools(self, notify_installed: bool = True) -> None:
         """
         Make sure that Codemagic CLI tools environment has tools that
