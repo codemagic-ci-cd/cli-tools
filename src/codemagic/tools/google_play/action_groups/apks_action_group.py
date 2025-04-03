@@ -1,9 +1,13 @@
+import importlib.util
 import pathlib
+import subprocess
+import sys
 from abc import ABCMeta
 from pathlib import Path
 from typing import List
 from typing import Optional
 from typing import Union
+from typing import cast
 
 from codemagic import cli
 from codemagic.cli import Colors
@@ -192,3 +196,38 @@ class ApksActionGroup(GooglePlayBaseAction, metaclass=ABCMeta):
             raise GooglePlayError(str(ge))
 
         self.logger.info(Colors.GREEN(f"Successfully published APK to Google Play track {track_name}"))
+
+    def _install_androguard(self):
+        commands = [
+            [sys.executable, "-m", "ensurepip"],
+            [sys.executable, "-m", "pip", "install", "androguard"],
+        ]
+        try:
+            for command in commands:
+                cli_process = cast(cli.CliApp, self).execute(command, show_output=False)
+                cli_process.raise_for_returncode()
+        except subprocess.CalledProcessError:
+            self.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
+            raise
+
+    @cli.action(
+        "ensure-tooling",
+        action_group=GooglePlayActionGroups.APKS,
+        suppress_help=True,
+    )
+    def ensure_apk_tooling(self, notify_installed: bool = True) -> None:
+        """
+        Make sure that Codemagic CLI tools environment has tools that
+        are required to work with Android APK files
+        """
+        if importlib.util.find_spec("androguard"):
+            if notify_installed:
+                self.logger.info(Colors.GREEN("Required Android tools are already installed"))
+            return  # Androguard is already present, no need to install anything
+
+        self.logger.info(Colors.WHITE("Installing missing tools to work with APK files..."))
+        try:
+            self._install_androguard()
+        except subprocess.CalledProcessError as cpe:
+            raise cli.CliAppException("Installing Android tools failed") from cpe
+        self.logger.info(Colors.GREEN("Required Android tools were successfully installed"))
