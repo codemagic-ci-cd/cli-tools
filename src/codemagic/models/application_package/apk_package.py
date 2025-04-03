@@ -48,9 +48,9 @@ def _silence_androguard_warnings():
     # Androguard uses hardcoded logger handler ID and subsequent calls
     # to set_log can cause errors because handler with ID 0 is removed
     # and the new handler might not have the same ID.
-    from androguard import util
+    from androguard.util import set_log
 
-    util.set_log("ERROR")
+    set_log("ERROR")
 
 
 def _get_androguard_apk(apk_path: pathlib.Path, _install_androguard: bool = True) -> APK:
