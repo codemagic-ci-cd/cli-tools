@@ -14,6 +14,7 @@ from cryptography.x509 import load_der_x509_certificate
 
 from codemagic.cli import CliApp
 from codemagic.cli import Colors
+from codemagic.utilities.decorators import run_once
 
 from .abstract_package import AbstractPackage
 
@@ -42,18 +43,26 @@ def _install_missing_androguard():
             subprocess.run(command, check=True)
 
 
+@run_once
+def _silence_androguard_warnings():
+    # Androguard uses hardcoded logger handler ID and subsequent calls
+    # to set_log can cause errors because handler with ID 0 is removed
+    # and the new handler might not have the same ID.
+    from androguard import util
+
+    util.set_log("ERROR")
+
+
 def _get_androguard_apk(apk_path: pathlib.Path, _install_androguard: bool = True) -> APK:
     try:
         from androguard.core.apk import APK
-        from androguard.util import set_log
     except ImportError:
         if not _install_androguard:
             raise
         _install_missing_androguard()
         return _get_androguard_apk(apk_path, _install_androguard=False)
 
-    # Silence androguard warnings
-    set_log("ERROR")
+    _silence_androguard_warnings()
     return APK(str(apk_path))
 
 
