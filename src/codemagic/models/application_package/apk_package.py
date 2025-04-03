@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-import subprocess
-import sys
 from functools import cached_property
 from typing import TYPE_CHECKING
 from typing import Any
@@ -12,8 +10,7 @@ from typing import Optional
 from cryptography import x509
 from cryptography.x509 import load_der_x509_certificate
 
-from codemagic.cli import CliApp
-from codemagic.cli import Colors
+from codemagic.tools.codemagic_cli_tools import CodemagicCliTools
 from codemagic.utilities.decorators import run_once
 
 from .abstract_package import AbstractPackage
@@ -22,25 +19,6 @@ if TYPE_CHECKING:
     from androguard.core.apk import APK
 
     from codemagic.models import Certificate
-
-
-def _install_missing_androguard():
-    commands = [
-        [sys.executable, "-m", "ensurepip"],
-        [sys.executable, "-m", "pip", "install", "androguard"],
-    ]
-    if cli_app := CliApp.get_running_app():
-        cli_app.logger.info(Colors.WHITE("Installing missing tools to work with APK files..."))
-        try:
-            for command in commands:
-                cli_process = cli_app.execute(command, show_output=False)
-                cli_process.raise_for_returncode()
-        except subprocess.CalledProcessError:
-            cli_app.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
-            raise
-    else:
-        for command in commands:
-            subprocess.run(command, check=True)
 
 
 @run_once
@@ -53,16 +31,18 @@ def _silence_androguard_warnings():
     set_log("ERROR")
 
 
-def _get_androguard_apk(apk_path: pathlib.Path, _install_androguard: bool = True) -> APK:
-    try:
-        from androguard.core.apk import APK
-    except ImportError:
-        if not _install_androguard:
-            raise
-        _install_missing_androguard()
-        return _get_androguard_apk(apk_path, _install_androguard=False)
+@run_once
+def _ensure_androguard():
+    running_app = CodemagicCliTools.get_running_app()
+    verbose = running_app.verbose if running_app else False
+    CodemagicCliTools(verbose=verbose).ensure_apk_tools(notify_installed=False)
 
+
+def _get_androguard_apk(apk_path: pathlib.Path) -> APK:
+    _ensure_androguard()
     _silence_androguard_warnings()
+    from androguard.core.apk import APK
+
     return APK(str(apk_path))
 
 
