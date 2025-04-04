@@ -32,11 +32,11 @@ def _silence_androguard_warnings():
 
 @run_once
 def _ensure_androguard():
-    from codemagic.tools import GooglePlay
+    from codemagic.tools import CodemagicCliTools
 
-    running_app = GooglePlay.get_running_app()
+    running_app = CodemagicCliTools.get_running_app()
     verbose = running_app.verbose if running_app else False
-    GooglePlay(verbose=verbose).ensure_apk_tooling(notify_installed=False)
+    CodemagicCliTools(verbose=verbose).ensure_androguard(notify_installed=False)
 
 
 def _get_androguard_apk(apk_path: pathlib.Path) -> APK:
