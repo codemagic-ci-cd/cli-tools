@@ -1,8 +1,17 @@
 Version 0.57.6
 -------------
 
+This release contains changes from [PR #455](https://github.com/codemagic-ci-cd/cli-tools/pull/455)
+
+**Features**
+- Add action `codemagic-cli-tools ensure-androguard` to pre-install [`androguard`](https://github.com/androguard/androguard) dependency that is required for working with APK files.
+
 **Bugfixes**
-- Fix `ValueError` when initializing more than one `ApkPackage` instances using Python APIs. [PR #454](https://github.com/codemagic-ci-cd/cli-tools/pull/454)
+- Fix `ValueError` when initializing more than one `ApkPackage` instances using Python APIs.
+- Fix available commands listings in terminal help messages for tools with hidden deprecated actions.
+
+**Development**
+- Add possibility to define hidden actions which are excluded from Markdown docs and terminal help messages.
 
 Version 0.57.5
 -------------
