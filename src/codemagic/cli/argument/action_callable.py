@@ -21,6 +21,7 @@ class ActionCallable:
     is_cli_action: bool
     action_options: Dict[str, Any]
     deprecation_info: Optional[ActionDeprecationInfo]
+    suppress_help: bool
     __name__: str
     __call__: Callable
 

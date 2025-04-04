@@ -393,13 +393,16 @@ class CliApp(metaclass=abc.ABCMeta):
         current_action_parsers: SubParsersAction,
         deprecated_action_parsers: SubParsersAction,
     ):
+        if main_or_group_action.suppress_help:
+            CliHelpFormatter.suppress_action(main_or_group_action.action_name)
+
         ArgumentParserBuilder(cls, main_or_group_action, current_action_parsers).build()
         if not main_or_group_action.deprecation_info:
             return
 
         # Also register the deprecated alias
         ArgumentParserBuilder(cls, main_or_group_action, deprecated_action_parsers, for_deprecated_alias=True).build()
-        CliHelpFormatter.suppress_deprecated_action(main_or_group_action.deprecation_info.alias)
+        CliHelpFormatter.suppress_action(main_or_group_action.deprecation_info.alias)
 
     def _obfuscate_command(
         self,

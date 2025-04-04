@@ -44,6 +44,7 @@ def action(
     action_group: Optional[ActionGroup] = None,
     action_options: Optional[Dict[str, Any]] = None,
     deprecation_info: Optional[ActionDeprecationInfo] = None,
+    suppress_help: bool = False,
 ) -> Callable[[_Fn], _Fn]:
     """
     Decorator to mark that the method is usable from CLI
@@ -55,6 +56,7 @@ def action(
                              backwards compatibility, and in which version it was deprecated.
                              The action is registered on the root arguments parser with this name
                              without explicit documentation.
+    :param suppress_help: Whether to suppress action info in help messages
     """
 
     # Ensure that each argument is used exactly once
@@ -75,6 +77,7 @@ def action(
         func.is_cli_action = True
         func.deprecation_info = deprecation_info
         func.action_options = action_options or {}
+        func.suppress_help = suppress_help
 
         @wraps(func)
         def wrapper(self: CliApp, *args, **kwargs):

@@ -34,3 +34,21 @@ def deprecated(
         return wrapper
 
     return decorator
+
+
+def run_once(function):
+    """
+    Ensure that decorated function is executed only once.
+    Cache the result for subsequent calls unless the function
+    fails with an exception.
+    """
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.return_value = function(*args, **kwargs)
+            wrapper.has_run = True
+        return wrapper.return_value
+
+    wrapper.has_run = False
+    return wrapper

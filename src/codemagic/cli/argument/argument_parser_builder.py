@@ -75,6 +75,12 @@ class ArgumentParserBuilder:
                 formatter_class=CliHelpFormatter,
                 description=f"{deprecation_message} {Colors.BOLD(self._cli_action.__doc__)}",
             )
+        elif self._cli_action.suppress_help:
+            return parent_parser.add_parser(
+                self._cli_action.action_name,
+                formatter_class=CliHelpFormatter,
+                description=Colors.BOLD(self._cli_action.__doc__),
+            )
         else:
             return parent_parser.add_parser(
                 self._cli_action.action_name,
@@ -99,7 +105,7 @@ class ArgumentParserBuilder:
             type=str,
             default="stderr",
             choices=["stderr", "stdout"],
-            help=f'Log output stream. {ArgumentFormatter.format_default_value("stderr")}',
+            help=f"Log output stream. {ArgumentFormatter.format_default_value('stderr')}",
         )
         options_group.add_argument(
             "--no-color",
