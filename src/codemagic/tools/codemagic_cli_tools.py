@@ -56,15 +56,15 @@ class CodemagicCliTools(cli.CliApp):
         """
         if importlib.util.find_spec("androguard"):
             if notify_installed:
-                self.logger.info(Colors.GREEN("Required Android tools are already installed"))
+                self.logger.info(Colors.GREEN("Androguard is already installed"))
             return  # Androguard is already present, no need to install anything
 
-        self.logger.info(Colors.WHITE("Installing missing tools to work with APK files..."))
+        self.logger.info(Colors.WHITE("Installing Androguard to work with APK files..."))
         try:
             self._install_androguard()
         except subprocess.CalledProcessError as cpe:
-            raise cli.CliAppException("Installing Android tools failed") from cpe
-        self.logger.info(Colors.GREEN("Required Android tools were successfully installed"))
+            raise cli.CliAppException("Installing Androguard failed") from cpe
+        self.logger.info(Colors.GREEN("Androguard successfully installed"))
 
 
 if __name__ == "__main__":
