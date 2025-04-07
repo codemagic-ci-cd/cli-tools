@@ -18,6 +18,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Type
 
 from mdutils.mdutils import MdUtils
 from mdutils.tools.Table import Table
@@ -27,6 +28,7 @@ sys.path.insert(0, os.path.abspath("./src"))
 from codemagic import cli
 from codemagic import tools
 from codemagic.cli import MutuallyExclusiveGroup
+from codemagic.cli.cli_help_formatter import CliHelpFormatter
 
 
 @dataclasses.dataclass(frozen=True)
@@ -81,8 +83,8 @@ class ArgumentsSerializer:
 
     @classmethod
     def _replace_quotes(cls, description: str) -> str:
-        json_array = re.compile(r'"(\[[^\]]+\])"')
-        json_object = re.compile(r'"(\{[^\}]+\})"')
+        json_array = re.compile(r'"(\[[^]]+])"')
+        json_object = re.compile(r'"(\{[^}]+})"')
         # Dummy handling for description containing JSON arrays and objects as an example
         for patt in (json_object, json_array):
             if not patt.search(description):
@@ -165,7 +167,7 @@ class MainPageDocumentationGenerator:
         self.title = title
         self.main_dir = main_dir
 
-    def generate(self, tools: List[cli.CliApp]):
+    def generate(self, tools: List[Type[cli.CliApp]]):
         os.makedirs(self.main_dir, exist_ok=True)
         md = MdUtils(file_name=f"{self.main_dir}/README", title=self.title)
         Writer(md).write_tools_table(tools)
@@ -292,7 +294,8 @@ class ToolDocumentationGenerator:
                 mutually_exclusive_args=action_args_serializer.mutually_exclusive_group_args,
             )
 
-        return list(map(_serialize_action, tool.iter_class_cli_actions(action_group=action_group)))
+        actions = (a for a in tool.iter_class_cli_actions(action_group=action_group) if not a.suppress_help)
+        return list(map(_serialize_action, actions))
 
     @classmethod
     def _serialize_default_options(cls, tool: cli.CliApp) -> List[SerializedArgument]:
@@ -312,7 +315,7 @@ class ToolDocumentationGenerator:
 
         parser = argparse.ArgumentParser(
             description=tool.__doc__,
-            formatter_class=cli.cli_help_formatter.CliHelpFormatter,
+            formatter_class=CliHelpFormatter,
         )
         cli.argument.ArgumentParserBuilder.set_default_cli_options(parser)
         return list(map(_serialize_option, parser._actions))
@@ -435,11 +438,11 @@ class Writer:
         )
         self.file.write(table, wrap_width=0)
 
-    def write_tools_table(self, tools: List[cli.CliApp]):
-        def _get_tool_link(tool: cli.CliApp) -> str:
+    def write_tools_table(self, tools: List[Type[cli.CliApp]]):
+        def _get_tool_link(tool: Type[cli.CliApp]) -> str:
             return f"[`{tool.get_executable_name()}`]({tool.get_executable_name()}/README.md)"
 
-        def _get_tool_doc(tool: cli.CliApp) -> List[str]:
+        def _get_tool_doc(tool: Type[cli.CliApp]) -> List[str]:
             assert isinstance(tool.__doc__, str)
             return [_get_tool_link(tool), str_plain(tool.__doc__)]
 
@@ -542,13 +545,13 @@ def str_plain(string: str) -> str:
     string = re.sub(f"{bold}([^\x1b]+){reset}", r"**\1**", string)  # Convert ANSI bold to markdown bold
     string = re.sub(f"([^`]){blue}([^\x1b]+){reset}([^`])", r"\1`\2`\3", string)  # Convert ANSI blue to backticks
     string = re.sub(r"\x1b\[\d*m", "", string)  # Remove all other ANSI formatting
-    return re.sub(r"\n|\t", " ", string).strip()  # Remove newlines and tabs
+    return re.sub(r"[\n\t]", " ", string).strip()  # Remove newlines and tabs
 
 
 def main():
     print(f"Generate documentation for module {tools.__name__} from {tools.__file__}")
     main_dir = "docs"
-    tool_classes = cli.CliApp.__subclasses__()
+    tool_classes = sorted(cli.CliApp.__subclasses__(), key=lambda tool: tool.get_executable_name())
     MainPageDocumentationGenerator("CLI tools", main_dir).generate(tool_classes)
     for tool_class in tool_classes:
         print(f"Generate documentation for tool {tool_class.get_executable_name()}")
