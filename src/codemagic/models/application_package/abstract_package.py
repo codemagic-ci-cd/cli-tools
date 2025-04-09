@@ -56,5 +56,9 @@ class AbstractPackage(StringConverterMixin, metaclass=abc.ABCMeta):
     def _format_name(cls, certificate_name_components: Dict[str, str]) -> str:
         from codemagic.models.certificate import CERTIFICATE_NAME_COMPONENT_TRANSFORMATION
 
-        parts = (f"{CERTIFICATE_NAME_COMPONENT_TRANSFORMATION[k]}: {v}" for k, v in certificate_name_components.items())
+        parts = (
+            f"{CERTIFICATE_NAME_COMPONENT_TRANSFORMATION[k]}: {v}"
+            for k, v in certificate_name_components.items()
+            if k in CERTIFICATE_NAME_COMPONENT_TRANSFORMATION
+        )
         return ", ".join(parts)
