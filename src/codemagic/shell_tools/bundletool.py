@@ -23,8 +23,9 @@ class Bundletool(JavaJarTool):
     https://developer.android.com/tools/bundletool
     """
 
-    @property
-    def _jar(self) -> pathlib.Path:
+    def _get_jar_path(self, jar_path: Optional[pathlib.Path] = None) -> pathlib.Path:
+        if jar_path:
+            return jar_path
         return _find_bundletool_jar()
 
     def version(self, show_output: bool = True) -> str:
@@ -34,7 +35,7 @@ class Bundletool(JavaJarTool):
         See full usage instructions with `java -jar bundletool.jar help version`.
         """
         completed_process = self._run_command(
-            (self._java, "-jar", self._jar, "version"),
+            (self.java, "-jar", self.jar, "version"),
             show_output=show_output,
         )
         return self._get_stdout(completed_process).strip()
@@ -65,7 +66,7 @@ class Bundletool(JavaJarTool):
             raise ValueError("The resource name or id can only be used when dumping resources")
 
         cmd = [
-            *(self._java, "-jar", self._jar),
+            *(self.java, "-jar", self.jar),
             "dump",
             target,
             *("--bundle", bundle),
@@ -94,7 +95,7 @@ class Bundletool(JavaJarTool):
         See full usage instructions with `java -jar bundletool.jar help verify`.
         """
         completed_process = self._run_command(
-            (self._java, "-jar", self._jar, "validate", "--bundle", bundle),
+            (self.java, "-jar", self.jar, "validate", "--bundle", bundle),
             show_output=show_output,
         )
         return self._get_stdout(completed_process)
@@ -117,7 +118,7 @@ class Bundletool(JavaJarTool):
         See full usage instructions with `java -jar bundletool.jar help build-apks`.
         """
         cmd = [
-            *(self._java, "-jar", self._jar),
+            *(self.java, "-jar", self.jar),
             "build-apks",
             *("--bundle", bundle),
             *("--output", output),
