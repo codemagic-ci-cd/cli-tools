@@ -32,14 +32,12 @@ class CodemagicCliTools(cli.CliApp):
             self.echo(f"{executable} installed at {shutil.which(executable) or executable}")
 
     def _install_androguard(self):
-        commands = [
-            [sys.executable, "-m", "ensurepip"],
-            [sys.executable, "-m", "pip", "install", "androguard"],
-        ]
+        # Ignore ensurepip failures. For example ensurepip is disabled in Debian/Ubuntu for the system python
+        # and it exits with error. This doesn't mean that pip isn't available.
+        self.execute([sys.executable, "-m", "ensurepip"], show_output=False)
         try:
-            for command in commands:
-                cli_process = self.execute(command, show_output=False)
-                cli_process.raise_for_returncode()
+            cli_process = self.execute([sys.executable, "-m", "pip", "install", "androguard"], show_output=False)
+            cli_process.raise_for_returncode()
         except subprocess.CalledProcessError:
             self.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
             raise

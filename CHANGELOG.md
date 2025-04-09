@@ -1,3 +1,9 @@
+Version 0.57.8
+-------------
+
+**Bugfixes**
+- Fix `codemagic-cli-tools ensure-androguard` if `ensurepip` is not allowed but `pip` is present.
+
 Version 0.57.7
 -------------
 
