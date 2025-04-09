@@ -1,3 +1,9 @@
+Version 0.57.7
+-------------
+
+**Bugfixes**
+- Use retrying for Google API requests to avoid intermittent timeout errors. [PR #456](https://github.com/codemagic-ci-cd/cli-tools/pull/456)
+
 Version 0.57.6
 -------------
 

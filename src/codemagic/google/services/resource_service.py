@@ -38,7 +38,7 @@ class ResourceService(Generic[ResourceT, GoogleServiceT], ABC):
         self,
         request: HttpRequest,
         request_type: Literal["commit", "delete", "get", "insert", "list", "update", "upload"],
-        retries: int = 0,
+        retries: int = 3,
     ) -> Dict[str, Any]:
         if isinstance(request.body, bytes):
             self._logger.info(f">>> {request.method} {request.uri} <{len(request.body)} bytes>")
