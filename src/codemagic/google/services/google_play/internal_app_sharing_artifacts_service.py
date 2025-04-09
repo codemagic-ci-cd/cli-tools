@@ -46,7 +46,7 @@ class InternalAppSharingArtifactsService(
         )
         response = cast(
             "android_publisher_resources.InternalAppSharingArtifact",
-            self._execute_request(upload_request, "upload", retries=3),
+            self._execute_request(upload_request, "upload"),
         )
         self._logger.debug("Uploaded APK to internal app sharing for %r", package_name)
         return InternalAppSharingArtifact(**response)
@@ -70,7 +70,7 @@ class InternalAppSharingArtifactsService(
         )
         response = cast(
             "android_publisher_resources.InternalAppSharingArtifact",
-            self._execute_request(upload_request, "upload", retries=3),
+            self._execute_request(upload_request, "upload"),
         )
         self._logger.debug("Uploaded app bundle to internal app sharing for %r", package_name)
         return InternalAppSharingArtifact(**response)
