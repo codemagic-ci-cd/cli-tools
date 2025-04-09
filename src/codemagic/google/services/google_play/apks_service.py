@@ -52,7 +52,7 @@ class ApksService(ResourceService[Apk, "android_publisher_resources.AndroidPubli
         )
         response = cast(
             "android_publisher_resources.Apk",
-            self._execute_request(upload_request, "upload", retries=3),
+            self._execute_request(upload_request, "upload"),
         )
         self._logger.debug("Uploaded apk for %r", package_name)
         return Apk(**cast(dict, response))
