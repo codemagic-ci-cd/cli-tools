@@ -1,3 +1,9 @@
+Version 0.57.7
+-------------
+
+**Bugfixes**
+- Fix errors in `AabPackage.get_summary` and `ApkPackage.get_summary` methods for cases when certificate contained unexpected issuer and subject attributes. [PR #457](https://github.com/codemagic-ci-cd/cli-tools/pull/457)
+
 Version 0.57.6
 -------------
 
