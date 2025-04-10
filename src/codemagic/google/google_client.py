@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import contextlib
+import socket
 from abc import ABC
 from abc import abstractmethod
 from functools import cached_property
 from typing import Dict
 from typing import Generic
-from typing import Optional
 from typing import TypeVar
 
 from googleapiclient import discovery
 from googleapiclient import errors
-from googleapiclient import http
 from oauth2client.service_account import ServiceAccountCredentials
 
 from codemagic.google.errors import GoogleClientError
@@ -23,13 +22,13 @@ GoogleResourceT = TypeVar("GoogleResourceT", bound=discovery.Resource)
 
 
 @contextlib.contextmanager
-def _custom_http_timeout(seconds: Optional[int]):
-    current_default = http.DEFAULT_HTTP_TIMEOUT_SEC
+def _custom_http_timeout(seconds: int):
+    current_default = socket.getdefaulttimeout()
     try:
-        http.DEFAULT_HTTP_TIMEOUT_SEC = seconds
+        socket.setdefaulttimeout(seconds)
         yield
     finally:
-        http.DEFAULT_HTTP_TIMEOUT_SEC = current_default
+        socket.setdefaulttimeout(current_default)
 
 
 class GoogleClient(Generic[GoogleResourceT], ABC):
@@ -46,7 +45,7 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
 
     def _build_google_resource(self) -> GoogleResourceT:
         try:
-            with _custom_http_timeout(None):
+            with _custom_http_timeout(seconds=10 * 60):
                 return discovery.build(
                     self.google_service_name,
                     self.google_service_version,
