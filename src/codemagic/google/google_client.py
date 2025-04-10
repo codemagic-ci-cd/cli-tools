@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import socket
 from abc import ABC
 from abc import abstractmethod
 from functools import cached_property
@@ -19,6 +21,16 @@ from codemagic.utilities import log
 GoogleResourceT = TypeVar("GoogleResourceT", bound=discovery.Resource)
 
 
+@contextlib.contextmanager
+def _custom_http_timeout(seconds: int):
+    current_default = socket.getdefaulttimeout()
+    try:
+        socket.setdefaulttimeout(seconds)
+        yield
+    finally:
+        socket.setdefaulttimeout(current_default)
+
+
 class GoogleClient(Generic[GoogleResourceT], ABC):
     def __init__(self, service_account_dict: Dict):
         self._service_account_dict = service_account_dict
@@ -33,11 +45,12 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
 
     def _build_google_resource(self) -> GoogleResourceT:
         try:
-            return discovery.build(
-                self.google_service_name,
-                self.google_service_version,
-                credentials=self._credentials,
-            )
+            with _custom_http_timeout(seconds=10 * 60):
+                return discovery.build(
+                    self.google_service_name,
+                    self.google_service_version,
+                    credentials=self._credentials,
+                )
         except Exception:
             log.get_file_logger(self.__class__).exception(
                 f"Failed to construct {self.google_service_version} {self.google_service_name} service resource",
