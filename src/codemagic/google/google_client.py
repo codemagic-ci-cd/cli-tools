@@ -62,6 +62,9 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
     @cached_property
     def _credentials(self) -> ServiceAccountCredentials:
         try:
-            return ServiceAccountCredentials.from_json_keyfile_dict(self._service_account_dict)
+            return ServiceAccountCredentials.from_json_keyfile_dict(
+                self._service_account_dict,
+                scopes=f"https://www.googleapis.com/auth/{self.google_service_name}",
+            )
         except KeyError as e:
             raise GoogleCredentialsError(str(e))
