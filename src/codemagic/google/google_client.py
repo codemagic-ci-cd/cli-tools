@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import contextlib
 from abc import ABC
 from abc import abstractmethod
 from functools import cached_property
 from typing import Dict
 from typing import Generic
+from typing import Optional
 from typing import TypeVar
 
-import httplib2
 from googleapiclient import discovery
 from googleapiclient import errors
+from googleapiclient import http
 from oauth2client.service_account import ServiceAccountCredentials
 
 from codemagic.google.errors import GoogleClientError
@@ -18,6 +20,16 @@ from codemagic.google.errors import GoogleHttpError
 from codemagic.utilities import log
 
 GoogleResourceT = TypeVar("GoogleResourceT", bound=discovery.Resource)
+
+
+@contextlib.contextmanager
+def _custom_http_timeout(seconds: Optional[int]):
+    current_default = http.DEFAULT_HTTP_TIMEOUT_SEC
+    try:
+        http.DEFAULT_HTTP_TIMEOUT_SEC = seconds
+        yield
+    finally:
+        http.DEFAULT_HTTP_TIMEOUT_SEC = current_default
 
 
 class GoogleClient(Generic[GoogleResourceT], ABC):
@@ -34,13 +46,12 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
 
     def _build_google_resource(self) -> GoogleResourceT:
         try:
-            http = httplib2.Http()
-            self._credentials.authorize(http)
-            return discovery.build(
-                self.google_service_name,
-                self.google_service_version,
-                http=http,
-            )
+            with _custom_http_timeout(None):
+                return discovery.build(
+                    self.google_service_name,
+                    self.google_service_version,
+                    credentials=self._credentials,
+                )
         except Exception:
             log.get_file_logger(self.__class__).exception(
                 f"Failed to construct {self.google_service_version} {self.google_service_name} service resource",
@@ -62,9 +73,6 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
     @cached_property
     def _credentials(self) -> ServiceAccountCredentials:
         try:
-            return ServiceAccountCredentials.from_json_keyfile_dict(
-                self._service_account_dict,
-                scopes=f"https://www.googleapis.com/auth/{self.google_service_name}",
-            )
+            return ServiceAccountCredentials.from_json_keyfile_dict(self._service_account_dict)
         except KeyError as e:
             raise GoogleCredentialsError(str(e))
