@@ -7,6 +7,7 @@ from typing import Dict
 from typing import Generic
 from typing import TypeVar
 
+import httplib2
 from googleapiclient import discovery
 from googleapiclient import errors
 from oauth2client.service_account import ServiceAccountCredentials
@@ -33,10 +34,12 @@ class GoogleClient(Generic[GoogleResourceT], ABC):
 
     def _build_google_resource(self) -> GoogleResourceT:
         try:
+            http = httplib2.Http()
+            self._credentials.authorize(http)
             return discovery.build(
                 self.google_service_name,
                 self.google_service_version,
-                credentials=self._credentials,
+                http=http,
             )
         except Exception:
             log.get_file_logger(self.__class__).exception(
