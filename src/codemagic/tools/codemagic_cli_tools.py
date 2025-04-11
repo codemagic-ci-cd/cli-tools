@@ -34,7 +34,7 @@ class CodemagicCliTools(cli.CliApp):
     def _install_androguard(self):
         # Try to install with uv if possible as it is a lot faster.
         if uv := shutil.which("uv"):
-            command = (uv, "pip", "install", "--python", sys.executable, "--no-cache", "androguard")
+            command = (uv, "pip", "install", "--python", sys.executable, "androguard")
             uv_process = self.execute(command, show_output=False)
             if uv_process.returncode == 0:
                 return
