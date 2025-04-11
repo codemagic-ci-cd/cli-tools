@@ -2,7 +2,7 @@ Version 0.57.9
 -------------
 
 **Bugfixes**
-- TBD
+- Fix empty release notes text usage for Google Play release tracks. [PR #462](https://github.com/codemagic-ci-cd/cli-tools/pull/462)
 
 Version 0.57.8
 -------------
