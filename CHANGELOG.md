@@ -1,3 +1,9 @@
+Version 0.57.8
+-------------
+
+**Bugfixes**
+- Fix socket timeouts on `google-play` actions. [PR #460](https://github.com/codemagic-ci-cd/cli-tools/pull/460)
+
 Version 0.57.7
 -------------
 
