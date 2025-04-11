@@ -58,7 +58,7 @@ class DeobfuscationFilesService(
         )
         response = cast(
             "android_publisher_resources.DeobfuscationFilesUploadResponse",
-            self._execute_request(upload_request, "upload", retries=3),
+            self._execute_request(upload_request, "upload"),
         )
         self._logger.debug("Uploaded deobfuscation file for %r", package_name)
         return DeobfuscationFile(**cast(dict, response["deobfuscationFile"]))

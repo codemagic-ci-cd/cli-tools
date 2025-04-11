@@ -56,7 +56,7 @@ class ExpansionFilesService(ResourceService[ExpansionFile, "android_publisher_re
         )
         response = cast(
             "android_publisher_resources.ExpansionFilesUploadResponse",
-            self._execute_request(upload_request, "upload", retries=3),
+            self._execute_request(upload_request, "upload"),
         )
         self._logger.debug("Uploaded expansion file for %r", package_name)
         return ExpansionFile(**response["expansionFile"])
@@ -91,7 +91,7 @@ class ExpansionFilesService(ResourceService[ExpansionFile, "android_publisher_re
         )
         response = cast(
             "android_publisher_resources.ExpansionFile",
-            self._execute_request(update_request, "update", retries=3),
+            self._execute_request(update_request, "update"),
         )
         self._logger.debug("Updated expansion file for %r", package_name)
         return ExpansionFile(**response)

@@ -1,3 +1,17 @@
+Version 0.57.8
+-------------
+
+**Bugfixes**
+- Fix socket timeouts on `google-play` actions. [PR #460](https://github.com/codemagic-ci-cd/cli-tools/pull/460)
+
+Version 0.57.7
+-------------
+
+**Bugfixes**
+- Use retrying for Google API requests to avoid intermittent timeout errors. [PR #456](https://github.com/codemagic-ci-cd/cli-tools/pull/456)
+- Fix errors in `AabPackage.get_summary` and `ApkPackage.get_summary` methods for cases when certificate contained unexpected issuer and subject attributes. [PR #457](https://github.com/codemagic-ci-cd/cli-tools/pull/457)
+- Fix converting bytes to strings on Windows using Windows-1252 encoding. [PR #458](https://github.com/codemagic-ci-cd/cli-tools/pull/458)
+
 Version 0.57.6
 -------------
 
