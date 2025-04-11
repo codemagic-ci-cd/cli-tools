@@ -8,14 +8,22 @@ from codemagic.shell_tools.shell_tool import ShellTool
 
 
 class JavaJarTool(ShellTool, metaclass=ABCMeta):
-    def __init__(self, java: Optional[pathlib.Path] = None):
-        self._java = self._get_java_path(java)
-        if not self._jar.exists():
-            raise IOError(f"{self._jar} does not exist")
+    def __init__(self, java: Optional[pathlib.Path] = None, jar: Optional[pathlib.Path] = None):
+        self.__java = self._get_java_path(java)
+        self.__jar = self._get_jar_path(jar)
+        if not self.__jar.exists():
+            raise IOError(f"{self.__jar} does not exist")
 
     @property
+    def java(self) -> pathlib.Path:
+        return self.__java
+
+    @property
+    def jar(self) -> pathlib.Path:
+        return self.__jar
+
     @abstractmethod
-    def _jar(self) -> pathlib.Path:
+    def _get_jar_path(self, jar_path: Optional[pathlib.Path]) -> pathlib.Path:
         raise NotImplementedError()
 
     @classmethod

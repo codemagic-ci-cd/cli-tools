@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import json
 import pathlib
 import subprocess
 import zipfile
@@ -34,7 +37,19 @@ class AndroidAppBundleError(cli.CliAppException):
     pass
 
 
+class BundleToolJarPathArgument(cli.TypedCliArgument[pathlib.Path]):
+    argument_type = cli.CommonArgumentTypes.existing_path
+    environment_variable_key = "ANDROID_APP_BUNDLE_BUNDLETOOL"
+
+
 class AndroidAppBundleArgument(cli.Argument):
+    BUNDLETOOL_JAR = cli.ArgumentProperties(
+        flags=("--bundletool", "-j"),
+        key="bundletool_jar",
+        type=BundleToolJarPathArgument,
+        description="Specify path to bundletool jar that will be used in place of the included version.",
+        argparse_kwargs={"required": False},
+    )
     BUNDLE_PATTERN = cli.ArgumentProperties(
         flags=("--bundle",),
         key="aab_pattern",
@@ -183,6 +198,13 @@ class AndroidAppBundleArgument(cli.Argument):
             "action": "store_true",
         },
     )
+    JSON_OUTPUT = cli.ArgumentProperties(
+        key="json_output",
+        flags=("--json",),
+        type=bool,
+        description="Whether to show the information in JSON format",
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
 
 
 KeystorePassword = Union[str, AndroidAppBundleTypes.KeystorePassword]
@@ -190,12 +212,28 @@ KeyAlias = Union[str, AndroidAppBundleTypes.KeyAlias]
 KeyPassword = Union[str, AndroidAppBundleTypes.KeyPassword]
 
 
-@cli.common_arguments()
+class AndroidAppBundleActionGroup(cli.ActionGroup):
+    BUNDLETOOL = cli.ActionGroupProperties(
+        name="bundletool",
+        description="Show information about Bundletool",
+    )
+
+
+@cli.common_arguments(
+    AndroidAppBundleArgument.BUNDLETOOL_JAR,
+)
 class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     """
     Manage Android App Bundles using
     [Bundletool](https://developer.android.com/studio/command-line/bundletool)
     """
+
+    def __init__(self, bundletool_jar: Optional[pathlib.Path | BundleToolJarPathArgument] = None, **kwargs):
+        super().__init__(**kwargs)
+        self._bundletool_jar = BundleToolJarPathArgument.resolve_value(bundletool_jar) if bundletool_jar else None
+
+    def _get_bundletool(self) -> Bundletool:
+        return Bundletool(jar=self._bundletool_jar)
 
     @classmethod
     @overload
@@ -395,7 +433,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
             self.logger.info(f'Dump target "{target}" from {aab_path}')
 
         try:
-            return Bundletool().dump(
+            return self._get_bundletool().dump(
                 target,
                 aab_path,
                 module=module,
@@ -475,20 +513,48 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         """
         self.logger.info(f"Validate {aab_path}")
         try:
-            return Bundletool().validate(aab_path)
+            return self._get_bundletool().validate(aab_path)
         except subprocess.CalledProcessError as cpe:
             raise AndroidAppBundleError(f"Unable to validate {aab_path}", called_process_error=cpe) from cpe
 
-    @cli.action("bundletool-version")
+    @cli.action(
+        "version",
+        action_group=AndroidAppBundleActionGroup.BUNDLETOOL,
+        deprecation_info=cli.ActionDeprecationInfo("bundletool-version", "0.57.7"),
+    )
     def bundletool_version(self) -> str:
         """
         Get Bundletool version
         """
         self.logger.info("Get Bundletool version")
         try:
-            return Bundletool().version()
+            return self._get_bundletool().version()
         except subprocess.CalledProcessError as cpe:
             raise AndroidAppBundleError("Unable to get Bundletool version", called_process_error=cpe) from cpe
+
+    @cli.action(
+        "info",
+        AndroidAppBundleArgument.JSON_OUTPUT,
+        action_group=AndroidAppBundleActionGroup.BUNDLETOOL,
+    )
+    def bundletool_info(self, json_output: bool = False):
+        """
+        Show full information about Bundletool runtime environment
+        """
+        try:
+            bundletool = self._get_bundletool()
+            version = bundletool.version(show_output=False)
+        except IOError as ioe:
+            raise AndroidAppBundleError(str(ioe)) from ioe
+        except subprocess.CalledProcessError as cpe:
+            raise AndroidAppBundleError("Unable to get Bundletool version", called_process_error=cpe) from cpe
+
+        if json_output:
+            self.echo(json.dumps({"java": str(bundletool.java), "bundletool": str(bundletool.jar), "version": version}))
+        else:
+            self.echo(f"Bundletool version: {version}")
+            self.echo(f"Bundletool: {bundletool.jar}")
+            self.echo(f"Java: {bundletool.java}")
 
     def _build_apk_set_archive(
         self,
@@ -501,7 +567,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
         apks_path = aab_path.parent / f"{aab_path.stem}.apks"
 
         try:
-            Bundletool().build_apks(
+            self._get_bundletool().build_apks(
                 aab_path,
                 apks_path,
                 mode=mode,
