@@ -29,6 +29,13 @@ def test_empty_release_notes():
     assert release_notes_argument.value == []
 
 
+def test_empty_text_release_notes():
+    release_notes_argument = ReleaseNotesArgument('[{"language": "en-US", "text": ""}]')
+    assert release_notes_argument.value == [
+        LocalizedText(language=Language.ENGLISH_UNITED_STATES, text=""),
+    ]
+
+
 @pytest.mark.parametrize(
     ("invalid_argument_value", "expected_error"),
     (
@@ -44,20 +51,6 @@ def test_invalid_release_notes(invalid_argument_value, expected_error):
     with pytest.raises(argparse.ArgumentTypeError) as exc_info:
         ReleaseNotesArgument(invalid_argument_value)
     assert str(exc_info.value) == expected_error
-
-
-def test_empty_text_release_notes():
-    argument_value = json.dumps(
-        [
-            {"language": "en-US", "text": "US notes"},
-            {"language": "et", "text": ""},
-            {"language": "fi-FI", "text": "FI notes"},
-        ],
-    )
-    with pytest.raises(argparse.ArgumentTypeError) as exc_info:
-        ReleaseNotesArgument(argument_value)
-
-    assert str(exc_info.value) == "Invalid release note on index 1, text is empty in {'language': 'et', 'text': ''}"
 
 
 def test_too_long_text_release_notes():

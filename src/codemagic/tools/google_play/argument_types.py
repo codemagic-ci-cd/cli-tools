@@ -45,8 +45,6 @@ class ReleaseNotesArgument(cli.EnvironmentArgumentValue[List[LocalizedText]]):
                 text = rn["text"]
                 if not isinstance(text, str):
                     raise ValueError("text is not a string")
-                if not text:
-                    raise ValueError("text is empty")
                 if len(text) > 500:
                     raise ValueError("text is too long (exceeds 500 characters)")
             except TypeError:  # Given beta build localization is not a dictionary
