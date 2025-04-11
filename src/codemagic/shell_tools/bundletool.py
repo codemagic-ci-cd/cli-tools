@@ -7,9 +7,11 @@ import codemagic
 
 from .java_jar_tool import JavaJarTool
 
+DEFAULT_BUNDLETOOL_PATH: Optional[pathlib.Path] = None
+
 
 @lru_cache(1)
-def _find_bundletool_jar() -> pathlib.Path:
+def find_included_bundletool_jar() -> pathlib.Path:
     data_dir = pathlib.Path(codemagic.__file__).parent / "data"
     bundletool_jar = next(data_dir.rglob("bundletool*.jar"), None)
     if not bundletool_jar:
@@ -26,7 +28,12 @@ class Bundletool(JavaJarTool):
     def _get_jar_path(self, jar_path: Optional[pathlib.Path] = None) -> pathlib.Path:
         if jar_path:
             return jar_path
-        return _find_bundletool_jar()
+        try:
+            return find_included_bundletool_jar()
+        except IOError:
+            if DEFAULT_BUNDLETOOL_PATH:
+                return DEFAULT_BUNDLETOOL_PATH
+            raise
 
     def version(self, show_output: bool = True) -> str:
         """
