@@ -32,13 +32,13 @@ class CodemagicCliTools(cli.CliApp):
             self.echo(f"{executable} installed at {shutil.which(executable) or executable}")
 
     def _install_androguard(self):
-        # Try to install with uv if possible as it is a lot faster.
+        # Try to install with uv if possible as it is a lot faster than standard pip interface.
         if uv := shutil.which("uv"):
             command = (uv, "pip", "install", "--python", sys.executable, "androguard")
             uv_process = self.execute(command, show_output=False)
             if uv_process.returncode == 0:
                 return
-            # Installation with uv failed, try with regular pip approach.
+            # Installation with uv failed, try again with regular pip.
 
         # Just call ensurepip and ignore its returncode.
         # ensurepip module can be disabled on Linuxes when using system Python as pip is
