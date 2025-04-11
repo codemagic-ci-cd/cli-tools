@@ -1,3 +1,9 @@
+Version 0.57.9
+-------------
+
+**Improvements**
+- Speed up Androguard installation with `codemagic-cli-tools ensure-androgurad` on hosts where `uv` is present. [PR #463](https://github.com/codemagic-ci-cd/cli-tools/pull/463)
+
 Version 0.57.8
 -------------
 
