@@ -34,7 +34,7 @@ class CodemagicCliTools(cli.CliApp):
     def _install_androguard(self):
         # Try to install with uv if possible as it is a lot faster.
         if uv := shutil.which("uv"):
-            command = [uv, "pip", "install", "--python", sys.executable, "androguard1"]
+            command = (uv, "pip", "install", "--python", sys.executable, "androguard")
             uv_process = self.execute(command, show_output=False)
             if uv_process.returncode == 0:
                 return
@@ -43,10 +43,10 @@ class CodemagicCliTools(cli.CliApp):
         # Just call ensurepip and ignore its returncode.
         # ensurepip module can be disabled on Linuxes when using system Python as pip is
         # managed by apt, deb etc. Exit code 1 doesn't necessarily mean that pip is not available.
-        self.execute([sys.executable, "-m", "ensurepip"], show_output=False)
+        self.execute((sys.executable, "-m", "ensurepip"), show_output=False)
 
         try:
-            pip_process = self.execute([sys.executable, "-m", "pip", "install", "androguard"], show_output=False)
+            pip_process = self.execute((sys.executable, "-m", "pip", "install", "androguard"), show_output=False)
             pip_process.raise_for_returncode()
         except subprocess.CalledProcessError:
             self.logger.error(Colors.RED("ERROR: Installing Androguard failed."))
