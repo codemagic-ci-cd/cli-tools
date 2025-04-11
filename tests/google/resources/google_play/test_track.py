@@ -61,3 +61,19 @@ def test_track_string_representation(api_google_play_track: dict):
         "            Text: trying2"
     )
     assert str(track) == expected_output
+
+
+def test_release_with_empty_release_notes():
+    release = Release(
+        **{
+            "name": "1.2.3",
+            "versionCodes": ["123"],
+            "releaseNotes": [{"language": "en-US"}],
+            "status": "draft",
+        },
+    )
+
+    assert release.name == "1.2.3"
+    assert release.versionCodes == ["123"]
+    assert release.releaseNotes == [LocalizedText(language="en-US", text="")]
+    assert release.status is Status.DRAFT
