@@ -17,6 +17,7 @@ from typing import Optional
 from typing import Type
 from typing import TypeVar
 from typing import Union
+from typing import cast
 
 from codemagic.cli.colors import Colors
 from codemagic.utilities import log
@@ -29,10 +30,8 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
-    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
+class TypedCliArgumentMeta(abc.ABCMeta):
     enable_name_transformation: bool = False
-    type_name_in_argparse_error: Optional[str] = None
 
     def __init__(cls, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,14 +59,14 @@ class TypedCliArgumentMeta(Generic[T], abc.ABCMeta):
             datetime: "datetime",
             Type[datetime]: "datetime",
         }
-        return known_types.get(cls.argument_type)
+        return known_types.get(cast(Type[TypedCliArgument], cls).argument_type)
 
     def _transform_class_name(cls):  # noqa: N805
         """
         Transform CamelCase class name 'ClassName' to more
         readable 'class name', which appears prettier in argparse error messages.
         """
-        type_name = cls.type_name_in_argparse_error or cls._get_type_name()
+        type_name = cast(Type[TypedCliArgument], cls).type_name_in_argparse_error or cls._get_type_name()
         if type_name is not None:
             cls.__name__ = type_name
         else:
@@ -144,7 +143,7 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
         return bool(value)
 
     def _apply_type(self, non_typed_value: str) -> T:
-        value = self.argument_type(non_typed_value)  # type: ignore
+        value = self.__class__.argument_type(non_typed_value)
         if not self._is_valid(value):
             raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
         return value

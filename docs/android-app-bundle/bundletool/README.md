@@ -1,21 +1,15 @@
 
-validate
-========
+bundletool
+==========
 
 
-**Verify that given Android App Bundle is valid and print out information about it**
+**Show information about Bundletool**
 ### Usage
 ```bash
-android-app-bundle validate [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+android-app-bundle bundletool [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--bundletool BUNDLETOOL_JAR]
-    --bundle BUNDLE_PATH
+    ACTION
 ```
-### Required arguments for action `validate`
-
-##### `--bundle=BUNDLE_PATH`
-
-
-Path to Android app bundle file
 ### Optional arguments for command `android-app-bundle`
 
 ##### `--bundletool=BUNDLETOOL_JAR`
@@ -48,3 +42,9 @@ Disable log output for commands
 
 
 Enable verbose logging for commands
+### Actions
+
+|Action|Description|
+| :--- | :--- |
+|[`info`](info.md)|Show full information about Bundletool runtime environment|
+|[`version`](version.md)|Get Bundletool version|

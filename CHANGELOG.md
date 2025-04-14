@@ -1,3 +1,25 @@
+Version 0.58.0
+-------------
+
+This release contains changes from [PR #461](https://github.com/codemagic-ci-cd/cli-tools/pull/461).
+
+**Features**
+- Added support for a new configuration option to define a custom bundletool.jar path.
+- Add option to specify custom bundletool jar for `android-app-bundle` via `--bundletool` argument.
+- New action `android-app-bundle bundletool info` to show information about used Bundletool (Java runtime, Bundletool path and Bundletool version).
+
+**Deprecations**
+- Action `android-app-bundle bundletool-version` was deprecated and shows a warning message when invoked. It is replaced by `android-app-bundle bundletool version`.
+
+**Development**
+- `codemagic.shell_tools.Bundletool` now accepts optional keyword argument `jar` to specify bundletool jar path that should be used.
+
+**Bugfixes**
+- Fix using non-built-in types for CLI arguments that can be defined via environment variables.
+
+**Docs**
+- Update docs for tool `android-app-bundle`.
+
 Version 0.57.9
 -------------
 
