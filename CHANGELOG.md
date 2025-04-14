@@ -1,3 +1,8 @@
+Version 0.58.1
+-------------
+
+- Fix `google-play apks publish` and `google-play apks upload` actions on Windows. [PR #463](https://github.com/codemagic-ci-cd/cli-tools/pull/463).
+
 Version 0.58.0
 -------------
 

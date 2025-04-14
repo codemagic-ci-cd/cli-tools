@@ -49,6 +49,7 @@ class ApksService(ResourceService[Apk, "android_publisher_resources.AndroidPubli
             packageName=package_name,
             editId=edit_id,
             media_body=str(apk_path),
+            media_mime_type="application/octet-stream",
         )
         response = cast(
             "android_publisher_resources.Apk",
