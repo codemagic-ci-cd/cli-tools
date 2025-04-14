@@ -12,7 +12,7 @@ class LocalizedText(Resource):
     """
 
     language: Language
-    text: str
+    text: str = dataclasses.field(default="")
 
     def __post_init__(self):
         if isinstance(self.language, str):
