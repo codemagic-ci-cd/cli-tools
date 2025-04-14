@@ -7,6 +7,7 @@ build-apks
 ### Usage
 ```bash
 android-app-bundle build-apks [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    [--bundletool BUNDLETOOL_JAR]
     [--bundle BUNDLE_PATTERN]
     [--ks KEYSTORE_PATH]
     [--ks-pass KEYSTORE_PASSWORD]
@@ -40,6 +41,12 @@ Keystore key password. If not given, the value will be checked from the environm
 
 
 Set the mode to universal if you want bundletool to build only a single APK that includes all of your app's code and resources such that the APK is compatible with all device configurations your app supports.
+### Optional arguments for command `android-app-bundle`
+
+##### `--bundletool, -j=BUNDLETOOL_JAR`
+
+
+Specify path to bundletool jar that will be used in place of the included version. If not given, the value will be checked from the environment variable `ANDROID_APP_BUNDLE_BUNDLETOOL`.
 ### Common options
 
 ##### `-h, --help`

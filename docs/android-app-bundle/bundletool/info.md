@@ -1,21 +1,21 @@
 
-is-signed
-=========
+info
+====
 
 
-**Check if given Android app bundle is signed**
+**Show full information about Bundletool runtime environment**
 ### Usage
 ```bash
-android-app-bundle is-signed [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+android-app-bundle bundletool info [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--bundletool BUNDLETOOL_JAR]
-    --bundle BUNDLE_PATH
+    [--json]
 ```
-### Required arguments for action `is-signed`
+### Optional arguments for action `info`
 
-##### `--bundle=BUNDLE_PATH`
+##### `--json`
 
 
-Path to Android app bundle file
+Whether to show the information in JSON format
 ### Optional arguments for command `android-app-bundle`
 
 ##### `--bundletool, -j=BUNDLETOOL_JAR`

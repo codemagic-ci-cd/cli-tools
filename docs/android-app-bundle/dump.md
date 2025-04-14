@@ -7,6 +7,7 @@ dump
 ### Usage
 ```bash
 android-app-bundle dump [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
+    [--bundletool BUNDLETOOL_JAR]
     [--module DUMP_MODULE]
     [--resource DUMP_RESOURCE]
     [--values]
@@ -42,6 +43,12 @@ When set, also prints the values of the resources. Defaults to false. Only appli
 
 
 XML path to specific attribute in the target. For example "/manifest/@android:versionCode" to obtain the version code from manifest. If not given, the full target will be dumped.
+### Optional arguments for command `android-app-bundle`
+
+##### `--bundletool, -j=BUNDLETOOL_JAR`
+
+
+Specify path to bundletool jar that will be used in place of the included version. If not given, the value will be checked from the environment variable `ANDROID_APP_BUNDLE_BUNDLETOOL`.
 ### Common options
 
 ##### `-h, --help`
