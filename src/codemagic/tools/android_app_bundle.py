@@ -44,7 +44,7 @@ class BundleToolJarPathArgument(cli.TypedCliArgument[pathlib.Path]):
 
 class AndroidAppBundleArgument(cli.Argument):
     BUNDLETOOL_JAR = cli.ArgumentProperties(
-        flags=("--bundletool", "-j"),
+        flags=("--bundletool",),
         key="bundletool_jar",
         type=BundleToolJarPathArgument,
         description="Specify path to bundletool jar that will be used in place of the included version.",
@@ -200,7 +200,7 @@ class AndroidAppBundleArgument(cli.Argument):
     )
     JSON_OUTPUT = cli.ArgumentProperties(
         key="json_output",
-        flags=("--json",),
+        flags=("--json", "-j"),
         type=bool,
         description="Whether to show the information in JSON format",
         argparse_kwargs={"required": False, "action": "store_true"},

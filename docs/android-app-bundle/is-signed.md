@@ -18,7 +18,7 @@ android-app-bundle is-signed [-h] [--log-stream STREAM] [--no-color] [--version]
 Path to Android app bundle file
 ### Optional arguments for command `android-app-bundle`
 
-##### `--bundletool, -j=BUNDLETOOL_JAR`
+##### `--bundletool=BUNDLETOOL_JAR`
 
 
 Specify path to bundletool jar that will be used in place of the included version. If not given, the value will be checked from the environment variable `ANDROID_APP_BUNDLE_BUNDLETOOL`.
