@@ -4,6 +4,9 @@ Version 0.57.9
 **Bugfixes**
 - Fix empty release notes text usage for Google Play release tracks. [PR #462](https://github.com/codemagic-ci-cd/cli-tools/pull/462)
 
+**Improvements**
+- Speed up Androguard installation with `codemagic-cli-tools ensure-androgurad` on hosts where `uv` is present. [PR #463](https://github.com/codemagic-ci-cd/cli-tools/pull/463)s
+
 Version 0.57.8
 -------------
 
