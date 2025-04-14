@@ -520,7 +520,7 @@ class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     @cli.action(
         "version",
         action_group=AndroidAppBundleActionGroup.BUNDLETOOL,
-        deprecation_info=cli.ActionDeprecationInfo("bundletool-version", "0.57.7"),
+        deprecation_info=cli.ActionDeprecationInfo("bundletool-version", "0.58.0"),
     )
     def bundletool_version(self) -> str:
         """
