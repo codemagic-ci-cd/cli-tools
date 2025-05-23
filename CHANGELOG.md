@@ -1,3 +1,8 @@
+Version 0.58.2
+-------------
+
+- Fix parsing datetime in Appe API response that contains nanoseconds. [PR #465](https://github.com/codemagic-ci-cd/cli-tools/pull/465).
+
 Version 0.58.1
 -------------
 
