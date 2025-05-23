@@ -57,6 +57,7 @@ pytest-cov = "*"
 ruff = "*"
 types-requests = "*"
 types-psutil = "*"
+types-python-dateutil= "*"
 androguard = ">=4.0.0"
 
 [build-system]
