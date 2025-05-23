@@ -23,6 +23,7 @@ from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
+from dateutil.parser import parse
 
 from .enums import ResourceType
 
@@ -260,15 +261,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
 
     @classmethod
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
-        if iso_8601_timestamp is None:
-            return None
-        try:
-            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
-        except ValueError:
-            # while most of API responses contain timestamp as '2020-08-04T11:44:12.000+0000'
-            # /builds endpoint returns timestamps with timedelta and without milliseconds
-            # as '2021-01-28T06:01:32-08:00'
-            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S%z")
+        return parse(iso_8601_timestamp) if iso_8601_timestamp else None
 
     @classmethod
     @overload
