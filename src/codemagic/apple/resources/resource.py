@@ -19,12 +19,13 @@ from typing import TypeVar
 from typing import Union
 from typing import overload
 
+from dateutil.parser import parse
+from dateutil.tz import tzutc
+
 from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
-from dateutil.parser import parse
-from dateutil.tz import tzutc
 
 from .enums import ResourceType
 
