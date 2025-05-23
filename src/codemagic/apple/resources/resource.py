@@ -24,6 +24,7 @@ from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
 from codemagic.utilities import log
 from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 from .enums import ResourceType
 
@@ -275,7 +276,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
     def to_iso_8601(cls, dt: Optional[datetime], with_fractional_seconds: bool = True):
         if dt is None:
             return None
-        if dt.tzinfo == timezone.utc and with_fractional_seconds:
+        if dt.tzinfo in (timezone.utc, tzutc()) and with_fractional_seconds:
             # while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
             # resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
             # /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'
