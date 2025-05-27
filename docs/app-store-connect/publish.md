@@ -175,7 +175,7 @@ Release App Store version update in phases. With this option your version update
 Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--phased-release`.
 ### Optional arguments to add localized meta information about build for TestFlight or App Store review submission
 
-##### `--locale, -l=ar-SA | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | he | hi | hr | hu | id | it | ja | ko | ms | nl-NL | no | pl | pt-BR | pt-PT | ro | ru | sk | sv | th | tr | uk | zh-Hans | zh-Hant`
+##### `--locale, -l=ar-SA | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | he | hi | hr | hu | id | it | ja | ko | ms | nl-NL | no | pl | pt-BR | pt-PT | ro | ru | sk | sv | th | tr | uk | vi | zh-Hans | zh-Hant`
 
 
 The locale code name for App Store metadata in different languages, or for displaying localized "What's new" content in TestFlight. In case not provided, application's primary locale is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes
