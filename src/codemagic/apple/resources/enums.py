@@ -474,6 +474,7 @@ class Locale(ResourceEnum):
     TH = "th"  # Thai
     TR = "tr"  # Turkish
     UK = "uk"  # Ukrainian
+    VI = "vi"  # Vietnamese
     ZH_HANS = "zh-Hans"  # Chinese (Simplified)
     ZH_HANT = "zh-Hant"  # Chinese (Traditional)
 
