@@ -19,6 +19,9 @@ from typing import TypeVar
 from typing import Union
 from typing import overload
 
+from dateutil.parser import parse
+from dateutil.tz import tzutc
+
 from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
 from codemagic.models import JsonSerializableMeta
@@ -260,15 +263,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
 
     @classmethod
     def from_iso_8601(cls, iso_8601_timestamp: Optional[str]):
-        if iso_8601_timestamp is None:
-            return None
-        try:
-            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
-        except ValueError:
-            # while most of API responses contain timestamp as '2020-08-04T11:44:12.000+0000'
-            # /builds endpoint returns timestamps with timedelta and without milliseconds
-            # as '2021-01-28T06:01:32-08:00'
-            return datetime.strptime(iso_8601_timestamp, "%Y-%m-%dT%H:%M:%S%z")
+        return parse(iso_8601_timestamp) if iso_8601_timestamp else None
 
     @classmethod
     @overload
@@ -282,7 +277,7 @@ class Resource(LinkedResourceData, metaclass=PrettyNameAbcMeta):
     def to_iso_8601(cls, dt: Optional[datetime], with_fractional_seconds: bool = True):
         if dt is None:
             return None
-        if dt.tzinfo == timezone.utc and with_fractional_seconds:
+        if dt.tzinfo in (timezone.utc, tzutc()) and with_fractional_seconds:
             # while most of API responses contain timestamps as '2020-08-04T11:44:12.000+0000'
             # resolved to datetime.datetime(2020, 8, 4, 11, 44, 12, tzinfo=datetime.timezone.utc),
             # /builds endpoint returns timestamps as isoformat() '2021-01-28T06:01:32-08:00'

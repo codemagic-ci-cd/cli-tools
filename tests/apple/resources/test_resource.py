@@ -5,6 +5,8 @@ from datetime import timedelta
 from datetime import timezone
 
 import pytest
+from dateutil.tz import tzoffset
+from dateutil.tz import tzutc
 
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import Resource
@@ -17,6 +19,8 @@ from codemagic.apple.resources.resource import PrettyNameMeta
         (None, None),
         (datetime(2020, 8, 4, 11, 44, 12, tzinfo=timezone.utc), "2020-08-04T11:44:12.000+0000"),
         (datetime(1970, 1, 1, 0, 0, 0, tzinfo=timezone.utc), "1970-01-01T00:00:00.000+0000"),
+        (datetime(2025, 5, 28, 10, 0, 0, tzinfo=tzutc()), "2025-05-28T10:00:00.000+0000"),
+        (datetime(2025, 5, 23, 9, 50, 3, 168550, tzinfo=tzoffset(None, -25200)), "2025-05-23T09:50:03.168550-07:00"),
     ],
 )
 def test_to_iso_8601(iso_8601_timestamp, expected_datetime):
@@ -33,6 +37,8 @@ def test_to_iso_8601(iso_8601_timestamp, expected_datetime):
             datetime(2021, 1, 28, 6, 1, 32, tzinfo=timezone(timedelta(days=-1, seconds=57600))),
         ),
         ("1970-01-01T00:00:00.000+0000", datetime(1970, 1, 1, 0, 0, 0, tzinfo=timezone.utc)),
+        ("2021-01-28T06:01:32+08:00", datetime(2021, 1, 28, 6, 1, 32, tzinfo=tzoffset(None, 28800))),
+        ("2025-05-23T09:50:03.168550349-07:00", datetime(2025, 5, 23, 9, 50, 3, 168550, tzinfo=tzoffset(None, -25200))),
     ],
 )
 def test_from_iso_8601(given_datetime, expected_iso_8601_timestamp):

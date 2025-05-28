@@ -44,6 +44,7 @@ packaging = ">=22.0"
 psutil = ">= 5.8.0"
 pyjwt = "^2.4.0"
 requests = ">= 2.25"
+python-dateutil = ">= 2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
@@ -56,6 +57,7 @@ pytest-cov = "*"
 ruff = "*"
 types-requests = "*"
 types-psutil = "*"
+types-python-dateutil= "*"
 androguard = ">=4.0.0"
 
 [build-system]
