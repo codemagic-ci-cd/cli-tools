@@ -1,7 +1,15 @@
-Version 0.58.2
+Version 0.58.3
 -------------
 
 - Fix parsing datetime in Apple API response that contains nanoseconds. [PR #465](https://github.com/codemagic-ci-cd/cli-tools/pull/465).
+
+Version 0.58.2
+-------------
+
+**Improvements**
+- Add missing App Store Connect locale definition for Vietnamese language. [PR #466](https://github.com/codemagic-ci-cd/cli-tools/pull/466)
+
+Special thanks for contribution to [@xalanq](https://github.com/xalanq).
 
 Version 0.58.1
 -------------
