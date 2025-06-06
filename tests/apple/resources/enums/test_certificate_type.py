@@ -114,11 +114,11 @@ def test_resolve_applicable_types_using_profile_type_with_one_match(
         ),
         (
             ProfileType.MAC_APP_DIRECT,
-            [CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2],
+            [CertificateType.DEVELOPER_ID_APPLICATION],
         ),
         (
             ProfileType.MAC_CATALYST_APP_DIRECT,
-            [CertificateType.DEVELOPER_ID_APPLICATION, CertificateType.DEVELOPER_ID_APPLICATION_G2],
+            [CertificateType.DEVELOPER_ID_APPLICATION],
         ),
         (
             ProfileType.MAC_APP_STORE,
@@ -148,12 +148,10 @@ def test_resolve_applicable_types_with_multiple_arguments():
         profile_type=ProfileType.IOS_APP_STORE,
         certificate_types=[
             CertificateType.DEVELOPER_ID_APPLICATION,
-            CertificateType.DEVELOPER_ID_APPLICATION_G2,
         ],
     )
     expected_certificate_types = [
         CertificateType.DEVELOPER_ID_APPLICATION,  # From "certificate_types" argument
-        CertificateType.DEVELOPER_ID_APPLICATION_G2,  # From "certificate_types" argument
         CertificateType.DISTRIBUTION,  # From given profile type
         CertificateType.IOS_DISTRIBUTION,  # From given profile type
     ]

@@ -167,8 +167,6 @@ class CertificateType(ResourceEnum):
     """
 
     DEVELOPER_ID_APPLICATION = "DEVELOPER_ID_APPLICATION"
-    # Undocumented developer ID certificate with profile type "G2 Sub-CA"
-    DEVELOPER_ID_APPLICATION_G2 = "DEVELOPER_ID_APPLICATION_G2"
     DEVELOPER_ID_KEXT = "DEVELOPER_ID_KEXT"
     DEVELOPMENT = "DEVELOPMENT"
     DISTRIBUTION = "DISTRIBUTION"
@@ -241,13 +239,6 @@ class CertificateType(ResourceEnum):
                 types.append(CertificateType.IOS_DISTRIBUTION)
             elif profile_type is ProfileType.MAC_APP_STORE:
                 types.append(CertificateType.MAC_APP_DISTRIBUTION)
-
-            # Developer ID profiles can also be used with undocumented (as of 04.07.24) flavor
-            # of developer ID application certificates that have special G2 suffix in the type name.
-            # Said profiles themselves have the same type as before regardless of whether they
-            # are of type "G2 Sub-GA" or "Previous Sub-GA".
-            if profile_type in (ProfileType.MAC_APP_DIRECT, ProfileType.MAC_CATALYST_APP_DIRECT):
-                types.append(CertificateType.DEVELOPER_ID_APPLICATION_G2)
 
         # Remove duplicate entries from the list in order-preserving way.
         return list(OrderedDict.fromkeys(types))
