@@ -7,8 +7,8 @@ This release contains changes from [PR #467](https://github.com/codemagic-ci-cd/
 - Enumeration value `DEVELOPER_ID_APPLICATION_G2` is removed from `codemagic.apple.resources.CertificateType`.
 
 **Bugfixes**
-- Fix action `app-store-connect fetch-signing-files` when fetching signing files for macOS apps (invoked with either option `--type=MAC_APP_DIRECT` or `--type=MAC_CATALYST_APP_DIRECT`).
-- Fix action `app-store-connect certificates list` when listing certificates for macOS provisioning profiles or explicitly with type `DEVELOPER_ID_APPLICATION_G2` (either invoked with `--profile-type=MAC_APP_DIRECT`, `--profile-type=MAC_CATALYST_APP_DIRECT` or `--type=DEVELOPER_ID_APPLICATION_G2`).
+- Fix action `app-store-connect fetch-signing-files` when fetching signing files for macOS apps that use direct distribution provisioning profiles (invoked with either option `--type=MAC_APP_DIRECT` or `--type=MAC_CATALYST_APP_DIRECT`).
+- Fix action `app-store-connect certificates list` when listing certificates for macOS direct distribution provisioning profiles or explicitly with type `DEVELOPER_ID_APPLICATION_G2` (either invoked with `--profile-type=MAC_APP_DIRECT`, `--profile-type=MAC_CATALYST_APP_DIRECT` or `--type=DEVELOPER_ID_APPLICATION_G2`).
 - Fix action `app-store-connect certificates create` when invoked with `--type=DEVELOPER_ID_APPLICATION_G2`.
 
 **Docs**
