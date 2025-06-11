@@ -2,7 +2,7 @@ Version 0.59.0
 -------------
 
 **Improvement**
-- Remove stale provisioning profiles when running `app-store-connect fetch-signing-files`. [PR #468](https://github.com/codemagic-ci-cd/cli-tools/pull/468)
+- Remove stale provisioning profiles when running `app-store-connect fetch-signing-files`. [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469)
 
 Version 0.59.0
 -------------
