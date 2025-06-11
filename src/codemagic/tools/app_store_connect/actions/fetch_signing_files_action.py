@@ -6,6 +6,7 @@ from typing import Iterator
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -18,6 +19,7 @@ from codemagic.apple.resources import DeviceStatus
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import ProfileState
 from codemagic.apple.resources import ProfileType
+from codemagic.apple.resources import ResourceId
 from codemagic.apple.resources import SigningCertificate
 from codemagic.cli import Colors
 from codemagic.models import PrivateKey
@@ -29,6 +31,10 @@ from ..arguments import CommonArgument
 from ..arguments import ProfileArgument
 from ..arguments import Types
 from ..errors import AppStoreConnectError
+
+
+class _StaleProfileError(Exception):
+    pass
 
 
 class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
@@ -148,6 +154,39 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
             certificates.append(certificate)
         return certificates
 
+    def _delete_stale_profile(self, profile: Profile) -> None:
+        try:
+            self.api_client.profiles.delete(profile)
+            self.logger.info(f"Deleted stale {Profile} {profile.id}")
+        except AppStoreConnectApiError as err:
+            if err.response.status_code == 404:
+                return  # Ignore 404 errors as those profiles are supposed not to exist
+            self.logger.warning(f"Failed to delete stale {Profile} {profile.id}: {err.error_response}")
+
+    def _has_certificate(self, profile: Profile, available_certificate_ids: Set[ResourceId]) -> bool:
+        try:
+            profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
+        except AppStoreConnectApiError as err:
+            error = f"Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly"
+            self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
+            if f"There is no resource of type 'profiles' with id '{profile.id}'" in str(err.error_response):
+                raise _StaleProfileError() from err
+            return False
+
+        # Do not use set.issubset as empty set is subset of another empty set.
+        return bool({c.id for c in profile_certificates} & available_certificate_ids)
+
+    def _has_profile(self, bundle_id: BundleId, available_profile_ids: Set[ResourceId]) -> bool:
+        try:
+            bundle_id_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
+        except AppStoreConnectApiError as err:
+            error = f"Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly"
+            self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
+            return False
+
+        # Do not use set.issubset as empty set is subset of another empty set.
+        return bool({p.id for p in bundle_id_profiles} & available_profile_ids)
+
     def _get_or_create_profiles(
         self,
         bundle_ids: Sequence[BundleId],
@@ -156,32 +195,25 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         create_resource: bool,
         platform: Optional[BundleIdPlatform] = None,
     ):
-        def has_certificate(profile) -> bool:
-            try:
-                profile_certificates = self.api_client.profiles.list_certificate_ids(profile)
-                return bool(certificate_ids.issubset({c.id for c in profile_certificates}))
-            except AppStoreConnectApiError as err:
-                error = f"Listing {SigningCertificate.s} for {Profile} {profile.id} failed unexpectedly"
-                self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
-                return False
-
-        def missing_profile(bundle_id) -> bool:
-            try:
-                bundle_ids_profiles = self.api_client.bundle_ids.list_profile_ids(bundle_id)
-                return not (profile_ids & {p.id for p in bundle_ids_profiles})
-            except AppStoreConnectApiError as err:
-                error = f"Listing {Profile.s} for {BundleId} {bundle_id.id} failed unexpectedly"
-                self.logger.warning(Colors.YELLOW(f"{error}: {err.error_response}"))
-                return True
-
-        certificate_ids = {c.id for c in certificates}
-        profiles = self.list_bundle_id_profiles(
+        all_profiles = self.list_bundle_id_profiles(
             [bundle_id.id for bundle_id in bundle_ids],
             profile_type=profile_type,
             profile_state=ProfileState.ACTIVE,
             should_print=False,
         )
-        profiles = list(filter(has_certificate, profiles))
+        certificate_ids = {c.id for c in certificates}
+        profiles = []
+        for profile in all_profiles:
+            try:
+                if self._has_certificate(profile, certificate_ids):
+                    profiles.append(profile)
+            except _StaleProfileError:
+                # App Store Connect API response for listing bundle identifier profiles contains resources that are
+                # already deleted. These stale profiles aren't available in the UI nor via read requests, but can be
+                # safely deleted via API. They significantly slow down actions as the deleted profiles accumulate and
+                # eventually many unnecessary 404 requests need to be performed. Delete such profiles so that they
+                # wouldn't be picked up on the following action invocations.
+                self._delete_stale_profile(profile)
 
         certificate_names = ", ".join(c.get_display_info() for c in certificates)
         message = f"that contain {SigningCertificate.plural(len(certificates))} {certificate_names}"
@@ -190,7 +222,7 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
             self.logger.info(f"- {profile.get_display_info()}")
 
         profile_ids = {p.id for p in profiles}
-        bundle_ids_without_profiles = list(filter(missing_profile, bundle_ids))
+        bundle_ids_without_profiles = [bid for bid in bundle_ids if not self._has_profile(bid, profile_ids)]
         if bundle_ids_without_profiles and not create_resource:
             missing = ", ".join(f'"{bid.attributes.identifier}" [{bid.id}]' for bid in bundle_ids_without_profiles)
             raise AppStoreConnectError(f"Did not find {profile_type} {Profile.s} for {BundleId.s}: {missing}")
