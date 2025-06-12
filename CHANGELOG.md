@@ -1,3 +1,9 @@
+Version 0.59.1
+-------------
+
+**Bugfix**
+- Fix `--type` argument for `google-play deobfuscation-files upload`. [PR #470](https://github.com/codemagic-ci-cd/cli-tools/pull/470)
+
 Version 0.59.0
 -------------
 
