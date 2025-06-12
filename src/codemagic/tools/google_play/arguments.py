@@ -192,7 +192,7 @@ class DeobfuscationsArgument(cli.Argument):
     DEOBFUSCATION_FILE_TYPE = cli.ArgumentProperties(
         key="deobfuscation_file_type",
         flags=("--type", "-t"),
-        type=ExpansionFileType,
+        type=DeobfuscationFileType,
         description="The type of APK deobfuscation file which is being updated",
         argparse_kwargs={
             "required": False,
