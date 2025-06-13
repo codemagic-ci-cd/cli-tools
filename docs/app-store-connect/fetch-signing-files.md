@@ -24,6 +24,7 @@ app-store-connect fetch-signing-files [-h] [--log-stream STREAM] [--no-color] [-
     [--type PROFILE_TYPE]
     [--strict-match-identifier]
     [--create]
+    [--delete-stale-profiles]
     BUNDLE_ID_IDENTIFIER
 ```
 ### Required arguments for action `fetch-signing-files`
@@ -62,6 +63,10 @@ Only match Bundle IDs that have exactly the same identifier specified by `BUNDLE
 
 
 Whether to create the resource if it does not exist yet
+##### `--delete-stale-profiles`
+
+
+Whether to delete invalid provisioning profiles that are discovered for specified bundle identifiers. Those profiles have active status with expiration date in the past, rendering them invalid. Such profiles are not shown in the Apple Developer Portal and they cannot be discovered using conventional read or list API queries.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
