@@ -1,14 +1,14 @@
+Version 0.60.0
+-------------
+
+**Improvement**
+- Remove stale provisioning profiles when running `app-store-connect fetch-signing-files`. [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469)
+
 Version 0.59.1
 -------------
 
 **Bugfix**
 - Fix `--type` argument for `google-play deobfuscation-files upload`. [PR #470](https://github.com/codemagic-ci-cd/cli-tools/pull/470)
-
-Version 0.59.0
--------------
-
-**Improvement**
-- Remove stale provisioning profiles when running `app-store-connect fetch-signing-files`. [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469)
 
 Version 0.59.0
 -------------
