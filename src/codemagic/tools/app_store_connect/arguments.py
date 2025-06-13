@@ -1551,6 +1551,21 @@ class ProfileArgument(cli.Argument):
             "metavar": "device-id",
         },
     )
+    DELETE_STALE_PROFILES = cli.ArgumentProperties(
+        key="delete_stale_profiles",
+        flags=("--delete-stale-profiles",),
+        type=bool,
+        description=(
+            "Whether to delete invalid provisioning profiles that are discovered for specified bundle identifiers. "
+            "Those profiles have active status with expiration date in the past, rendering them invalid. Such "
+            "profiles are not shown in the Apple Developer Portal and they cannot be discovered using conventional "
+            "read or list API queries."
+        ),
+        argparse_kwargs={
+            "required": False,
+            "action": "store_true",
+        },
+    )
 
 
 class CommonArgument(cli.Argument):
