@@ -1,8 +1,13 @@
 Version 0.60.0
 -------------
 
-**Improvement**
-- Remove stale provisioning profiles when running `app-store-connect fetch-signing-files`. [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469)
+This release contains changes from [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469).
+
+**Features**
+- Add option `--delete-stale-profiles` to action `app-store-connect fetch-signing-files` to delete encountered stale provisioning profiles. Those profiles are not shown in Apple Developer Portal and cannot be queried using normal App Store Connect API profiles read and listing endpoints.
+
+**Docs**
+- Update docs for `app-store-connect fetch-signing-files`.
 
 Version 0.59.1
 -------------
