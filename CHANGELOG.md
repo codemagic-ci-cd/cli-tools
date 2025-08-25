@@ -1,6 +1,12 @@
 Version 0.60.0
 -------------
 
+**Bugfixes**
+- Fix action `firebase-app-distribution-debug get-latest-build-version` by supporting new `updateTime` and `expireTime` timestamps for releases. [PR #473](https://github.com/codemagic-ci-cd/cli-tools/pull/473)
+
+Version 0.60.0
+-------------
+
 This release contains changes from [PR #469](https://github.com/codemagic-ci-cd/cli-tools/pull/469).
 
 **Features**
