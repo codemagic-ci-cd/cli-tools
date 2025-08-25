@@ -67,4 +67,4 @@ class ReleasesService(ResourceService[Release, "FirebaseAppDistributionResource"
             next_page_token = response["nextPageToken"]
 
         self._logger.debug("Listed %d Firebase releases for app %r", len(firebase_releases[:limit]), app_id)
-        return [Release(**cast(dict, firebase_release)) for firebase_release in firebase_releases[:limit]]
+        return [Release.from_api_response(firebase_release) for firebase_release in firebase_releases[:limit]]

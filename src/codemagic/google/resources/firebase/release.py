@@ -4,6 +4,7 @@ import dataclasses
 from datetime import datetime
 from datetime import timezone
 from typing import Optional
+from typing import overload
 
 from codemagic.google.resources import Resource
 
@@ -24,9 +25,32 @@ class Release(Resource):
     testingUri: str
     binaryDownloadUri: str
     releaseNotes: Optional[ReleaseNotes] = None
+    updateTime: Optional[datetime] = None
+    expireTime: Optional[datetime] = None
 
     def __post_init__(self):
-        if isinstance(self.createTime, str):
-            self.createTime = datetime.fromisoformat(self.createTime.rstrip("Z")).replace(tzinfo=timezone.utc)
+        self.createTime = self._parse_datetime(self.createTime)
+        self.updateTime = self._parse_datetime(self.updateTime)
+        self.expireTime = self._parse_datetime(self.expireTime)
         if isinstance(self.releaseNotes, dict):
             self.releaseNotes = ReleaseNotes(self.releaseNotes["text"])
+
+    @classmethod
+    @overload
+    def _parse_datetime(cls, timestamp: str) -> datetime: ...
+
+    @classmethod
+    @overload
+    def _parse_datetime(cls, timestamp: datetime) -> datetime: ...
+
+    @classmethod
+    @overload
+    def _parse_datetime(cls, timestamp: None) -> None: ...
+
+    @classmethod
+    def _parse_datetime(cls, timestamp: str | datetime | None) -> datetime | None:
+        if isinstance(timestamp, datetime):
+            return timestamp
+        elif isinstance(timestamp, str):
+            return datetime.fromisoformat(timestamp.rstrip("Z")).replace(tzinfo=timezone.utc)
+        return None
