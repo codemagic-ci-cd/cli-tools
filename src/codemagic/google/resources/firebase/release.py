@@ -18,12 +18,12 @@ class Release(Resource):
     """
 
     name: str
-    displayVersion: str
-    buildVersion: str
     createTime: datetime
     firebaseConsoleUri: str
     testingUri: str
     binaryDownloadUri: str
+    buildVersion: str
+    displayVersion: str = ""
     releaseNotes: Optional[ReleaseNotes] = None
     updateTime: Optional[datetime] = None
     expireTime: Optional[datetime] = None
