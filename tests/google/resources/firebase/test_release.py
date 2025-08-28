@@ -10,6 +10,12 @@ def test_release_initialization(api_firebase_release: dict):
     assert release.dict() == api_firebase_release
 
 
+def test_release_without_display_version(api_firebase_release: dict):
+    api_firebase_release.pop("displayVersion", None)
+    release = Release(**api_firebase_release)
+    assert release.displayVersion == ""
+
+
 def test_release_string_representation(api_firebase_release: dict):
     release = Release(**api_firebase_release)
     expected = textwrap.dedent(
