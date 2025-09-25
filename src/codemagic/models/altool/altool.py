@@ -135,20 +135,17 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         action_name: str,
         artifact_path: pathlib.Path,
         auth_flags: Sequence[str],
+        additional_arguments: Sequence[str] | None = None,
     ) -> Tuple[str, ...]:
         verbose_flags = ["--verbose"] if self.verbose else []
         return (
-            "xcrun",
-            "altool",
-            action_name,
-            "--file",
-            str(artifact_path),
-            "--type",
-            PlatformType.from_path(artifact_path).value,
+            *("xcrun", "altool", action_name),
+            *("--file", str(artifact_path)),
+            *("--type", PlatformType.from_path(artifact_path).value),
             *auth_flags,
-            "--output-format",
-            "json",
+            *("--output-format", "json"),
             *verbose_flags,
+            *(additional_arguments or ()),
         )
 
     def validate_app(
@@ -156,10 +153,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         artifact_path: pathlib.Path,
         retries: int = 1,
         retry_wait_seconds: Union[int, float] = 0.5,
+        additional_arguments: Sequence[str] | None = None,
     ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
-            cmd = self._construct_action_command("--validate-app", artifact_path, auth_flags)
+            cmd = self._construct_action_command(
+                "--validate-app",
+                artifact_path,
+                auth_flags,
+                additional_arguments,
+            )
             return self._run_retrying_command(cmd, artifact_path, "validate", retries, retry_wait_seconds)
 
     def upload_app(
@@ -167,10 +170,16 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         artifact_path: pathlib.Path,
         retries: int = 1,
         retry_wait_seconds: Union[int, float] = 0.5,
+        additional_arguments: Sequence[str] | None = None,
     ) -> Optional[AltoolResult]:
         self._ensure_altool()
         with self._get_authentication_flags() as auth_flags:
-            cmd = self._construct_action_command("--upload-app", artifact_path, auth_flags)
+            cmd = self._construct_action_command(
+                "--upload-app",
+                artifact_path,
+                auth_flags,
+                additional_arguments,
+            )
             return self._run_retrying_command(cmd, artifact_path, "upload", retries, retry_wait_seconds)
 
     def _run_retrying_command(
@@ -284,7 +293,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             # This pattern captures the variable name before `=>`.
             environment_variable_names = re.findall(r',?"([^"]+)"\s?=>', env_match.group(1))
             sanitized_environment = ", ".join(f'"{name}"=>"..."' for name in environment_variable_names)
-            output = f"{output[:env_match.span()[0]]}ENV: {{{sanitized_environment}}}{output[env_match.span()[1]:]}"
+            output = f"{output[: env_match.span()[0]]}ENV: {{{sanitized_environment}}}{output[env_match.span()[1] :]}"
 
         return output
 
