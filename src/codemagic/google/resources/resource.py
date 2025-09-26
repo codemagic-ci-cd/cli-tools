@@ -1,15 +1,50 @@
 from __future__ import annotations
 
+import dataclasses
 import enum
 import re
-from typing import Any
-from typing import Tuple
+from abc import ABCMeta
+from typing import TYPE_CHECKING
 
 from codemagic.models import DictSerializable
 from codemagic.models import JsonSerializable
+from codemagic.models import JsonSerializableMeta
+from codemagic.utilities import log
+
+if TYPE_CHECKING:
+    from typing import Any
+    from typing import Dict
+    from typing import Mapping
+    from typing import Tuple
+    from typing import Type
+    from typing import TypeVar
+
+    R = TypeVar("R", bound="Resource")
 
 
-class Resource(DictSerializable, JsonSerializable):
+class ResourceAbcMeta(JsonSerializableMeta, ABCMeta):
+    pass
+
+
+@dataclasses.dataclass
+class Resource(DictSerializable, JsonSerializable, metaclass=ResourceAbcMeta):
+    @classmethod
+    def _get_defined_fields(cls, given_fields: Mapping[str, Any]) -> Dict[str, Any]:
+        logger = log.get_logger(cls, log_to_stream=False)
+        defined_fields = {f.name for f in dataclasses.fields(cls)}
+        fields = {}
+        for field_name, field_value in given_fields.items():
+            if field_name in defined_fields:
+                fields[field_name] = field_value
+            else:
+                logger.warning("Unknown field %r for resource %s", field_name, cls.__name__)
+        return fields
+
+    @classmethod
+    def from_api_response(cls: Type[R], api_response: Mapping[str, Any]) -> R:
+        defined_fields = cls._get_defined_fields(api_response)
+        return cls(**defined_fields)
+
     @staticmethod
     def _format_attribute_name(name: str) -> str:
         name = re.sub(r"([a-z])([A-Z])", r"\1 \2", name)
