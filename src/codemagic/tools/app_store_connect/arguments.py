@@ -1105,7 +1105,7 @@ class PublishArgument(cli.Argument):
         type=Types.AltoolAdditionalAdditionalArguments,
         description=(
             "Pass additional command line arguments to `xcrun altool` invocations. "
-            'For example `--apple-id "1481211155".'
+            "For example `\"--apple-id '1481211155'\"`."
         ),
         argparse_kwargs={
             "required": False,
