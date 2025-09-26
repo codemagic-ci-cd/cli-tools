@@ -152,7 +152,6 @@ class Types:
         default_value = tuple()
 
         def _apply_type(self, non_typed_value: str) -> Tuple[str, ...]:
-            print(f"{non_typed_value=}")
             try:
                 return tuple(shlex.split(non_typed_value))
             except ValueError as ve:
