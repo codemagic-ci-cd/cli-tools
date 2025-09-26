@@ -90,6 +90,7 @@ class CliProcess:
         env: Optional[Dict[str, str]] = None,
         poll_interval: float = 0.01,
     ) -> CliProcess:
+        print(self._command_args)
         self._log_exec_started()
         start = time.time()
         try:
