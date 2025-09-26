@@ -1,3 +1,15 @@
+Version 0.60.2
+-------------
+
+**Bugfixes**
+- Fix `TypeError` in `firebase-app-distribution` actions if Firebase release response is missing `displayVersion` attribute. [PR #474](https://github.com/codemagic-ci-cd/cli-tools/pull/474)
+
+Version 0.60.1
+-------------
+
+**Bugfixes**
+- Fix action `firebase-app-distribution get-latest-build-version` by supporting new `updateTime` and `expireTime` timestamps for releases. [PR #473](https://github.com/codemagic-ci-cd/cli-tools/pull/473)
+
 Version 0.60.0
 -------------
 
