@@ -1,8 +1,13 @@
 Version 0.61.0
 -------------
 
+This release contains changes from [PR #476](https://github.com/codemagic-ci-cd/cli-tools/pull/476).
+
 **Features**
-- Add option `--altool-additional-arguments` to action `app-store-connect publish` to pass additional CLI arguments to `altool` when uploading app to App Store Connect. [PR #476](https://github.com/codemagic-ci-cd/cli-tools/pull/476)
+- Add `--altool-additional-arguments` option to the `app-store-connect publish` action. This allows passing extra CLI arguments directly to `altool` during the app upload process.
+
+**Docs**
+- Update docs for `app-store-connect publish`.
 
 Version 0.60.2
 -------------
