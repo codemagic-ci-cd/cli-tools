@@ -11,6 +11,7 @@ from datetime import datetime
 from datetime import timezone
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Type
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
@@ -144,6 +145,17 @@ class Types:
         @classmethod
         def _is_valid(cls, value: float) -> bool:
             return value >= 0
+
+    class AltoolAdditionalAdditionalArguments(cli.EnvironmentArgumentValue[Tuple[str, ...]]):
+        argument_type = Tuple[str, ...]
+        environment_variable_key = "APP_STORE_CONNECT_ALTOOL_ADDITIONAL_ARGUMENTS"
+        default_value = tuple()
+
+        def _apply_type(self, non_typed_value: str) -> Tuple[str, ...]:
+            try:
+                return tuple(shlex.split(non_typed_value))
+            except ValueError as ve:
+                raise argparse.ArgumentTypeError(str(ve)) from ve
 
     class AltoolVerboseLogging(cli.TypedCliArgument[bool]):
         argument_type = bool
@@ -319,7 +331,7 @@ class Types:
             if duplicate_locales:
                 raise ArgumentTypeError(
                     (
-                        f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
+                        f"Ambiguous definitions for locale(s) {', '.join(duplicate_locales)}. "
                         "Please define App Store Version localization for each locale exactly once."
                     ),
                 )
@@ -357,7 +369,7 @@ class Types:
             if duplicate_locales:
                 raise ArgumentTypeError(
                     (
-                        f'Ambiguous definitions for locale(s) {", ".join(duplicate_locales)}. '
+                        f"Ambiguous definitions for locale(s) {', '.join(duplicate_locales)}. "
                         "Please define beta build localization for each locale exactly once."
                     ),
                 )
@@ -500,8 +512,8 @@ class AppStoreConnectArgument(cli.Argument):
             f"{_API_DOCS_REFERENCE} "
             f"If not provided, the key will be searched from the following directories "
             f'in sequence for a private key file with the name "AuthKey_<key_identifier>.p8": '
-            f'{", ".join(map(str, Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS))}, where '
-            f'<key_identifier> is the value of {Colors.BRIGHT_BLUE("--key-id")}'
+            f"{', '.join(map(str, Types.PrivateKeyArgument.PRIVATE_KEY_LOCATIONS))}, where "
+            f"<key_identifier> is the value of {Colors.BRIGHT_BLUE('--key-id')}"
         ),
         argparse_kwargs={"required": False},
     )
@@ -551,9 +563,9 @@ class AppStoreVersionArgument(cli.Argument):
         description=(
             "General App information and version release options for App Store version submission "
             "as a JSON encoded object. Alternative to individually defining "
-            f'`{Colors.BRIGHT_BLUE("--platform")}`, `{Colors.BRIGHT_BLUE("--copyright")}`, '
-            f'`{Colors.BRIGHT_BLUE("--earliest-release-date")}`, `{Colors.BRIGHT_BLUE("--release-type")}` '
-            f'and `{Colors.BRIGHT_BLUE("--version-string")}`. '
+            f"`{Colors.BRIGHT_BLUE('--platform')}`, `{Colors.BRIGHT_BLUE('--copyright')}`, "
+            f"`{Colors.BRIGHT_BLUE('--earliest-release-date')}`, `{Colors.BRIGHT_BLUE('--release-type')}` "
+            f"and `{Colors.BRIGHT_BLUE('--version-string')}`. "
             f'For example, "{Colors.WHITE(Types.AppStoreVersionInfoArgument.example_value)}". '
             "Definitions from the JSON will be overridden by dedicated CLI options if provided."
         ),
@@ -571,7 +583,7 @@ class AppStoreVersionArgument(cli.Argument):
         flags=("--copyright",),
         description=(
             "The name of the person or entity that owns the exclusive rights to your app, "
-            f'preceded by the year the rights were obtained (for example, `{Colors.WHITE("2008 Acme Inc.")}`). '
+            f"preceded by the year the rights were obtained (for example, `{Colors.WHITE('2008 Acme Inc.')}`). "
             "Do not provide a URL."
         ),
         argparse_kwargs={"required": False},
@@ -582,7 +594,7 @@ class AppStoreVersionArgument(cli.Argument):
         type=Types.EarliestReleaseDate,
         description=(
             f"Specify earliest return date for scheduled release type "
-            f'(see `{Colors.BRIGHT_BLUE("--release-type")}` configuration option). '
+            f"(see `{Colors.BRIGHT_BLUE('--release-type')}` configuration option). "
             f"Timezone aware ISO8601 timestamp with hour precision, "
             f'for example "{Colors.WHITE("2021-11-10T14:00:00+00:00")}".'
         ),
@@ -628,7 +640,7 @@ class AppStoreVersionArgument(cli.Argument):
             "that identifies an iteration of the bundle. "
             "The string can only contain one to three groups of numeric characters (0-9) "
             "separated by period in the format [Major].[Minor].[Patch]. "
-            f'For example `{Colors.WHITE("3.2.46")}`'
+            f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
     )
@@ -641,7 +653,7 @@ class AppStoreVersionArgument(cli.Argument):
             "will be released over a 7-day period to a percentage of your users "
             "(selected at random by their Apple ID) on iOS or macOS with automatic updates turned on. "
             f"Learon more from {_PHASED_RELEASE_DOCS_URL}. "
-            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--no-phased-release")}`.'
+            f"Mutually exclusive with option `{Colors.BRIGHT_BLUE('--no-phased-release')}`."
         ),
         argparse_kwargs={
             "required": False,
@@ -655,7 +667,7 @@ class AppStoreVersionArgument(cli.Argument):
         description=(
             "Turn off phased release for your App Store version update. "
             f"Learon more about phased releases from {_PHASED_RELEASE_DOCS_URL}. "
-            f'Mutually exclusive with option `{Colors.BRIGHT_BLUE("--phased-release")}`.'
+            f"Mutually exclusive with option `{Colors.BRIGHT_BLUE('--phased-release')}`."
         ),
         argparse_kwargs={
             "required": False,
@@ -851,7 +863,7 @@ class AppStoreVersionLocalizationArgument(cli.Argument):
         description=(
             "Localized App Store version meta information for App Store version submission "
             "as a JSON encoded list. Alternative to individually defining version release notes "
-            f'and other options via dedicated CLI options such as `{Colors.BRIGHT_BLUE("--whats-new")}`. '
+            f"and other options via dedicated CLI options such as `{Colors.BRIGHT_BLUE('--whats-new')}`. "
             "Definitions for duplicate locales are not allowed. "
             f'For example, "{Colors.WHITE(Types.AppStoreVersionLocalizationInfoArgument.example_value)}"'
         ),
@@ -913,7 +925,7 @@ class PublishArgument(cli.Argument):
         description=(
             "App-specific password used for application package validation "
             "and upload if App Store Connect API Key is not specified. "
-            f'Used together with {Colors.BRIGHT_BLUE("--apple-id")} '
+            f"Used together with {Colors.BRIGHT_BLUE('--apple-id')} "
             'and should match pattern "abcd-abcd-abcd-abcd". '
             "Create an app-specific password in the Security section of your Apple ID account. "
             "Learn more from https://support.apple.com/en-us/HT204397"
@@ -939,7 +951,7 @@ class PublishArgument(cli.Argument):
         flags=("--skip-package-validation", "-sv"),
         type=Types.AppStoreConnectSkipPackageValidation,
         description=(
-            f'{Colors.BOLD("Deprecated")}. '
+            f"{Colors.BOLD('Deprecated')}. "
             f"Starting from version `0.14.0` package validation before "
             "uploading it to App Store Connect is disabled by default."
         ),
@@ -1087,6 +1099,18 @@ class PublishArgument(cli.Argument):
             "required": False,
         },
     )
+    ALTOOL_ADDITIONAL_ARGUMENTS = cli.ArgumentProperties(
+        key="altool_additional_arguments",
+        flags=("--altool-additional-arguments",),
+        type=Types.AltoolAdditionalAdditionalArguments,
+        description=(
+            "Pass additional command line arguments to `xcrun altool` invocations. "
+            "For example \"--apple-id '1481211155'\"."
+        ),
+        argparse_kwargs={
+            "required": False,
+        },
+    )
 
 
 class BuildArgument(cli.Argument):
@@ -1095,7 +1119,7 @@ class BuildArgument(cli.Argument):
         flags=("--expired",),
         type=bool,
         description=(
-            f'List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--not-expired")}`.'
+            f"List only expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE('--not-expired')}`."
         ),
         argparse_kwargs={
             "required": False,
@@ -1107,7 +1131,7 @@ class BuildArgument(cli.Argument):
         flags=("--not-expired",),
         type=bool,
         description=(
-            f'List only not expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE("--expired")}`.'
+            f"List only not expired builds. Mutually exclusive with option `{Colors.BRIGHT_BLUE('--expired')}`."
         ),
         argparse_kwargs={
             "required": False,
@@ -1457,8 +1481,8 @@ class CertificateArgument(cli.Argument):
         type=Types.CertificateKeyArgument,
         description=(
             f"Private key used to generate the certificate. "
-            f'Used together with {Colors.BRIGHT_BLUE("--save")} '
-            f'or {Colors.BRIGHT_BLUE("--create")} options.'
+            f"Used together with {Colors.BRIGHT_BLUE('--save')} "
+            f"or {Colors.BRIGHT_BLUE('--create')} options."
         ),
         argparse_kwargs={"required": False},
     )
@@ -1468,8 +1492,8 @@ class CertificateArgument(cli.Argument):
         type=Types.CertificateKeyPasswordArgument,
         description=(
             f"Password of the private key used to generate the certificate. "
-            f'Used together with {Colors.BRIGHT_BLUE("--certificate-key")} '
-            f'or {Colors.BRIGHT_BLUE("--certificate-key-path")} options '
+            f"Used together with {Colors.BRIGHT_BLUE('--certificate-key')} "
+            f"or {Colors.BRIGHT_BLUE('--certificate-key-path')} options "
             f"if the provided key is encrypted."
         ),
         argparse_kwargs={"required": False},
@@ -1479,7 +1503,7 @@ class CertificateArgument(cli.Argument):
         flags=("--p12-password",),
         description=(
             "If provided, the saved p12 container will be encrypted using this password. "
-            f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
+            f"Used together with {Colors.BRIGHT_BLUE('--save')} option."
         ),
         argparse_kwargs={"required": False, "default": ""},
     )
@@ -1490,8 +1514,8 @@ class CertificateArgument(cli.Argument):
         description=(
             "If provided, the exported p12 container will saved at this path. "
             "Otherwise it will be saved with a random name in the directory specified "
-            f'by {Colors.BRIGHT_BLUE("--certificates-dir")}. '
-            f'Used together with {Colors.BRIGHT_BLUE("--save")} option.'
+            f"by {Colors.BRIGHT_BLUE('--certificates-dir')}. "
+            f"Used together with {Colors.BRIGHT_BLUE('--save')} option."
         ),
         argparse_kwargs={"required": False},
     )
@@ -1618,6 +1642,7 @@ class ArgumentGroups:
         PublishArgument.ALTOOL_RETRIES_COUNT,
         PublishArgument.ALTOOL_RETRY_WAIT,
         PublishArgument.ALTOOL_VERBOSE_LOGGING,
+        PublishArgument.ALTOOL_ADDITIONAL_ARGUMENTS,
     )
     LIST_BUILDS_FILTERING_ARGUMENTS = (
         BuildArgument.BETA_REVIEW_STATE,

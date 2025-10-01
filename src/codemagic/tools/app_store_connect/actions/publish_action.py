@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 from typing import Union
 
 from codemagic import cli
@@ -135,7 +136,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     def _validate_publishing_arguments(
         self,
         apple_id: Optional[str] = None,
-        app_specific_password: Optional[Types.AppSpecificPassword] = None,
+        app_specific_password: Optional[str | Types.AppSpecificPassword] = None,
         submit_to_testflight: Optional[bool] = None,
         submit_to_app_store: Optional[bool] = None,
         beta_build_localizations: Optional[Types.BetaBuildLocalizations] = None,
@@ -302,11 +303,12 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         skip_package_validation: Optional[bool] = None,  # Deprecated
         enable_package_validation: Optional[bool] = None,
         skip_package_upload: Optional[bool] = None,
-        altool_retries_count: Optional[Types.AltoolRetriesCount] = None,
-        altool_retry_wait: Optional[Types.AltoolRetryWait] = None,
+        altool_retries_count: Optional[int | Types.AltoolRetriesCount] = None,
+        altool_retry_wait: Optional[float | Types.AltoolRetryWait] = None,
         altool_verbose_logging: Optional[bool] = None,
-        max_find_build_wait: Union[Types.MaxFindBuildWait, int] = PublishArgument.MAX_BUILD_FIND_WAIT.get_default(),
-        max_build_processing_wait: Optional[Union[Types.MaxBuildProcessingWait, int]] = None,
+        altool_additional_arguments: Optional[Tuple[str] | Types.AltoolAdditionalAdditionalArguments] = None,
+        max_find_build_wait: Union[int | Types.MaxFindBuildWait] = PublishArgument.MAX_BUILD_FIND_WAIT.get_default(),
+        max_build_processing_wait: Optional[int | Types.MaxBuildProcessingWait] = None,
         **app_store_connect_submit_options,
     ) -> None:
         """
@@ -336,6 +338,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     skip_package_upload,
                     Types.AltoolRetriesCount.resolve_value(altool_retries_count),
                     Types.AltoolRetryWait.resolve_value(altool_retry_wait),
+                    Types.AltoolAdditionalAdditionalArguments.resolve_value(altool_additional_arguments),
                 )
                 self._process_application_after_upload(
                     application_package,
@@ -374,6 +377,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         skip_package_upload: Optional[bool],
         altool_retries: int,
         altool_retry_wait: float,
+        altool_additional_arguments: Sequence[str] | None = None,
     ):
         """
         :raises IOError in case any step of publishing fails
@@ -382,10 +386,22 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         self.logger.info(application_package.get_text_summary())
 
         if bool(enable_package_validation):
-            self._validate_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
+            self._validate_artifact_with_altool(
+                altool,
+                application_package.path,
+                altool_retries,
+                altool_retry_wait,
+                altool_additional_arguments,
+            )
 
         if not bool(skip_package_upload):
-            self._upload_artifact_with_altool(altool, application_package.path, altool_retries, altool_retry_wait)
+            self._upload_artifact_with_altool(
+                altool,
+                application_package.path,
+                altool_retries,
+                altool_retry_wait,
+                altool_additional_arguments,
+            )
         else:
             self.logger.info(Colors.YELLOW('\nSkip uploading "%s" to App Store Connect'), application_package.path)
 
@@ -593,9 +609,15 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         artifact_path: pathlib.Path,
         retries: int,
         retry_wait: float,
+        additional_arguments: Sequence[str] | None = None,
     ):
         self.logger.info(Colors.BLUE('\nValidate "%s" for App Store Connect'), artifact_path)
-        result = altool.validate_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
+        result = altool.validate_app(
+            artifact_path,
+            retries=retries,
+            retry_wait_seconds=retry_wait,
+            additional_arguments=additional_arguments,
+        )
         message = result.success_message if result else f'No errors validating archive at "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
 
@@ -605,8 +627,14 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
         artifact_path: pathlib.Path,
         retries: int,
         retry_wait: float,
+        additional_arguments: Sequence[str] | None = None,
     ):
         self.logger.info(Colors.BLUE('\nUpload "%s" to App Store Connect'), artifact_path)
-        result = altool.upload_app(artifact_path, retries=retries, retry_wait_seconds=retry_wait)
+        result = altool.upload_app(
+            artifact_path,
+            retries=retries,
+            retry_wait_seconds=retry_wait,
+            additional_arguments=additional_arguments,
+        )
         message = result.success_message if result else f'No errors uploading "{artifact_path}".'
         self.logger.info(Colors.GREEN(message))
