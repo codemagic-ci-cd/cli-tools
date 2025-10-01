@@ -1,3 +1,17 @@
+Version 0.61.1
+-------------
+
+This release contains changes from [PR #477](https://github.com/codemagic-ci-cd/cli-tools/pull/477).
+
+**Bugfixes**
+- Support `Runtime Warning` test node type for XCTest results which was added by Xcode 26. Fixes actions
+  - `xcode-project run-tests`,
+  - `xcode-project test-summary`,
+  - `xcode-project junit-test-results`.
+
+**Development**
+- Rename submodule `xcode_16_xcresult` to `xcresult` in package `codemagic.models.xctest.xcresult`.
+
 Version 0.61.0
 -------------
 

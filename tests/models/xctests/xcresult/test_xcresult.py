@@ -1,13 +1,13 @@
 from codemagic.models.xctests.xcresult import XcTestNode
 from codemagic.models.xctests.xcresult import XcTestNodeType
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcConfiguration
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcDevice
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcSummary
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestFailure
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestPlanConfiguration
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestResult
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTests
-from codemagic.models.xctests.xcresult.xcode_16_xcresult import XcTestStatistic
+from codemagic.models.xctests.xcresult.xcresult import XcConfiguration
+from codemagic.models.xctests.xcresult.xcresult import XcDevice
+from codemagic.models.xctests.xcresult.xcresult import XcSummary
+from codemagic.models.xctests.xcresult.xcresult import XcTestFailure
+from codemagic.models.xctests.xcresult.xcresult import XcTestPlanConfiguration
+from codemagic.models.xctests.xcresult.xcresult import XcTestResult
+from codemagic.models.xctests.xcresult.xcresult import XcTests
+from codemagic.models.xctests.xcresult.xcresult import XcTestStatistic
 
 
 def test_load_test_results_summary(test_results_summary_dict):
