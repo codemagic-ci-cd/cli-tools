@@ -39,6 +39,7 @@ class XcTestNodeType(str, enum.Enum):
     ATTACHMENT = "Attachment"
     EXPRESSION = "Expression"
     TEST_VALUE = "Test Value"
+    RUNTIME_WARNING = "Runtime Warning"
 
 
 @dataclasses.dataclass
@@ -56,7 +57,9 @@ class XcModel(ABC):
 class XcSummary(XcModel):
     """
     Model definitions for `xcresulttool get test-results summary` output.
-    Check schema with `xcrun xcresulttool help get test-results summary`.
+    Check schema with:
+        - Xcode 16.x: `xcrun xcresulttool help get test-results summary`
+        - Xcode 26.x: `xcrun xcresulttool get test-results summary --schema`
     """
 
     title: str
@@ -164,7 +167,9 @@ class XcTestInsight(XcModel):
 class XcTests(XcModel):
     """
     Model definitions for `xcresulttool get test-results tests` output.
-    Check schema with `xcrun xcresulttool help get test-results tests`.
+    Check schema with:
+        - Xcode 16.x: `xcrun xcresulttool help get test-results tests`
+        - Xcode 26.x: `xcrun xcresulttool get test-results tests --schema`
     """
 
     devices: List[XcDevice]
