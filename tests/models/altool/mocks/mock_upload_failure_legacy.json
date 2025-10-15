@@ -1,0 +1,18 @@
+{
+  "tool-version": "7.006.15006",
+  "tool-path": "\/Applications\/Xcode-15.4.app\/Contents\/SharedFrameworks\/ContentDeliveryServices.framework\/Versions\/A\/Frameworks\/AppStoreService.framework",
+  "os-version": "14.4.1",
+  "product-errors": [
+    {
+      "message": "The provided entity includes an attribute with a value that has already been used",
+      "userInfo": {
+        "NSUnderlyingError": "Error Domain=IrisAPI Code=-19241 \"The provided entity includes an attribute with a value that has already been used\" UserInfo={status=409, detail=The bundle version must be higher than the previously uploaded version., source={\n    pointer = \"\/data\/attributes\/cfBundleVersion\";\n}, id=9a2d7ded-9d3d-424f-9d66-4aa96a881ca8, code=ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE, title=The provided entity includes an attribute with a value that has already been used, meta={\n    previousBundleVersion = \"2.0.53.731\";\n}, NSLocalizedDescription=The provided entity includes an attribute with a value that has already been used, NSLocalizedFailureReason=The bundle version must be higher than the previously uploaded version.}",
+        "NSLocalizedDescription": "The provided entity includes an attribute with a value that has already been used",
+        "previousBundleVersion": "2.0.53.731",
+        "iris-code": "ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE",
+        "NSLocalizedFailureReason": "The bundle version must be higher than the previously uploaded version: ‘2.0.53.731’. (ID: 9a2d7ded-9d3d-424f-9d66-4aa96a881ca8)"
+      },
+      "code": -19232
+    }
+  ]
+}

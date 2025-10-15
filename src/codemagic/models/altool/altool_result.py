@@ -1,51 +1,100 @@
 from __future__ import annotations
 
-import re
-from dataclasses import dataclass
-from typing import List
+import dataclasses
 from typing import Optional
+from typing import get_type_hints
 
 
-@dataclass
+@dataclasses.dataclass
 class ResultBase:
     @classmethod
-    def _convert_field_name(cls, name: str) -> str:
-        name = name.replace("-", "_")
-        name = re.sub(r"^NSLocalized", "", name)
-        name = f"{name[0].lower()}{name[1:]}"
-        return re.sub(r"([A-Z])", lambda m: f"_{m.group(1).lower()}", name)
-
-    @classmethod
     def create(cls, **kwargs):
-        return cls(**{cls._convert_field_name(name): value for name, value in kwargs.items()})
+        known_fields = {
+            alias: field
+            for field in dataclasses.fields(cls)
+            for alias in (field.metadata.get("aliases") or [field.metadata["alias"]])
+        }
+        hints = get_type_hints(cls)
+        create_kwargs = {}
+        for name, value in kwargs.items():
+            if "user" in name:
+                print()
+            try:
+                field = known_fields[name]
+            except KeyError:
+                continue
+
+            hint = hints[field.name]
+            if isinstance(hint, type(list[ResultBase])):
+                _cls = next((h for h in hint.__args__ if isinstance(h, type) and issubclass(h, ResultBase)), None)
+                if _cls and value:
+                    value = [v if isinstance(v, _cls) else _cls.create(**v) for v in value]
+            elif isinstance(hint, type) and issubclass(hint, ResultBase):
+                value = hint.create(**value)
+            elif isinstance(hint, type(Optional[ResultBase])):
+                _cls = next((h for h in hint.__args__ if isinstance(h, type) and issubclass(h, ResultBase)), None)
+                if _cls and value and not isinstance(value, _cls):
+                    value = _cls.create(**value)
+
+            create_kwargs[field.name] = value
+
+        return cls(**create_kwargs)
 
 
-@dataclass
+@dataclasses.dataclass
 class UserInfo(ResultBase):
-    failure_reason: str
-    recovery_suggestion: str
-    description: str
+    description: str = dataclasses.field(metadata={"alias": "NSLocalizedDescription"})
+    failure_reason: str = dataclasses.field(metadata={"alias": "NSLocalizedFailureReason"})
+    recovery_suggestion: Optional[str] = dataclasses.field(
+        default=None,
+        metadata={"alias": "NSLocalizedRecoverySuggestion"},
+    )
+
+    code: Optional[str] = dataclasses.field(default=None, metadata={"alias": "code"})
+    detail: Optional[str] = dataclasses.field(default=None, metadata={"alias": "detail"})
+    id: Optional[str] = dataclasses.field(default=None, metadata={"alias": "id"})
+    meta: Optional[str] = dataclasses.field(default=None, metadata={"alias": "meta"})
+    source: Optional[str] = dataclasses.field(default=None, metadata={"alias": "source"})
+    status: Optional[str] = dataclasses.field(default=None, metadata={"alias": "status"})
+    title: Optional[str] = dataclasses.field(default=None, metadata={"alias": "title"})
+
+    underlying_error: Optional[str] = dataclasses.field(default=None, metadata={"alias": "NSUnderlyingError"})
+    iris_code: Optional[str] = dataclasses.field(default=None, metadata={"alias": "iris-code"})
 
 
-@dataclass
+@dataclasses.dataclass
+class DeliveryDetails(ResultBase):
+    delivery_uuid: str = dataclasses.field(metadata={"alias": "delivery-uuid"})
+    transferred: str = dataclasses.field(metadata={"alias": "transferred"})
+
+
+@dataclasses.dataclass
 class ProductError(ResultBase):
-    message: str
-    user_info: UserInfo
-    code: int
+    message: str = dataclasses.field(metadata={"alias": "message"})
+    code: int = dataclasses.field(metadata={"alias": "code"})
+    user_info: Optional[UserInfo] = dataclasses.field(
+        default=None,
+        metadata={
+            "aliases": [
+                "user-info",
+                "userInfo",  # Appears in Xcode 16.x outputs
+            ],
+        },
+    )
+    underlying_errors: list[ProductError] = dataclasses.field(
+        default_factory=list,
+        metadata={"alias": "underlying-errors"},
+    )
 
-    def __post_init__(self):
-        if self.user_info and not isinstance(self.user_info, UserInfo):
-            self.user_info = UserInfo.create(**self.user_info)
 
-
-@dataclass
+@dataclasses.dataclass
 class AltoolResult(ResultBase):
-    tool_version: str
-    tool_path: str
-    os_version: str
-    success_message: Optional[str] = None
-    product_errors: Optional[List[ProductError]] = None
+    os_version: str = dataclasses.field(metadata={"alias": "os-version"})
+    tool_version: str = dataclasses.field(metadata={"alias": "tool-version"})
+    tool_path: str = dataclasses.field(metadata={"alias": "tool-path"})
 
-    def __post_init__(self):
-        if self.product_errors and not isinstance(self.product_errors[0], ProductError):
-            self.product_errors = [ProductError.create(**pe) for pe in self.product_errors]
+    success_message: str = dataclasses.field(default="", metadata={"alias": "success-message"})
+    details: Optional[DeliveryDetails] = dataclasses.field(default=None, metadata={"alias": "details"})
+
+    product_errors: list[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "product-errors"})
+    warnings: list[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "warnings"})
