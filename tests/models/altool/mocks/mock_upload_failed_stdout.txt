@@ -1,0 +1,27 @@
+Running altool at path '/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+26.0.18 (170018)
+Running altool at path '/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+2025-10-13 16:51:13.737 ERROR: [ContentDelivery.Uploader.60000251C480]
+=======================================
+UPLOAD FAILED with 1 error
+=======================================
+{
+  "os-version" : "Version 15.7 (Build 24G222)",
+  "product-errors" : [
+    {
+      "code" : 504,
+      "message" : "Failed to upload part number 8.",
+      "underlying-errors" : [
+
+      ],
+      "user-info" : {
+        "NSLocalizedDescription" : "Failed to upload part number 8.",
+        "NSLocalizedFailureReason" : "HTTP response: gateway timed out. HTTP status code: 504"
+      }
+    }
+  ],
+  "tool-path" : "/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources",
+  "tool-version" : "26.0.18 (170018)"
+}

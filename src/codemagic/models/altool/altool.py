@@ -8,7 +8,6 @@ import subprocess
 import time
 from contextlib import contextmanager
 from functools import lru_cache
-from itertools import chain
 from typing import TYPE_CHECKING
 from typing import AnyStr
 from typing import Callable
@@ -261,7 +260,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                     stderr=subprocess.STDOUT,
                 ).decode()
         except subprocess.CalledProcessError as cpe:
-            result = self._get_action_result(cpe.stdout)
+            result = self._get_action_result(self._str(cpe.stdout))
             if result and result.product_errors:
                 product_errors = "\n".join(pe.message for pe in result.product_errors)
                 error_message = f"{error_message}:\n{product_errors}"
@@ -272,7 +271,23 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             )
 
         self._log_process_output(stdout, cli_app)
-        return self._get_action_result(stdout)
+        result = self._get_action_result(self._str(stdout))
+
+        if result and result.product_errors:
+            product_errors = "\n".join(pe.message for pe in result.product_errors)
+            raise AltoolCommandError(
+                f"{error_message}:\n{product_errors}",
+                self._hide_environment_variable_values(stdout),
+                0,
+            )
+        elif (errors := re.findall(r".*ERROR:\s*(.*)", stdout)) and not re.match(".*UPLOAD SUCCEEDED.*", stdout):
+            raise AltoolCommandError(
+                errors[0],
+                self._hide_environment_variable_values(stdout),
+                0,
+            )
+
+        return result
 
     @classmethod
     def _hide_environment_variable_values(cls, altool_output: Optional[AnyStr]) -> str:
@@ -309,14 +324,23 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         return any(pattern.search(command_error.process_output) for pattern in patterns)
 
     @classmethod
-    def _get_action_result(cls, action_stdout: AnyStr) -> Optional[AltoolResult]:
-        # Try to parse the whole stdout at once first, and then do it backwards line by line
-        for line in chain([action_stdout], reversed(action_stdout.splitlines())):
+    def _get_action_result(cls, action_stdout: str) -> Optional[AltoolResult]:
+        def parse(content: str) -> Optional[AltoolResult]:
             try:
-                parsed_result = json.loads(line)
+                parsed_result = json.loads(content)
                 return AltoolResult.create(**parsed_result)
-            except (TypeError, ValueError):
-                continue
+            except (ValueError, TypeError):
+                return None
+
+        # Try to parse the whole stdout at once first, and then do it backwards line by line
+        if altool_result := parse(action_stdout):
+            return altool_result
+
+        json_end = max(action_stdout.rfind("]"), action_stdout.rfind("}")) + 1
+        for i in range(json_end, 0, -1):
+            if altool_result := parse(action_stdout[i:json_end]):
+                return altool_result
+
         return None
 
     @classmethod
