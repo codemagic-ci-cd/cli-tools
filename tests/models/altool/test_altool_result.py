@@ -53,9 +53,7 @@ def test_create(user_info_key: str):
             },
         ],
     }
-
-    result = AltoolResult.create(source)
-    assert result == AltoolResult(
+    expected_result = AltoolResult(
         os_version="os-version",
         tool_path="tool-path",
         tool_version="tool-version",
@@ -99,6 +97,9 @@ def test_create(user_info_key: str):
             ),
         ],
     )
+
+    result = AltoolResult.create(source)
+    assert result == expected_result
 
 
 @pytest.mark.parametrize(

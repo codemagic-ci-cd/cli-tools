@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import List
 from typing import Optional
+from typing import Union
 from typing import get_type_hints
 
 
@@ -24,18 +26,18 @@ class ResultBase:
                 continue
 
             hint = hints[field.name]
-            if isinstance(hint, type(list[ResultBase])):
-                hint_args = hint.__args__  # type: ignore
-                _cls = next((h for h in hint_args if isinstance(h, type) and issubclass(h, ResultBase)), None)
-                if _cls and value:
+            hint_origin = getattr(hint, "__origin__", None)
+            hint_args = getattr(hint, "__args__", [])
+            result_base_types = (h for h in hint_args if isinstance(h, type) and issubclass(h, ResultBase))
+
+            if hint_origin is list:  # List[ResultBase] check
+                if (_cls := next(result_base_types, None)) and value:
                     value = [v if isinstance(v, _cls) else _cls.create(v) for v in value]
-            elif isinstance(hint, type) and issubclass(hint, ResultBase):
-                value = hint.create(value)
-            elif isinstance(hint, type(Optional[ResultBase])):
-                hint_args = hint.__args__  # type: ignore
-                _cls = next((h for h in hint_args if isinstance(h, type) and issubclass(h, ResultBase)), None)
-                if _cls and value and not isinstance(value, _cls):
+            elif hint_origin is Union and type(None) in hint_args:  # Optional[ResultBase] check
+                if (_cls := next(result_base_types, None)) and value and not isinstance(value, _cls):
                     value = _cls.create(value)
+            elif isinstance(hint, type) and issubclass(_cls := hint, ResultBase):
+                value = _cls.create(value)
 
             create_kwargs[field.name] = value
 
@@ -82,7 +84,7 @@ class ProductError(ResultBase):
             ],
         },
     )
-    underlying_errors: list[ProductError] = dataclasses.field(
+    underlying_errors: List[ProductError] = dataclasses.field(
         default_factory=list,
         metadata={"alias": "underlying-errors"},
     )
@@ -97,5 +99,5 @@ class AltoolResult(ResultBase):
     success_message: str = dataclasses.field(default="", metadata={"alias": "success-message"})
     details: Optional[DeliveryDetails] = dataclasses.field(default=None)
 
-    product_errors: list[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "product-errors"})
-    warnings: list[ProductError] = dataclasses.field(default_factory=list)
+    product_errors: List[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "product-errors"})
+    warnings: List[ProductError] = dataclasses.field(default_factory=list)
