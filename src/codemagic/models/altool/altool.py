@@ -260,7 +260,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                     stderr=subprocess.STDOUT,
                 ).decode()
         except subprocess.CalledProcessError as cpe:
-            result = self._get_action_result(self._str(cpe.stdout))
+            result = self.parse_altool_result(cpe.stdout)
             if result and result.product_errors:
                 product_errors = "\n".join(pe.message for pe in result.product_errors)
                 error_message = f"{error_message}:\n{product_errors}"
@@ -271,7 +271,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
             )
 
         self._log_process_output(stdout, cli_app)
-        result = self._get_action_result(self._str(stdout))
+        result = self.parse_altool_result(stdout)
 
         if result and result.product_errors:
             product_errors = "\n".join(pe.message for pe in result.product_errors)
@@ -324,22 +324,22 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         return any(pattern.search(command_error.process_output) for pattern in patterns)
 
     @classmethod
-    def _get_action_result(cls, action_stdout: str) -> Optional[AltoolResult]:
-        def parse(content: str) -> Optional[AltoolResult]:
-            try:
-                parsed_result = json.loads(content)
-                return AltoolResult.create(**parsed_result)
-            except (ValueError, TypeError):
-                return None
+    def parse_altool_result(cls, stdout: AnyStr) -> Optional[AltoolResult]:
+        """
+        Find the last JSON from given STDOUT which matches Altool result schema
+        """
 
-        # Try to parse the whole stdout at once first, and then do it backwards line by line
-        if altool_result := parse(action_stdout):
-            return altool_result
+        json_patt = re.compile(r"^\s*\{.*\}\s*$", re.MULTILINE | re.DOTALL)
 
-        json_end = max(action_stdout.rfind("]"), action_stdout.rfind("}")) + 1
-        for i in range(json_end, 0, -1):
-            if altool_result := parse(action_stdout[i:json_end]):
-                return altool_result
+        tail = ""
+        for line in reversed(stdout.splitlines(keepends=True)):
+            tail = f"{cls._str(line)}{tail}"
+            if match := json_patt.search(tail):
+                try:
+                    parsed_result = json.loads(match.group())
+                    return AltoolResult.create(parsed_result)
+                except (ValueError, TypeError):
+                    continue
 
         return None
 

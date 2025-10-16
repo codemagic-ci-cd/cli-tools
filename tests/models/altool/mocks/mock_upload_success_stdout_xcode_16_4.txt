@@ -1,0 +1,9 @@
+Running altool at path '/Applications/Xcode-16.4.app/Contents/SharedFrameworks/ContentDeliveryServices.framework/Frameworks/AppStoreService.framework/Support/altool'...
+Running altool at path '/Applications/Xcode-16.4.app/Contents/SharedFrameworks/ContentDeliveryServices.framework/Frameworks/AppStoreService.framework/Support/altool'...
+2025-10-16 09:27:49.069  INFO: [altool.600002FD4180] [ContentDelivery.Uploader.600002FD4180]
+==========================================
+UPLOAD SUCCEEDED with 0 warnings, 0 messages
+Delivery UUID: ba9f2a5c-3003-40f4-a756-9031ced0e73f
+Transferred 19245201 bytes in 0.752 seconds (25.6MB/s)
+==========================================
+{"tool-version":"8.303.16303","tool-path":"\/Applications\/Xcode-16.4.app\/Contents\/SharedFrameworks\/ContentDeliveryServices.framework\/Versions\/A\/Frameworks\/AppStoreService.framework","success-message":"No errors uploading '\/Users\/builder\/clone\/build\/ios\/ipa\/banaan_2_0_69_747.ipa'","os-version":"15.5.0"}

@@ -27,7 +27,7 @@ def mock_altool():
 @pytest.fixture
 def mock_success_result():
     return AltoolResult.create(
-        **{
+        {
             "tool-version": "4.050.1210",
             "tool-path": "/Applications/Xcode.app/Contents/.../AppStoreService.framework",
             "os-version": "11.2.3",
@@ -49,7 +49,7 @@ def mock_auth_error_stdout() -> str:
 
 @pytest.fixture
 def mock_success_stdout() -> str:
-    mock_path = pathlib.Path(__file__).parent / "mocks" / "mock_upload_success.json"
+    mock_path = pathlib.Path(__file__).parent / "mocks" / "mock_upload_success_legacy.json"
     return mock_path.read_text()
 
 

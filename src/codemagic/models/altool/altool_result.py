@@ -8,17 +8,16 @@ from typing import get_type_hints
 @dataclasses.dataclass
 class ResultBase:
     @classmethod
-    def create(cls, **kwargs):
-        known_fields = {
-            alias: field
-            for field in dataclasses.fields(cls)
-            for alias in (field.metadata.get("aliases") or [field.metadata["alias"]])
-        }
+    def create(cls, source: dict):
+        known_fields = {}
+        for field in dataclasses.fields(cls):
+            for alias in [*field.metadata.get("aliases", []), field.metadata.get("alias"), field.name]:
+                if alias:
+                    known_fields[alias] = field
+
         hints = get_type_hints(cls)
         create_kwargs = {}
-        for name, value in kwargs.items():
-            if "user" in name:
-                print()
+        for name, value in source.items():
             try:
                 field = known_fields[name]
             except KeyError:
@@ -26,15 +25,17 @@ class ResultBase:
 
             hint = hints[field.name]
             if isinstance(hint, type(list[ResultBase])):
-                _cls = next((h for h in hint.__args__ if isinstance(h, type) and issubclass(h, ResultBase)), None)
+                hint_args = hint.__args__  # type: ignore
+                _cls = next((h for h in hint_args if isinstance(h, type) and issubclass(h, ResultBase)), None)
                 if _cls and value:
-                    value = [v if isinstance(v, _cls) else _cls.create(**v) for v in value]
+                    value = [v if isinstance(v, _cls) else _cls.create(v) for v in value]
             elif isinstance(hint, type) and issubclass(hint, ResultBase):
-                value = hint.create(**value)
+                value = hint.create(value)
             elif isinstance(hint, type(Optional[ResultBase])):
-                _cls = next((h for h in hint.__args__ if isinstance(h, type) and issubclass(h, ResultBase)), None)
+                hint_args = hint.__args__  # type: ignore
+                _cls = next((h for h in hint_args if isinstance(h, type) and issubclass(h, ResultBase)), None)
                 if _cls and value and not isinstance(value, _cls):
-                    value = _cls.create(**value)
+                    value = _cls.create(value)
 
             create_kwargs[field.name] = value
 
@@ -50,13 +51,13 @@ class UserInfo(ResultBase):
         metadata={"alias": "NSLocalizedRecoverySuggestion"},
     )
 
-    code: Optional[str] = dataclasses.field(default=None, metadata={"alias": "code"})
-    detail: Optional[str] = dataclasses.field(default=None, metadata={"alias": "detail"})
-    id: Optional[str] = dataclasses.field(default=None, metadata={"alias": "id"})
-    meta: Optional[str] = dataclasses.field(default=None, metadata={"alias": "meta"})
-    source: Optional[str] = dataclasses.field(default=None, metadata={"alias": "source"})
-    status: Optional[str] = dataclasses.field(default=None, metadata={"alias": "status"})
-    title: Optional[str] = dataclasses.field(default=None, metadata={"alias": "title"})
+    code: Optional[str] = dataclasses.field(default=None)
+    detail: Optional[str] = dataclasses.field(default=None)
+    id: Optional[str] = dataclasses.field(default=None)
+    meta: Optional[str] = dataclasses.field(default=None)
+    source: Optional[str] = dataclasses.field(default=None)
+    status: Optional[str] = dataclasses.field(default=None)
+    title: Optional[str] = dataclasses.field(default=None)
 
     underlying_error: Optional[str] = dataclasses.field(default=None, metadata={"alias": "NSUnderlyingError"})
     iris_code: Optional[str] = dataclasses.field(default=None, metadata={"alias": "iris-code"})
@@ -65,13 +66,13 @@ class UserInfo(ResultBase):
 @dataclasses.dataclass
 class DeliveryDetails(ResultBase):
     delivery_uuid: str = dataclasses.field(metadata={"alias": "delivery-uuid"})
-    transferred: str = dataclasses.field(metadata={"alias": "transferred"})
+    transferred: str = dataclasses.field()
 
 
 @dataclasses.dataclass
 class ProductError(ResultBase):
-    message: str = dataclasses.field(metadata={"alias": "message"})
-    code: int = dataclasses.field(metadata={"alias": "code"})
+    message: str = dataclasses.field()
+    code: int = dataclasses.field()
     user_info: Optional[UserInfo] = dataclasses.field(
         default=None,
         metadata={
@@ -94,7 +95,7 @@ class AltoolResult(ResultBase):
     tool_path: str = dataclasses.field(metadata={"alias": "tool-path"})
 
     success_message: str = dataclasses.field(default="", metadata={"alias": "success-message"})
-    details: Optional[DeliveryDetails] = dataclasses.field(default=None, metadata={"alias": "details"})
+    details: Optional[DeliveryDetails] = dataclasses.field(default=None)
 
     product_errors: list[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "product-errors"})
-    warnings: list[ProductError] = dataclasses.field(default_factory=list, metadata={"alias": "warnings"})
+    warnings: list[ProductError] = dataclasses.field(default_factory=list)
