@@ -329,17 +329,14 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
         Find the last JSON from given STDOUT which matches Altool result schema
         """
 
-        json_patt = re.compile(r"^\s*\{.*\}\s*$", re.MULTILINE | re.DOTALL)
-
         tail = ""
         for line in reversed(stdout.splitlines(keepends=True)):
             tail = f"{cls._str(line)}{tail}"
-            if match := json_patt.search(tail):
-                try:
-                    parsed_result = json.loads(match.group())
-                    return AltoolResult.create(parsed_result)
-                except (ValueError, TypeError):
-                    continue
+            try:
+                parsed_result = json.loads(tail)
+                return AltoolResult.create(parsed_result)
+            except (ValueError, TypeError):
+                continue
 
         return None
 
