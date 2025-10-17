@@ -1,3 +1,15 @@
+Version 0.62.0
+-------------
+
+This release contains changes from [PR #478](https://github.com/codemagic-ci-cd/cli-tools/pull/478).
+
+**Bugfixes**
+- Fail `app-store-connect publish` action when `altool` fails with errors but successful returncode.
+- Fix parsing `altool` result from command output if the JSON-encoded result spans multiple lines.
+
+**Development**
+- Update schema for `codemagic.models.altool.AltoolResult` to match recent output from recent `altool` versions.
+
 Version 0.61.1
 -------------
 

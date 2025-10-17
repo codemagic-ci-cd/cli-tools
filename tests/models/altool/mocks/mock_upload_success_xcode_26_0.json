@@ -1,0 +1,10 @@
+{
+  "details": {
+    "delivery-uuid": "3d0e58d4-3054-4a58-af9a-4bb63c606726",
+    "transferred": "19244619 bytes in 0.703 seconds (27.4MB/s, 218.972Mbps)"
+  },
+  "os-version": "Version 15.7 (Build 24G222)",
+  "success-message": "No errors uploading archive at '/Users/builder/clone/build/ios/ipa/banaan_2_0_60_738.ipa'.",
+  "tool-path": "/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources",
+  "tool-version": "26.0.18 (170018)"
+}

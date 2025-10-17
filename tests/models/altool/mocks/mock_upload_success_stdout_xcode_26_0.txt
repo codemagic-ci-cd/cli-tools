@@ -1,0 +1,21 @@
+Running altool at path '/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+26.0.18 (170018)
+Running altool at path '/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+2025-10-16 09:35:13.129  INFO: [ContentDelivery.Uploader.600000DCC040]
+==========================================
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: 20d105d6-1244-4846-8813-6d7d2bac535d
+Transferred 19244646 bytes in 4.831 seconds (4.0MB/s, 31.870Mbps)
+==========================================
+{
+  "details" : {
+    "delivery-uuid" : "20d105d6-1244-4846-8813-6d7d2bac535d",
+    "transferred" : "19244646 bytes in 4.831 seconds (4.0MB/s, 31.870Mbps)"
+  },
+  "os-version" : "Version 15.7 (Build 24G222)",
+  "success-message" : "No errors uploading archive at '/Users/builder/clone/build/ios/ipa/banaan_2_0_70_748.ipa'.",
+  "tool-path" : "/Applications/Xcode-26.0.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources",
+  "tool-version" : "26.0.18 (170018)"
+}

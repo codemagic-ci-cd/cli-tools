@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codemagic-cli-tools"
-version = "0.61.1"
+version = "0.62.0"
 description = "CLI tools used in Codemagic builds"
 readme = "README.md"
 authors = [
@@ -69,7 +69,7 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
-target-version = "py37"
+target-version = "py38"
 exclude = [".venv", "stubs"]
 
 [tool.ruff.lint]
