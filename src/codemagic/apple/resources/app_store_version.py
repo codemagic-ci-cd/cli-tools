@@ -26,7 +26,6 @@ class AppStoreVersion(Resource):
         copyright: str
         earliestReleaseDate: datetime
         releaseType: ReleaseType
-        reviewType: str
         versionString: str
         createdDate: datetime
         downloadable: bool
