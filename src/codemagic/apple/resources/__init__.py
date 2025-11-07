@@ -16,6 +16,7 @@ from .bundle_id_capability import BundleIdCapability
 from .bundle_id_capability import CapabilitySetting
 from .device import Device
 from .enums import AppStoreState
+from .enums import AppVersionState
 from .enums import BetaReviewState
 from .enums import BuildAudienceType
 from .enums import BuildProcessingState

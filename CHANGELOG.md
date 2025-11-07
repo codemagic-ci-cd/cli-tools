@@ -1,3 +1,15 @@
+Version 0.62.1
+-------------
+
+This release contains changes from [PR #481](https://github.com/codemagic-ci-cd/cli-tools/pull/481).
+
+**Bugfixes**
+- Do not require deprecated [`ageRatingDeclaration`](https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion/relationships-data.dictionary/ageratingdeclaration-data.dictionary) relationship for `codemagic.apple.resources.AppStoreVersion`.
+
+**Development**
+- Define [`AppVersionState`] enumeration for App Store Connect resources and use it on `AppStoreVersion` resource.
+- Make deprecated attributes `usesIdfa` and `appStoreState` optional on `AppStoreVersion` resource.
+
 Version 0.62.0
 -------------
 

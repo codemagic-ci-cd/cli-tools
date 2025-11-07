@@ -13,6 +13,11 @@ from codemagic.utilities.decorators import deprecated
 
 
 class AppStoreState(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionstate
+    Deprecated. Use `AppVersionState` instead.
+    """
+
     DEVELOPER_REMOVED_FROM_SALE = "DEVELOPER_REMOVED_FROM_SALE"
     DEVELOPER_REJECTED = "DEVELOPER_REJECTED"
     IN_REVIEW = "IN_REVIEW"
@@ -41,6 +46,28 @@ class AppStoreState(ResourceEnum):
             AppStoreState.REJECTED,
             AppStoreState.WAITING_FOR_REVIEW,
         )
+
+
+class AppVersionState(ResourceEnum):
+    """
+    https://developer.apple.com/documentation/appstoreconnectapi/appversionstate
+    """
+
+    ACCEPTED = "ACCEPTED"
+    DEVELOPER_REJECTED = "DEVELOPER_REJECTED"
+    IN_REVIEW = "IN_REVIEW"
+    INVALID_BINARY = "INVALID_BINARY"
+    METADATA_REJECTED = "METADATA_REJECTED"
+    PENDING_APPLE_RELEASE = "PENDING_APPLE_RELEASE"
+    PENDING_DEVELOPER_RELEASE = "PENDING_DEVELOPER_RELEASE"
+    PREPARE_FOR_SUBMISSION = "PREPARE_FOR_SUBMISSION"
+    PROCESSING_FOR_DISTRIBUTION = "PROCESSING_FOR_DISTRIBUTION"
+    READY_FOR_DISTRIBUTION = "READY_FOR_DISTRIBUTION"
+    READY_FOR_REVIEW = "READY_FOR_REVIEW"
+    REJECTED = "REJECTED"
+    REPLACED_WITH_NEW_VERSION = "REPLACED_WITH_NEW_VERSION"
+    WAITING_FOR_EXPORT_COMPLIANCE = "WAITING_FOR_EXPORT_COMPLIANCE"
+    WAITING_FOR_REVIEW = "WAITING_FOR_REVIEW"
 
 
 class BetaReviewState(ResourceEnum):
