@@ -1,3 +1,9 @@
+UNRELEASED
+-------------
+
+**Dependencies**
+- Update `cryptography` version.
+
 Version 0.62.1
 -------------
 
