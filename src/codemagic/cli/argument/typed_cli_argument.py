@@ -87,7 +87,8 @@ class TypedCliArgumentMeta(abc.ABCMeta):
 
 
 class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
-    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore
+    # TODO: Do not use strict str as a default for generic
+    argument_type: Union[Type[T], Callable[[str], T]] = str  # type: ignore[assignment]
     environment_variable_key: Optional[str] = None
     deprecated_environment_variable_key: Optional[str] = None
     default_value: Optional[T] = None
@@ -143,7 +144,8 @@ class TypedCliArgument(Generic[T], metaclass=TypedCliArgumentMeta):
         return bool(value)
 
     def _apply_type(self, non_typed_value: str) -> T:
-        value = self.__class__.argument_type(non_typed_value)
+        # TODO: Fix argument_type type definition
+        value = self.__class__.argument_type(non_typed_value)  # type: ignore[call-arg]
         if not self._is_valid(value):
             raise argparse.ArgumentTypeError(f'Provided value "{non_typed_value}" is not valid')
         return value
