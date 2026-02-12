@@ -253,8 +253,7 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                     self._log_build_processing_message(build.id, max_processing_minutes)
 
                 msg_template = (
-                    "Build %s is still being processed on App Store Connect side, waiting %d seconds "
-                    "and checking again"
+                    "Build %s is still being processed on App Store Connect side, waiting %d seconds and checking again"
                 )
                 self.logger.info(msg_template, build.id, retry_wait_seconds)
                 time.sleep(retry_wait_seconds)

@@ -100,7 +100,7 @@ class Xcodebuild(RunningCliAppMixin):
         schemes = self._detect_schemes(project)
         if not schemes:
             raise ValueError(f"Did not find any schemes for {project}. Please specify scheme or target manually")
-        self.logger.debug(f'Found schemes {", ".join(map(repr, schemes))}')
+        self.logger.debug(f"Found schemes {', '.join(map(repr, schemes))}")
         self.scheme = self._find_matching_scheme(schemes, project.stem)
         self.logger.debug(f"Using scheme {self.scheme!r}")
 

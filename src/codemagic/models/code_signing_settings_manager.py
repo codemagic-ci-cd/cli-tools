@@ -229,7 +229,7 @@ class CodeSigningSettingsManager(RunningCliAppMixin, StringConverterMixin):
                     [
                         error_message,
                         'Ruby gem "xcodeproj" is required to configure code signing settings',
-                        f'Install it with {Colors.BOLD("[sudo] gem install xcodeproj")}',
+                        f"Install it with {Colors.BOLD('[sudo] gem install xcodeproj')}",
                     ],
                 )
             raise IOError(error_message, process)

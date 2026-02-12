@@ -124,10 +124,10 @@ class PbxProject(RunningCliAppMixin, StringConverterMixin):
         build_settings = build_configuration.get("buildSettings", {})
         try:
             value = build_settings[variable]
-            self.logger.debug(f'Resolved {variable} for {target["name"]} [{config_name}]: {value}')
+            self.logger.debug(f"Resolved {variable} for {target['name']} [{config_name}]: {value}")
         except KeyError:
             self.logger.warning(
-                f'Unable to resolve {variable} for {target["name"]} [{config_name}]: variable not found',
+                f"Unable to resolve {variable} for {target['name']} [{config_name}]: variable not found",
             )
             value = None
         return value

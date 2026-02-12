@@ -68,7 +68,7 @@ class Table:
         lh, rh = self.vertical_hinges
         default_spacer = f"{lh}{total_width * self.horizontal_separator}{rh}"
         left = len(self.left_padding) + keys_width + len(self.right_padding)
-        return f"{default_spacer[:left + 1]}{hinge}{default_spacer[left + 2:]}"
+        return f"{default_spacer[: left + 1]}{hinge}{default_spacer[left + 2 :]}"
 
     def _get_header(self, line: Header, total_width: int):
         header = line.get_header()
