@@ -65,12 +65,11 @@ def test_missing_arg_from_env(mock_appstore_api_client, namespace_kwargs, argume
     "invalid_private_key",
     (
         "this is not a private key",
-        (  # Note the lack of newlines
+        (  # Invalid private key contents. ASN.1 parsing error: short data (needed at least 6 additional bytes)
             "-----BEGIN PRIVATE KEY-----"
             "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgfxGj0TlD8myo/YiA"
             "lvhAWg05J0sTHa+HDGsdOiMHTFqgCgYIKoZIzj0DAQehRANCAAT9RChXSoIeFn7L"
             "Ht2+k7pcfdfhZHt23WJuqDgFapNutGTDC1zSK+USyF7C8bjkVC4Fv/opeFXHMxi5"
-            "pmJunkXh"
             "-----END PRIVATE KEY-----"
         ),
         "-----BEGIN PRIVATE KEY-----\ngibberish\n-----END PRIVATE KEY-----",
