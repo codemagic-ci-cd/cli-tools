@@ -16,7 +16,9 @@ def test_get_public_key(pem):
 
 def test_private_key_invalid_key(pem):
     with pytest.raises(ValueError) as exception_info:
-        PrivateKey.from_pem(pem.content + b"not a good suffix", pem.password)
+        lines = pem.content.splitlines(keepends=True)
+        lines.insert(-2, b"invalid private key PEM content")
+        PrivateKey.from_pem(b"".join(lines), pem.password)
     error = exception_info.value
     assert str(error) == "Invalid private key PEM content"
 

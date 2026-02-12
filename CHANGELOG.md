@@ -1,3 +1,9 @@
+UNRELEASED
+-------------
+
+**Dependencies**
+- Update `cryptography` version. [PR #487](https://github.com/codemagic-ci-cd/cli-tools/pull/487)
+
 Version 0.62.1
 -------------
 
