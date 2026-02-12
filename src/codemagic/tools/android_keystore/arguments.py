@@ -36,7 +36,7 @@ class AndroidKeystoreArgument(cli.Argument):
         type=argument_types.KeyPassword,
         description=(
             "Secure password for your keystore key. "
-            f'Keystore password specified by {Colors.BRIGHT_BLUE("--keystore-pass")} '
+            f"Keystore password specified by {Colors.BRIGHT_BLUE('--keystore-pass')} "
             f"will be used in case it is not given."
         ),
         argparse_kwargs={
@@ -92,7 +92,7 @@ class AndroidKeystoreIssuerArgument(cli.Argument):
     ORGANIZATION_UNIT = cli.ArgumentProperties(
         key="issuer_organization_unit",
         flags=("-OU", "--organization-unit"),
-        description=f'Organizational unit of the keystore issuer. For example `{Colors.WHITE("engineering")}`',
+        description=f"Organizational unit of the keystore issuer. For example `{Colors.WHITE('engineering')}`",
         argparse_kwargs={"required": False},
     )
     LOCALITY = cli.ArgumentProperties(
@@ -125,7 +125,7 @@ class AndroidKeystoreIssuerArgument(cli.Argument):
             "just define the distinguished name or the certificate that is included in the keystore. "
             "It should describe you or your company as the certificate issuer. "
             "If defined it takes precedence over individually set attributes. "
-            f'For example `{Colors.WHITE("CN=corp.example.com,L=Mountain View,C=US")}`'
+            f"For example `{Colors.WHITE('CN=corp.example.com,L=Mountain View,C=US')}`"
         ),
         argparse_kwargs={"required": False},
     )

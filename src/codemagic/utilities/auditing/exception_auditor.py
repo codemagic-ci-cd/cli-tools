@@ -32,7 +32,7 @@ class ExceptionAuditor(BaseAuditor):
             exception_name = self._exception_type.__name__
         else:
             exception_name = "UnknownException"
-        return f'error-{exception_name}-{datetime.now().strftime("%H-%M-%S")}.json'
+        return f"error-{exception_name}-{datetime.now().strftime('%H-%M-%S')}.json"
 
     def _serialize_exception_arguments(self):
         try:

@@ -93,7 +93,7 @@ class ResourceManager(Generic[R], metaclass=abc.ABCMeta):
 
     class Ordering(enum.Enum):
         def as_param(self, reverse=False) -> str:
-            return f'{"-" if reverse else ""}{self.value}'
+            return f"{'-' if reverse else ''}{self.value}"
 
     def __init__(self, client: AppStoreConnectApiClient):
         self.client = client

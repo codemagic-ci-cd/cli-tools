@@ -665,9 +665,9 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         env_var_bundle_ids, valid_bundle_ids = group(detected_bundle_ids)
         if env_var_bundle_ids:
-            msg = f'Bundle IDs {", ".join(env_var_bundle_ids)} contain environment variables, exclude them.'
+            msg = f"Bundle IDs {', '.join(env_var_bundle_ids)} contain environment variables, exclude them."
             self.logger.info(Colors.YELLOW(msg))
-        self.logger.info(f'Detected Bundle IDs: {", ".join(valid_bundle_ids)}')
+        self.logger.info(f"Detected Bundle IDs: {', '.join(valid_bundle_ids)}")
         return valid_bundle_ids
 
     @classmethod
@@ -706,7 +706,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
         else:
             simulators = [self.get_default_test_destination(should_print=False)]
 
-        self.echo(Colors.BLUE(f'Running tests on {"simulators:" if simulators else "macOS"}'))
+        self.echo(Colors.BLUE(f"Running tests on {'simulators:' if simulators else 'macOS'}"))
         for s in simulators:
             self.echo("- %s %s (%s)", s.runtime, s.name, s.udid)
         self.echo("")
@@ -721,7 +721,7 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
 
         message = (
             "Cannot use xcpretty formatter to process Xcode log output. Showing verbatim Xcode logs.\n"
-            f'To see formatted logs install xcpretty with {Colors.BOLD("[sudo] gem install xcpretty")}\n'
+            f"To see formatted logs install xcpretty with {Colors.BOLD('[sudo] gem install xcpretty')}\n"
         )
         self.logger.info(Colors.YELLOW(message))
         return None
