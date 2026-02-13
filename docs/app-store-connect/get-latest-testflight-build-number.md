@@ -89,11 +89,11 @@ App Store Connect API private key used for JWT authentication to communicate wit
 ##### `--certificates-dir=CERTIFICATES_DIRECTORY`
 
 
-Directory where the code signing certificates will be saved. Default:&nbsp;`$HOME/Library/Developer/Xcode/UserData/Certificates`
+Directory where the code signing certificates will be saved. Default:&nbsp;`$HOME/Library/MobileDevice/Certificates`
 ##### `--profiles-dir=PROFILES_DIRECTORY`
 
 
-Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles`
+Directory where the provisioning profiles will be saved. Default:&nbsp;`$HOME/Library/MobileDevice/Provisioning Profiles`
 ### Common options
 
 ##### `-h, --help`
