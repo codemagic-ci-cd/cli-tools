@@ -1,6 +1,6 @@
 [project]
 name = "codemagic-cli-tools"
-version = "0.63.0"
+version = "0.64.0"
 description = "CLI tools used in Codemagic builds"
 authors = [{ name = "Priit Lätt", email = "priit@nevercode.io" }]
 requires-python = ">=3.8,<4"

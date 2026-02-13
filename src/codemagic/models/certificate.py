@@ -39,7 +39,10 @@ CERTIFICATE_NAME_COMPONENT_TRANSFORMATION: Final = {
 
 
 class Certificate(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
-    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), "Library", "MobileDevice", "Certificates")
+    # This location is not generally recognized by Apple in any way. Just keep it in sync with
+    # the provisioning profiles directory.
+    DEFAULT_LOCATION = pathlib.Path.home() / "Library" / "Developer" / "Xcode" / "UserData" / "Certificates"
+    LEGACY_LOCATION = pathlib.Path.home() / "Library" / "MobileDevice" / "Certificates"
 
     def __init__(self, certificate: x509.Certificate):
         if hasattr(certificate, "to_cryptography"):

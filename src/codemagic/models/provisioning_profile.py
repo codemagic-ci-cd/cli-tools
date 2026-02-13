@@ -23,7 +23,12 @@ from codemagic.models.json_serializable import JsonSerializable
 
 
 class ProvisioningProfile(JsonSerializable, RunningCliAppMixin, StringConverterMixin):
-    DEFAULT_LOCATION = pathlib.Path(pathlib.Path.home(), "Library", "MobileDevice", "Provisioning Profiles")
+    # Xcode versions up to 15.x expected profiles to be stored in '~/Library/MobileDevice/Provisioning Profiles'.
+    # This is also where Xcode's auto-managed profiles were put. Since Xcode 16.0 profiles are stored in
+    # '~/Library/Developer/Xcode/UserData/Provisioning Profiles' instead. Keep a reference to the old location
+    # for backwards compatibility.
+    DEFAULT_LOCATION = pathlib.Path.home() / "Library" / "Developer" / "Xcode" / "UserData" / "Provisioning Profiles"
+    LEGACY_LOCATION = pathlib.Path.home() / "Library" / "MobileDevice" / "Provisioning Profiles"
 
     def __init__(self, plist: Dict[str, Any]):
         self._plist = plist

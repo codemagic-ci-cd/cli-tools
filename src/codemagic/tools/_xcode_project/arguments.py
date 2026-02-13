@@ -134,6 +134,8 @@ class XcodeProjectArgument(cli.Argument):
             "default": (
                 ProvisioningProfile.DEFAULT_LOCATION / "*.mobileprovision",
                 ProvisioningProfile.DEFAULT_LOCATION / "*.provisionprofile",
+                ProvisioningProfile.LEGACY_LOCATION / "*.mobileprovision",
+                ProvisioningProfile.LEGACY_LOCATION / "*.provisionprofile",
             ),
         },
     )
