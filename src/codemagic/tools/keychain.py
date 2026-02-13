@@ -74,7 +74,10 @@ class KeychainArgument(cli.Argument):
             "required": False,
             "nargs": "+",
             "metavar": "certificate-path",
-            "default": (Certificate.DEFAULT_LOCATION / "*.p12",),
+            "default": (
+                Certificate.DEFAULT_LOCATION / "*.p12",
+                Certificate.LEGACY_LOCATION / "*.p12",
+            ),
         },
     )
     CERTIFICATE_PASSWORD = cli.ArgumentProperties(
