@@ -2,7 +2,7 @@ Version 0.63.0
 -------------
 
 This is a development release contains changes from [PR #486](https://github.com/codemagic-ci-cd/cli-tools/pull/486) and [PR #487](https://github.com/codemagic-ci-cd/cli-tools/pull/487).
-There are no functional changes for package end-users.
+There are no functional changes for the package end-users.
 
 **Development**
 - Replace [Poetry](https://python-poetry.org/) package management system with [uv](https://docs.astral.sh/uv/).
