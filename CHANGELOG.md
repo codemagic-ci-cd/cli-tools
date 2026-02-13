@@ -1,7 +1,7 @@
 Version 0.63.0
 -------------
 
-This is a development release contains changes from [PR #486](https://github.com/codemagic-ci-cd/cli-tools/pull/486) and [PR #487](https://github.com/codemagic-ci-cd/cli-tools/pull/487).
+This is a development release that contains changes from [PR #486](https://github.com/codemagic-ci-cd/cli-tools/pull/486) and [PR #487](https://github.com/codemagic-ci-cd/cli-tools/pull/487).
 There are no functional changes for the package end-users.
 
 **Development**
