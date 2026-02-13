@@ -1,3 +1,20 @@
+Version 0.64.0
+-------------
+
+This release contains changes from [PR #489](https://github.com/codemagic-ci-cd/cli-tools/pull/489).
+
+**Features**
+- Update default argument values for tool `app-store-connect` to be consistent with Xcode 16.0+. This changes where downloaded signing files are saved by default.
+  - Argument `--certificates-dir` defaults now to `~/Library/Developer/Xcode/UserData/Certificates`.
+  - Argument `--profiles-dir` defaults now to `~/Library/Developer/Xcode/UserData/Provisioning Profiles`.
+- Update action `keychain add-certificates` argument `--certificate` to look up certificates from `~/Library/Developer/Xcode/UserData/Certificates`. Old certificates location remains also included in the default glob patterns.
+- Update action `xcode-project use-profiles` argument `--profile` to look up provisioning profiles from `~/Library/Developer/Xcode/UserData/Provisioning Profiles.` by default. Old certificates location remains also included in the default glob patterns.
+
+**Docs**
+- Update docs for `app-store-connect`.
+- Update docs for `keychain add-certificates`.
+- Update docs for `xcode-project use-profiles`.
+
 Version 0.63.0
 -------------
 
