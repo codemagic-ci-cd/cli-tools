@@ -100,36 +100,36 @@ Out[7]: PosixPath('/private/tmp/new.keychain')
 
 # Development
 
-This project uses [Poetry](https://python-poetry.org/) to manage dependencies. Before starting development, please ensure that your
-machine has Poetry available. Installation instructions can be found from their
-[docs](https://python-poetry.org/docs/#installation).
+This project uses [uv](https://docs.astral.sh/uv/) to manage dependencies. Before starting development, please ensure that your
+machine has `uv` available. Installation instructions can be found from their
+[docs](https://docs.astral.sh/uv/getting-started/installation/).
 
 Assuming you've already cloned the [repository](https://github.com/codemagic-ci-cd/cli-tools/)
 itself, or a fork of it, you can get started by running
 
 ```shell
-poetry install
+uv sync
 ```
 
-This will install all required dependencies specified in the `poetry.lock` file.
+This will install all required dependencies specified in the `uv.lock` file.
 
 The source code of the project lives inside the `src` directory and tests are
 implemented in the `tests` directory.
 
 ### Code formatting and linting rules
 
-Automatic code formatting is done with [Black](https://github.com/psf/black).
-Invoke Black checks from repository root directory with
+Automatic code formatting is done with the [Ruff Formatter](https://docs.astral.sh/ruff/formatter/).
+Invoke formatting checks from repository root directory with
 
 ```shell
-poetry run black --check .
+uv run ruff format --check .
 ```
 
-Linting rules are enforced using [Ruff](https://beta.ruff.rs).
+Linting rules are enforced using the [Ruff Linter](https://docs.astral.sh/ruff/linter/).
 Checks can be started from repository root with
 
 ```shell
-poetry run ruff check .
+uv run ruff check .
 ```
 
 ### Static type checks
@@ -139,7 +139,7 @@ are expected to have type hints. Static type checks of the source code are perfo
 [Mypy](http://mypy-lang.org/) from the repository root by running
 
 ```shell
-poetry run mypy .
+uv run mypy .
 ```
 
 ### Running tests
@@ -151,7 +151,7 @@ mirrors the structure of the `codemagic` package in the source directory.
 Tests can be started by running the following command from the repository root:
 
 ```shell
-poetry run pytest
+uv run pytest
 ```
 
 Note that tests that target [App Store Connect API](https://developer.apple.com/documentation/appstoreconnectapi) or

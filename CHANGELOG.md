@@ -1,8 +1,17 @@
-UNRELEASED
+Version 0.63.0
 -------------
 
+This is a development release that contains changes from [PR #486](https://github.com/codemagic-ci-cd/cli-tools/pull/486) and [PR #487](https://github.com/codemagic-ci-cd/cli-tools/pull/487).
+There are no functional changes for the package end-users.
+
+**Development**
+- Replace [Poetry](https://python-poetry.org/) package management system with [uv](https://docs.astral.sh/uv/).
+- Update CI scripts to use `uv` instead of `poetry`.
+- Replace [Black](https://black.readthedocs.io/en/stable/) code formatter with the [Ruff Formatter](https://docs.astral.sh/ruff/formatter/).
+
 **Dependencies**
-- Update `cryptography` version.
+- Update Python dependencies in lockfile.
+- Remove `black` from dev dependencies.
 
 Version 0.62.1
 -------------

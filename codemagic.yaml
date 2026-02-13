@@ -1,51 +1,48 @@
 definitions:
-  cache: &cache
-    cache_paths:
-      - $CM_BUILD_DIR/.venv
   artifacts: &artifacts
     - dist/codemagic*.whl
     - dist/codemagic*.tar.gz
   scripts:
     - &install_dependencies
       name: Install dependencies
-      script: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        poetry config virtualenvs.in-project true
-        poetry install --no-interaction
+      script: uv sync --frozen
     - &check_code_formatting
       name: Check code formatting
       script: |
         set -e
-        poetry run black --check .
-        poetry run ruff check .
+        uv run ruff format --check .
+        uv run ruff check .
     - &static_type_checks
       name: Static type checks with mypy
-      script: poetry run mypy .
+      script: uv run mypy .
     - &run_tests
       name: Run tests
-      script: poetry run pytest --junitxml="test-report.xml"
+      script: uv run pytest --junitxml="test-report.xml"
       test_report: test-report.xml
     - &update_version_in_source
       name: Update version number in source code
       script: |
         set -e
-        VERSION=$(poetry version --short)
+        VERSION=$(uv version --short)
         echo "Using version $VERSION"
         sed -i -e \
           "s/__version__ = .*/__version__ = '${VERSION}'/g" \
           src/codemagic/__version__.py
     - &build_wheels
       name: Build wheels
-      script: poetry build
+      script: uv build
+    - &publish_to_pypi
+      name: Publish release to PyPI
+      script: |
+        rm dist/codemagic_cli_tools-*.tar.gz
+        uv publish --token "${PYPI_TOKEN:?}"
 
 workflows:
   tests:
-    instance_type: mac_mini_m1
     triggering:
       events:
         - push
       cancel_previous_builds: true
-    cache: *cache
     scripts:
       - *install_dependencies
       - *check_code_formatting
@@ -54,25 +51,25 @@ workflows:
 
   release-test:
     name: Release [Test]
-    instance_type: mac_mini_m1
-    cache: *cache
     environment:
       groups:
         - github
         - pypi-test
+      vars:
+        UV_PUBLISH_URL: https://test.pypi.org/legacy/
     scripts:
       - *install_dependencies
       - *check_code_formatting
       - *static_type_checks
       - *run_tests
       - name: Bump version number for development build
-        script: poetry version "$(poetry version --short).${BUILD_NUMBER:?}"
+        script: uv version "$(uv version --short).${BUILD_NUMBER:?}"
       - *update_version_in_source
       - *build_wheels
       - name: Make GitHub prerelease
         script: |
           set -e
-          TAG_NAME=v$(poetry version --short)
+          TAG_NAME=v$(uv version --short)
           cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
           gh release create "${TAG_NAME}" \
               --title "${TAG_NAME}" \
@@ -82,20 +79,11 @@ workflows:
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
           rm dist/codemagic_cli_tools-latest-py3-none-any.whl
-      - name: Publish release to PyPI Test environment
-        script: |
-          rm dist/codemagic_cli_tools-*.tar.gz
-          poetry config repositories.test-pypi https://test.pypi.org/legacy/
-          poetry publish \
-            --repository test-pypi \
-            --username "__token__" \
-            --password "${PYPI_TOKEN:?}"
+      - *publish_to_pypi
     artifacts: *artifacts
 
   release:
     name: Release
-    instance_type: mac_mini_m1
-    cache: *cache
     environment:
       groups:
         - github
@@ -117,7 +105,7 @@ workflows:
       - name: Make GitHub release
         script: |
           set -e
-          TAG_NAME=v$(poetry version --short)
+          TAG_NAME=v$(uv version --short)
           previous_version_line=$(grep -n "^Version " CHANGELOG.md | head -2 | tail -1 | cut -f1 -d:)
           head -n "$(($previous_version_line - 1))" CHANGELOG.md | tail +3 > release_notes.md
           cp dist/codemagic_cli_tools-*-py3-none-any.whl dist/codemagic_cli_tools-latest-py3-none-any.whl
@@ -127,8 +115,5 @@ workflows:
               dist/codemagic*.whl \
               dist/codemagic*.tar.gz
           rm dist/codemagic_cli_tools-latest-py3-none-any.whl
-      - name: Publish release to PyPI
-        script: |
-          rm dist/codemagic_cli_tools-*.tar.gz
-          poetry publish --username "__token__" --password "${PYPI_TOKEN:?}"
+      - *publish_to_pypi
     artifacts: *artifacts
