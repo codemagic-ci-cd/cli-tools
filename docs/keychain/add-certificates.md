@@ -19,7 +19,7 @@ keychain add-certificates [-h] [--log-stream STREAM] [--no-color] [--version] [-
 ##### `-c, --certificate=CERTIFICATE_PATHS`
 
 
-Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to match certificates. Multiple arguments. Default:&nbsp;`$HOME/Library/MobileDevice/Certificates/*.p12`
+Path to pkcs12 certificate. Can be either a path literal, or a glob pattern to match certificates. Multiple arguments. Default:&nbsp;`$HOME/Library/Developer/Xcode/UserData/Certificates/*.p12, $HOME/Library/MobileDevice/Certificates/*.p12`
 ##### `--certificate-password=CERTIFICATE_PASSWORD`
 
 
