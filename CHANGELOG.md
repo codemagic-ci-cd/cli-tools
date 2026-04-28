@@ -1,3 +1,17 @@
+Version 0.65.0
+-------------
+
+**Features**
+- Add 11 new App Store Connect locales from [Apple's March 2026 expansion](https://developer.apple.com/news/?id=97t4mt64): Bangla (`bn`), Gujarati (`gu`), Kannada (`kn`), Malayalam (`ml`), Marathi (`mr`), Odia (`or`), Punjabi (`pa`), Slovenian (`sl`), Tamil (`ta`), Telugu (`te`), Urdu (`ur`). Total supported locales: 50.
+
+**Docs**
+- Update `--locale` argument options for `app-store-connect app-store-versions localizations`.
+- Update `--locale` argument options for `app-store-connect beta-build-localizations create`.
+- Update `--locale` argument options for `app-store-connect beta-build-localizations list`.
+- Update `--locale` argument options for `app-store-connect builds add-beta-test-info`.
+- Update `--locale` argument options for `app-store-connect builds submit-to-app-store`.
+- Update `--locale` argument options for `app-store-connect publish`.
+
 Version 0.64.0
 -------------
 
