@@ -457,6 +457,7 @@ class Locale(ResourceEnum):
     """
 
     AR_SA = "ar-SA"  # Arabic
+    BN = "bn-BD"  # Bangla
     CA = "ca"  # Catalan
     CS = "cs"  # Czech
     DA = "da"  # Danish
@@ -471,6 +472,7 @@ class Locale(ResourceEnum):
     FI = "fi"  # Finnish
     FR_CA = "fr-CA"  # French (Canada)
     FR_FR = "fr-FR"  # French
+    GU = "gu-IN"  # Gujarati
     HE = "he"  # Hebrew
     HI = "hi"  # Hindi
     HR = "hr"  # Croatian
@@ -478,20 +480,29 @@ class Locale(ResourceEnum):
     ID = "id"  # Indonesian
     IT = "it"  # Italian
     JA = "ja"  # Japanese
+    KN = "kn-IN"  # Kannada
     KO = "ko"  # Korean
+    ML = "ml-IN"  # Malayalam
+    MR = "mr-IN"  # Marathi
     MS = "ms"  # Malay
     NL_NL = "nl-NL"  # Dutch
     NO = "no"  # Norwegian
+    OR = "or-IN"  # Odia
+    PA = "pa-IN"  # Punjabi
     PL = "pl"  # Polish
     PT_BR = "pt-BR"  # Portuguese (Brazil)
     PT_PT = "pt-PT"  # Portuguese (Portugal)
     RO = "ro"  # Romanian
     RU = "ru"  # Russian
     SK = "sk"  # Slovak
+    SL = "sl-SI"  # Slovenian
     SV = "sv"  # Swedish
+    TA = "ta-IN"  # Tamil
+    TE = "te-IN"  # Telugu
     TH = "th"  # Thai
     TR = "tr"  # Turkish
     UK = "uk"  # Ukrainian
+    UR = "ur-PK"  # Urdu
     VI = "vi"  # Vietnamese
     ZH_HANS = "zh-Hans"  # Chinese (Simplified)
     ZH_HANT = "zh-Hant"  # Chinese (Traditional)
