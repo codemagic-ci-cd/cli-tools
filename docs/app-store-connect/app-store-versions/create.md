@@ -36,7 +36,7 @@ Alphanumeric ID value of the Build
 
 
 The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, `2008 Acme Inc.`). Do not provide a URL.
-##### `--version-string, --app-store-version=VERSION_STRING`
+##### `--version-string, --app-store-version, -V=VERSION_STRING`
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`

@@ -32,7 +32,7 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-testflight-build-number`
 
-##### `--pre-release-version=PRE_RELEASE_VERSION`
+##### `--pre-release-version, -V=PRE_RELEASE_VERSION`
 
 
 Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`

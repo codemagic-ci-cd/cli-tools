@@ -73,7 +73,7 @@ App Store Version platform. Default:&nbsp;`IOS`
 
 
 Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
-##### `--version-string, --app-store-version=VERSION_STRING`
+##### `--version-string, --app-store-version, -V=VERSION_STRING`
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
