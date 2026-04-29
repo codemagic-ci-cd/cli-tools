@@ -1,3 +1,16 @@
+Version 0.65.1
+-------------
+
+**Features**
+- Add `-V` / `--version-string` argument to `app-store-connect get-latest-build-number` to pin the build number lookup to a specific version string across both App Store and TestFlight. Resolves part of [issue #320](https://github.com/codemagic-ci-cd/cli-tools/issues/320).
+- Add `-V` short flag alias for `--version-string` argument on `app-store-connect get-latest-app-store-build-number`.
+- Add `-V` short flag alias for `--pre-release-version` argument on `app-store-connect get-latest-testflight-build-number`.
+
+**Docs**
+- Update docs for `app-store-connect get-latest-build-number`.
+- Update docs for `app-store-connect get-latest-app-store-build-number`.
+- Update docs for `app-store-connect get-latest-testflight-build-number`.
+
 Version 0.65.0
 -------------
 
