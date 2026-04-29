@@ -29,7 +29,7 @@ app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--
 Alphanumeric ID value of the Build
 ### Optional arguments for action `create`
 
-##### `--locale, -l=ar-SA | bn | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | gu-IN | he | hi | hr | hu | id | it | ja | kn-IN | ko | ml-IN | mr-IN | ms | nl-NL | no | or-IN | pa-IN | pl | pt-BR | pt-PT | ro | ru | sk | sl-SI | sv | ta-IN | te-IN | th | tr | uk | ur | vi | zh-Hans | zh-Hant`
+##### `--locale, -l=ar-SA | bn-BD | ca | cs | da | de-DE | el | en-AU | en-CA | en-GB | en-US | es-ES | es-MX | fi | fr-CA | fr-FR | gu-IN | he | hi | hr | hu | id | it | ja | kn-IN | ko | ml-IN | mr-IN | ms | nl-NL | no | or-IN | pa-IN | pl | pt-BR | pt-PT | ro | ru | sk | sl-SI | sv | ta-IN | te-IN | th | tr | uk | ur-PK | vi | zh-Hans | zh-Hant`
 
 
 The locale code name for displaying localized "What's new" content in TestFlight. In case not provided, application's primary locale from test information is used instead. Learn more from https://developer.apple.com/documentation/appstoreconnectapi/betabuildlocalizationcreaterequest/data/attributes

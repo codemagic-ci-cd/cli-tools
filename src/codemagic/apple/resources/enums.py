@@ -457,7 +457,7 @@ class Locale(ResourceEnum):
     """
 
     AR_SA = "ar-SA"  # Arabic
-    BN = "bn"  # Bangla
+    BN = "bn-BD"  # Bangla
     CA = "ca"  # Catalan
     CS = "cs"  # Czech
     DA = "da"  # Danish
@@ -502,7 +502,7 @@ class Locale(ResourceEnum):
     TH = "th"  # Thai
     TR = "tr"  # Turkish
     UK = "uk"  # Ukrainian
-    UR = "ur"  # Urdu
+    UR = "ur-PK"  # Urdu
     VI = "vi"  # Vietnamese
     ZH_HANS = "zh-Hans"  # Chinese (Simplified)
     ZH_HANT = "zh-Hant"  # Chinese (Traditional)
