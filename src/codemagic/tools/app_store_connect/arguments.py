@@ -1168,7 +1168,7 @@ class BuildArgument(cli.Argument):
     )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key="pre_release_version",
-        flags=("--pre-release-version", "-V"),
+        flags=("--version-string", "--pre-release-version", "-V"),
         description=(
             "Version of the build published to Testflight "
             "that identifies an iteration of the bundle. "
