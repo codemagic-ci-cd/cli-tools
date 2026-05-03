@@ -20,6 +20,7 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--version-string VERSION_STRING]
     [--platform PLATFORM]
     [--include-version]
+    [--all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-app-store-build-number`
@@ -42,6 +43,10 @@ Apple operating systems
 
 
 Explicitly show version string in command output in addition to build number
+##### `--all-versions, -A`
+
+
+Search across all versions and return the highest build number found, instead of returning the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number. Mutually exclusive with `--version-string` and `--pre-release-version`.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`
