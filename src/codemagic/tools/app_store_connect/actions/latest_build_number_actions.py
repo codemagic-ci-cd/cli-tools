@@ -153,7 +153,7 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             candidates.append(candidate)
         return max(
             candidates,
-            key=lambda info: versions.sorting_key(info.build_number),
+            key=lambda info: versions.sorting_key(cast(_LatestBuildInfo, info).build_number),
             default=None,
         )
 
@@ -180,7 +180,7 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             candidates.append(candidate)
         return max(
             candidates,
-            key=lambda info: versions.sorting_key(info.build_number),
+            key=lambda info: versions.sorting_key(cast(_LatestBuildInfo, info).build_number),
             default=None,
         )
 
