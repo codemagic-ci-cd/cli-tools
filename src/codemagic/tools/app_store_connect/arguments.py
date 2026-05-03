@@ -1297,6 +1297,19 @@ class BuildNumberArgument(cli.Argument):
         ),
         argparse_kwargs={"required": False},
     )
+    ALL_VERSIONS = cli.ArgumentProperties(
+        key="all_versions",
+        flags=("--all-versions", "-A"),
+        type=bool,
+        description=(
+            "Search across all versions and return the highest build number found, "
+            "instead of returning the build of the highest version. Useful for hot-fix flows "
+            "where a lower marketing version may carry a higher build number. "
+            f"Mutually exclusive with `{Colors.BRIGHT_BLUE('--version-string')}` and "
+            f"`{Colors.BRIGHT_BLUE('--pre-release-version')}`."
+        ),
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
 
 
 class BundleIdArgument(cli.Argument):
