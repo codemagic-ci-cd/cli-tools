@@ -1,3 +1,14 @@
+Version 0.66.0
+-------------
+
+**Features**
+- Add `-A` / `--all-versions` flag to `app-store-connect get-latest-build-number`, `get-latest-app-store-build-number`, and `get-latest-testflight-build-number`. When set, scans across every version and returns the globally highest build number found, instead of returning the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number. Resolves [issue #320](https://github.com/codemagic-ci-cd/cli-tools/issues/320).
+
+**Docs**
+- Update docs for `app-store-connect get-latest-build-number`.
+- Update docs for `app-store-connect get-latest-app-store-build-number`.
+- Update docs for `app-store-connect get-latest-testflight-build-number`.
+
 Version 0.65.1
 -------------
 
