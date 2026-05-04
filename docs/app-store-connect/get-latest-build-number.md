@@ -30,7 +30,7 @@ app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-build-number`
 
-##### `--version-string, -V=VERSION`
+##### `--version-string=VERSION`
 
 
 Version of the build to look up. Pins the search to a specific version string across both App Store and TestFlight. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
