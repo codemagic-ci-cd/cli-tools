@@ -115,3 +115,38 @@ def test_get_latest_build_number_returns_match_when_only_one_side_has_build(
         result = app_store_connect.get_latest_build_number(application_id, version="2.0.0")
 
     assert result == "7"
+
+
+@mock.patch("codemagic.tools.AppStoreConnect.api_client")
+def test_get_latest_build_number_picks_higher_build_when_versions_equal(
+    _mock_api_client: mock.MagicMock,
+):
+    app_store_connect = _make_app_store_connect()
+    application_id = ResourceId("application-id")
+
+    asc_info = _LatestBuildInfo(
+        build_id="asc-build-id",
+        build_number="120",
+        app_store_version="3.2.46",
+    )
+    tf_info = _LatestBuildInfo(
+        build_id="tf-build-id",
+        build_number="90",
+        pre_release_version="3.2.46",
+    )
+
+    with mock.patch.object(
+        app_store_connect,
+        "_get_app_store_latest_build_info",
+        return_value=asc_info,
+    ), mock.patch.object(
+        app_store_connect,
+        "_get_testflight_latest_build_info",
+        return_value=tf_info,
+    ), mock.patch.object(
+        app_store_connect,
+        "_log_latest_build_info",
+    ):
+        result = app_store_connect.get_latest_build_number(application_id, version="3.2.46")
+
+    assert result == "120"
