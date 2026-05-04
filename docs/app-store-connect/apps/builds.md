@@ -22,7 +22,7 @@ app-store-connect apps builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--build-version-number BUILD_VERSION_NUMBER]
     [--expired]
     [--not-expired]
-    [--version-string PRE_RELEASE_VERSION]
+    [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
     [--platform PLATFORM]
     APPLICATION_ID_RESOURCE_ID
@@ -55,7 +55,7 @@ List only expired builds. Mutually exclusive with option `--not-expired`.
 
 
 List only not expired builds. Mutually exclusive with option `--expired`.
-##### `--version-string, --pre-release-version=PRE_RELEASE_VERSION`
+##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
 
 
 Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
