@@ -240,7 +240,7 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
             else:
                 latest_build_info = max(
                     (app_store_build_info, testflight_build_info),
-                    key=lambda b: versions.sorting_key(cast(_LatestBuildInfo, b).build_number),
+                    key=lambda b: versions.sorting_key(b.build_number),
                 )
         elif app_store_build_info is not None:
             latest_build_info = app_store_build_info
