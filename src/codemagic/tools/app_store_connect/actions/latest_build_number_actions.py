@@ -151,11 +151,9 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             if not all_versions:
                 return candidate
             candidates.append(candidate)
-        return max(
-            candidates,
-            key=lambda info: versions.sorting_key(cast(_LatestBuildInfo, info).build_number),
-            default=None,
-        )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
 
     def __get_app_store_latest_build_info(
         self,
@@ -178,11 +176,9 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             if not all_versions:
                 return candidate
             candidates.append(candidate)
-        return max(
-            candidates,
-            key=lambda info: versions.sorting_key(cast(_LatestBuildInfo, info).build_number),
-            default=None,
-        )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
 
     def _get_testflight_latest_build_info(
         self,

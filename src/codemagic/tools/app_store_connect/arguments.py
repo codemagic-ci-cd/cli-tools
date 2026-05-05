@@ -1302,9 +1302,9 @@ class BuildNumberArgument(cli.Argument):
         flags=("--all-versions",),
         type=bool,
         description=(
-            "Search across all versions and return the highest build number found, "
-            "instead of returning the build of the highest version. Useful for hot-fix flows "
-            "where a lower marketing version may carry a higher build number. "
+            "Return the highest build number across all versions, instead of the build "
+            "of the highest version. Useful for hot-fix flows where a lower marketing "
+            "version may carry a higher build number. Slower for apps with many versions. "
             f"Mutually exclusive with `{Colors.BRIGHT_BLUE('--version-string')}` and "
             f"`{Colors.BRIGHT_BLUE('--pre-release-version')}`."
         ),
