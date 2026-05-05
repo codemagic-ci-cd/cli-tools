@@ -640,7 +640,7 @@ class AppStoreVersionArgument(cli.Argument):
     )
     VERSION_STRING = cli.ArgumentProperties(
         key="version_string",
-        flags=("--version-string", "--app-store-version", "-V"),
+        flags=("--version-string", "--app-store-version"),
         description=(
             "Version of the build published to App Store "
             "that identifies an iteration of the bundle. "
@@ -1168,7 +1168,7 @@ class BuildArgument(cli.Argument):
     )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key="pre_release_version",
-        flags=("--version-string", "--pre-release-version", "-V"),
+        flags=("--pre-release-version", "--version-string"),
         description=(
             "Version of the build published to Testflight "
             "that identifies an iteration of the bundle. "
@@ -1287,7 +1287,7 @@ class BuildNumberArgument(cli.Argument):
     )
     VERSION = cli.ArgumentProperties(
         key="version",
-        flags=("--version-string", "-V"),
+        flags=("--version-string",),
         description=(
             "Version of the build to look up. Pins the search to a specific version "
             "string across both App Store and TestFlight. "

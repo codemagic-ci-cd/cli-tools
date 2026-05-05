@@ -269,13 +269,22 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
         latest_build_info: _LatestBuildInfo
         if app_store_build_info is not None and testflight_build_info is not None:
             if all_versions:
-                asc_key = versions.sorting_key(app_store_build_info.build_number)
-                tf_key = versions.sorting_key(testflight_build_info.build_number)
-                latest_build_info = app_store_build_info if asc_key > tf_key else testflight_build_info
+                latest_build_info = max(
+                    (app_store_build_info, testflight_build_info),
+                    key=lambda b: versions.sorting_key(b.build_number),
+                )
             else:
                 asv = versions.parse_version(app_store_build_info.version)
                 tfv = versions.parse_version(testflight_build_info.version)
-                latest_build_info = app_store_build_info if asv > tfv else testflight_build_info
+                if asv > tfv:
+                    latest_build_info = app_store_build_info
+                elif tfv > asv:
+                    latest_build_info = testflight_build_info
+                else:
+                    latest_build_info = max(
+                        (app_store_build_info, testflight_build_info),
+                        key=lambda b: versions.sorting_key(b.build_number),
+                    )
         elif app_store_build_info is not None:
             latest_build_info = app_store_build_info
         elif testflight_build_info is not None:

@@ -10,7 +10,8 @@ from codemagic.tools import AppStoreConnect
 from codemagic.tools.app_store_connect.actions.latest_build_number_actions import _LatestBuildInfo
 
 
-def _make_app_store_connect() -> AppStoreConnect:
+@pytest.fixture
+def app_store_connect() -> AppStoreConnect:
     return AppStoreConnect(
         issuer_id=IssuerId("issuer-id"),
         key_identifier=KeyIdentifier("key-identifier"),
@@ -18,9 +19,7 @@ def _make_app_store_connect() -> AppStoreConnect:
     )
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_build_number_forwards_version_to_both_sides(_mock_api_client: mock.MagicMock):
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_build_number_forwards_version_to_both_sides(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     asc_info = _LatestBuildInfo(
@@ -63,9 +62,7 @@ def test_get_latest_build_number_forwards_version_to_both_sides(_mock_api_client
     assert result == "43"
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_build_number_without_version_passes_none(_mock_api_client: mock.MagicMock):
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_build_number_without_version_passes_none(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     with mock.patch.object(
@@ -94,11 +91,9 @@ def test_get_latest_build_number_without_version_passes_none(_mock_api_client: m
     assert result is None
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
 def test_get_latest_build_number_returns_match_when_only_one_side_has_build(
-    _mock_api_client: mock.MagicMock,
+    app_store_connect: AppStoreConnect,
 ):
-    app_store_connect = _make_app_store_connect()
     application_id = ResourceId("application-id")
 
     tf_info = _LatestBuildInfo(
@@ -124,9 +119,40 @@ def test_get_latest_build_number_returns_match_when_only_one_side_has_build(
     assert result == "7"
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_build_number_all_versions(_mock_api_client: mock.MagicMock):
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_build_number_picks_higher_build_when_versions_equal(
+    app_store_connect: AppStoreConnect,
+):
+    application_id = ResourceId("application-id")
+
+    asc_info = _LatestBuildInfo(
+        build_id="asc-build-id",
+        build_number="120",
+        app_store_version="3.2.46",
+    )
+    tf_info = _LatestBuildInfo(
+        build_id="tf-build-id",
+        build_number="90",
+        pre_release_version="3.2.46",
+    )
+
+    with mock.patch.object(
+        app_store_connect,
+        "_get_app_store_latest_build_info",
+        return_value=asc_info,
+    ), mock.patch.object(
+        app_store_connect,
+        "_get_testflight_latest_build_info",
+        return_value=tf_info,
+    ), mock.patch.object(
+        app_store_connect,
+        "_log_latest_build_info",
+    ):
+        result = app_store_connect.get_latest_build_number(application_id, version="3.2.46")
+
+    assert result == "120"
+
+
+def test_get_latest_build_number_all_versions_tiebreak_uses_build_number(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     asc_info = _LatestBuildInfo(
@@ -169,8 +195,7 @@ def test_get_latest_build_number_all_versions(_mock_api_client: mock.MagicMock):
     assert result == "12"
 
 
-def test_get_latest_app_store_build_number_all_versions():
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_app_store_build_number_all_versions_picks_global_max(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
@@ -193,8 +218,9 @@ def test_get_latest_app_store_build_number_all_versions():
     assert mock_api.app_store_versions.read_build_data.call_count == 2
 
 
-def test_get_latest_app_store_build_number_without_all_versions():
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_app_store_build_number_without_all_versions_stops_at_first_version(
+    app_store_connect: AppStoreConnect,
+):
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
@@ -217,8 +243,7 @@ def test_get_latest_app_store_build_number_without_all_versions():
     assert mock_api.app_store_versions.read_build_data.call_count == 1
 
 
-def test_get_latest_testflight_build_number_all_versions():
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_testflight_build_number_all_versions_picks_global_max(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
@@ -241,8 +266,9 @@ def test_get_latest_testflight_build_number_all_versions():
     assert mock_api.pre_release_versions.list_builds_data.call_count == 2
 
 
-def test_get_latest_testflight_build_number_without_all_versions():
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_testflight_build_number_without_all_versions_stops_at_first_version(
+    app_store_connect: AppStoreConnect,
+):
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
@@ -265,9 +291,7 @@ def test_get_latest_testflight_build_number_without_all_versions():
     assert mock_api.pre_release_versions.list_builds_data.call_count == 1
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_build_number_with_all_versions_and_version(_mock_api_client: mock.MagicMock):
-    app_store_connect = _make_app_store_connect()
+def test_get_latest_build_number_with_all_versions_and_version_raises(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     with mock.patch.object(
@@ -283,11 +307,9 @@ def test_get_latest_build_number_with_all_versions_and_version(_mock_api_client:
     mock_testflight.assert_not_called()
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_app_store_build_number_with_all_versions_and_version_string(
-    _mock_api_client: mock.MagicMock,
+def test_get_latest_app_store_build_number_with_all_versions_and_version_string_raises(
+    app_store_connect: AppStoreConnect,
 ):
-    app_store_connect = _make_app_store_connect()
     application_id = ResourceId("application-id")
 
     with mock.patch.object(
@@ -303,11 +325,9 @@ def test_get_latest_app_store_build_number_with_all_versions_and_version_string(
     mock_app_store.assert_not_called()
 
 
-@mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_get_latest_testflight_build_number_with_all_versions_and_pre_release_version(
-    _mock_api_client: mock.MagicMock,
+def test_get_latest_testflight_build_number_with_all_versions_and_pre_release_version_raises(
+    app_store_connect: AppStoreConnect,
 ):
-    app_store_connect = _make_app_store_connect()
     application_id = ResourceId("application-id")
 
     with mock.patch.object(
