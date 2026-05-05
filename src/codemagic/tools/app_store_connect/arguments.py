@@ -1299,7 +1299,7 @@ class BuildNumberArgument(cli.Argument):
     )
     ALL_VERSIONS = cli.ArgumentProperties(
         key="all_versions",
-        flags=("--all-versions", "-A"),
+        flags=("--all-versions",),
         type=bool,
         description=(
             "Search across all versions and return the highest build number found, "
