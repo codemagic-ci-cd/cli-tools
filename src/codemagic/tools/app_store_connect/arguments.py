@@ -1168,7 +1168,7 @@ class BuildArgument(cli.Argument):
     )
     PRE_RELEASE_VERSION = cli.ArgumentProperties(
         key="pre_release_version",
-        flags=("--pre-release-version",),
+        flags=("--pre-release-version", "--version-string"),
         description=(
             "Version of the build published to Testflight "
             "that identifies an iteration of the bundle. "
@@ -1284,6 +1284,18 @@ class BuildNumberArgument(cli.Argument):
         type=bool,
         description="Explicitly show version string in command output in addition to build number",
         argparse_kwargs={"required": False, "action": "store_true"},
+    )
+    VERSION = cli.ArgumentProperties(
+        key="version",
+        flags=("--version-string",),
+        description=(
+            "Version of the build to look up. Pins the search to a specific version "
+            "string across both App Store and TestFlight. "
+            "The string can only contain one to three groups of numeric characters (0-9) "
+            "separated by period in the format [Major].[Minor].[Patch]. "
+            f"For example `{Colors.WHITE('3.2.46')}`"
+        ),
+        argparse_kwargs={"required": False},
     )
 
 

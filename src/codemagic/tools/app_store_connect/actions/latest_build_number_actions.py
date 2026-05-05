@@ -204,26 +204,44 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
     @cli.action(
         "get-latest-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
+        BuildNumberArgument.VERSION,
         CommonArgument.PLATFORM,
         BuildNumberArgument.INCLUDE_VERSION,
     )
     def get_latest_build_number(
         self,
         application_id: ResourceId,
+        version: Optional[str] = None,
         platform: Optional[Platform] = None,
         include_version: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the highest build number of the highest version used for the given app.
         """
-        app_store_build_info = self._get_app_store_latest_build_info(application_id, platform=platform)
-        testflight_build_info = self._get_testflight_latest_build_info(application_id, platform=platform)
+        app_store_build_info = self._get_app_store_latest_build_info(
+            application_id,
+            version_string=version,
+            platform=platform,
+        )
+        testflight_build_info = self._get_testflight_latest_build_info(
+            application_id,
+            pre_release_version=version,
+            platform=platform,
+        )
 
         latest_build_info: _LatestBuildInfo
         if app_store_build_info is not None and testflight_build_info is not None:
             asv = versions.parse_version(app_store_build_info.version)
             tfv = versions.parse_version(testflight_build_info.version)
-            latest_build_info = app_store_build_info if asv > tfv else testflight_build_info
+            if asv > tfv:
+                latest_build_info = app_store_build_info
+            elif tfv > asv:
+                latest_build_info = testflight_build_info
+            else:
+                latest_build_info = max(
+                    (app_store_build_info, testflight_build_info),
+                    key=lambda b: versions.sorting_key(b.build_number),
+                )
         elif app_store_build_info is not None:
             latest_build_info = app_store_build_info
         elif testflight_build_info is not None:
