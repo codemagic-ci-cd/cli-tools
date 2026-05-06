@@ -136,31 +136,22 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
         self,
         pre_release_versions: List[_ResourceVersion],
         build_expired_status: Optional[bool],
-        all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
-        candidates: List[_LatestBuildInfo] = []
         for pre_release_version in pre_release_versions:
             max_build = self.__get_pre_release_version_max_build(pre_release_version.id, build_expired_status)
             if not max_build:
                 continue
-            candidate = _LatestBuildInfo(
+            return _LatestBuildInfo(
                 build_id=max_build.id,
                 build_number=max_build.version,
                 pre_release_version=pre_release_version.version,
             )
-            if not all_versions:
-                return candidate
-            candidates.append(candidate)
-        if not candidates:
-            return None
-        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
+        return None
 
     def __get_app_store_latest_build_info(
         self,
         app_store_versions: List[_ResourceVersion],
-        all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
-        candidates: List[_LatestBuildInfo] = []
         for app_store_version in app_store_versions:
             max_build_data = self.api_client.app_store_versions.read_build_data(
                 ResourceId(app_store_version.id),
@@ -168,14 +159,85 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             )
             if not max_build_data:
                 continue
-            candidate = _LatestBuildInfo(
+            return _LatestBuildInfo(
                 build_id=ResourceId(max_build_data["id"]),
                 build_number=max_build_data["attributes"]["version"],
                 app_store_version=app_store_version.version,
             )
-            if not all_versions:
-                return candidate
-            candidates.append(candidate)
+        return None
+
+    def __get_app_store_latest_build_info_all_versions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform],
+    ) -> Optional[_LatestBuildInfo]:
+        versions_filter = self.api_client.app_store_versions.Filter(platform=platform)
+        result = self.api_client.apps.list_app_store_versions_data_with_include(
+            application_id,
+            include="build",
+            resource_filter=versions_filter,
+            extra_params={
+                "fields[appStoreVersions]": "versionString,build",
+                "fields[builds]": "version",
+            },
+            page_size=200,
+        )
+        builds_by_id = {b["id"]: b for b in result.included}
+        candidates: List[_LatestBuildInfo] = []
+        for asv in result.data:
+            build_ref = asv.get("relationships", {}).get("build", {}).get("data")
+            if not build_ref:
+                continue
+            build = builds_by_id.get(build_ref["id"])
+            if not build:
+                continue
+            candidates.append(
+                _LatestBuildInfo(
+                    build_id=ResourceId(build["id"]),
+                    build_number=build["attributes"]["version"],
+                    app_store_version=asv["attributes"]["versionString"],
+                ),
+            )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
+
+    def __get_testflight_latest_build_info_all_versions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform],
+        build_expired_status: Optional[bool],
+    ) -> Optional[_LatestBuildInfo]:
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
+            expired=build_expired_status,
+            pre_release_version_platform=platform,
+        )
+        result = self.api_client.builds.list_data_with_include(
+            include="preReleaseVersion",
+            resource_filter=builds_filter,
+            extra_params={
+                "fields[builds]": "version,preReleaseVersion",
+                "fields[preReleaseVersions]": "version",
+            },
+            page_size=200,
+        )
+        prvs_by_id = {p["id"]: p for p in result.included}
+        candidates: List[_LatestBuildInfo] = []
+        for build in result.data:
+            prv_ref = build.get("relationships", {}).get("preReleaseVersion", {}).get("data")
+            if not prv_ref:
+                continue
+            prv = prvs_by_id.get(prv_ref["id"])
+            if not prv:
+                continue
+            candidates.append(
+                _LatestBuildInfo(
+                    build_id=ResourceId(build["id"]),
+                    build_number=build["attributes"]["version"],
+                    pre_release_version=prv["attributes"]["version"],
+                ),
+            )
         if not candidates:
             return None
         return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
@@ -189,16 +251,18 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
         all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
         try:
+            if all_versions:
+                return self.__get_testflight_latest_build_info_all_versions(
+                    application_id,
+                    platform,
+                    build_expired_status,
+                )
             pre_release_version_numbers = self.__get_ordered_pre_release_version_numbers(
                 application_id,
                 pre_release_version,
                 platform,
             )
-            return self.__get_testflight_latest_build_info(
-                pre_release_version_numbers,
-                build_expired_status,
-                all_versions=all_versions,
-            )
+            return self.__get_testflight_latest_build_info(pre_release_version_numbers, build_expired_status)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 
@@ -210,15 +274,14 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
         all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
         try:
+            if all_versions:
+                return self.__get_app_store_latest_build_info_all_versions(application_id, platform)
             app_store_version_numbers = self.__get_ordered_app_store_version_numbers(
                 application_id,
                 version_string,
                 platform,
             )
-            return self.__get_app_store_latest_build_info(
-                app_store_version_numbers,
-                all_versions=all_versions,
-            )
+            return self.__get_app_store_latest_build_info(app_store_version_numbers)
         except AppStoreConnectApiError as api_error:
             raise AppStoreConnectError(str(api_error))
 

@@ -5,6 +5,7 @@ import pytest
 
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.app_store_connect.type_declarations import PaginateResult
 from codemagic.apple.resources import ResourceId
 from codemagic.tools import AppStoreConnect
 from codemagic.tools.app_store_connect.actions.latest_build_number_actions import _LatestBuildInfo
@@ -199,14 +200,24 @@ def test_get_latest_app_store_build_number_all_versions_picks_global_max(app_sto
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
-    mock_api.apps.list_app_store_versions_data.return_value = [
-        {"id": "asv1", "attributes": {"versionString": "2.0.0"}},
-        {"id": "asv2", "attributes": {"versionString": "1.9.0"}},
-    ]
-    mock_api.app_store_versions.read_build_data.side_effect = [
-        {"id": "build-2.0.0", "attributes": {"version": "5"}},
-        {"id": "build-1.9.0", "attributes": {"version": "12"}},
-    ]
+    mock_api.apps.list_app_store_versions_data_with_include.return_value = PaginateResult(
+        data=[
+            {
+                "id": "asv1",
+                "attributes": {"versionString": "2.0.0"},
+                "relationships": {"build": {"data": {"id": "build-2.0.0"}}},
+            },
+            {
+                "id": "asv2",
+                "attributes": {"versionString": "1.9.0"},
+                "relationships": {"build": {"data": {"id": "build-1.9.0"}}},
+            },
+        ],
+        included=[
+            {"id": "build-2.0.0", "attributes": {"version": "5"}},
+            {"id": "build-1.9.0", "attributes": {"version": "12"}},
+        ],
+    )
 
     with mock.patch.object(app_store_connect, "_get_api_client", return_value=mock_api), mock.patch.object(
         app_store_connect,
@@ -215,21 +226,31 @@ def test_get_latest_app_store_build_number_all_versions_picks_global_max(app_sto
         result = app_store_connect.get_latest_app_store_build_number(application_id, all_versions=True)
 
     assert result == "12"
-    assert mock_api.app_store_versions.read_build_data.call_count == 2
+    assert mock_api.apps.list_app_store_versions_data_with_include.call_count == 1
 
 
 def test_get_latest_testflight_build_number_all_versions_picks_global_max(app_store_connect: AppStoreConnect):
     application_id = ResourceId("application-id")
 
     mock_api = mock.MagicMock()
-    mock_api.pre_release_versions.list_data.return_value = [
-        {"id": "prv1", "attributes": {"version": "2.0.0"}},
-        {"id": "prv2", "attributes": {"version": "1.9.0"}},
-    ]
-    mock_api.pre_release_versions.list_builds_data.side_effect = [
-        [{"id": "b1", "attributes": {"version": "5"}}],
-        [{"id": "b2", "attributes": {"version": "12"}}],
-    ]
+    mock_api.builds.list_data_with_include.return_value = PaginateResult(
+        data=[
+            {
+                "id": "b1",
+                "attributes": {"version": "5"},
+                "relationships": {"preReleaseVersion": {"data": {"id": "prv1"}}},
+            },
+            {
+                "id": "b2",
+                "attributes": {"version": "12"},
+                "relationships": {"preReleaseVersion": {"data": {"id": "prv2"}}},
+            },
+        ],
+        included=[
+            {"id": "prv1", "attributes": {"version": "2.0.0"}},
+            {"id": "prv2", "attributes": {"version": "1.9.0"}},
+        ],
+    )
 
     with mock.patch.object(app_store_connect, "_get_api_client", return_value=mock_api), mock.patch.object(
         app_store_connect,
@@ -238,7 +259,7 @@ def test_get_latest_testflight_build_number_all_versions_picks_global_max(app_st
         result = app_store_connect.get_latest_testflight_build_number(application_id, all_versions=True)
 
     assert result == "12"
-    assert mock_api.pre_release_versions.list_builds_data.call_count == 2
+    assert mock_api.builds.list_data_with_include.call_count == 1
 
 
 def test_get_latest_build_number_with_all_versions_and_version_raises(app_store_connect: AppStoreConnect):

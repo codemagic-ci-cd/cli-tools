@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
@@ -8,6 +9,7 @@ from typing import TypeVar
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.app_store_connect.type_declarations import PaginateResult
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import BetaReviewState
@@ -82,6 +84,23 @@ class Builds(ResourceManager[Build]):
         params = {"sort": ordering.as_param(reverse), **resource_filter.as_query_params()}
         builds = self.client.paginate(f"{self.client.API_URL}/builds", params=params)
         return [Build(build) for build in builds]
+
+    def list_data_with_include(
+        self,
+        include: str,
+        resource_filter: Filter = Filter(),
+        extra_params: Optional[Dict[str, str]] = None,
+        limit: Optional[int] = None,
+        page_size: Optional[int] = 100,
+    ) -> PaginateResult:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_builds
+        """
+        params: Dict[str, str] = {"include": include, **resource_filter.as_query_params()}
+        if extra_params:
+            params.update(extra_params)
+        url = f"{self.client.API_URL}/builds"
+        return self.client.paginate_with_included(url, params=params, limit=limit, page_size=page_size)
 
     def read_app(self, build: Union[Build, ResourceId]) -> App:
         """
