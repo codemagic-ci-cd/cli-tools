@@ -176,10 +176,8 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             application_id,
             include="build",
             resource_filter=versions_filter,
-            extra_params={
-                "fields[appStoreVersions]": "versionString,build",
-                "fields[builds]": "version",
-            },
+            fields=("versionString", "build"),
+            include_fields=("version",),
             page_size=200,
         )
         builds_by_id = {b["id"]: b for b in result.included}
@@ -216,10 +214,8 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
         result = self.api_client.builds.list_data_with_include(
             include="preReleaseVersion",
             resource_filter=builds_filter,
-            extra_params={
-                "fields[builds]": "version,preReleaseVersion",
-                "fields[preReleaseVersions]": "version",
-            },
+            fields=("version", "preReleaseVersion"),
+            include_fields=("version",),
             page_size=200,
         )
         prvs_by_id = {p["id"]: p for p in result.included}
@@ -306,12 +302,6 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
         """
         Get the highest build number of the highest version used for the given app.
         """
-        if all_versions and version is not None:
-            flags = f"{BuildNumberArgument.ALL_VERSIONS.flag!r} and {BuildNumberArgument.VERSION.flag!r}"
-            raise BuildNumberArgument.ALL_VERSIONS.raise_argument_error(
-                f"Using mutually exclusive options {flags}.",
-            )
-
         app_store_build_info = self._get_app_store_latest_build_info(
             application_id,
             version_string=version,
@@ -377,12 +367,6 @@ class GetLatestAppStoreBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC
         """
         Get the latest App Store build number of the highest version for the given application
         """
-        if all_versions and version_string is not None:
-            flags = f"{BuildNumberArgument.ALL_VERSIONS.flag!r} and {AppStoreVersionArgument.VERSION_STRING.flag!r}"
-            raise BuildNumberArgument.ALL_VERSIONS.raise_argument_error(
-                f"Using mutually exclusive options {flags}.",
-            )
-
         latest_build_info = self._get_app_store_latest_build_info(
             application_id,
             version_string=version_string,
@@ -427,12 +411,6 @@ class GetLatestTestflightBuildNumberAction(AbstractGetLatestBuildNumberAction, A
         except ValueError:
             flags = f"{BuildArgument.EXPIRED.flag!r} and {BuildArgument.NOT_EXPIRED.flag!r}"
             raise BuildArgument.NOT_EXPIRED.raise_argument_error(f"Using mutually exclusive switches {flags}.")
-
-        if all_versions and pre_release_version is not None:
-            flags = f"{BuildNumberArgument.ALL_VERSIONS.flag!r} and {BuildArgument.PRE_RELEASE_VERSION.flag!r}"
-            raise BuildNumberArgument.ALL_VERSIONS.raise_argument_error(
-                f"Using mutually exclusive options {flags}.",
-            )
 
         latest_build_info = self._get_testflight_latest_build_info(
             application_id,

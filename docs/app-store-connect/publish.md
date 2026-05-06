@@ -25,6 +25,7 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--skip-package-upload]
     [--max-find-build-wait MAX_BUILD_FIND_WAIT]
     [--max-build-processing-wait MAX_BUILD_PROCESSING_WAIT]
+    [--version-string VERSION_STRING]
     [--beta-build-localizations BETA_BUILD_LOCALIZATIONS]
     [--testflight]
     [--expire-build-submitted-for-review]
@@ -36,7 +37,6 @@ app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-
     [--copyright COPYRIGHT]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
     [--release-type RELEASE_TYPE]
-    [--version-string VERSION_STRING]
     [--description DESCRIPTION]
     [--keywords KEYWORDS]
     [--marketing-url MARKETING_URL]
@@ -138,10 +138,6 @@ Specify earliest return date for scheduled release type (see `--release-type` co
 
 
 Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--description, -d=DESCRIPTION`
 
 
@@ -202,6 +198,12 @@ Show verbose log output when launching Application Loader tool. That is add `--v
 
 
 Pass additional command line arguments to `xcrun altool` invocations. For example `--apple-id '1481211155'`. If not given, the value will be checked from the environment variable `APP_STORE_CONNECT_ALTOOL_ADDITIONAL_ARGUMENTS`. Alternatively to entering `ALTOOL_ADDITIONAL_ARGUMENTS` in plaintext, it may also be specified using the `@env:` prefix followed by an environment variable name, or the `@file:` prefix followed by a path to the file containing the value. Example: `@env:<variable>` uses the value in the environment variable named `<variable>`, and `@file:<file_path>` uses the value from the file at `<file_path>`.
+### Optional mutually exclusive arguments for action `publish`
+
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

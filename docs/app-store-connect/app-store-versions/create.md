@@ -18,10 +18,10 @@ app-store-connect app-store-versions create [-h] [--log-stream STREAM] [--no-col
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--copyright COPYRIGHT]
-    [--version-string VERSION_STRING]
     [--earliest-release-date EARLIEST_RELEASE_DATE]
     [--release-type RELEASE_TYPE]
     [--platform PLATFORM]
+    [--version-string VERSION_STRING]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `create`
@@ -36,10 +36,6 @@ Alphanumeric ID value of the Build
 
 
 The name of the person or entity that owns the exclusive rights to your app, preceded by the year the rights were obtained (for example, `2008 Acme Inc.`). Do not provide a URL.
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--earliest-release-date=EARLIEST_RELEASE_DATE`
 
 
@@ -52,6 +48,12 @@ Choose when to release the app. You can either manually release the app at a lat
 
 
 Apple operating systems
+### Optional mutually exclusive arguments for action `create`
+
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

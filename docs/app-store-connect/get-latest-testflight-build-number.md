@@ -17,12 +17,11 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--pre-release-version PRE_RELEASE_VERSION]
     [--platform PLATFORM]
     [--expired]
     [--not-expired]
     [--include-version]
-    [--all-versions]
+    [--pre-release-version PRE_RELEASE_VERSION | --all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-testflight-build-number`
@@ -33,10 +32,6 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-testflight-build-number`
 
-##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
-
-
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform=IOS | MAC_OS | TV_OS`
 
 
@@ -53,10 +48,16 @@ List only not expired builds. Mutually exclusive with option `--expired`.
 
 
 Explicitly show version string in command output in addition to build number
+### Optional mutually exclusive arguments for action `get-latest-testflight-build-number`
+
+##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--all-versions`
 
 
-Return the highest build number across all versions, instead of the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number. Slower for apps with many versions. Mutually exclusive with `--version-string` and `--pre-release-version`.
+Return the highest build number across all versions, instead of the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

@@ -1,4 +1,3 @@
-import argparse
 from unittest import mock
 
 import pytest
@@ -260,55 +259,3 @@ def test_get_latest_testflight_build_number_all_versions_picks_global_max(app_st
 
     assert result == "12"
     assert mock_api.builds.list_data_with_include.call_count == 1
-
-
-def test_get_latest_build_number_with_all_versions_and_version_raises(app_store_connect: AppStoreConnect):
-    application_id = ResourceId("application-id")
-
-    with mock.patch.object(
-        app_store_connect,
-        "_get_app_store_latest_build_info",
-    ) as mock_app_store, mock.patch.object(
-        app_store_connect,
-        "_get_testflight_latest_build_info",
-    ) as mock_testflight, pytest.raises((argparse.ArgumentError, AttributeError)):
-        app_store_connect.get_latest_build_number(application_id, version="1.0.0", all_versions=True)
-
-    mock_app_store.assert_not_called()
-    mock_testflight.assert_not_called()
-
-
-def test_get_latest_app_store_build_number_with_all_versions_and_version_string_raises(
-    app_store_connect: AppStoreConnect,
-):
-    application_id = ResourceId("application-id")
-
-    with mock.patch.object(
-        app_store_connect,
-        "_get_app_store_latest_build_info",
-    ) as mock_app_store, pytest.raises((argparse.ArgumentError, AttributeError)):
-        app_store_connect.get_latest_app_store_build_number(
-            application_id,
-            version_string="1.0.0",
-            all_versions=True,
-        )
-
-    mock_app_store.assert_not_called()
-
-
-def test_get_latest_testflight_build_number_with_all_versions_and_pre_release_version_raises(
-    app_store_connect: AppStoreConnect,
-):
-    application_id = ResourceId("application-id")
-
-    with mock.patch.object(
-        app_store_connect,
-        "_get_testflight_latest_build_info",
-    ) as mock_testflight, pytest.raises((argparse.ArgumentError, AttributeError)):
-        app_store_connect.get_latest_testflight_build_number(
-            application_id,
-            pre_release_version="1.0.0",
-            all_versions=True,
-        )
-
-    mock_testflight.assert_not_called()

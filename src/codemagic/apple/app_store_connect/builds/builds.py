@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -87,18 +87,21 @@ class Builds(ResourceManager[Build]):
 
     def list_data_with_include(
         self,
-        include: str,
+        include: Literal["preReleaseVersion"],
         resource_filter: Filter = Filter(),
-        extra_params: Optional[Dict[str, str]] = None,
+        fields: Sequence[str] = tuple(),
+        include_fields: Sequence[str] = tuple(),
         limit: Optional[int] = None,
         page_size: Optional[int] = 100,
     ) -> PaginateResult:
         """
         https://developer.apple.com/documentation/appstoreconnectapi/list_builds
         """
-        params: Dict[str, str] = {"include": include, **resource_filter.as_query_params()}
-        if extra_params:
-            params.update(extra_params)
+        params = {"include": include, **resource_filter.as_query_params()}
+        if fields:
+            params["fields[builds]"] = ",".join(fields)
+        if include_fields:
+            params[f"fields[{include}s]"] = ",".join(include_fields)
         url = f"{self.client.API_URL}/builds"
         return self.client.paginate_with_included(url, params=params, limit=limit, page_size=page_size)
 

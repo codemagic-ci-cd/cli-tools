@@ -17,10 +17,9 @@ app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--version-string VERSION]
     [--platform PLATFORM]
     [--include-version]
-    [--all-versions]
+    [--version-string VERSION | --all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-build-number`
@@ -31,10 +30,6 @@ app-store-connect get-latest-build-number [-h] [--log-stream STREAM] [--no-color
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-build-number`
 
-##### `--version-string=VERSION`
-
-
-Version of the build to look up. Pins the search to a specific version string across both App Store and TestFlight. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform=IOS | MAC_OS | TV_OS`
 
 
@@ -43,10 +38,16 @@ Apple operating systems
 
 
 Explicitly show version string in command output in addition to build number
+### Optional mutually exclusive arguments for action `get-latest-build-number`
+
+##### `--version-string=VERSION`
+
+
+Version of the build to look up. Pins the search to a specific version string across both App Store and TestFlight. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--all-versions`
 
 
-Return the highest build number across all versions, instead of the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number. Slower for apps with many versions. Mutually exclusive with `--version-string` and `--pre-release-version`.
+Return the highest build number across all versions, instead of the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

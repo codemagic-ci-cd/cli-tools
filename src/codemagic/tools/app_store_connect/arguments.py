@@ -39,6 +39,11 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
 
+BUILD_VERSION_INFO_GROUP = cli.MutuallyExclusiveGroup(
+    name="specify version information",
+    required=False,
+)
+
 
 @dataclass
 class BetaBuildInfo:
@@ -649,6 +654,7 @@ class AppStoreVersionArgument(cli.Argument):
             f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     ENABLE_PHASED_RELEASE = cli.ArgumentProperties(
         key="enable_phased_release",
@@ -1177,6 +1183,7 @@ class BuildArgument(cli.Argument):
             "For example `3.2.46`"
         ),
         argparse_kwargs={"required": False},
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     PROCESSING_STATE = cli.ArgumentProperties(
         key="processing_state",
@@ -1296,6 +1303,7 @@ class BuildNumberArgument(cli.Argument):
             f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     ALL_VERSIONS = cli.ArgumentProperties(
         key="all_versions",
@@ -1304,11 +1312,10 @@ class BuildNumberArgument(cli.Argument):
         description=(
             "Return the highest build number across all versions, instead of the build "
             "of the highest version. Useful for hot-fix flows where a lower marketing "
-            "version may carry a higher build number. Slower for apps with many versions. "
-            f"Mutually exclusive with `{Colors.BRIGHT_BLUE('--version-string')}` and "
-            f"`{Colors.BRIGHT_BLUE('--pre-release-version')}`."
+            "version may carry a higher build number."
         ),
         argparse_kwargs={"required": False, "action": "store_true"},
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
 
 
