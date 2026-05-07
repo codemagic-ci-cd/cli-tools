@@ -17,9 +17,9 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--private-key PRIVATE_KEY]
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
-    [--version-string VERSION_STRING]
     [--platform PLATFORM]
     [--include-version]
+    [--version-string VERSION_STRING_MUTUALLY_EXCLUSIVE | --all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-app-store-build-number`
@@ -30,10 +30,6 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-app-store-build-number`
 
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform=IOS | MAC_OS | TV_OS`
 
 
@@ -42,6 +38,16 @@ Apple operating systems
 
 
 Explicitly show version string in command output in addition to build number
+### Optional mutually exclusive arguments for action `get-latest-app-store-build-number`
+
+##### `--version-string, --app-store-version=VERSION_STRING_MUTUALLY_EXCLUSIVE`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
+##### `--all-versions`
+
+
+Return the highest build number across all versions, instead of the build of the highest version. Useful for hot-fix flows where a lower marketing version may carry a higher build number.
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

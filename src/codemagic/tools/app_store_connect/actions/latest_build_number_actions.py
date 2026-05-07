@@ -166,14 +166,93 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
             )
         return None
 
+    def __get_app_store_latest_build_info_all_versions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform],
+    ) -> Optional[_LatestBuildInfo]:
+        versions_filter = self.api_client.app_store_versions.Filter(platform=platform)
+        result = self.api_client.apps.list_app_store_versions_data_with_include(
+            application_id,
+            include="build",
+            resource_filter=versions_filter,
+            fields=("versionString", "build"),
+            include_fields=("version",),
+            page_size=200,
+        )
+        builds_by_id = {b["id"]: b for b in result.included}
+        candidates: List[_LatestBuildInfo] = []
+        for asv in result.data:
+            build_ref = asv.get("relationships", {}).get("build", {}).get("data")
+            if not build_ref:
+                continue
+            build = builds_by_id.get(build_ref["id"])
+            if not build:
+                continue
+            candidates.append(
+                _LatestBuildInfo(
+                    build_id=ResourceId(build["id"]),
+                    build_number=build["attributes"]["version"],
+                    app_store_version=asv["attributes"]["versionString"],
+                ),
+            )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
+
+    def __get_testflight_latest_build_info_all_versions(
+        self,
+        application_id: ResourceId,
+        platform: Optional[Platform],
+        build_expired_status: Optional[bool],
+    ) -> Optional[_LatestBuildInfo]:
+        builds_filter = self.api_client.builds.Filter(
+            app=application_id,
+            expired=build_expired_status,
+            pre_release_version_platform=platform,
+        )
+        result = self.api_client.builds.list_data_with_include(
+            include="preReleaseVersion",
+            resource_filter=builds_filter,
+            fields=("version", "preReleaseVersion"),
+            include_fields=("version",),
+            page_size=200,
+        )
+        prvs_by_id = {p["id"]: p for p in result.included}
+        candidates: List[_LatestBuildInfo] = []
+        for build in result.data:
+            prv_ref = build.get("relationships", {}).get("preReleaseVersion", {}).get("data")
+            if not prv_ref:
+                continue
+            prv = prvs_by_id.get(prv_ref["id"])
+            if not prv:
+                continue
+            candidates.append(
+                _LatestBuildInfo(
+                    build_id=ResourceId(build["id"]),
+                    build_number=build["attributes"]["version"],
+                    pre_release_version=prv["attributes"]["version"],
+                ),
+            )
+        if not candidates:
+            return None
+        return max(candidates, key=lambda info: versions.sorting_key(info.build_number))
+
     def _get_testflight_latest_build_info(
         self,
         application_id: ResourceId,
         pre_release_version: Optional[str] = None,
         platform: Optional[Platform] = None,
         build_expired_status: Optional[bool] = None,
+        all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
         try:
+            if all_versions:
+                return self.__get_testflight_latest_build_info_all_versions(
+                    application_id,
+                    platform,
+                    build_expired_status,
+                )
             pre_release_version_numbers = self.__get_ordered_pre_release_version_numbers(
                 application_id,
                 pre_release_version,
@@ -188,8 +267,11 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
         application_id: ResourceId,
         version_string: Optional[str] = None,
         platform: Optional[Platform] = None,
+        all_versions: bool = False,
     ) -> Optional[_LatestBuildInfo]:
         try:
+            if all_versions:
+                return self.__get_app_store_latest_build_info_all_versions(application_id, platform)
             app_store_version_numbers = self.__get_ordered_app_store_version_numbers(
                 application_id,
                 version_string,
@@ -201,12 +283,28 @@ class AbstractGetLatestBuildNumberAction(AbstractBaseAction, ABC):
 
 
 class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
+    @staticmethod
+    def _choose_latest_build_info(
+        app_store: _LatestBuildInfo,
+        testflight: _LatestBuildInfo,
+        all_versions: bool,
+    ) -> _LatestBuildInfo:
+        if not all_versions:
+            asv = versions.parse_version(app_store.version)
+            tfv = versions.parse_version(testflight.version)
+            if asv > tfv:
+                return app_store
+            if tfv > asv:
+                return testflight
+        return max((app_store, testflight), key=lambda b: versions.sorting_key(b.build_number))
+
     @cli.action(
         "get-latest-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        BuildNumberArgument.VERSION,
+        BuildNumberArgument.VERSION_MUTUALLY_EXCLUSIVE,
         CommonArgument.PLATFORM,
         BuildNumberArgument.INCLUDE_VERSION,
+        BuildNumberArgument.ALL_VERSIONS_MUTUALLY_EXCLUSIVE,
     )
     def get_latest_build_number(
         self,
@@ -214,6 +312,7 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
         version: Optional[str] = None,
         platform: Optional[Platform] = None,
         include_version: Optional[bool] = None,
+        all_versions: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the highest build number of the highest version used for the given app.
@@ -222,26 +321,22 @@ class GetLatestBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC):
             application_id,
             version_string=version,
             platform=platform,
+            all_versions=bool(all_versions),
         )
         testflight_build_info = self._get_testflight_latest_build_info(
             application_id,
             pre_release_version=version,
             platform=platform,
+            all_versions=bool(all_versions),
         )
 
         latest_build_info: _LatestBuildInfo
         if app_store_build_info is not None and testflight_build_info is not None:
-            asv = versions.parse_version(app_store_build_info.version)
-            tfv = versions.parse_version(testflight_build_info.version)
-            if asv > tfv:
-                latest_build_info = app_store_build_info
-            elif tfv > asv:
-                latest_build_info = testflight_build_info
-            else:
-                latest_build_info = max(
-                    (app_store_build_info, testflight_build_info),
-                    key=lambda b: versions.sorting_key(b.build_number),
-                )
+            latest_build_info = self._choose_latest_build_info(
+                app_store_build_info,
+                testflight_build_info,
+                bool(all_versions),
+            )
         elif app_store_build_info is not None:
             latest_build_info = app_store_build_info
         elif testflight_build_info is not None:
@@ -259,9 +354,10 @@ class GetLatestAppStoreBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC
     @cli.action(
         "get-latest-app-store-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        AppStoreVersionArgument.VERSION_STRING,
+        AppStoreVersionArgument.VERSION_STRING_MUTUALLY_EXCLUSIVE,
         CommonArgument.PLATFORM,
         BuildNumberArgument.INCLUDE_VERSION,
+        BuildNumberArgument.ALL_VERSIONS_MUTUALLY_EXCLUSIVE,
     )
     def get_latest_app_store_build_number(
         self,
@@ -269,6 +365,7 @@ class GetLatestAppStoreBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC
         version_string: Optional[str] = None,
         platform: Optional[Platform] = None,
         include_version: Optional[bool] = None,
+        all_versions: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the latest App Store build number of the highest version for the given application
@@ -277,6 +374,7 @@ class GetLatestAppStoreBuildNumberAction(AbstractGetLatestBuildNumberAction, ABC
             application_id,
             version_string=version_string,
             platform=platform,
+            all_versions=bool(all_versions),
         )
         if latest_build_info is None:
             self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))
@@ -291,11 +389,12 @@ class GetLatestTestflightBuildNumberAction(AbstractGetLatestBuildNumberAction, A
     @cli.action(
         "get-latest-testflight-build-number",
         AppArgument.APPLICATION_ID_RESOURCE_ID,
-        BuildArgument.PRE_RELEASE_VERSION,
+        BuildArgument.PRE_RELEASE_VERSION_MUTUALLY_EXCLUSIVE,
         CommonArgument.PLATFORM,
         BuildArgument.EXPIRED,
         BuildArgument.NOT_EXPIRED,
         BuildNumberArgument.INCLUDE_VERSION,
+        BuildNumberArgument.ALL_VERSIONS_MUTUALLY_EXCLUSIVE,
     )
     def get_latest_testflight_build_number(
         self,
@@ -305,6 +404,7 @@ class GetLatestTestflightBuildNumberAction(AbstractGetLatestBuildNumberAction, A
         expired: Optional[bool] = None,
         not_expired: Optional[bool] = None,
         include_version: Optional[bool] = None,
+        all_versions: Optional[bool] = None,
     ) -> Optional[str]:
         """
         Get the latest Testflight build number of the highest version for the given application
@@ -320,6 +420,7 @@ class GetLatestTestflightBuildNumberAction(AbstractGetLatestBuildNumberAction, A
             pre_release_version=pre_release_version,
             platform=platform,
             build_expired_status=expired_value,
+            all_versions=bool(all_versions),
         )
         if latest_build_info is None:
             self.logger.info(Colors.YELLOW(f"Did not find latest build for app {application_id}"))

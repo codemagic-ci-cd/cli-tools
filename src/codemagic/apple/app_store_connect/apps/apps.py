@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Type
 from typing import Union
 
 from codemagic.apple.app_store_connect.resource_manager import ResourceManager
+from codemagic.apple.app_store_connect.type_declarations import PaginateResult
 from codemagic.apple.app_store_connect.versioning import AppStoreVersions
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreState
@@ -110,6 +112,28 @@ class Apps(ResourceManager[App]):
             params["fields[appStoreVersions]"] = ",".join(fields)
         url = f"{self.client.API_URL}/apps/{app_id}/appStoreVersions"
         return self.client.paginate(url, params=params, limit=limit, page_size=page_size)
+
+    def list_app_store_versions_data_with_include(
+        self,
+        app: Union[LinkedResourceData, ResourceId],
+        include: Literal["build"],
+        resource_filter: AppStoreVersions.Filter = AppStoreVersions.Filter(),
+        fields: Sequence[str] = tuple(),
+        include_fields: Sequence[str] = tuple(),
+        limit: Optional[int] = None,
+        page_size: Optional[int] = 100,
+    ) -> PaginateResult:
+        """
+        https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
+        """
+        app_id = self._get_resource_id(app)
+        params = {"include": include, **resource_filter.as_query_params()}
+        if fields:
+            params["fields[appStoreVersions]"] = ",".join(fields)
+        if include_fields:
+            params[f"fields[{include}s]"] = ",".join(include_fields)
+        url = f"{self.client.API_URL}/apps/{app_id}/appStoreVersions"
+        return self.client.paginate_with_included(url, params=params, limit=limit, page_size=page_size)
 
     def list_app_store_versions(
         self,

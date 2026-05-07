@@ -39,6 +39,11 @@ from codemagic.cli import Colors
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
 
+BUILD_VERSION_INFO_GROUP = cli.MutuallyExclusiveGroup(
+    name="specify version information",
+    required=False,
+)
+
 
 @dataclass
 class BetaBuildInfo:
@@ -650,6 +655,10 @@ class AppStoreVersionArgument(cli.Argument):
         ),
         argparse_kwargs={"required": False},
     )
+    VERSION_STRING_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        VERSION_STRING,
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
+    )
     ENABLE_PHASED_RELEASE = cli.ArgumentProperties(
         key="enable_phased_release",
         flags=("--phased-release",),
@@ -1178,6 +1187,10 @@ class BuildArgument(cli.Argument):
         ),
         argparse_kwargs={"required": False},
     )
+    PRE_RELEASE_VERSION_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        PRE_RELEASE_VERSION,
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
+    )
     PROCESSING_STATE = cli.ArgumentProperties(
         key="processing_state",
         flags=("--processing-state",),
@@ -1296,6 +1309,25 @@ class BuildNumberArgument(cli.Argument):
             f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
+    )
+    VERSION_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        VERSION,
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
+    )
+    ALL_VERSIONS = cli.ArgumentProperties(
+        key="all_versions",
+        flags=("--all-versions",),
+        type=bool,
+        description=(
+            "Return the highest build number across all versions, instead of the build "
+            "of the highest version. Useful for hot-fix flows where a lower marketing "
+            "version may carry a higher build number."
+        ),
+        argparse_kwargs={"required": False, "action": "store_true"},
+    )
+    ALL_VERSIONS_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        ALL_VERSIONS,
+        mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
 
 
