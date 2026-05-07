@@ -48,8 +48,6 @@ Specify earliest return date for scheduled release type (see `--release-type` co
 
 
 Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
-### Optional mutually exclusive arguments for action `modify`
-
 ##### `--version-string, --app-store-version=VERSION_STRING`
 
 

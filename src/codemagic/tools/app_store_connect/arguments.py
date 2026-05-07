@@ -654,6 +654,9 @@ class AppStoreVersionArgument(cli.Argument):
             f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
+    )
+    VERSION_STRING_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        VERSION_STRING,
         mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     ENABLE_PHASED_RELEASE = cli.ArgumentProperties(
@@ -1183,6 +1186,9 @@ class BuildArgument(cli.Argument):
             "For example `3.2.46`"
         ),
         argparse_kwargs={"required": False},
+    )
+    PRE_RELEASE_VERSION_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        PRE_RELEASE_VERSION,
         mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     PROCESSING_STATE = cli.ArgumentProperties(
@@ -1303,6 +1309,9 @@ class BuildNumberArgument(cli.Argument):
             f"For example `{Colors.WHITE('3.2.46')}`"
         ),
         argparse_kwargs={"required": False},
+    )
+    VERSION_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        VERSION,
         mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
     ALL_VERSIONS = cli.ArgumentProperties(
@@ -1315,6 +1324,9 @@ class BuildNumberArgument(cli.Argument):
             "version may carry a higher build number."
         ),
         argparse_kwargs={"required": False, "action": "store_true"},
+    )
+    ALL_VERSIONS_MUTUALLY_EXCLUSIVE = cli.ArgumentProperties.duplicate(
+        ALL_VERSIONS,
         mutually_exclusive_group=BUILD_VERSION_INFO_GROUP,
     )
 

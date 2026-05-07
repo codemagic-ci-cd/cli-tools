@@ -19,7 +19,7 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
     [--profiles-dir PROFILES_DIRECTORY]
     [--platform PLATFORM]
     [--include-version]
-    [--version-string VERSION_STRING | --all-versions]
+    [--version-string VERSION_STRING_MUTUALLY_EXCLUSIVE | --all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-app-store-build-number`
@@ -40,7 +40,7 @@ Apple operating systems
 Explicitly show version string in command output in addition to build number
 ### Optional mutually exclusive arguments for action `get-latest-app-store-build-number`
 
-##### `--version-string, --app-store-version=VERSION_STRING`
+##### `--version-string, --app-store-version=VERSION_STRING_MUTUALLY_EXCLUSIVE`
 
 
 Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`

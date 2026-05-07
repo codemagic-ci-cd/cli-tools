@@ -24,6 +24,7 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--earliest-release-date EARLIEST_RELEASE_DATE]
     [--platform PLATFORM]
     [--release-type RELEASE_TYPE]
+    [--version-string VERSION_STRING]
     [--description DESCRIPTION]
     [--keywords KEYWORDS]
     [--locale LOCALE_DEFAULT]
@@ -34,7 +35,6 @@ app-store-connect builds submit-to-app-store [-h] [--log-stream STREAM] [--no-co
     [--app-store-version-localizations APP_STORE_VERSION_LOCALIZATION_INFOS]
     [--phased-release]
     [--no-phased-release]
-    [--version-string VERSION_STRING]
     BUILD_ID_RESOURCE_ID
 ```
 ### Required arguments for action `submit-to-app-store`
@@ -73,6 +73,10 @@ App Store Version platform. Default:&nbsp;`IOS`
 
 
 Choose when to release the app. You can either manually release the app at a later date on the App Store Connect website, or the app version can be automatically released right after it has been approved by App Review.
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--description, -d=DESCRIPTION`
 
 
@@ -113,12 +117,6 @@ Release App Store version update in phases. With this option your version update
 
 
 Turn off phased release for your App Store version update. Learon more about phased releases from https://developer.apple.com/help/app-store-connect/update-your-app/release-a-version-update-in-phases. Mutually exclusive with option `--phased-release`.
-### Optional mutually exclusive arguments for action `submit-to-app-store`
-
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

@@ -18,9 +18,9 @@ app-store-connect apps app-store-versions [-h] [--log-stream STREAM] [--no-color
     [--certificates-dir CERTIFICATES_DIRECTORY]
     [--profiles-dir PROFILES_DIRECTORY]
     [--version-id APP_STORE_VERSION_ID_OPTIONAL]
+    [--version-string VERSION_STRING]
     [--platform PLATFORM_OPTIONAL]
     [--state APP_STORE_STATE]
-    [--version-string VERSION_STRING]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `app-store-versions`
@@ -35,6 +35,10 @@ Application Apple ID. An automatically generated ID assigned to your app
 
 
 UUID value of the App Store Version
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 
@@ -43,12 +47,6 @@ App Store Version platform
 
 
 State of App Store Version
-### Optional mutually exclusive arguments for action `app-store-versions`
-
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

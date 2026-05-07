@@ -22,9 +22,9 @@ app-store-connect apps list [-h] [--log-stream STREAM] [--no-color] [--version] 
     [--app-id APPLICATION_ID_RESOURCE_ID_OPTIONAL]
     [--app-name APPLICATION_NAME]
     [--app-sku APPLICATION_SKU]
+    [--version-string VERSION_STRING]
     [--platform PLATFORM_OPTIONAL]
     [--state APP_STORE_STATE]
-    [--version-string VERSION_STRING]
 ```
 ### Optional arguments for action `list`
 
@@ -48,6 +48,10 @@ The name of your app as it will appear in the App Store
 
 
 A unique ID for your app that is not visible on the App Store.
+##### `--version-string, --app-store-version=VERSION_STRING`
+
+
+Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
 
 
@@ -56,12 +60,6 @@ App Store Version platform
 
 
 State of App Store Version
-### Optional mutually exclusive arguments for action `list`
-
-##### `--version-string, --app-store-version=VERSION_STRING`
-
-
-Version of the build published to App Store that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

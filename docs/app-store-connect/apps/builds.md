@@ -22,9 +22,9 @@ app-store-connect apps builds [-h] [--log-stream STREAM] [--no-color] [--version
     [--build-version-number BUILD_VERSION_NUMBER]
     [--expired]
     [--not-expired]
+    [--pre-release-version PRE_RELEASE_VERSION]
     [--processing-state PROCESSING_STATE]
     [--platform PLATFORM]
-    [--pre-release-version PRE_RELEASE_VERSION]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `builds`
@@ -55,6 +55,10 @@ List only expired builds. Mutually exclusive with option `--not-expired`.
 
 
 List only not expired builds. Mutually exclusive with option `--expired`.
+##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
+
+
+Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ##### `--processing-state=PROCESSING | FAILED | INVALID | VALID`
 
 
@@ -63,12 +67,6 @@ Build processing state
 
 
 Apple operating systems
-### Optional mutually exclusive arguments for action `builds`
-
-##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
-
-
-Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
 ### Optional arguments for command `app-store-connect`
 
 ##### `--log-api-calls`

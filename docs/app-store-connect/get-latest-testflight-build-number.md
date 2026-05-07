@@ -21,7 +21,7 @@ app-store-connect get-latest-testflight-build-number [-h] [--log-stream STREAM] 
     [--expired]
     [--not-expired]
     [--include-version]
-    [--pre-release-version PRE_RELEASE_VERSION | --all-versions]
+    [--pre-release-version PRE_RELEASE_VERSION_MUTUALLY_EXCLUSIVE | --all-versions]
     APPLICATION_ID_RESOURCE_ID
 ```
 ### Required arguments for action `get-latest-testflight-build-number`
@@ -50,7 +50,7 @@ List only not expired builds. Mutually exclusive with option `--expired`.
 Explicitly show version string in command output in addition to build number
 ### Optional mutually exclusive arguments for action `get-latest-testflight-build-number`
 
-##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION`
+##### `--pre-release-version, --version-string=PRE_RELEASE_VERSION_MUTUALLY_EXCLUSIVE`
 
 
 Version of the build published to Testflight that identifies an iteration of the bundle. The string can only contain one to three groups of numeric characters (0-9) separated by period in the format [Major].[Minor].[Patch]. For example `3.2.46`
