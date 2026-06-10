@@ -194,6 +194,7 @@ class CertificateType(ResourceEnum):
     """
 
     DEVELOPER_ID_APPLICATION = "DEVELOPER_ID_APPLICATION"
+    DEVELOPER_ID_APPLICATION_G2 = "DEVELOPER_ID_APPLICATION_G2"
     DEVELOPER_ID_KEXT = "DEVELOPER_ID_KEXT"
     DEVELOPMENT = "DEVELOPMENT"
     DISTRIBUTION = "DISTRIBUTION"
@@ -266,6 +267,13 @@ class CertificateType(ResourceEnum):
                 types.append(CertificateType.IOS_DISTRIBUTION)
             elif profile_type is ProfileType.MAC_APP_STORE:
                 types.append(CertificateType.MAC_APP_DISTRIBUTION)
+
+            # macOS direct distribution profiles primarily map to "DEVELOPER_ID_APPLICATION" (see
+            # `from_profile_type` above), but they can equally be signed with its newer "G2" generation.
+            # The provisioning profile keeps the same type regardless of which certificate generation it
+            # was created with.
+            if profile_type in (ProfileType.MAC_APP_DIRECT, ProfileType.MAC_CATALYST_APP_DIRECT):
+                types.append(CertificateType.DEVELOPER_ID_APPLICATION_G2)
 
         # Remove duplicate entries from the list in order-preserving way.
         return list(OrderedDict.fromkeys(types))

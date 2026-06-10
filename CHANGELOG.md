@@ -1,3 +1,13 @@
+Version 0.68.0
+-------------
+
+**Features**
+- Restore support for certificate type `DEVELOPER_ID_APPLICATION_G2` in `codemagic.apple.resources.CertificateType`. Apple [documents it as a valid certificate type](https://developer.apple.com/documentation/appstoreconnectapi/certificatetype) again after it had been temporarily deprecated in [version 0.59.0](https://github.com/codemagic-ci-cd/cli-tools/releases/tag/v0.59.0). This re-enables `app-store-connect certificates create` and `app-store-connect certificates list` invoked with `--type=DEVELOPER_ID_APPLICATION_G2`, as well as macOS direct distribution signing flows invoked with `--profile-type=MAC_APP_DIRECT` or `--profile-type=MAC_CATALYST_APP_DIRECT`.
+
+**Docs**
+- Update docs for `app-store-connect certificates create`.
+- Update docs for `app-store-connect certificates list`.
+
 Version 0.67.0
 -------------
 
