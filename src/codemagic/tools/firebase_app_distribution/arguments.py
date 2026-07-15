@@ -1,8 +1,8 @@
 from codemagic import cli
 from codemagic.cli.colors import Colors
-from codemagic.google.resources.firebase import OrderBy
 
 from .argument_types import CredentialsArgument
+from .argument_types import ReleasesOrderByArgument
 
 select_project_group = cli.MutuallyExclusiveGroup(
     name="select project",
@@ -50,12 +50,12 @@ class ResourcesArgument(cli.Argument):
     ORDER_BY = cli.ArgumentProperties(
         key="order_by",
         flags=("--order-by", "-o"),
-        type=OrderBy,
+        type=ReleasesOrderByArgument,
         description="Sort resources in the specified order",
         argparse_kwargs={
             "required": False,
-            "default": OrderBy.CREATE_TIME_DESC,
-            "choices": list(OrderBy),
+            "default": ReleasesOrderByArgument.CREATE_TIME_DESC,
+            "choices": list(ReleasesOrderByArgument),
         },
     )
 

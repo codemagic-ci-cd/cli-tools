@@ -4,9 +4,9 @@ from typing import List
 from codemagic import cli
 from codemagic.cli import Colors
 from codemagic.google.errors import GoogleError
-from codemagic.google.resources.firebase import OrderBy
 from codemagic.google.resources.firebase import Release
 
+from ..argument_types import ReleasesOrderByArgument
 from ..arguments import ReleasesArgument
 from ..arguments import ResourcesArgument
 from ..errors import FirebaseAppDistributionError
@@ -26,7 +26,7 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         self,
         app_id: str,
         limit: int = ResourcesArgument.LIMIT.get_default(),
-        order_by: OrderBy = ResourcesArgument.ORDER_BY.get_default(),
+        order_by: ReleasesOrderByArgument = ResourcesArgument.ORDER_BY.get_default(),
         should_print: bool = True,
     ) -> List[Release]:
         """
@@ -34,7 +34,7 @@ class ReleasesActionGroup(FirebaseAppDistributionAction, ABC):
         """
 
         try:
-            releases = self.client.releases.list(self.project_number, app_id, order_by, limit)
+            releases = self.client.releases.list(self.project_number, app_id, order_by.order_by, limit)
         except GoogleError as e:
             raise FirebaseAppDistributionError(str(e))
 
