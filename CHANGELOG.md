@@ -1,3 +1,9 @@
+Version 0.69.0
+-------------
+
+**Bugfixes**
+- Fix `firebase-app-distribution` actions `get-latest-build-version` and `releases list`. The Firebase App Distribution API changed `orderBy` query parameter validation and rejects the previously tolerated `createTimeDesc`, requiring the documented space-separated grammar `createTime desc` instead.
+
 Version 0.68.0
 -------------
 

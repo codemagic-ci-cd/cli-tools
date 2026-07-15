@@ -17,6 +17,7 @@ from codemagic.google.resources.firebase import Release
 from codemagic.google.services.firebase import ReleasesService
 from codemagic.tools.firebase_app_distribution import FirebaseAppDistribution
 from codemagic.tools.firebase_app_distribution.argument_types import CredentialsArgument
+from codemagic.tools.firebase_app_distribution.argument_types import ReleasesOrderByArgument
 from codemagic.tools.firebase_app_distribution.arguments import FirebaseArgument
 from codemagic.tools.firebase_app_distribution.errors import FirebaseAppDistributionError
 
@@ -24,6 +25,25 @@ credentials_argument = FirebaseArgument.FIREBASE_SERVICE_ACCOUNT_CREDENTIALS
 project_number_argument = FirebaseArgument.PROJECT_NUMBER
 project_id_argument = FirebaseArgument.PROJECT_ID
 json_output_argument = FirebaseArgument.JSON_OUTPUT
+
+
+@pytest.mark.parametrize(
+    ("argument", "expected_order_by", "expected_cli_token"),
+    (
+        (ReleasesOrderByArgument.CREATE_TIME_DESC, OrderBy.CREATE_TIME_DESC, "createTimeDesc"),
+        (ReleasesOrderByArgument.CREATE_TIME_ASC, OrderBy.CREATE_TIME_ASC, "createTime"),
+    ),
+)
+def test_releases_order_by_argument(argument, expected_order_by, expected_cli_token):
+    # CLI parameter value stays a single, backwards-compatible token and maps to the API-facing OrderBy.
+    assert argument.value == expected_cli_token
+    assert argument.order_by is expected_order_by
+
+
+def test_every_releases_order_by_argument_maps_to_order_by():
+    # Guards against adding a CLI ordering choice without a matching API-facing OrderBy member.
+    for argument in ReleasesOrderByArgument:
+        assert isinstance(argument.order_by, OrderBy)
 
 
 @pytest.fixture

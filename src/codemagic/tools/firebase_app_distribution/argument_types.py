@@ -3,6 +3,17 @@ import json
 from typing import Dict
 
 from codemagic import cli
+from codemagic.google.resources.firebase import OrderBy
+from codemagic.models.enums import ResourceEnum
+
+
+class ReleasesOrderByArgument(ResourceEnum):
+    CREATE_TIME_DESC = "createTimeDesc"
+    CREATE_TIME_ASC = "createTime"
+
+    @property
+    def order_by(self) -> OrderBy:
+        return OrderBy[self.name]
 
 
 class CredentialsArgument(cli.EnvironmentArgumentValue[dict]):

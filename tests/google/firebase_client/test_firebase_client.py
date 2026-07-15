@@ -69,6 +69,29 @@ def test_list_releases(firebase_client, release, mock_releases):
     assert releases[1].buildVersion == "71"
 
 
+@pytest.mark.parametrize(
+    ("order_by", "expected_order_by_param"),
+    (
+        (OrderBy.CREATE_TIME_DESC, "createTime desc"),
+        (OrderBy.CREATE_TIME_ASC, "createTime"),
+    ),
+)
+def test_list_releases_order_by(firebase_client, mock_releases, order_by, expected_order_by_param):
+    firebase_client.releases.list(
+        "firebase-project-id",
+        "firebase-app-id",
+        order_by=order_by,
+        page_size=2,
+    )
+
+    mock_releases.return_value.list.assert_called_once_with(
+        orderBy=expected_order_by_param,
+        parent="projects/firebase-project-id/apps/firebase-app-id",
+        pageSize=2,
+        pageToken="",
+    )
+
+
 def test_list_releases_limit(firebase_client, mock_releases):
     releases = firebase_client.releases.list(
         "firebase-project-number",
