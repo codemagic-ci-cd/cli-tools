@@ -1,3 +1,16 @@
+Version 0.69.1
+-------------
+
+**Bugfixes**
+- Support `Expected Failure` and `Skip Message` test node types for XCTest results
+  which were added in `xcresulttool` test-results schema 0.2.0 (default on Xcode 27).
+  Fixes actions
+  - `xcode-project run-tests`,
+  - `xcode-project test-summary`,
+  - `xcode-project junit-test-results`.
+  Also restore skip messages in JUnit output when Apple emits `Skip Message`
+  children instead of `Failure Message` with result `Skipped`.
+
 Version 0.69.0
 -------------
 

@@ -12,6 +12,9 @@ from codemagic.models.junit import TestCase
 from codemagic.models.junit import TestSuites
 from codemagic.models.xctests import XcResultTool
 from codemagic.models.xctests.converter import Xcode16XcResultConverter
+from codemagic.models.xctests.xcresult import XcTestNode
+from codemagic.models.xctests.xcresult import XcTestNodeType
+from codemagic.models.xctests.xcresult import XcTestResult
 
 
 @pytest.fixture
@@ -151,3 +154,20 @@ def test_converter(mock_datetime, expected_properties):
 def test_parse_xcresult_test_node_duration_value(duration, expected_value):
     value = Xcode16XcResultConverter.parse_xcresult_test_node_duration_value(duration)
     assert value == pytest.approx(expected_value)
+
+
+def test_get_test_case_skipped_from_skip_message_node():
+    xc_test_case = XcTestNode(
+        name="testSkip()",
+        node_type=XcTestNodeType.TEST_CASE,
+        result=XcTestResult.SKIPPED,
+        children=[
+            XcTestNode(
+                name="Test skipped - skipping on purpose",
+                node_type=XcTestNodeType.SKIP_MESSAGE,
+            ),
+        ],
+    )
+    assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(
+        message="Test skipped - skipping on purpose",
+    )

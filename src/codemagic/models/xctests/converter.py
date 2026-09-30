@@ -238,9 +238,14 @@ class Xcode16XcResultConverter(XcResultConverter):
         if xc_test_case.result is not XcTestResult.SKIPPED:
             return None
 
+        # Schema 0.1.0 / Xcode 16: skip reason is a Failure Message child with result Skipped.
         failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
         skipped_message_nodes = (node for node in failure_messages_nodes if node.result is XcTestResult.SKIPPED)
         skipped_messages = [node.name for node in skipped_message_nodes if node.name]
+
+        # Schema 0.2.0+ / Xcode 27: skip reason is a Skip Message child.
+        skip_message_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.SKIP_MESSAGE)
+        skipped_messages.extend(node.name for node in skip_message_nodes if node.name)
 
         return Skipped(message="\n".join(skipped_messages))
 
