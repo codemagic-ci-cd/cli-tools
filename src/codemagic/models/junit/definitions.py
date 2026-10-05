@@ -159,6 +159,7 @@ class TestCase:
     error: Optional[Error] = None
     failure: Optional[Failure] = None
     skipped: Optional[Skipped] = None
+    system_out: Optional[str] = None
 
     __test__ = False  # Tell Pytest not to collect this class as test
 
@@ -190,6 +191,9 @@ class TestCase:
             element.append(self.failure.as_xml())
         if self.skipped:
             element.append(self.skipped.as_xml())
+        if self.system_out:
+            system_out = SubElement(element, "system-out")
+            system_out.text = self.system_out
         return element
 
 

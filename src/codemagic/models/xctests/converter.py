@@ -263,6 +263,17 @@ class Xcode16XcResultConverter(XcResultConverter):
         return Skipped(message="\n".join(unique_skipped_messages))
 
     @classmethod
+    def _get_test_case_system_out(cls, xc_test_case: XcTestNode) -> Optional[str]:
+        if xc_test_case.result is not XcTestResult.EXPECTED_FAILURE:
+            return None
+
+        expected_failure_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.EXPECTED_FAILURE)
+        reasons = [node.name for node in expected_failure_nodes if node.name]
+        if not reasons:
+            return None
+        return "\n".join(dict.fromkeys(reasons))
+
+    @classmethod
     def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:
         duration = timedelta()
 
@@ -310,6 +321,7 @@ class Xcode16XcResultConverter(XcResultConverter):
             time=cls._get_test_node_duration(xc_test_case),
             status=xc_test_case.result.value if xc_test_case.result else None,
             skipped=cls._get_test_case_skipped(xc_test_case),
+            system_out=cls._get_test_case_system_out(xc_test_case),
         )
 
     @classmethod

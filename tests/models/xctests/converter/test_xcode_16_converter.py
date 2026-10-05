@@ -226,3 +226,40 @@ def test_get_test_case_error_excludes_expected_failures():
         message=real_failure,
         type="Failure",
     )
+
+
+def test_get_test_case_system_out_from_expected_failure_children():
+    xc_test_case = XcTestNode(
+        name="testExpectedFailure()",
+        node_type=XcTestNodeType.TEST_CASE,
+        node_identifier="ExpectedFailureProbeTests/testExpectedFailure()",
+        result=XcTestResult.EXPECTED_FAILURE,
+        children=[
+            XcTestNode(
+                name="known bad assertion",
+                node_type=XcTestNodeType.EXPECTED_FAILURE,
+            ),
+        ],
+    )
+    xc_test_suite = XcTestNode(name="ExpectedFailureProbeTests", node_type=XcTestNodeType.TEST_SUITE)
+
+    test_case = Xcode16XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
+
+    assert test_case == TestCase(
+        name="testExpectedFailure()",
+        classname="ExpectedFailureProbeTests",
+        error=None,
+        time=0.0,
+        status="Expected Failure",
+        skipped=None,
+        system_out="known bad assertion",
+    )
+
+
+def test_get_test_case_system_out_absent_for_success():
+    xc_test_case = XcTestNode(
+        name="testPass()",
+        node_type=XcTestNodeType.TEST_CASE,
+        result=XcTestResult.PASSED,
+    )
+    assert Xcode16XcResultConverter._get_test_case_system_out(xc_test_case) is None

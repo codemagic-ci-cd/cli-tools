@@ -10,6 +10,8 @@ Version 0.69.1
   - `xcode-project junit-test-results`.
   Also restore skip messages in JUnit output when Apple emits `Skip Message`
   children instead of `Failure Message` with result `Skipped`.
+- Emit `XCTExpectFailure` reason text in JUnit `<system-out>` for test cases with
+  `status="Expected Failure"`.
 
 Version 0.69.0
 -------------
