@@ -247,7 +247,8 @@ class Xcode16XcResultConverter(XcResultConverter):
         skip_message_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.SKIP_MESSAGE)
         skipped_messages.extend(node.name for node in skip_message_nodes if node.name)
 
-        return Skipped(message="\n".join(skipped_messages))
+        unique_skipped_messages = dict.fromkeys(skipped_messages)
+        return Skipped(message="\n".join(unique_skipped_messages))
 
     @classmethod
     def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:

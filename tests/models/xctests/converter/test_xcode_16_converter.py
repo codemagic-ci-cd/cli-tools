@@ -171,3 +171,24 @@ def test_get_test_case_skipped_from_skip_message_node():
     assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(
         message="Test skipped - skipping on purpose",
     )
+
+
+def test_get_test_case_skipped_deduplicates_identical_messages():
+    message = "Test skipped - skipping on purpose"
+    xc_test_case = XcTestNode(
+        name="testSkip()",
+        node_type=XcTestNodeType.TEST_CASE,
+        result=XcTestResult.SKIPPED,
+        children=[
+            XcTestNode(
+                name=message,
+                node_type=XcTestNodeType.FAILURE_MESSAGE,
+                result=XcTestResult.SKIPPED,
+            ),
+            XcTestNode(
+                name=message,
+                node_type=XcTestNodeType.SKIP_MESSAGE,
+            ),
+        ],
+    )
+    assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(message=message)
