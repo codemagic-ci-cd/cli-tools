@@ -182,12 +182,17 @@ class LegacyXcResultConverter(XcResultConverter):
 
 class Xcode16XcResultConverter(XcResultConverter):
     @classmethod
-    def _iter_nodes(cls, root_node: XcTestNode, node_type: XcTestNodeType) -> Iterator[XcTestNode]:
+    def _iter_nodes(
+        cls,
+        root_node: XcTestNode,
+        node_type: XcTestNodeType,
+        skip_subtree_node_type: Optional[XcTestNodeType] = None,
+    ) -> Iterator[XcTestNode]:
         if root_node.node_type is node_type:
             yield root_node
-        else:
+        elif root_node.node_type is not skip_subtree_node_type:
             for child in root_node.children:
-                yield from cls._iter_nodes(child, node_type)
+                yield from cls._iter_nodes(child, node_type, skip_subtree_node_type)
 
     @classmethod
     def _get_run_destination(cls, root_node: XcTestNode) -> Optional[XcDevice]:
@@ -225,8 +230,15 @@ class Xcode16XcResultConverter(XcResultConverter):
         if xc_test_case.result is not XcTestResult.FAILED:
             return None
 
-        failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
-        failure_messages = [node.name for node in failure_messages_nodes if node.name]
+        failure_messages_nodes = cls._iter_nodes(
+            xc_test_case,
+            XcTestNodeType.FAILURE_MESSAGE,
+            skip_subtree_node_type=XcTestNodeType.EXPECTED_FAILURE,
+        )
+        unexpected_failure_message_nodes = (
+            node for node in failure_messages_nodes if node.result is not XcTestResult.EXPECTED_FAILURE
+        )
+        failure_messages = [node.name for node in unexpected_failure_message_nodes if node.name]
         return Error(
             message=failure_messages[0] if failure_messages else "",
             type="Error" if any("caught error" in m for m in failure_messages) else "Failure",

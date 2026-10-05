@@ -192,3 +192,37 @@ def test_get_test_case_skipped_deduplicates_identical_messages():
         ],
     )
     assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(message=message)
+
+
+def test_get_test_case_error_excludes_expected_failures():
+    real_failure = 'XCTAssertEqual failed: ("3") is not equal to ("4") - should be real failure'
+    xc_test_case = XcTestNode(
+        name="testExpectedFailureThenRealFailure()",
+        node_type=XcTestNodeType.TEST_CASE,
+        result=XcTestResult.FAILED,
+        children=[
+            XcTestNode(
+                name=real_failure,
+                node_type=XcTestNodeType.FAILURE_MESSAGE,
+            ),
+            XcTestNode(
+                name="known bad assertion",
+                node_type=XcTestNodeType.EXPECTED_FAILURE,
+                children=[
+                    XcTestNode(
+                        name="nested expected failure message",
+                        node_type=XcTestNodeType.FAILURE_MESSAGE,
+                    ),
+                ],
+            ),
+            XcTestNode(
+                name="expected failure via result",
+                node_type=XcTestNodeType.FAILURE_MESSAGE,
+                result=XcTestResult.EXPECTED_FAILURE,
+            ),
+        ],
+    )
+    assert Xcode16XcResultConverter._get_test_case_error(xc_test_case) == Error(
+        message=real_failure,
+        type="Failure",
+    )
