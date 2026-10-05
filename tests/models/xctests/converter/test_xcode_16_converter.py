@@ -263,3 +263,42 @@ def test_get_test_case_system_out_absent_for_success():
         result=XcTestResult.PASSED,
     )
     assert Xcode16XcResultConverter._get_test_case_system_out(xc_test_case) is None
+
+
+def test_get_test_case_system_out_on_failed_case_with_expected_failures():
+    real_failure = 'XCTAssertEqual failed: ("3") is not equal to ("4") - should be real failure'
+    xc_test_case = XcTestNode(
+        name="testExpectedFailureThenRealFailure()",
+        node_type=XcTestNodeType.TEST_CASE,
+        node_identifier="ExpectedFailureProbeTests/testExpectedFailureThenRealFailure()",
+        result=XcTestResult.FAILED,
+        children=[
+            XcTestNode(
+                name=real_failure,
+                node_type=XcTestNodeType.FAILURE_MESSAGE,
+            ),
+            XcTestNode(
+                name="known bad assertion",
+                node_type=XcTestNodeType.EXPECTED_FAILURE,
+                children=[
+                    XcTestNode(
+                        name="nested expected failure message",
+                        node_type=XcTestNodeType.FAILURE_MESSAGE,
+                    ),
+                ],
+            ),
+            XcTestNode(
+                name="expected failure via result",
+                node_type=XcTestNodeType.FAILURE_MESSAGE,
+                result=XcTestResult.EXPECTED_FAILURE,
+            ),
+        ],
+    )
+    xc_test_suite = XcTestNode(name="ExpectedFailureProbeTests", node_type=XcTestNodeType.TEST_SUITE)
+
+    test_case = Xcode16XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
+
+    assert test_case.error == Error(message=real_failure, type="Failure")
+    assert test_case.system_out == "known bad assertion\nexpected failure via result"
+    assert test_case.status == "Failed"
+    assert test_case.skipped is None
