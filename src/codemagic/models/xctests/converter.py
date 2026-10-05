@@ -264,11 +264,15 @@ class Xcode16XcResultConverter(XcResultConverter):
 
     @classmethod
     def _get_test_case_system_out(cls, xc_test_case: XcTestNode) -> Optional[str]:
-        if xc_test_case.result is not XcTestResult.EXPECTED_FAILURE:
-            return None
-
         expected_failure_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.EXPECTED_FAILURE)
         reasons = [node.name for node in expected_failure_nodes if node.name]
+
+        failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
+        expected_failure_message_nodes = (
+            node for node in failure_messages_nodes if node.result is XcTestResult.EXPECTED_FAILURE
+        )
+        reasons.extend(node.name for node in expected_failure_message_nodes if node.name)
+
         if not reasons:
             return None
         return "\n".join(dict.fromkeys(reasons))
