@@ -351,3 +351,23 @@ def test_xml(temp_dir, _testsuites, expected_xml_path):
     generated_xml = ElementTree.parse(xml_path)
     expected_xml = ElementTree.parse(expected_xml_path)
     _assert_elements_are_equal(generated_xml.getroot(), expected_xml.getroot())
+
+
+def test_testcase_emits_system_out():
+    testcase = TestCase(
+        classname="ExpectedFailureProbeTests",
+        name="testExpectedFailure()",
+        status="Expected Failure",
+        time=0.001,
+        system_out="known bad assertion",
+    )
+    xml = testcase.as_xml()
+    system_out_elements = [child for child in xml if child.tag == "system-out"]
+    assert len(system_out_elements) == 1
+    assert system_out_elements[0].text == "known bad assertion"
+
+
+def test_testcase_omits_system_out_when_unset():
+    testcase = TestCase(classname="Suite", name="testPass()", status="Success")
+    xml = testcase.as_xml()
+    assert all(child.tag != "system-out" for child in xml)

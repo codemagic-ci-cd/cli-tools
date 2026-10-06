@@ -182,12 +182,17 @@ class LegacyXcResultConverter(XcResultConverter):
 
 class Xcode16XcResultConverter(XcResultConverter):
     @classmethod
-    def _iter_nodes(cls, root_node: XcTestNode, node_type: XcTestNodeType) -> Iterator[XcTestNode]:
+    def _iter_nodes(
+        cls,
+        root_node: XcTestNode,
+        node_type: XcTestNodeType,
+        skip_subtree_node_type: Optional[XcTestNodeType] = None,
+    ) -> Iterator[XcTestNode]:
         if root_node.node_type is node_type:
             yield root_node
-        else:
+        elif root_node.node_type is not skip_subtree_node_type:
             for child in root_node.children:
-                yield from cls._iter_nodes(child, node_type)
+                yield from cls._iter_nodes(child, node_type, skip_subtree_node_type)
 
     @classmethod
     def _get_run_destination(cls, root_node: XcTestNode) -> Optional[XcDevice]:
@@ -225,8 +230,15 @@ class Xcode16XcResultConverter(XcResultConverter):
         if xc_test_case.result is not XcTestResult.FAILED:
             return None
 
-        failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
-        failure_messages = [node.name for node in failure_messages_nodes if node.name]
+        failure_messages_nodes = cls._iter_nodes(
+            xc_test_case,
+            XcTestNodeType.FAILURE_MESSAGE,
+            skip_subtree_node_type=XcTestNodeType.EXPECTED_FAILURE,
+        )
+        unexpected_failure_message_nodes = (
+            node for node in failure_messages_nodes if node.result is not XcTestResult.EXPECTED_FAILURE
+        )
+        failure_messages = [node.name for node in unexpected_failure_message_nodes if node.name]
         return Error(
             message=failure_messages[0] if failure_messages else "",
             type="Error" if any("caught error" in m for m in failure_messages) else "Failure",
@@ -238,11 +250,32 @@ class Xcode16XcResultConverter(XcResultConverter):
         if xc_test_case.result is not XcTestResult.SKIPPED:
             return None
 
+        # Schema 0.1.0 / Xcode 16: skip reason is a Failure Message child with result Skipped.
         failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
         skipped_message_nodes = (node for node in failure_messages_nodes if node.result is XcTestResult.SKIPPED)
         skipped_messages = [node.name for node in skipped_message_nodes if node.name]
 
-        return Skipped(message="\n".join(skipped_messages))
+        # Schema 0.2.0+ / Xcode 27: skip reason is a Skip Message child.
+        skip_message_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.SKIP_MESSAGE)
+        skipped_messages.extend(node.name for node in skip_message_nodes if node.name)
+
+        unique_skipped_messages = dict.fromkeys(skipped_messages)
+        return Skipped(message="\n".join(unique_skipped_messages))
+
+    @classmethod
+    def _get_test_case_system_out(cls, xc_test_case: XcTestNode) -> Optional[str]:
+        expected_failure_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.EXPECTED_FAILURE)
+        reasons = [node.name for node in expected_failure_nodes if node.name]
+
+        failure_messages_nodes = cls._iter_nodes(xc_test_case, XcTestNodeType.FAILURE_MESSAGE)
+        expected_failure_message_nodes = (
+            node for node in failure_messages_nodes if node.result is XcTestResult.EXPECTED_FAILURE
+        )
+        reasons.extend(node.name for node in expected_failure_message_nodes if node.name)
+
+        if not reasons:
+            return None
+        return "\n".join(dict.fromkeys(reasons))
 
     @classmethod
     def parse_xcresult_test_node_duration_value(cls, xc_duration: str) -> float:
@@ -292,6 +325,7 @@ class Xcode16XcResultConverter(XcResultConverter):
             time=cls._get_test_node_duration(xc_test_case),
             status=xc_test_case.result.value if xc_test_case.result else None,
             skipped=cls._get_test_case_skipped(xc_test_case),
+            system_out=cls._get_test_case_system_out(xc_test_case),
         )
 
     @classmethod

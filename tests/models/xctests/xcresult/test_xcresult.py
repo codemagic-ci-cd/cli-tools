@@ -10,6 +10,18 @@ from codemagic.models.xctests.xcresult.xcresult import XcTests
 from codemagic.models.xctests.xcresult.xcresult import XcTestStatistic
 
 
+def test_parse_expected_failure_node_type():
+    node = XcTestNode.from_dict({"nodeType": "Expected Failure", "name": "known bad assertion"})
+    assert node.node_type is XcTestNodeType.EXPECTED_FAILURE
+    assert node.name == "known bad assertion"
+
+
+def test_parse_skip_message_node_type():
+    node = XcTestNode.from_dict({"nodeType": "Skip Message", "name": "Test skipped - skipping on purpose"})
+    assert node.node_type is XcTestNodeType.SKIP_MESSAGE
+    assert node.name == "Test skipped - skipping on purpose"
+
+
 def test_load_test_results_summary(test_results_summary_dict):
     test_results_summary = XcSummary.from_dict(test_results_summary_dict)
 

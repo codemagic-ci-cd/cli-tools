@@ -40,6 +40,8 @@ class XcTestNodeType(str, enum.Enum):
     EXPRESSION = "Expression"
     TEST_VALUE = "Test Value"
     RUNTIME_WARNING = "Runtime Warning"
+    SKIP_MESSAGE = "Skip Message"
+    EXPECTED_FAILURE = "Expected Failure"
 
 
 @dataclasses.dataclass
