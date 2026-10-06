@@ -11,7 +11,7 @@ from codemagic.models.junit import Skipped
 from codemagic.models.junit import TestCase
 from codemagic.models.junit import TestSuites
 from codemagic.models.xctests import XcResultTool
-from codemagic.models.xctests.converter import Xcode16XcResultConverter
+from codemagic.models.xctests.converter import XcResultConverter
 from codemagic.models.xctests.xcresult import XcTestNode
 from codemagic.models.xctests.xcresult import XcTestNodeType
 from codemagic.models.xctests.xcresult import XcTestResult
@@ -42,7 +42,7 @@ def patch_xcresulttool(test_results_summary_dict, test_results_tests_dict):
 def test_converter(mock_datetime, expected_properties):
     mock_datetime.fromtimestamp.return_value = datetime(2024, 10, 15, tzinfo=timezone.utc)
 
-    test_suites: TestSuites = Xcode16XcResultConverter(...).convert()
+    test_suites: TestSuites = XcResultConverter(...).convert()
 
     assert test_suites.name == "Test - banaan"
     assert test_suites.disabled == 0
@@ -152,7 +152,7 @@ def test_converter(mock_datetime, expected_properties):
     ),
 )
 def test_parse_xcresult_test_node_duration_value(duration, expected_value):
-    value = Xcode16XcResultConverter.parse_xcresult_test_node_duration_value(duration)
+    value = XcResultConverter.parse_xcresult_test_node_duration_value(duration)
     assert value == pytest.approx(expected_value)
 
 
@@ -168,7 +168,7 @@ def test_get_test_case_skipped_from_skip_message_node():
             ),
         ],
     )
-    assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(
+    assert XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(
         message="Test skipped - skipping on purpose",
     )
 
@@ -191,7 +191,7 @@ def test_get_test_case_skipped_deduplicates_identical_messages():
             ),
         ],
     )
-    assert Xcode16XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(message=message)
+    assert XcResultConverter._get_test_case_skipped(xc_test_case) == Skipped(message=message)
 
 
 def test_get_test_case_error_excludes_expected_failures():
@@ -222,7 +222,7 @@ def test_get_test_case_error_excludes_expected_failures():
             ),
         ],
     )
-    assert Xcode16XcResultConverter._get_test_case_error(xc_test_case) == Error(
+    assert XcResultConverter._get_test_case_error(xc_test_case) == Error(
         message=real_failure,
         type="Failure",
     )
@@ -243,7 +243,7 @@ def test_get_test_case_system_out_from_expected_failure_children():
     )
     xc_test_suite = XcTestNode(name="ExpectedFailureProbeTests", node_type=XcTestNodeType.TEST_SUITE)
 
-    test_case = Xcode16XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
+    test_case = XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
 
     assert test_case == TestCase(
         name="testExpectedFailure()",
@@ -262,7 +262,7 @@ def test_get_test_case_system_out_absent_for_success():
         node_type=XcTestNodeType.TEST_CASE,
         result=XcTestResult.PASSED,
     )
-    assert Xcode16XcResultConverter._get_test_case_system_out(xc_test_case) is None
+    assert XcResultConverter._get_test_case_system_out(xc_test_case) is None
 
 
 def test_get_test_case_system_out_on_failed_case_with_expected_failures():
@@ -296,7 +296,7 @@ def test_get_test_case_system_out_on_failed_case_with_expected_failures():
     )
     xc_test_suite = XcTestNode(name="ExpectedFailureProbeTests", node_type=XcTestNodeType.TEST_SUITE)
 
-    test_case = Xcode16XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
+    test_case = XcResultConverter._get_test_case(xc_test_case, xc_test_suite)
 
     assert test_case.error == Error(message=real_failure, type="Failure")
     assert test_case.system_out == "known bad assertion\nexpected failure via result"
