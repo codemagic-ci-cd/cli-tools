@@ -1,3 +1,16 @@
+Version 0.70.0
+-------------
+
+This release drops support for parsing XcResult bundles with `xcresulttool` from Xcode versions older than 16.0. Some of the changes to **Python API are backwards incompatible**.
+
+Xcode 16.0 or newer is required to convert XcResult bundles to JUnit test reports. This affects `xcode-project` actions `run-tests`, `test-summary` and `junit-test-results`.
+
+**Development**
+- **Breaking**: Remove `LegacyXcResultConverter` from `codemagic.models.xctests.converter`.
+- **Breaking**: Remove module `codemagic.models.xctests.xcresult.legacy_xcresult` along with all of its definitions (`ActionsInvocationRecord` etc.) that were also exported from packages `codemagic.models.xctests.xcresult` and `codemagic.models.xctests`.
+- **Breaking**: Remove methods `is_legacy`, `get_bundle` and `get_object` from `XcResultTool`.
+- **Breaking**: Merge `Xcode16XcResultConverter` into `XcResultConverter`.
+
 Version 0.69.1
 -------------
 
