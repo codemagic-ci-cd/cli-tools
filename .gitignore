@@ -113,3 +113,8 @@ venv.bak/
 .mypy_cache/
 
 local_scripts/
+
+# AI
+.cursor/
+.claude/
+CLAUDE.md
