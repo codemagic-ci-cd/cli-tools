@@ -48,7 +48,9 @@ class ChangelogEntry(typing.NamedTuple):
 @cli.common_arguments(*GitChangelogArgument)
 class GitChangelog(cli.CliApp):
     """
-    Generate a changelog text from git history
+    Generate a changelog text from git history.
+
+    Platform support: Linux and macOS, with `git` on PATH.
     """
 
     ENTRY_SEPARATOR = "\x1e"

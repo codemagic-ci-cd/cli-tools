@@ -3,7 +3,7 @@ keychain
 ========
 
 
-**Utility to manage macOS keychains and certificates**
+**Utility to manage macOS keychains and certificates.  Platform support: macOS only, since it drives the system `security` tool.**
 ### Usage
 ```bash
 keychain [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -225,7 +225,10 @@ class AndroidAppBundleActionGroup(cli.ActionGroup):
 class AndroidAppBundle(cli.CliApp, PathFinderMixin):
     """
     Manage Android App Bundles using
-    [Bundletool](https://developer.android.com/studio/command-line/bundletool)
+    [Bundletool](https://developer.android.com/studio/command-line/bundletool).
+
+    Platform support: Linux and macOS, with a Java runtime for Bundletool and
+    `jarsigner` from a JDK for the signing actions.
     """
 
     def __init__(self, bundletool_jar: Optional[pathlib.Path | BundleToolJarPathArgument] = None, **kwargs):
