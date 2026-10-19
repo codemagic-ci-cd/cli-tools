@@ -3,7 +3,7 @@ android-keystore
 ================
 
 
-**Manage your Android app code signing keystores**
+**Manage your Android app code signing keystores.  Platform support: Linux and macOS, with `keytool` from a JDK on PATH.**
 ### Usage
 ```bash
 android-keystore [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

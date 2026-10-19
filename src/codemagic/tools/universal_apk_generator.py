@@ -59,7 +59,10 @@ class UniversalApkGeneratorArgument(cli.Argument):
 class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     """
     Generate universal APK files from Android App Bundles.
-    DEPRECATED! Use `android-app-bundle` instead
+    DEPRECATED! Use `android-app-bundle` instead.
+
+    Platform support: Linux and macOS, with a Java runtime for Bundletool, which
+    it delegates to.
     """
 
     def __init__(self, pattern: pathlib.Path, android_signing_info: Optional[AndroidSigningInfo], **kwargs):
