@@ -10,7 +10,9 @@ from codemagic.cli import Colors
 
 class CodemagicCliTools(cli.CliApp):
     """
-    Show general information of installed Codemagic CLI tools
+    Show general information of installed Codemagic CLI tools.
+
+    Platform support: Linux and macOS.
     """
 
     @cli.action("version")

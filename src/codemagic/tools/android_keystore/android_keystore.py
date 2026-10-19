@@ -27,7 +27,9 @@ class AndroidKeystoreError(cli.CliAppException):
 
 class AndroidKeystore(cli.CliApp, PathFinderMixin):
     """
-    Manage your Android app code signing keystores
+    Manage your Android app code signing keystores.
+
+    Platform support: Linux and macOS, with `keytool` from a JDK on PATH.
     """
 
     @classmethod

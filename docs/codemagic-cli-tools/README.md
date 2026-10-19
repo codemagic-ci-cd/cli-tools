@@ -3,7 +3,7 @@ codemagic-cli-tools
 ===================
 
 
-**Show general information of installed Codemagic CLI tools**
+**Show general information of installed Codemagic CLI tools.  Platform support: Linux and macOS.**
 ### Usage
 ```bash
 codemagic-cli-tools [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

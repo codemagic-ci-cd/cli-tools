@@ -29,7 +29,9 @@ class FirebaseAppDistribution(
     ReleasesActionGroup,
 ):
     """
-    Utility to list releases and retrieve the latest release build version number from Firebase
+    Utility to list releases and retrieve the latest release build version number from Firebase.
+
+    Platform support: Linux and macOS.
     """
 
     def __init__(

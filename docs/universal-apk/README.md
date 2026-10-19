@@ -3,7 +3,7 @@ universal-apk
 =============
 
 
-**Generate universal APK files from Android App Bundles. DEPRECATED! Use `android-app-bundle` instead**
+**Generate universal APK files from Android App Bundles. DEPRECATED! Use `android-app-bundle` instead.  Platform support: Linux and macOS, with a Java runtime for Bundletool, which it delegates to.**
 ### Usage
 ```bash
 universal-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

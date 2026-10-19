@@ -1,3 +1,9 @@
+Version UNRELEASED
+-------------
+
+**Docs**
+- Document the platform support of every CLI tool in its description, which shows up in the docs and in `--help` ([#133](https://github.com/codemagic-ci-cd/cli-tools/issues/133)).
+
 Version 0.70.1
 -------------
 

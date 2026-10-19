@@ -33,7 +33,10 @@ class GooglePlay(
     actions.GetLatestBuildNumberAction,
 ):
     """
-    Utility to get the latest build numbers from Google Play using Google Play Developer API
+    Utility to get the latest build numbers from Google Play using Google Play Developer API.
+
+    Platform support: Linux and macOS, with a Java runtime for the actions that
+    read an Android App Bundle.
     """
 
     def __init__(
