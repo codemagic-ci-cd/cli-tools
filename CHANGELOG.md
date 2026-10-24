@@ -1,3 +1,9 @@
+Version 0.70.1
+-------------
+
+**Bugfixes**
+- Fix successful App Store Connect uploads being reported as failed when `altool` also logs an `ERROR:` line, as Xcode 27 does with `Failed to create URL for 'CDUploaderStateInfoResumeFilePath'`. The `UPLOAD SUCCEEDED` check only looked at the start of the output, so it missed the message on a later line. Affects `app-store-connect publish`.
+
 Version 0.70.0
 -------------
 
