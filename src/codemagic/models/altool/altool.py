@@ -280,7 +280,7 @@ class Altool(RunningCliAppMixin, StringConverterMixin):
                 self._hide_environment_variable_values(stdout),
                 0,
             )
-        elif (errors := re.findall(r".*ERROR:\s*(.*)", stdout)) and not re.match(".*UPLOAD SUCCEEDED.*", stdout):
+        elif (errors := re.findall(r".*ERROR:\s*(.*)", stdout)) and "UPLOAD SUCCEEDED" not in stdout:
             raise AltoolCommandError(
                 errors[0],
                 self._hide_environment_variable_values(stdout),
