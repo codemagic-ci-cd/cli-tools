@@ -1,0 +1,22 @@
+Running altool at path '/Applications/Xcode-27.2.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+27.10.4 (2.2)
+Running altool at path '/Applications/Xcode-27.2.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources/altool'...
+
+2026-10-24 04:48:45.654 ERROR: [ContentDelivery.Uploader.7894C51FC0] Failed to create URL for 'CDUploaderStateInfoResumeFilePath'. The file doesn’t exist. (4) The file doesn’t exist.
+2026-10-24 04:48:45.656  INFO: [ContentDelivery.Uploader.7894C51FC0] 
+==========================================
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: c6819933-6f75-4a5f-898a-7f2d10274817
+Transferred 49532740 bytes in 3.120 seconds (15.9MB/s, 127.012Mbps)
+==========================================
+{
+  "details" : {
+    "delivery-uuid" : "c6819933-6f75-4a5f-898a-7f2d10274817",
+    "transferred" : "49532740 bytes in 3.120 seconds (15.9MB/s, 127.012Mbps)"
+  },
+  "os-version" : "Version 27.0.1 (Build 26A434)",
+  "success-message" : "No errors uploading archive at 'build/ios/ipa/app.ipa'.",
+  "tool-path" : "/Applications/Xcode-27.2.app/Contents/SharedFrameworks/ContentDelivery.framework/Resources",
+  "tool-version" : "27.10.4 (2.2)"
+}

@@ -28,6 +28,22 @@ def test_error_handling_on_successful_returncode(mock_check_output: mock.Mock, m
     assert exc_info.value.args == ('Failed to upload archive at "app.ipa":\nFailed to upload part number 8.',)
 
 
+@mock.patch.object(PlatformType, "from_path", mock.Mock(return_value=PlatformType.IOS))
+@mock.patch.object(Altool, "_ensure_altool", mock.Mock(return_value=True))
+@mock.patch.object(Altool, "_log_process_output", mock.Mock())
+@mock.patch("subprocess.check_output", autospec=True)
+def test_logged_error_before_upload_succeeded(mock_check_output: mock.Mock, mocks_dir: pathlib.Path):
+    mock_name = "mock_upload_success_with_error_log_stdout_xcode_27_2.txt"
+    mock_check_output.side_effect = [(mocks_dir / mock_name).read_bytes()]
+
+    altool = Altool(username="user@example.com", password="xxxx-yyyy-zzzz-wwww")
+    result = altool.upload_app(Path("app.ipa"))
+
+    mock_check_output.assert_called_once()
+    assert result is not None
+    assert result.success_message == "No errors uploading archive at 'build/ios/ipa/app.ipa'."
+
+
 @pytest.mark.parametrize(
     "mock_name",
     [
@@ -36,6 +52,7 @@ def test_error_handling_on_successful_returncode(mock_check_output: mock.Mock, m
         "mock_upload_success_verbose_stdout_xcode_15_4.txt",
         "mock_upload_success_verbose_stdout_xcode_16_4.txt",
         "mock_upload_success_verbose_stdout_xcode_26_0.txt",
+        "mock_upload_success_with_error_log_stdout_xcode_27_2.txt",
         "mock_upload_failed_stdout_xcode_26_0.txt",
         "mock_upload_failed_stdout_xcode_16_4.txt",
         "mock_upload_failed_stdout_xcode_15_4.txt",
