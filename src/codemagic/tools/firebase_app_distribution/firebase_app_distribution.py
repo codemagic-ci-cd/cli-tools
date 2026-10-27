@@ -30,9 +30,9 @@ class FirebaseAppDistribution(
 ):
     """
     Utility to list releases and retrieve the latest release build version number from Firebase.
-
-    Platform support: Linux and macOS.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(
         self,

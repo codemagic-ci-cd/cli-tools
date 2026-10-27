@@ -50,8 +50,10 @@ class GitChangelog(cli.CliApp):
     """
     Generate a changelog text from git history.
 
-    Platform support: Linux and macOS, with `git` on PATH.
+    Requires `git` on PATH.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     ENTRY_SEPARATOR = "\x1e"
     PARAM_SEPARATOR = "\x1f"

@@ -211,7 +211,7 @@ class ToolDocumentationGenerator:
         os.makedirs(self.tool_prefix, exist_ok=True)
         md = MdUtils(file_name=f"{self.tool_prefix}/README", title=self.tool_command)
         writer = Writer(md)
-        writer.write_description(self.tool.__doc__)
+        writer.write_description(self.tool.get_description())
         writer.write_command_usage(self)
         self._write_tool_command_arguments_and_options(writer)
         writer.write_actions_table(self.tool_serialized_actions)
@@ -314,7 +314,7 @@ class ToolDocumentationGenerator:
             )
 
         parser = argparse.ArgumentParser(
-            description=tool.__doc__,
+            description=tool.get_description(),
             formatter_class=CliHelpFormatter,
         )
         cli.argument.ArgumentParserBuilder.set_default_cli_options(parser)
@@ -444,7 +444,7 @@ class Writer:
 
         def _get_tool_doc(tool: Type[cli.CliApp]) -> List[str]:
             assert isinstance(tool.__doc__, str)
-            return [_get_tool_link(tool), str_plain(tool.__doc__)]
+            return [_get_tool_link(tool), str_plain(tool.get_description())]
 
         self.write_table(list(map(_get_tool_doc, tools)), ["Tool name", "Description"])
 

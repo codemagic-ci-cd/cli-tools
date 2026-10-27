@@ -3,7 +3,7 @@ firebase-app-distribution
 =========================
 
 
-**Utility to list releases and retrieve the latest release build version number from Firebase.  Platform support: Linux and macOS.**
+**Utility to list releases and retrieve the latest release build version number from Firebase. Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 firebase-app-distribution [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

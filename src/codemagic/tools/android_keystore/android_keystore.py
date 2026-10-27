@@ -29,8 +29,10 @@ class AndroidKeystore(cli.CliApp, PathFinderMixin):
     """
     Manage your Android app code signing keystores.
 
-    Platform support: Linux and macOS, with `keytool` from a JDK on PATH.
+    Requires `keytool` from a JDK on PATH.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     @classmethod
     def _get_certificate_attributes(

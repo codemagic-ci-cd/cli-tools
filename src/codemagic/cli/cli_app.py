@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import abc
 import argparse
+import enum
+import inspect
 import os
 import pathlib
 import platform
@@ -84,8 +86,21 @@ class CliAppException(Exception):  # noqa: N818
         return f"Running {cmd_args} failed with exit code {exit_code}: {self.message}"
 
 
+class Platform(enum.Enum):
+    LINUX = "Linux"
+    MACOS = "macOS"
+    WINDOWS = "Windows"
+
+
+def _join_platforms(platforms: Sequence[str]) -> str:
+    if len(platforms) == 1:
+        return platforms[0]
+    return f"{', '.join(platforms[:-1])} and {platforms[-1]}"
+
+
 class CliApp(metaclass=abc.ABCMeta):
     CLASS_ARGUMENTS: Tuple[Argument, ...] = tuple()
+    SUPPORTED_PLATFORMS: Tuple[Platform, ...] = tuple()
     REGISTERED_CLASS_ARGUMENTS: Dict[Type[CliApp], Tuple[Argument, ...]] = {}
     CLI_EXCEPTION_TYPE: Type[CliAppException] = CliAppException
     _printer = None
@@ -105,6 +120,14 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def get_executable_name(cls) -> str:
         return re.sub(r"(.)([A-Z])", r"\1-\2", cls.__name__).lower()
+
+    @classmethod
+    def get_description(cls) -> str:
+        description = inspect.cleandoc(cls.__doc__ or "")
+        supported = [platform.value for platform in Platform if platform in cls.SUPPORTED_PLATFORMS]
+        if not supported:
+            return description
+        return f"{description}\nPlatform support: {_join_platforms(supported)}."
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):
@@ -361,7 +384,7 @@ class CliApp(metaclass=abc.ABCMeta):
             raise RuntimeError(f'CLI app "{cls.__name__}" is not documented')
 
         main_parser = argparse.ArgumentParser(
-            description=Colors.BOLD(cls.__doc__),
+            description=Colors.BOLD(cls.get_description()),
             formatter_class=CliHelpFormatter,
         )
         ArgumentParserBuilder.set_default_cli_options(main_parser)

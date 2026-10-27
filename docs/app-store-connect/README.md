@@ -3,7 +3,7 @@ app-store-connect
 =================
 
 
-**Interact with Apple services via App Store Connect API.  Platform support: Linux and macOS, except the `publish` action, which runs `xcrun altool` and therefore needs macOS.**
+**Interact with Apple services via App Store Connect API.  The `publish` action runs `xcrun altool` and therefore needs macOS. Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

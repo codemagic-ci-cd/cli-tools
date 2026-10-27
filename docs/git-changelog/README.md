@@ -3,7 +3,7 @@ git-changelog
 =============
 
 
-**Generate a changelog text from git history.  Platform support: Linux and macOS, with `git` on PATH.**
+**Generate a changelog text from git history.  Requires `git` on PATH. Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 git-changelog [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

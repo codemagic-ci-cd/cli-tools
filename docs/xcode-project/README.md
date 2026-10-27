@@ -3,7 +3,7 @@ xcode-project
 =============
 
 
-**Utility to work with Xcode projects. Use it to manage iOS application code signing properties for builds, create IPAs and run tests.  Platform support: macOS only, with the Xcode command line tools.**
+**Utility to work with Xcode projects. Use it to manage iOS application code signing properties for builds, create IPAs and run tests.  Requires the Xcode command line tools. Platform support: macOS.**
 ### Usage
 ```bash
 xcode-project [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

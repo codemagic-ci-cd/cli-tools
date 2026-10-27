@@ -58,9 +58,10 @@ class AppStoreConnect(
     """
     Interact with Apple services via App Store Connect API.
 
-    Platform support: Linux and macOS, except the `publish` action, which runs
-    `xcrun altool` and therefore needs macOS.
+    The `publish` action runs `xcrun altool` and therefore needs macOS.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(
         self,

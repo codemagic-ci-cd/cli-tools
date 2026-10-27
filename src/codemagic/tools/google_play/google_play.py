@@ -35,9 +35,10 @@ class GooglePlay(
     """
     Utility to get the latest build numbers from Google Play using Google Play Developer API.
 
-    Platform support: Linux and macOS, with a Java runtime for the actions that
-    read an Android App Bundle.
+    Requires a Java runtime for the actions that read an Android App Bundle.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(
         self,

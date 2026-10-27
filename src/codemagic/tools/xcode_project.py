@@ -58,8 +58,10 @@ class XcodeProject(cli.CliApp, PathFinderMixin):
     Utility to work with Xcode projects. Use it to manage iOS application
     code signing properties for builds, create IPAs and run tests.
 
-    Platform support: macOS only, with the Xcode command line tools.
+    Requires the Xcode command line tools.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.MACOS,)
 
     @cli.action(
         "detect-bundle-id",

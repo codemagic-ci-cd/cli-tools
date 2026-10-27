@@ -3,7 +3,7 @@ google-play
 ===========
 
 
-**Utility to get the latest build numbers from Google Play using Google Play Developer API.  Platform support: Linux and macOS, with a Java runtime for the actions that read an Android App Bundle.**
+**Utility to get the latest build numbers from Google Play using Google Play Developer API.  Requires a Java runtime for the actions that read an Android App Bundle. Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 google-play [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

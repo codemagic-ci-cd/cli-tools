@@ -10,6 +10,7 @@ from .argument import MutuallyExclusiveGroup
 from .argument import TypedCliArgument
 from .cli_app import CliApp
 from .cli_app import CliAppException
+from .cli_app import Platform
 from .cli_app import common_arguments
 from .cli_process import CliProcess
 from .cli_types import CommandArg

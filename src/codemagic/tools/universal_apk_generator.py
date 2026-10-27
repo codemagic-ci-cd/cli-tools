@@ -61,9 +61,10 @@ class UniversalApkGenerator(cli.CliApp, PathFinderMixin):
     Generate universal APK files from Android App Bundles.
     DEPRECATED! Use `android-app-bundle` instead.
 
-    Platform support: Linux and macOS, with a Java runtime for Bundletool, which
-    it delegates to.
+    Requires a Java runtime for Bundletool, which it delegates to.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(self, pattern: pathlib.Path, android_signing_info: Optional[AndroidSigningInfo], **kwargs):
         super().__init__(**kwargs)
