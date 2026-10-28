@@ -3,7 +3,11 @@ android-keystore
 ================
 
 
-**Manage your Android app code signing keystores.  Requires `keytool` from a JDK on PATH. Platform support: Linux, macOS and Windows.**
+**Manage your Android app code signing keystores.**
+
+**Requires `keytool` from a JDK on PATH.**
+
+**Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 android-keystore [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -43,4 +47,4 @@ Enable verbose logging for commands
 |[`create-debug-keystore`](create-debug-keystore.md)|Create Android debug keystore at ~/.android/debug.keystore|
 |[`certificate`](certificate.md)|Extract certificate for specified alias from the keystore|
 |[`certificates`](certificates.md)|List certificates that are included in keystore|
-|[`verify`](verify.md)|Check that the keystore password, key password and key alias are correct for specified keystore|
+|[`verify`](verify.md)|Check that the keystore password, key password and key alias are correct         for specified keystore|

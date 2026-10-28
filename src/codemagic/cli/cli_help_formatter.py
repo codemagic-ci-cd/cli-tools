@@ -97,6 +97,12 @@ class CliHelpFormatter(argparse.HelpFormatter):
         # return a single string
         return self._join_parts(parts)
 
+    def _fill_text(self, text: str, width: int, indent: str) -> str:
+        # Reflow each paragraph separately to keep blank lines between them
+        paragraphs = re.split(r"\n\s*\n", text.strip())
+        filled = [super(CliHelpFormatter, self)._fill_text(paragraph, width, indent) for paragraph in paragraphs]
+        return "\n\n".join(filled)
+
     def _format_usage(self, *args, **kwargs) -> str:
         usage = super()._format_usage(*args, **kwargs)
         return self._exclude_suppressed_actions(usage)

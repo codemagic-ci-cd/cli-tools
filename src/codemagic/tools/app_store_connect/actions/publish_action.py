@@ -313,6 +313,7 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
     ) -> None:
         """
         Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers.
+
         Requires macOS, since the package is validated and uploaded with `xcrun altool`.
         """
         if bool(skip_package_validation):

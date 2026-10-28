@@ -1,8 +1,13 @@
 Version UNRELEASED
 -------------
 
+**Development**
+- Add `Platform` enumeration, exported as `codemagic.cli.Platform`.
+- Add `CliApp.SUPPORTED_PLATFORMS` class attribute for declaring the platforms that a CLI tool supports. All tools in `codemagic.tools` declare it.
+- Add `CliApp.get_description` class method that returns the tool docstring followed by the generated `Platform support:` line. It is used for `--help` output and documentation generation.
+
 **Docs**
-- Declare the supported platforms of every CLI tool as `CliApp.SUPPORTED_PLATFORMS` and append the generated `Platform support:` line to the tool description, so `--help` and the generated docs cannot drift from the declaration ([#133](https://github.com/codemagic-ci-cd/cli-tools/issues/133)).
+- Show the supported platforms of every CLI tool in its `--help` output and in the generated documentation ([#133](https://github.com/codemagic-ci-cd/cli-tools/issues/133)).
 
 Version 0.70.1
 -------------

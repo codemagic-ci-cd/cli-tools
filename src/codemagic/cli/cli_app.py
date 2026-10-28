@@ -124,10 +124,10 @@ class CliApp(metaclass=abc.ABCMeta):
     @classmethod
     def get_description(cls) -> str:
         description = inspect.cleandoc(cls.__doc__ or "")
-        supported = [platform.value for platform in Platform if platform in cls.SUPPORTED_PLATFORMS]
+        supported = [supported.value for supported in Platform if supported in cls.SUPPORTED_PLATFORMS]
         if not supported:
             return description
-        return f"{description}\nPlatform support: {_join_platforms(supported)}."
+        return f"{description}\n\nPlatform support: {_join_platforms(supported)}."
 
     @classmethod
     def echo(cls, message: str, *args, **kwargs):

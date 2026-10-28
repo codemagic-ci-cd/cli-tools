@@ -95,5 +95,5 @@ Enable verbose logging for commands
 |[`delete`](delete.md)|Delete specified App Store version from Apple Developer portal|
 |[`get`](get.md)|Read App Store Version information|
 |[`phased-release`](phased-release.md)|Read the phased release status and configuration for a version with phased release enabled.|
-|[`localizations`](localizations.md)|List All App Store Version Localizations for an App Store Version. Get a list of localized, version-level information about an app, for all locales.|
+|[`localizations`](localizations.md)|List All App Store Version Localizations for an App Store Version.         Get a list of localized, version-level information about an app, for all locales.|
 |[`modify`](modify.md)|Update the app store version for a specific app.|

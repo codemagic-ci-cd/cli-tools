@@ -51,6 +51,6 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`upload-apk`](internal-app-sharing/upload-apk.md)|Upload APK to Google Play through Internal App Sharing to get a link that can be shared with your team|
-|[`upload-bundle`](internal-app-sharing/upload-bundle.md)|Upload App Bundle to Google Play through Internal App Sharing to get a link that can be shared with your team|
-|[`upload`](internal-app-sharing/upload.md)|Upload APK or App Bundle to Google Play through Internal App Sharing to get a link that can be shared with your team|
+|[`upload-apk`](internal-app-sharing/upload-apk.md)|Upload APK to Google Play through Internal App Sharing         to get a link that can be shared with your team|
+|[`upload-bundle`](internal-app-sharing/upload-bundle.md)|Upload App Bundle to Google Play through Internal App Sharing         to get a link that can be shared with your team|
+|[`upload`](internal-app-sharing/upload.md)|Upload APK or App Bundle to Google Play through Internal App Sharing         to get a link that can be shared with your team|

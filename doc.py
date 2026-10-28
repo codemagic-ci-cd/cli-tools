@@ -416,8 +416,8 @@ class Writer:
         self.file.write("\n")
 
     def write_description(self, content: str):
-        content = str_plain(content)
-        self.file.new_paragraph(f"**{content}**", wrap_width=0)
+        for paragraph in str_paragraphs(content):
+            self.file.new_paragraph(f"**{paragraph}**", wrap_width=0)
 
     def write_command_usage(
         self,
@@ -443,8 +443,7 @@ class Writer:
             return f"[`{tool.get_executable_name()}`]({tool.get_executable_name()}/README.md)"
 
         def _get_tool_doc(tool: Type[cli.CliApp]) -> List[str]:
-            assert isinstance(tool.__doc__, str)
-            return [_get_tool_link(tool), str_plain(tool.get_description())]
+            return [_get_tool_link(tool), str_table_cell(tool.get_description())]
 
         self.write_table(list(map(_get_tool_doc, tools)), ["Tool name", "Description"])
 
@@ -455,7 +454,7 @@ class Writer:
         def _get_action_doc(action: Action) -> List[str]:
             action_group_str = f"{action_group.name}/" if action_group else ""
             action_link = f"{action_group_str}{action.action_name}.md"
-            return [f"[`{action.action_name}`]({action_link})", str_plain(action.description)]
+            return [f"[`{action.action_name}`]({action_link})", str_table_cell(action.description)]
 
         self.file.new_header(level=3, title="Actions", add_table_of_contents="n")
         self.write_table(list(map(_get_action_doc, actions)), ["Action", "Description"])
@@ -546,6 +545,14 @@ def str_plain(string: str) -> str:
     string = re.sub(f"([^`]){blue}([^\x1b]+){reset}([^`])", r"\1`\2`\3", string)  # Convert ANSI blue to backticks
     string = re.sub(r"\x1b\[\d*m", "", string)  # Remove all other ANSI formatting
     return re.sub(r"[\n\t]", " ", string).strip()  # Remove newlines and tabs
+
+
+def str_paragraphs(string: str) -> List[str]:
+    return [str_plain(paragraph) for paragraph in re.split(r"\n\s*\n", string.strip())]
+
+
+def str_table_cell(string: str) -> str:
+    return "<br>".join(str_paragraphs(string))
 
 
 def main():

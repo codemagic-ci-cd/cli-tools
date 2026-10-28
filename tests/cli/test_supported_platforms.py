@@ -23,6 +23,6 @@ def test_tool_declares_supported_platforms(tool):
 
 def test_description_appends_the_supported_platforms():
     assert codemagic.tools.CodemagicCliTools.get_description().endswith(
-        "\nPlatform support: Linux, macOS and Windows.",
+        "\n\nPlatform support: Linux, macOS and Windows.",
     )
-    assert codemagic.tools.Keychain.get_description().endswith("\nPlatform support: macOS.")
+    assert codemagic.tools.Keychain.get_description().endswith("\n\nPlatform support: macOS.")

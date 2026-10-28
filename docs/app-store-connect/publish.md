@@ -3,7 +3,9 @@ publish
 =======
 
 
-**Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers. Requires macOS, since the package is validated and uploaded with `xcrun altool`.**
+**Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers.**
+
+**Requires macOS, since the package is validated and uploaded with `xcrun altool`.**
 ### Usage
 ```bash
 app-store-connect publish [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
