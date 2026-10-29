@@ -1,8 +1,6 @@
 import pathlib
 from unittest import mock
 
-from codemagic.apple.app_store_connect import IssuerId
-from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import Locale
 from codemagic.apple.resources import Platform
 from codemagic.apple.resources import ReleaseType
@@ -11,38 +9,33 @@ from codemagic.tools.app_store_connect.arguments import AppStoreVersionLocalizat
 from codemagic.tools.app_store_connect.arguments import Types
 
 
-def test_app_store_submission():
-    app_store_connect = AppStoreConnect(
-        issuer_id=IssuerId("issuer-id"),
-        key_identifier=KeyIdentifier("key-identifier"),
-        private_key="private-key",
-    )
+def test_app_store_submission(mock_app_store_connect: AppStoreConnect):
     mock_ipa = mock.MagicMock(version="1.2.3", is_for_tvos=lambda: False)
     mock_build = mock.MagicMock(id="mock-build-id")
 
     with mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_get_publishing_application_packages",
         return_value=[mock_ipa],
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_publish_application_package",
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_get_uploaded_build_application",
         return_value=mock.MagicMock(),
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_get_uploaded_build",
         return_value=mock_build,
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "wait_until_build_is_processed",
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "submit_to_app_store",
     ) as mock_submit_to_app_store:
-        app_store_connect.publish(
+        mock_app_store_connect.publish(
             [pathlib.Path("path/to/application.ipa")],
             submit_to_app_store=True,
             release_type=ReleaseType.MANUAL,

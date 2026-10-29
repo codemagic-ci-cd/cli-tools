@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import pathlib
 
 import pytest
 
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.resources import Profile
+from codemagic.apple.resources import SigningCertificate
 from codemagic.tools.app_store_connect import AppStoreConnect
 from codemagic.tools.app_store_connect.arguments import AppStoreConnectArgument
 from codemagic.tools.app_store_connect.arguments import Types
+
+_RESOURCE_MOCKS_DIR = pathlib.Path(__file__).parents[2] / "apple" / "resources" / "mocks"
 
 
 @pytest.fixture(autouse=True)
@@ -20,6 +27,30 @@ def register_args(cli_argument_group):
 @pytest.fixture
 def mock_auth_key() -> pathlib.Path:
     return pathlib.Path(__file__).parent / "mocks" / "AuthKeyMock.p8"
+
+
+@pytest.fixture
+def profile() -> Profile:
+    return Profile(json.loads((_RESOURCE_MOCKS_DIR / "profile.json").read_text()))
+
+
+@pytest.fixture
+def profile_without_content() -> Profile:
+    return Profile(json.loads((_RESOURCE_MOCKS_DIR / "profile_without_content.json").read_text()))
+
+
+@pytest.fixture
+def signing_certificate() -> SigningCertificate:
+    return SigningCertificate(json.loads((_RESOURCE_MOCKS_DIR / "certificate.json").read_text()))
+
+
+@pytest.fixture
+def mock_app_store_connect() -> AppStoreConnect:
+    return AppStoreConnect(
+        issuer_id=IssuerId("issuer-id"),
+        key_identifier=KeyIdentifier("key-identifier"),
+        private_key="private-key",
+    )
 
 
 @pytest.fixture()

@@ -78,6 +78,12 @@ def api_profile() -> Dict:
 
 
 @pytest.fixture
+def api_profile_without_content() -> Dict:
+    mock_path = pathlib.Path(__file__).parent / "mocks" / "profile_without_content.json"
+    return json.loads(mock_path.read_text())
+
+
+@pytest.fixture
 def api_mock_resource() -> Dict:
     mock_path = pathlib.Path(__file__).parent / "mocks" / "mock_resource.json"
     return json.loads(mock_path.read_text())
