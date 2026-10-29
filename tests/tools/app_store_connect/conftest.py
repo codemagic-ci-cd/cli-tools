@@ -7,6 +7,8 @@ import pathlib
 
 import pytest
 
+from codemagic.apple.app_store_connect import IssuerId
+from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import Profile
 from codemagic.apple.resources import SigningCertificate
 from codemagic.tools.app_store_connect import AppStoreConnect
@@ -40,6 +42,15 @@ def profile_without_content() -> Profile:
 @pytest.fixture
 def signing_certificate() -> SigningCertificate:
     return SigningCertificate(json.loads((_RESOURCE_MOCKS_DIR / "certificate.json").read_text()))
+
+
+@pytest.fixture
+def mock_app_store_connect() -> AppStoreConnect:
+    return AppStoreConnect(
+        issuer_id=IssuerId("issuer-id"),
+        key_identifier=KeyIdentifier("key-identifier"),
+        private_key="private-key",
+    )
 
 
 @pytest.fixture()
