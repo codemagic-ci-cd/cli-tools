@@ -1,0 +1,49 @@
+{
+  "type": "profiles",
+  "id": "XYZ1234567",
+  "attributes": {
+    "profileState": "EXPIRED",
+    "createdDate": null,
+    "profileType": "IOS_APP_DEVELOPMENT",
+    "profileVersion": "1",
+    "name": "Expired profile",
+    "uuid": "0ecf3811-7d5b-4dee-843e-2e085708cb6b",
+    "platform": "IOS",
+    "expirationDate": "2020-01-31T00:00:00.000+00:00"
+  },
+  "relationships": {
+    "bundleId": {
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/relationships/bundleId",
+        "related": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/bundleId"
+      }
+    },
+    "certificates": {
+      "meta": {
+        "paging": {
+          "total": 0,
+          "limit": 2147483647
+        }
+      },
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/relationships/certificates",
+        "related": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/certificates"
+      }
+    },
+    "devices": {
+      "meta": {
+        "paging": {
+          "total": 0,
+          "limit": 2147483647
+        }
+      },
+      "links": {
+        "self": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/relationships/devices",
+        "related": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567/devices"
+      }
+    }
+  },
+  "links": {
+    "self": "https://api.appstoreconnect.apple.com/v1/profiles/XYZ1234567"
+  }
+}

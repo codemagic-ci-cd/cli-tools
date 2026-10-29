@@ -1,3 +1,16 @@
+Version 0.70.2
+-------------
+
+**Bugfixes**
+- Do not fail to load provisioning profiles from App Store Connect API that have no `profileContent` attribute. Apple omits it for some old expired profiles, which crashed for example `app-store-connect bundle-ids profiles` with `TypeError`.
+  - Actions `app-store-connect profiles list`, `app-store-connect profiles get` and `app-store-connect bundle-ids profiles` skip saving such profiles with a warning when `--save` is given.
+  - Action `app-store-connect fetch-signing-files` does not consider such profiles usable, so a new profile is created if `--create` is given and otherwise the action fails.
+
+**Development**
+- Make attribute `profileContent` optional on `Profile` resource. Property `Profile.profile_content` raises `ValueError` if the profile has no content.
+- Add property `has_profile_content` to `Profile` resource.
+- Add optional attribute `profileVersion` to `Profile` resource.
+
 Version 0.70.1
 -------------
 
