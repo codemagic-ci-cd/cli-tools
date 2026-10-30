@@ -36,7 +36,10 @@ class SigningFileSaverMixin:
         tf.close()
         return pathlib.Path(tf.name)
 
-    def _save_profile(self, profile: Profile) -> pathlib.Path:
+    def _save_profile(self, profile: Profile) -> Optional[pathlib.Path]:
+        if not profile.has_profile_content:
+            self.printer.log_not_saved(profile, "profile content is missing")
+            return None
         profile_path = self._get_unique_path(
             f"{profile.attributes.profileType}_{profile.id}{profile.profile_extension}",
             self.profiles_directory,
@@ -71,7 +74,8 @@ class SigningFileSaverMixin:
         return p12_path
 
     def _save_profiles(self, profiles: Sequence[Profile]) -> List[pathlib.Path]:
-        return [self._save_profile(profile) for profile in profiles]
+        saved_paths = (self._save_profile(profile) for profile in profiles)
+        return [path for path in saved_paths if path is not None]
 
     def _save_certificates(
         self,

@@ -236,6 +236,10 @@ class FetchSigningFilesAction(AbstractBaseAction, metaclass=ABCMeta):
         usable_profiles, stale_profiles = [], []
         certificate_ids = {c.id for c in certificates}
         for profile in all_profiles:
+            if not profile.has_profile_content:
+                message = f"Skip {Profile} {profile.get_display_info()}: profile content is missing"
+                self.logger.warning(Colors.YELLOW(message))
+                continue
             try:
                 if self._has_certificate(profile, certificate_ids):
                     usable_profiles.append(profile)

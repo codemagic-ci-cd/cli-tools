@@ -158,6 +158,9 @@ class ResourcePrinter:
         destination = shlex.quote(str(path))
         self.logger.info(Colors.GREEN(f"Saved {resource.__class__} {resource.get_display_info()} to {destination}"))
 
+    def log_not_saved(self, resource: Union[SigningCertificate, Profile], reason: str):
+        self.logger.warning(Colors.YELLOW(f"Skip saving {resource.__class__} {resource.get_display_info()}: {reason}"))
+
     def log_modify(self, resource_type: Type[R], resource_reference: ResourceReference):
         self.logger.info(Colors.BLUE(f"Modify {resource_type} {Resource.get_id(resource_reference)}"))
 

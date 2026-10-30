@@ -23,6 +23,8 @@ class Profile(Resource):
 
     @dataclass
     class Attributes(Resource.Attributes):
+        _OMIT_IF_NONE_KEYS = ("profileContent", "profileVersion")
+
         name: str
         platform: BundleIdPlatform
         uuid: str
@@ -30,7 +32,8 @@ class Profile(Resource):
         profileState: ProfileState
         profileType: ProfileType
         expirationDate: datetime
-        profileContent: str = field(metadata={"hide": True})
+        profileContent: Optional[str] = field(default=None, metadata={"hide": True})
+        profileVersion: Optional[str] = None
 
         def __post_init__(self):
             if isinstance(self.platform, str):
@@ -60,5 +63,12 @@ class Profile(Resource):
         return ".mobileprovision"
 
     @property
+    def has_profile_content(self) -> bool:
+        return bool(self.attributes.profileContent)
+
+    @property
     def profile_content(self) -> bytes:
-        return b64decode(self.attributes.profileContent)
+        content = self.attributes.profileContent
+        if not content:
+            raise ValueError(f"{self.get_display_info()} does not have profile content")
+        return b64decode(content)

@@ -1,7 +1,5 @@
 from unittest import mock
 
-from codemagic.apple.app_store_connect import IssuerId
-from codemagic.apple.app_store_connect import KeyIdentifier
 from codemagic.apple.resources import App
 from codemagic.apple.resources import AppStoreVersion
 from codemagic.apple.resources import Build
@@ -18,13 +16,10 @@ from codemagic.tools.app_store_connect.arguments import AppStoreVersionLocalizat
 
 
 @mock.patch("codemagic.tools.AppStoreConnect.api_client")
-def test_submit_to_app_store_platform_using_version_info(mock_api_client: mock.MagicMock):
-    app_store_connect = AppStoreConnect(
-        issuer_id=IssuerId("issuer-id"),
-        key_identifier=KeyIdentifier("key-identifier"),
-        private_key="private-key",
-    )
-
+def test_submit_to_app_store_platform_using_version_info(
+    mock_api_client: mock.MagicMock,
+    mock_app_store_connect: AppStoreConnect,
+):
     build = mock.MagicMock(spec=Build, id=ResourceId("build-id"))
     app = mock.MagicMock(spec=App, id=ResourceId("app-id"))
     pre_release_version = mock.MagicMock(spec=PreReleaseVersion, id=ResourceId("pre-release-version-id"))
@@ -35,38 +30,38 @@ def test_submit_to_app_store_platform_using_version_info(mock_api_client: mock.M
     mock_api_client.builds.read_with_include.return_value = (build, app)
 
     with mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_cancel_previous_submissions",
     ) as mock_cancel_previous_submissions, mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "wait_until_build_is_processed",
     ) as mock_wait_until_build_is_processed, mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "get_build_pre_release_version",
         return_value=pre_release_version,
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_ensure_app_store_version",
         return_value=app_store_version,
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_manage_app_store_version_phased_release",
     ) as mock_manage_app_store_version_phased_release, mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_create_or_update_app_store_version_localizations",
     ), mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "_create_review_submission",
         return_value=review_submission,
     ) as mock_create_review_submission, mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "create_review_submission_item",
         return_value=review_submission_item,
     ) as mock_create_review_submission_item, mock.patch.object(
-        app_store_connect,
+        mock_app_store_connect,
         "confirm_review_submission",
     ) as mock_confirm_review_submission:
-        created_review_submission, created_review_submission_item = app_store_connect.submit_to_app_store(
+        created_review_submission, created_review_submission_item = mock_app_store_connect.submit_to_app_store(
             build.id,
             max_build_processing_wait=23,
             cancel_previous_submissions=True,
