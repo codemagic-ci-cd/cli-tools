@@ -3,7 +3,7 @@ delete
 ======
 
 
-**Delete an App Store Version Localization.         Remove a language from your version metadata.**
+**Delete an App Store Version Localization. Remove a language from your version metadata.**
 ### Usage
 ```bash
 app-store-connect app-store-version-localizations delete [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

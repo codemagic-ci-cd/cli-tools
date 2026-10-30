@@ -3,7 +3,7 @@ create
 ======
 
 
-**Create a beta build localization if it doesn't exist or update existing         beta build localization for specified locale**
+**Create a beta build localization if it doesn't exist or update existing beta build localization for specified locale**
 ### Usage
 ```bash
 app-store-connect beta-build-localizations create [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

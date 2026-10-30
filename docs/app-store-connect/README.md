@@ -95,7 +95,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier|
+|[`fetch-signing-files`](fetch-signing-files.md)|Fetch provisioning profiles and code signing certificates for Bundle ID with given identifier|
 |[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get the latest App Store build number of the highest version for the given application|
 |[`get-latest-build-number`](get-latest-build-number.md)|Get the highest build number of the highest version used for the given app.|
 |[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get the latest Testflight build number of the highest version for the given application|

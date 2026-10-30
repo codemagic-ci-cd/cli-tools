@@ -70,4 +70,4 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`generate`](generate.md)|Generate universal APK files from Android App Bundles.         DEPRECATED! Use `android-app-bundle build-universal-apk` instead|
+|[`generate`](generate.md)|Generate universal APK files from Android App Bundles. DEPRECATED! Use `android-app-bundle build-universal-apk` instead|

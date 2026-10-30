@@ -54,4 +54,4 @@ Enable verbose logging for commands
 |[`run-tests`](run-tests.md)|Run unit or UI tests for given Xcode project or workspace|
 |[`show-build-settings`](show-build-settings.md)|Show build settings for Xcode project|
 |[`test-summary`](test-summary.md)|Show summary of Xcode Test Result|
-|[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects         to use given provisioning profiles|
+|[`use-profiles`](use-profiles.md)|Set up code signing settings on specified Xcode projects to use given provisioning profiles|

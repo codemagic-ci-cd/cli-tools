@@ -3,7 +3,7 @@ fetch-signing-files
 ===================
 
 
-**Fetch provisioning profiles and code signing certificates         for Bundle ID with given identifier**
+**Fetch provisioning profiles and code signing certificates for Bundle ID with given identifier**
 ### Usage
 ```bash
 app-store-connect fetch-signing-files [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

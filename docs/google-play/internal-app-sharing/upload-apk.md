@@ -3,7 +3,7 @@ upload-apk
 ==========
 
 
-**Upload APK to Google Play through Internal App Sharing         to get a link that can be shared with your team**
+**Upload APK to Google Play through Internal App Sharing to get a link that can be shared with your team**
 ### Usage
 ```bash
 google-play internal-app-sharing upload-apk [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

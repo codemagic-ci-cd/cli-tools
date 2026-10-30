@@ -548,7 +548,10 @@ def str_plain(string: str) -> str:
 
 
 def str_paragraphs(string: str) -> List[str]:
-    return [str_plain(paragraph) for paragraph in re.split(r"\n\s*\n", string.strip())]
+    # Dedent before splitting: a paragraph's continuation lines keep their
+    # indentation otherwise, and str_plain() turns those into spaces.
+    string = textwrap.dedent(string).strip()
+    return [str_plain(paragraph) for paragraph in re.split(r"\n\s*\n", string)]
 
 
 def str_table_cell(string: str) -> str:

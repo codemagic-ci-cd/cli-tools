@@ -91,7 +91,7 @@ Enable verbose logging for commands
 
 |Action|Description|
 | :--- | :--- |
-|[`create`](create.md)|Create an App Store Version Localization.         Add localized version-level information for a new locale.|
-|[`delete`](delete.md)|Delete an App Store Version Localization.         Remove a language from your version metadata.|
-|[`get`](get.md)|Read App Store Version Localization Information.         Get localized version-level information.|
-|[`modify`](modify.md)|Modify an App Store Version Localization.         Edit localized version-level information for a particular language.|
+|[`create`](create.md)|Create an App Store Version Localization. Add localized version-level information for a new locale.|
+|[`delete`](delete.md)|Delete an App Store Version Localization. Remove a language from your version metadata.|
+|[`get`](get.md)|Read App Store Version Localization Information. Get localized version-level information.|
+|[`modify`](modify.md)|Modify an App Store Version Localization. Edit localized version-level information for a particular language.|

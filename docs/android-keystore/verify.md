@@ -3,7 +3,7 @@ verify
 ======
 
 
-**Check that the keystore password, key password and key alias are correct         for specified keystore**
+**Check that the keystore password, key password and key alias are correct for specified keystore**
 ### Usage
 ```bash
 android-keystore verify [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -3,7 +3,7 @@ get
 ===
 
 
-**Read App Store Version Localization Information.         Get localized version-level information.**
+**Read App Store Version Localization Information. Get localized version-level information.**
 ### Usage
 ```bash
 app-store-connect app-store-version-localizations get [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
