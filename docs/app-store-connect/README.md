@@ -3,7 +3,11 @@ app-store-connect
 =================
 
 
-**Interact with Apple services via App Store Connect API**
+**Interact with Apple services via App Store Connect API.**
+
+**The `publish` action runs `xcrun altool` and therefore needs macOS.**
+
+**Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 app-store-connect [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
@@ -95,7 +99,7 @@ Enable verbose logging for commands
 |[`get-latest-app-store-build-number`](get-latest-app-store-build-number.md)|Get the latest App Store build number of the highest version for the given application|
 |[`get-latest-build-number`](get-latest-build-number.md)|Get the highest build number of the highest version used for the given app.|
 |[`get-latest-testflight-build-number`](get-latest-testflight-build-number.md)|Get the latest Testflight build number of the highest version for the given application|
-|[`publish`](publish.md)|Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers|
+|[`publish`](publish.md)|Publish application packages to App Store, submit them to Testflight, and release to the groups of beta testers.<br>Requires macOS, since the package is validated and uploaded with `xcrun altool`.|
 
 ### Action groups
 

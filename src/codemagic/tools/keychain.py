@@ -118,8 +118,10 @@ class KeychainArgument(cli.Argument):
 @cli.common_arguments(KeychainArgument.PATH)
 class Keychain(cli.CliApp, PathFinderMixin):
     """
-    Utility to manage macOS keychains and certificates
+    Utility to manage macOS keychains and certificates. Drives the system `security` tool.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.MACOS,)
 
     def __init__(self, path: Optional[pathlib.Path] = None, **kwargs):
         super().__init__(**kwargs)

@@ -29,8 +29,10 @@ class FirebaseAppDistribution(
     ReleasesActionGroup,
 ):
     """
-    Utility to list releases and retrieve the latest release build version number from Firebase
+    Utility to list releases and retrieve the latest release build version number from Firebase.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(
         self,

@@ -3,7 +3,11 @@ android-app-bundle
 ==================
 
 
-**Manage Android App Bundles using [Bundletool](https://developer.android.com/studio/command-line/bundletool)**
+**Manage Android App Bundles using [Bundletool](https://developer.android.com/studio/command-line/bundletool).**
+
+**Requires a Java runtime for Bundletool and `jarsigner` from a JDK for the signing actions.**
+
+**Platform support: Linux, macOS and Windows.**
 ### Usage
 ```bash
 android-app-bundle [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]

@@ -10,8 +10,10 @@ from codemagic.cli import Colors
 
 class CodemagicCliTools(cli.CliApp):
     """
-    Show general information of installed Codemagic CLI tools
+    Show general information of installed Codemagic CLI tools.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     @cli.action("version")
     def version(self) -> str:

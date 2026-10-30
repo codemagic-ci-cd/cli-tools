@@ -56,8 +56,12 @@ class AppStoreConnect(
     PathFinderMixin,
 ):
     """
-    Interact with Apple services via App Store Connect API
+    Interact with Apple services via App Store Connect API.
+
+    The `publish` action runs `xcrun altool` and therefore needs macOS.
     """
+
+    SUPPORTED_PLATFORMS = (cli.Platform.LINUX, cli.Platform.MACOS, cli.Platform.WINDOWS)
 
     def __init__(
         self,
