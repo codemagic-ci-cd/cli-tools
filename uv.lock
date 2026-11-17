@@ -550,7 +550,7 @@ wheels = [
 
 [[package]]
 name = "codemagic-cli-tools"
-version = "0.70.2"
+version = "0.71.0"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
