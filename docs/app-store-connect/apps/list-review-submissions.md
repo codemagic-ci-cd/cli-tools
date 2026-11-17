@@ -29,7 +29,7 @@ app-store-connect apps list-review-submissions [-h] [--log-stream STREAM] [--no-
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `list-review-submissions`
 
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 App Store Version platform

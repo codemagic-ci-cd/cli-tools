@@ -19,6 +19,7 @@ class PlatformType(StringConverterMixin, str, enum.Enum):
     APPLE_TV_OS = "appletvos"
     MAC_OS = "osx"
     IOS = "ios"
+    VISION_OS = "visionos"
 
     @classmethod
     def from_path(cls, artifact_path: Union[pathlib.Path, AnyStr]) -> PlatformType:
@@ -28,8 +29,11 @@ class PlatformType(StringConverterMixin, str, enum.Enum):
         if artifact_path.suffix == ".pkg":
             return PlatformType.MAC_OS
         elif artifact_path.suffix == ".ipa":
-            if Ipa(artifact_path).is_for_tvos():
+            ipa = Ipa(artifact_path)
+            if ipa.is_for_tvos():
                 return PlatformType.APPLE_TV_OS
+            if ipa.is_for_visionos():
+                return PlatformType.VISION_OS
             return PlatformType.IOS
         else:
             raise ValueError(f"Unknown artifact type from path {artifact_path}")

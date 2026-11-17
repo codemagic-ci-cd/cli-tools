@@ -116,7 +116,7 @@ Name of your Beta group. Multiple arguments
 
 
 Enable submission of an app to App Store app review procedure.
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 App Store Version platform

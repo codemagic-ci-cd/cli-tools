@@ -30,7 +30,7 @@ app-store-connect get-latest-app-store-build-number [-h] [--log-stream STREAM] [
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `get-latest-app-store-build-number`
 
-##### `--platform=IOS | MAC_OS | TV_OS`
+##### `--platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 Apple operating systems

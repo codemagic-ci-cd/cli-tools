@@ -29,7 +29,7 @@ app-store-connect apps cancel-review-submissions [-h] [--log-stream STREAM] [--n
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `cancel-review-submissions`
 
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 App Store Version platform

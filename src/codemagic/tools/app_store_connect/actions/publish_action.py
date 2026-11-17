@@ -285,6 +285,8 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
             return Platform.MAC_OS
         if application_package.is_for_tvos():
             return Platform.TV_OS
+        if application_package.is_for_visionos():
+            return Platform.VISION_OS
         return Platform.IOS
 
     @cli.action(

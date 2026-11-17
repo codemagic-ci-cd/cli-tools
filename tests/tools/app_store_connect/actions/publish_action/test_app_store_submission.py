@@ -10,7 +10,7 @@ from codemagic.tools.app_store_connect.arguments import Types
 
 
 def test_app_store_submission(mock_app_store_connect: AppStoreConnect):
-    mock_ipa = mock.MagicMock(version="1.2.3", is_for_tvos=lambda: False)
+    mock_ipa = mock.MagicMock(version="1.2.3", is_for_tvos=lambda: False, is_for_visionos=lambda: False)
     mock_build = mock.MagicMock(id="mock-build-id")
 
     with mock.patch.object(
