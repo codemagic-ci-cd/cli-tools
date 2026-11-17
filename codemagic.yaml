@@ -42,6 +42,7 @@ workflows:
     triggering:
       events:
         - push
+        - pull_request
       cancel_previous_builds: true
     scripts:
       - *install_dependencies
