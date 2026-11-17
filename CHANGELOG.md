@@ -6,10 +6,12 @@ Version UNRELEASED
 
 **Bugfixes**
 - Fix `app-store-connect publish` using the wrong build for visionOS `.ipa` files. It looked up the uploaded build on App Store Connect as an iOS build, so when an iOS build with the same version and build number existed, the steps after upload (for example TestFlight beta review submission) ran on that iOS build instead of the visionOS build.
+- Fix `app-store-connect publish` passing `--type ios` to `altool` for visionOS `.ipa` files. It now passes `--type visionos` when validating or uploading them.
 
 **Development**
 - Add `VISION_OS` to enumeration `codemagic.apple.resources.Platform`.
 - Add method `is_for_visionos()` to `codemagic.models.application_package.Ipa`.
+- Add `VISION_OS` to enumeration `codemagic.models.altool.enums.PlatformType`.
 - Add `Platform` enumeration, exported as `codemagic.cli.Platform`.
 - Add `CliApp.SUPPORTED_PLATFORMS` class attribute for declaring the platforms that a CLI tool supports. All tools in `codemagic.tools` declare it.
 - Add `CliApp.get_description` class method that returns the tool docstring followed by the generated `Platform support:` line. It is used for `--help` output and documentation generation.

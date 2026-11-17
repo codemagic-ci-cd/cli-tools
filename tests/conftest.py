@@ -4,9 +4,13 @@ import argparse
 import logging
 import os
 import pathlib
+import plistlib
 import shutil
 import sys
+import zipfile
 from functools import lru_cache
+from typing import Callable
+from typing import List
 from typing import NamedTuple
 from typing import Optional
 
@@ -15,6 +19,7 @@ import pytest
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.models.application_package import Ipa
 from codemagic.utilities import log
 
 log.initialize_logging(
@@ -167,3 +172,20 @@ def temp_dir(tmpdir) -> pathlib.Path:
     if not os.environ.get("CI"):
         # Cleanup generated dirs if not running on CI
         shutil.rmtree(tmpdir)
+
+
+@pytest.fixture
+def create_ipa(tmp_path: pathlib.Path) -> Callable[[List[str]], Ipa]:
+    def _create_ipa(supported_platforms: List[str]) -> Ipa:
+        ipa_path = tmp_path / "app.ipa"
+        info_plist = {
+            "CFBundleIdentifier": "io.codemagic.app",
+            "CFBundleShortVersionString": "1.2.3",
+            "CFBundleSupportedPlatforms": supported_platforms,
+            "CFBundleVersion": "42",
+        }
+        with zipfile.ZipFile(ipa_path, "w") as zf:
+            zf.writestr("Payload/App.app/Info.plist", plistlib.dumps(info_plist))
+        return Ipa(ipa_path)
+
+    return _create_ipa

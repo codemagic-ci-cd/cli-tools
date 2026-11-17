@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import pathlib
-import plistlib
-import zipfile
+from typing import Callable
 from typing import List
 from unittest import mock
 
@@ -16,19 +14,6 @@ from codemagic.models.application_package import MacOsPackage
 from codemagic.tools import AppStoreConnect
 
 
-def _create_ipa(directory: pathlib.Path, supported_platforms: List[str]) -> Ipa:
-    ipa_path = directory / "app.ipa"
-    info_plist = {
-        "CFBundleIdentifier": "io.codemagic.app",
-        "CFBundleShortVersionString": "1.2.3",
-        "CFBundleSupportedPlatforms": supported_platforms,
-        "CFBundleVersion": "42",
-    }
-    with zipfile.ZipFile(ipa_path, "w") as zf:
-        zf.writestr("Payload/App.app/Info.plist", plistlib.dumps(info_plist))
-    return Ipa(ipa_path)
-
-
 @pytest.mark.parametrize(
     ("supported_platforms", "expected_platform"),
     (
@@ -37,8 +22,12 @@ def _create_ipa(directory: pathlib.Path, supported_platforms: List[str]) -> Ipa:
         (["XROS"], Platform.VISION_OS),
     ),
 )
-def test_ipa_platform(tmp_path: pathlib.Path, supported_platforms: List[str], expected_platform: Platform):
-    ipa = _create_ipa(tmp_path, supported_platforms)
+def test_ipa_platform(
+    create_ipa: Callable[[List[str]], Ipa],
+    supported_platforms: List[str],
+    expected_platform: Platform,
+):
+    ipa = create_ipa(supported_platforms)
 
     assert AppStoreConnect._get_application_package_platform(ipa) is expected_platform
 
@@ -49,8 +38,11 @@ def test_macos_package_platform():
     assert AppStoreConnect._get_application_package_platform(macos_package) is Platform.MAC_OS
 
 
-def test_find_build_for_visionos_ipa(tmp_path: pathlib.Path, mock_app_store_connect: AppStoreConnect):
-    ipa = _create_ipa(tmp_path, ["XROS"])
+def test_find_build_for_visionos_ipa(
+    create_ipa: Callable[[List[str]], Ipa],
+    mock_app_store_connect: AppStoreConnect,
+):
+    ipa = create_ipa(["XROS"])
     build = mock.Mock(id="1525e3c9-3015-407a-9ba5-9addd2558224")
     mock_api_client = mock.Mock()
     mock_api_client.builds.Filter = Builds.Filter
