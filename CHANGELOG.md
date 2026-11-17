@@ -1,3 +1,9 @@
+Version 0.71.1
+-------------
+
+**Development**
+- Log only the status code of successful App Store Connect API responses at `INFO` level in `AppStoreConnectApiSession` when it is created with `log_requests=False`. Their bodies are logged at `DEBUG` level. Failed responses, and all responses with `log_requests=True`, are still logged with the body at `INFO` level.
+
 Version 0.71.0
 -------------
 

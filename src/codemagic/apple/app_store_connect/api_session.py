@@ -23,15 +23,22 @@ class AppStoreConnectApiSession(requests.Session):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
         self._revoke_auth_info = revoke_auth_info
+        self._log_requests = log_requests
         self._logger = log.get_logger(self.__class__, log_to_stream=log_requests)
         self._unauthorized_retries = unauthorized_request_retries
         self._server_error_retries = server_error_retries
 
-    def _log_response(self, response):
+    def _log_response(self, response: requests.Response):
         try:
-            self._logger.info(f"<<< {response.status_code} {response.json()}")
+            message = f"<<< {response.status_code} {response.json()}"
         except ValueError:
-            self._logger.info(f"<<< {response.status_code} {response.content}")
+            message = f"<<< {response.status_code} {response.content!r}"
+
+        if response.ok and not self._log_requests:
+            self._logger.info(f"<<< {response.status_code}")
+            self._logger.debug(message)
+        else:
+            self._logger.info(message)
 
     def _log_request(self, *args, **kwargs):
         method = args[0].upper()

@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 import pytest
@@ -206,3 +207,32 @@ def test_http_error_not_found(mock_session, mock_successful_response, mock_not_f
 
     # Original error is raised
     assert error_info.value.response is mock_not_found_response
+
+
+@pytest.mark.parametrize(
+    ("log_requests", "response_fixture", "logs_body_at_info"),
+    (
+        (False, "mock_successful_response", False),
+        (True, "mock_successful_response", True),
+        (False, "mock_not_found_response", True),
+        (True, "mock_not_found_response", True),
+    ),
+)
+@mock.patch.object(Session, "request")
+def test_response_logging(mock_session, log_requests, response_fixture, logs_body_at_info, request, caplog):
+    response = request.getfixturevalue(response_fixture)
+    mock_session.return_value = response
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}), log_requests=log_requests)
+
+    try:
+        session.get("https://example.com")
+    except AppStoreConnectApiError:
+        pass
+
+    response_records = [record for record in caplog.records if record.getMessage().startswith("<<<")]
+    message_with_body = f"<<< {response.status_code} {response.json.return_value}"
+    if logs_body_at_info:
+        expected_records = [(logging.INFO, message_with_body)]
+    else:
+        expected_records = [(logging.INFO, f"<<< {response.status_code}"), (logging.DEBUG, message_with_body)]
+    assert [(record.levelno, record.getMessage()) for record in response_records] == expected_records
