@@ -1,7 +1,15 @@
 Version UNRELEASED
 -------------
 
+**Features**
+- Accept `VISION_OS` as App Store platform value for option `--platform` of `app-store-connect` actions, such as `publish`, `builds list` and `get-latest-testflight-build-number`.
+
+**Bugfixes**
+- Fix `app-store-connect publish` using the wrong build for visionOS `.ipa` files. It looked up the uploaded build on App Store Connect as an iOS build, so when an iOS build with the same version and build number existed, the steps after upload (for example TestFlight beta review submission) ran on that iOS build instead of the visionOS build.
+
 **Development**
+- Add `VISION_OS` to enumeration `codemagic.apple.resources.Platform`.
+- Add method `is_for_visionos()` to `codemagic.models.application_package.Ipa`.
 - Add `Platform` enumeration, exported as `codemagic.cli.Platform`.
 - Add `CliApp.SUPPORTED_PLATFORMS` class attribute for declaring the platforms that a CLI tool supports. All tools in `codemagic.tools` declare it.
 - Add `CliApp.get_description` class method that returns the tool docstring followed by the generated `Platform support:` line. It is used for `--help` output and documentation generation.

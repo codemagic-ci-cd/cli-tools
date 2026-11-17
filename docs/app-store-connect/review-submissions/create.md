@@ -28,7 +28,7 @@ app-store-connect review-submissions create [-h] [--log-stream STREAM] [--no-col
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `create`
 
-##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS`
+##### `--platform, --app-store-version-platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 App Store Version platform. Default:&nbsp;`IOS`

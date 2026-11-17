@@ -215,3 +215,6 @@ class Ipa(AbstractPackage):
 
     def is_for_tvos(self) -> bool:
         return any("tv" in platform_name.lower() for platform_name in self.supported_platforms)
+
+    def is_for_visionos(self) -> bool:
+        return any(platform_name.lower().startswith("xr") for platform_name in self.supported_platforms)

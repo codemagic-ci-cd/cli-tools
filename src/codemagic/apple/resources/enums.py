@@ -354,6 +354,7 @@ class Platform(ResourceEnum):
     IOS = "IOS"
     MAC_OS = "MAC_OS"
     TV_OS = "TV_OS"
+    VISION_OS = "VISION_OS"
 
 
 class ProfileState(ResourceEnum):

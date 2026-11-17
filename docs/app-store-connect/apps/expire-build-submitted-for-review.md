@@ -28,7 +28,7 @@ app-store-connect apps expire-build-submitted-for-review [-h] [--log-stream STRE
 Application Apple ID. An automatically generated ID assigned to your app
 ### Optional arguments for action `expire-build-submitted-for-review`
 
-##### `--platform=IOS | MAC_OS | TV_OS`
+##### `--platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 Apple operating systems

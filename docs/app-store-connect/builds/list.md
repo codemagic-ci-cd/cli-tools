@@ -61,7 +61,7 @@ Version of the build published to Testflight that identifies an iteration of the
 
 
 Build processing state
-##### `--platform=IOS | MAC_OS | TV_OS`
+##### `--platform=IOS | MAC_OS | TV_OS | VISION_OS`
 
 
 Apple operating systems
