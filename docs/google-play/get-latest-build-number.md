@@ -9,7 +9,7 @@ get-latest-build-number
 google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--version] [-s] [-v]
     [--credentials GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS]
     [--json]
-    [--tracks TRACKS]
+    [--tracks TRACKS | --include-uploaded-builds]
     --package-name PACKAGE_NAME
 ```
 ### Required arguments for action `get-latest-build-number`
@@ -18,12 +18,16 @@ google-play get-latest-build-number [-h] [--log-stream STREAM] [--no-color] [--v
 
 
 Package name of the app in Google Play Console. For example `com.example.app`
-### Optional arguments for action `get-latest-build-number`
+### Optional mutually exclusive arguments for action `get-latest-build-number`
 
 ##### `--tracks, -t=TRACKS`
 
 
 Get the build number from the specified track(s). If not specified, the highest build number across all tracks is returned. Multiple arguments
+##### `--include-uploaded-builds`
+
+
+Also check the version codes of all App Bundles and APKs uploaded to Google Play, including the ones that are not assigned to any track (for example builds that were uploaded but never released). Useful for incrementing the build number when some uploaded builds are not published
 ### Optional arguments for command `google-play`
 
 ##### `--credentials=GOOGLE_PLAY_SERVICE_ACCOUNT_CREDENTIALS`
