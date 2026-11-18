@@ -1,3 +1,13 @@
+Version UNRELEASED
+-------------
+
+**Features**
+- Add option `--include-uploaded-builds` to action `google-play get-latest-build-number`. When it is given, the version codes of all App Bundles and APKs uploaded to Google Play are also checked, including the builds that are not assigned to any track, such as builds that were uploaded but never released. This prevents choosing a build number that Google Play already rejects as used ([#400](https://github.com/codemagic-ci-cd/cli-tools/issues/400)). The option cannot be used together with `--tracks`, and the default behavior is unchanged.
+
+**Development**
+- Add keyword argument `include_uploaded_builds` to `GooglePlay.get_latest_build_number`.
+- Use a single app edit for all Google Play API requests made by `GooglePlay.get_latest_build_number`.
+
 Version 0.72.0
 -------------
 
