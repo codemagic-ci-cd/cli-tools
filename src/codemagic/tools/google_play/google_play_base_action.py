@@ -47,6 +47,8 @@ class GooglePlayBaseAction(metaclass=ABCMeta):
         self,
         package_name: str,
         tracks: Optional[Sequence[str]] = None,
+        include_uploaded_builds: bool = False,
+        should_print: bool = True,
     ) -> Optional[int]:
         from .actions import GetLatestBuildNumberAction
 
