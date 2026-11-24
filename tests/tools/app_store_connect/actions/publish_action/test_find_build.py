@@ -5,6 +5,7 @@ from typing import List
 from unittest import mock
 
 import pytest
+from requests import ReadTimeout
 
 from codemagic.apple.app_store_connect.builds import Builds
 from codemagic.apple.resources import Platform
@@ -65,3 +66,28 @@ def test_find_build_for_visionos_ipa(
         "filter[preReleaseVersion.version]": "1.2.3",
         "filter[preReleaseVersion.platform]": "VISION_OS",
     }
+
+
+def test_find_build_continues_after_timeout(
+    create_ipa: Callable[[List[str]], Ipa],
+    mock_app_store_connect: AppStoreConnect,
+):
+    build = mock.Mock(id="1525e3c9-3015-407a-9ba5-9addd2558224")
+    mock_api_client = mock.Mock()
+    mock_api_client.builds.Filter = Builds.Filter
+    mock_api_client.builds.list.side_effect = (
+        ReadTimeout("Read timed out."),
+        [build],
+    )
+
+    with mock.patch.object(AppStoreConnect, "api_client", new_callable=mock.PropertyMock) as mock_api_client_property:
+        mock_api_client_property.return_value = mock_api_client
+        found_build = mock_app_store_connect._find_build(
+            ResourceId("1234567890"),
+            create_ipa(["iPhoneOS"]),
+            max_find_build_minutes=1,
+            retry_wait_seconds=0,
+        )
+
+    assert found_build is build
+    assert mock_api_client.builds.list.call_count == 2

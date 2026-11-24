@@ -1,3 +1,12 @@
+Version 0.72.0
+-------------
+
+**Development**
+- Add optional `request_timeout` argument to `AppStoreConnectApiSession`, `AppStoreConnectApiClient` and `codemagic.tools.AppStoreConnect`. It is passed to every App Store Connect API request, including retries, unless the request sets its own `timeout`. Requests have no timeout by default, as before.
+- Add type alias `codemagic.apple.app_store_connect.RequestTimeout`.
+- `AppStoreConnectApiSession` doesn't retry timed out requests, and logs them as `<<< Timed out: ...`. A read timeout while downloading the response body, which `requests` raises as `ConnectionError`, is re-raised as `requests.ReadTimeout`, so all timeouts can be caught as `requests.Timeout`.
+- `AppStoreConnect.publish` and `AppStoreConnect.wait_until_build_is_processed` keep polling after a timed out App Store Connect API request while waiting for the uploaded build to appear or finish processing, until the maximum wait time is reached.
+
 Version 0.71.0
 -------------
 
