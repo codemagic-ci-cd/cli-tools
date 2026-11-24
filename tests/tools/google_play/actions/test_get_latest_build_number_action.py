@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from codemagic.google.errors import GoogleHttpError
 from codemagic.google.resources.google_play import Apk
 from codemagic.google.resources.google_play import ApkBinary
 from codemagic.google.resources.google_play import AppEdit
@@ -249,3 +250,19 @@ def test_get_latest_build_number_include_uploaded_builds_with_tracks(google_play
 
     assert str(exc_info.value) == "Uploaded builds can only be included when no tracks are specified"
     mock_google_play_client.edits.create.assert_not_called()
+
+
+def test_get_latest_build_number_app_edit_failure(google_play: GooglePlay):
+    with mock.patch.object(google_play, "client") as mock_google_play_client, mock.patch.object(
+        google_play,
+        "logger",
+    ) as mock_logger:
+        mock_google_play_client.edits.create.side_effect = GoogleHttpError("Package not found: com.example.app")
+
+        with pytest.raises(GooglePlayError) as exc_info:
+            google_play.get_latest_build_number("com.example.app")
+
+    assert str(exc_info.value) == "Package not found: com.example.app"
+    expected_warning = 'Getting latest build number from Google Play for package "com.example.app" failed.'
+    assert any(expected_warning in str(call.args[0]) for call in mock_logger.warning.call_args_list)
+    mock_google_play_client.tracks.list.assert_not_called()

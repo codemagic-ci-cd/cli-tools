@@ -46,6 +46,8 @@ class GetLatestBuildNumberAction(GooglePlayBaseAction, metaclass=ABCMeta):
                 if include_uploaded_builds:
                     uploaded_version_code = self._get_max_uploaded_version_code(package_name, edit)
         except GoogleError as ge:
+            error_message = f'Getting latest build number from Google Play for package "{package_name}" failed.'
+            self.logger.warning(Colors.RED(error_message))
             raise GooglePlayError(str(ge))
 
         track_version_codes = self._get_max_track_version_codes(requested_track_names, package_tracks)
