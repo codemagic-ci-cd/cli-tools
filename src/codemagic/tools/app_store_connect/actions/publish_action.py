@@ -13,6 +13,8 @@ from typing import Sequence
 from typing import Tuple
 from typing import Union
 
+import requests
+
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
@@ -516,6 +518,9 @@ class PublishAction(AbstractBaseAction, metaclass=ABCMeta):
                     ordering=self.api_client.builds.Ordering.UPLOADED_DATE,
                     reverse=True,
                 )
+            except requests.Timeout as timeout_error:
+                self.logger.warning(Colors.YELLOW(str(timeout_error)))
+                found_builds = []
             except AppStoreConnectApiError as api_error:
                 raise AppStoreConnectError(str(api_error))
 

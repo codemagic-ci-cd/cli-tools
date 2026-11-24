@@ -22,6 +22,7 @@ from .type_declarations import ApiKey
 from .type_declarations import IssuerId
 from .type_declarations import KeyIdentifier
 from .type_declarations import PaginateResult
+from .type_declarations import RequestTimeout
 from .versioning import AppStoreVersionLocalizations
 from .versioning import AppStoreVersions
 from .versioning import AppStoreVersionSubmissions
@@ -47,6 +48,7 @@ class AppStoreConnectApiClient:
         unauthorized_request_retries: int = 1,
         server_error_retries: int = 1,
         enable_jwt_cache: bool = False,
+        request_timeout: Optional[RequestTimeout] = None,
     ):
         """
         :param key_identifier: Your private key ID from App Store Connect (Ex: 2X9R4HXF34)
@@ -56,6 +58,10 @@ class AppStoreConnectApiClient:
         :param log_requests: Whether or not to log App Store Connect API requests and responses to STDOUT
         :param enable_jwt_cache: Whether or not to allow loading and writing generated App Store Connect
                                  JSON Web Token from or to a file cache.
+        :param request_timeout: Connect and read timeout in seconds for App Store Connect API requests, either
+                                a single value for both or a (connect, read) tuple. The read timeout limits
+                                the wait between received bytes, not the total response time.
+                                No timeout by default.
         """
         self._logger = log.get_logger(self.__class__)
         self._api_key = ApiKey(key_identifier, issuer_id, private_key)
@@ -66,6 +72,7 @@ class AppStoreConnectApiClient:
             unauthorized_request_retries=unauthorized_request_retries,
             server_error_retries=server_error_retries,
             revoke_auth_info=self._jwt_manager.revoke,
+            request_timeout=request_timeout,
         )
 
     @property

@@ -1,8 +1,11 @@
 from unittest import mock
 
 import pytest
+from requests import ConnectionError
+from requests import ReadTimeout
 from requests import Response
 from requests import Session
+from urllib3.exceptions import ReadTimeoutError
 
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.app_store_connect import AppStoreConnectApiSession
@@ -206,3 +209,75 @@ def test_http_error_not_found(mock_session, mock_successful_response, mock_not_f
 
     # Original error is raised
     assert error_info.value.response is mock_not_found_response
+
+
+@mock.patch.object(Session, "request")
+def test_no_timeout_by_default(mock_session, mock_successful_response):
+    mock_session.return_value = mock_successful_response
+
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}))
+    session.get("https://example.com")
+
+    assert mock_session.call_args.kwargs["timeout"] is None
+
+
+@mock.patch.object(Session, "request")
+def test_request_timeout_kept_on_retries(mock_session, mock_successful_response, mock_server_error_response):
+    mock_session.side_effect = (mock_server_error_response, mock_successful_response)
+
+    session = AppStoreConnectApiSession(
+        mock.Mock(return_value={}),
+        server_error_retries=2,
+        request_timeout=(10, 120),
+    )
+    session.get("https://example.com")
+
+    assert [call.kwargs["timeout"] for call in mock_session.call_args_list] == [(10, 120), (10, 120)]
+
+
+@mock.patch.object(Session, "request")
+def test_explicit_timeout_overrides_request_timeout(mock_session, mock_successful_response):
+    mock_session.return_value = mock_successful_response
+
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}), request_timeout=(10, 120))
+    session.get("https://example.com", timeout=5)
+
+    assert mock_session.call_args.kwargs["timeout"] == 5
+
+
+@mock.patch.object(Session, "request")
+def test_timeout_error(mock_session):
+    timeout_error = ReadTimeout("Read timed out. (read timeout=5)")
+    mock_session.side_effect = timeout_error
+
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}), request_timeout=5)
+    with pytest.raises(ReadTimeout) as error_info:
+        session.get("https://example.com/")
+
+    assert error_info.value is timeout_error
+    mock_session.assert_called_once()
+
+
+@mock.patch.object(Session, "request")
+def test_body_read_timeout_error(mock_session):
+    connection_error = ConnectionError(ReadTimeoutError(None, None, "Read timed out."))
+    mock_session.side_effect = connection_error
+
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}), request_timeout=5)
+    with pytest.raises(ReadTimeout) as error_info:
+        session.get("https://example.com/")
+
+    assert error_info.value.__cause__ is connection_error
+    mock_session.assert_called_once()
+
+
+@mock.patch.object(Session, "request")
+def test_connection_error_is_not_timeout_error(mock_session):
+    connection_error = ConnectionError("Connection refused")
+    mock_session.side_effect = connection_error
+
+    session = AppStoreConnectApiSession(mock.Mock(return_value={}), request_timeout=5)
+    with pytest.raises(ConnectionError) as error_info:
+        session.get("https://example.com/")
+
+    assert error_info.value is connection_error

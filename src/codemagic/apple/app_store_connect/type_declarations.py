@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from typing import Dict
 from typing import List
 from typing import NamedTuple
+from typing import Tuple
+from typing import Union
 
 
 @dataclass
@@ -16,6 +18,10 @@ class KeyIdentifier(str):
 
 class IssuerId(str):
     pass
+
+
+# Seconds, either for both connect and read, or as a (connect, read) tuple
+RequestTimeout = Union[float, Tuple[float, float]]
 
 
 class ApiKey(NamedTuple):

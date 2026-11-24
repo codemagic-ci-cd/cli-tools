@@ -9,6 +9,8 @@ from typing import Sequence
 from typing import Union
 from typing import cast
 
+import requests
+
 from codemagic import cli
 from codemagic.apple import AppStoreConnectApiError
 from codemagic.apple.resources import App
@@ -259,6 +261,8 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
                 time.sleep(retry_wait_seconds)
                 try:
                     build = self.api_client.builds.read(build)
+                except requests.Timeout as timeout_error:
+                    self.logger.warning(Colors.YELLOW(str(timeout_error)))
                 except AppStoreConnectApiError as api_error:
                     raise AppStoreConnectError(str(api_error))
             elif build.attributes.processingState in (BuildProcessingState.FAILED, BuildProcessingState.INVALID):
@@ -288,6 +292,10 @@ class BuildsActionGroup(AbstractBaseAction, metaclass=ABCMeta):
         while time.time() - processing_started_at < max_processing_minutes * 60:
             try:
                 build_beta_detail = self.api_client.builds.read_beta_detail(build)
+            except requests.Timeout as timeout_error:
+                self.logger.warning(Colors.YELLOW(str(timeout_error)))
+                time.sleep(retry_wait_seconds)
+                continue
             except AppStoreConnectApiError as api_error:
                 raise AppStoreConnectError(str(api_error))
 

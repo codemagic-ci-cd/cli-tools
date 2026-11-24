@@ -13,6 +13,7 @@ from codemagic import cli
 from codemagic.apple.app_store_connect import AppStoreConnectApiClient
 from codemagic.apple.app_store_connect import IssuerId
 from codemagic.apple.app_store_connect import KeyIdentifier
+from codemagic.apple.app_store_connect import RequestTimeout
 from codemagic.mixins import PathFinderMixin
 from codemagic.models import Certificate
 from codemagic.models import ProvisioningProfile
@@ -75,6 +76,7 @@ class AppStoreConnect(
         json_output: bool = False,
         profiles_directory: pathlib.Path = ProvisioningProfile.DEFAULT_LOCATION,
         certificates_directory: pathlib.Path = Certificate.DEFAULT_LOCATION,
+        request_timeout: Optional[RequestTimeout] = None,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -88,6 +90,7 @@ class AppStoreConnect(
         self._unauthorized_request_retries = unauthorized_request_retries
         self._server_error_retries = server_error_retries
         self._enable_jwt_cache = enable_jwt_cache
+        self._request_timeout = request_timeout
 
     @classmethod
     def from_cli_args(cls, cli_args: argparse.Namespace) -> AppStoreConnect:
@@ -196,6 +199,7 @@ class AppStoreConnect(
             unauthorized_request_retries=self._unauthorized_request_retries,
             server_error_retries=self._server_error_retries,
             enable_jwt_cache=self._enable_jwt_cache,
+            request_timeout=self._request_timeout,
         )
         self._validate_api_client_key(client)
         return client

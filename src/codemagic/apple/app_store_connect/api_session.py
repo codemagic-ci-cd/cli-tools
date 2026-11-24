@@ -2,13 +2,16 @@ from __future__ import annotations
 
 from typing import Callable
 from typing import Dict
+from typing import Optional
 
 import requests
+from urllib3.exceptions import ReadTimeoutError
 
 from codemagic.utilities import auditing
 from codemagic.utilities import log
 
 from .api_error import AppStoreConnectApiError
+from .type_declarations import RequestTimeout
 
 
 class AppStoreConnectApiSession(requests.Session):
@@ -19,6 +22,7 @@ class AppStoreConnectApiSession(requests.Session):
         unauthorized_request_retries: int = 1,
         server_error_retries: int = 1,
         revoke_auth_info: Callable[[], None] = lambda: None,
+        request_timeout: Optional[RequestTimeout] = None,
     ):
         super().__init__()
         self._auth_headers_factory = auth_headers_factory
@@ -26,6 +30,7 @@ class AppStoreConnectApiSession(requests.Session):
         self._logger = log.get_logger(self.__class__, log_to_stream=log_requests)
         self._unauthorized_retries = unauthorized_request_retries
         self._server_error_retries = server_error_retries
+        self._request_timeout = request_timeout
 
     def _log_response(self, response):
         try:
@@ -67,7 +72,18 @@ class AppStoreConnectApiSession(requests.Session):
         headers = request_kwargs.pop("headers", {})
         headers.update(self._auth_headers_factory())
         request_kwargs["headers"] = headers
-        response = super().request(*request_args, **request_kwargs)
+        request_kwargs.setdefault("timeout", self._request_timeout)
+        try:
+            response = super().request(*request_args, **request_kwargs)
+        except requests.Timeout as timeout_error:
+            self._logger.info(f"<<< Timed out: {timeout_error}")
+            raise
+        except requests.ConnectionError as connection_error:
+            # Read timeout while downloading response body is raised as ConnectionError
+            if connection_error.args and isinstance(connection_error.args[0], ReadTimeoutError):
+                self._logger.info(f"<<< Timed out: {connection_error}")
+                raise requests.ReadTimeout(*connection_error.args) from connection_error
+            raise
         self._log_response(response)
 
         if response.ok:
