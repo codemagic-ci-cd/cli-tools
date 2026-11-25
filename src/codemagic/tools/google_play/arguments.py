@@ -14,6 +14,10 @@ STAGED_ROLLOUT_AND_DRAFT_STATUS_GROUP = cli.MutuallyExclusiveGroup(
     name="configure publishing options",
     required=False,
 )
+LATEST_BUILD_NUMBER_SOURCE_GROUP = cli.MutuallyExclusiveGroup(
+    name="select build number source",
+    required=False,
+)
 
 
 class GooglePlayArgument(cli.Argument):
@@ -120,6 +124,20 @@ class LatestBuildNumberArgument(cli.Argument):
             "required": False,
             "nargs": "+",
         },
+        mutually_exclusive_group=LATEST_BUILD_NUMBER_SOURCE_GROUP,
+    )
+    INCLUDE_UPLOADED_BUILDS = cli.ArgumentProperties(
+        key="include_uploaded_builds",
+        flags=("--include-uploaded-builds",),
+        type=bool,
+        description=(
+            "Also check the version codes of all App Bundles and APKs uploaded to Google Play, "
+            "including the ones that are not assigned to any track (for example builds that were "
+            "uploaded but never released). Useful for incrementing the build number when some "
+            "uploaded builds are not published"
+        ),
+        argparse_kwargs={"required": False, "action": "store_true"},
+        mutually_exclusive_group=LATEST_BUILD_NUMBER_SOURCE_GROUP,
     )
 
 
