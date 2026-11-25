@@ -62,7 +62,7 @@ class ReleasesService(ResourceService[Release, "FirebaseAppDistributionResource"
             firebase_releases.extend(response.get("releases", []))
             if not response.get("nextPageToken"):
                 break
-            elif limit and len(firebase_releases) > limit:
+            elif limit and len(firebase_releases) >= limit:
                 break
             next_page_token = response["nextPageToken"]
 

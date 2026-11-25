@@ -128,3 +128,27 @@ def test_list_releases_pagination(release, firebase_client, mock_releases_pagina
     assert len(releases) == 2
     assert releases[0] == release
     assert releases[1].buildVersion == "71"
+
+
+@pytest.mark.parametrize(("limit", "page_size", "expected_requests"), ((1, 25, 1), (2, 1, 2), (3, 2, 2)))
+def test_list_releases_stops_paginating_at_limit(
+    firebase_client,
+    release_response,
+    limit,
+    page_size,
+    expected_requests,
+):
+    page = {"releases": [release_response] * min(limit, page_size), "nextPageToken": "next-page-token"}
+    with patch.object(ReleasesService, "_releases", new_callable=PropertyMock) as mock_resource:
+        execute = mock_resource.return_value.list.return_value.execute
+        execute.side_effect = [page] * expected_requests + [AssertionError("Requested a page beyond the limit")]
+
+        releases = firebase_client.releases.list(
+            "firebase-project-id",
+            "firebase-app-id",
+            limit=limit,
+            page_size=page_size,
+        )
+
+    assert len(releases) == limit
+    assert execute.call_count == expected_requests

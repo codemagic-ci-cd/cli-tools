@@ -1,3 +1,9 @@
+Version 0.72.1
+-------------
+
+**Bugfixes**
+- Do not request another page of Firebase releases once the requested number of releases has been listed. Previously `firebase-app-distribution get-latest-build-version` made a second, unneeded API request, and failed if that request returned an error.
+
 Version 0.72.0
 -------------
 
